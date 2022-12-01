@@ -11,7 +11,7 @@ const network: CardanoNetwork = "testnet"
 const blockfrost: BlockFrostAPI = new BlockFrostAPI({ projectId: "preprod3AJiD07toi4rcvmhnVSZ92Auip8fh2RW" })
 
 const stubPath = (filename: string): string =>
-    path.join(__dirname, "..", "test-keys", filename)
+    path.join(__dirname, "..", "..", "stubs", "test-keys", filename)
 
 const nftOptions = (script: NativeScript): NFTMintOptions => {
     return {

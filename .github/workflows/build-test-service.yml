@@ -47,7 +47,7 @@ jobs:
         aws-region: us-east-1
 
     - name: Service build and test
-      working-directory: service
+      working-directory: backend
       env:
         GITHUB_CI: "true"
       run: |
