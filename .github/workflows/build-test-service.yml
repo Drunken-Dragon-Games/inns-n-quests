@@ -1,0 +1,57 @@
+on: 
+  push:
+    branches:
+    - '*'
+    - '!acceptance'
+    - '!mainnet'
+name: Build Test Service
+jobs:
+
+  Build-Test-Service:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: service_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+          POSTGRES_PORT: 5432
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      id: config-aws-credentials
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Service build and test
+      working-directory: service
+      env:
+        GITHUB_CI: "true"
+      run: |
+        npm run login:aws
+        npm ci
+        npm run build
+        npm test
