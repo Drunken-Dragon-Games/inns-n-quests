@@ -1,0 +1,49 @@
+{
+  "name": "ddu-app-module-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:docker": "npm run login:aws && cp ~/.npmrc . && docker build . -t dev/ddu-app-module-frontend:latest && rm .npmrc",
+    "start": "next start",
+    "lint": "next lint",
+    "login:aws": "aws codeartifact login --tool npm --repository service-libs --domain ddu-app --domain-owner 091008970572",
+    "login:npm": "npm config set registry https://registry.npmjs.com/"
+  },
+  "dependencies": {
+    "@emurgo/cardano-message-signing-asmjs": "^1.0.1",
+    "@emurgo/cardano-serialization-lib-asmjs": "^11.0.5",
+    "@emurgo/cardano-serialization-lib-browser": "^11.0.5",
+    "@react-hook/window-size": "^3.1.1",
+    "@reduxjs/toolkit": "^1.8.5",
+    "@types/react-redux": "^7.1.24",
+    "axios": "^0.27.2",
+    "babel-plugin-styled-components": "^2.0.7",
+    "cookies-next": "^2.1.1",
+    "formik": "^2.2.9",
+    "next": "12.2.5",
+    "react": "18.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "18.2.0",
+    "react-redux": "^8.0.2",
+    "react-slick": "^0.29.0",
+    "react-youtube": "^10.0.0",
+    "sharp": "^0.31.0",
+    "slick-carousel": "^1.8.1",
+    "string-hex": "^1.0.0",
+    "styled-components": "^5.3.5",
+    "uuidv4": "^6.2.13"
+  },
+  "devDependencies": {
+    "@types/node": "18.7.13",
+    "@types/react": "18.0.17",
+    "@types/react-dom": "18.0.6",
+    "@types/react-slick": "^0.23.10",
+    "@types/styled-components": "^5.1.26",
+    "eslint": "8.22.0",
+    "eslint-config-next": "12.2.5",
+    "typescript": "4.7.4"
+  }
+}
