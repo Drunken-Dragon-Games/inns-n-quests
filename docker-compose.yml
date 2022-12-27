@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: ddu_backend
+    command: npm run start --trace-sync-io
+    ports:
+      - 5000:5000
+    volumes:
+      - ./backend:/code
+    env_file:
+      - ./backend/.env
+    restart: always
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:11
+    container_name: ddu_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+
+  frontend:
+    build: ./frontend
+    container_name: ddu_frontend
+    command: npm run dev
+    ports:
+      - 3000:3000
+    restart: always
+    volumes:
+      - ./frontend:/app
+      - ./frontend/node_modules:/app/node_modules
+      - ./frontend/.next:/app/.next
