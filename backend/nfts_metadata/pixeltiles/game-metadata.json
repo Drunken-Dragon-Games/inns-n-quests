@@ -1,0 +1,134 @@
+{
+    "PixelTile1": {
+      "class": "rogue",
+      "race": "human"
+    },
+    "PixelTile2": {
+      "class": "cleric",
+      "race": "human"
+    },
+    "PixelTile3": {
+      "class": "warlock",
+      "race": "human"
+    },
+    "PixelTile11": {
+      "class": "fighter",
+      "race": "human"
+    },
+    "PixelTile12": {
+      "class": "rogue",
+      "race": "human"
+    },
+    "PixelTile13": {
+      "class": "mage",
+      "race": "human"
+    },
+    "PixelTile21": {
+      "class": "mage",
+      "race": "human"
+    },
+    "PixelTile22": {
+      "class": "mage",
+      "race": "human"
+    },
+    "PixelTile23": {
+      "class": "host",
+      "race": "human"
+    },
+    "PixelTile24": {
+      "class": "knight",
+      "race": "human"
+    },
+    "PixelTile31": {
+      "class": "host",
+      "race": "human"
+    },
+    "PixelTile32": {
+      "class": "monster",
+      "race": "slime"
+    },
+    "PixelTile33": {
+      "class": "monster",
+      "race": "slime"
+    },
+    "PixelTile41": {
+      "class": "fighter",
+      "race": "human"
+    },
+    "PixelTile42": {
+      "class": "monster",
+      "race": "wolf"
+    },
+    "PixelTile43": {
+      "class": "ranger",
+      "race": "elf"
+    },
+    "PixelTile44": {
+      "class": "bard",
+      "race": "human"
+    },
+    "PixelTile45": {
+      "class": "knight",
+      "race": "human"
+    },
+    "PixelTile46": {
+      "class": "fighter",
+      "race": "human"
+    },
+    "PixelTile47": {
+      "class": "paladin",
+      "race": "human"
+    },
+    "PixelTile48": {
+      "class": "druid",
+      "race": "human"
+    },
+    "PixelTile49": {
+      "class": "fighter",
+      "race": "human"
+    },
+    "PixelTile51": {
+      "class": "mage",
+      "race": "human"
+    },
+    "PixelTile52": {
+      "class": "rogue",
+      "race": "human"
+    },
+    "PixelTile53": {
+      "class": "ranger",
+      "race": "human"
+    },
+    "PixelTile54": {
+      "class": "fighter",
+      "race": "human"
+    },
+    "PixelTile55": {
+      "class": "fighter",
+      "race": "orc"
+    },
+    "PixelTile56": {
+      "class": "fighter",
+      "race": "orc"
+    },
+    "PixelTile57": {
+      "class": "host",
+      "race": "elf"
+    },
+    "PixelTile58": {
+      "class": "monster",
+      "race": "spider"
+    },
+    "PixelTile59": {
+      "class": "monster",
+      "race": "bee"
+    },
+    "PixelTile60": {
+      "class": "monster",
+      "race": "golem"
+    },
+    "PixelTile61": {
+      "class": "fighter",
+      "race": "human"
+    }
+  }

@@ -1,6 +1,6 @@
 FROM node:18
 
-WORKDIR /usr/src/app
+WORKDIR /code
 
 COPY --chown=node package*.json ./
 COPY --chown=node ./dist ./dist

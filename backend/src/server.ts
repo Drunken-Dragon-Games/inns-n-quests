@@ -7,6 +7,7 @@ import { SecureSigningServiceDsl } from "./service-secure-signing";
 import { connectToDB } from "./tools-database";
 import { config } from "./tools-utils";
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
+import { loadQuestModuleModels } from "./module-quests/app/database/migration_scripts/migrate";
 
 (async () => {
     const database = connectToDB({ 
@@ -17,12 +18,13 @@ import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
         password: config.stringOrError("DB_PASSWORD"),
         database: config.stringOrError("DB_DATABASE"),
     })
-    const blockfrost = new BlockFrostAPI({ projectId: config.stringOrError("BLOCKFROST_API_KEY") })
+    const blockfrost = new BlockFrostAPI({ projectId: config.stringOrError("BLOCKFROST_API_KEY") })    
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv()
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
     await registry.load(assetManagementService)
-    const app = buildApp(identityService, assetManagementService)
+    await loadQuestModuleModels(database)
+    const app = await buildApp(identityService, assetManagementService, database)
 
     await identityService.loadDatabaseModels()
     await assetManagementService.loadDatabaseModels()
