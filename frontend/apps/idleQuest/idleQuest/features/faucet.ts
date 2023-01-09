@@ -6,6 +6,7 @@ import { AxiosError } from 'axios';
 import {
   Address
 } from "@emurgo/cardano-serialization-lib-asmjs"
+import { getAdventurers } from '../apps/console/features/adventurers';
 
 export const fetchAddressPost = (): generalReducerThunk => async (dispatch) =>{
 
@@ -13,25 +14,10 @@ export const fetchAddressPost = (): generalReducerThunk => async (dispatch) =>{
 
     try {  
         // se hace el fetch al backend y regresa una transaccion para firmar
-        const api = await window.cardano.nami.enable()
-
-        const raw = await api.getRewardAddresses()
-
-        const rewardAddress = raw[0]
-
-        // se desserializa el reward Address y se obtiene el stake Address
-        const stakeAddress = Address.from_bytes(Buffer.from(rewardAddress, "hex")).to_bech32() 
-
-        console.log(stakeAddress);
       
-        const response = await axiosCustomInstance('/quests/api/mint-test-nft').post('/quests/api/mint-test-nft',{address: stakeAddress})
-
-        console.log(response);
-        
-        
-        // se llama la funcion para firmar la trasaccion
-        dispatch(signPolicy(response.data, api ))
+        const response = await axiosCustomInstance('/quests/api/mint-test-nft').post('/quests/api/mint-test-nft')
     
+        dispatch(getAdventurers())
         dispatch(setFetchAddressPostStatusFulfilled())
         
       } catch (err: unknown) {
@@ -51,33 +37,4 @@ export const fetchAddressPost = (): generalReducerThunk => async (dispatch) =>{
 const  fetchAddressPostStatus  = createSliceStatus("fetchAddressPostStatus")
 
 const [ setFetchAddressPostStatusIdle, setFetchAddressPostStatusPending, setFetchAddressPostStatusFulfilled, setFetchAddressPostStatusErrors ] = actionsGenerator(fetchAddressPostStatus.actions)
-
-
-export const signPolicy = (transaction: any, api: any): generalReducerThunk => async (dispatch) =>{
-
-  dispatch(setSignPolicyStatusPending())
-
-    //obtiene el api del estado 
- 
-    try {  
-      
-        //se pide la firma del usuario
-      const signature = await api.signTx(transaction, true)
-      console.log(signature);
-      
-      //se llama la funcion para enviar la transaccion
-      // dispatch(submitTransactionPost(signature, transaction, false))
-      dispatch(setSignPolicyStatusFulfilled())
-      
-    } catch (err) {
-      dispatch(setSignPolicyStatusErrors())
-    }
-}
-
-
-//reducer para monitorear el estado del request para los available quest 
-
-const  signPolicyStatus  = createSliceStatus("signPolicyStatus")
-
-const [ setSignPolicyStatusIdle, setSignPolicyStatusPending, setSignPolicyStatusFulfilled, setSignPolicyStatusErrors ] = actionsGenerator(signPolicyStatus.actions)
 

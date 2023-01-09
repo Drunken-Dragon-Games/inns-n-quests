@@ -80,8 +80,11 @@ export const takeAvailableQuest = (questId: string, adventurers: (string | undef
         //deseleciona al available quest
         dispatch(setAvailableQuestUnselect())
 
+        // dispatch(setQuestTakenId(questUiidFront))
             
         dispatch(setFetchTakeAvailableQuestStatusFulfilled())
+
+        dispatch(setTakenId(questUiidFront))
                     
     } catch (err: unknown) {
 
@@ -296,12 +299,41 @@ const selectAdventurer = createSlice({
 
 export const { setSelectAdventurer, setClearSelectedAdventurers } = selectAdventurer.actions
 
+//taken id
+
+interface TakenId {
+    id: string | null
+}
+
+interface initialStateSelectAdventurer{
+    selectAdventurer: (string | undefined) []
+}
+
+const initialTakenId: TakenId = {id: null}
+
+const takenId = createSlice({
+    name: "takenId",
+    initialState: initialTakenId,
+    reducers: {
+        setTakenId:  (state, action: PayloadAction<string>)=> {
+            state.id = action.payload    
+        },
+
+        setTakenIdReset:  ( state )=> {
+            state.id = null   
+        }
+    },
+});
+
+export const { setTakenId, setTakenIdReset } = takenId.actions
+
 //combinacion de Reducers
 
 export const availableQuestGeneralReducer = combineReducers({
     data: combineReducers({
         quest: availableQuests.reducer,
-        selectAdventurer: selectAdventurer.reducer
+        selectAdventurer: selectAdventurer.reducer,
+        takenId: takenId.reducer
     }),
     status: combineReducers({
         getAvailableQuestStatus: fetchGetAvailableQuestStatus.reducer,
