@@ -5,45 +5,33 @@ import { createSliceStatus, actionsGenerator } from "../../../../../utils/featur
 import { generalReducerThunk } from '../../../../../../features/generalReducer';
 import { inProgress } from '../../../dummy_data';
 import { setFreeAdventurers, setExperienceReward, setDeath } from '../../console/features/adventurers';
-
+import { AxiosError } from 'axios';
 
 //fetch para obeter a los in progress quests
 
 export const getInProgressQuest = (): generalReducerThunk => async (dispatch) =>{
 
     dispatch(setFetchGetInProgressQuestStatusPending())
-    try {
-
-    
-
-        if(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] !== undefined){
-        
-            // FIXME: verify path
+    try {   
             //fetch para obtener los inprogress quest
-            const response = await axiosCustomInstance('/quests/api/taken-quests').get('/quests/api/taken-quests')  
-            
-            //funcion para setear los ques in progress
-            dispatch(setInProgressQuest(response.data))
+        const response = await axiosCustomInstance('/quests/api/taken-quests').get('/quests/api/taken-quests')  
+        
+        //funcion para setear los ques in progress
+        dispatch(setInProgressQuest(response.data))
 
-            
-            dispatch(setFetchGetInProgressQuestStatusFulfilled())
+        
+        dispatch(setFetchGetInProgressQuestStatusFulfilled())
 
-
-
-        } else{
-            
-            dispatch(setInProgressQuest(inProgress))
-            dispatch(setFetchGetInProgressQuestStatusFulfilled())
-
-        }
-
+        // Mock to test Without backend     
+        // dispatch(setInProgressQuest(inProgress))
+        // dispatch(setFetchGetInProgressQuestStatusFulfilled())
 
     } catch (err: unknown) {
         
-        // if(err instanceof AxiosError ){
-        //     dispatch(setFetchGetInProgressQuestStatusErrors(err.response))
-        //     dispatch(fetchRefreshToken( () => dispatch(getInProgressQuest()), err))
-        // }
+        if(err instanceof AxiosError ){
+            dispatch(setFetchGetInProgressQuestStatusErrors(err.response))
+            // dispatch(fetchRefreshToken( () => dispatch(getInProgressQuest()), err))
+        }
     }
 
 }
@@ -107,56 +95,44 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
     
     dispatch(setFetchPostClaimRewardInProgressQuestStatusPending())
     try {
+            
+        //fetch para claimear los inprogress quest 
+        const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: quest.id, stake_address: quest.player_stake_address })
+            
+        dispatch(setFetchPostClaimRewardInProgressQuestStatusFulfilled())
+        //condicional depenende de si el quest es exitoso o fallido 
+        if(quest.state == "succeeded"){
+            //se activa esta funcion para realizar las animaciones correspondientes
 
-        
-        if(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] !== undefined){
+            dispatch(setRewardClaimSucceed(response.data.adventurers))
+
+            //estas funciones actualizan los datos del estado
+            dispatch(setFreeAdventurers(response.data.adventurers))
+
+            // dispatch(setDragonSilverToClaimAdd(quest.quest.reward_ds))
+            dispatch(setExperienceReward(response.data.adventurers))
+
+        } else if(quest.state == "failed"){
+                
+            //se activa esta funcion para realizar las animaciones correspondientes
+            dispatch(setRewardClaimFail(response.data.dead_adventurers))
 
             
-            //fetch para claimear los inprogress quest 
-            const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: quest.id, stake_address: quest.player_stake_address })
-            
-            dispatch(setFetchPostClaimRewardInProgressQuestStatusFulfilled())
-             //condicional depenende de si el quest es exitoso o fallido 
-            if(quest.state == "succeeded"){
-                //se activa esta funcion para realizar las animaciones correspondientes
-
-                dispatch(setRewardClaimSucceed(response.data.adventurers))
-
-                //estas funciones actualizan los datos del estado
-                // dispatch(setFreeAdventurers(response.data.adventurers))
-
-                // FIXME: add dependencie
-                // dispatch(setDragonSilverToClaimAdd(quest.quest.reward_ds))
-                dispatch(setExperienceReward(response.data.adventurers))
-            } else if(quest.state == "failed"){
-                
-                //se activa esta funcion para realizar las animaciones correspondientes
-                dispatch(setRewardClaimFail(response.data.dead_adventurers))
-
-                
-                //estas funciones actualizan los datos del estado
-                dispatch( setDeath(response.data.dead_adventurers) )
-                dispatch(setFreeAdventurers(response.data.dead_adventurers))
-            
-                
-            }
-
+            //estas funciones actualizan los datos del estado
+            dispatch( setDeath(response.data.dead_adventurers) )
+            dispatch(setFreeAdventurers(response.data.dead_adventurers))    
         }
-         else{
-                     
-        dispatch(setInProgressQuest(inProgress))
-        dispatch(setFetchGetInProgressQuestStatusFulfilled())
-
-        }
-        
-    
+       
+        // Mock to test Without backend   
+        // dispatch(setInProgressQuest(inProgress))
+        // dispatch(setFetchGetInProgressQuestStatusFulfilled())
 
     } catch (err: unknown) {
         
-        // if(err instanceof AxiosError ){
-        //     dispatch(setFetchPostClaimRewardInProgressQuestStatusErrors(err.response))
-        //     dispatch(fetchRefreshToken( () => dispatch(PostClaimInProgressQuest(quest)), err))
-        // }
+        if(err instanceof AxiosError ){
+            dispatch(setFetchPostClaimRewardInProgressQuestStatusErrors(err.response))
+            // dispatch(fetchRefreshToken( () => dispatch(PostClaimInProgressQuest(quest)), err))
+        }
     }
 
 }
@@ -231,14 +207,14 @@ const inProgressQuests = createSlice({
             
         },
 
-        deleteInProgressQuest:  (state, action: PayloadAction<string>)=> {
+        setDeleteInProgressQuest:  (state, action: PayloadAction<string>)=> {
             
             const filterState = state.quests.filter((quest: inProgressQuest) => quest.id !== action.payload)
             
             state.quests = filterState
         },
 
-        addInProgressQuest:  (state, action: PayloadAction<inProgressQuest>)=> {
+        setAddInProgressQuest:  (state, action: PayloadAction<inProgressQuest>)=> {
             
             state.quests.concat(action.payload)
         }
@@ -246,7 +222,7 @@ const inProgressQuests = createSlice({
     },
 });
 
-export const { setInProgressQuest, deleteInProgressQuest,  addInProgressQuest } = inProgressQuests.actions
+export const { setInProgressQuest, setDeleteInProgressQuest,  setAddInProgressQuest } = inProgressQuests.actions
 
 
 interface isClaimRewardData {

@@ -1,6 +1,9 @@
 import styled from "styled-components"
 import { useState } from "react"
 import Image from "next/image"
+import { useGeneralDispatch, useGeneralSelector } from "../../../../../../../features/hooks"
+import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
+import { fetchAddressPost } from "../../../../features/faucet"
 
 const AdventuresButtonWrapper = styled.div`
     width: 100%;
@@ -54,9 +57,14 @@ const CrearteAdverturerButton = () =>{
 
    
     const [hover, setHover] = useState<boolean>(false)
+
+    const generalDispatch = useGeneralDispatch()
+
+    
+
     // FIXME: add action to the button
     return <>
-        <AdventuresButtonWrapper onClick={()=> null}>
+        <AdventuresButtonWrapper onClick={()=> generalDispatch(fetchAddressPost())}>
             <ImageWrapper hover = {hover} onMouseOver ={()=> setHover(true)}>
                 <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/create_adventures_button/boton_inactivo.webp"  alt="punt image" width={2000} height={1250} priority/>
             </ImageWrapper>

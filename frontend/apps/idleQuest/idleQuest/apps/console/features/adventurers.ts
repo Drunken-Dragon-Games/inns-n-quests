@@ -4,35 +4,32 @@ import { axiosCustomInstance } from '../../../../../../axios/axiosApi';
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
 import { generalReducerThunk } from '../../../../../../features/generalReducer';
 import { adventurer } from "../../../dummy_data"
+import { AxiosError } from 'axios';
 
 //fetch para obeter a los aventureros
 
 export const getAdventurers = () : generalReducerThunk => async (dispatch) =>{
   
     dispatch(setFetchGetAdventurersStatusPending())
+
     try {  
 
-        if(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] !== undefined){
-            //fetch para obeter a los aventureros
-            // FIXME: verify path
-            const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
-            dispatch(setAdventurers(response.data))  
-            dispatch(setFetchGetAdventurersStatusFulfilled())
-
-        } else{
+        //fetch para obeter a los aventureros
+        const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
+        dispatch(setAdventurers(response.data))  
+        dispatch(setFetchGetAdventurersStatusFulfilled())
+        
+        // Mock to test Without backend
                      
-            dispatch(setAdventurers(adventurer))
-            dispatch(setFetchGetAdventurersStatusFulfilled())
-        }
-       
-      
+        // dispatch(setAdventurers(adventurer))
+        // dispatch(setFetchGetAdventurersStatusFulfilled())
  
     } catch (err: unknown) {
         
-        // if(err instanceof AxiosError ){
-        //     dispatch(setFetchGetAdventurersStatusErrors(err.response))
-        //     dispatch(fetchRefreshToken( () => dispatch(getAdventurers()), err))
-        // }
+        if(err instanceof AxiosError ){
+            dispatch(setFetchGetAdventurersStatusErrors(err.response))
+            // dispatch(fetchRefreshToken( () => dispatch(getAdventurers()), err))
+        }
     }
   
 }
@@ -42,8 +39,6 @@ export const getAdventurers = () : generalReducerThunk => async (dispatch) =>{
 const  fetchGetAdventurersStatus  = createSliceStatus("fetchGetAdventurersStatus")
 
 const [ setFetchGetAdventurersStatusIdle, setFetchGetAdventurersStatusPending, setFetchGetAdventurersStatusFulfilled, setFetchGetAdventurersStatusErrors ] = actionsGenerator(fetchGetAdventurersStatus.actions)
-
-
 
 //reducer para manejar los cambios en los datos de adventurers
 

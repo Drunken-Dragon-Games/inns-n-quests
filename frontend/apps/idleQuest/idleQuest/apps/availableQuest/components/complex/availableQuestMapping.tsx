@@ -32,6 +32,8 @@ const AvailableQuest = () =>{
     
     const availableQuest = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
 
+    console.log(availableQuest);
+    
     const generalDispatch = useGeneralDispatch()
         
     return (

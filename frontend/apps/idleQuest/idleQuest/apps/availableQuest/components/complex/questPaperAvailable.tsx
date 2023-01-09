@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { takeAvailableQuest } from "../../features/availableQuest"
 import Image from 'next/image'
 import { useIsOpenAvailableQuest, useGetAvailableQuestData, useResetSelectAdventurers } from "../../hooks";
@@ -12,6 +12,7 @@ import { QuestRequirementsSection, ProgressionQuest } from "../../../../utils/co
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { DropBox } from "../basic_components";
+import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 
 
 
@@ -143,7 +144,7 @@ const ShadowWrapper = styled.section<ShadowWrapper>`
     background-color: rgba(0,0,0,0.8);
     visibility: ${props => props.isClose == true  ? "hidden"  : "visible "};
     opacity: ${props => props.isClose == true  ? "0"  : "1"};
-    transition: opacity 1s, visibility 1s;
+    transition: opacity 1s, visibility 0.5s;
 `
 
 
@@ -181,14 +182,15 @@ const SucceedChanceWrapper = styled.div`
 `
 
 const QuestPaperAvailable = () => {
-
+    
     const shadowWrapper = useRef<HTMLDivElement | null>(null)
     const questPaper = useRef<HTMLDivElement | null>(null)
+    const [bonus, setBonus] = useState<number>(0)
 
     const isOpen = useIsOpenAvailableQuest(shadowWrapper, questPaper)
 
 
-    const questData = useGetAvailableQuestData()
+    const questData = useGetAvailableQuestData()  
 
     const [slots, setSlots] = useState(Array(questData.slots).fill('')) 
 
@@ -196,9 +198,8 @@ const QuestPaperAvailable = () => {
     const generalDispatch = useGeneralDispatch()    
 
     const selectedAdventurers = generalSelector.idleQuest.questAvailable.data.selectAdventurer.selectAdventurer
-        
+    
     useResetSelectAdventurers(!isOpen)
-
 
     return(<>
         <ShadowWrapper  isClose ={!isOpen} ref={shadowWrapper}>
@@ -229,12 +230,11 @@ const QuestPaperAvailable = () => {
                                 <Title>{questData.name}</Title>
 
                                 <QuestRequirementsSectionPosition>
-                                    {/* FIXME: this element is no working */}
-                                    {/* <QuestRequirementsSection 
+                                    <QuestRequirementsSection 
                                         requirements ={questData.requirements} 
                                         adventuresSelected={selectedAdventurers!}
                                         callbackBonus = {(bonus: number) => setBonus(bonus)}
-                                    /> */}
+                                    />
                                 </QuestRequirementsSectionPosition>
 
                             </TitleSection>
@@ -252,8 +252,7 @@ const QuestPaperAvailable = () => {
                                     <SucceedChance 
                                         questDifficulty={questData.difficulty}
                                         questSlots={questData.slots}
-                                        // FIXME: bonus
-                                        requirementBonus= {50}
+                                        requirementBonus= {bonus}
                                         adventurersList ={selectedAdventurers}
                                         type = "available"
                                     />
@@ -283,6 +282,7 @@ const QuestPaperAvailable = () => {
                                 </CornerRightDown>
                                 
                             </Flex>
+
                             <Signature available ={true} onClick = {() => generalDispatch(takeAvailableQuest(questData.id, selectedAdventurers, questData.uiid! )) }/>
                         
                         </Card>

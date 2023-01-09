@@ -7,6 +7,6 @@ export default () => {
     const generalDispatch = useGeneralDispatch()
 
     useEffect(()=>{
-        generalDispatch(getAvailableQuest())
+        generalDispatch(getAvailableQuest(true))
     },[])
 }

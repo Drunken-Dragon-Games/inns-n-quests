@@ -36,6 +36,7 @@ const LogoPosition = styled.div`
     margin: auto 0vw;
     margin-left: max(13vw, 249.6px);
 
+
     @media only screen and (max-width: 414px) {
         display: none;
     }

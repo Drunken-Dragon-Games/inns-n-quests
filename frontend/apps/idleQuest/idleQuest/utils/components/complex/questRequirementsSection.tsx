@@ -1,6 +1,7 @@
 import { QuestRequirement} from "../basic_component"
 import { useRequirementsBonus } from "../../hooks"
-import { useEffect } from "react"
+import { useGetRequirementText } from "../../../apps/availableQuest/hooks"
+import { useEffect, useState } from "react"
 import { ConditionalRender } from "../../../../../utils/components/basic_components"
 
 interface questRequirementsSection{
@@ -28,20 +29,21 @@ interface party {
 
 
 const QuestRequirementsSection = ({requirements, adventuresSelected, callbackBonus} : questRequirementsSection) =>{
-
+    
     const bonus = useRequirementsBonus(adventuresSelected, requirements)
       
     useEffect(() => {
         callbackBonus(bonus)
     }, [bonus])
     
+    const text = useGetRequirementText(requirements)
 
     //si el objeto esta vacio no renderiza nada 
     if(Object.keys(requirements).length == 0){
         return <></>
     }
 
- 
+
     return(<>
 
             <ConditionalRender condition={requirements.all == undefined }>
@@ -52,18 +54,16 @@ const QuestRequirementsSection = ({requirements, adventuresSelected, callbackBon
                     })
                 }
             </ConditionalRender>
-
-            <ConditionalRender condition={requirements.all == true }>
+            <ConditionalRender condition={requirements.all === true}>
                 <QuestRequirement 
                     data={requirements}
                     adventuresSelected={adventuresSelected}    
                 >
-                    All {requirements.character![0].race !== undefined ? requirements.character![0].race.concat("s ") : ""} 
-                    {requirements.character![0].class !== undefined ? requirements.character![0].class.concat("s") : ""} 
+                    {text}
                 </QuestRequirement>
             </ConditionalRender>
 
-            <ConditionalRender condition={requirements.party != undefined  && requirements.party.balanced == true}>
+            <ConditionalRender condition={requirements.party !== undefined  && requirements.party.balanced == true}>
                 
                 <QuestRequirement
                     data={requirements}

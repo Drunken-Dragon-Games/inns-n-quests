@@ -42,8 +42,7 @@ const AvailableQuests = () => {
         <QuestDashboardContainer>
 
             <QuestDashboardWrapper>
-                <Center>
-                    
+                <Center> 
                     <ImageWrapper>
                         <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp"  alt="dashboard" width={2100} height={1250} layout ="responsive" />
                     </ImageWrapper>
