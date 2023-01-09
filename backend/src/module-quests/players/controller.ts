@@ -108,20 +108,11 @@ const getDragonSilverToClaim = (assetManagementService: AssetManagementService) 
     const userId: string  = (request as AuthRequest).auth.userId;
     logger.log.info({messagge: "get Dragon Silver To Claim: user id from the request cookie", userId})
     try {
-        // player = await Player.findOne({
-        //    attributes: ["dragon_silver"],
-        //    where: {
-        //        user_id: userId,
-        //    }
-        // });
-        // if(!player) throw new ApiError (404, "address_not_found", "Address not found")
-
-        // const dragonSilver = player?.getDataValue("dragon_silver");
+        await registry.load(assetManagementService)
         const policy = registry.policies.ds
         logger.log.info({message: "registry policies are", policies: registry.policies})
         logger.log.info({message: "get Dragon silver To claim: policy from the registry", policy})
         if (policy == undefined) throw new Error("Dragon silver policy is undefined")
-        // const amResponse = await assetManagementServiceClient.list(userId, logger, { chain: false ,policies: [policy] })
         const amResponse = await assetManagementService.list(userId, logger)
         logger.log.info({message: "get Dragon silver To claim: amResponse from list endpoint", status: amResponse.status, amResponse })
         if (amResponse.status == "unknown-user") throw new Error("AssetManagement: Unknown User")
@@ -132,6 +123,7 @@ const getDragonSilverToClaim = (assetManagementService: AssetManagementService) 
             dragon_silver: parseInt(dragonSilverQuantity)
         })
     } catch (error: any) {
+        console.error(error)
         next(error)
     }
 }
