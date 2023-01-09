@@ -11,20 +11,14 @@ export const getDragonSilverToClaim = () : generalReducerThunk => async (dispatc
     dispatch(setFetchGetDragonSilverToClaimStatusPending())
     try {  
         
-        if(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] !== undefined){
-            //fetch para pedir el dragonSilver to Claim
-            const response = await axiosCustomInstance('/quests/api/vm/dragon-silver').get('/quests/api/vm/dragon-silver') 
+        //fetch para pedir el dragonSilver to Claim
+        const response = await axiosCustomInstance('/quests/api/vm/dragon-silver').get('/quests/api/vm/dragon-silver') 
 
-        
-            //setea el dragon silver to claim en el estado
-            dispatch(setDragonSilverToClaim(response.data))
-            dispatch(setFetchGetDragonSilverToClaimStatusFulfilled())
-
-        } else{
-            dispatch(setDragonSilverToClaim(15))
-            dispatch(setFetchGetDragonSilverToClaimStatusFulfilled())
-        }
-       
+    
+        //setea el dragon silver to claim en el estado
+        dispatch(setDragonSilverToClaim(response.data.dragon_silver))
+        dispatch(setFetchGetDragonSilverToClaimStatusFulfilled())
+    
               
     } catch (err: unknown) {
         
@@ -53,7 +47,7 @@ export const getDragonSilver = () : generalReducerThunk => async (dispatch) =>{
         const response = await axiosCustomInstance('/quests/api/vm/dragon-silver').get('/quests/api/vm/dragon-silver') 
 
         //setea el dragon silver to claim en el estado
-        dispatch(setDragonSilver(response.data))
+        dispatch(setDragonSilver(response.data.dragon_silver))
         dispatch(setFetchGetDragonSilverStatusFulfilled())
 
         // Mock to test Without backend
