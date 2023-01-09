@@ -9,7 +9,7 @@ export default (isReset: boolean) =>{
 
     useEffect(() => {
         
-        if(isReset == false){
+        if(isReset == true){
             generalDispatch(setClearSelectedAdventurers())
         }
         
