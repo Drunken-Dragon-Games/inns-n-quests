@@ -8,3 +8,4 @@ export { default as useGetSucceedChance } from "./useGetSucceedChance"
 export { default as useGetAverageLevel } from "./useGetAverageLevel"
 export { default as useDropElement } from "./useDropElement"
 export { default as useResetSelectAdventurers } from "./useResetSelectAdventurers"
+export { default as useGetRequirementText } from './useGetRequirementText'

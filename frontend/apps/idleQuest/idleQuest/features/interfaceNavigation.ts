@@ -39,10 +39,8 @@ const inProgressQuestSelected = createSlice({
     initialState: initialStateNavigationInprogress,
     reducers: {
         setInProgressQuestSelected:  (state, action: PayloadAction<number>)=> {
-            console.log("entroe");
             
-            state.inProgressQuest = action.payload
-            
+            state.inProgressQuest = action.payload           
         },
         setInProgressQuestUnselect:  (state)=> {
             

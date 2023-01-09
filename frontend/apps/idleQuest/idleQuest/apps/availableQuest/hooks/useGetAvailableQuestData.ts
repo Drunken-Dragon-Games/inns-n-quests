@@ -13,8 +13,25 @@ interface availableQuest {
     slots: number
     rarity: string
     duration: number
+    requirements: requirement
     width?: number
     height?: number
+}
+
+interface requirement{
+    character?: character []
+    all?: boolean
+    party?: party
+}
+
+
+interface character {
+    class?: string
+    race?: string
+}
+
+interface party {
+    balanced: boolean
 }
 
 const placeHolder: availableQuest ={
@@ -27,7 +44,8 @@ const placeHolder: availableQuest ={
     difficulty: 1,
     slots: 3,
     rarity: "townsfolk",
-    duration: 12312421
+    duration: 12312421,
+    requirements: {}
 }
 
 
@@ -36,6 +54,8 @@ export default ():availableQuest  =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     const questNumber = generalSelector.idleQuest.navigator.availableQuest.availableQuest
+    console.log( generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests);
+    
     const quests = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
 
     const [questData, setQuestData] = useState<availableQuest>(placeHolder)

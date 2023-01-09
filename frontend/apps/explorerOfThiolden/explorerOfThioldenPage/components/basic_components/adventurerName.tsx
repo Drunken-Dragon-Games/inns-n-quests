@@ -77,7 +77,7 @@ const AdventurerName = ({name, number, title}:AdventurerName) => {
                     
                 </Center>
             </MarginTop>
-            <TextElMessiri color="#FFFFFF" fontsize={1.1} textAlign="center" fontsizeMobile={4.5}>{numberString}</TextElMessiri>
+            {/* <TextElMessiri color="#FFFFFF" fontsize={1.1} textAlign="center" fontsizeMobile={4.5}>{numberString}</TextElMessiri> */}
         </AdventurerNameComponent>
         
     </>)

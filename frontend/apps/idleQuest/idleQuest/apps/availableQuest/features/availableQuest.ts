@@ -8,7 +8,7 @@ import { AxiosError } from "axios"
 import { setAdventuresInQuest } from '../../console/features/adventurers';
 import { available } from '../../../dummy_data';
 import { setAvailableQuestUnselect } from '../../../features/interfaceNavigation';
-
+import { setAddInProgressQuest } from '../../inProgressQuests/features/inProgressQuest';
 //fetch para obeter los available quest si es la primera vez que se piden se realiza una peticion de 10 y posteriormente de 5 en 5 
 
 export const getAvailableQuest = (firstTime? : boolean): generalReducerThunk => async (dispatch) =>{
@@ -17,30 +17,31 @@ export const getAvailableQuest = (firstTime? : boolean): generalReducerThunk => 
 
     try { 
 
-        if(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] !== undefined){
-            const response = await axiosCustomInstance('/quests/api/quests').get('/quests/api/quests')
-        
-            dispatch(setFetchGetAvailableQuestStatusFulfilled())
+       
+        const response = await axiosCustomInstance('/quests/api/quests').get('/quests/api/quests')
     
-            //dependiendo si es la primera vez o no que se piden los quest durante el renderizado
-            if(firstTime == true){
-                dispatch(setAvailableQuest(response.data))
-            } else{
-                // dispatch(setNewQuests(response.data))
-            }
+        dispatch(setFetchGetAvailableQuestStatusFulfilled())
 
+        //dependiendo si es la primera vez o no que se piden los quest durante el renderizado
+        if(firstTime == true){
+            dispatch(setAvailableQuest(response.data))
         } else{
-                
-            dispatch(setAvailableQuest(available))
-            dispatch(setFetchGetAvailableQuestStatusFulfilled())
+            dispatch(setNewExtraQuests(response.data))
         }
+
+       
+        // Mock to test Without backend
+            
+        // dispatch(setAvailableQuest(available))
+        // dispatch(setFetchGetAvailableQuestStatusFulfilled())
+        
         
     } catch (err: unknown) {
         
-        // if(err instanceof AxiosError ){
-        //     dispatch(setFetchGetAvailableQuestStatusErrors(err.response))
-        //     dispatch(fetchRefreshToken( () => dispatch(getAvailableQuest(firstTime)), err))
-        // }
+        if(err instanceof AxiosError ){
+            dispatch(setFetchGetAvailableQuestStatusErrors(err.response))
+            // dispatch(fetchRefreshToken( () => dispatch(getAvailableQuest(firstTime)), err))
+        }
     }
 
 }
@@ -58,7 +59,6 @@ const [ setFetchGetAvailableQuestStatusIdle, setFetchGetAvailableQuestStatusPend
 export const takeAvailableQuest = (questId: string, adventurers: (string | undefined)  [], questUiidFront: string  ): generalReducerThunk  => async (dispatch) =>{
 
     dispatch(setFetchTakeAvailableQuestStatusPending())  
-    
 
     //filtrar si en el array hay undefined
 
@@ -66,57 +66,29 @@ export const takeAvailableQuest = (questId: string, adventurers: (string | undef
 
     
     try {  
-        
 
-        
-        if(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] !== undefined){
-        
-                //fetch para aceptar el quest
-            const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: questId, adventurer_ids: adventurers_id})
+        //fetch para aceptar el quest
+        const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: questId, adventurer_ids: adventurers_id})
 
-            // se agrega a los ques in progress
-            // FIXME: add the import and DUmmy data
-            // dispatch(setAddInProgressQuest(response.data))
+        // se agrega a los ques in progress
+           
+        dispatch(setAddInProgressQuest(response.data))
             
-            //se agrega a los aventureros en el quest la propiedad de in_quest
-            dispatch(setAdventuresInQuest(adventurers))
+        //se agrega a los aventureros en el quest la propiedad de in_quest
+        dispatch(setAdventuresInQuest(adventurers))
 
-            //deseleciona al available quest
-            dispatch(setAvailableQuestUnselect())
+        //deseleciona al available quest
+        dispatch(setAvailableQuestUnselect())
 
             
-            dispatch(setFetchTakeAvailableQuestStatusFulfilled())
-
-            //se agrega a la interfaz que quest se ha tomado para que los paper props puedan compararse y si tienen ese id ejecutan la accion de salida y eliminarse
-            // dispatch(setQuestTakenId(questUiidFront))
-
-        } else{
-            
-             // se agrega a los ques in progress
-             // FIXME: add the import and DUmmy data
-            //  dispatch(setAddInProgressQuest())
-            
-             //se agrega a los aventureros en el quest la propiedad de in_quest
-            dispatch(setAdventuresInQuest(adventurers)) 
-             //deseleciona al available quest
-            dispatch(setAvailableQuestUnselect())
-
-        
-            dispatch(setFetchTakeAvailableQuestStatusFulfilled())
-
-             //se agrega a la interfaz que quest se ha tomado para que los paper props puedan compararse y si tienen ese id ejecutan la accion de salida y eliminarse
-             // FIXME: add the import 
-            //  dispatch(setQuestTakenId(questUiidFront))
-        }
-        
-
-        
+        dispatch(setFetchTakeAvailableQuestStatusFulfilled())
+                    
     } catch (err: unknown) {
 
-        // if(err instanceof AxiosError ){
-        //     dispatch(setFetchTakeAvailableQuestStatusErrors(err.response))
-        //     dispatch(fetchRefreshToken( () => dispatch(takeAvailableQuest(questId, adventurers, questUiidFront)), err))
-        // }
+        if(err instanceof AxiosError ){
+            dispatch(setFetchTakeAvailableQuestStatusErrors(err.response))
+            // dispatch(fetchRefreshToken( () => dispatch(takeAvailableQuest(questId, adventurers, questUiidFront)), err))
+        }
     }
 
 }
@@ -154,8 +126,23 @@ interface availableQuest {
     duration: number
     width?: number
     height?: number
+    requirements: requirement
 }
 
+interface requirement{
+    character?: character []
+    all?: boolean
+    party?: party
+}
+
+interface character {
+    class?: string
+    race?: string
+}
+
+interface party {
+    balanced: boolean
+}
 interface position{
     width: number
     height: number

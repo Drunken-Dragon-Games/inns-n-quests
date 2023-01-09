@@ -10,8 +10,10 @@ import { useDispatch, useSelector} from 'react-redux'
 // import { selectGeneralPageReducer} from '../../features/generalPage';
 import { useState } from "react"
 import { ConditionalRender } from "../../../../../utils/components/basic_components";
-
-
+import { useGeneralSelector } from "../../../../../../features/hooks"
+import {  selectGeneralReducer } from "../../../../../../features/generalReducer"
+import { useGeneralDispatch } from "../../../../../../features/hooks";
+import { PostClaimInProgressQuest } from "../../../apps/inProgressQuests/features/inProgressQuest";
 
 const PositionWrapper = styled.div`
     position: relative;
@@ -189,40 +191,43 @@ interface ProgressionQuest {
 
 const ProgressionQuest = ({startTime, duration, inProgress, questState, selected, dsReward}: ProgressionQuest) => {
 
-    // const [ timeLeft, completeDuration ] = useGetTimeLeft(startTime, duration)    
+    const [ timeLeft, completeDuration ] = useGetTimeLeft(startTime, duration)    
 
-    // const [ distance, numberOfPunts, slots ] = useGetPuntDistance( completeDuration, 2, 18.5)
+    const [ distance, numberOfPunts, slots ] = useGetPuntDistance( completeDuration, 2, 18.5)
 
-    // const [ timeMarkLeft ] = useGetMarkTimeLeft( (timeLeft as number), (completeDuration as number), 2)
+    const [ timeMarkLeft ] = useGetMarkTimeLeft( (timeLeft as number), (completeDuration as number), 2)
 
-    // const [ isClaimed, setIsClaimed ] = useState<boolean>(false)
+    const [ isClaimed, setIsClaimed ] = useState<boolean>(false)
 
-    // const dispatch = useDispatch()
+    const generalDispatch = useGeneralDispatch()   
 
-    // const generalSelector = useSelector(selectGeneralPageReducer)
+    const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     // const index = generalSelector.navigator.inProgressQuestSelected
+    const index = generalSelector.idleQuest.navigator.inProgress
     let isSuccessful : boolean = false;
-    // if(index !== null){
-    //     isSuccessful = generalSelector.inProgress.data[index].state == "succeeded"
-    // }
+    if(index !== null){
+        // FIXME: this selector
+        // isSuccessful = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests[(index as keyof generalReducerDispatch )].state === "succeeded"
+        isSuccessful = true
+    }
 
 
-    // const ClaimQuest = () =>{
+    const ClaimQuest = () =>{
 
-    //     setIsClaimed(true)
-    //     if(isClaimed == false ){
+        setIsClaimed(true)
 
-    //         // dispatch(PostClaimInProgressQuest(selected) as any)
+        if(isClaimed == false ){
 
-    //     }
-    // }
+            generalDispatch(PostClaimInProgressQuest(selected) as any)
+
+        }
+    }
 
     return (<>
-                {/* <PositionWrapper>
-                    <RescalingProgression src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progression.svg" /> */}
-                    {/* FIXME: arreglo */}
-                    {/* <ChestWrapper onClick= {isSuccessful == true ? ClaimQuest : null} successful={isSuccessful} >
+                <PositionWrapper>
+                    <RescalingProgression src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progression.svg" />
+                    <ChestWrapper onClick= {isSuccessful == true ? ClaimQuest : null} successful={isSuccessful} >
                         <RescalingChest src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_progression.svg"/>
                         <CoinRewardWrapper>
                             <CoinReward>{dsReward.toString()}</CoinReward>
@@ -296,7 +301,7 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
                         }
 
                     </ConditionalRender>
-                </PositionWrapper> */}
+                </PositionWrapper>
 
     </>)
 }

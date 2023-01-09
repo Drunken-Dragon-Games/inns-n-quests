@@ -3,7 +3,7 @@ import { combineReducers } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
 import { generalReducerThunk } from '../../../../../../features/generalReducer';
-  
+import { AxiosError } from 'axios';
 //fetch para obeter a el dragon silver to claim
 
 export const getDragonSilverToClaim = () : generalReducerThunk => async (dispatch) =>{
@@ -13,7 +13,6 @@ export const getDragonSilverToClaim = () : generalReducerThunk => async (dispatc
         
         if(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] !== undefined){
             //fetch para pedir el dragonSilver to Claim
-             // FIXME: verify path
             const response = await axiosCustomInstance('/quests/api/vm/dragon-silver').get('/quests/api/vm/dragon-silver') 
 
         
@@ -29,10 +28,10 @@ export const getDragonSilverToClaim = () : generalReducerThunk => async (dispatc
               
     } catch (err: unknown) {
         
-        // if(err instanceof AxiosError ){
-        //     // dispatch(setFetchGetDragonSilverToClaimStatusErrors(err.response))
-        //     // dispatch(fetchRefreshToken( () => dispatch(getDragonSilverToClaim()), err))
-        // }
+        if(err instanceof AxiosError ){
+            dispatch(setFetchGetDragonSilverToClaimStatusErrors(err.response))
+            // dispatch(fetchRefreshToken( () => dispatch(getDragonSilverToClaim()), err))
+        }
     }
   
 }
@@ -50,27 +49,24 @@ export const getDragonSilver = () : generalReducerThunk => async (dispatch) =>{
     dispatch(setFetchGetDragonSilverStatusPending())
     try {  
         
-        if(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] !== undefined){
-            //fetch para pedir el dragonSilver to Claim
-            // FIXME: verify path
-            const response = await axiosCustomInstance('/quests/api/vm/dragon-silver').get('/quests/api/vm/dragon-silver') 
+        //fetch para pedir el dragonSilver to Claim
+        const response = await axiosCustomInstance('/quests/api/vm/dragon-silver').get('/quests/api/vm/dragon-silver') 
 
-            //setea el dragon silver to claim en el estado
-            dispatch(setDragonSilver(response.data))
-            dispatch(setFetchGetDragonSilverStatusFulfilled())
+        //setea el dragon silver to claim en el estado
+        dispatch(setDragonSilver(response.data))
+        dispatch(setFetchGetDragonSilverStatusFulfilled())
 
-        } else{
-            dispatch(setDragonSilver(10))
-            dispatch(setFetchGetDragonSilverStatusFulfilled())
-        }
-       
+        // Mock to test Without backend
+        // dispatch(setDragonSilver(10))
+        // dispatch(setFetchGetDragonSilverStatusFulfilled())
+    
               
     } catch (err: unknown) {
         
-        // if(err instanceof AxiosError ){
-        //     // dispatch(setFetchGetDragonSilverStatusErrors(err.response))
-        //     // dispatch(fetchRefreshToken( () => dispatch(getDragonSilverToClaim()), err))
-        // }
+        if(err instanceof AxiosError ){
+            dispatch(setFetchGetDragonSilverStatusErrors(err.response))
+            // dispatch(fetchRefreshToken( () => dispatch(getDragonSilverToClaim()), err))
+        }
     }
   
 }
