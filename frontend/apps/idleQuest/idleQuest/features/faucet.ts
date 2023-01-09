@@ -29,8 +29,8 @@ export const fetchAddressPost = (): generalReducerThunk => async (dispatch) =>{
         console.log(response);
         
         
-        //se llama la funcion para firmar la trasaccion
-        // dispatch(signPolicy(response.data))
+        // se llama la funcion para firmar la trasaccion
+        dispatch(signPolicy(response.data, api ))
     
         dispatch(setFetchAddressPostStatusFulfilled())
         
@@ -51,4 +51,33 @@ export const fetchAddressPost = (): generalReducerThunk => async (dispatch) =>{
 const  fetchAddressPostStatus  = createSliceStatus("fetchAddressPostStatus")
 
 const [ setFetchAddressPostStatusIdle, setFetchAddressPostStatusPending, setFetchAddressPostStatusFulfilled, setFetchAddressPostStatusErrors ] = actionsGenerator(fetchAddressPostStatus.actions)
+
+
+export const signPolicy = (transaction: any, api: any): generalReducerThunk => async (dispatch) =>{
+
+  dispatch(setSignPolicyStatusPending())
+
+    //obtiene el api del estado 
+ 
+    try {  
+      
+        //se pide la firma del usuario
+      const signature = await api.signTx(transaction, true)
+      console.log(signature);
+      
+      //se llama la funcion para enviar la transaccion
+      // dispatch(submitTransactionPost(signature, transaction, false))
+      dispatch(setSignPolicyStatusFulfilled())
+      
+    } catch (err) {
+      dispatch(setSignPolicyStatusErrors())
+    }
+}
+
+
+//reducer para monitorear el estado del request para los available quest 
+
+const  signPolicyStatus  = createSliceStatus("signPolicyStatus")
+
+const [ setSignPolicyStatusIdle, setSignPolicyStatusPending, setSignPolicyStatusFulfilled, setSignPolicyStatusErrors ] = actionsGenerator(signPolicyStatus.actions)
 
