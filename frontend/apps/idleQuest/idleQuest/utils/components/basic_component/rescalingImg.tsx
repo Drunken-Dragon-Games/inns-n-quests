@@ -60,8 +60,6 @@ const RescalingImg  = ({src, inQuest, selectedInQuest, is_alive, type} : scaling
     const heightPixelTiles = useGetHeightAndWidth(src, 3.5)
     const heightGMA = useGetHeightAndWidth(src, 5.3)
     const [aotHeight, aotWidth] = useGetHeightAndWidthAdventurerThiolden(src, type)
-
-    console.log(inQuest);
     
 
     if(src == undefined){

@@ -22,7 +22,7 @@ import Image from 'next/image'
 import { useOpenInProgressPaper } from "../../hooks";
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
-import { useGetInProgressData, useGetAdventurerPng, useGetClaimRewardShadow } from "../../hooks"
+import { useGetInProgressData, useGetAdventurerPng, useGetClaimRewardShadow, useGetAdventurersEnrollsRequirements } from "../../hooks"
 import { QuestLabelLevel, 
     RescalingMonster, 
     SucceedChance, 
@@ -288,9 +288,18 @@ const QuestPaperInProgress = () => {
     // }, [isClaimedData.isClaimed])
         
 
+    const [ bonus, setBonus] = useState<number>(0)
+
     const isClose = useOpenInProgressPaper()
 
     const inProgressQuestData = useGetInProgressData()
+    
+    const requirements = inProgressQuestData.quest.requirements
+
+    const adventurersEnrollsRequirements = useGetAdventurersEnrollsRequirements(inProgressQuestData.enrolls)
+
+    console.log(inProgressQuestData);
+    
 
     const adventurersEnrolls = inProgressQuestData.enrolls
 
@@ -330,14 +339,13 @@ const QuestPaperInProgress = () => {
                                     
                                     <TitleSection>
                                         <Title>{inProgressQuestData.quest.name}</Title>
-                                        {/* FIXME: theis */}
-                                        {/* <QuestRequirementsSectionPosition>
+                                        <QuestRequirementsSectionPosition>
                                             <QuestRequirementsSection 
-                                                requirements ={selected.quest.requirements} 
-                                                adventuresSelected={adventurersId}
+                                                requirements ={requirements} 
+                                                adventuresSelected={adventurersEnrollsRequirements}
                                                 callbackBonus = {(bonus: number) => setBonus(bonus)}
                                             />
-                                        </QuestRequirementsSectionPosition> */}
+                                        </QuestRequirementsSectionPosition>
                                     </TitleSection>
                                     
 
@@ -381,7 +389,7 @@ const QuestPaperInProgress = () => {
                                                     
                                                     
                                                     const adventurerData: Sprites = pngAdvernturer(el.adventurer_id, generalSelector.idleQuest.adventurers.data.data)
-                                                                console.log(adventurerData);
+                                                                
                                                                 
                                                     return  <Adventurer data ={el} 
                                                                         questLevel = {inProgressQuestData.quest.difficulty} 

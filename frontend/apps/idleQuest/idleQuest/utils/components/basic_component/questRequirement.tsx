@@ -45,9 +45,7 @@ interface character {
 
 const QuestRequirement = ({data, children, adventuresSelected}: questRequirement) =>{
 
-
-    const [isValidate] = useValidateRequirements(adventuresSelected, data)
-
+    const [isValidate] = useValidateRequirements(adventuresSelected, data)    
 
     return (<>
                 <RequirementWrapper>

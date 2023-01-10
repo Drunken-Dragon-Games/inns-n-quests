@@ -5,3 +5,4 @@ export { default as useGetLevelUp } from "./useGetLevelUp"
 export { default as useIsDead } from "./useIsDead"
 export { default as useGetAdventurerPng } from "./useGetAdventurerPng"
 export { default as useGetClaimRewardShadow } from "./useGetClaimRewardShadow"
+export { default as useGetAdventurersEnrollsRequirements } from './useGetAdventurersEnrollsRequirements'

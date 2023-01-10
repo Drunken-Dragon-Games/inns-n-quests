@@ -11,6 +11,8 @@ export default (time: number | string, representativeTime: number, lineLong: num
     //cuando llega el tiempo en dias se activa el efecto y obtiene el numero de puntos
     
     useEffect(() => {
+        
+        
         if(typeof(time) != "string"){
             setNumberOfPunts(Math.ceil(time/ representativeTime))
         }
@@ -18,10 +20,13 @@ export default (time: number | string, representativeTime: number, lineLong: num
     
     //una vez calculado el numero de puntos obtiene el array y la distancia entre putnos 
     useEffect(() => {
+
+        if(numberOfPunts > 0){
+            setSlots(Array(numberOfPunts).fill(''))
+        }
         
-        setSlots(Array(numberOfPunts).fill(''))
         setDistanceBetweenPunts( lineLong / numberOfPunts )
-        
+            
     }, [numberOfPunts])
 
     return [ distanceBetweenPunts, numberOfPunts, slots ]

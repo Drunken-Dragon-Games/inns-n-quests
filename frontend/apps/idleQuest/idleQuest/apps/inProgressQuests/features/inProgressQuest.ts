@@ -168,6 +168,22 @@ interface quest{
     reward_ds: number
     reward_xp: number
     slots: number
+    requirements: requirement
+}
+
+interface requirement{
+    character?: character []
+    all?: boolean
+    party?: party
+}
+
+interface character {
+    class?: string
+    race?: string
+}
+
+interface party {
+    balanced: boolean
 }
 
 interface enrolls{
