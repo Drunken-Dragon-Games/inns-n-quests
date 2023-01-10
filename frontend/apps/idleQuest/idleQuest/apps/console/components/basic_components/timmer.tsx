@@ -32,7 +32,7 @@ const Timmer = ({startTime, duration, questStatus}:Timmer ) => {
     //esta funcion regresa el tiempo restante que queda para que un evento acabe
     // FIXME: time doesnt work
     const [ timeLeft, completeDuration ] = useGetTimeLeft(startTime, duration, true)
-
+    
     useTimmerOverQuestInProgress(timeLeft, questStatus)
     
     return(<>
