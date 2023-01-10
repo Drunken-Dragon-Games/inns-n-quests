@@ -232,7 +232,7 @@ const inProgressQuests = createSlice({
 
         setAddInProgressQuest:  (state, action: PayloadAction<inProgressQuest>)=> {
             
-            state.quests.concat(action.payload)
+            state.quests = state.quests.concat(action.payload)
         }
 
     },
