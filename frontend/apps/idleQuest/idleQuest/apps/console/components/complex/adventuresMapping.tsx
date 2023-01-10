@@ -70,7 +70,7 @@ const AdventuresMapping = styled.div`
 const ArrowDecreseContainer = styled.div`
       position: absolute;
       bottom: -2vh;
-      right: 0.2vw;
+      right: 0.15vw;
       cursor: pointer;  
 
       img{
@@ -82,7 +82,7 @@ const ArrowDecreseContainer = styled.div`
 const ArrowIncreseContainer = styled.div`
       position: absolute;
       top: -0.9vw;
-      right: 0.2vw;
+      right: 0.15vw;
       cursor: pointer;  
 
       img{
