@@ -101,6 +101,10 @@ const Title = styled.h2`
     -webkit-font-smoothing : none;
     padding: 0vw 3.5vw;
     margin-top: 1.5vw;
+    overflow: hidden;
+    max-width: 25vw;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 `
 
 const Flex = styled.div`
@@ -290,22 +294,22 @@ const QuestPaperInProgress = () => {
 
     const [ bonus, setBonus] = useState<number>(0)
 
-    const isClose = useOpenInProgressPaper()
-
     const inProgressQuestData = useGetInProgressData()
-    
+
+    const isClose = useOpenInProgressPaper(inProgressQuestData.id)
+        
     const requirements = inProgressQuestData.quest.requirements
 
     const adventurersEnrollsRequirements = useGetAdventurersEnrollsRequirements(inProgressQuestData.enrolls)
-
-    console.log(inProgressQuestData);
-    
 
     const adventurersEnrolls = inProgressQuestData.enrolls
 
     const [pngAdvernturer] = useGetAdventurerPng()   
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
+
+    // console.log(generalSelector);
+    
 
     const isClaimedData = generalSelector.idleQuest.questsInProgress.data.claimReward
 
@@ -362,8 +366,7 @@ const QuestPaperInProgress = () => {
                                             <SucceedChance
                                                 questDifficulty = {inProgressQuestData.quest.difficulty}
                                                 questSlots = {inProgressQuestData.quest.slots}
-                                                // FIXME: bonus
-                                                requirementBonus = {50}
+                                                requirementBonus = {bonus}
                                                 adventurersList = {adventurersEnrolls}
                                                 type = "inProgress"
                                             />

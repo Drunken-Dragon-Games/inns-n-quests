@@ -13,7 +13,7 @@ interface SignatureWrapper {
 
 const SignatureWrapper = style.div<SignatureWrapper>`
     position: absolute;
-    bottom: 1.5vw;
+    top: 40vw;
     left: 4vw;
     cursor: ${props => props.notClickable  ? "context-menu": "pointer"};
     

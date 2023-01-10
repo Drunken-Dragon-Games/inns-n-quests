@@ -142,7 +142,7 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
 
 const  fetchPostClaimRewardInProgressQuestStatus  = createSliceStatus("fetchPostClaimRewardInProgressQuestStatus")
 
-const [ setFetchPostClaimRewardInProgressQuestStatusIdle, setFetchPostClaimRewardInProgressQuestStatusPending, setFetchPostClaimRewardInProgressQuestStatusFulfilled, setFetchPostClaimRewardInProgressQuestStatusErrors ] = actionsGenerator(fetchPostClaimRewardInProgressQuestStatus.actions)
+export const [ setFetchPostClaimRewardInProgressQuestStatusIdle, setFetchPostClaimRewardInProgressQuestStatusPending, setFetchPostClaimRewardInProgressQuestStatusFulfilled, setFetchPostClaimRewardInProgressQuestStatusErrors ] = actionsGenerator(fetchPostClaimRewardInProgressQuestStatus.actions)
 
 
 
@@ -226,7 +226,7 @@ const inProgressQuests = createSlice({
         setDeleteInProgressQuest:  (state, action: PayloadAction<string>)=> {
             
             const filterState = state.quests.filter((quest: inProgressQuest) => quest.id !== action.payload)
-            
+
             state.quests = filterState
         },
 
