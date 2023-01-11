@@ -5,14 +5,19 @@ export default (questSuccessful: "failed" | "succeeded" | "in_progress" | null, 
 
     const [claimShadow, setClaimShadow ] =useState<boolean>(false)
 
+    console.log(questSuccessful)
+
     useEffect(() => {
-        if(questSuccessful == "succeeded"){
+        if(questSuccessful === "succeeded"){
             setClaimShadow(true)
+        } else{
+            setClaimShadow(false)
         }
     }, [questSuccessful])
 
     useEffect(() => {
-        if(claimStatus == "succeded"){
+
+        if(claimStatus == "fulfilled"){
             setClaimShadow(false)
         }
     }, [claimStatus])

@@ -6,6 +6,7 @@ import { generalReducerThunk } from '../../../../../../features/generalReducer';
 import { inProgress } from '../../../dummy_data';
 import { setFreeAdventurers, setExperienceReward, setDeath } from '../../console/features/adventurers';
 import { AxiosError } from 'axios';
+import { setAddDragonSilverToClaim } from '../../console/features/player';
 
 //fetch para obeter a los in progress quests
 
@@ -109,8 +110,10 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
             //estas funciones actualizan los datos del estado
             dispatch(setFreeAdventurers(response.data.adventurers))
 
-            // dispatch(setDragonSilverToClaimAdd(quest.quest.reward_ds))
+            dispatch(setAddDragonSilverToClaim(quest.quest.reward_ds))
             dispatch(setExperienceReward(response.data.adventurers))
+
+
 
         } else if(quest.state == "failed"){
                 

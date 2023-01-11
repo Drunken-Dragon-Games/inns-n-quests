@@ -39,7 +39,7 @@ const CooldownDeathTimmer = ({coolDownTime}: CooldownDeathTimmer) =>{
                 <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/time_icon.png"  alt="drunken Dragon idel adventurers" width={60} height={100} layout="responsive" />
             </ImageWrapper>
             <TextOswald fontsize={ 0.7} color = "white">
-                {`${timeLeftNumber} ${coolDownTimeLeft}`}
+                {`${coolDownTimeLeft}`}
             </TextOswald>
         </CoolDownTimmerWrapper>
     </>)

@@ -95,9 +95,21 @@ export default (): inProgressQuest => {
     const inProgressQuest = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests
 
     useEffect(()=>{
-        if(index != null)
-            setInProgressQuestData(inProgressQuest[index])
+        if(index != null){
+            if(inProgressQuestData.id === 'asdasdasfgqhwyhhqfadh'){
+                setInProgressQuestData(inProgressQuest[index])
+            } else{
+                setTimeout(()=>  setInProgressQuestData(inProgressQuest[index]), 300)
+            }
+        }
     },[index])
+
+
+    useEffect(()=>{
+        return () => {
+            setInProgressQuestData(placeHolder)
+        }
+    },[])
 
     return inProgressQuestData
 }

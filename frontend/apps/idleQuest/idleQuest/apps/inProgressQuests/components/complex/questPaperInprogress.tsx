@@ -308,9 +308,6 @@ const QuestPaperInProgress = () => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
-    // console.log(generalSelector);
-    
-
     const isClaimedData = generalSelector.idleQuest.questsInProgress.data.claimReward
 
     const questClaimStatus = generalSelector.idleQuest.questsInProgress.Status.claimReward.status
