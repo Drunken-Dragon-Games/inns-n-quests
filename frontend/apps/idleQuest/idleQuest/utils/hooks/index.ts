@@ -8,3 +8,4 @@ export { default as useGetPuntDistance } from "./useGetPuntDistance"
 export { default as useGetMarkTimeLeft } from "./useGetMarkTimeLeft"
 export { default as useGetEmoji } from "./useGetEmoji"
 export { default as useErrorHandler } from "./useErrorHandler"
+export { default as useLoading } from './useLoading'
