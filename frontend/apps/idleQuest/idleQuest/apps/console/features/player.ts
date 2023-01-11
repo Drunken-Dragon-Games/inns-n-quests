@@ -4,6 +4,8 @@ import { axiosCustomInstance } from '../../../../../../axios/axiosApi';
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
 import { generalReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from 'axios';
+import { fetchRefreshToken } from '../../../../../../features/refresh';
+
 //fetch para obeter a el dragon silver to claim
 
 export const getDragonSilverToClaim = () : generalReducerThunk => async (dispatch) =>{
@@ -24,7 +26,7 @@ export const getDragonSilverToClaim = () : generalReducerThunk => async (dispatc
         
         if(err instanceof AxiosError ){
             dispatch(setFetchGetDragonSilverToClaimStatusErrors(err.response))
-            // dispatch(fetchRefreshToken( () => dispatch(getDragonSilverToClaim()), err))
+            dispatch(fetchRefreshToken( () => dispatch(getDragonSilverToClaim()), err))
         }
     }
   
@@ -59,7 +61,7 @@ export const getDragonSilver = () : generalReducerThunk => async (dispatch) =>{
         
         if(err instanceof AxiosError ){
             dispatch(setFetchGetDragonSilverStatusErrors(err.response))
-            // dispatch(fetchRefreshToken( () => dispatch(getDragonSilverToClaim()), err))
+            dispatch(fetchRefreshToken( () => dispatch(getDragonSilver()), err))
         }
     }
   

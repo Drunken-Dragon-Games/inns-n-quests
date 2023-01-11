@@ -5,6 +5,7 @@ import { createSliceStatus, actionsGenerator } from "../../../../../utils/featur
 import { generalReducerThunk } from '../../../../../../features/generalReducer';
 import { adventurer } from "../../../dummy_data"
 import { AxiosError } from 'axios';
+import { fetchRefreshToken } from '../../../../../../features/refresh';
 
 //fetch para obeter a los aventureros
 
@@ -28,7 +29,7 @@ export const getAdventurers = () : generalReducerThunk => async (dispatch) =>{
         
         if(err instanceof AxiosError ){
             dispatch(setFetchGetAdventurersStatusErrors(err.response))
-            // dispatch(fetchRefreshToken( () => dispatch(getAdventurers()), err))
+            dispatch(fetchRefreshToken( () => dispatch(getAdventurers()), err))
         }
     }
   

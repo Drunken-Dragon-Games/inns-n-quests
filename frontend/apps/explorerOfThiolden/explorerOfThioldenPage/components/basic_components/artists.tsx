@@ -49,8 +49,7 @@ interface Artists{
 
 
 const Artists = ({concept, composition, illustration, miniature}: Artists) =>{
-        console.log(concept);
-        
+      
     return (<>
     
         <ArtistElement>
@@ -59,7 +58,7 @@ const Artists = ({concept, composition, illustration, miniature}: Artists) =>{
                 <Flex>
                     <Center>
                         {concept.map((el: string ,index: number) =>{
-                            console.log(el);
+                           
                             
                             return <Artist name={el} index={index} key={el}/>
                         })}

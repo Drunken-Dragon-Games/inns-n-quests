@@ -21,10 +21,6 @@ const ImagePopup = ({width, height, name, imgSrc }:AllCharacterChart ): JSX.Elem
 
     const banner = generalSelector.exploreOfThioldenReducer.banner.bannerName
 
-    console.log(banner);
-
-    console.log(name);
-    
     useBlockScreen( banner == name )
 
     return (<>

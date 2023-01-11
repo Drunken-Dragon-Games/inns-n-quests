@@ -2,6 +2,7 @@ import styled from "styled-components"
 import Console from "./apps/console/console"
 import AvailableQuests from "./apps/availableQuest/availableQuests"
 import InProgressQuest from "./apps/inProgressQuests/inProgressQuest"
+import { ErrorHandler } from "./utils/components/complex"
 
 
 
@@ -27,6 +28,7 @@ const IdleQuestApp = (): JSX.Element =>{
                     <InProgressQuest/>
                 </Flex>
             </Relative>
+            <ErrorHandler />
     </>)
 }
 

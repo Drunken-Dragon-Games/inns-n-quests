@@ -21,8 +21,7 @@ export default (cooldown: number) => {
         //timeleft saca el tiempo que queda de cooldown en horas
         let timeLeft = (cooldown - now) / 3600000        
         
-        console.log(timeLeft);
-        
+      
         //realiza una comparacion para ver que regresar 
         if(timeLeft > 24){
             const timeDaysDecimals = timeLeft/24
@@ -39,8 +38,6 @@ export default (cooldown: number) => {
         } else if (timeLeft < 0){
             setTimeLeftNumber(0)
         }
-
-        console.log(coolDownTimeLeft);
         
     }
 
