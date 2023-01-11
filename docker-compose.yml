@@ -26,9 +26,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
 
-  # frontend:
-  #   image: docker-nextjs
-  #   build: ./frontend
-  #   container_name: ddu_frontend
-  #   ports:
-  #     - 3000:3000
+  frontend:
+    image: docker-nextjs
+    build: ./frontend
+    container_name: ddu_frontend
+    ports:
+      - 3000:3000
