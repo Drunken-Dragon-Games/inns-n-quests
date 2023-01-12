@@ -27,12 +27,13 @@ import { loadAdventurerAssosiations } from "../../../adventurers/models";
 //     storage: new SequelizeStorage({ sequelize }),
 //     logger: console
 // })
+const extension = process.env.NODE_ENV === 'production' ? 'js' : 'ts'
 
 export const createMigrator = (database: Sequelize) => {
     console.log(path.join(__dirname, '..', 'migrations', '*.js'));
     
     const migrator = new Umzug({
-        migrations: { glob: path.join(__dirname, '..', 'migrations', '*.js') },
+        migrations: { glob: path.join(__dirname, '..', 'migrations', `*.${extension}`) },
         context: database,
         storage: new SequelizeStorage({ sequelize: database }),
         logger: console
@@ -81,10 +82,10 @@ export const loadQuestModuleModels = async (database: Sequelize): Promise<void> 
  */
 const seedExecuter = async (database: Sequelize, migrations: MigrationMeta[]) => {
     for (const migration of migrations) {
-        if (migration.name === '20220608155113-create-quests.js') await generateQuests(200)
-        else if (migration.name === '20220805163635-add-quest-requirement.js') await executeRequirementGeneration(database)
-        else if (migration.name === '20220805164319-add-adventurer-class.js') await addAdventurerClass(database)
-        else if (migration.name === '20220810152042-add-adventurer-race.js') await addAdventurerRace(database) 
+        if (migration.name === `20220608155113-create-quests.${extension}`) await generateQuests(200)
+        else if (migration.name === `20220805163635-add-quest-requirement.${extension}`) await executeRequirementGeneration(database)
+        else if (migration.name === `20220805164319-add-adventurer-class.${extension}`) await addAdventurerClass(database)
+        else if (migration.name === `20220810152042-add-adventurer-race.${extension}`) await addAdventurerRace(database) 
     }
 }
 
