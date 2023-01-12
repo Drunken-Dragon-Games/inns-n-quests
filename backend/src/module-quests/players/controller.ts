@@ -136,7 +136,7 @@ THE CLIENT SIGNS THE TX AND RESEND IT TO THE SIGN AND SUBMIT TX ENDPOINT
 const mintTestNft = (assetManagementService: AssetManagementService) => async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     const {stakeAddress, userId} = request.auth!
-    const [assetName, nftType] = getRandomNFT()
+    const [assetName, nftType] = await getRandomNFT()
     const policyId = await getCollectionPolicy(nftType)
 
     try {

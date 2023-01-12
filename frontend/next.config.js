@@ -14,7 +14,7 @@ const nextConfig = {
     return config
   },
   images : {
-    domains : ['d1f9hywwzs4bxo.cloudfront.net']
+    domains : ['d1f9hywwzs4bxo.cloudfront.net', 'cdn.ddu.gg']
   },
   rewrites: async () =>
     [
