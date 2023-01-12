@@ -9,6 +9,8 @@ import { setAdventuresInQuest } from '../../console/features/adventurers';
 import { available } from '../../../dummy_data';
 import { setAvailableQuestUnselect } from '../../../features/interfaceNavigation';
 import { setAddInProgressQuest } from '../../inProgressQuests/features/inProgressQuest';
+import { fetchRefreshToken } from '../../../../../../features/refresh';
+
 //fetch para obeter los available quest si es la primera vez que se piden se realiza una peticion de 10 y posteriormente de 5 en 5 
 
 export const getAvailableQuest = (firstTime? : boolean): generalReducerThunk => async (dispatch) =>{
@@ -40,7 +42,7 @@ export const getAvailableQuest = (firstTime? : boolean): generalReducerThunk => 
         
         if(err instanceof AxiosError ){
             dispatch(setFetchGetAvailableQuestStatusErrors(err.response))
-            // dispatch(fetchRefreshToken( () => dispatch(getAvailableQuest(firstTime)), err))
+            dispatch(fetchRefreshToken( () => dispatch(getAvailableQuest(firstTime)), err))
         }
     }
 
@@ -80,14 +82,17 @@ export const takeAvailableQuest = (questId: string, adventurers: (string | undef
         //deseleciona al available quest
         dispatch(setAvailableQuestUnselect())
 
+        // dispatch(setQuestTakenId(questUiidFront))
             
         dispatch(setFetchTakeAvailableQuestStatusFulfilled())
+
+        dispatch(setTakenId(questUiidFront))
                     
     } catch (err: unknown) {
 
         if(err instanceof AxiosError ){
             dispatch(setFetchTakeAvailableQuestStatusErrors(err.response))
-            // dispatch(fetchRefreshToken( () => dispatch(takeAvailableQuest(questId, adventurers, questUiidFront)), err))
+            dispatch(fetchRefreshToken( () => dispatch(takeAvailableQuest(questId, adventurers, questUiidFront)), err))
         }
     }
 
@@ -296,12 +301,41 @@ const selectAdventurer = createSlice({
 
 export const { setSelectAdventurer, setClearSelectedAdventurers } = selectAdventurer.actions
 
+//taken id
+
+interface TakenId {
+    id: string | null
+}
+
+interface initialStateSelectAdventurer{
+    selectAdventurer: (string | undefined) []
+}
+
+const initialTakenId: TakenId = {id: null}
+
+const takenId = createSlice({
+    name: "takenId",
+    initialState: initialTakenId,
+    reducers: {
+        setTakenId:  (state, action: PayloadAction<string>)=> {
+            state.id = action.payload    
+        },
+
+        setTakenIdReset:  ( state )=> {
+            state.id = null   
+        }
+    },
+});
+
+export const { setTakenId, setTakenIdReset } = takenId.actions
+
 //combinacion de Reducers
 
 export const availableQuestGeneralReducer = combineReducers({
     data: combineReducers({
         quest: availableQuests.reducer,
-        selectAdventurer: selectAdventurer.reducer
+        selectAdventurer: selectAdventurer.reducer,
+        takenId: takenId.reducer
     }),
     status: combineReducers({
         getAvailableQuestStatus: fetchGetAvailableQuestStatus.reducer,

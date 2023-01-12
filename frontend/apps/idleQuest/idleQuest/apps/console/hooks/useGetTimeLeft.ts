@@ -1,6 +1,5 @@
 //esta funcion recibe el tiempo unicial la duracion y un booleano es para para saber si se muestra 
 export default (startTime: Date , duration: number, displayed?: boolean) =>{
-// FIXME: dont know the input 
 
     //transforma un string a formato date 
     const initialDate = new Date(startTime)
@@ -8,10 +7,7 @@ export default (startTime: Date , duration: number, displayed?: boolean) =>{
     const startingDate = new Date(startTime)
 
     
-    // console.log(initialDate)
-
-
-    //obtiene en milisegundos el tiempo total
+      //obtiene en milisegundos el tiempo total
     initialDate.setMilliseconds(initialDate.getMilliseconds() + duration)
 
     const date = new Date()
@@ -21,8 +17,6 @@ export default (startTime: Date , duration: number, displayed?: boolean) =>{
 
     //obtiene la duracion competa en dias 
     let completeDuration = ((initialDate.getTime() - startingDate.getTime()) /3600000)/24
-    
-    // console.log(completeDuration);
     
 
     //condicional lanza un string

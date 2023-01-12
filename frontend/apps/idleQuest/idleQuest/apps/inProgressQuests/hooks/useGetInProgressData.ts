@@ -23,6 +23,22 @@ interface quest{
     reward_ds: number
     reward_xp: number
     slots: number
+    requirements: requirement
+}
+
+interface requirement{
+    character?: character []
+    all?: boolean
+    party?: party
+}
+
+interface character {
+    class?: string
+    race?: string
+}
+
+interface party {
+    balanced: boolean
 }
 
 interface enrolls{
@@ -66,6 +82,7 @@ const placeHolder : inProgressQuest = {
         reward_ds: 4,
         reward_xp: 1245,
         slots: 2,
+        requirements:{}
     }
 }
 
@@ -78,9 +95,21 @@ export default (): inProgressQuest => {
     const inProgressQuest = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests
 
     useEffect(()=>{
-        if(index != null)
-            setInProgressQuestData(inProgressQuest[index])
+        if(index != null){
+            if(inProgressQuestData.id === 'asdasdasfgqhwyhhqfadh'){
+                setInProgressQuestData(inProgressQuest[index])
+            } else{
+                setTimeout(()=>  setInProgressQuestData(inProgressQuest[index]), 300)
+            }
+        }
     },[index])
+
+
+    useEffect(()=>{
+        return () => {
+            setInProgressQuestData(placeHolder)
+        }
+    },[])
 
     return inProgressQuestData
 }

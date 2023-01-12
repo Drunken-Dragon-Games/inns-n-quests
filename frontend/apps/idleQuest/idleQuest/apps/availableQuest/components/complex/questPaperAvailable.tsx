@@ -85,6 +85,10 @@ const Title = styled.h2`
     -webkit-font-smoothing : none;
     padding: 0vw 3.5vw;
     margin-top: 1.5vw;
+    overflow: hidden;
+    max-width: 25vw;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 `
 
 const Flex = styled.div`
@@ -226,8 +230,11 @@ const QuestPaperAvailable = () => {
                             
 
                             <TitleSection>
+                          
 
                                 <Title>{questData.name}</Title>
+                                
+                            
 
                                 <QuestRequirementsSectionPosition>
                                     <QuestRequirementsSection 

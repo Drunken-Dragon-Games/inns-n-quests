@@ -9,8 +9,7 @@ export default (timeLeft: string | number, questStatus: questStatus ) =>{
 
     useEffect(()=>{
 
-          
-        if(timeLeft == "0" && questStatus == "in_progress"){
+        if(timeLeft == "0 hrs" && questStatus == "in_progress"){
             generalDispatch(getInProgressQuest())
         }
         

@@ -6,6 +6,8 @@ import { generalReducerThunk } from '../../../../../../features/generalReducer';
 import { inProgress } from '../../../dummy_data';
 import { setFreeAdventurers, setExperienceReward, setDeath } from '../../console/features/adventurers';
 import { AxiosError } from 'axios';
+import { setAddDragonSilverToClaim } from '../../console/features/player';
+import { fetchRefreshToken } from '../../../../../../features/refresh';
 
 //fetch para obeter a los in progress quests
 
@@ -30,7 +32,7 @@ export const getInProgressQuest = (): generalReducerThunk => async (dispatch) =>
         
         if(err instanceof AxiosError ){
             dispatch(setFetchGetInProgressQuestStatusErrors(err.response))
-            // dispatch(fetchRefreshToken( () => dispatch(getInProgressQuest()), err))
+            dispatch(fetchRefreshToken( () => dispatch(getInProgressQuest()), err))
         }
     }
 
@@ -109,8 +111,10 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
             //estas funciones actualizan los datos del estado
             dispatch(setFreeAdventurers(response.data.adventurers))
 
-            // dispatch(setDragonSilverToClaimAdd(quest.quest.reward_ds))
+            dispatch(setAddDragonSilverToClaim(quest.quest.reward_ds))
             dispatch(setExperienceReward(response.data.adventurers))
+
+
 
         } else if(quest.state == "failed"){
                 
@@ -131,7 +135,7 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
         
         if(err instanceof AxiosError ){
             dispatch(setFetchPostClaimRewardInProgressQuestStatusErrors(err.response))
-            // dispatch(fetchRefreshToken( () => dispatch(PostClaimInProgressQuest(quest)), err))
+            dispatch(fetchRefreshToken( () => dispatch(PostClaimInProgressQuest(quest)), err))
         }
     }
 
@@ -142,7 +146,7 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
 
 const  fetchPostClaimRewardInProgressQuestStatus  = createSliceStatus("fetchPostClaimRewardInProgressQuestStatus")
 
-const [ setFetchPostClaimRewardInProgressQuestStatusIdle, setFetchPostClaimRewardInProgressQuestStatusPending, setFetchPostClaimRewardInProgressQuestStatusFulfilled, setFetchPostClaimRewardInProgressQuestStatusErrors ] = actionsGenerator(fetchPostClaimRewardInProgressQuestStatus.actions)
+export const [ setFetchPostClaimRewardInProgressQuestStatusIdle, setFetchPostClaimRewardInProgressQuestStatusPending, setFetchPostClaimRewardInProgressQuestStatusFulfilled, setFetchPostClaimRewardInProgressQuestStatusErrors ] = actionsGenerator(fetchPostClaimRewardInProgressQuestStatus.actions)
 
 
 
@@ -168,6 +172,22 @@ interface quest{
     reward_ds: number
     reward_xp: number
     slots: number
+    requirements: requirement
+}
+
+interface requirement{
+    character?: character []
+    all?: boolean
+    party?: party
+}
+
+interface character {
+    class?: string
+    race?: string
+}
+
+interface party {
+    balanced: boolean
 }
 
 interface enrolls{
@@ -210,13 +230,13 @@ const inProgressQuests = createSlice({
         setDeleteInProgressQuest:  (state, action: PayloadAction<string>)=> {
             
             const filterState = state.quests.filter((quest: inProgressQuest) => quest.id !== action.payload)
-            
+
             state.quests = filterState
         },
 
         setAddInProgressQuest:  (state, action: PayloadAction<inProgressQuest>)=> {
             
-            state.quests.concat(action.payload)
+            state.quests = state.quests.concat(action.payload)
         }
 
     },

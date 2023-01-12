@@ -22,7 +22,7 @@ import Image from 'next/image'
 import { useOpenInProgressPaper } from "../../hooks";
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
-import { useGetInProgressData, useGetAdventurerPng, useGetClaimRewardShadow } from "../../hooks"
+import { useGetInProgressData, useGetAdventurerPng, useGetClaimRewardShadow, useGetAdventurersEnrollsRequirements } from "../../hooks"
 import { QuestLabelLevel, 
     RescalingMonster, 
     SucceedChance, 
@@ -101,6 +101,10 @@ const Title = styled.h2`
     -webkit-font-smoothing : none;
     padding: 0vw 3.5vw;
     margin-top: 1.5vw;
+    overflow: hidden;
+    max-width: 25vw;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 `
 
 const Flex = styled.div`
@@ -288,9 +292,15 @@ const QuestPaperInProgress = () => {
     // }, [isClaimedData.isClaimed])
         
 
-    const isClose = useOpenInProgressPaper()
+    const [ bonus, setBonus] = useState<number>(0)
 
     const inProgressQuestData = useGetInProgressData()
+
+    const isClose = useOpenInProgressPaper(inProgressQuestData.id)
+        
+    const requirements = inProgressQuestData.quest.requirements
+
+    const adventurersEnrollsRequirements = useGetAdventurersEnrollsRequirements(inProgressQuestData.enrolls)
 
     const adventurersEnrolls = inProgressQuestData.enrolls
 
@@ -330,14 +340,13 @@ const QuestPaperInProgress = () => {
                                     
                                     <TitleSection>
                                         <Title>{inProgressQuestData.quest.name}</Title>
-                                        {/* FIXME: theis */}
-                                        {/* <QuestRequirementsSectionPosition>
+                                        <QuestRequirementsSectionPosition>
                                             <QuestRequirementsSection 
-                                                requirements ={selected.quest.requirements} 
-                                                adventuresSelected={adventurersId}
+                                                requirements ={requirements} 
+                                                adventuresSelected={adventurersEnrollsRequirements}
                                                 callbackBonus = {(bonus: number) => setBonus(bonus)}
                                             />
-                                        </QuestRequirementsSectionPosition> */}
+                                        </QuestRequirementsSectionPosition>
                                     </TitleSection>
                                     
 
@@ -354,8 +363,7 @@ const QuestPaperInProgress = () => {
                                             <SucceedChance
                                                 questDifficulty = {inProgressQuestData.quest.difficulty}
                                                 questSlots = {inProgressQuestData.quest.slots}
-                                                // FIXME: bonus
-                                                requirementBonus = {50}
+                                                requirementBonus = {bonus}
                                                 adventurersList = {adventurersEnrolls}
                                                 type = "inProgress"
                                             />
@@ -381,7 +389,7 @@ const QuestPaperInProgress = () => {
                                                     
                                                     
                                                     const adventurerData: Sprites = pngAdvernturer(el.adventurer_id, generalSelector.idleQuest.adventurers.data.data)
-                                                                console.log(adventurerData);
+                                                                
                                                                 
                                                     return  <Adventurer data ={el} 
                                                                         questLevel = {inProgressQuestData.quest.difficulty} 

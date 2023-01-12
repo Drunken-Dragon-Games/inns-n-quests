@@ -26,13 +26,10 @@ interface AvailableQuest {
 const AvailableQuest = () =>{
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-
-    // console.log(generalSelector);
     
     
     const availableQuest = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
 
-    console.log(availableQuest);
     
     const generalDispatch = useGeneralDispatch()
         

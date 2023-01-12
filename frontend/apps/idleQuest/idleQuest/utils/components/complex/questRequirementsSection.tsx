@@ -31,7 +31,7 @@ interface party {
 const QuestRequirementsSection = ({requirements, adventuresSelected, callbackBonus} : questRequirementsSection) =>{
     
     const bonus = useRequirementsBonus(adventuresSelected, requirements)
-      
+    
     useEffect(() => {
         callbackBonus(bonus)
     }, [bonus])

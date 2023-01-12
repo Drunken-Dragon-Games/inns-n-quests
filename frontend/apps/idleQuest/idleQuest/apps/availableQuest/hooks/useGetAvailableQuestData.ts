@@ -54,7 +54,6 @@ export default ():availableQuest  =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     const questNumber = generalSelector.idleQuest.navigator.availableQuest.availableQuest
-    console.log( generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests);
     
     const quests = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
 
