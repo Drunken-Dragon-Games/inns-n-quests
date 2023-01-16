@@ -30,5 +30,17 @@ services:
     image: docker-nextjs
     build: ./frontend
     container_name: ddu_frontend
+    env_file:
+      - ./frontend/.env
     ports:
       - 3000:3000
+
+  nginx:
+    image: nginx:1.13
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+        - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+        - backend
