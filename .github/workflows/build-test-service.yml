@@ -45,9 +45,8 @@ jobs:
         npm run build
         npm test
 
-    - name: Frontend - build and test
-      working-directory: frontend
-      run: |
-        npm run login:aws
-        npm ci
-        npm run build
+  #  - name: Frontend - build and test
+  #    working-directory: frontend
+  #    run: |
+  #      npm ci
+  #      npm run build

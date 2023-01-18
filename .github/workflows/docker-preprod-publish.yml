@@ -2,10 +2,10 @@ on:
   push:
     branches: 
     - preprod
-name: Docker Acceptance Publish
+name: Docker Preprod Publish
 jobs:
 
-  Docker-Acc-Publish:
+  Docker-Proprod-Publish:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,13 +30,17 @@ jobs:
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
 
+    - name: Login Digital Ocean Container Registry
+      run: |
+        docker login -u ${{ secrets.DIGITAL_OCEAN_API_TOKEN }} -p ${{ secrets.DIGITAL_OCEAN_API_TOKEN }} registry.digitalocean.com
+
     - name: Backend - Build, tag, and push
       id: docker-build-push-backend
       working-directory: backend
       env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REGISTRY: registry.digitalocean.com/ddu-cr
         REPOSITORY: ddu-backend
-        IMAGE_TAG: a-${{ steps.date.outputs.date }}-${{ github.sha }}
+        IMAGE_TAG: preprod # a-${{ steps.date.outputs.date }}-${{ github.sha }}
       run: |
         echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
@@ -46,12 +50,11 @@ jobs:
       id: docker-build-push-frontend
       working-directory: frontend
       env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REGISTRY: registry.digitalocean.com/ddu-cr
         REPOSITORY: ddu-frontend
-        IMAGE_TAG: a-${{ steps.date.outputs.date }}-${{ github.sha }}
+        IMAGE_TAG: preprod # a-${{ steps.date.outputs.date }}-${{ github.sha }}
       run: |
         echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
-        cp ~/.npmrc .
         echo -e "NEXT_PUBLIC_API_BASE_HOSTNAME=https://ddu.gg" >> .env.local 
         echo -e "NEXT_PUBLIC_CARDANO_NETWORK=testnet" >> .env.local 
         echo -e "NEXT_PUBLIC_DISCORD_CLIENT_ID='1017194651008106516'" >> .env.local 
