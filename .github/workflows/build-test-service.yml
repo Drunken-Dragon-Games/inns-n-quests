@@ -2,7 +2,7 @@ on:
   push:
     branches:
     - '*'
-    - '!acceptance'
+    - '!preprod'
     - '!mainnet'
 name: Build Test Service
 jobs:
@@ -38,20 +38,16 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      id: config-aws-credentials
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    - name: Service build and test
+    - name: Backend - build and test
       working-directory: backend
-      env:
-        GITHUB_CI: "true"
+      run: |
+        npm ci
+        npm run build
+        npm test
+
+    - name: Frontend - build and test
+      working-directory: frontend
       run: |
         npm run login:aws
         npm ci
         npm run build
-        npm test

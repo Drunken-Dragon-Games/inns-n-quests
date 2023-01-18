@@ -1,0 +1,74 @@
+on: 
+  push:
+    branches: 
+    - preprod
+name: Docker Acceptance Publish
+jobs:
+
+  Docker-Acc-Publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Backend - build 
+      working-directory: backend 
+      run: |
+        npm run login:aws
+        npm ci
+        npm run build
+
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y%m%d')"
+
+    - name: Backend - Build, tag, and push
+      id: docker-build-push-backend
+      working-directory: backend
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: ddu-backend
+        IMAGE_TAG: a-${{ steps.date.outputs.date }}-${{ github.sha }}
+      run: |
+        echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+      # docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+    - name: Frontend - Build, tag, and push docker image to Amazon ECR
+      id: docker-build-push-frontend
+      working-directory: frontend
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: ddu-frontend
+        IMAGE_TAG: a-${{ steps.date.outputs.date }}-${{ github.sha }}
+      run: |
+        echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+        cp ~/.npmrc .
+        echo -e "NEXT_PUBLIC_API_BASE_HOSTNAME=https://ddu.gg" >> .env.local 
+        echo -e "NEXT_PUBLIC_CARDANO_NETWORK=testnet" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_CLIENT_ID='1017194651008106516'" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI=https%3A%2F%2Fddu.gg%2FdiscordValidate" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT=https%3A%2F%2Fddu.gg%2FdiscordAdd" >> .env.local 
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+  #  - name: Deploy Acceptance
+  #    uses: bitovi/github-actions-deploy-eks-helm@v1.1.0
+  #    with:
+  #      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #      aws-region: us-east-1
+  #      cluster-name: ddu
+  #      config-files: .github/values/acceptance.yaml
+  #      chart-path: chart/
+  #      namespace: acceptance
+  #      values: image.tag=a-${{ steps.date.outputs.date }}-${{ github.sha }}
+  #      name: ddu-app-module
