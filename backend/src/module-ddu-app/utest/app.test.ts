@@ -1,6 +1,10 @@
 // import { buildApp } from "../app"
 // import { Server } from "http"
 
+test("placeholder", async () => {
+    expect(true).toBeTruthy()
+})
+
 // import * as mock from "./mockServices"
 // import * as flow from "./flow"
 
