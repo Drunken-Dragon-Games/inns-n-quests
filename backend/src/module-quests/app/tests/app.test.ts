@@ -20,6 +20,10 @@
 // import { registry } from "../utils"
 // import  * as randomNft from "../../players/app-logic/testnet/random-nft"
 
+test("placeholder", async () => {
+    expect(true).toBeTruthy()
+})
+
 // //////////////////// SET UP DATA ///////////////////////
 
 // let server: Server

@@ -4,6 +4,9 @@
 // import * as adventurerUtils from "../../adventurers/utils";
 // import { calculateExperienceGained } from "../../quests/utils";
 
+test("placeholder", async () => {
+    expect(true).toBeTruthy()
+})
 
 // const pixeltileData = {
 //     id: "113d180b-d5eb-459a-bfa3-acb10e6d4e6d",
