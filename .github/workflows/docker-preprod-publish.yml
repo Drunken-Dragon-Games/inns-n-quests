@@ -45,7 +45,7 @@ jobs:
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Frontend - Build, tag, and push docker image to Amazon ECR
+    - name: Frontend - Build, tag, and push docker image
       id: docker-build-push-frontend
       working-directory: frontend
       env:
@@ -61,16 +61,3 @@ jobs:
         echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT=https%3A%2F%2Fddu.gg%2FdiscordAdd" >> .env.local 
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-
-  #  - name: Deploy Acceptance
-  #    uses: bitovi/github-actions-deploy-eks-helm@v1.1.0
-  #    with:
-  #      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #      aws-region: us-east-1
-  #      cluster-name: ddu
-  #      config-files: .github/values/acceptance.yaml
-  #      chart-path: chart/
-  #      namespace: acceptance
-  #      values: image.tag=a-${{ steps.date.outputs.date }}-${{ github.sha }}
-  #      name: ddu-app-module
