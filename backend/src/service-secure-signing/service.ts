@@ -19,19 +19,19 @@ export class SecureSigningServiceDsl implements SecureSigningService {
 
     constructor (private registry: Registry) {}
 
-    static async loadFromEnv(logger?: LoggingContext): Promise<SecureSigningService> {
+    static async loadFromEnv(salt: string, logger?: LoggingContext): Promise<SecureSigningService> {
         dotenv.config()
-        return SecureSigningServiceDsl.loadFromConfig(
+        return SecureSigningServiceDsl.loadFromConfig(salt,
             { network: cardanoNetworkFromString(config.stringOrElse("CARDANO_NETWORK", "testnet"))
             , encryptionPassword: config.stringOrError("ENCRYPTION_PASSWORD")
             , initialRegistry: config.stringOrError("ENCRYPTED_REGISTRY")
             }, logger)
     }
 
-    static async loadFromConfig(appConfig: SecureSigningServiceConfig, logger?: LoggingContext): Promise<SecureSigningService> {
+    static async loadFromConfig(salt: string, appConfig: SecureSigningServiceConfig, logger?: LoggingContext): Promise<SecureSigningService> {
         const registry = new Registry(
             appConfig.network,
-            { salt: "{{ENCRYPTION_SALT}}", password: appConfig.encryptionPassword }
+            { salt, password: appConfig.encryptionPassword }
         )
         if (appConfig.initialRegistry != undefined) {
             await registry.importCache(appConfig.initialRegistry)
