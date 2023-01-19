@@ -40,12 +40,14 @@ jobs:
         REGISTRY: registry.digitalocean.com/ddu-cr
         REPOSITORY: ddu-backend
         IMAGE_TAG: preprod # a-${{ steps.date.outputs.date }}-${{ github.sha }}
+        ENCRYPTION_SALT: ${{ secrets.ENCRYPTION_SALT_PREPROD }}
       run: |
         echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+        npm run secrets:replace
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Frontend - Build, tag, and push docker image
+    - name: Frontend - Build, tag, and push
       id: docker-build-push-frontend
       working-directory: frontend
       env:

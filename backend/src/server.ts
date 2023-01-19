@@ -20,7 +20,7 @@ import { loadQuestModuleModels } from "./module-quests/app/database/migration_sc
     })
     const blockfrost = new BlockFrostAPI({ projectId: config.stringOrError("BLOCKFROST_API_KEY") })    
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
-    const secureSigningService = await SecureSigningServiceDsl.loadFromEnv()
+    const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
     await registry.load(assetManagementService)
     await loadQuestModuleModels(database)
