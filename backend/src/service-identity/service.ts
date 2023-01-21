@@ -25,7 +25,6 @@ import { Umzug } from "umzug"
 
 export interface IdentityServiceConfig 
     { network: string
-    , environment: string
     , discord: DiscordConfig
     , sessions: SessionsConfig
     }
@@ -52,7 +51,6 @@ export class IdentityServiceDsl implements IdentityService {
         dotenv.config()
         return await IdentityServiceDsl.loadFromConfig(
             { network: config.stringOrElse("CARDANO_NETWORK", "testnet")
-            , environment: config.stringOrElse("ENVIRONMENT", "local")
             , discord:
                 { clientId: config.stringOrError("DISCORD_CLIENT_ID")
                 , clientSecret: config.stringOrError("DISCORD_CLIENT_SECRET")
