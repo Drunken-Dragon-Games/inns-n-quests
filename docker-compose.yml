@@ -2,19 +2,14 @@ version: '3.8'
 
 services:
   backend:
-    build: ./backend
-    container_name: ddu_backend
-    command: npm run start --trace-sync-io
+    image: registry.digitalocean.com/ddu-cr/ddu-backend:preprod
     ports:
       - 5000:5000
-    volumes:
-      - ./backend:/code
     env_file:
-      - ./backend/.env
+      - ./backend/.env-preprod
     restart: always
     depends_on:
       - db
-  
   db:
     image: postgres:11
     container_name: ddu_db
@@ -27,8 +22,7 @@ services:
       POSTGRES_USER: postgres
 
   frontend:
-    image: docker-nextjs
-    build: ./frontend
+    image: registry.digitalocean.com/ddu-cr/ddu-frontend:preprod
     container_name: ddu_frontend
     env_file:
       - ./frontend/.env
@@ -41,6 +35,14 @@ services:
       - 80:80
       - 443:443
     volumes:
-        - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/conf.d/production.conf:/etc/nginx/conf.d/local.conf
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
     depends_on:
-        - backend
+      - backend
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw

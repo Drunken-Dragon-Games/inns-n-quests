@@ -12,8 +12,7 @@
     "lint": "eslint . --ext .ts",
     "test": "jest ./src",
     "jest": "jest",
-    "login:aws": "aws codeartifact login --tool npm --repository service-libs --domain ddu-app --domain-owner 091008970572",
-    "login:npm": "npm config set registry https://registry.npmjs.com/"
+    "secrets:replace": "node ./secret-replace.js"
   },
   "author": "The Adventurers of Drunken Dragon Entertainment",
   "license": "MIT",

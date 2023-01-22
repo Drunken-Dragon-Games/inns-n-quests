@@ -2,31 +2,14 @@ on:
   push:
     branches: 
     - mainnet
-name: Docker Acceptance Publish
+name: Docker Preprod Publish
 jobs:
 
-  Docker-Acc-Publish:
+  Docker-Proprod-Publish:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [18.x]
-
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_DB: service_db
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: admin
-          POSTGRES_PORT: 5432
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
 
     - uses: actions/checkout@v3
@@ -36,55 +19,47 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      id: config-aws-credentials
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    - name: Service build and test
-      working-directory: service
-      env:
-        GITHUB_CI: "true"
+    - name: Backend - build 
+      working-directory: backend 
       run: |
-        npm run login:aws
         npm ci
         npm run build
-        npm test
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
 
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
 
-    - name: Build, tag, and push docker image to Amazon ECR
-      id: docker-build-push
-      working-directory: service
+    - name: Login Digital Ocean Container Registry
+      run: |
+        docker login -u ${{ secrets.DIGITAL_OCEAN_API_TOKEN }} -p ${{ secrets.DIGITAL_OCEAN_API_TOKEN }} registry.digitalocean.com
+
+    - name: Backend - Build, tag, and push
+      id: docker-build-push-backend
+      working-directory: backend
       env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: identity-service
-        IMAGE_TAG: m-${{ steps.date.outputs.date }}-${{ github.sha }}
+        REGISTRY: registry.digitalocean.com/ddu-cr
+        REPOSITORY: ddu-backend
+        IMAGE_TAG: mainnet # a-${{ steps.date.outputs.date }}-${{ github.sha }}
+        ENCRYPTION_SALT: ${{ secrets.ENCRYPTION_SALT_MAINNET }}
       run: |
         echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+        npm run secrets:replace
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Deploy Mainnet
-      uses: bitovi/github-actions-deploy-eks-helm@v1.1.0
+    - name: Frontend - Build, tag, and push
+      id: docker-build-push-frontend
+      working-directory: frontend
       env:
-        IMAGE_TAG: m-${{ steps.date.outputs.date }}-${{ github.sha }}
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-        cluster-name: ddu
-        config-files: .github/values/mainnet.yaml
-        chart-path: chart/
-        namespace: mainnet
-        values: image.tag=m-${{ steps.date.outputs.date }}-${{ github.sha }}
-        name: identity-service
+        REGISTRY: registry.digitalocean.com/ddu-cr
+        REPOSITORY: ddu-frontend
+        IMAGE_TAG: mainnet # a-${{ steps.date.outputs.date }}-${{ github.sha }}
+      run: |
+        echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+        echo -e "NEXT_PUBLIC_API_BASE_HOSTNAME=https://ddu.gg" >> .env.local 
+        echo -e "NEXT_PUBLIC_CARDANO_NETWORK=mainnet" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_CLIENT_ID='1017194651008106516'" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI=https%3A%2F%2Fddu.gg%2FdiscordValidate" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT=https%3A%2F%2Fddu.gg%2FdiscordAdd" >> .env.local 
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
