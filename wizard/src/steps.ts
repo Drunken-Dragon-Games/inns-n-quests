@@ -74,3 +74,15 @@ export async function setupWizStructure(): Promise<void> {
     await createWizBackendDirectory()
     await createWizFrontendDirectory()
 }
+
+// Build docker images
+export async function buildDockerImage(project: "backend" | "frontend"): Promise<void> {
+    await execp((project == "backend" ? 'cd backend && npm run build && cd .. && ' : '') + `docker build -t ddu-${project}:local ./${project}`)
+}
+
+// Start docker postgres container
+export async function startDockerPostgresContainer(): Promise<void> {
+    const { stdout, stderr } = await execp('docker run -d -e POSTGRES_DB=service_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -p 5432:5432 --health-cmd pg_isready --health-interval 1s --health-timeout 5s --health-retries 30 postgres:14.5')
+    console.log(stdout)
+    await execp(`docker kill ${stdout}`)
+}
