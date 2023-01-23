@@ -1,5 +1,5 @@
 import util from 'util'
-import { access, mkdir, rm } from 'fs/promises'
+import { access, mkdir, readFile, rm, writeFile } from 'fs/promises'
 import { exec } from 'child_process'
 import { PlatformTypes } from '@oclif/core/lib/interfaces'
 
@@ -80,9 +80,24 @@ export async function buildDockerImage(project: "backend" | "frontend"): Promise
     await execp((project == "backend" ? 'cd backend && npm run build && cd .. && ' : '') + `docker build -t ddu-${project}:local ./${project}`)
 }
 
-// Start docker postgres container
-export async function startDockerPostgresContainer(): Promise<void> {
-    const { stdout, stderr } = await execp('docker run -d -e POSTGRES_DB=service_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -p 5432:5432 --health-cmd pg_isready --health-interval 1s --health-timeout 5s --health-retries 30 postgres:14.5')
-    console.log(stdout)
-    await execp(`docker kill ${stdout}`)
+export async function stopDockerPostgresContainer(): Promise<void> {
+    try {
+        await access(".wiz/backend/postgres_container_id")
+        const currentFileContent = await readFile(".wiz/backend/postgres_container_id")
+        await execp(`docker kill ${currentFileContent}`)
+    } catch (e) {
+        return
+    }
+}
+
+// Start docker postgres container, returns true if container was started, false if it was already running
+export async function startDockerPostgresContainer(): Promise<boolean> {
+    try {
+        await access(".wiz/backend/postgres_container_id")
+        return false
+    } catch (e) {
+        const { stdout, stderr } = await execp('docker run -d -e POSTGRES_DB=service_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -p 5432:5432 --health-cmd pg_isready --health-interval 1s --health-timeout 5s --health-retries 30 postgres:14.5')
+        await writeFile(".wiz/backend/postgres_container_id", stdout)
+        return true
+    }
 }

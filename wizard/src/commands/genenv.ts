@@ -17,7 +17,7 @@ type EnvFile = {
     SECRET_KEY: string,
     BLOCKFROST_API_KEY: string,
     DISCORD_CLIENT_ID: string,
-    DISCORD_SECRET: string,
+    DISCORD_CLIENT_SECRET: string,
     DISCORD_REDIRECT_URI_VALIDATE: string,
     DISCORD_REDIRECT_URI_ADD: string,
     CORS_ORIGIN: string,
@@ -240,7 +240,7 @@ export default class Genenv extends Command {
         const BLOCKFROST_API_KEY = await this.requestBlockFrostApiKey()
         await this.promptDiscordAppCreation()
         const DISCORD_CLIENT_ID = await this.requestDiscordClientID()
-        const DISCORD_SECRET = await this.requestDiscordSecret()
+        const DISCORD_CLIENT_SECRET = await this.requestDiscordSecret()
         await this.promptNGrokRequirement()
         const registry = await this.generateAssetRegistry()
 
@@ -253,7 +253,7 @@ export default class Genenv extends Command {
             SECRET_KEY: "secret-key",
             BLOCKFROST_API_KEY,
             DISCORD_CLIENT_ID,
-            DISCORD_SECRET,
+            DISCORD_CLIENT_SECRET,
             DISCORD_REDIRECT_URI_VALIDATE: "http://localhost:3000/discordValidate",
             DISCORD_REDIRECT_URI_ADD: "http://localhost:3000/discordAdd",
             CORS_ORIGIN: "http://localhost:3000",

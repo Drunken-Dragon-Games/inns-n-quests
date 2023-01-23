@@ -30,10 +30,11 @@ import { loadAdventurerAssosiations } from "../../../adventurers/models";
 const extension = process.env.NODE_ENV === 'production' ? 'js' : 'ts'
 
 export const createMigrator = (database: Sequelize) => {
-    console.log(path.join(__dirname, '..', 'migrations', '*.js'));
+    const migrationsPath = path.join(__dirname, '..', 'migrations', `*.${extension}`).replace(/\\/g, "/")
+    console.log(migrationsPath)
     
     const migrator = new Umzug({
-        migrations: { glob: path.join(__dirname, '..', 'migrations', `*.${extension}`) },
+        migrations: { glob: migrationsPath },
         context: database,
         storage: new SequelizeStorage({ sequelize: database }),
         logger: console
@@ -65,7 +66,7 @@ export const loadQuestModuleModels = async (database: Sequelize): Promise<void> 
         
         console.log("")        
         if(migrations.length > 0) console.log("Database Synchronized")
-        else console.log("There are no new migrations")        
+        else console.log("There are no new migrations")
         await seedExecuter(database, migrations)
         
     } catch (error: any) {
