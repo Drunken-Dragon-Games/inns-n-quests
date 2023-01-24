@@ -124,7 +124,6 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
             dispatch(setRewardClaimSucceed(response.data.adventurers))
 
             //estas funciones actualizan los datos del estado
-            console.log(response.data.adventurers)
 
             dispatch(setFreeAdventurers(response.data.adventurers))
 
@@ -137,7 +136,6 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
             
             //se activa esta funcion para realizar las animaciones correspondientes
             dispatch(setRewardClaimFail(response.data.dead_adventurers))
-
             
             //estas funciones actualizan los datos del estado
             dispatch( setDeath(response.data.dead_adventurers) )
