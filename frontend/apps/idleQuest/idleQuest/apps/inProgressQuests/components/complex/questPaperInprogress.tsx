@@ -220,77 +220,7 @@ interface Sprites {
 }
 
 const QuestPaperInProgress = () => {
-    
-    // const dispatch = useDispatch()
-    // const generalSelector = useSelector(selectGeneralPageReducer)
-    
-    // const index = generalSelector.navigator.inProgressQuestSelected
-    // const selected = generalSelector.inProgress.data[index]
-    // const questData = generalSelector.inProgress.data[index].quest
-    // const inProgressQuestChange = generalSelector.navigator.isInProgressAnimation
-    // const isClaimedData = generalSelector.inProgress.claimRewardData
-    // const questState = generalSelector.inProgress.data[index].state
-    // const questClaimStatus = generalSelector.inProgress.status.claimRewardInProgressQuestStatus.loading
-    // const enrolls = generalSelector.inProgress.data[index].enrolls
-    
-    
-    // const [isAnimationClose, setIsAnimationClose ] = useState<boolean>(false)
-    // const [ bonus, setBonus] = useState<number>(0)
-       
- 
-    
-    // const [ claimShadowEffect ] =useGetClaimRewardShadow(questState, questClaimStatus)
-
-    // //transforma los enrolls a un array de id para poder mandarlo al compoenente de QuestRequirementsSection
-    // const adventurersId = useGetArrayIdAdventurersInprogress(enrolls)
-
-    // //activa la animacion de cerrado
-    // useEffect(() => {
-    //     if(inProgressQuestChange == true){
-    //         setIsAnimationClose(true)
-    //     }
-
-    //   }, [inProgressQuestChange])
-
-    // //cuando el elemento se ceirra setea la animacion de cambio como false y el claimReward a default  
-    // useEffect(() => {
-        
-    //   return () => {
-    //     dispatch(setIsInProgressAnimation(false))
-    //     dispatch(setClaimRewardDefault())
-    //   }
-    // }, [])
-
-    // //cuando el reward es claimeado llama a este efecto que por medio de timmers va activando diversas funciones
-    // useEffect(() => {
-    //     if(isClaimedData.isClaimed == true){
-
-    //         if(isClaimedData.state == "failed"){
-    //             const closePaper = setTimeout(function(){
-    //                 setIsAnimationClose(true)
-    //             }, 5800);
-    
-    //             const exitInProgress = setTimeout(function(){
-    //                 dispatch(setFetchPostClaimRewardInProgressQuestStatusIdle())
-    //                 dispatch(setInProgressQuestUnselect())
-    //                 dispatch(setDeleteInProgressQuest(selected.id))
-    //             }, 6400);
-    //         } else if (isClaimedData.state == "succeeded"){
-    //             const closePaper = setTimeout(function(){
-    //                 setIsAnimationClose(true)
-    //             }, 5000);
-    
-    //             const exitInProgress = setTimeout(function(){
-    //                 dispatch(setFetchPostClaimRewardInProgressQuestStatusIdle())
-    //                 dispatch(setInProgressQuestUnselect())
-    //                 dispatch(setDeleteInProgressQuest(selected.id))
-    //             }, 5700);
-    //         }
-
-
-    //     }
-    // }, [isClaimedData.isClaimed])
-        
+            
 
     const [ bonus, setBonus] = useState<number>(0)
 

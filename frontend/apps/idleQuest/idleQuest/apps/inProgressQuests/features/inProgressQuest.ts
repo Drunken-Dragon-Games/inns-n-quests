@@ -50,7 +50,7 @@ const [ setFetchGetInProgressQuestStatusIdle, setFetchGetInProgressQuestStatusPe
 //fetch para claimear el reward
 
 interface inProgressQuestClaimed{
-    enrolls: enrolls
+    enrolls: enrolls []
     id: string
     is_claimed: boolean
     player_stake_address: string
@@ -93,6 +93,21 @@ interface metadata{
     dead_cooldown?: number
 }
 
+
+interface Ids{
+    id: string
+  }
+
+const getAdventurers = (enrolls : enrolls []): Ids [] =>{
+
+    const adventurers = enrolls.map(el => {
+        return el.adventurer
+    })
+
+    return adventurers
+
+}
+
 export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): generalReducerThunk => async (dispatch) =>{
     
     dispatch(setFetchPostClaimRewardInProgressQuestStatusPending())
@@ -109,6 +124,8 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
             dispatch(setRewardClaimSucceed(response.data.adventurers))
 
             //estas funciones actualizan los datos del estado
+            console.log(response.data.adventurers)
+
             dispatch(setFreeAdventurers(response.data.adventurers))
 
             dispatch(setAddDragonSilverToClaim(quest.quest.reward_ds))
@@ -117,14 +134,17 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
 
 
         } else if(quest.state == "failed"){
-                
+            
             //se activa esta funcion para realizar las animaciones correspondientes
             dispatch(setRewardClaimFail(response.data.dead_adventurers))
 
             
             //estas funciones actualizan los datos del estado
             dispatch( setDeath(response.data.dead_adventurers) )
-            dispatch(setFreeAdventurers(response.data.dead_adventurers))    
+
+            const adventurers  = getAdventurers(quest.enrolls)
+           
+            dispatch(setFreeAdventurers(adventurers))   
         }
        
         // Mock to test Without backend   
