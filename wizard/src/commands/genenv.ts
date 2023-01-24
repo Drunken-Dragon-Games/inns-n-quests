@@ -214,7 +214,7 @@ export default class Genenv extends Command {
 
     async generateAssetRegistry(): Promise<GeneratedRegistryData> {
         CliUx.ux.action.start(`Generating test policy asset registry`)
-        const { stdout, stderr } = await execp('cd backend && npm run gen:test-registry && cd..')
+        const { stdout, stderr } = await execp('cd backend && npm run gen:test-registry && cd ..')
         const registry: GeneratedRegistryData = JSON.parse(stdout.split("JSON_DATA#BEGIN|")[1].split("|JSON_DATA#END")[0])
         CliUx.ux.action.stop()
         return registry
