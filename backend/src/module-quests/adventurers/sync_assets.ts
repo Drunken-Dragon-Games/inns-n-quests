@@ -85,7 +85,6 @@ class SyncAssets {
         })
         const filteredAdventurers = adventurerArray.filter(adventurer => 
             !(!ADVENTURER_PIXELTILES.includes(adventurer.name) && adventurer.name.includes("PixelTile")))
-        console.log(filteredAdventurers)
         return filteredAdventurers
     }
 
@@ -250,18 +249,18 @@ class SyncAssets {
 
     // METHOD THAT PERFORMS THE SYNCHRONIZATION
     async sync(sequelize: Sequelize, logger: LoggingContext) {
-        logger.log.info({message: "trying to sync assets"})
+        //logger.log.info({message: "trying to sync assets"})
         let adventurersToCreateData: IWalletNFT[] | undefined;
         let adventurersToCreate: Optional<IAdventurerData, 'id' | 'experience' | 'in_quest'>[];
         let adventurersToDeleteData: IWalletNFT[] | undefined;
         if (this.existingAdventurers) {            
             adventurersToDeleteData = this.getAdventurersToDelete();
-            logger.log.info({message: "adventurers to delete:", adventurersToDeleteData})
+            //logger.log.info({message: "adventurers to delete:", adventurersToDeleteData})
         }
         if (this.walletAdventurers){
             adventurersToCreateData = this.getAdventurersToCreate();
             if (adventurersToCreateData) adventurersToCreate = this.parseAdventurersData(adventurersToCreateData);
-            logger.log.info({message: "adventurers to Create:", adventurersToCreateData})
+            //logger.log.info({message: "adventurers to Create:", adventurersToCreateData})
         }
 
         // console.log(adventurersToCreate);
