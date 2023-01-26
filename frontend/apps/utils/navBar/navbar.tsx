@@ -10,7 +10,7 @@ import { gamesButtonSection } from "../../../setting"
 import { useErrorHandler } from "./hooks"
 import { claimDragonSilver } from "./features/claimSilverDragon"
 import { useGetAuthenticationIcon } from '../navBar/hooks'
-
+import { useState, useEffect } from "react"
 
 
 const NavbarComponent = styled.nav`
@@ -175,7 +175,13 @@ const Navbar = (): JSX.Element =>{
 
     useErrorHandler()
 
+    const [isAvailable, setIsAvailable] = useState<boolean>(true)
     
+    useEffect(() => {
+        if(isAvailable == false){
+            setTimeout(()=> setIsAvailable(true), 5000 )
+        }
+    },[isAvailable])
     
     return (<>
       
@@ -227,7 +233,10 @@ const Navbar = (): JSX.Element =>{
                                         icon="dragon_silver_toClaim"
                                         number={ "+" + generalSelector.userDataNavBar.data.DSTC} 
                                         optionalText="Claim" 
-                                        functionOnclick = { () => generalDispatch(claimDragonSilver(amountDragonSilver, authenticationMethod))}
+                                        functionOnclick = { isAvailable ?  () => {
+                                            generalDispatch(claimDragonSilver(amountDragonSilver, authenticationMethod))
+                                            setIsAvailable(false)
+                                        } : () => null}
                                     />
                                 </IndividualTokenPosition>
                                 
