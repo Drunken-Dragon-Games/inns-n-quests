@@ -169,7 +169,7 @@ const signAndSubmitTx = (assetManagementService: AssetManagementService) => asyn
     const {witness, tx, claimId} = request.body
 
     try {
-        if(process.env.CARDANO_NETWORK == "mainnet") throw new ApiError(403, "incorrect_network", "Adventurers can only be minted in testnet")
+        //if(process.env.CARDANO_NETWORK == "mainnet") throw new ApiError(403, "incorrect_network", "Adventurers can only be minted in testnet")
         // const mintTx: string | undefined = await signMintTx(tx, witness, process.env.POLICY_PRIVATE_KEY)
 
         // const claimedDs = await ClaimedDragonSilver.findOne({
