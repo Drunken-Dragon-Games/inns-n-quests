@@ -9,6 +9,7 @@ import { useGetUserData } from "./hooks"
 import { gamesButtonSection } from "../../../setting"
 import { useErrorHandler } from "./hooks"
 import { claimDragonSilver } from "./features/claimSilverDragon"
+import { useGetAuthenticationIcon } from '../navBar/hooks'
 
 
 
@@ -161,6 +162,8 @@ const GameIconsPositionMobile = styled.div`
 const Navbar = (): JSX.Element =>{
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
+
+    const amountDragonSilver = generalSelector.userDataNavBar.data.DSTC
     
     const [redirectPath, redirectUrl] = useRedirect()
     
@@ -168,7 +171,11 @@ const Navbar = (): JSX.Element =>{
 
     const generalDispatch = useGeneralDispatch()
 
+    const authenticationMethod = useGetAuthenticationIcon()
+
     useErrorHandler()
+
+    
     
     return (<>
       
@@ -220,7 +227,7 @@ const Navbar = (): JSX.Element =>{
                                         icon="dragon_silver_toClaim"
                                         number={ "+" + generalSelector.userDataNavBar.data.DSTC} 
                                         optionalText="Claim" 
-                                        functionOnclick = { () => generalDispatch(claimDragonSilver(10))}
+                                        functionOnclick = { () => generalDispatch(claimDragonSilver(amountDragonSilver, authenticationMethod))}
                                     />
                                 </IndividualTokenPosition>
                                 

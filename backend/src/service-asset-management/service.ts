@@ -64,7 +64,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
             { network: config.stringOrElse("CARDANO_NETWORK", "testnet") as CardanoNetwork
             , environment: config.stringOrElse("ENVIRONMENT", "local")
             , claimsConfig: 
-                { feeAddress: config.stringOrElse("CLAIM_FEE_ADDRESS", "addr1q9duljxyczms3x7x2cpqc8yezmv46uuznx9k7pd5332tmgcufvhswpdcca36zk44q2u6qnkqf283fv8yshgkk3x4ffds4tdty6")
+                { feeAddress: config.stringOrElse("CLAIM_FEE_ADDRESS", "addr_test1qq4e7rcz9c95shmxale22rkd5flqp2ft7kfvg8mmt7829g5e4ruvq60uyzc0e0u988ypdn96y9jfstgj0xumdt60sekq3wydq9")
                 , feeAmount: config.stringOrElse("CLAIM_FEE_AMOUNT", "1000000")
                 , txTTL: config.intOrElse("CLAIM_TX_TTL", 15 * 60)
                 }

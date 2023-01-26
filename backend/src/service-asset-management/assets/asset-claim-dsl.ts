@@ -39,6 +39,7 @@ export class AssetClaimDsl {
 		const transaction = await this.db.transaction()
 		const availableAssets = await OffChainStore.findOne({ where: { userId, policyId: asset.policyId, unit: asset.unit }, transaction })
 		const quantityToClaim = (asset.quantity ?? availableAssets?.quantity) ?? "0"
+
 		if (availableAssets == null || BigInt(availableAssets.quantity) < BigInt(quantityToClaim)) {
 			await transaction.commit()
 			return failure("not-enough-assets")
@@ -48,7 +49,9 @@ export class AssetClaimDsl {
 			const script = NativeScript.from_json(JSON.stringify(policyResponse.policy))
 			const mintOptions = this.mintOptBuilder(asset.unit, script, quantityToClaim)
 			const tx = await cardano.createTokenMintTransaction(stakeAddress, mintOptions, this.blockfrost)
-			return cbor.encode(tx.to_bytes()).toString("hex")
+  			const hexTx = Buffer.from(tx.to_bytes()).toString("hex");	
+			return hexTx
+			// return cbor.encode(tx.to_bytes()).toString("hex")
 		}
 
 		const updateAvailableAssets = async() => {
@@ -83,9 +86,10 @@ export class AssetClaimDsl {
 		if (txHash != claim.txHash) return failure("corrupted-tx")
 		const signResponse = await this.secureSigningService.signWithPolicy(claim.policyId, tx, logger)
 		if (signResponse.status == "bad-tx" || signResponse.status == "forbidden") return failure("corrupted-tx")
-		const knownDecoded = Transaction.from_bytes(await cbor.decodeFirst(tx))
-		const witnessSet1 = TransactionWitnessSet.from_bytes(await cbor.decodeFirst(witness))
+		const knownDecoded = Transaction.from_bytes(Buffer.from(tx, "hex"))
+		const witnessSet1 = TransactionWitnessSet.from_bytes(Buffer.from(witness, "hex"))
 		const witnessSet2 = TransactionWitnessSet.from_bytes(await cbor.decodeFirst(signResponse.witness))
+		// const witnessSet1 = TransactionWitnessSet.from_bytes(await cbor.decodeFirst(witness))
 		const witnesses = this.combineWitnessSets(witnessSet1, witnessSet2)
 		const signedTx = cardano.addWitnessesToTransaction(witnesses, knownDecoded)
     	const txId = await this.blockfrost.txSubmit(signedTx.to_hex())

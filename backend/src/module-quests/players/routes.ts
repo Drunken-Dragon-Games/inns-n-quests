@@ -24,6 +24,6 @@ export const loadPlayerRoutes = (identityService: IdentityService, assetManageme
     router.post('/mint-test-nft', mintTestNft(assetManagementService))
     router.post('/submit-tx', signAndSubmitTx(assetManagementService))
     router.post('/tx/status', checkTxStatus)
-    router.get('/claim/dragon-silver', claimDragonSilver(assetManagementService))
+    router.post('/claim/dragon-silver', claimDragonSilver(assetManagementService))
     return router
 }
