@@ -129,8 +129,12 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         const result = await this.claims.claim(userId, stakeAddress, assets, logger)
         if (result.ctype == "success") 
             return { status: "ok", claimId: result.result.claimId, tx: result.result.tx }
-        else 
+        else {
+            console.log("===================================== " + result.error)
+            console.log(`userId: ${userId}, stakeAddress: ${stakeAddress}, assets: ${JSON.stringify(assets)}`)
+            console.log("===================================== ")
             return { status: "invalid", reason: result.error }        
+        }
     }
 
     async submitClaimSignature(claimId: string, tx: string, witness: string, logger: LoggingContext): Promise<SubmitClaimSignatureResponse> {
