@@ -140,7 +140,7 @@ const mintTestNft = (assetManagementService: AssetManagementService) => async (r
     const policyId = await getCollectionPolicy(nftType)
 
     try {
-        if(process.env.CARDANO_NETWORK == "mainnet") throw new ApiError(403, "incorrect_network", "Adventurers can only be minted in testnet")
+        // if(process.env.CARDANO_NETWORK == "mainnet") throw new ApiError(403, "incorrect_network", "Adventurers can only be minted in testnet")
         // const unsignedTx = await createMintNftTx(stakeAddress, assetName, nftMetadata);
         const options = {
             unit: assetName,
