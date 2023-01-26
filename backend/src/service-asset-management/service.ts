@@ -125,14 +125,12 @@ export class AssetManagementServiceDsl implements AssetManagementService {
     }
 
     async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, logger: LoggingContext): Promise<ClaimResponse> {
-        return { status: "invalid", reason: "unimplemented" }
-        /*
+        // return { status: "invalid", reason: "unimplemented" }
         const result = await this.claims.claim(userId, stakeAddress, assets, logger)
         if (result.ctype == "success") 
             return { status: "ok", claimId: result.result.claimId, tx: result.result.tx }
         else 
-            return { status: "invalid", reason: result.error }
-        */
+            return { status: "invalid", reason: result.error }        
     }
 
     async submitClaimSignature(claimId: string, tx: string, witness: string, logger: LoggingContext): Promise<SubmitClaimSignatureResponse> {

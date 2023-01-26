@@ -5,6 +5,7 @@ import ApiError from "./api_error"
 
 
 const apiErrorHandler = (err: any, request: Request, response: Response, next: NextFunction) => {
+    console.error(err)
     if (err instanceof ApiError) {
         return response.status(err.status).json({
             message: err.message,
