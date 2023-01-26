@@ -257,7 +257,7 @@ const claimDragonSilver = (assetManagementService: AssetManagementService) => as
     const stakeAddress = request.auth!.stake_address
     const {amount} = request.body
     try {
-        if(process.env.CARDANO_NETWORK == "mainnet") throw new ApiError(403, "incorrect_network", "Dragon Silver can only be claimed in testnet")
+        //if(process.env.CARDANO_NETWORK == "mainnet") throw new ApiError(403, "incorrect_network", "Dragon Silver can only be claimed in testnet")
         // const player: IPlayer | null = await Player.findOne({
         //     attributes: ["dragon_silver"],
         //     raw: true,
