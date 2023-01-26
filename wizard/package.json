@@ -1,0 +1,56 @@
+{
+  "name": "wizard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "bin": {
+    "wiz": "./bin/run.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "/bin",
+    "/dist",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "oclif": {
+    "bin": "wiz",
+    "dirname": "wiz",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topicSeparator": " ",
+    "topics": {
+      "hello": {
+        "description": "Say hello to the world and others"
+      }
+    }
+  },
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "oclif": "oclif",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "prepack": "npm run build && oclif manifest && oclif readme",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@oclif/core": "^1.25.0",
+    "@oclif/plugin-help": "^5.2.0",
+    "@oclif/plugin-plugins": "^2.2.2",
+    "@types/inquirer": "^9.0.3",
+    "@types/node": "^18.11.18",
+    "inquirer": "^9.1.4",
+    "oclif": "^3.6.0",
+    "shx": "^0.3.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  }
+}

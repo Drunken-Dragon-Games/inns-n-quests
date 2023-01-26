@@ -27,7 +27,7 @@ export class Wallet {
 
     static networkId = (network: CardanoNetwork): number => {
         if (network == "mainnet") return NetworkInfo.mainnet().network_id()
-        else return NetworkInfo.testnet().network_id()
+        else return NetworkInfo.testnet_preprod().network_id()
     }
 
     static generate(network: CardanoNetwork, password: string): Wallet {

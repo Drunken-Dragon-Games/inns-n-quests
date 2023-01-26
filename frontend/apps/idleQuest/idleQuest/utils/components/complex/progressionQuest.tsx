@@ -204,12 +204,15 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     // const index = generalSelector.navigator.inProgressQuestSelected
-    const index = generalSelector.idleQuest.navigator.inProgress
-    let isSuccessful : boolean = false;
+    const index = generalSelector.idleQuest.navigator.inProgress.inProgressQuest
+
+    let isSuccessful = false;
+
+    let questStateActual: "failed" | "succeeded" | "in_progress" | null = null
+
     if(index !== null){
-        // FIXME: this selector
-        // isSuccessful = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests[(index as keyof generalReducerDispatch )].state === "succeeded"
-        isSuccessful = true
+        isSuccessful = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests[index].state === "succeeded"
+        questStateActual = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests[index].state
     }
 
 
@@ -227,7 +230,7 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
     return (<>
                 <PositionWrapper>
                     <RescalingProgression src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progression.svg" />
-                    <ChestWrapper onClick= {isSuccessful == true ? ClaimQuest : null} successful={isSuccessful} >
+                    <ChestWrapper onClick= {questStateActual === 'in_progress' ?  null  :isSuccessful == true ? ClaimQuest : null} successful={isSuccessful} >
                         <RescalingChest src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_progression.svg"/>
                         <CoinRewardWrapper>
                             <CoinReward>{dsReward.toString()}</CoinReward>

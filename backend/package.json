@@ -5,10 +5,11 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts",
+    "dev": "nodemon src/server.ts",
+    "gen:test-registry": "ts-node src/gen-test-registry.ts",
     "db:start": "docker run -d -e POSTGRES_DB=service_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -p 5432:5432 --health-cmd pg_isready --health-interval 1s --health-timeout 5s --health-retries 30 postgres:14.5",
     "build": "tsc",
-    "build:docker": "npm install && npm run build && docker build . -t dev/identity-service:latest",
+    "build:docker": "npm install && npm run build && docker build . -t ddu-backend:local",
     "lint": "eslint . --ext .ts",
     "test": "jest ./src",
     "jest": "jest",
@@ -19,7 +20,7 @@
   "dependencies": {
     "@blockfrost/blockfrost-js": "^5.0.0",
     "@emurgo/cardano-message-signing-nodejs": "^1.0.1",
-    "@emurgo/cardano-serialization-lib-nodejs": "^11.0.5",
+    "@emurgo/cardano-serialization-lib-nodejs": "^11.2.1",
     "@types/compression": "^1.7.2",
     "axios": "^0.27.2",
     "bech32": "^2.0.0",

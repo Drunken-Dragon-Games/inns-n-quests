@@ -71,7 +71,8 @@ export class SecureSigningServiceDsl implements SecureSigningService {
 
     public async signWithPolicy(policyId: string, transaction: string, logger: LoggingContext): Promise<models.SignTxResult> {
         try {
-            const tx = Transaction.from_bytes(await cbor.decodeFirst(transaction))
+            const tx = Transaction.from_bytes(Buffer.from(transaction, "hex"))
+            // const tx = Transaction.from_bytes(await cbor.decodeFirst(transaction))
             const response = this.registry.signWithPolicy(policyId, tx)
             if (response == null) return { status: "forbidden" }
             else {

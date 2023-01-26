@@ -83,13 +83,10 @@ class SyncAssets {
         Object.keys(this.walletNFTs!).forEach(group => {
             adventurerArray = adventurerArray.concat(this.walletNFTs![group as keyof IApiNFTs])
         })
-        for (let i = 0; i < adventurerArray.length; i++) {
-            if (!ADVENTURER_PIXELTILES.includes(adventurerArray[i].name) && adventurerArray[i].name.includes("PixelTile")) {
-                adventurerArray.splice(i, 1)
-            }
-            
-        }
-        return adventurerArray
+        const filteredAdventurers = adventurerArray.filter(adventurer => 
+            !(!ADVENTURER_PIXELTILES.includes(adventurer.name) && adventurer.name.includes("PixelTile")))
+        console.log(filteredAdventurers)
+        return filteredAdventurers
     }
 
     // GET DATA OF THE ADVENTURERS IN THE DB

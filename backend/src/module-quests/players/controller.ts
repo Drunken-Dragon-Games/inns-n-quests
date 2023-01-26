@@ -7,10 +7,11 @@ import { blockfrost } from "../blockfrost/intializer";
 import ApiError from "../app/error/api_error";
 import { getRandomNFT, getCollectionPolicy } from "./app-logic/testnet/random-nft";
 import { handleSignVerification, handleRefreshToken } from "./app-logic/authentication";
-import { registry } from "../app/utils";
+// import { registry } from "../app/utils";
 import { withTracing } from "../base-logger"
 import { IdentityService } from "../../service-identity";
-import { AssetManagementService } from "../../service-asset-management";
+import { AssetManagementService, RegistryPolicy } from "../../service-asset-management";
+import registry from "../../module-ddu-app/assets/registry";
 
 ////////////////// GET NONCE ////////////////////
 /* 
@@ -108,8 +109,7 @@ const getDragonSilverToClaim = (assetManagementService: AssetManagementService) 
     const userId: string  = (request as AuthRequest).auth.userId;
     logger.log.info({messagge: "get Dragon Silver To Claim: user id from the request cookie", userId})
     try {
-        await registry.load(assetManagementService)
-        const policy = registry.policies.ds
+        const policy = registry.policies.find((policy: RegistryPolicy) => policy.name == "Dragon Silver")?.policyId
         logger.log.info({message: "registry policies are", policies: registry.policies})
         logger.log.info({message: "get Dragon silver To claim: policy from the registry", policy})
         if (policy == undefined) throw new Error("Dragon silver policy is undefined")
@@ -255,8 +255,7 @@ const claimDragonSilver = (assetManagementService: AssetManagementService) => as
     const logger = withTracing(request)
     const userId = request.auth!.userId
     const stakeAddress = request.auth!.stake_address
-    const [amount] = request.body
-
+    const {amount} = request.body
     try {
         if(process.env.CARDANO_NETWORK == "mainnet") throw new ApiError(403, "incorrect_network", "Dragon Silver can only be claimed in testnet")
         // const player: IPlayer | null = await Player.findOne({
@@ -288,7 +287,7 @@ const claimDragonSilver = (assetManagementService: AssetManagementService) => as
         // }) 
 
         // await t.commit();
-        const dragonSilverPolicy = process.env.POLICY_ID 
+        const dragonSilverPolicy = registry.policies.find((policy: RegistryPolicy) => policy.name == "Dragon Silver")?.policyId
         if (dragonSilverPolicy == undefined) throw new Error("Dragon Silver policy id not found")
         const options = {
             unit: "DragonSilver",

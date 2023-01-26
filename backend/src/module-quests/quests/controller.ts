@@ -16,6 +16,7 @@ import { Enrolled,
          TakenQuest } from "./models";
 import { withTracing } from "../base-logger";
 import { AssetManagementService } from "../../service-asset-management";
+import { config } from '../../tools-utils'
 
 const { Op } = require("sequelize");
 
@@ -205,7 +206,8 @@ const getTakenQuest = async (request: Request, response: Response, next: NextFun
     // CHECKS STATUS THE STATUS OF EACH TAKEN QUEST
     let takenQuestsJSON: TakenQuest[] = new Array();
     for (let i = 0; i < takenQuests.length; i++) {
-        if (Date.parse(takenQuests[i].started_on as string) + takenQuests[i].quest!.duration < Date.now()
+        if (config.intOrElse("QUEST_TIME", 1) * (Date.parse(takenQuests[i].started_on as string) + 
+            takenQuests[i].quest!.duration) < Date.now()
             && takenQuests[i].state == "in_progress"
         ) {
             await takenQuests[i].calculateQuestOutcome();

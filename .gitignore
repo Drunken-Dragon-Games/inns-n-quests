@@ -1,4 +1,6 @@
+*.code-workspace
 *.session.sql
+/.wiz
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 

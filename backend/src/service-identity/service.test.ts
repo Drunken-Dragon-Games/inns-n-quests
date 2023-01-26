@@ -23,7 +23,6 @@ const databaseConfig: DBConfig =
 beforeEach(async () => {
     service = await IdentityServiceDsl.loadFromConfig(
         { network
-        , environment: "local"
         , discord:
             { clientId: "" , clientSecret: "" , redirectValidate: "", redirectAdd: "" }
         , sessions:

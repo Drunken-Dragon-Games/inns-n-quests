@@ -1,5 +1,6 @@
 import { buildApp } from "./module-ddu-app/app"
-import registry from "./module-ddu-app/assets/registry";
+import * as questUtils from "./module-quests/app/utils"
+import assetsRegistry from "./module-ddu-app/assets/registry"
 import { PORT } from "./module-ddu-app/settings";
 import { IdentityServiceDsl } from "./service-identity";
 import { AssetManagementServiceDsl } from "./service-asset-management/service";
@@ -22,7 +23,8 @@ import { loadQuestModuleModels } from "./module-quests/app/database/migration_sc
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
-    await registry.load(assetManagementService)
+    await assetsRegistry.load(assetManagementService)
+    await questUtils.registry.load(assetManagementService)
     await loadQuestModuleModels(database)
     const app = await buildApp(identityService, assetManagementService, database)
 

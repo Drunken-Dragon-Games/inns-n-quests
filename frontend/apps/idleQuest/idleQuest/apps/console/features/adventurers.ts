@@ -143,7 +143,7 @@ const adventurers = createSlice({
             state.data = adventurersSorted
         },
 
-        setFreeAdventurers: (state, action: PayloadAction<DataAdventurer[]>) => {
+        setFreeAdventurers: (state, action: PayloadAction<any>) => {
 
             // FIXME: change it to filter, forEach or map
             //crea un array con todos los id de los aventureros en el array
