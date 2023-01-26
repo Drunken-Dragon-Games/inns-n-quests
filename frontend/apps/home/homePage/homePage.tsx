@@ -16,7 +16,7 @@ const HomePage = ():JSX.Element => {
             <HomePageComponent>
                 <BannerSection/>
                 <SocialMediaSection/>
-                <RoadMapSection/>
+                {/* <RoadMapSection/> */}
                 <DeadQueenSection/>
                 <IdleQuestsSection/>
                 <CollectionsSection/>

@@ -1,13 +1,15 @@
 import { Logo, TokenDisplayer, AuthenticationMethodIcon, GamesButton} from "./basic_components"
 import { ProfileInformation } from "./complex_components"
 import styled from "styled-components"
-import {  useGeneralSelector } from "../../../features/hooks" 
+import {  useGeneralSelector, useGeneralDispatch } from "../../../features/hooks" 
 import { selectGeneralReducer } from "../../../features/generalReducer"
 import { ConditionalRender,  Button, TextOswald } from "../components/basic_components"
 import {  useRedirect } from "../hooks"
 import { useGetUserData } from "./hooks"
 import { gamesButtonSection } from "../../../setting"
 import { useErrorHandler } from "./hooks"
+import { claimDragonSilver } from "./features/claimSilverDragon"
+
 
 
 const NavbarComponent = styled.nav`
@@ -164,6 +166,8 @@ const Navbar = (): JSX.Element =>{
     
     const isDataUser = useGetUserData()
 
+    const generalDispatch = useGeneralDispatch()
+
     useErrorHandler()
     
     return (<>
@@ -212,7 +216,12 @@ const Navbar = (): JSX.Element =>{
                                 </IndividualTokenPosition>
 
                                 <IndividualTokenPosition>
-                                    <TokenDisplayer icon="dragon_silver_toClaim" number={ "+" + generalSelector.userDataNavBar.data.DSTC}optionalText="Claim" />
+                                    <TokenDisplayer 
+                                        icon="dragon_silver_toClaim"
+                                        number={ "+" + generalSelector.userDataNavBar.data.DSTC} 
+                                        optionalText="Claim" 
+                                        functionOnclick = { () => generalDispatch(claimDragonSilver(10))}
+                                    />
                                 </IndividualTokenPosition>
                                 
                                 

@@ -40,11 +40,19 @@ const TextWrapper = styled.div`
     margin: auto 0vw;
 `
 
-const TextWrapperNew = styled.div`
+interface TextWrapperNewType{
+    disable: boolean
+}
+
+const TextWrapperNew = styled.div<TextWrapperNewType>`
     margin: auto 0vw;
     margin-left: 0.4vw;
-    // cursor: pointer;
-    filter: grayscale(100%);
+    cursor: pointer;
+    ${props => props.disable ? 'filter: grayscale(100%);' : ''}
+
+    &:hover{
+        ${props => props.disable ? '' : 'opacity: 0.8;'} 
+    }
 
     @media only screen and (max-width: 414px) {
         margin-left: 1vw;
@@ -54,9 +62,11 @@ interface TokenDisplayer{
     icon: string
     number: number | string
     optionalText?: string
+    disable?: boolean
+    functionOnclick?: () => void
 }
 
-const TokenDisplayer = ({ icon, number, optionalText }:TokenDisplayer): JSX.Element => {
+const TokenDisplayer = ({ icon, number, optionalText, disable = false, functionOnclick = () => null }:TokenDisplayer): JSX.Element => {
 
     const [hover, setHover] = useState<boolean>(false)
 
@@ -80,8 +90,10 @@ const TokenDisplayer = ({ icon, number, optionalText }:TokenDisplayer): JSX.Elem
 
                 <ConditionalRender condition = {optionalText !== undefined}>
 
-                    <TextWrapperNew onMouseOver={() => setHover(true)} onMouseLeave = {() => setHover(false)} >
-                        {/* <TextOswald fontsize = {1} color = { hover ? "#ffffff " : "#CA9F44"} fontsizeMobile = {3.5} colorMobile= "#A2A2A2"  lineHeightMobil={4.5}>{optionalText!}</TextOswald> */}
+                    <TextWrapperNew 
+                        disable = {disable}
+                        onClick = {functionOnclick}
+                    >
                         <TextOswald fontsize = {1} color = "#CA9F44" fontsizeMobile = {3.5} colorMobile= "#A2A2A2"  lineHeightMobil={4.5}>{optionalText!}</TextOswald>
                     </TextWrapperNew>
                     

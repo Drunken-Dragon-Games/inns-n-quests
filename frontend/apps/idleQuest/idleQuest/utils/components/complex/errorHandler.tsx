@@ -15,9 +15,6 @@ const SnackbarContainer = styled.div`
 const ErrorHandler = ()=>{
     
     const [errorsArray] = useErrorHandler()
-
-    console.log(errorsArray);
-    
     
     return (<>
     
