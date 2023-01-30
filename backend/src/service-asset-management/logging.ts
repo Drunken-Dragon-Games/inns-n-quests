@@ -82,4 +82,10 @@ export class AssetManagementServiceLogging implements AssetManagementService {
             serviceLogger?.log.info(`Claim ${claimId} status ok`)
         return response
     }
+
+    async revertStaledClaims(logger?: LoggingContext): Promise<number> {
+        const serviceLogger = this.withComponent(logger)
+        const response = await this.base.revertStaledClaims(serviceLogger)
+        return response
+    }
 }

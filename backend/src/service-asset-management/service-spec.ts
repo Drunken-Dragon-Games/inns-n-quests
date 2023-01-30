@@ -30,4 +30,6 @@ export interface AssetManagementService {
     submitClaimSignature(claimId: string, tx: string, witness: string, logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse>
 
     claimStatus(claimId: string, logger?: LoggingContext): Promise<models.ClaimStatusResponse>
+
+    revertStaledClaims(logger?: LoggingContext): Promise<number>
 }

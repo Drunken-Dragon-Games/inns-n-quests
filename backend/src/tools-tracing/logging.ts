@@ -62,7 +62,6 @@ export class LoggingContext {
         }
     }
 
-
     info(message: string, context?: object): void {
         this.log.info({ message, context })
     }
