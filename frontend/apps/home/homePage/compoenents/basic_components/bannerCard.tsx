@@ -38,7 +38,7 @@ const BannerCard = ( {src} : BannerCard): JSX.Element =>{
 
             <BannerButton>
 
-                <LinkDisable url="https://s2.drunkendragon.games/" openExternal = {true}>
+                <LinkDisable url="/s2" openExternal = {false}>
                     <SimpleButton action={() => null}>Explore Collection</SimpleButton>
                 </LinkDisable>
                 

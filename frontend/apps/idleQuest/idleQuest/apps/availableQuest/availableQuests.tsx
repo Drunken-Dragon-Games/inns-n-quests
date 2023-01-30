@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import Image from "next/image"
-import { useGetAvailableQuest } from "./hooks";
+import { useGetAvailableQuest, useRefreshQuest } from "./hooks";
 import { AvailableQuestMapping, MapDrunkenDragon, QuestPaperAvailable } from "./components/complex";
+import { RefreshButton } from "./components/basic_components";
 
 const QuestDashboardContainer =styled.div`
     width: 85%;
@@ -32,11 +33,15 @@ const ImageWrapper = styled.div`
     top: 1vw;
 `
 
+
+
 const AvailableQuests = () => {
 
     
 
     useGetAvailableQuest();
+
+    const setRefresh = useRefreshQuest()
 
     return (<>
         <QuestDashboardContainer>
@@ -49,6 +54,7 @@ const AvailableQuests = () => {
                     <AvailableQuestMapping/>
                     <MapDrunkenDragon/>
                 </Center>
+                <RefreshButton onClick ={() => setRefresh(true)} />
             </QuestDashboardWrapper>
                         
             <QuestPaperAvailable/>
