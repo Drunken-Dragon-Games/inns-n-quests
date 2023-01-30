@@ -40,6 +40,14 @@ jobs:
 
     - name: Backend - build and test
       working-directory: backend
+      env:
+        POLICY_DRAGON_SILVER: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        POLICY_PIXEL_TILES: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+        POLICY_GMAS: cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        POLICY_THIOLDEN: dddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+        POLICY_EMOJIS: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+        POLICY_SLIMES: ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        POLICY_FURNITURE: gggggggggggggggggggggggggggggggggggggggggggggggggggggggg
       run: |
         npm ci
         npm run build

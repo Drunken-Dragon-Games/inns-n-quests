@@ -95,7 +95,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         await this.database.close()
     }
 
-    async health(logger: LoggingContext): Promise<HealthStatus> {
+    async health(logger?: LoggingContext): Promise<HealthStatus> {
         let dbHealth: "ok" | "faulty"
         try { await this.database.authenticate(); dbHealth = "ok" }
         catch (e) { console.error(e); dbHealth = "faulty" }
@@ -105,14 +105,14 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         }
     }
 
-    async registry(logger: LoggingContext): Promise<RegistryPolicy[]> {
+    async registry(logger?: LoggingContext): Promise<RegistryPolicy[]> {
         return Promise.resolve(this.registryM.list())
     }
 
-    async list(userId: string, logger: LoggingContext, options?: { count?: number, page?: number, chain?: boolean , policies?: string[] }): Promise<ListResponse> {
+    async list(userId: string, logger?: LoggingContext, options?: { count?: number, page?: number, chain?: boolean , policies?: string[] }): Promise<ListResponse> {
         const userInfo = await this.identityService.resolveUser({ ctype: "user-id", userId }, logger)
         if (userInfo.status == "unknown-user-id") return { status: "unknown-user" }
-        const inventory = await this.assets.list( userId, userInfo.info.knownStakeAddresses, 
+        const inventory = await this.assets.list(userId, userInfo.info.knownStakeAddresses, 
             { count: options?.count ?? 100, page: options?.page ?? 0, chain: options?.chain, policies: options?.policies })
         return { status: "ok", inventory }
     }
@@ -124,20 +124,16 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         return { status: "ok" }
     }
 
-    async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, logger: LoggingContext): Promise<ClaimResponse> {
-        // return { status: "invalid", reason: "unimplemented" }
+    async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<ClaimResponse> {
         const result = await this.claims.claim(userId, stakeAddress, assets, logger)
         if (result.ctype == "success") 
             return { status: "ok", claimId: result.result.claimId, tx: result.result.tx }
         else {
-            console.log("===================================== " + result.error)
-            console.log(`userId: ${userId}, stakeAddress: ${stakeAddress}, assets: ${JSON.stringify(assets)}`)
-            console.log("===================================== ")
             return { status: "invalid", reason: result.error }        
         }
     }
 
-    async submitClaimSignature(claimId: string, tx: string, witness: string, logger: LoggingContext): Promise<SubmitClaimSignatureResponse> {
+    async submitClaimSignature(claimId: string, tx: string, witness: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResponse> {
         const result = await this.claims.submitClaimSignature(claimId, tx, witness, logger)
         if (result.ctype == "success") 
             return { status: "ok", txId: result.result }
@@ -145,11 +141,15 @@ export class AssetManagementServiceDsl implements AssetManagementService {
             return { status: "invalid", reason: result.error }
     }
 
-    async claimStatus(claimId: string, logger: LoggingContext): Promise<ClaimStatusResponse> {
+    async claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResponse> {
         const result = await this.claims.claimStatus(claimId, logger)
         if (result.ctype == "success") 
             return { status: "ok", claimStatus: result.result }
         else 
             return { status: "invalid", reason: result.error }
+    }
+
+    async revertStaledClaims(logger?: LoggingContext): Promise<number> {
+        return await this.claims.revertStaledClaims(logger)
     }
 }

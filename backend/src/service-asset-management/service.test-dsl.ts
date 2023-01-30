@@ -9,7 +9,7 @@ import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import path from "path"
 import { Transaction } from "@emurgo/cardano-serialization-lib-nodejs"
 import { Wallet, cardano } from "../tools-cardano"
-import { failure, success, unit } from "../tools-utils"
+import { config, failure, success, unit } from "../tools-utils"
 import { expectResponse } from "../tools-utils/api-expectations"
 
 export type User = {
@@ -25,7 +25,7 @@ export type TestClaim = {
 
 export default class ServiceTestDsl {
 
-    public readonly testTokenPolicyId = "2c037a7d19dfe49eb5e560e5838392b5fe47cd6068db77a9dad68d0b"
+    public readonly testTokenPolicyId = config.stringOrError("POLICY_DRAGON_SILVER")
 
     private readonly identityService: IdentityServiceMock
     private readonly secureSigningService: SecureSigningServiceMock 

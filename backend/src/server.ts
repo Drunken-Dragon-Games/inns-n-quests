@@ -9,6 +9,16 @@ import { connectToDB } from "./tools-database";
 import { config } from "./tools-utils";
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
 import { loadQuestModuleModels } from "./module-quests/app/database/migration_scripts/migrate";
+import { setTimeout } from "timers/promises";
+import { LoggingContext } from "./tools-tracing";
+import { AssetManagementService } from "./service-asset-management";
+
+async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
+    await setTimeout(1000 * 60)
+    const amountReverted = await assetManagementService.revertStaledClaims(logger)
+    logger.info(`Reverted ${amountReverted} staled claims`)
+    await revertStaledClaimsLoop(assetManagementService, logger)
+}
 
 (async () => {
     const database = connectToDB({ 
@@ -31,4 +41,6 @@ import { loadQuestModuleModels } from "./module-quests/app/database/migration_sc
     await identityService.loadDatabaseModels()
     await assetManagementService.loadDatabaseModels()
     app.listen(PORT, () => console.log(`Server running on port ${PORT}...`));
+
+    revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
 })()

@@ -54,7 +54,7 @@ const getAllAdventurers = (thioldenMetadata: any) => async (request: Request, re
                 user_id: userId 
             }
         });
-        logger.log.info({message: "get all adventurers got", adventurers})
+        //logger.log.info({message: "get all adventurers got", adventurers})
         let gmAdventurers: Model<IAdventurer>[] = adventurers.filter((adventurer: Model<IAdventurer>) => {
             return adventurer.toJSON().type == "gma"
         })
@@ -73,7 +73,7 @@ const getAllAdventurers = (thioldenMetadata: any) => async (request: Request, re
     adventurersJSON.map((adventurer: IAdventurerRes) => {
         return getAdventurerToReturn(adventurer, thioldenMetadata)
     });
-    logger.log.info({message: "adventurers JSON is", adventurersJSON})
+    //logger.log.info({message: "adventurers JSON is", adventurersJSON})
     return response.status(200).json(adventurersJSON)
     } catch (error) {
         next(error)

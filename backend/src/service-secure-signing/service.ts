@@ -42,20 +42,20 @@ export class SecureSigningServiceDsl implements SecureSigningService {
         return new SecureSigningServiceLogging(new SecureSigningServiceDsl(registry))
     }
 
-    async health(logger: LoggingContext): Promise<HealthStatus> {
+    async health(logger?: LoggingContext): Promise<HealthStatus> {
         return {
             status: "ok",
             dependencies: []
         }
     }
 
-    public async policy(policyId: string, logger: LoggingContext): Promise<models.PolicyResult> {
+    public async policy(policyId: string, logger?: LoggingContext): Promise<models.PolicyResult> {
         const response = this.registry.policy(policyId)
         if (response == null) return { status: "unknown-policy" }
         else return { status: "ok", policy: response }
     }
 
-    public async signTx(policyId: string, transaction: string, logger: LoggingContext): Promise<models.SignTxResult> {
+    public async signTx(policyId: string, transaction: string, logger?: LoggingContext): Promise<models.SignTxResult> {
         try {
             const tx = Transaction.from_bytes(await cbor.decodeFirst(transaction))
             const response = this.registry.signTx(policyId, tx)
@@ -69,7 +69,7 @@ export class SecureSigningServiceDsl implements SecureSigningService {
         }
     }
 
-    public async signWithPolicy(policyId: string, transaction: string, logger: LoggingContext): Promise<models.SignTxResult> {
+    public async signWithPolicy(policyId: string, transaction: string, logger?: LoggingContext): Promise<models.SignTxResult> {
         try {
             const tx = Transaction.from_bytes(Buffer.from(transaction, "hex"))
             // const tx = Transaction.from_bytes(await cbor.decodeFirst(transaction))
@@ -84,7 +84,7 @@ export class SecureSigningServiceDsl implements SecureSigningService {
         }
     }
 
-    public async signData(policyId: string, payload: string, logger: LoggingContext): Promise<models.SignDataResult> {
+    public async signData(policyId: string, payload: string, logger?: LoggingContext): Promise<models.SignDataResult> {
         try {
             const response = this.registry.signData(policyId, payload)
             if (response == null) return { status: "forbidden" }
