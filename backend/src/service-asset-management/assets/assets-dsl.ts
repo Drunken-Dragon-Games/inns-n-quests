@@ -68,8 +68,6 @@ export class AssetStoreDsl {
 
     private fetchOnChainAssets = async (account: string, options: Options): Promise<Inventory> => {
 		const count = 100
-		//const account = await this.fetchHandleAddress(address)
-		//const account = extractStakeAddress(realAddress)
 		const recurse = async (page: number, acc: Inventory): Promise<Inventory> => {
 			// FIX ME: In case blockfrost throws an exception then return error
 			const assets = await this.blockfrost.accountsAddressesAssets(account, { count, page })
