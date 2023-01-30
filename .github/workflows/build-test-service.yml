@@ -42,12 +42,12 @@ jobs:
       working-directory: backend
       env:
         POLICY_DRAGON_SILVER: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        POLICY_PIXEL_TILES: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        POLICY_GMAS: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        POLICY_THIOLDEN: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        POLICY_EMOJIS: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        POLICY_SLIMES: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        POLICY_FURNITURE: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        POLICY_PIXEL_TILES: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+        POLICY_GMAS: cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        POLICY_THIOLDEN: dddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+        POLICY_EMOJIS: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+        POLICY_SLIMES: ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        POLICY_FURNITURE: gggggggggggggggggggggggggggggggggggggggggggggggggggggggg
       run: |
         npm ci
         npm run build
