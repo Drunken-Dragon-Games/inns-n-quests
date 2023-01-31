@@ -107,9 +107,15 @@ const getRandomQuestsV2 = (sequelize: Sequelize) => async (request: Request, res
 
         let quests = await Promise.all(queryArray).then(data => {
             return [].concat.apply([], data as any)
-        });
+        }) as Quest[];
 
-        return response.status(200).send(shuffle(quests));
+        const parsedQuests = quests.map(quest => {
+            const newQuest = quest.toJSON()
+            newQuest.duration = config.floatOrElse("QUEST_TIME", 1) * quest.duration
+            return newQuest
+        })
+        console.log(parsedQuests)
+        return response.status(200).send(shuffle(parsedQuests));
         
     } catch (error: any) { 
         next(error);
@@ -170,6 +176,7 @@ const acceptQuest = (database: Sequelize) => async (request: Request, response: 
             OTHERWISE DB ROLLBACK
         */
         const takenQuest = await quest.accept(userId, adventurerIds, database)
+        takenQuest.quest!.duration *= config.floatOrElse("QUEST_TIME", 1)
             
         return response.status(201).send(takenQuest)
     } catch (error: any) {
@@ -206,7 +213,7 @@ const getTakenQuest = async (request: Request, response: Response, next: NextFun
     // CHECKS STATUS THE STATUS OF EACH TAKEN QUEST
     let takenQuestsJSON: TakenQuest[] = new Array();
     for (let i = 0; i < takenQuests.length; i++) {
-        if (config.intOrElse("QUEST_TIME", 1) * (Date.parse(takenQuests[i].started_on as string) + 
+        if (config.floatOrElse("QUEST_TIME", 1) * (Date.parse(takenQuests[i].started_on as string) + 
             takenQuests[i].quest!.duration) < Date.now()
             && takenQuests[i].state == "in_progress"
         ) {
