@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.ts",
     "gen:test-registry": "ts-node src/gen-test-registry.ts",
     "db:start": "docker run -d -e POSTGRES_DB=service_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -p 5432:5432 --health-cmd pg_isready --health-interval 1s --health-timeout 5s --health-retries 30 postgres:14.5",
+    "db:generate-migration": "sequelize-cli migration:generate",
     "build": "tsc",
     "build:docker": "npm install && npm run build && docker build . -t ddu-backend:local",
     "lint": "eslint . --ext .ts",

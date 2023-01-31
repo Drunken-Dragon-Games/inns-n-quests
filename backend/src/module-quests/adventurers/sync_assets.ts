@@ -13,6 +13,8 @@ import ApiError from "../app/error/api_error";
 import { Policy } from "../app/types";
 import { ADVENTURER_PIXELTILES } from "../app/settings";
 import { LoggingContext } from "../../tools-tracing"
+import { Enrolled, Quest, TakenQuest } from "../quests/models";
+import { Player } from "../players/models";
 
 /////////// SYNCHRONIZATION CLASS //////////
 /* 
@@ -268,29 +270,54 @@ class SyncAssets {
 
         // ORM METHODS TO UPDATE THE DB
         try {
-            const result = await sequelize.transaction (async t => {
+            const result = await sequelize.transaction (async transaction => {
                 // CREATES IN BULK
-                if(adventurersToCreate) await Adventurer.bulkCreate(adventurersToCreate, {
-                    transaction: t
-                });
+                if(adventurersToCreate) 
+                    await Adventurer.bulkCreate(adventurersToCreate, { transaction });
                 if(adventurersToDeleteData) {
+                    // Picks the adventurers to delete
+                    const adventurersToDelete = await Promise.all(adventurersToDeleteData.map(adv => {
+                        return Adventurer.findAll({
+                            where: { on_chain_ref: adv.name, user_id: this.userId },
+                            order: [['experience', 'ASC']],
+                            limit: adv.quantity,
+                            transaction
+                        })
+                    })).then(arr => arr.flat())
+
+                    // Finds and deletes the taken quests of the adventurers to delete
+                    for (const adv of adventurersToDelete) {
+                        const res = await sequelize.query('SELECT taken_quests.id FROM taken_quests INNER JOIN enrolls ON taken_quests.id = enrolls.taken_quest_id WHERE enrolls.adventurer_id = :adventurerId', { replacements: { adventurerId: adv.id }, transaction })
+                        const takenQuestsIds = res[0].map((quest: any) => quest.id)
+                        await sequelize.query('UPDATE adventurers SET in_quest = false WHERE id IN (SELECT adventurer_id FROM enrolls WHERE taken_quest_id IN (:takenQuestsIds))', { replacements: { takenQuestsIds }, transaction })
+                        await TakenQuest.destroy({ where: { id: takenQuestsIds }, transaction })
+                    }
+
+                    // Deletes the adventurers to delete
+                    await Adventurer.destroy({
+                        where: { id: adventurersToDelete.map(adv => adv.id) },
+                        transaction
+                    })
+                }
                     /* 
                     DELETES IN BULK ADVENTURER WITH LOWEST LEVEL
                     RAW SQL NEEDED TO PERFORM COMPLICATED QUERY
                     */
+
+                    /*
                     for (let i = 0; i < adventurersToDeleteData.length; i++) {
                         await Adventurer.destroy({ 
                             where: { 
                                 id: [
-                                    sequelize.literal(`(SELECT id FROM adventurers WHERE on_chain_ref = '${adventurersToDeleteData[i].name}' AND user_id = '${this.userId}'ORDER BY experience ASC LIMIT ${adventurersToDeleteData[i].quantity})`)
+                                    
+sequelize.literal(`(SELECT id FROM adventurers WHERE on_chain_ref = '${adventurersToDeleteData[i].name}' AND user_id = '${this.userId}'ORDER BY experience ASC LIMIT ${adventurersToDeleteData[i].quantity})`)
                                 ], 
                             },
                             transaction: t
                         });
                     }
-                }
+                    */
             });
-            
         } catch (error) {
             logger.log.error({message: "Assets could not be synchronized", error})
             throw new Error("Assets could not be synchronized");
