@@ -290,6 +290,7 @@ class SyncAssets {
                         const res = await sequelize.query('SELECT taken_quests.id FROM taken_quests INNER JOIN enrolls ON taken_quests.id = enrolls.taken_quest_id WHERE enrolls.adventurer_id = :adventurerId', { replacements: { adventurerId: adv.id }, transaction })
                         const takenQuestsIds = res[0].map((quest: any) => quest.id)
                         await sequelize.query('UPDATE adventurers SET in_quest = false WHERE id IN (SELECT adventurer_id FROM enrolls WHERE taken_quest_id IN (:takenQuestsIds))', { replacements: { takenQuestsIds }, transaction })
+                        await Enrolled.destroy({ where: { taken_quest_id: takenQuestsIds }, transaction })
                         await TakenQuest.destroy({ where: { id: takenQuestsIds }, transaction })
                     }
 
