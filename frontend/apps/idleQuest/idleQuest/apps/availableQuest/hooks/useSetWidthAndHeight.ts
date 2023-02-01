@@ -3,24 +3,10 @@ import { useEffect, useState } from "react"
 import { useGetRandomNumber } from "."
 import { setPositionAvailableQuest } from "../features/availableQuest"
 import { propPosition } from "../../../../../idleQuest/settings"
+import { AvailableQuestType } from "../../../../../../types/idleQuest" 
 
 
-interface AvailableQuest {
-    uiid?: string
-    id: string
-    name: string
-    description: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    duration: number
-    width?: number
-    height?: number
-}
-
-export default (data: AvailableQuest , position: number) : (number | null) [] =>{
+export default (data: AvailableQuestType , position: number) : (number | null) [] =>{
 
     const generalDispatch = useGeneralDispatch()
     

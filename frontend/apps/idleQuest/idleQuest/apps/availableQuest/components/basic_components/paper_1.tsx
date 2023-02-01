@@ -4,7 +4,7 @@ import {  useState } from "react"
 import { useSetWidthAndHeight, useCloseProps } from "../../hooks";
 import { PropStamp } from "."
 import { RescalingMonster } from "../../../../utils/components/basic_component";
-
+import { AvailableQuestType } from "../../../../../../../types/idleQuest";
 
 const Placeit = keyframes`
     0% { height: 0vw;  }
@@ -96,6 +96,11 @@ const PageWrapper = styled.div`
         -webkit-font-smoothing : none;
     }
 `
+
+interface  Hover {
+    Hover: boolean
+}
+
 const OnHover = styled.div<Hover>`
     position: absolute;
     top: 0.3vw;
@@ -117,33 +122,11 @@ const MonsterWrapper = styled.div`
     height: 6vw !important;
 `
 
-
-
-interface AvailableQuest {
-    uiid?: string
-    id: string
-    name: string
-    description: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    duration: number
-    width?: number
-    height?: number
-}
-
 interface  PaperProp {
-    data: AvailableQuest
+    data: AvailableQuestType
     position: number
     onClick: React.MouseEventHandler<HTMLButtonElement>
 }
-
-interface  Hover {
-    Hover: boolean
-}
-
 
 const Paper_1 = ({data, position, onClick}: PaperProp) => {
     

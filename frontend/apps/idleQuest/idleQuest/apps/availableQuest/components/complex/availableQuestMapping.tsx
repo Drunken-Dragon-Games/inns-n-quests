@@ -5,23 +5,7 @@ import { selectGeneralReducer } from "../../../../../../../features/generalReduc
 import { ConditionalRender } from "../../../../../../utils/components/basic_components"
 import { useGeneralDispatch } from "../../.././../../../../features/hooks"
 import { setAvailableQuestSelected } from "../../../../features/interfaceNavigation"
-
-
-interface AvailableQuest {
-    uiid?: string
-    id: string
-    name: string
-    description: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    duration: number
-    width?: number
-    height?: number
-}
-
+import { AvailableQuestType } from "../../../../../../../types/idleQuest";
 
 const AvailableQuest = () =>{
 
@@ -36,7 +20,7 @@ const AvailableQuest = () =>{
     return (
         <>
                 <ConditionalRender condition = {availableQuest.length > 0}>
-                    {  availableQuest.map((el: AvailableQuest, index: number ) => {
+                    {  availableQuest.map((el: AvailableQuestType, index: number ) => {
 
                         if (index == 0){
                             return <Paper_1 position = {2} data = {el} key={el.uiid} onClick={() => generalDispatch(setAvailableQuestSelected(index))} />

@@ -10,6 +10,7 @@ import { available } from '../../../dummy_data';
 import { setAvailableQuestUnselect } from '../../../features/interfaceNavigation';
 import { setAddInProgressQuest } from '../../inProgressQuests/features/inProgressQuest';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
+import { AvailableQuestType } from '../../../../../../types/idleQuest';
 
 //fetch para obeter los available quest si es la primera vez que se piden se realiza una peticion de 10 y posteriormente de 5 en 5 
 
@@ -107,64 +108,23 @@ const [ setFetchTakeAvailableQuestStatusIdle, setFetchTakeAvailableQuestStatusPe
 
 //reducer para manejar los cambios en los datos de availablequest
 
-interface initialStateNavigationConsole{
-    page: "available" | "in_progress"
-}
-
-const initialStateNavigationConsole: initialStateNavigationConsole = {page: "available"}
-
-interface AvailableInitialQuest {
-    availableQuest: availableQuest[]
-    shownQuest: availableQuest[] 
-}
-
-interface availableQuest {
-    uiid?: string
-    id: string
-    name: string
-    description: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    duration: number
-    width?: number
-    height?: number
-    requirements: requirement
-}
-
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
-
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
-}
-interface position{
+interface PositionType{
     width: number
     height: number
     uiid: string
 }
 
-interface AvailableInitialQuest {
-    availableQuest: availableQuest[]
-    shownQuest: availableQuest[] 
+interface AvailableInitialQuestType {
+    availableQuest: AvailableQuestType []
+    shownQuest: AvailableQuestType [] 
 }
 
-const initialStateAvailableQuest: AvailableInitialQuest = {availableQuest: [], shownQuest: []}
+const initialStateAvailableQuest: AvailableInitialQuestType = {availableQuest: [], shownQuest: []}
 
 
-const AddUuid = (quests: availableQuest[]): availableQuest[] =>{
+const AddUuid = (quests: AvailableQuestType []): AvailableQuestType [] =>{
 
-    quests.map((availableQuest: availableQuest) => {
+    quests.map((availableQuest) => {
         const uiid = uuidv4()
         availableQuest.uiid = uiid
     });
@@ -178,7 +138,7 @@ const availableQuests = createSlice({
     initialState: initialStateAvailableQuest,
     reducers: {
 
-        setAvailableQuest:  (state, action: PayloadAction<availableQuest[]>)=> {
+        setAvailableQuest:  (state, action: PayloadAction<AvailableQuestType[]>)=> {
 
             const questWithUuid = AddUuid(action.payload)
 
@@ -191,74 +151,67 @@ const availableQuests = createSlice({
             // con este reducer se eliminan el quest que tenga el id igual al payload
             const newArray = state.availableQuest.filter( quest => quest.uiid !== action.payload)
 
-            const index = state.shownQuest.findIndex((el: availableQuest) => el.uiid === action.payload)
+            const index = state.shownQuest.findIndex((el) => el.uiid === action.payload)
 
             // remplaza el siguiente quest en la posicion del quest eliminado
-            state.shownQuest[index] = newArray[3] as availableQuest
+            state.shownQuest[index] = newArray[3] 
 
             state.availableQuest = newArray
         
         },
 
-        setPositionAvailableQuest:  (state, action: PayloadAction<position>)=> {
+        setPositionAvailableQuest:  (state, action: PayloadAction<PositionType>)=> {
 
-            state.shownQuest.forEach((quest: availableQuest) =>{
-                
+            state.shownQuest.forEach((quest) =>{
                 if(quest.uiid == action.payload.uiid){
                     quest.width = action.payload.width
                     quest.height = action.payload.height
                 }
-                
             })
         
         },
 
-        setNewExtraQuests:  (state, action: PayloadAction<availableQuest[]>)=> {
+        setNewExtraQuests:  (state, action: PayloadAction<AvailableQuestType[]>)=> {
 
              //se asigna el uiid a los nuevos quest llegados;
             const questWithUuid = AddUuid(action.payload)
 
-
             //se agregan los nuevos quest al availableQuestArray
             state.availableQuest = state.availableQuest.concat(questWithUuid)
-            
+
             //agrega los quest restantes al shownQuest array
-            const rePlaced = state.shownQuest.reduce ((acc: availableQuest [] , originalElement: availableQuest) =>{
-                
+            const rePlaced = state.shownQuest.reduce ((acc: AvailableQuestType [] , originalElement) =>{
                 if (originalElement == undefined){
                     return acc.concat(questWithUuid[0])
                 }
                 return acc.concat(originalElement)
             },[])
 
-            
-            state.shownQuest = rePlaced
-        
+            state.shownQuest = rePlaced        
         }
-    
     },
 });
 
 export const { setAvailableQuest, setDeleteAvailableQuest, setPositionAvailableQuest, setNewExtraQuests } = availableQuests.actions
 
 
-interface SelectAdventurer {
+interface SelectAdventurerType {
     index: number,
     id?: string | undefined,
     unSelect: boolean,
 }
 
-interface initialStateSelectAdventurer{
+interface InitialStateSelectAdventurerType{
     selectAdventurer: (string | undefined) []
 }
 
-const initialStateSelectAdventurer: initialStateSelectAdventurer = {selectAdventurer: []}
+const initialStateSelectAdventurer: InitialStateSelectAdventurerType = {selectAdventurer: []}
 
 const selectAdventurer = createSlice({
     name: "selectAdventurer",
     initialState: initialStateSelectAdventurer,
     reducers: {
-        setSelectAdventurer:  (state, action: PayloadAction<SelectAdventurer>)=> {
+        setSelectAdventurer:  (state, action: PayloadAction<SelectAdventurerType>)=> {
             
             // se crea un nuevo array y se igual al anterior
             let newArray : (string | undefined) [] =  []
@@ -280,11 +233,8 @@ const selectAdventurer = createSlice({
                     if(originalElement != undefined){
                         return [false]
                     }
-
                     return acc
-                    
                 },[true])
-
                 if(isEmpty[0] == true){
                     state.selectAdventurer = []
                 }
@@ -303,15 +253,11 @@ export const { setSelectAdventurer, setClearSelectedAdventurers } = selectAdvent
 
 //taken id
 
-interface TakenId {
+interface TakenIdType {
     id: string | null
 }
 
-interface initialStateSelectAdventurer{
-    selectAdventurer: (string | undefined) []
-}
-
-const initialTakenId: TakenId = {id: null}
+const initialTakenId: TakenIdType = {id: null}
 
 const takenId = createSlice({
     name: "takenId",
