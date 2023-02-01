@@ -17,6 +17,7 @@ import { Enrolled,
 import { withTracing } from "../base-logger";
 import { AssetManagementService } from "../../service-asset-management";
 import { config } from '../../tools-utils'
+import { IdleQuestsService } from "../../service-idle-quests";
 
 const { Op } = require("sequelize");
 
@@ -26,7 +27,7 @@ GETS PLAYER ADVENTURERS
 QUERIES RANDOM QUESTS FROM THE DB BASED ON ADVENTURER LEVEL BUCKETS
 RETURN QUESTS TO THE CLIENT
 */
-const getRandomQuestsV2 = (sequelize: Sequelize) => async (request: Request, response: Response, next: NextFunction) => {
+const getRandomQuestsV2 = (sequelize: Sequelize, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const userId = request.auth!.userId
     const numberOfQuests = 20;
 
@@ -129,7 +130,7 @@ RECEIVES QUEST ID
 CREATED ENROLLMENT AND TAKEN QUEST TO DB
 CHANGES ADVENTURER STATUS
 */
-const acceptQuest = (database: Sequelize) => async (request: Request, response: Response, next: NextFunction) => {
+const acceptQuest = (database: Sequelize, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const questId: string = request.body.quest_id;
     const adventurerIds: string[] = request.body.adventurer_ids;
     const userId: string = request.auth!.userId
@@ -190,7 +191,7 @@ GETS PLAYER TAKEN QUESTS
 CHECKS THE STATUS OF THE TAKEN QUEST
 CHANGES STATUS IF NEEDED
 */
-const getTakenQuest = async (request: Request, response: Response, next: NextFunction) => {
+const getTakenQuest = (idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const userId: string = request.auth!.userId
 
     try {
@@ -244,7 +245,7 @@ GETS SPECIFIC TAKEN QUEST FROM PLAYER
 UPDATES DB: DELETES ENROLLMENTS, CHANGES TAKEN QUEST STATUS, CHANGES ADVENTURER STATUS
 DISTRIBUTES REWARDS
 */
-const claimQuestReward = (sequelize: Sequelize, assetManagementService: AssetManagementService) => async (request: Request, response: Response, next: NextFunction) => {
+const claimQuestReward = (sequelize: Sequelize, assetManagementService: AssetManagementService, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     // const stakeAddress: string  = request.auth!.stake_address!
     const userId: string = request.auth!.userId

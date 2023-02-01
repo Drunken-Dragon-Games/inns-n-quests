@@ -12,6 +12,7 @@ import { loadQuestModuleModels } from "./module-quests/app/database/migration_sc
 import { setTimeout } from "timers/promises";
 import { LoggingContext } from "./tools-tracing";
 import { AssetManagementService } from "./service-asset-management";
+import { IdleQuestsServiceDsl } from "./service-idle-quests/service";
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -33,10 +34,11 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
+    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ database })
     await assetsRegistry.load(assetManagementService)
     await questUtils.registry.load(assetManagementService)
     await loadQuestModuleModels(database)
-    const app = await buildApp(identityService, assetManagementService, database)
+    const app = await buildApp(identityService, assetManagementService, idleQuestsService, database)
 
     await identityService.loadDatabaseModels()
     await assetManagementService.loadDatabaseModels()

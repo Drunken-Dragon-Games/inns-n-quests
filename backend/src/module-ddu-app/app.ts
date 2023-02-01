@@ -17,11 +17,12 @@ import { loadAdventurerRoutes } from "../module-quests/adventurers/routes";
 import { loadQuestRoutes } from "../module-quests/quests/routes";
 import { Sequelize } from "sequelize";
 import compression from "compression"
+import { IdleQuestsService } from "../service-idle-quests";
 
 dotenv.config()
 const questRootPath = "/quests/api"
 
-const buildApp = async (identityService: IdentityService, assetManagementService: AssetManagementService, database: Sequelize) => {
+const buildApp = async (identityService: IdentityService, assetManagementService: AssetManagementService, idleQuestsService: IdleQuestsService, database: Sequelize) => {
     const app = express();
     
     const healthEndpoint = Router()
@@ -50,8 +51,8 @@ const buildApp = async (identityService: IdentityService, assetManagementService
     
     // QUEST MODULE ROUTES
     app.use(questRootPath, loadPlayerRoutes(identityService, assetManagementService))
-    app.use(questRootPath, (await loadAdventurerRoutes(database, assetManagementService)))
-    app.use(questRootPath, loadQuestRoutes(database, assetManagementService))
+    app.use(questRootPath, (await loadAdventurerRoutes(database, assetManagementService, idleQuestsService)))
+    app.use(questRootPath, loadQuestRoutes(database, assetManagementService, idleQuestsService))
     
     // Error handler middleware
     app.use(apiErrorHandler)

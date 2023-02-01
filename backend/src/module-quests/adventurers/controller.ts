@@ -9,6 +9,7 @@ import { getAdventurerToReturn } from "./app-logic/get-adventurer-sprite";
 import { registry } from "../app/utils";
 import { withTracing } from "../base-logger";
 import { AssetManagementService } from "../../service-asset-management";
+import { IdleQuestsService } from "../../service-idle-quests";
 
 ///////////////////// ASSET SYNCHRONIZATION  //////////////////////////
 /*
@@ -42,9 +43,10 @@ VIEW THAT QUERIES ALL THE ADVENTURERS FROM THE DB
 ADDS THE CORRESPONDING SPRITE AND RETURNS INSTANCES
 
 */
-const getAllAdventurers = (thioldenMetadata: any) => async (request: Request, response: Response, next: NextFunction) => {
+const getAllAdventurers = (thioldenMetadata: any, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const userId: string  = (request as AuthRequest).auth.userId!
     const logger = withTracing(request)
+    /*
     try {   
         // QUERY TO THE DB
         logger.log.info({message: "trying to get all adventurers"})
@@ -78,6 +80,8 @@ const getAllAdventurers = (thioldenMetadata: any) => async (request: Request, re
     } catch (error) {
         next(error)
     }
+    */
+    return response.status(200).json(await idleQuestsService.module_getAllAdventurers())
 }
 
 export {

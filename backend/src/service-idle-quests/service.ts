@@ -9,6 +9,10 @@ import { IdleQuestsServiceLogging } from "./logging"
 
 import { HealthStatus } from "./models"
 
+import * as module_models from "../module-quests/adventurers/models"
+
+
+
 export interface IdleQuestsServiceConfig 
     { 
     }
@@ -59,4 +63,44 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         }
     }
 
+    async module_getAllAdventurers(): Promise<object[]> {
+        return [
+            {
+                id: "6d550e6d-9822-4abc-a7db-f564f19e2bf7",
+                on_chain_ref: "AdventurerOfThiolden7062",
+                experience: 4120,
+                in_quest: false,
+                type: "aot",
+                metadata: {},
+                race: "human",
+                class: "paladin",
+                sprites: "https://cdn.ddu.gg/adv-of-thiolden/x6/tyr-front-plain.png",
+                name: "Tyr"
+            },
+            {
+                id: "9ce8eb80-2ecc-4e1a-a9db-254439920b50",
+                on_chain_ref: "AdventurerOfThiolden6176",
+                experience: 3940,
+                in_quest: false,
+                type: "aot",
+                metadata: {},
+                race: "human",
+                class: "rogue",
+                sprites: "https://cdn.ddu.gg/adv-of-thiolden/x6/perneli-front-plain.png",
+                name: "Perneli"
+            },
+            {
+                id: "005f9aaa-1634-44d1-95a8-b4597341d602",
+                on_chain_ref: "AdventurerOfThiolden14073",
+                experience: 130,
+                in_quest: false,
+                type: "aot",
+                metadata: {},
+                race: "worgenkin",
+                class: "ranger",
+                sprites: "https://cdn.ddu.gg/adv-of-thiolden/x6/friga-front-plain.png",
+                name: "Friga"
+            }
+        ]
+    }
 }
