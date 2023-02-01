@@ -15,8 +15,11 @@ export interface IdleQuestsService {
 
     module_getAllAdventurers(): Promise<object[]>
 
-    //getItems(challengesType: models.ChallengesType): Promise<models.Item[]>
+    module_getAvailableQuests(userId: string): Promise<object[]> 
 
-    //getChallenges(challengesType: models.ChallengesType): Promise<models.Challenge[]>
-    
+    module_acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<object>
+
+    module_getTakenQuests(userId: string): Promise<object[]>
+
+    module_claimQuestResult(userId: string, questId: string): Promise<object>
 }
