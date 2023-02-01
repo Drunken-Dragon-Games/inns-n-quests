@@ -8,14 +8,14 @@ export type HealthStatus =
     }
 
 export type Adventurer = {
-    adventurerId: string,
+    adventurerId?: string,
     userId: string,
     name: string,
     class: AdventurerClass,
     race: Race,
     collection: AdventurerCollection,
     assetRef: string,
-    inChallenge?: string,
+    inChallenge?: boolean,
     athleticism: number,
     intellect: number,
     charisma: number,

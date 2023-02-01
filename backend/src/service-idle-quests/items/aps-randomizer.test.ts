@@ -4,7 +4,7 @@ import apsRandomizer from "./aps-randomizer"
 const sum = (aps: { athleticism: number, intellect: number, charisma: number }): number =>
     aps.athleticism + aps.intellect + aps.charisma
 
-test("apsRandomizer", () => {
+test("apsRandomizer simple check", () => {
     const rand = genrand.create("test")
     expect(sum(apsRandomizer(30, rand))).toBe(30)
     expect(sum(apsRandomizer(28, rand))).toBe(28)

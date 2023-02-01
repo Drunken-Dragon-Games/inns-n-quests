@@ -1,5 +1,5 @@
 import { Inventory, WellKnownPolicies } from "../../service-asset-management"
-import { AdventurerCollection } from "../models"
+import { Adventurer, AdventurerClass, AdventurerCollection, Race } from "../models"
 import { DBAdventurer } from "./adventurer-db"
 import genrand from "random-seed"
 
@@ -7,7 +7,7 @@ import metadataCache from "./metadata-cache"
 import apsRandomizer from "./aps-randomizer"
 
 type PreSyncedAdventurers = {
-    adventurerId: string,
+    adventurerId?: string,
     assetRef: string,
     collection: AdventurerCollection
 }
@@ -18,12 +18,12 @@ type AssetInventoryAdventurer = {
     quantity: number
 }
 
-export async function syncAdventurers(userId: string, assetInventory: Inventory, wellKnownPolicies: WellKnownPolicies): Promise<void> {
-
+export default async function syncAdventurers(userId: string, assetInventory: Inventory, wellKnownPolicies: WellKnownPolicies): Promise<void> {
     const preSyncedAdventurers: PreSyncedAdventurers[] = await fetchPreSyncedAdventurers(userId)
     const assetInventoryAdventurers: AssetInventoryAdventurer[] = fetchAssetInventoryAdventurers(assetInventory, wellKnownPolicies)
     const { adventurersToCreate, adventurersToDelete } = adventurersToSync(preSyncedAdventurers, assetInventoryAdventurers)
     await createAdventurers(userId, adventurersToCreate)
+    await deleteAdventurers(adventurersToDelete)
 }
 
 async function fetchPreSyncedAdventurers(userId: string): Promise<PreSyncedAdventurers[]> {
@@ -41,40 +41,46 @@ function fetchAssetInventoryAdventurers(assetInventory: Inventory, wellKnownPoli
     return [...pxs, ...gmas, ...aots]
 }
 
-function adventurersToSync(preSyncedAdventurers: PreSyncedAdventurers[], assetInventoryAdventurers: AssetInventoryAdventurer[]): { adventurersToCreate: AssetInventoryAdventurer[], adventurersToDelete: AssetInventoryAdventurer[] } {
+function adventurersToSync(preSyncedAdventurers: PreSyncedAdventurers[], assetInventoryAdventurers: AssetInventoryAdventurer[]): { adventurersToCreate: AssetInventoryAdventurer[], adventurersToDelete: PreSyncedAdventurers[] } {
    const assetDifference = assetInventoryAdventurers
         .map(asset => {
             const allSyncedAdventurersQuantity = 
                 preSyncedAdventurers.filter(preSynced => preSynced.assetRef == asset.assetRef).length
             return { ...asset, quantity: asset.quantity - allSyncedAdventurersQuantity }
         })
-    return { 
-        adventurersToCreate: assetDifference.filter(asset => asset.quantity > 0), 
-        adventurersToDelete: assetDifference.filter(asset => asset.quantity < 0) 
-    }
+    const adventurersToCreate = assetDifference.filter(asset => asset.quantity > 0) 
+    const assetAdventurersToDelete = assetDifference.filter(asset => asset.quantity < 0)
+    // Pick the pre-synced adventurers to delete based on the asset difference
+    const adventurersToDelete = assetAdventurersToDelete.map(asset => {
+        const preSyncedAdventurersToDelete = preSyncedAdventurers
+            .filter(preSynced => preSynced.assetRef == asset.assetRef)
+            .slice(0, Math.abs(asset.quantity))
+        return preSyncedAdventurersToDelete
+    }).flat()
+    return { adventurersToCreate, adventurersToDelete }
 }
 
 async function createAdventurers(userId: string, adventurersToCreate: AssetInventoryAdventurer[]): Promise<void> {
 
-    function adventurerClass(adventurer: AssetInventoryAdventurer): string {
+    function adventurerClass(adventurer: AssetInventoryAdventurer): AdventurerClass {
         switch (adventurer.collection) {
-            case "pixel-tiles": return metadataCache.pixelTilesGameMetadata[adventurer.assetRef].class
-            case "grandmaster-adventurers": return metadataCache.gmasMetadata[adventurer.assetRef].class
+            case "pixel-tiles": return metadataCache.pixelTilesGameMetadata[adventurer.assetRef].class as AdventurerClass
+            case "grandmaster-adventurers": return metadataCache.gmasMetadata[adventurer.assetRef].class as AdventurerClass
             case "adventurers-of-thiolden": 
                 const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
                 const adventurerName = metadataCache.advOfThioldenAppMetadata[idx].adv
-                return metadataCache.advOfThioldenGameMetadata[adventurerName]["Game Class"].toLowerCase()
+                return metadataCache.advOfThioldenGameMetadata[adventurerName]["Game Class"].toLowerCase() as AdventurerClass
         }
     }
 
-    function adventurerRace(adventurer: AssetInventoryAdventurer): string {
+    function adventurerRace(adventurer: AssetInventoryAdventurer): Race {
         switch (adventurer.collection) {
-            case "pixel-tiles": return metadataCache.pixelTilesGameMetadata[adventurer.assetRef].race
-            case "grandmaster-adventurers": return metadataCache.gmasMetadata[adventurer.assetRef].race
+            case "pixel-tiles": return metadataCache.pixelTilesGameMetadata[adventurer.assetRef].race as Race
+            case "grandmaster-adventurers": return metadataCache.gmasMetadata[adventurer.assetRef].race as Race
             case "adventurers-of-thiolden": 
                 const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
                 const adventurerName = metadataCache.advOfThioldenAppMetadata[idx].adv
-                return metadataCache.advOfThioldenGameMetadata[adventurerName]["Race"].toLowerCase()
+                return metadataCache.advOfThioldenGameMetadata[adventurerName]["Race"].toLowerCase() as Race
         }
     }
 
@@ -104,18 +110,27 @@ async function createAdventurers(userId: string, adventurersToCreate: AssetInven
 
     const adventurers = adventurersToCreate.map(adventurer => {
         const aps = adventurerAPS(adventurer)
-        return {
-            userId,
-            assetRef: adventurer.assetRef,
-            collection: adventurer.collection,
-            name: adventurer.assetRef,
-            class: adventurerClass(adventurer),
-            race: adventurerRace(adventurer),
-            inChallenge: false,
-            athleticism: aps.athleticism,
-            intellect: aps.intellect,
-            charisma: aps.charisma,
+        const toCreate: Adventurer[] = []
+        for (let i = 0; i < adventurer.quantity; i++) {
+            toCreate.push({
+                userId,
+                assetRef: adventurer.assetRef,
+                collection: adventurer.collection,
+                name: adventurer.assetRef,
+                class: adventurerClass(adventurer),
+                race: adventurerRace(adventurer),
+                inChallenge: false,
+                athleticism: aps.athleticism,
+                intellect: aps.intellect,
+                charisma: aps.charisma,
+            })
         }
-    })
+        return toCreate
+    }).flat()
     await DBAdventurer.bulkCreate(adventurers)
+}
+
+async function deleteAdventurers(adventurersToDelete: PreSyncedAdventurers[]): Promise<void> {
+    if (adventurersToDelete.length == 0) return
+    await DBAdventurer.destroy({ where: { adventurerId: adventurersToDelete.map(adv => adv.adventurerId) } } )
 }

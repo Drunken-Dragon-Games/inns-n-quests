@@ -2,14 +2,14 @@ import { DataTypes, Model, Sequelize } from "sequelize"
 import { Adventurer, AdventurerClass, adventurerClasses, AdventurerCollection, adventurerCollections, Race, races } from "../models"
 
 export class DBAdventurer extends Model implements Adventurer {
-    declare adventurerId: string
+    declare adventurerId?: string
     declare userId: string
     declare name: string
     declare class: AdventurerClass
     declare race: Race
     declare collection: AdventurerCollection
     declare assetRef: string
-    declare inChallenge?: string
+    declare inChallenge?: boolean
     declare athleticism: number
     declare intellect: number
     declare charisma: number
@@ -57,19 +57,19 @@ export const DBAdventurerTableAttributes = {
         allowNull: false
     },
     inChallenge: {
-        type: DataTypes.UUID,
+        type: DataTypes.BOOLEAN,
         allowNull: true
     },
     athleticism: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     intellect: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     charisma: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
 }

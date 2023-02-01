@@ -27,21 +27,12 @@ class MetadataCacheLoader {
     pixelTilesMetadata: PixelTilesMetadata = {}
     pixelTilesGameMetadata: PixelTilesGameMetadata = {}
 
-    async load() {
-        this.advOfThioldenAppMetadata = await
-            axios.get("https://cdn.ddu.gg/adv-of-thiolden/metadata-app.json").then(r => r.data)
-
-        this.advOfThioldenGameMetadata = await
-            axios.get("https://cdn.ddu.gg/adv-of-thiolden/metadata-game.json").then(r => r.data)
-
-        this.gmasMetadata = await
-            axios.get("https://cdn.ddu.gg/gmas/metadata.json").then(r => r.data)
-
-        this.pixelTilesMetadata = await
-            axios.get("https://cdn.ddu.gg/pixeltiles/metadata.json").then(r => r.data)
-
-        this.pixelTilesGameMetadata = await
-            axios.get("https://cdn.ddu.gg/pixeltiles/metadata-game.json").then(r => r.data)
+    async load(): Promise<void> {
+        this.advOfThioldenAppMetadata = (await axios.get("https://cdn.ddu.gg/adv-of-thiolden/metadata-app.json")).data
+        this.advOfThioldenGameMetadata = (await axios.get("https://cdn.ddu.gg/adv-of-thiolden/metadata-game.json")).data
+        this.gmasMetadata = (await axios.get("https://cdn.ddu.gg/gmas/metadata.json")).data
+        this.pixelTilesMetadata = (await axios.get("https://cdn.ddu.gg/pixeltiles/metadata.json")).data
+        this.pixelTilesGameMetadata = (await axios.get("https://cdn.ddu.gg/pixeltiles/metadata-game.json")).data
     }
 }
 
