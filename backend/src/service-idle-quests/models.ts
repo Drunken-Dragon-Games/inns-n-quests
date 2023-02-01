@@ -29,9 +29,9 @@ export type AdventurerClass = "fighter" | "paladin" | "ranger" | "rogue" | "bard
 
 export const adventurerClasses = ["fighter", "paladin", "ranger", "rogue", "bard", "mage", "warlock", "cleric", "druid", "knight"]
 
-export type AdventurerCollection = "gma" | "aot" | "px"
+export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-thiolden" | "pixel-tiles"
 
-export const adventurerCollections = [ "gma", "aot", "px" ]
+export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
 
 export type AvailableQuest = {
     questId: string,

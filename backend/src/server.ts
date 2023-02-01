@@ -14,6 +14,8 @@ import { LoggingContext } from "./tools-tracing";
 import { AssetManagementService } from "./service-asset-management";
 import { IdleQuestsServiceDsl } from "./service-idle-quests/service";
 
+import metadataCache from "./service-idle-quests/items/metadata-cache";
+
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
     const amountReverted = await assetManagementService.revertStaledClaims(logger)
@@ -35,6 +37,8 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ database })
+    
+    await metadataCache.load()
     await assetsRegistry.load(assetManagementService)
     await questUtils.registry.load(assetManagementService)
     await loadQuestModuleModels(database)

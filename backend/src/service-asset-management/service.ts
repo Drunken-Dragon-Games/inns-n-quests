@@ -2,7 +2,8 @@ import dotenv from "dotenv"
 import { AssetManagementService } from "./service-spec"
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import { QueryInterface, Sequelize } from "sequelize"
-import Registry from "./registry/registry"
+import * as mainnetRegistry from "./registry/registry-mainnet"
+import * as testnetRegistry from "./registry/registry-testnet"
 import { AssetStoreDsl } from "./assets/assets-dsl"
 import { IdentityService } from "../service-identity"
 import { SecureSigningService } from "../service-secure-signing"
@@ -17,7 +18,7 @@ import { AssetManagementServiceLogging } from "./logging"
 
 import { 
     ClaimResponse, ClaimStatusResponse, GrantResponse, HealthStatus, 
-    ListResponse, RegistryPolicy, SubmitClaimSignatureResponse 
+    ListResponse, RegistryPolicy, SubmitClaimSignatureResponse, WellKnownPolicies 
 } from "./models"
 
 import * as offChainStoreDB from "./assets/offchain-store-db"
@@ -38,10 +39,11 @@ export interface AssetManagemenetServiceDependencies
 
 export class AssetManagementServiceDsl implements AssetManagementService {
 
-    private readonly registryM: Registry
     private readonly assets: AssetStoreDsl
     private readonly claims: AssetClaimDsl
     private readonly migrator: Umzug<QueryInterface>
+    private readonly policyRegistry: RegistryPolicy[]
+    private readonly wellKnownRegistry: WellKnownPolicies
 
     constructor (
         private readonly network: CardanoNetwork,
@@ -51,8 +53,9 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         private readonly identityService: IdentityService,
         private readonly secureSigningService: SecureSigningService,
     ) {
-        this.registryM = new Registry(network)
-        this.assets = new AssetStoreDsl(blockfrost, this.registryM)
+        this.policyRegistry = network === "mainnet" ? mainnetRegistry.registry : testnetRegistry.registry
+        this.wellKnownRegistry = network === "mainnet" ? mainnetRegistry.wellKnownPolicies : testnetRegistry.wellKnownPolicies
+        this.assets = new AssetStoreDsl(blockfrost, this.policyRegistry)
         this.claims = new AssetClaimDsl(assetClaimConfig, database, blockfrost, secureSigningService, this.assets)
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -105,8 +108,12 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         }
     }
 
-    async registry(logger?: LoggingContext): Promise<RegistryPolicy[]> {
-        return Promise.resolve(this.registryM.list())
+    registry(logger?: LoggingContext): RegistryPolicy[] {
+        return this.policyRegistry
+    }
+
+    wellKnownPolicies(logger?: LoggingContext): WellKnownPolicies {
+        return this.wellKnownRegistry
     }
 
     async list(userId: string, logger?: LoggingContext, options?: { count?: number, page?: number, chain?: boolean , policies?: string[] }): Promise<ListResponse> {
@@ -118,7 +125,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
     }
 
     async grant(userId: string, assets: { unit: string, policyId: string, quantity: string }, logger: LoggingContext): Promise<GrantResponse> {
-        if (!this.registryM.list().map(p => p.policyId).includes(assets.policyId)) 
+        if (!this.policyRegistry.map(p => p.policyId).includes(assets.policyId)) 
             return { status: "invalid", reason: "unknown policy id" }
         await this.assets.grant(userId, assets.unit, assets.policyId, assets.quantity)
         return { status: "ok" }

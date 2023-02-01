@@ -19,7 +19,9 @@ export interface AssetManagementService {
 
     health(logger?: LoggingContext): Promise<models.HealthStatus>
 
-    registry(logger?: LoggingContext): Promise<models.RegistryPolicy[]>
+    registry(logger?: LoggingContext): models.RegistryPolicy[]
+
+    wellKnownPolicies(logger?: LoggingContext): models.WellKnownPolicies
 
     list(userId: string, logger?: LoggingContext, options?: { count?: number, page?: number, chain?: boolean , policies?: string[] }): Promise<models.ListResponse>
 

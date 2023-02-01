@@ -1,8 +1,7 @@
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import { OffChainStore } from "./offchain-store-db";
-import Registry from "../registry/registry";
 import { Transaction, WhereOptions } from "sequelize";
-import { Inventory } from "../models";
+import { Inventory, RegistryPolicy } from "../models";
 import { cardano } from "../../tools-cardano";
 
 type Options = { count: number, page: number, chain?: boolean , policies?: string[] }
@@ -13,7 +12,7 @@ export class AssetStoreDsl {
 
 	constructor (
         private blockfrost: BlockFrostAPI,
-        private registry: Registry,
+        private registry: RegistryPolicy[],
     ) {}
 
 	public async list(userId: string, addresses: string[], options: Options): Promise<Inventory> {
@@ -103,9 +102,8 @@ export class AssetStoreDsl {
 	 * @returns 
 	 */
 	private filterBlockFrostAssets = (assets: { unit: string, quantity: string }[], inventory: Inventory, options: Options): Inventory => {
-		const allPolicies = this.registry.list()
-		const filterPolicies = options.policies ?? allPolicies.map(p => p.policyId)
-		const policies = allPolicies 
+		const filterPolicies = options.policies ?? this.registry.map(p => p.policyId)
+		const policies = this.registry 
 			.map(p => { return {
                 policyId: p.policyId,
                 rx: new RegExp(p.policyId+"(.+)")

@@ -26,11 +26,14 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return status 
     }
 
-    async registry(logger?: LoggingContext): Promise<models.RegistryPolicy[]> {
+    registry(logger?: LoggingContext): models.RegistryPolicy[] {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.log.info("fetching asset registry")
-        const response = await this.base.registry(serviceLogger)
-        return response
+        return this.base.registry(serviceLogger)
+    }
+
+    wellKnownPolicies(logger?: LoggingContext): models.WellKnownPolicies {
+        const serviceLogger = this.withComponent(logger)
+        return this.base.wellKnownPolicies(serviceLogger)
     }
 
     async list(userId: string, logger?: LoggingContext, options?: { count?: number, page?: number, chain?: boolean , policies?: string[] }): Promise<models.ListResponse> {

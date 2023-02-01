@@ -14,6 +14,15 @@ export type RegistryPolicy =
     , tags: string[]
     }
 
+export type WellKnownPolicies =
+    { pixelTiles: RegistryPolicy 
+    , grandMasterAdventurers: RegistryPolicy
+    , adventurersOfThiolden: RegistryPolicy
+    , dragonSilver: RegistryPolicy
+    , ddeXjpgstore: RegistryPolicy
+    , emojis: RegistryPolicy
+    }
+
 export type Inventory = 
     { [policyId: string]: { unit: string, quantity: string, chain: boolean }[] }
 

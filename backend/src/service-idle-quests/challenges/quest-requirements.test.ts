@@ -10,7 +10,7 @@ const genAdventurer = (advClass: AdventurerClass, aps: APS): Adventurer => {
         name: "",
         class: advClass,
         race: "human",
-        collection: "gma",
+        collection: "pixel-tiles",
         assetRef: "",
         athleticism: aps.athleticism,
         intellect: aps.intellect,
