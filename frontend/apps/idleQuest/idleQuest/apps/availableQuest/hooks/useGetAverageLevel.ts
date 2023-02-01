@@ -1,27 +1,7 @@
 import { useState, useEffect } from "react"
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-
-
-interface DataAdventurer{
-    id: string
-    name: string,
-    experience: number
-    adventurer_img: string
-    in_quest: boolean
-    on_chain_ref: string
-    onRecruitment?: boolean
-    sprites: string
-    type: "pixeltile" | "gma"
-    metadata: metadata
-    race: string
-    class: string
-}
-
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
+import { DataAdventurerType } from "../../../../../../types/idleQuest"
 
 interface enrolls{
     adventurer: adventurer
@@ -90,7 +70,7 @@ export default (slots: number, adventurerList: (string | undefined) [] | enrolls
         
         const levelSum = (adventurerList as string []).reduce((acc: number, id: string) => {
             
-            const filterAdventurer = allAdventurer.filter((adventurer: DataAdventurer) => adventurer.id == id)
+            const filterAdventurer = allAdventurer.filter((adventurer: DataAdventurerType) => adventurer.id == id)
             
 
             if(filterAdventurer.length == 1){

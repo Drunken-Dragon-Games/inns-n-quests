@@ -2,6 +2,7 @@ import {  useDrop } from "react-dnd";
 import { useState, useEffect } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
 import { setSelectAdventurer } from "../features/availableQuest"
+import { DataAdventurerType } from "../../../../../../types/idleQuest";
 
 interface DataAdventurer{
     id: string,
@@ -10,6 +11,7 @@ interface DataAdventurer{
     type: string
 }
 
+// FIXME: data types
 
 export default (index: number, reset: boolean) => {
     const [ adventurer, SetAdventurer ] = useState<string>("")

@@ -7,6 +7,7 @@ import { Feelings, RescalingImg } from ".";
 import { useGetLevel } from "../../hooks";
 import Image from 'next/image'
 
+// FIXME: types data adventurer
 interface DataAdventurer{
     id: string,
     src: string,

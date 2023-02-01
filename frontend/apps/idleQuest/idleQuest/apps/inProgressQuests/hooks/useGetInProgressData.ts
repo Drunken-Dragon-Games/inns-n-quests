@@ -1,70 +1,10 @@
 import { useEffect, useState } from "react"
 import { useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-
-interface inProgressQuest{
-    enrolls: enrolls []
-    id: string
-    is_claimed: boolean
-    player_stake_address: string
-    quest: quest
-    quest_id: string
-    started_on: string
-    state: "failed" | "succeeded" | "in_progress" | null
-}
-
-interface quest{
-    description: string
-    difficulty: number
-    duration: number
-    id: string
-    name: string
-    rarity: string
-    reward_ds: number
-    reward_xp: number
-    slots: number
-    requirements: requirement
-}
-
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
-
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
-}
-
-interface enrolls{
-    adventurer: adventurer
-    adventurer_id: string
-    taken_quest_id: string
-}
-
-interface adventurer{
-    experience: number
-    id: string
-    in_quest: boolean
-    metadata: metadata
-    on_chain_ref: string
-    player_stake_address: string
-    type: "pixeltile" | "gma"
-}
-
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
+import { inProgressQuestType } from "../../../../../../types/idleQuest"
 
 
-
-const placeHolder : inProgressQuest = {
+const placeHolder: inProgressQuestType  = {
     enrolls:[],
     id: "asdasdasfgqhwyhhqfadh",
     is_claimed: false,
@@ -86,10 +26,10 @@ const placeHolder : inProgressQuest = {
     }
 }
 
-export default (): inProgressQuest => {
+export default (): inProgressQuestType => {
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
-    const [inProgressQuestData, setInProgressQuestData] = useState<inProgressQuest>(placeHolder)
+    const [inProgressQuestData, setInProgressQuestData] = useState<inProgressQuestType>(placeHolder)
 
     const index = generalSelector.idleQuest.navigator.inProgress.inProgressQuest
     const inProgressQuest = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests

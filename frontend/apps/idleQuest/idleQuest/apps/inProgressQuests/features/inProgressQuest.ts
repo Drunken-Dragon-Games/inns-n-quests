@@ -3,11 +3,11 @@ import { combineReducers } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
 import { generalReducerThunk } from '../../../../../../features/generalReducer';
-import { inProgress } from '../../../dummy_data';
 import { setFreeAdventurers, setExperienceReward, setDeath } from '../../console/features/adventurers';
 import { AxiosError } from 'axios';
 import { setAddDragonSilverToClaim } from '../../console/features/player';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
+import { inProgressQuestType, EnrollsType } from '../../../../../../types/idleQuest';
 
 //fetch para obeter a los in progress quests
 
@@ -23,10 +23,6 @@ export const getInProgressQuest = (): generalReducerThunk => async (dispatch) =>
 
         
         dispatch(setFetchGetInProgressQuestStatusFulfilled())
-
-        // Mock to test Without backend     
-        // dispatch(setInProgressQuest(inProgress))
-        // dispatch(setFetchGetInProgressQuestStatusFulfilled())
 
     } catch (err: unknown) {
         
@@ -49,56 +45,11 @@ const [ setFetchGetInProgressQuestStatusIdle, setFetchGetInProgressQuestStatusPe
 
 //fetch para claimear el reward
 
-interface inProgressQuestClaimed{
-    enrolls: enrolls []
+interface IdsType{
     id: string
-    is_claimed: boolean
-    player_stake_address: string
-    quest: quest
-    quest_id: string
-    started_on: string
-    state: "failed" | "succeeded" | null
 }
 
-interface quest{
-    description: string
-    difficulty: number
-    duration: number
-    id: string
-    name: string
-    rarity: string
-    reward_ds: number
-    reward_xp: number
-    slots: number
-}
-
-interface enrolls{
-    adventurer: adventurer
-    adventurer_id: string
-    taken_quest_id: string
-}
-
-interface adventurer{
-    experience: number
-    id: string
-    in_quest: boolean
-    metadata: metadata
-    on_chain_ref: string
-    player_stake_address: string
-    type: "pixeltile" | "gma"
-}
-
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
-
-
-interface Ids{
-    id: string
-  }
-
-const getAdventurers = (enrolls : enrolls []): Ids [] =>{
+const getAdventurers = (enrolls : EnrollsType []): IdsType [] =>{
 
     const adventurers = enrolls.map(el => {
         return el.adventurer
@@ -108,7 +59,7 @@ const getAdventurers = (enrolls : enrolls []): Ids [] =>{
 
 }
 
-export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): generalReducerThunk => async (dispatch) =>{
+export const PostClaimInProgressQuest = (quest: inProgressQuestType): generalReducerThunk => async (dispatch) =>{
     
     dispatch(setFetchPostClaimRewardInProgressQuestStatusPending())
     try {
@@ -145,10 +96,6 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestClaimed): general
             dispatch(setFreeAdventurers(adventurers))   
         }
        
-        // Mock to test Without backend   
-        // dispatch(setInProgressQuest(inProgress))
-        // dispatch(setFetchGetInProgressQuestStatusFulfilled())
-
     } catch (err: unknown) {
         
         if(err instanceof AxiosError ){
@@ -167,79 +114,17 @@ const  fetchPostClaimRewardInProgressQuestStatus  = createSliceStatus("fetchPost
 export const [ setFetchPostClaimRewardInProgressQuestStatusIdle, setFetchPostClaimRewardInProgressQuestStatusPending, setFetchPostClaimRewardInProgressQuestStatusFulfilled, setFetchPostClaimRewardInProgressQuestStatusErrors ] = actionsGenerator(fetchPostClaimRewardInProgressQuestStatus.actions)
 
 
-
-
-interface inProgressQuest{
-    enrolls: enrolls []
-    id: string
-    is_claimed: boolean
-    player_stake_address: string
-    quest: quest
-    quest_id: string
-    started_on: string
-    state: "failed" | "succeeded" | "in_progress" | null
+interface InitialStateNavigationConsoleType{
+    quests: inProgressQuestType []
 }
 
-interface quest{
-    description: string
-    difficulty: number
-    duration: number
-    id: string
-    name: string
-    rarity: string
-    reward_ds: number
-    reward_xp: number
-    slots: number
-    requirements: requirement
-}
-
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
-
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
-}
-
-interface enrolls{
-    adventurer: adventurer
-    adventurer_id: string
-    taken_quest_id: string
-}
-
-interface adventurer{
-    experience: number
-    id: string
-    in_quest: boolean
-    metadata: metadata
-    on_chain_ref: string
-    player_stake_address: string
-    type: "pixeltile" | "gma"
-}
-
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
-
-interface initialStateNavigationConsole{
-    quests: inProgressQuest []
-}
-
-const initialInProgressQuest: initialStateNavigationConsole = {quests : []}
+const initialInProgressQuest: InitialStateNavigationConsoleType = {quests : []}
 
 const inProgressQuests = createSlice({
     name: "inProgressQuests",
     initialState: initialInProgressQuest,
     reducers: {
-        setInProgressQuest:  (state, action: PayloadAction<inProgressQuest []>)=> {
+        setInProgressQuest:  (state, action: PayloadAction<inProgressQuestType []>)=> {
             
             state.quests = action.payload
             
@@ -247,12 +132,12 @@ const inProgressQuests = createSlice({
 
         setDeleteInProgressQuest:  (state, action: PayloadAction<string>)=> {
             
-            const filterState = state.quests.filter((quest: inProgressQuest) => quest.id !== action.payload)
+            const filterState = state.quests.filter((quest) => quest.id !== action.payload)
 
             state.quests = filterState
         },
 
-        setAddInProgressQuest:  (state, action: PayloadAction<inProgressQuest>)=> {
+        setAddInProgressQuest:  (state, action: PayloadAction<inProgressQuestType>)=> {
             
             state.quests = state.quests.concat(action.payload)
         }
@@ -263,19 +148,19 @@ const inProgressQuests = createSlice({
 export const { setInProgressQuest, setDeleteInProgressQuest,  setAddInProgressQuest } = inProgressQuests.actions
 
 
-interface isClaimRewardData {
+interface IsClaimRewardDataType {
     isClaimed: boolean
     dead_adventurers: string [] | null 
-    exp_given: exp_given [] | null
+    exp_given: ExpGivenType [] | null
     state: "failed" | "succeeded" | null
 }
 
-interface exp_given {
+interface ExpGivenType {
     experience: number
     id: string
 }
 
-const initialClaimReward: isClaimRewardData = { isClaimed :false, dead_adventurers: null, exp_given: null, state: null }
+const initialClaimReward: IsClaimRewardDataType = { isClaimed :false, dead_adventurers: null, exp_given: null, state: null }
 
 
 const inProgressReward = createSlice({
@@ -301,7 +186,7 @@ const inProgressReward = createSlice({
 
         },
 
-        setRewardClaimSucceed:  (state, action: PayloadAction<exp_given []>)=> {
+        setRewardClaimSucceed:  (state, action: PayloadAction<ExpGivenType []>)=> {
 
             state.isClaimed = true
             state.dead_adventurers =  null

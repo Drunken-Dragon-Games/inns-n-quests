@@ -1,27 +1,7 @@
 import { useDrag } from "react-dnd";
+import { DataAdventurerType } from "../../../../../../types/idleQuest";
 
-
-interface DataAdventurer{
-    id: string
-    name: string,
-    experience: number
-    adventurer_img: string
-    in_quest: boolean
-    on_chain_ref: string
-    onRecruitment?: boolean
-    sprites: string
-    type: "pixeltile" | "gma"
-    metadata: metadata
-    race: string
-    class: string
-}
-
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
-
-export default (data: DataAdventurer) => {
+export default (data: DataAdventurerType) => {
 
     const previewOptions = {
         offsetX: 40,
