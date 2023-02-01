@@ -7,3 +7,5 @@ export { default as useLocalStorage } from "./useLocalStorage"
 export { default as useBlockScreen } from "./useBlockScreen"
 export { default as useKeyPress } from "./useKeyPress"
 export { default as useClickInside } from "./useClickInside"
+export { default as useIsCookie } from './useIsCookie'
+export { default as useRedirectWithBoolean } from './useRedirectWithBoolean'
