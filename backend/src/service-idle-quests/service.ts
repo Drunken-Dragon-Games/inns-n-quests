@@ -7,7 +7,9 @@ import path from "path"
 import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
 
-import { HealthStatus } from "./models"
+import { GetAllAdventurersResult, HealthStatus } from "./models"
+
+import * as adventurersDB from "./items/adventurer-db"
 
 import * as module_models from "../module-quests/adventurers/models"
 
@@ -48,9 +50,13 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async loadDatabaseModels(): Promise<void> {
+        adventurersDB.configureSequelizeModel(this.database)
+        await this.migrator.up()
     }
 
     async unloadDatabaseModels(): Promise<void> {
+        await this.migrator.down()
+        await this.database.close()
     }
 
     async health(logger?: LoggingContext): Promise<HealthStatus> {
@@ -63,7 +69,11 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         }
     }
 
-    async module_getAllAdventurers(): Promise<object[]> {
+    async getAllAdventurers(): Promise<GetAllAdventurersResult> {
+        return { status: "ok", adventurers: [] }
+    }
+
+    async module_getAllAdventurers(userId: string): Promise<object[]> {
         return [
             {
                 id: "6d550e6d-9822-4abc-a7db-f564f19e2bf7",

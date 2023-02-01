@@ -1,12 +1,12 @@
-import { Item, QuestRequirement, Adventurer } from "../models"
-import { successRate } from "./requirements"
+import { QuestRequirement, Adventurer, AdventurerClass } from "../models"
+import { successRate } from "./quest-requirement"
 
 type APS = { athleticism: number, intellect: number, charisma: number }
 
-const genAdventurer = (advClass: string, aps: APS): Adventurer => {
+const genAdventurer = (advClass: AdventurerClass, aps: APS): Adventurer => {
     return {
-        ctype: "adventurer",
         adventurerId: "",
+        userId: "",
         name: "",
         class: advClass,
         race: "human",
@@ -40,7 +40,7 @@ test("Basic requirement success rate calculation", () => {
             charisma: 10,
         },
     }
-    const party: Item[] = [
+    const party: Adventurer[] = [
         genAdventurer("warlock", { athleticism: 5, intellect: 5, charisma: 5 }),
         genAdventurer("cleric", { athleticism: 5, intellect: 5, charisma: 5 }),
     ]

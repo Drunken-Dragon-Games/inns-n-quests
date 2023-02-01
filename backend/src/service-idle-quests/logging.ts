@@ -30,8 +30,8 @@ export class IdleQuestsServiceLogging implements IdleQuestsService {
         return status 
     }
 
-    async module_getAllAdventurers(): Promise<object[]> {
-        return await this.base.module_getAllAdventurers()
+    async module_getAllAdventurers(userId: string): Promise<object[]> {
+        return await this.base.module_getAllAdventurers(userId)
     }
 
     async module_getAvailableQuests(userId: string): Promise<object[]> {
@@ -48,5 +48,9 @@ export class IdleQuestsServiceLogging implements IdleQuestsService {
 
     async module_claimQuestResult(userId: string, questId: string): Promise<object> {
         return await this.base.module_claimQuestResult(userId, questId)
+    }
+
+    async getAllAdventurers(): Promise<models.GetAllAdventurersResult> {
+        return await this.base.getAllAdventurers()
     }
 }

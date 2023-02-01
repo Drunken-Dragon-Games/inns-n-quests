@@ -7,38 +7,40 @@ export type HealthStatus =
         }[]
     }
 
-export type Item = Adventurer | Pet
-
 export type Adventurer = {
-    ctype: "adventurer",
     adventurerId: string,
+    userId: string,
     name: string,
-    class: string,
-    race: string,
-    collection: ItemCollection,
+    class: AdventurerClass,
+    race: Race,
+    collection: AdventurerCollection,
     assetRef: string,
+    inChallenge?: string,
     athleticism: number,
     intellect: number,
     charisma: number,
 }
 
-export type ItemCollection = "gma" | "aot" | "px"
+export type Race = "human" | "elf" | "tiefling" | "dragonkin" | "worgenkin" | "undead" | "viera" | "troll" | "vulkin" | "orc" | "tauren"
 
-export type Pet = {
-    ctype: "pet",
-}
+export const races = ["human", "elf", "tiefling", "dragonkin", "worgenkin", "undead", "viera", "troll", "vulkin", "orc", "tauren"]
 
-export type Challenge = Quest | Job
+export type AdventurerClass = "fighter" | "paladin" | "ranger" | "rogue" | "bard" | "mage" | "warlock" | "cleric" | "druid" | "knight"
 
-export type Quest = {
-    ctype: "quest",
+export const adventurerClasses = ["fighter", "paladin", "ranger", "rogue", "bard", "mage", "warlock", "cleric", "druid", "knight"]
+
+export type AdventurerCollection = "gma" | "aot" | "px"
+
+export const adventurerCollections = [ "gma", "aot", "px" ]
+
+export type AvailableQuest = {
     questId: string,
     name: string,
     description: string,
     requirements: QuestRequirement,
     rewards: string,
     duration: number,
-    slots: QuestSlot[],
+    slots: number,
     rarity: number,
 }
 
@@ -77,8 +79,5 @@ export type ClassRequirement = {
     class: string,
 }
 
-export type QuestSlot = "adventurer" | "pet"
-
-export type Job = {
-    ctype: "job",
-}
+export type GetAllAdventurersResult = 
+    { status: "ok", adventurers: Adventurer[] }

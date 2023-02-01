@@ -13,7 +13,7 @@ export interface IdleQuestsService {
 
     health(logger?: LoggingContext): Promise<models.HealthStatus>
 
-    module_getAllAdventurers(): Promise<object[]>
+    module_getAllAdventurers(userId: string): Promise<object[]>
 
     module_getAvailableQuests(userId: string): Promise<object[]> 
 
@@ -22,4 +22,6 @@ export interface IdleQuestsService {
     module_getTakenQuests(userId: string): Promise<object[]>
 
     module_claimQuestResult(userId: string, questId: string): Promise<object>
+
+    getAllAdventurers(): Promise<models.GetAllAdventurersResult>
 }
