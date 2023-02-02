@@ -13,7 +13,6 @@ const generateAvailableQuest = (idleAdventurers: Adventurer[]): AvailableQuest =
             intellect: 10,
             charisma: 10,
         },
-        duration: 1000,
         slots: 3,
     }
 }

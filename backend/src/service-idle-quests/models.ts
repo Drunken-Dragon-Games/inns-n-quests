@@ -50,7 +50,6 @@ export type AvailableQuest = {
     name: string,
     description: string,
     requirements: QuestRequirement,
-    duration: number,
     slots: number,
 }
 
@@ -60,7 +59,6 @@ export type TakenQuest = {
     name: string,
     description: string,
     requirements: QuestRequirement,
-    duration: number,
     adventurerIds: string[],
 }
 

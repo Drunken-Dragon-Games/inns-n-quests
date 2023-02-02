@@ -6,7 +6,6 @@ export type IAvailableQuestDB = {
     name: string,
     description: string,
     requirements: string,
-    duration: number,
     adventurerSlots: number,
 }
 
@@ -16,7 +15,6 @@ export class AvailableQuestDB extends Model implements IAvailableQuestDB {
     declare name: string
     declare description: string
     declare requirements: string
-    declare duration: number
     declare adventurerSlots: number
 }
 
@@ -42,10 +40,6 @@ export const AvailableQuestDBTableAttributes = {
     },
     requirements: {
         type: DataTypes.STRING,
-        allowNull: false
-    },
-    duration: {
-        type: DataTypes.INTEGER,
         allowNull: false
     },
     adventurerSlots: {
