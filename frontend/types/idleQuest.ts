@@ -89,19 +89,3 @@ interface AdventurerInQuestType{
     type: "pixeltile" | "gma"
 }
 
-// FIXME: checar manana
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
-
-
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
-}

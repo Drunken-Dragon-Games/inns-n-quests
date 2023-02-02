@@ -8,7 +8,7 @@ import {
 } from "@emurgo/cardano-serialization-lib-asmjs"
 import { getAdventurers } from '../apps/console/features/adventurers';
 
-export const fetchAddressPost = (): generalReducerThunk => async (dispatch) =>{
+export const fetchMintTest = (): generalReducerThunk => async (dispatch) =>{
 
     dispatch(setFetchAddressPostStatusPending())
 

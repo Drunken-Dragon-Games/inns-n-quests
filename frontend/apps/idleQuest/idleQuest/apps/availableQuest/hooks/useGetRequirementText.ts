@@ -1,24 +1,10 @@
 import { useEffect, useState } from "react"
+import { RequirementType } from "../../../../../../types/idleQuest"
 
 
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
 
 
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
-}
-
-
-export default (requirements:requirement): string => {
+export default (requirements:RequirementType): string => {
 
     const [text, setText] = useState<string>('')
 

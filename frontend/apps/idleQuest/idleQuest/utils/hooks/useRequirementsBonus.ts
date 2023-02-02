@@ -2,28 +2,9 @@ import { useEffect, useState } from "react"
 import { useGeneralSelector } from "../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../features/generalReducer"
 import { DataAdventurerType } from "../../../../../types/idleQuest"
+import { RequirementType, CharacterType } from "../../../../../types/idleQuest"
 
-
-
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
-
-
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
-}
-
-
-
-export default (adventurerList: string [], requirements: requirement ): number => {
+export default (adventurerList: string [], requirements: RequirementType ): number => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const allAdventurer = generalSelector.idleQuest.adventurers.data.data
@@ -100,7 +81,7 @@ export default (adventurerList: string [], requirements: requirement ): number =
             if(requirements.character != undefined){
 
                 //validad y regresa boolean array
-                const characterValidateBoolean : boolean [] = requirements.character!.map((requirement : character) => {
+                const characterValidateBoolean : boolean [] = requirements.character!.map((requirement ) => {
                     const validation = singleRequirement(requirement, adventurers)
                     return validation
                 })
@@ -133,7 +114,7 @@ export default (adventurerList: string [], requirements: requirement ): number =
         const adventurers = adventuresSelectedArray(adventurerList, allAdventurer)
         
         //validad y regresa boolean array
-        const characterValidateBoolean : boolean [] = requirements.character!.map((requirement : character) => {
+        const characterValidateBoolean : boolean [] = requirements.character!.map((requirement) => {
             const validation = singleRequirement(requirement, adventurers)
 
             return validation
@@ -171,7 +152,7 @@ const adventuresSelectedArray = (adventurerList: string [], allAdventurer: DataA
 
 }
 
-const singleRequirement = (requirements:character, adventurerList:  DataAdventurerType []) =>{
+const singleRequirement = (requirements:CharacterType, adventurerList:  DataAdventurerType []) =>{
 
 
   //se obtienen las propiedades del objeto del rquerimiento
@@ -182,7 +163,7 @@ const singleRequirement = (requirements:character, adventurerList:  DataAdventur
       
       const isTrue = requirementsKeys.reduce((acc: boolean [] , requirementKey: string) => {
           
-          if(requirements[requirementKey as keyof character] == adventurer[requirementKey  as keyof DataAdventurerType]){
+          if(requirements[requirementKey as keyof CharacterType] == adventurer[requirementKey  as keyof DataAdventurerType]){
 
               return acc.concat(true)
               

@@ -2,24 +2,11 @@ import { useState, useEffect } from "react"
 import { useGeneralSelector } from "../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../features/generalReducer"
 import { DataAdventurerType } from "../../../../../types/idleQuest"
-
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
+import { RequirementType, CharacterType } from "../../../../../types/idleQuest"
 
 
-interface character {
-    class?: string
-    race?: string
-}
 
-interface party {
-    balanced: boolean
-}
-
-export default (adventurerList: string [], requirements: requirement  ) => {
+export default (adventurerList: string [], requirements: RequirementType  ) => {
 
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
@@ -96,7 +83,7 @@ export default (adventurerList: string [], requirements: requirement  ) => {
             
             const isTrue = requirementsKeys.reduce((acc: boolean [] , requirementKey: string) => {
                 
-                if(requirements.character![0][requirementKey as keyof character] == adventurer[requirementKey  as keyof DataAdventurerType]){
+                if(requirements.character![0][requirementKey as keyof CharacterType] == adventurer[requirementKey  as keyof DataAdventurerType]){
 
                     return acc.concat(true)
                     
