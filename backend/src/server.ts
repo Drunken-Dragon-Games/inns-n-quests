@@ -36,7 +36,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
-    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ database })
+    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ database, assetManagementService })
     
     await metadataCache.load()
     await assetsRegistry.load(assetManagementService)

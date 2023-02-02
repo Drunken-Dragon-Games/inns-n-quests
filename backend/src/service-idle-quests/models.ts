@@ -15,6 +15,7 @@ export type Adventurer = {
     race: Race,
     collection: AdventurerCollection,
     assetRef: string,
+    sprite?: string,
     inChallenge?: boolean,
     athleticism: number,
     intellect: number,
@@ -79,5 +80,6 @@ export type ClassRequirement = {
     class: string,
 }
 
-export type GetAllAdventurersResult = 
-    { status: "ok", adventurers: Adventurer[] }
+export type GetAllAdventurersResult 
+    = { status: "ok", adventurers: Adventurer[] }
+    | { status: "unknown-user" }

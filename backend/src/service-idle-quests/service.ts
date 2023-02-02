@@ -7,11 +7,14 @@ import path from "path"
 import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
 
-import { GetAllAdventurersResult, HealthStatus } from "./models"
+import { Adventurer, GetAllAdventurersResult, HealthStatus } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
 
 import * as module_models from "../module-quests/adventurers/models"
+import syncAdventurers from "./items/sync-adventurers"
+import { AssetManagementService } from "../service-asset-management"
+import metadataCache from "./items/metadata-cache"
 
 
 
@@ -21,6 +24,7 @@ export interface IdleQuestsServiceConfig
 
 export interface AssetManagemenetServiceDependencies 
     { database: Sequelize
+    , assetManagementService: AssetManagementService
     }
 
 export class IdleQuestsServiceDsl implements IdleQuestsService {
@@ -29,6 +33,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     constructor (
         private readonly database: Sequelize,
+        private readonly assetManagementService: AssetManagementService,
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -44,6 +49,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     static async loadFromConfig(servConfig: IdleQuestsServiceConfig, dependencies: AssetManagemenetServiceDependencies): Promise<IdleQuestsService> {
         const service = new IdleQuestsServiceLogging(new IdleQuestsServiceDsl(
             dependencies.database,
+            dependencies.assetManagementService
         ))
         await service.loadDatabaseModels()
         return service
@@ -69,24 +75,56 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         }
     }
 
-    async getAllAdventurers(): Promise<GetAllAdventurersResult> {
-        return { status: "ok", adventurers: [] }
+    async getAllAdventurers(userId: string): Promise<GetAllAdventurersResult> {
+        
+        const getPixeltileSprite = (adventurer: Adventurer): string => {
+            return `https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_${adventurer.assetRef.replace("PixelTile", "")}.png`
+        }
+
+        const getGmaSprite = (adventurer: Adventurer): string => {
+            return `https://cdn.ddu.gg/gmas/x3/${adventurer.assetRef}.png`
+        }
+
+        const getAdvOfThioldenSprite = (adventurer: Adventurer): string => {
+            const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
+            const adventurerName = metadataCache.advOfThioldenAppMetadata[idx].adv
+            const chromaOrPlain = metadataCache.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
+            return `https://cdn.ddu.gg/adv-of-thiolden/x6/${adventurerName}-front-${chromaOrPlain}.png`
+        }
+
+        const inventoryResult = await this.assetManagementService.list(userId)
+        if (inventoryResult.status == "unknown-user") 
+            return { status: "unknown-user" }
+        await syncAdventurers(userId, inventoryResult.inventory, this.assetManagementService.wellKnownPolicies())
+        const adventurers = (await adventurersDB.DBAdventurer.findAll({ where: { userId } }))
+            .map(adv => {
+                switch (adv.collection) {
+                    case "pixel-tiles": return { ...adv, sprite: getPixeltileSprite(adv) }
+                    case "grandmaster-adventurers": return { ...adv, sprite: getGmaSprite(adv) }
+                    case "adventurers-of-thiolden": return { ...adv, sprite: getAdvOfThioldenSprite(adv) }
+                }
+            })
+
+        return { status: "ok", adventurers }
     }
 
     async module_getAllAdventurers(userId: string): Promise<object[]> {
+        const adventurers = await this.getAllAdventurers(userId)
+        if (adventurers.status == "unknown-user") return []
+        return adventurers.adventurers.map(a => ({
+            id: a.adventurerId,
+            on_chain_ref: a.assetRef,   
+            experience: 200,
+            in_quest: false,
+            type: "pxt",
+            metadata: {},
+            race: "human",
+            class: "paladin",
+            sprites: a.sprite,
+            name:a.name
+        }))
+        /*
         return [
-            {
-                id: "6d550e6d-9822-4abc-a7db-f564f19e2bf7",
-                on_chain_ref: "AdventurerOfThiolden7062",
-                experience: 4120,
-                in_quest: false,
-                type: "aot",
-                metadata: {},
-                race: "human",
-                class: "paladin",
-                sprites: "https://cdn.ddu.gg/adv-of-thiolden/x6/tyr-front-plain.png",
-                name: "Tyr"
-            },
             {
                 id: "9ce8eb80-2ecc-4e1a-a9db-254439920b50",
                 on_chain_ref: "AdventurerOfThiolden6176",
@@ -112,6 +150,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
                 name: "Friga"
             }
         ]
+        */
     }
 
     async module_getAvailableQuests(userId: string): Promise<object[]> {
