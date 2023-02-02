@@ -66,7 +66,7 @@ export type TakenQuest = {
 
 export type QuestRequirement 
     = APSRequirement | ClassRequirement | OrRequirement | AndRequirement 
-    | BonusRequirement | OnlySuccessBonusRequirement
+    | BonusRequirement | SuccessBonus | TimeModifier | RewardModifier
 
 export type OrRequirement = {
     ctype: "or-requirement",
@@ -87,7 +87,7 @@ export type BonusRequirement = {
     right: QuestRequirement,
 }
 
-export type OnlySuccessBonusRequirement = {
+export type SuccessBonus = {
     ctype: "only-success-bonus-requirement",
     bonus: number,
     left: QuestRequirement,
@@ -104,6 +104,19 @@ export type APSRequirement = {
 export type ClassRequirement = {
     ctype: "class-requirement",
     class: string,
+}
+
+export type TimeModifier = {
+    ctype: "time-modifier",
+    modifier: number,
+    operator: "multiply" | "add",
+    continuation: QuestRequirement,
+}
+
+export type RewardModifier = {
+    ctype: "reward-modifier",
+    modifier: Reward,
+    continuation: QuestRequirement,
 }
 
 export type GetAllAdventurersResult 

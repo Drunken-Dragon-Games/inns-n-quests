@@ -1,5 +1,5 @@
 import { AssetManagementService } from "../../service-asset-management"
-import { Adventurer, adventurerClasses, AndRequirement, APS, APSRequirement, BonusRequirement, ClassRequirement, OnlySuccessBonusRequirement, OrRequirement, QuestRequirement, Reward } from "../models"
+import { Adventurer, adventurerClasses, AndRequirement, APS, APSRequirement, BonusRequirement, ClassRequirement, SuccessBonus, OrRequirement, QuestRequirement, Reward } from "../models"
 import { apsReward, apsSum, AssetRewards, bestReward, mergeRewards } from "./reward"
 
 export function isQuestRequirement(obj: any): obj is QuestRequirement {
@@ -38,7 +38,7 @@ export function successRate(requirement: QuestRequirement, inventory: Adventurer
     const orRequirementSuccessRate = (requirement: OrRequirement): number => 
         Math.max(successRate(requirement.left, inventory), successRate(requirement.right, inventory))
 
-    const bonusRequirementSuccessRate = (requirement: BonusRequirement | OnlySuccessBonusRequirement): number => {
+    const bonusRequirementSuccessRate = (requirement: BonusRequirement | SuccessBonus): number => {
         const leftSuccessRate = successRate(requirement.left, inventory)
         const rightSuccessRate = successRate(requirement.right, inventory)
         const bonus = leftSuccessRate == 0 ? 0 - requirement.bonus : requirement.bonus
@@ -78,13 +78,17 @@ export function successRate(requirement: QuestRequirement, inventory: Adventurer
         return bonusRequirementSuccessRate(requirement)
     else if (requirement.ctype === "and-requirement") 
         return andRequirementSuccessRate(requirement)
+    else if (requirement.ctype === "time-modifier")
+        return successRate(requirement.continuation, inventory)
+    else if (requirement.ctype === "reward-modifier")
+        return successRate(requirement.continuation, inventory)
     else 
         return orRequirementSuccessRate(requirement)
 }
 
 export class RewardCalculator {
 
-    private assetRewards: AssetRewards
+    public readonly assetRewards: AssetRewards
 
     constructor(
         private readonly assetManagementService: AssetManagementService, 
@@ -107,7 +111,7 @@ export class RewardCalculator {
             return bestReward(leftReward, rightReward)
         }
 
-        const onlySuccessBonusRequirementReward = (requirement: OnlySuccessBonusRequirement): Reward => 
+        const onlySuccessBonusRequirementReward = (requirement: SuccessBonus): Reward => 
             this.reward(requirement.right)
 
         const apsRequirementReward = (requirement: APSRequirement): Reward => {
@@ -139,7 +143,40 @@ export class RewardCalculator {
             return onlySuccessBonusRequirementReward(questRequirement)
         else if (questRequirement.ctype === "and-requirement")
             return andRequirementReward(questRequirement)
+        else if (questRequirement.ctype === "time-modifier")
+            return this.reward(questRequirement.continuation)
+        else if (questRequirement.ctype === "reward-modifier")
+            return mergeRewards(this.reward(questRequirement.continuation), questRequirement.modifier)
         else
             return orRequirementReward(questRequirement)
+    }
+}
+
+export class DurationCalculator {
+
+    constructor(private readonly durationFactor: number = 1) {}
+
+    duration(requirement: QuestRequirement): number {
+        if (requirement.ctype === "aps-requirement")
+            return apsSum({ athleticism: requirement.athleticism, intellect: requirement.intellect, charisma: requirement.charisma }) * 1000 * this.durationFactor
+        else if (requirement.ctype === "class-requirement")
+            return 0
+        else if (requirement.ctype === "bonus-requirement")
+            return this.duration(requirement.right)
+        else if (requirement.ctype === "only-success-bonus-requirement")
+            return this.duration(requirement.right)
+        else if (requirement.ctype === "and-requirement")
+            return this.duration(requirement.left) + this.duration(requirement.right)
+        else if (requirement.ctype === "or-requirement")
+            return Math.max(this.duration(requirement.left), this.duration(requirement.right))
+        else if (requirement.ctype === "time-modifier")
+            switch (requirement.operator) {
+                case "add": return this.duration(requirement.continuation) + requirement.modifier
+                case "multiply": return this.duration(requirement.continuation) * requirement.modifier
+            }
+        else if (requirement.ctype === "reward-modifier")
+            return this.duration(requirement.continuation)
+        else
+            return 0
     }
 }

@@ -1,7 +1,7 @@
 import { AssetManagementService } from "../../service-asset-management"
 import { wellKnownPolicies } from "../../service-asset-management/registry/registry-testnet"
 import { QuestRequirement, Adventurer, AdventurerClass, APS } from "../models"
-import { RewardCalculator, successRate } from "./quest-requirement"
+import { DurationCalculator, RewardCalculator, successRate } from "./quest-requirement"
 
 const assetManagementServiceMock = (): AssetManagementService => {
     const mocked = {
@@ -86,46 +86,56 @@ test("Basic requirement calculations", () => {
 })
 
 test("Playground", () => {
-
+    const rewardCalculator = new RewardCalculator(assetManagementService)
+    const durationCalculator = new DurationCalculator()
     const requirement: QuestRequirement = {
-        ctype: "and-requirement",
-        left: {
+        ctype: "time-modifier",
+        operator: "multiply",
+        modifier: 0.1,
+        continuation: {
             ctype: "and-requirement",
             left: {
-                ctype: "class-requirement",
-                class: "fighter",
-            },
-            right: {
-                ctype: "or-requirement",
+                ctype: "and-requirement",
                 left: {
                     ctype: "class-requirement",
-                    class: "paladin",
+                    class: "fighter",
                 },
                 right: {
-                    ctype: "class-requirement",
-                    class: "cleric",
+                    ctype: "or-requirement",
+                    left: {
+                        ctype: "class-requirement",
+                        class: "paladin",
+                    },
+                    right: {
+                        ctype: "reward-modifier",
+                        modifier: rewardCalculator.assetRewards.dragonSilver("100"),
+                        continuation: {
+                            ctype: "class-requirement",
+                            class: "cleric",
+                        },
+                    }
                 },
-            },
-        },
-        right: {
-            ctype: "and-requirement",
-            left: {
-                ctype: "class-requirement",
-                class: "fighter",
             },
             right: {
                 ctype: "and-requirement",
                 left: {
                     ctype: "class-requirement",
-                    class: "warlock",
+                    class: "fighter",
                 },
                 right: {
-                    ctype: "aps-requirement",
-                    athleticism: 200,
-                    intellect: 350,
-                    charisma: 20,
+                    ctype: "and-requirement",
+                    left: {
+                        ctype: "class-requirement",
+                        class: "warlock",
+                    },
+                    right: {
+                        ctype: "aps-requirement",
+                        athleticism: 200,
+                        intellect: 350,
+                        charisma: 20,
+                    },
                 },
-            },
+            }
         }
     }
     const party: Adventurer[] = [
@@ -135,6 +145,6 @@ test("Playground", () => {
         genAdventurer("paladin", { athleticism: 40, intellect: 150, charisma: 5 }),
     ]
     const sRate = successRate(requirement, party)
-    const rewardCalculator = new RewardCalculator(assetManagementService)
+    console.log(durationCalculator.duration(requirement), "s")
     expect(Math.round(sRate * 100)).toBe(90)
 })
