@@ -20,4 +20,6 @@ export interface IdleQuestsService {
     module_claimQuestResult(userId: string, questId: string): Promise<object>
 
     getAllAdventurers(userId: string): Promise<models.GetAllAdventurersResult>
+
+    getAvailableQuests(location: string): Promise<models.Quest[]>
 }

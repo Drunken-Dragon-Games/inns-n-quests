@@ -49,4 +49,8 @@ export class IdleQuestsServiceLogging implements IdleQuestsService {
     async getAllAdventurers(userId: string): Promise<models.GetAllAdventurersResult> {
         return await this.base.getAllAdventurers(userId)
     }
+
+    async getAvailableQuests(location: string): Promise<models.Quest[]> {
+        return await this.base.getAvailableQuests(location)
+    }
 }

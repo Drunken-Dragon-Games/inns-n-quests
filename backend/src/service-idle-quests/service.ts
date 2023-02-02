@@ -6,8 +6,9 @@ import { buildMigrator } from "../tools-database"
 import path from "path"
 import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
+import { config } from "../tools-utils"
 
-import { Adventurer, GetAllAdventurersResult, HealthStatus } from "./models"
+import { Adventurer, GetAllAdventurersResult, HealthStatus, Quest } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
 import * as runningQuestsDB from "./challenges/taken-quest-db"
@@ -15,13 +16,19 @@ import * as runningQuestsDB from "./challenges/taken-quest-db"
 import syncAdventurers from "./items/sync-adventurers"
 import { AssetManagementService } from "../service-asset-management"
 import metadataCache from "./items/metadata-cache"
+import { loadQuestRegistry, pickRandomQuests, pickRandomQuestsByLocation, QuestRegistry } from "./challenges/quest-registry"
+import Random from "../tools-utils/random"
+import { RewardCalculator, DurationCalculator } from "./challenges/quest-requirement"
 
 export interface IdleQuestsServiceConfig 
-    { 
+    { questRegistry: string | QuestRegistry
+    , rewardFactor: number
+    , durationFactor: number
     }
 
-export interface AssetManagemenetServiceDependencies 
-    { database: Sequelize
+export interface IdleQuestServiceDependencies 
+    { random: Random
+    , database: Sequelize
     , assetManagementService: AssetManagementService
     }
 
@@ -30,24 +37,38 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     private readonly migrator: Umzug<QueryInterface>
 
     constructor (
+        private readonly random: Random,
         private readonly database: Sequelize,
         private readonly assetManagementService: AssetManagementService,
+        private readonly questRegistry: QuestRegistry,
+        private readonly rewardCalculator: RewardCalculator,
+        private readonly durationCalculator: DurationCalculator,
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
     }
 
-    static async loadFromEnv(dependencies: AssetManagemenetServiceDependencies): Promise<IdleQuestsService> {
+    static async loadFromEnv(dependencies: IdleQuestServiceDependencies): Promise<IdleQuestsService> {
         dotenv.config()
         return await IdleQuestsServiceDsl.loadFromConfig(
-            { 
+            { questRegistry: config.stringOrElse("QUEST_REGISTRY_LOCATION", "https://cdn.ddu.gg/quests/quest-registry.json")
+            , rewardFactor: config.intOrElse("QUEST_REWARD_FACTOR", 1)
+            , durationFactor: config.intOrElse("QUEST_DURATION_FACTOR", 1)
             }, dependencies)
     }
 
-    static async loadFromConfig(servConfig: IdleQuestsServiceConfig, dependencies: AssetManagemenetServiceDependencies): Promise<IdleQuestsService> {
+    static async loadFromConfig(servConfig: IdleQuestsServiceConfig, dependencies: IdleQuestServiceDependencies): Promise<IdleQuestsService> {
+        const questRegistry = 
+            typeof servConfig.questRegistry === "string" 
+            ? await loadQuestRegistry(servConfig.questRegistry) 
+            : servConfig.questRegistry
         const service = new IdleQuestsServiceLogging(new IdleQuestsServiceDsl(
+            dependencies.random,
             dependencies.database,
-            dependencies.assetManagementService
+            dependencies.assetManagementService,
+            questRegistry,
+            new RewardCalculator(dependencies.assetManagementService, servConfig.rewardFactor),
+            new DurationCalculator(servConfig.durationFactor),
         ))
         await service.loadDatabaseModels()
         return service
@@ -110,7 +131,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     async module_getAllAdventurers(userId: string): Promise<object[]> {
         const adventurers = await this.getAllAdventurers(userId)
         if (adventurers.status == "unknown-user") return []
-        return adventurers.adventurers.map(a => ({
+        return adventurers.adventurers.map(a => ({ 
+            ...a,
             id: a.adventurerId,
             on_chain_ref: a.assetRef,   
             experience: 200,
@@ -152,7 +174,29 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         */
     }
 
+    async getAvailableQuests(location: string): Promise<Quest[]> {
+        return pickRandomQuestsByLocation(location, 20, this.questRegistry, this.random)
+    }
+
     async module_getAvailableQuests(userId: string): Promise<object[]> {
+        return (await this.getAvailableQuests("Auristar")).map(quest => {
+            const baseRewardCurrencies = this.rewardCalculator.baseReward(quest.requirements).currencies ?? []
+            return { ...quest,
+                "reward": this.rewardCalculator.baseReward(quest.requirements),
+                "id": quest.questId,
+                "name": quest.name,
+                "description": quest.description,
+                "reward_ds": parseInt(baseRewardCurrencies[0]?.quantity),
+                "reward_xp": 1,
+                "difficulty": 1,
+                "slots": quest.slots,
+                "rarity": "townsfolk",
+                "duration": this.durationCalculator.baseDuration(quest.requirements),
+                "requirements": {},
+                "is_war_effort": false
+            }
+        })
+        /*
         return [
             {
                 "id": "84daa515-72b4-4f96-916e-0c24bb3c3be2",
@@ -209,6 +253,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
                 "is_war_effort": false
             },
         ]
+        */
     }
 
     async module_acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<object> {

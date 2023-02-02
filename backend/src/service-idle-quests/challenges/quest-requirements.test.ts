@@ -1,7 +1,7 @@
 import { AssetManagementService } from "../../service-asset-management"
 import { wellKnownPolicies } from "../../service-asset-management/registry/registry-testnet"
 import { QuestRequirement, Adventurer, AdventurerClass, APS } from "../models"
-import { DurationCalculator, RewardCalculator, successRate } from "./quest-requirement"
+import { DurationCalculator, RewardCalculator, baseSuccessRate } from "./quest-requirement"
 
 const assetManagementServiceMock = (): AssetManagementService => {
     const mocked = {
@@ -66,7 +66,7 @@ test("Basic requirement calculations", () => {
         genAdventurer("cleric", { athleticism: 5, intellect: 5, charisma: 5 }),
     ]
     const rewardCalculator = new RewardCalculator(assetManagementService)
-    const reward = rewardCalculator.reward(requirement)
+    const reward = rewardCalculator.baseReward(requirement)
     const expectedReward = {
       "currencies": [
         {
@@ -82,60 +82,51 @@ test("Basic requirement calculations", () => {
       }
     }
     expect(reward).toStrictEqual(expectedReward)
-    expect(successRate(requirement, party)).toBe(0.9)
+    expect(baseSuccessRate(requirement, party)).toBe(0.9)
 })
 
 test("Playground", () => {
     const rewardCalculator = new RewardCalculator(assetManagementService)
     const durationCalculator = new DurationCalculator()
     const requirement: QuestRequirement = {
-        ctype: "time-modifier",
-        operator: "multiply",
-        modifier: 0.1,
-        continuation: {
+        ctype: "and-requirement",
+        left: {
             ctype: "and-requirement",
             left: {
-                ctype: "and-requirement",
+                ctype: "class-requirement",
+                class: "fighter",
+            },
+            right: {
+                ctype: "or-requirement",
                 left: {
                     ctype: "class-requirement",
-                    class: "fighter",
+                    class: "paladin",
                 },
                 right: {
-                    ctype: "or-requirement",
-                    left: {
-                        ctype: "class-requirement",
-                        class: "paladin",
-                    },
-                    right: {
-                        ctype: "reward-modifier",
-                        modifier: rewardCalculator.assetRewards.dragonSilver("100"),
-                        continuation: {
-                            ctype: "class-requirement",
-                            class: "cleric",
-                        },
-                    }
+                    ctype: "class-requirement",
+                    class: "cleric",
                 },
+            },
+        },
+        right: {
+            ctype: "and-requirement",
+            left: {
+                ctype: "class-requirement",
+                class: "fighter",
             },
             right: {
                 ctype: "and-requirement",
                 left: {
                     ctype: "class-requirement",
-                    class: "fighter",
+                    class: "warlock",
                 },
                 right: {
-                    ctype: "and-requirement",
-                    left: {
-                        ctype: "class-requirement",
-                        class: "warlock",
-                    },
-                    right: {
-                        ctype: "aps-requirement",
-                        athleticism: 200,
-                        intellect: 350,
-                        charisma: 20,
-                    },
+                    ctype: "aps-requirement",
+                    athleticism: 200,
+                    intellect: 350,
+                    charisma: 20,
                 },
-            }
+            },
         }
     }
     const party: Adventurer[] = [
@@ -144,7 +135,6 @@ test("Playground", () => {
         genAdventurer("warlock", { athleticism: 40, intellect: 85, charisma: 5 }),
         genAdventurer("paladin", { athleticism: 40, intellect: 150, charisma: 5 }),
     ]
-    const sRate = successRate(requirement, party)
-    console.log(durationCalculator.duration(requirement), "s")
+    const sRate = baseSuccessRate(requirement, party)
     expect(Math.round(sRate * 100)).toBe(90)
 })

@@ -28,8 +28,10 @@ export type APS = {
     charisma: number,
 }
 
+export type AssetReward = { policyId: string, unit: string, quantity: string }
+
 export type Reward = { 
-    currencies?: { policyId: string, unit: string, quantity: string }[], 
+    currencies?: AssetReward[], 
     apsExperience?: APS 
 }
 
@@ -45,26 +47,27 @@ export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-t
 
 export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
 
-export type AvailableQuest = {
-    questId?: string,
+export type Quest = {
+    questId: string,
     name: string,
+    location: string,
     description: string,
     requirements: QuestRequirement,
+    timeModifier?: { operator: "multiply" | "add" | "replace", modifier: number },
+    rewardModifier?: { operator: "multiply" | "add" | "replace", modifier: Reward },
     slots: number,
 }
 
 export type TakenQuest = {
-    questId?: string,
+    takenQuestId?: string,
+    questId: string,
     userId: string,
-    name: string,
-    description: string,
-    requirements: QuestRequirement,
     adventurerIds: string[],
 }
 
 export type QuestRequirement 
     = APSRequirement | ClassRequirement | OrRequirement | AndRequirement 
-    | BonusRequirement | SuccessBonus | TimeModifier | RewardModifier
+    | BonusRequirement | SuccessBonusRequirement 
 
 export type OrRequirement = {
     ctype: "or-requirement",
@@ -85,8 +88,8 @@ export type BonusRequirement = {
     right: QuestRequirement,
 }
 
-export type SuccessBonus = {
-    ctype: "only-success-bonus-requirement",
+export type SuccessBonusRequirement = {
+    ctype: "success-bonus-requirement",
     bonus: number,
     left: QuestRequirement,
     right: QuestRequirement,
@@ -102,19 +105,6 @@ export type APSRequirement = {
 export type ClassRequirement = {
     ctype: "class-requirement",
     class: string,
-}
-
-export type TimeModifier = {
-    ctype: "time-modifier",
-    modifier: number,
-    operator: "multiply" | "add",
-    continuation: QuestRequirement,
-}
-
-export type RewardModifier = {
-    ctype: "reward-modifier",
-    modifier: Reward,
-    continuation: QuestRequirement,
 }
 
 export type GetAllAdventurersResult 

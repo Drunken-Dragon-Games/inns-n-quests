@@ -15,6 +15,7 @@ import { AssetManagementService } from "./service-asset-management";
 import { IdleQuestsServiceDsl } from "./service-idle-quests/service";
 
 import metadataCache from "./service-idle-quests/items/metadata-cache";
+import Random from "./tools-utils/random";
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -24,6 +25,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
 }
 
 (async () => {
+    const random = new Random(config.stringOrElse("RANDOM_SEED", Date.now().toString()))
     const database = connectToDB({ 
         host: config.stringOrError("DB_HOST"),
         port: config.intOrError("DB_PORT"),
@@ -36,9 +38,10 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
-    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ database, assetManagementService })
+    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ random, database, assetManagementService })
     
     await metadataCache.load()
+
     await assetsRegistry.load(assetManagementService)
     await questUtils.registry.load(assetManagementService)
     await loadQuestModuleModels(database)

@@ -1,10 +1,10 @@
 import { Inventory, WellKnownPolicies } from "../../service-asset-management"
 import { Adventurer, AdventurerClass, AdventurerCollection, Race } from "../models"
 import { DBAdventurer } from "./adventurer-db"
-import genrand from "random-seed"
 
 import metadataCache from "./metadata-cache"
 import apsRandomizer from "./aps-randomizer"
+import Random from "../../tools-utils/random"
 
 type PreSyncedAdventurers = {
     adventurerId?: string,
@@ -97,7 +97,7 @@ async function createAdventurers(userId: string, adventurersToCreate: AssetInven
                 const armor = parseInt(metadataCache.gmasMetadata[adventurer.assetRef].armor)
                 const weapon = parseInt(metadataCache.gmasMetadata[adventurer.assetRef].weapon)
                 const aps = Math.round((armor + weapon) * 30 / 10)
-                const rand = genrand.create(adventurer.assetRef)
+                const rand = new Random(adventurer.assetRef)
                 return apsRandomizer(aps, rand)
             case "adventurers-of-thiolden": 
                 const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1

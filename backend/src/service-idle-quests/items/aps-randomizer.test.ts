@@ -1,11 +1,11 @@
-import * as genrand from "random-seed"
+import Random from "../../tools-utils/random"
 import apsRandomizer from "./aps-randomizer"
 
 const sum = (aps: { athleticism: number, intellect: number, charisma: number }): number =>
     aps.athleticism + aps.intellect + aps.charisma
 
 test("apsRandomizer simple check", () => {
-    const rand = genrand.create("test")
+    const rand = new Random("test")
     expect(sum(apsRandomizer(30, rand))).toBe(30)
     expect(sum(apsRandomizer(28, rand))).toBe(28)
     expect(sum(apsRandomizer(21, rand))).toBe(21)
