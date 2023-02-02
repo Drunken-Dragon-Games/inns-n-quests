@@ -8,7 +8,7 @@ import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
 import { config } from "../tools-utils"
 
-import { Adventurer, GetAllAdventurersResult, HealthStatus, Quest } from "./models"
+import { AcceptQuestResult, Adventurer, GetAllAdventurersResult, HealthStatus, Quest } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
 import * as runningQuestsDB from "./challenges/taken-quest-db"
@@ -256,30 +256,40 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         */
     }
 
+    async acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptQuestResult> {
+        if (this.questRegistry[questId] === undefined) return { status: "unknown-quest" }
+        const transaction = await this.database.transaction()
+        const [ _, adventurers ] = await adventurersDB.DBAdventurer.update({ inChallenge: true }, { where: { adventurerIds, inChallenge: false }, returning: true, transaction })
+        console.log(adventurers)
+        const takenQuest = await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId) }, { transaction })
+        await transaction.commit()
+        console.log(takenQuest)
+        return { status: "ok", takenQuest }
+    }
+
     async module_acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<object> {
+
+        const result = await this.acceptQuest(userId, questId, adventurerIds)
+        if (result.status !== "ok") return { "status": "error", "error": result.status }
+        const quest = this.questRegistry[questId]
         return {
-            "id": "fb181bff-34ee-45fd-83d8-2bc6ab49e921",
+            "id": result.takenQuest.takenQuestId,
             "started_on": "2023-02-01T04:22:38.139Z",
             "state": "in_progress",
             "is_claimed": false,
-            "user_id": "5e402098-be38-4bba-9ea8-d97e2b5c9c49",
-            "quest_id": "1c15fe8d-cd04-4996-982a-a784b1d78c7a",
+            "user_id": userId,
+            "quest_id": result.takenQuest.questId,
             "quest": {
-                "id": "1c15fe8d-cd04-4996-982a-a784b1d78c7a",
-                "name": "MISSING TOWNFOLK",
-                "description": "Kind adventurers wanted. Our villagers have been disappearing! To the <b>north of Farvirheim, across the river and near the great ruins</b> we have identified <b>a clan of wild Beastmen</b>. It must be related! Our nijmkjold is lacking personel. Neighbours have cooperated with a <b>just</b> reward of <b>3</b> Dragon Silver.",
+                "id": quest.questId,
+                "name": quest.name,
+                "description": quest.description,
                 "reward_ds": 3,
                 "reward_xp": 1,
                 "difficulty": 2,
                 "slots": 4,
                 "rarity": "townsfolk",
                 "duration": 120763172,
-                "requirements": {
-                    "party": {
-                        "balanced": true
-                    },
-                    "character": []
-                },
+                "requirements": {},
                 "is_war_effort": false
             },
             "enrolls": [

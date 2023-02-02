@@ -110,3 +110,8 @@ export type ClassRequirement = {
 export type GetAllAdventurersResult 
     = { status: "ok", adventurers: Adventurer[] }
     | { status: "unknown-user" }
+
+export type AcceptQuestResult
+    = { status: "ok", takenQuest: TakenQuest }
+    | { status: "unknown-user" }
+    | { status: "unknown-quest" }
