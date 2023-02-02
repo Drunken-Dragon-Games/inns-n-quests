@@ -1,4 +1,29 @@
-import { Adventurer, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, OrRequirement, QuestRequirement } from "../models"
+import { Adventurer, adventurerClasses, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, OrRequirement, QuestRequirement } from "../models"
+
+export function isQuestRequirement(obj: any): obj is QuestRequirement {
+
+    function isAndRequirement(obj: any): obj is AndRequirement {
+        return obj.ctype === "and-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
+    }
+
+    function isOrRequirement(obj: any): obj is OrRequirement {
+        return obj.ctype === "or-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
+    }
+
+    function isBonusRequirement(obj: any): obj is BonusRequirement {
+        return obj.ctype === "bonus-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
+    }
+
+    function isAPSRequirement(obj: any): obj is APSRequirement {
+        return obj.ctype === "aps-requirement" && typeof obj.athleticism === "number" && typeof obj.intellect === "number" && typeof obj.charisma === "number"
+    }
+
+    function isClassRequirement(obj: any): obj is ClassRequirement {
+        return obj.ctype === "class-requirement" && typeof obj.class === "string" && adventurerClasses.includes(obj.class)
+    }
+
+    return isAndRequirement(obj) || isOrRequirement(obj) || isBonusRequirement(obj) || isAPSRequirement(obj) || isClassRequirement(obj)
+}
 
 export const successRate = (requirement: QuestRequirement, inventory: Adventurer[]): number => {
 

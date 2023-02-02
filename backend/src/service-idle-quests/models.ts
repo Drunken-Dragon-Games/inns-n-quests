@@ -35,14 +35,22 @@ export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-t
 export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
 
 export type AvailableQuest = {
-    questId: string,
+    questId?: string,
     name: string,
     description: string,
     requirements: QuestRequirement,
-    rewards: string,
     duration: number,
     slots: number,
-    rarity: number,
+}
+
+export type RunningQuest = {
+    questId?: string,
+    userId: string,
+    name: string,
+    description: string,
+    requirements: QuestRequirement,
+    duration: number,
+    adventurerIds: string[],
 }
 
 export type QuestRequirement 

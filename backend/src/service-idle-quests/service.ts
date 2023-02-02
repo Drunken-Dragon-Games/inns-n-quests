@@ -10,13 +10,11 @@ import { IdleQuestsServiceLogging } from "./logging"
 import { Adventurer, GetAllAdventurersResult, HealthStatus } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
+import * as runningQuestsDB from "./challenges/running-quest-db"
 
-import * as module_models from "../module-quests/adventurers/models"
 import syncAdventurers from "./items/sync-adventurers"
 import { AssetManagementService } from "../service-asset-management"
 import metadataCache from "./items/metadata-cache"
-
-
 
 export interface IdleQuestsServiceConfig 
     { 
@@ -57,6 +55,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     async loadDatabaseModels(): Promise<void> {
         adventurersDB.configureSequelizeModel(this.database)
+        runningQuestsDB.configureSequelizeModel(this.database)
         await this.migrator.up()
     }
 
