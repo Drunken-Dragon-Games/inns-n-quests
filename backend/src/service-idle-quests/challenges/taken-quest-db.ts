@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
 
-export type IRunningQuestDB = {
+export type ITakenQuestDB = {
     questId: string,
     userId: string,
     name: string,
@@ -9,7 +9,7 @@ export type IRunningQuestDB = {
     adventurerIds: string[],
 }
 
-export class RunningQuestDB extends Model implements IRunningQuestDB {
+export class TakenQuestDB extends Model implements ITakenQuestDB {
     declare questId: string
     declare userId: string
     declare name: string
@@ -18,9 +18,9 @@ export class RunningQuestDB extends Model implements IRunningQuestDB {
     declare adventurerIds: string[]
 }
 
-export const RunningQuestDBTableName = "idle_quests_running_quests"
+export const TakenQuestDBTableName = "idle_quests_taken_quests"
 
-export const RunningQuestDBTableAttributes = {
+export const TakenQuestDBTableAttributes = {
     questId: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -49,8 +49,8 @@ export const RunningQuestDBTableAttributes = {
 }
 
 export function configureSequelizeModel(sequelize: Sequelize): void {
-    RunningQuestDB.init(RunningQuestDBTableAttributes, {
+    TakenQuestDB.init(TakenQuestDBTableAttributes, {
         sequelize,
-        tableName: RunningQuestDBTableName
+        tableName: TakenQuestDBTableName
     })
 }

@@ -1,4 +1,6 @@
-import { Adventurer, adventurerClasses, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, OrRequirement, QuestRequirement } from "../models"
+import { AssetManagementService } from "../../service-asset-management"
+import { Adventurer, adventurerClasses, AndRequirement, APS, APSRequirement, BonusRequirement, ClassRequirement, OnlySuccessBonusRequirement, OrRequirement, QuestRequirement, Reward } from "../models"
+import { apsReward, apsSum, AssetRewards, bestReward, mergeRewards } from "./reward"
 
 export function isQuestRequirement(obj: any): obj is QuestRequirement {
 
@@ -25,7 +27,7 @@ export function isQuestRequirement(obj: any): obj is QuestRequirement {
     return isAndRequirement(obj) || isOrRequirement(obj) || isBonusRequirement(obj) || isAPSRequirement(obj) || isClassRequirement(obj)
 }
 
-export const successRate = (requirement: QuestRequirement, inventory: Adventurer[]): number => {
+export function successRate(requirement: QuestRequirement, inventory: Adventurer[]): number {
 
     const andRequirementSuccessRate = (requirement: AndRequirement): number => {
         const leftSuccessRate = successRate(requirement.left, inventory)
@@ -36,7 +38,7 @@ export const successRate = (requirement: QuestRequirement, inventory: Adventurer
     const orRequirementSuccessRate = (requirement: OrRequirement): number => 
         Math.max(successRate(requirement.left, inventory), successRate(requirement.right, inventory))
 
-    const bonusRequirementSuccessRate = (requirement: BonusRequirement): number => {
+    const bonusRequirementSuccessRate = (requirement: BonusRequirement | OnlySuccessBonusRequirement): number => {
         const leftSuccessRate = successRate(requirement.left, inventory)
         const rightSuccessRate = successRate(requirement.right, inventory)
         const bonus = leftSuccessRate == 0 ? 0 - requirement.bonus : requirement.bonus
@@ -72,8 +74,72 @@ export const successRate = (requirement: QuestRequirement, inventory: Adventurer
         return classRequirementSuccessRate(requirement)
     else if (requirement.ctype === "bonus-requirement") 
         return bonusRequirementSuccessRate(requirement)
+    else if (requirement.ctype === "only-success-bonus-requirement")
+        return bonusRequirementSuccessRate(requirement)
     else if (requirement.ctype === "and-requirement") 
         return andRequirementSuccessRate(requirement)
     else 
         return orRequirementSuccessRate(requirement)
+}
+
+export class RewardCalculator {
+
+    private assetRewards: AssetRewards
+
+    constructor(
+        private readonly assetManagementService: AssetManagementService, 
+        private readonly rewardFactor: number = 1
+    ) {
+        this.assetRewards = new AssetRewards(assetManagementService)
+    }
+
+    reward(questRequirement: QuestRequirement): Reward {
+
+        const andRequirementReward = (requirement: AndRequirement | BonusRequirement): Reward => {
+            const leftReward = this.reward(requirement.left)
+            const rightReward = this.reward(requirement.right)
+            return mergeRewards(leftReward, rightReward)
+        }
+
+        const orRequirementReward = (requirement: OrRequirement): Reward => {
+            const leftReward = this.reward(requirement.left)
+            const rightReward = this.reward(requirement.right)
+            return bestReward(leftReward, rightReward)
+        }
+
+        const onlySuccessBonusRequirementReward = (requirement: OnlySuccessBonusRequirement): Reward => 
+            this.reward(requirement.right)
+
+        const apsRequirementReward = (requirement: APSRequirement): Reward => {
+            const dragonSilverReward = this.assetRewards.dragonSilver(
+                (apsSum({
+                    athleticism: requirement.athleticism,
+                    intellect: requirement.intellect,
+                    charisma: requirement.charisma,
+                }) * this.rewardFactor).toString())
+            const experienceReward = apsReward({
+                athleticism: requirement.athleticism * 0.1 * this.rewardFactor,
+                intellect: requirement.intellect * 0.1 * this.rewardFactor,
+                charisma: requirement.charisma * 0.1 * this.rewardFactor,
+            })
+            return mergeRewards(dragonSilverReward, experienceReward)
+        }
+
+        const classRequirementReward = (requirement: ClassRequirement): Reward => {
+            return this.assetRewards.dragonSilver("5")
+        }
+
+        if (questRequirement.ctype === "aps-requirement")
+            return apsRequirementReward(questRequirement)
+        else if (questRequirement.ctype === "class-requirement")
+            return classRequirementReward(questRequirement)
+        else if (questRequirement.ctype === "bonus-requirement")
+            return andRequirementReward(questRequirement)
+        else if (questRequirement.ctype === "only-success-bonus-requirement")
+            return onlySuccessBonusRequirementReward(questRequirement)
+        else if (questRequirement.ctype === "and-requirement")
+            return andRequirementReward(questRequirement)
+        else
+            return orRequirementReward(questRequirement)
+    }
 }

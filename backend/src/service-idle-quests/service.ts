@@ -10,7 +10,7 @@ import { IdleQuestsServiceLogging } from "./logging"
 import { Adventurer, GetAllAdventurersResult, HealthStatus } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
-import * as runningQuestsDB from "./challenges/running-quest-db"
+import * as runningQuestsDB from "./challenges/taken-quest-db"
 
 import syncAdventurers from "./items/sync-adventurers"
 import { AssetManagementService } from "../service-asset-management"

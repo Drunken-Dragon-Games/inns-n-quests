@@ -22,6 +22,17 @@ export type Adventurer = {
     charisma: number,
 }
 
+export type APS = {
+    athleticism: number,
+    intellect: number,
+    charisma: number,
+}
+
+export type Reward = { 
+    currencies?: { policyId: string, unit: string, quantity: string }[], 
+    apsExperience?: APS 
+}
+
 export type Race = "human" | "elf" | "tiefling" | "dragonkin" | "worgenkin" | "undead" | "viera" | "troll" | "vulkin" | "orc" | "tauren"
 
 export const races = ["human", "elf", "tiefling", "dragonkin", "worgenkin", "undead", "viera", "troll", "vulkin", "orc", "tauren"]
@@ -43,7 +54,7 @@ export type AvailableQuest = {
     slots: number,
 }
 
-export type RunningQuest = {
+export type TakenQuest = {
     questId?: string,
     userId: string,
     name: string,
@@ -55,7 +66,7 @@ export type RunningQuest = {
 
 export type QuestRequirement 
     = APSRequirement | ClassRequirement | OrRequirement | AndRequirement 
-    | BonusRequirement
+    | BonusRequirement | OnlySuccessBonusRequirement
 
 export type OrRequirement = {
     ctype: "or-requirement",
@@ -71,6 +82,13 @@ export type AndRequirement = {
 
 export type BonusRequirement = {
     ctype: "bonus-requirement",
+    bonus: number,
+    left: QuestRequirement,
+    right: QuestRequirement,
+}
+
+export type OnlySuccessBonusRequirement = {
+    ctype: "only-success-bonus-requirement",
     bonus: number,
     left: QuestRequirement,
     right: QuestRequirement,

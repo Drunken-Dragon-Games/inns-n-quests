@@ -1,10 +1,6 @@
 import { LoggingContext } from "../tools-tracing"
 import * as models from "./models"
 
-
-import * as module_models from "../module-quests/adventurers/models"
-
-
 export interface IdleQuestsService {
 
     loadDatabaseModels(): Promise<void>
