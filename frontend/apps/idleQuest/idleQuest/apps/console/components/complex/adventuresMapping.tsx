@@ -86,8 +86,6 @@ const AdventureMappingElement = () =>{
     
     const renderArrows =  useIsScroll(scrolling, numberOfAdventurer)
   
-
-
     return(
       <>
         <AdventuresMappingWrapper>
@@ -102,24 +100,11 @@ const AdventureMappingElement = () =>{
             <AdventuresMapping ref={scrolling}>
 
                 <ConditionalRender condition = {adventurers !== undefined}>
-                    { adventurers.map((elOriginal: DataAdventurerType) => {
-                        
-                            //  FIXME: onRecruiment card
-                            let selectedInQuest = false
-                                    
-                            selectedAdventurer.forEach((elSelected : string | undefined) =>  elOriginal.id ==  elSelected ? selectedInQuest = true : null )
-                            
-                            if(elOriginal.onRecruitment == undefined){
-                                return  <AdventuresCard data={elOriginal} key={elOriginal.id} selectedInQuest ={selectedInQuest}/>
-                            } 
-      
-                            else if (elOriginal.onRecruitment == true){
-                            //   return <OnRecruitChampionCard  key={elOriginal.id} />
-                            } 
-                            
-                          
-                            return <></>
-                        })}
+                    { adventurers.map((elOriginal: DataAdventurerType) => {                    
+                        let selectedInQuest = false
+                        selectedAdventurer.forEach((elSelected : string | undefined) =>  elOriginal.id ==  elSelected ? selectedInQuest = true : null )
+                        return  <AdventuresCard data={elOriginal} key={elOriginal.id} selectedInQuest ={selectedInQuest}/>
+                    })}
                   
                 </ConditionalRender>
         

@@ -10,7 +10,6 @@ const DropBoxElement = styled.div`
     width: 7vw;
     height: 8vw;
     position: relative;
-    
 `
 
 const Center = styled.div`
@@ -79,21 +78,19 @@ const AdventurerCenterWrapper = styled.div`
     height: 7.8vw;
 
     div{
-        
         margin: auto auto 0vw auto;
     }
 `
 
 
-interface DropBox {
+interface DropBoxType {
     index: number,
     questLevel: number,
     reset: boolean
 }
 
 
-const DropBox = ({index, questLevel, reset}: DropBox ) =>{
-
+const DropBox: React.FC <DropBoxType> = ({index, questLevel, reset}) =>{
 
     const {drop, adventurer, experience, type, removeBox}  = useDropElement(index, reset)
     const [ onHover, setOnHover ] =useState<boolean>(false)

@@ -2,29 +2,10 @@ import { useState, useEffect } from "react"
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
 import { DataAdventurerType } from "../../../../../../types/idleQuest"
+import { EnrollsType } from "../../../../../../types/idleQuest"
 
-interface enrolls{
-    adventurer: adventurer
-    adventurer_id: string
-    taken_quest_id: string
-}
 
-interface adventurer{
-    experience: number
-    id: string
-    in_quest: boolean
-    metadata: metadata
-    on_chain_ref: string
-    player_stake_address: string
-    type: "pixeltile" | "gma"
-}
-
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
-
-export default (slots: number, adventurerList: (string | undefined) [] | enrolls [], type: "available" | "inProgress") => {
+export default (slots: number, adventurerList: (string | undefined) [] | EnrollsType [], type: "available" | "inProgress") => {
     
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const allAdventurer = generalSelector.idleQuest.adventurers.data.data
@@ -47,7 +28,7 @@ export default (slots: number, adventurerList: (string | undefined) [] | enrolls
     //funcion cuando es inProgress el quest cambia la forma de sumar debido al cambio de lista
     const getAverageLevelInProgress = () =>{
         
-        const levelSum = (adventurerList as enrolls []).reduce((acc: number, adventurer) => {
+        const levelSum = (adventurerList as EnrollsType []).reduce((acc: number, adventurer) => {
             
             const level = getLevelFromXp(adventurer.adventurer.experience)
             
@@ -70,7 +51,7 @@ export default (slots: number, adventurerList: (string | undefined) [] | enrolls
         
         const levelSum = (adventurerList as string []).reduce((acc: number, id: string) => {
             
-            const filterAdventurer = allAdventurer.filter((adventurer: DataAdventurerType) => adventurer.id == id)
+            const filterAdventurer = allAdventurer.filter((adventurer) => adventurer.id == id)
             
 
             if(filterAdventurer.length == 1){

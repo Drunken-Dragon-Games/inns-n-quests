@@ -52,13 +52,8 @@ const ClaimDragonSilverButtonWrapper = styled.div`
 const Navbar = () =>{
     
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-
-
     const dragonSilver = generalSelector.idleQuest.player.data.dragonSilver
-    
-    
     const dragonSilverToClaim = generalSelector.idleQuest.player.data.dragonSilverToClaim
-
 
     useGetDragonSilver()
 

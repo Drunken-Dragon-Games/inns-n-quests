@@ -3,9 +3,6 @@ import { createSliceStatus, actionsGenerator } from '../../../utils/features/uti
 import { generalReducerThunk } from '../../../../features/generalReducer';
 import { axiosCustomInstance } from '../../../../axios/axiosApi';
 import { AxiosError } from 'axios';
-import {
-  Address
-} from "@emurgo/cardano-serialization-lib-asmjs"
 import { getAdventurers } from '../apps/console/features/adventurers';
 
 export const fetchMintTest = (): generalReducerThunk => async (dispatch) =>{

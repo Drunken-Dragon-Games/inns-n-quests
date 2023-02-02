@@ -11,8 +11,6 @@ const AdventuresButtonWrapper = styled.div`
     display: flex;
 `
 
-
-
 interface ImageWrapperHover {
 
     hover: boolean

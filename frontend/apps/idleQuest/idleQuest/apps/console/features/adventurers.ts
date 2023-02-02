@@ -78,7 +78,7 @@ interface initialStateAdventurer{
 interface AdventurerAfterQuestType{
     id: string
     experience?: number
-    type?: "pixeltile" | "gma"
+    type?: "pixeltile" | "gma" | 'aot'
     dead_cooldown?: number
 }
 
@@ -101,51 +101,42 @@ const adventurers = createSlice({
 
         setAdventuresInQuest: (state, action: PayloadAction<(string | undefined)[]>) => {
 
-            // FIXME: change it to filter, forEach or map
-            const reducer =  state.data.reduce ((acc: DataAdventurerType [] , originalElement) =>{
+            const adventurerArrays =  state.data.map(adventurer =>{
                 
-                action.payload.forEach((newElement: string | undefined) => {
-                    if(newElement == originalElement.id){
-                            originalElement.in_quest = true
-                        return acc.concat(originalElement)
+                action.payload.forEach((adventurerId: string | undefined) => {
+                    if(adventurerId == adventurer.id){
+                        adventurer.in_quest = true
+                        return adventurer
                     }
                 })
 
-                return acc.concat(originalElement)
+                return adventurer
                 
-            }, [])
-
+            })
     
-            const adventurersSorted = adventurersSorting(reducer)
+            const adventurersSorted = adventurersSorting(adventurerArrays)
 
             state.data = adventurersSorted
         },
 
-        setFreeAdventurers: (state, action: PayloadAction<any>) => {
+        setFreeAdventurers: (state, action: PayloadAction<AdventurerAfterQuestType []>) => {
 
-            // FIXME: change it to filter, forEach or map
             //crea un array con todos los id de los aventureros en el array
-            const adventurersIds = action.payload.reduce ((acc: string [] , originalElement: AdventurerAfterQuestType) =>{            
-                return acc.concat(originalElement.id)
-            }, [])
+            const adventurersIds = action.payload.map (adventurer => adventurer.id)
 
-            // FIXME: change it to filter, forEach or map
              //este reducer toma el array con los ids y el estado con el array de los aventureros y cuando tenga el mismo id cambia la propiedad in_quest  a false
         
-            const adventurers =  state.data.reduce ((acc: DataAdventurerType [] , originalElement) =>{            
-            
-            adventurersIds.forEach((adventurerId: string) => {
-                if(adventurerId == originalElement.id){
-                        originalElement.in_quest = false
-                    return acc.concat(originalElement)
-                }
+            const adventurerArrays =  state.data.map (adventurer => {            
+                adventurersIds.forEach(adventurerId => {
+                    if(adventurerId == adventurer.id){
+                        adventurer.in_quest = false
+                        return adventurer
+                    }
+                })
+            return adventurer
             })
 
-            return acc.concat(originalElement)
-                
-            }, [])
-
-            const adventurersSorted = adventurersSorting(adventurers)
+            const adventurersSorted = adventurersSorting(adventurerArrays)
 
             state.data = adventurersSorted
 
@@ -153,22 +144,17 @@ const adventurers = createSlice({
 
           //Este caso recibe un array de aventureros para dar expericia de un quest y cambia la propiedad de experience a la nueva expericia y el nuevo nivel
         setExperienceReward: (state, action: PayloadAction<DataAdventurerType[]>) => {
-            // FIXME: change it to filter, forEach or map
-            const adventurers =  state.data.reduce ((acc: DataAdventurerType[] , originalElement) =>{            
-                
-                action.payload.forEach((adventurer: AdventurerAfterQuestType) => {
+    
+            const adventurers =  state.data.map (adventurer =>{            
+                action.payload.forEach(adventurerRewarded => {
 
-                if(adventurer.id == originalElement.id){
-                    
-                    originalElement.experience = adventurer.experience!
-
-                    return acc.concat(originalElement)
-                }
+                    if(adventurerRewarded.id == adventurer.id){
+                        adventurer.experience = adventurerRewarded.experience
+                        return adventurer
+                    }
+                })
+                return adventurer   
             })
-
-                return acc.concat(originalElement)
-                
-            }, [])
 
             const adventurersSorted = adventurersSorting(adventurers)
 
@@ -178,28 +164,21 @@ const adventurers = createSlice({
 
         //este caso setea la muerte llega un array con los heroes muertos y se compara con el estado el array de aventureros se comparan los id y enn caso de que el tipo sea pixeltile se setea la experioencia a 0 y en casa gma se setea el cooldown de muerto
         setDeath: (state, action: PayloadAction<DataAdventurerType[]>) => {
-            // FIXME: change it to filter, forEach or map
-            const adventurers =  state.data.reduce ((acc: DataAdventurerType [] , originalElement ) =>{            
-                    
-                action.payload.forEach((adventurer: AdventurerAfterQuestType) => {
-
-
-                    if(adventurer.id == originalElement.id){
-                        if(adventurer.type == "pixeltile"){
-                            originalElement.experience = 0
-                        } else if (adventurer.type == "gma"){
-                            originalElement.metadata.dead_cooldown = adventurer.dead_cooldown
-                            originalElement.metadata.is_alive = false;
+    
+            const adventurers =  state.data.map ((adventurer ) =>{                            
+                action.payload.forEach((deathAdventurerData: AdventurerAfterQuestType) => {
+                    if(deathAdventurerData.id == adventurer.id){
+                        if(deathAdventurerData.type == "pixeltile"){
+                            adventurer.experience = 0
+                        } else if (deathAdventurerData.type == "gma"){
+                            adventurer.metadata.dead_cooldown = deathAdventurerData.dead_cooldown
+                            adventurer.metadata.is_alive = false;
                         }
-
-                        return acc.concat(originalElement)
+                        return adventurer
                     }
                 })
-
-                return acc.concat(originalElement)
-                
-            }, [])
-
+                return adventurer   
+            })
             
             const adventurersSorted = adventurersSorting(adventurers)
 

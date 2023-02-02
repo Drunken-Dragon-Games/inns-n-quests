@@ -1,4 +1,3 @@
-import styled from "styled-components";
 import { Paper_1, Paper_2, Paper_3, Paper_4 } from "../basic_components";
 import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"

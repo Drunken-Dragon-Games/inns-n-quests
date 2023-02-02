@@ -1,7 +1,7 @@
 import { QuestRequirement} from "../basic_component"
 import { useRequirementsBonus } from "../../hooks"
 import { useGetRequirementText } from "../../../apps/availableQuest/hooks"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { ConditionalRender } from "../../../../../utils/components/basic_components"
 import { RequirementType, CharacterType } from "../../../../../../types/idleQuest"
 

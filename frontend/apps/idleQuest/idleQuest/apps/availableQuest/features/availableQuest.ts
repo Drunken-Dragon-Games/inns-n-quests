@@ -6,7 +6,6 @@ import { createSliceStatus, actionsGenerator } from "../../../../../utils/featur
 import { generalReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from "axios"
 import { setAdventuresInQuest } from '../../console/features/adventurers';
-import { available } from '../../../dummy_data';
 import { setAvailableQuestUnselect } from '../../../features/interfaceNavigation';
 import { setAddInProgressQuest } from '../../inProgressQuests/features/inProgressQuest';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
@@ -20,9 +19,7 @@ export const getAvailableQuest = (firstTime? : boolean): generalReducerThunk => 
 
     try { 
 
-       
         const response = await axiosCustomInstance('/quests/api/quests').get('/quests/api/quests')
-    
         dispatch(setFetchGetAvailableQuestStatusFulfilled())
 
         //dependiendo si es la primera vez o no que se piden los quest durante el renderizado
@@ -30,14 +27,7 @@ export const getAvailableQuest = (firstTime? : boolean): generalReducerThunk => 
             dispatch(setAvailableQuest(response.data))
         } else{
             dispatch(setNewExtraQuests(response.data))
-        }
-
-       
-        // Mock to test Without backend
-            
-        // dispatch(setAvailableQuest(available))
-        // dispatch(setFetchGetAvailableQuestStatusFulfilled())
-        
+        }     
         
     } catch (err: unknown) {
         
@@ -53,7 +43,6 @@ export const getAvailableQuest = (firstTime? : boolean): generalReducerThunk => 
 //reducer para monitorear el estado del request para los available quest 
 
 const  fetchGetAvailableQuestStatus  = createSliceStatus("fetchGetAvailableQuestStatus")
-
 const [ setFetchGetAvailableQuestStatusIdle, setFetchGetAvailableQuestStatusPending, setFetchGetAvailableQuestStatusFulfilled, setFetchGetAvailableQuestStatusErrors ] = actionsGenerator(fetchGetAvailableQuestStatus.actions)
 
 
@@ -74,7 +63,6 @@ export const takeAvailableQuest = (questId: string, adventurers: (string | undef
         const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: questId, adventurer_ids: adventurers_id})
 
         // se agrega a los ques in progress
-           
         dispatch(setAddInProgressQuest(response.data))
             
         //se agrega a los aventureros en el quest la propiedad de in_quest

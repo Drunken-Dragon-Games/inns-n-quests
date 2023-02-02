@@ -5,9 +5,6 @@ import { RescalingProgression,
 import styled, { keyframes} from "styled-components"
 import Image from 'next/image'
 import { useGetTimeLeft, useGetPuntDistance, useGetMarkTimeLeft } from "../../hooks";
-import { useDispatch, useSelector} from 'react-redux'
-// import { PostClaimInProgressQuest } from "../../features/inProgressQuest";
-// import { selectGeneralPageReducer} from '../../features/generalPage';
 import { useState } from "react"
 import { ConditionalRender } from "../../../../../utils/components/basic_components";
 import { useGeneralSelector } from "../../../../../../features/hooks"

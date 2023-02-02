@@ -128,7 +128,7 @@ interface  PaperProp {
     onClick: React.MouseEventHandler<HTMLButtonElement>
 }
 
-const Paper_1 = ({data, position, onClick}: PaperProp) => {
+const Paper_1: React.FC <PaperProp> = ({data, position, onClick}) => {
     
     const [onHover, setOnHover] = useState(false)
 

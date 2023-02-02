@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import Image from "next/image"
-
 import { useState } from "react";
 import { Timmer } from "../basic_components";
 import { rolls, stamps } from "../../../../../settings";
@@ -10,6 +9,10 @@ import {  useGeneralDispatch } from "../../../../../../../features/hooks"
 import { setInProgressQuestSelected } from "../../../../features/interfaceNavigation";
 import { useIsQuestSelected } from "../../hooks";
 import { inProgressQuestType } from "../../../../../../../types/idleQuest";
+
+interface card{
+    onClick: any,
+}
 
 const Card = styled.div<card>`
     width: 95%;
@@ -58,6 +61,10 @@ const Center = styled.div`
     margin: auto;
 `
 
+interface title {
+    succeeded: boolean,
+}
+
 const Title = styled.h2 <title>`
     color: ${props => props.succeeded  ? "#cba044": "white"};
     font-size: 0.9vw;
@@ -91,13 +98,8 @@ const StampWrapper = styled.div`
     top: 0vw;
 `
 
-interface title {
-    succeeded: boolean,
-}
 
-interface card{
-    onClick: any,
-}
+
 
 interface inProgressCard {
     data: inProgressQuestType
@@ -106,9 +108,6 @@ interface inProgressCard {
 
 
 const TakeQuest = ({data, index}: inProgressCard) => {
-
-    // FIXME: add this when inProgress is ready 
-
 
     const [onHover, setOnHover] = useState<boolean>(false)
 

@@ -1,5 +1,3 @@
-// import {  selectGeneralPageReducer } from '../../features/generalPage';
-import { useSelector } from 'react-redux'
 import { useEffectCounting } from "../../hooks";
 import styled from 'styled-components';
 import { TextElMessiri } from '../../../../../../utils/components/basic_components';
@@ -11,8 +9,6 @@ const DragonSilverTextWrapper = styled.div`
 
 const CountEffect = () => {
     
-    // const generalSelector = useSelector(selectGeneralPageReducer)
-
     //realiza el efecto de contador de dragon silver
     const dragonSilver  = useEffectCounting(10, 15, 10)
    

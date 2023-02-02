@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { useDrag } from "react-dnd";
 import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon } from "../basic_components";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 import { RescalingImg } from "../../../../utils/components/basic_component";
@@ -91,8 +90,6 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
   
     //este elemento hace drageable todo la tarjeta
     const drag = useDragElement( data )
-
-  
     
     return(
     <>

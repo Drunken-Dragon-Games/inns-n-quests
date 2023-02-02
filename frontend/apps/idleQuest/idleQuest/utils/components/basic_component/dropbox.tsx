@@ -1,13 +1,11 @@
 import {  useDrop } from "react-dnd";
 import styled from "styled-components";
 import { useState } from "react"
-// import { setSelectAdventurer } from "../../features/availableQuest"
 import { useDispatch } from 'react-redux'
 import { Feelings, RescalingImg } from ".";
 import { useGetLevel } from "../../hooks";
 import Image from 'next/image'
 
-// FIXME: types data adventurer
 interface DataAdventurer{
     id: string,
     src: string,
