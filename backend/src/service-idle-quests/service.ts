@@ -8,7 +8,7 @@ import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
 import { config } from "../tools-utils"
 
-import { AcceptQuestResult, Adventurer, AvailableQuest, GetAllAdventurersResult, HealthStatus, Quest } from "./models"
+import { AcceptQuestResult, Adventurer, AvailableQuest, ClaimQuestResult, GetAllAdventurersResult, GetAvailableQuestsResult, GetTakenQuestsResult, HealthStatus, Quest } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
 import * as runningQuestsDB from "./challenges/taken-quest-db"
@@ -17,7 +17,7 @@ import { AssetManagementService } from "../service-asset-management"
 import { MetadataRegistry } from "../registry-metadata"
 import { pickRandomQuestsByLocation, QuestRegistry } from "../registry-quests"
 import Random from "../tools-utils/random"
-import { RewardCalculator, DurationCalculator } from "./challenges/quest-requirement"
+import { RewardCalculator, DurationCalculator, baseSuccessRate } from "./challenges/quest-requirement"
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import AdventurersSyncer from "./items/sync-adventurers"
 
@@ -128,7 +128,6 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
                     case "adventurers-of-thiolden": return { ...adv, sprite: getAdvOfThioldenSprite(adv) }
                 }
             })
-
         return { status: "ok", adventurers }
     }
 
@@ -178,8 +177,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         */
     }
 
-    async getAvailableQuests(location: string): Promise<AvailableQuest[]> {
-        return pickRandomQuestsByLocation(location, 20, this.questsRegistry, this.random).map(quest => ({ 
+    async getAvailableQuests(location: string): Promise<GetAvailableQuestsResult> {
+        return { status: "ok", quests: pickRandomQuestsByLocation(location, 20, this.questsRegistry, this.random).map(quest => ({ 
             questId: quest.questId,
             name: quest.name,
             location: quest.location,
@@ -188,11 +187,11 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             reward: this.rewardCalculator.baseReward(quest.requirements), 
             duration: this.durationCalculator.baseDuration(quest.requirements),
             slots: quest.slots
-        }))
+        })) }
     }
 
     async module_getAvailableQuests(userId: string): Promise<object[]> {
-        return (await this.getAvailableQuests("Auristar")).map(quest => {
+        return (await this.getAvailableQuests("Auristar")).quests.map(quest => {
             const baseRewardCurrencies = this.rewardCalculator.baseReward(quest.requirements).currencies ?? []
             return { ...quest,
                 "id": quest.questId,
@@ -267,10 +266,9 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         if (this.questsRegistry[questId] === undefined) return { status: "unknown-quest" }
         const transaction = await this.database.transaction()
         const [ _, adventurers ] = await adventurersDB.DBAdventurer.update({ inChallenge: true }, { where: { adventurerIds, inChallenge: false }, returning: true, transaction })
-        console.log(adventurers)
         const takenQuest = await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId) }, { transaction })
         await transaction.commit()
-        console.log(takenQuest)
+        // need to check if it is alive
         return { status: "ok", takenQuest }
     }
 
@@ -498,6 +496,37 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
                 ]
             }
         ]
+    }
+
+    async getTakenQuests(userId: string): Promise<GetTakenQuestsResult> {
+        const quests = await runningQuestsDB.TakenQuestDB.findAll({ where: { userId } })
+        return { status: "ok", quests }
+    }
+
+    async claimQuestResult(userId: string, questId: string): Promise<ClaimQuestResult> {
+        const quest = await runningQuestsDB.TakenQuestDB.findOne({ where: { userId, questId } })
+        if (!quest) return { status: "unknown-quest" }
+        const requirements = this.questsRegistry[quest.questId].requirements
+        const duration = this.durationCalculator.baseDuration(requirements)
+        if (quest.createdAt.getTime() + duration > Date.now()) return { status: "quest-not-finished" }
+        const adventurers = await adventurersDB.DBAdventurer.findAll({ where: { adventurerId: quest.adventurerIds } })
+        const missing = adventurers.map(a => a.adventurerId!).filter(item => quest.adventurerIds.indexOf(item) < 0)
+        if (missing.length !== 0) {
+            await quest.destroy()
+            return { status: "missing-adventurers", missing }
+        } 
+        const transaction = await this.database.transaction()
+        await adventurersDB.DBAdventurer.update({ inQuest: false }, { where: { adventurerId: quest.adventurerIds, transaction } })
+        await quest.destroy({ transaction })
+        await transaction.commit()
+        const successRate = baseSuccessRate(requirements, adventurers)
+        const success = this.random.randomNumberBetween(1, 100) <= Math.floor(successRate * 100)
+        if (success) {
+            const reward = this.rewardCalculator.baseReward(requirements)
+            return { status: "ok", outcome: { status: "success", reward } }
+        } else {
+            return { status: "ok", outcome: { status: "failure", deadAdventurers: [] } }
+        }
     }
 
     async module_claimQuestResult(userId: string, questId: string): Promise<object> {

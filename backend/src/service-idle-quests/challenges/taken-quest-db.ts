@@ -5,6 +5,7 @@ export type ITakenQuestDB = {
     questId: string,
     userId: string,
     adventurerIds: string[],
+    createdAt: Date,
 }
 
 export class TakenQuestDB extends Model implements ITakenQuestDB {
@@ -12,6 +13,7 @@ export class TakenQuestDB extends Model implements ITakenQuestDB {
     declare questId: string
     declare userId: string
     declare adventurerIds: string[]
+    declare createdAt: Date
 }
 
 export const TakenQuestDBTableName = "idle_quests_taken_quests"
@@ -33,7 +35,11 @@ export const TakenQuestDBTableAttributes = {
     adventurerIds: {
         type: DataTypes.ARRAY(DataTypes.UUID),
         allowNull: false
-    }
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
 }
 
 export function configureSequelizeModel(sequelize: Sequelize): void {

@@ -21,7 +21,11 @@ export interface IdleQuestsService {
 
     getAllAdventurers(userId: string): Promise<models.GetAllAdventurersResult>
 
-    getAvailableQuests(location: string): Promise<models.Quest[]>
+    getAvailableQuests(location: string): Promise<models.GetAvailableQuestsResult>
 
     acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<models.AcceptQuestResult>
+
+    getTakenQuests(userId: string): Promise<models.GetTakenQuestsResult>
+
+    claimQuestResult(userId: string, questId: string): Promise<models.ClaimQuestResult>
 }
