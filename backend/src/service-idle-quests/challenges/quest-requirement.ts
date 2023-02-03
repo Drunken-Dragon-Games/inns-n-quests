@@ -1,5 +1,99 @@
-import { Adventurer, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, SuccessBonusRequirement, OrRequirement, QuestRequirement, Reward } from "../models"
+import { Adventurer, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, SuccessBonusRequirement, OrRequirement, QuestRequirement, Reward, EmptyRequirement, NotRequirement } from "../models"
 import { apsReward, apsSum, AssetRewards, bestReward, mergeRewards } from "./reward"
+
+export const aps = (athleticism: number, intellect: number, charisma: number): APSRequirement => ({
+    ctype: "aps-requirement",
+    athleticism: athleticism,
+    intellect: intellect,
+    charisma: charisma,
+})
+
+export const bonus = (bonus: number, left: QuestRequirement, right: QuestRequirement): BonusRequirement => ({
+    ctype: "bonus-requirement",
+    bonus, left, right,
+})
+
+export const all = (requirements: QuestRequirement[]): QuestRequirement => 
+    requirements.reduce((left, right) => and(left, right), empty)
+
+export const one = (requirements: QuestRequirement[]): QuestRequirement =>
+    requirements.reduce((left, right) => or(left, right), empty)
+
+export const none = (requirements: QuestRequirement[]): QuestRequirement =>
+    not(all(requirements))
+
+export const successBonus = (bonus: number, left: QuestRequirement, right: QuestRequirement): SuccessBonusRequirement => ({
+    ctype: "success-bonus-requirement",
+    bonus, left, right,
+})
+
+export const and = (left: QuestRequirement, right: QuestRequirement): AndRequirement => ({
+    ctype: "and-requirement",
+    left, right,
+})
+
+export const or = (left: QuestRequirement, right: QuestRequirement): OrRequirement => ({
+    ctype: "or-requirement",
+    left, right,
+})
+
+export const not = (continuation: QuestRequirement): NotRequirement => ({
+    ctype: "not-requirement",
+    continuation,
+})
+
+export const empty: EmptyRequirement = 
+    { ctype: "empty-requirement" }
+
+export const fighter: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "fighter",
+}
+
+export const paladin: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "paladin",
+}
+
+export const knight: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "knight",
+}
+
+export const cleric: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "cleric",
+}
+
+export const druid: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "druid",
+}
+
+export const warlock: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "warlock",
+}
+
+export const mage: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "mage",
+}
+
+export const bard: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "bard",
+}
+
+export const rogue: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "rogue",
+}
+
+export const ranger: ClassRequirement = {
+    ctype: "class-requirement",
+    class: "ranger",
+}
 
 export function baseSuccessRate(requirement: QuestRequirement, inventory: Adventurer[]): number {
 
@@ -52,8 +146,10 @@ export function baseSuccessRate(requirement: QuestRequirement, inventory: Advent
         return bonusRequirementSuccessRate(requirement)
     else if (requirement.ctype === "and-requirement") 
         return andRequirementSuccessRate(requirement)
-    else 
+    else if (requirement.ctype === "or-requirement")
         return orRequirementSuccessRate(requirement)
+    else 
+        return 1
 }
 
 export class RewardCalculator {
@@ -113,8 +209,10 @@ export class RewardCalculator {
             return onlySuccessBonusRequirementReward(questRequirement)
         else if (questRequirement.ctype === "and-requirement")
             return andRequirementReward(questRequirement)
-        else
+        else if (questRequirement.ctype === "or-requirement")
             return orRequirementReward(questRequirement)
+        else
+            return {}
     }
 }
 
@@ -125,8 +223,6 @@ export class DurationCalculator {
     baseDuration(requirement: QuestRequirement): number {
         if (requirement.ctype === "aps-requirement")
             return apsSum({ athleticism: requirement.athleticism, intellect: requirement.intellect, charisma: requirement.charisma }) * 1000 * this.durationFactor
-        else if (requirement.ctype === "class-requirement")
-            return 0
         else if (requirement.ctype === "bonus-requirement")
             return this.baseDuration(requirement.right)
         else if (requirement.ctype === "success-bonus-requirement")

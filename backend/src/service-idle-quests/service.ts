@@ -8,7 +8,7 @@ import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
 import { config } from "../tools-utils"
 
-import { AcceptQuestResult, Adventurer, GetAllAdventurersResult, HealthStatus, Quest } from "./models"
+import { AcceptQuestResult, Adventurer, AvailableQuest, GetAllAdventurersResult, HealthStatus, Quest } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
 import * as runningQuestsDB from "./challenges/taken-quest-db"
@@ -18,7 +18,7 @@ import { MetadataRegistry } from "../registry-metadata"
 import { pickRandomQuestsByLocation, QuestRegistry } from "../registry-quests"
 import Random from "../tools-utils/random"
 import { RewardCalculator, DurationCalculator } from "./challenges/quest-requirement"
-import { WellKnownPolicies } from "../registry-policies"
+import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import AdventurersSyncer from "./items/sync-adventurers"
 
 export interface IdleQuestsServiceConfig 
@@ -116,8 +116,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             return `https://cdn.ddu.gg/adv-of-thiolden/x6/${adventurerName}-front-${chromaOrPlain}.png`
         }
 
-        const policies = Object.values(this.wellKnownPolicies).map(p => p.policyId)
-        const inventoryResult = await this.assetManagementService.list(userId, { policies })
+        const inventoryResult = await this.assetManagementService.list(userId, { policies: onlyPolicies(this.wellKnownPolicies) })
         if (inventoryResult.status == "unknown-user") 
             return { status: "unknown-user" }
         await this.adventurerSyncer.syncAdventurers(userId, inventoryResult.inventory)
@@ -179,25 +178,28 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         */
     }
 
-    async getAvailableQuests(location: string): Promise<Quest[]> {
-        return pickRandomQuestsByLocation(location, 20, this.questsRegistry, this.random)
+    async getAvailableQuests(location: string): Promise<AvailableQuest[]> {
+        return pickRandomQuestsByLocation(location, 20, this.questsRegistry, this.random).map(quest => ({ 
+            questId: quest.questId,
+            name: quest.name,
+            location: quest.location,
+            description: quest.description,
+            requirements: quest.requirements,
+            reward: this.rewardCalculator.baseReward(quest.requirements), 
+            duration: this.durationCalculator.baseDuration(quest.requirements),
+            slots: quest.slots
+        }))
     }
 
     async module_getAvailableQuests(userId: string): Promise<object[]> {
         return (await this.getAvailableQuests("Auristar")).map(quest => {
             const baseRewardCurrencies = this.rewardCalculator.baseReward(quest.requirements).currencies ?? []
             return { ...quest,
-                "reward": this.rewardCalculator.baseReward(quest.requirements),
                 "id": quest.questId,
-                "name": quest.name,
-                "description": quest.description,
                 "reward_ds": parseInt(baseRewardCurrencies[0]?.quantity),
                 "reward_xp": 1,
                 "difficulty": 1,
-                "slots": quest.slots,
                 "rarity": "townsfolk",
-                "duration": this.durationCalculator.baseDuration(quest.requirements),
-                "requirements": {},
                 "is_war_effort": false
             }
         })

@@ -58,6 +58,17 @@ export type Quest = {
     slots: number,
 }
 
+export type AvailableQuest = {
+    questId: string,
+    name: string,
+    location: string,
+    description: string,
+    requirements: QuestRequirement,
+    reward: Reward,
+    duration: number,
+    slots: number,
+}
+
 export type TakenQuest = {
     takenQuestId?: string,
     questId: string,
@@ -67,7 +78,7 @@ export type TakenQuest = {
 
 export type QuestRequirement 
     = APSRequirement | ClassRequirement | OrRequirement | AndRequirement 
-    | BonusRequirement | SuccessBonusRequirement 
+    | BonusRequirement | SuccessBonusRequirement | NotRequirement | EmptyRequirement
 
 export type OrRequirement = {
     ctype: "or-requirement",
@@ -105,6 +116,15 @@ export type APSRequirement = {
 export type ClassRequirement = {
     ctype: "class-requirement",
     class: string,
+}
+
+export type NotRequirement = {
+    ctype: "not-requirement",
+    continuation: QuestRequirement,
+}
+
+export type EmptyRequirement = {
+    ctype: "empty-requirement",
 }
 
 export type GetAllAdventurersResult 

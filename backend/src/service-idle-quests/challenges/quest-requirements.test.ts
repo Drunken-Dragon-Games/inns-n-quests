@@ -1,40 +1,21 @@
-import { QuestRequirement, Adventurer, AdventurerClass, APS } from "../models"
-import { DurationCalculator, RewardCalculator, baseSuccessRate } from "./quest-requirement"
+import { Adventurer, AdventurerClass } from "../models"
+import { DurationCalculator, RewardCalculator, baseSuccessRate, aps, bonus, fighter, or, paladin, and, cleric, warlock } from "./quest-requirement"
 
 const policies = { dragonSilver: "cd597b903fb228d7e3fac443f9ddb19b3d91bf6b552f38f074386307" }
 const rewardCalculator = new RewardCalculator(policies)
 const durationCalculator = new DurationCalculator()
 
-const genAdventurer = (advClass: AdventurerClass, aps: APS): Adventurer => ({
+const adventurer = (advClass: AdventurerClass, athleticism: number, intellect: number, charisma: number): Adventurer => ({
     adventurerId: "", userId: "", name: "", class: advClass, race: "human", collection: "pixel-tiles", assetRef: "",
-    athleticism: aps.athleticism, intellect: aps.intellect, charisma: aps.charisma,
+    athleticism, intellect, charisma,
 })
 
 test("Basic requirement calculations", () => {
-    const requirement: QuestRequirement = {
-        ctype: "bonus-requirement",
-        bonus: 0.1,
-        left: {
-            ctype: "or-requirement",
-            right: {
-                ctype: "class-requirement",
-                class: "fighter",
-            },
-            left: {
-                ctype: "class-requirement",
-                class: "paladin",
-            },
-        },
-        right: {
-            ctype: "aps-requirement",
-            athleticism: 10,
-            intellect: 10,
-            charisma: 10,
-        },
-    }
-    const party: Adventurer[] = [
-        genAdventurer("warlock", { athleticism: 5, intellect: 5, charisma: 5 }),
-        genAdventurer("cleric", { athleticism: 5, intellect: 5, charisma: 5 }),
+    const requirement = 
+        bonus(0.1, or(fighter, paladin), aps(10, 10, 10))
+    const party = [
+        adventurer("warlock", 5,5,5),
+        adventurer("cleric", 5,5,5),
     ]
     const reward = rewardCalculator.baseReward(requirement)
     const expectedReward = {
@@ -56,52 +37,14 @@ test("Basic requirement calculations", () => {
 })
 
 test("Playground", () => {
-    const requirement: QuestRequirement = {
-        ctype: "and-requirement",
-        left: {
-            ctype: "and-requirement",
-            left: {
-                ctype: "class-requirement",
-                class: "fighter",
-            },
-            right: {
-                ctype: "or-requirement",
-                left: {
-                    ctype: "class-requirement",
-                    class: "paladin",
-                },
-                right: {
-                    ctype: "class-requirement",
-                    class: "cleric",
-                },
-            },
-        },
-        right: {
-            ctype: "and-requirement",
-            left: {
-                ctype: "class-requirement",
-                class: "fighter",
-            },
-            right: {
-                ctype: "and-requirement",
-                left: {
-                    ctype: "class-requirement",
-                    class: "warlock",
-                },
-                right: {
-                    ctype: "aps-requirement",
-                    athleticism: 200,
-                    intellect: 350,
-                    charisma: 20,
-                },
-            },
-        }
-    }
-    const party: Adventurer[] = [
-        genAdventurer("fighter", { athleticism: 40, intellect: 50, charisma: 5 }),
-        genAdventurer("druid", { athleticism: 40, intellect: 50, charisma: 5 }),
-        genAdventurer("warlock", { athleticism: 40, intellect: 85, charisma: 5 }),
-        genAdventurer("paladin", { athleticism: 40, intellect: 150, charisma: 5 }),
+    const requirement = and(
+        and(fighter, or(cleric, paladin)), 
+        and(warlock, aps(200, 350, 20)))
+    const party = [
+        adventurer("fighter", 40,50,5),
+        adventurer("druid", 40,50,5),
+        adventurer("warlock", 40,85,5),
+        adventurer("paladin", 40,150,5),
     ]
     const sRate = baseSuccessRate(requirement, party)
     expect(Math.round(sRate * 100)).toBe(90)
