@@ -6,10 +6,10 @@ import { IAdventurerRes } from "../adventurers/models/adventurer_model";
 import { AuthRequest } from "../app/types";
 import { Model, Sequelize } from "sequelize/types";
 import { getAdventurerToReturn } from "./app-logic/get-adventurer-sprite";
-import { registry } from "../app/utils";
 import { withTracing } from "../base-logger";
 import { AssetManagementService } from "../../service-asset-management";
 import { IdleQuestsService } from "../../service-idle-quests";
+import { WellKnownPolicies } from "../../registry-policies";
 
 ///////////////////// ASSET SYNCHRONIZATION  //////////////////////////
 /*
@@ -21,11 +21,10 @@ TO THE ADVENTURER NFT IN CARANO WALLET
 THE FUNCTION USES A SYNCASSETS CLASS TO PERFORM SYNCHRONIZATION
 
 */
-const syncCardanoWallet =  (database: Sequelize, assetManagementService: AssetManagementService, thioldenMetadata: any) => async (request: Request, response: Response, next: NextFunction) => {
+const syncCardanoWallet =  (database: Sequelize, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies, thioldenMetadata: any) => async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     const userId = request.auth!.userId
-    let policies = registry.policies
-    let assets = new SyncAssets(userId, thioldenMetadata, policies, logger);
+    let assets = new SyncAssets(userId, thioldenMetadata, wellKnownPolicies, logger);
     try {
         await assets.init(assetManagementService, logger);
         await assets.sync(database, logger);

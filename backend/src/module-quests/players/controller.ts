@@ -10,8 +10,8 @@ import { handleSignVerification, handleRefreshToken } from "./app-logic/authenti
 // import { registry } from "../app/utils";
 import { withTracing } from "../base-logger"
 import { IdentityService } from "../../service-identity";
-import { AssetManagementService, RegistryPolicy } from "../../service-asset-management";
-import registry from "../../module-ddu-app/assets/registry";
+import { AssetManagementService } from "../../service-asset-management";
+import { onlyPolicies, WellKnownPolicies } from "../../registry-policies";
 
 ////////////////// GET NONCE ////////////////////
 /* 
@@ -104,21 +104,16 @@ const walletLogout = (request: Request, response: Response) => {
 /* 
 GETS THE DRAGON SILVER TO CLAIM FROM THE DB OF A SPECIFIC STAKE ADDRESS
 */
-const getDragonSilverToClaim = (assetManagementService: AssetManagementService) => async (request: Request, response: Response, next: NextFunction) => {
+const getDragonSilverToClaim = (assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     const userId: string  = (request as AuthRequest).auth.userId;
     logger.log.info({messagge: "get Dragon Silver To Claim: user id from the request cookie", userId})
     try {
-        const policy = registry.policies.find((policy: RegistryPolicy) => policy.name == "Dragon Silver")?.policyId
-        logger.log.info({message: "registry policies are", policies: registry.policies})
-        logger.log.info({message: "get Dragon silver To claim: policy from the registry", policy})
+        const policy = wellKnownPolicies.dragonSilver.policyId
         if (policy == undefined) throw new Error("Dragon silver policy is undefined")
-        const amResponse = await assetManagementService.list(userId, logger)
-        logger.log.info({message: "get Dragon silver To claim: amResponse from list endpoint", status: amResponse.status, amResponse })
+        const amResponse = await assetManagementService.list(userId, { policies: onlyPolicies(wellKnownPolicies) }, logger)
         if (amResponse.status == "unknown-user") throw new Error("AssetManagement: Unknown User")
-        logger.log.info({message: "get Dragon silver To claim: did not throw undefined error"})
         const dragonSilverQuantity = amResponse.inventory[policy]?.find(asset => asset.unit == "DragonSilver")?.quantity ?? "0"
-        logger.log.info({message: "get Dragon silver To claim: quantity of Dragon Silver", dragonSilverQuantity })
         return response.status(200).json({
             dragon_silver: parseInt(dragonSilverQuantity)
         })
@@ -133,11 +128,11 @@ const getDragonSilverToClaim = (assetManagementService: AssetManagementService) 
 GENERATES THE TX DATA (CBOR) TO MINT A NFT AND SENDS IT TO THE CLIENT
 THE CLIENT SIGNS THE TX AND RESEND IT TO THE SIGN AND SUBMIT TX ENDPOINT
 */
-const mintTestNft = (assetManagementService: AssetManagementService) => async (request: Request, response: Response, next: NextFunction) => {
+const mintTestNft = (assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     const {stakeAddress, userId} = request.auth!
     const [assetName, nftType] = await getRandomNFT()
-    const policyId = await getCollectionPolicy(nftType)
+    const policyId = await getCollectionPolicy(nftType, wellKnownPolicies)
 
     try {
         // if(process.env.CARDANO_NETWORK == "mainnet") throw new ApiError(403, "incorrect_network", "Adventurers can only be minted in testnet")
@@ -251,7 +246,7 @@ GENERATES A TX THAT MINTS THE AMOUNT OF DRAGON SILVER TO CLAIM
 SETS THE DRAGON SILVER TO CLAIM TO 0
 IF THE TX FAILS RETURNS THE AMOUNT OF DS
 */
-const claimDragonSilver = (assetManagementService: AssetManagementService) => async (request: Request, response: Response, next: NextFunction) => {
+const claimDragonSilver = (assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     const userId = request.auth!.userId
     const stakeAddress = request.auth!.stake_address
@@ -287,7 +282,7 @@ const claimDragonSilver = (assetManagementService: AssetManagementService) => as
         // }) 
 
         // await t.commit();
-        const dragonSilverPolicy = registry.policies.find((policy: RegistryPolicy) => policy.name == "Dragon Silver")?.policyId
+        const dragonSilverPolicy = wellKnownPolicies.dragonSilver.policyId
         if (dragonSilverPolicy == undefined) throw new Error("Dragon Silver policy id not found")
         const options = {
             unit: "DragonSilver",

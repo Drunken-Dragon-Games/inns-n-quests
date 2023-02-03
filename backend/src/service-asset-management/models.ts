@@ -7,22 +7,6 @@ export type HealthStatus =
         }[]
     }
 
-export type RegistryPolicy =
-    { policyId: string
-    , name: string
-    , description: string
-    , tags: string[]
-    }
-
-export type WellKnownPolicies =
-    { pixelTiles: RegistryPolicy 
-    , grandMasterAdventurers: RegistryPolicy
-    , adventurersOfThiolden: RegistryPolicy
-    , dragonSilver: RegistryPolicy
-    , ddeXjpgstore: RegistryPolicy
-    , emojis: RegistryPolicy
-    }
-
 export type Inventory = 
     { [policyId: string]: { unit: string, quantity: string, chain: boolean }[] }
 

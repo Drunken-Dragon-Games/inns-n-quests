@@ -20,8 +20,7 @@ beforeEach(async () => {
     const secureSigningService = SecureSigningServiceMock.buildInterface()
     const blockfrost = new BlockFrostAPI({ projectId: "preprod00000000000000000000000000000000" })
     service = await AssetManagementServiceDsl.loadFromConfig(
-        { network: "testnet"
-        , environment: "local"
+        { environment: "local"
         , claimsConfig: 
             { feeAddress: "addr_test1qr50mcpmrfavg9ca0pd7mq3gc9uvqhr7gm78f346e2cc07l7u3q390npuc24v47udvsrr7h0t4d4m26h4f6gjpvw393sfwrk9j"
             , feeAmount: "1000000"

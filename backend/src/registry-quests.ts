@@ -1,7 +1,7 @@
-import { Quest } from "../models";
+import { Quest } from "./service-idle-quests/models";
 import axios from "axios"
-import { isQuest } from "./quest-validation";
-import Random from "../../tools-utils/random";
+import { isQuest } from "./service-idle-quests/challenges/quest-validation";
+import Random from "./tools-utils/random";
 
 export type QuestRegistry = { [questId: string]: Quest }
 

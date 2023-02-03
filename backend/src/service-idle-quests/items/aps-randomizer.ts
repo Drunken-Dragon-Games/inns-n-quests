@@ -22,7 +22,6 @@ export default function apsRandomizer(targetAPS: number, rand: Random): { athlet
             stats[stat] = finalStat
         }
     })
-    if (overflow > 0) console.log("Overflowed by " + overflow)
     // Randomly distribute the rest
     while (overflow > 0) {
         baseStatsOrder.forEach((stat) => {

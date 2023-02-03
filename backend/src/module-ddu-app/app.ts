@@ -18,11 +18,12 @@ import { loadQuestRoutes } from "../module-quests/quests/routes";
 import { Sequelize } from "sequelize";
 import compression from "compression"
 import { IdleQuestsService } from "../service-idle-quests";
+import { WellKnownPolicies } from "../registry-policies";
 
 dotenv.config()
 const questRootPath = "/quests/api"
 
-const buildApp = async (identityService: IdentityService, assetManagementService: AssetManagementService, idleQuestsService: IdleQuestsService, database: Sequelize) => {
+const buildApp = async (identityService: IdentityService, assetManagementService: AssetManagementService, idleQuestsService: IdleQuestsService, wellKnownPolicies: WellKnownPolicies, database: Sequelize) => {
     const app = express();
     
     const healthEndpoint = Router()
@@ -46,12 +47,12 @@ const buildApp = async (identityService: IdentityService, assetManagementService
     // ROUTES
     app.use("/api", healthEndpoint)
     app.use("/api", loadAccountManagementRoutes(identityService))
-    app.use("/api", loadUserRoutes(identityService, assetManagementService))
+    app.use("/api", loadUserRoutes(identityService, assetManagementService, wellKnownPolicies))
     app.use("/api", loadAccountRegisterRoutes(identityService))
     
     // QUEST MODULE ROUTES
-    app.use(questRootPath, loadPlayerRoutes(identityService, assetManagementService))
-    app.use(questRootPath, (await loadAdventurerRoutes(database, assetManagementService, idleQuestsService)))
+    app.use(questRootPath, loadPlayerRoutes(identityService, assetManagementService, wellKnownPolicies))
+    app.use(questRootPath, (await loadAdventurerRoutes(database, assetManagementService, idleQuestsService, wellKnownPolicies)))
     app.use(questRootPath, loadQuestRoutes(database, assetManagementService, idleQuestsService))
     
     // Error handler middleware

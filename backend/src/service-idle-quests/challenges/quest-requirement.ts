@@ -1,4 +1,3 @@
-import { AssetManagementService } from "../../service-asset-management"
 import { Adventurer, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, SuccessBonusRequirement, OrRequirement, QuestRequirement, Reward } from "../models"
 import { apsReward, apsSum, AssetRewards, bestReward, mergeRewards } from "./reward"
 
@@ -62,10 +61,10 @@ export class RewardCalculator {
     public readonly assetRewards: AssetRewards
 
     constructor(
-        assetManagementService: AssetManagementService, 
+        policies: { dragonSilver: string },
         private readonly rewardFactor: number = 1
     ) {
-        this.assetRewards = new AssetRewards(assetManagementService)
+        this.assetRewards = new AssetRewards(policies)
     }
 
     baseReward(questRequirement: QuestRequirement): Reward {

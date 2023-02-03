@@ -1,12 +1,11 @@
-import { AssetManagementService } from "../../service-asset-management";
 import { APS, Reward } from "../models";
 
 export class AssetRewards {
 
-    constructor(private assetManagementService: AssetManagementService) {}
+    constructor(private readonly policies: { dragonSilver: string }) {}
 
     dragonSilver (quantity: string): Reward {
-        return { currencies: [{ policyId: this.assetManagementService.wellKnownPolicies().dragonSilver.policyId, unit: "DragonSilver", quantity }] }
+        return { currencies: [{ policyId: this.policies.dragonSilver, unit: "DragonSilver", quantity }] }
     }
 }
 

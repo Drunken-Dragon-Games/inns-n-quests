@@ -20,11 +20,10 @@ const addSequelizeColumns = (tableAttributes: ModelAttributes<any, any>): ModelA
 
 export const up: MigrationFun = async ({ context: query }) => {
   await query.createTable(DBAdventurerTableName, addSequelizeColumns(DBAdventurerTableAttributes))
-  await query.addIndex(DBAdventurerTableName, ["userId"])
   await query.createTable(TakenQuestDBTableName, addSequelizeColumns(TakenQuestDBTableAttributes))
-  await query.addIndex(TakenQuestDBTableName, ["userId"])
 }
 
 export const down: MigrationFun = async ({ context: query }) => {
+  await query.dropTable(DBAdventurerTableName)
   await query.dropTable(TakenQuestDBTableName)
 }

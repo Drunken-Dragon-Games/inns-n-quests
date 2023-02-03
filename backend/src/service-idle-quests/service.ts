@@ -13,16 +13,16 @@ import { AcceptQuestResult, Adventurer, GetAllAdventurersResult, HealthStatus, Q
 import * as adventurersDB from "./items/adventurer-db"
 import * as runningQuestsDB from "./challenges/taken-quest-db"
 
-import syncAdventurers from "./items/sync-adventurers"
 import { AssetManagementService } from "../service-asset-management"
-import metadataCache from "./items/metadata-cache"
-import { loadQuestRegistry, pickRandomQuests, pickRandomQuestsByLocation, QuestRegistry } from "./challenges/quest-registry"
+import { MetadataRegistry } from "../registry-metadata"
+import { pickRandomQuestsByLocation, QuestRegistry } from "../registry-quests"
 import Random from "../tools-utils/random"
 import { RewardCalculator, DurationCalculator } from "./challenges/quest-requirement"
+import { WellKnownPolicies } from "../registry-policies"
+import AdventurersSyncer from "./items/sync-adventurers"
 
 export interface IdleQuestsServiceConfig 
-    { questRegistry: string | QuestRegistry
-    , rewardFactor: number
+    { rewardFactor: number
     , durationFactor: number
     }
 
@@ -30,44 +30,48 @@ export interface IdleQuestServiceDependencies
     { random: Random
     , database: Sequelize
     , assetManagementService: AssetManagementService
+    , metadataRegistry: MetadataRegistry
+    , questsRegistry: QuestRegistry
+    , wellKnownPolicies: WellKnownPolicies
     }
 
 export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     private readonly migrator: Umzug<QueryInterface>
+    private readonly adventurerSyncer: AdventurersSyncer
 
     constructor (
         private readonly random: Random,
         private readonly database: Sequelize,
         private readonly assetManagementService: AssetManagementService,
-        private readonly questRegistry: QuestRegistry,
+        private readonly questsRegistry: QuestRegistry,
+        private readonly metadataRegistry: MetadataRegistry,
+        private readonly wellKnownPolicies: WellKnownPolicies,
         private readonly rewardCalculator: RewardCalculator,
         private readonly durationCalculator: DurationCalculator,
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
+        this.adventurerSyncer = new AdventurersSyncer(metadataRegistry, wellKnownPolicies)
     }
 
     static async loadFromEnv(dependencies: IdleQuestServiceDependencies): Promise<IdleQuestsService> {
         dotenv.config()
         return await IdleQuestsServiceDsl.loadFromConfig(
-            { questRegistry: config.stringOrElse("QUEST_REGISTRY_LOCATION", "https://cdn.ddu.gg/quests/quest-registry.json")
-            , rewardFactor: config.intOrElse("QUEST_REWARD_FACTOR", 1)
+            { rewardFactor: config.intOrElse("QUEST_REWARD_FACTOR", 1)
             , durationFactor: config.intOrElse("QUEST_DURATION_FACTOR", 1)
             }, dependencies)
     }
 
     static async loadFromConfig(servConfig: IdleQuestsServiceConfig, dependencies: IdleQuestServiceDependencies): Promise<IdleQuestsService> {
-        const questRegistry = 
-            typeof servConfig.questRegistry === "string" 
-            ? await loadQuestRegistry(servConfig.questRegistry) 
-            : servConfig.questRegistry
         const service = new IdleQuestsServiceLogging(new IdleQuestsServiceDsl(
             dependencies.random,
             dependencies.database,
             dependencies.assetManagementService,
-            questRegistry,
-            new RewardCalculator(dependencies.assetManagementService, servConfig.rewardFactor),
+            dependencies.questsRegistry,
+            dependencies.metadataRegistry,
+            dependencies.wellKnownPolicies,
+            new RewardCalculator({ dragonSilver: dependencies.wellKnownPolicies.dragonSilver.policyId }, servConfig.rewardFactor),
             new DurationCalculator(servConfig.durationFactor),
         ))
         await service.loadDatabaseModels()
@@ -107,15 +111,16 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
         const getAdvOfThioldenSprite = (adventurer: Adventurer): string => {
             const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
-            const adventurerName = metadataCache.advOfThioldenAppMetadata[idx].adv
-            const chromaOrPlain = metadataCache.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
+            const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
+            const chromaOrPlain = this.metadataRegistry.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
             return `https://cdn.ddu.gg/adv-of-thiolden/x6/${adventurerName}-front-${chromaOrPlain}.png`
         }
 
-        const inventoryResult = await this.assetManagementService.list(userId)
+        const policies = Object.values(this.wellKnownPolicies).map(p => p.policyId)
+        const inventoryResult = await this.assetManagementService.list(userId, { policies })
         if (inventoryResult.status == "unknown-user") 
             return { status: "unknown-user" }
-        await syncAdventurers(userId, inventoryResult.inventory, this.assetManagementService.wellKnownPolicies())
+        await this.adventurerSyncer.syncAdventurers(userId, inventoryResult.inventory)
         const adventurers = (await adventurersDB.DBAdventurer.findAll({ where: { userId } }))
             .map(adv => {
                 switch (adv.collection) {
@@ -175,7 +180,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async getAvailableQuests(location: string): Promise<Quest[]> {
-        return pickRandomQuestsByLocation(location, 20, this.questRegistry, this.random)
+        return pickRandomQuestsByLocation(location, 20, this.questsRegistry, this.random)
     }
 
     async module_getAvailableQuests(userId: string): Promise<object[]> {
@@ -257,7 +262,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptQuestResult> {
-        if (this.questRegistry[questId] === undefined) return { status: "unknown-quest" }
+        if (this.questsRegistry[questId] === undefined) return { status: "unknown-quest" }
         const transaction = await this.database.transaction()
         const [ _, adventurers ] = await adventurersDB.DBAdventurer.update({ inChallenge: true }, { where: { adventurerIds, inChallenge: false }, returning: true, transaction })
         console.log(adventurers)
@@ -271,7 +276,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
         const result = await this.acceptQuest(userId, questId, adventurerIds)
         if (result.status !== "ok") return { "status": "error", "error": result.status }
-        const quest = this.questRegistry[questId]
+        const quest = this.questsRegistry[questId]
         return {
             "id": result.takenQuest.takenQuestId,
             "started_on": "2023-02-01T04:22:38.139Z",

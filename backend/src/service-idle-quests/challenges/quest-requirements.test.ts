@@ -1,43 +1,14 @@
-import { AssetManagementService } from "../../service-asset-management"
-import { wellKnownPolicies } from "../../service-asset-management/registry/registry-testnet"
 import { QuestRequirement, Adventurer, AdventurerClass, APS } from "../models"
 import { DurationCalculator, RewardCalculator, baseSuccessRate } from "./quest-requirement"
 
-const assetManagementServiceMock = (): AssetManagementService => {
-    const mocked = {
-        loadDatabaseModels: jest.fn(),
-        unloadDatabaseModels: jest.fn(),
-        health: jest.fn(),
-        registry: jest.fn(),
-        wellKnownPolicies: jest.fn(),
-        list: jest.fn(),
-        grant: jest.fn(),
-        claim: jest.fn(),
-        submitClaimSignature: jest.fn(),
-        claimStatus: jest.fn(),
-        revertStaledClaims: jest.fn(),
-    }
-    jest.spyOn(mocked, "wellKnownPolicies")
-        .mockReturnValue(wellKnownPolicies)
-    return mocked
-}
+const policies = { dragonSilver: "cd597b903fb228d7e3fac443f9ddb19b3d91bf6b552f38f074386307" }
+const rewardCalculator = new RewardCalculator(policies)
+const durationCalculator = new DurationCalculator()
 
-const assetManagementService = assetManagementServiceMock()
-
-const genAdventurer = (advClass: AdventurerClass, aps: APS): Adventurer => {
-    return {
-        adventurerId: "",
-        userId: "",
-        name: "",
-        class: advClass,
-        race: "human",
-        collection: "pixel-tiles",
-        assetRef: "",
-        athleticism: aps.athleticism,
-        intellect: aps.intellect,
-        charisma: aps.charisma,
-    }
-}
+const genAdventurer = (advClass: AdventurerClass, aps: APS): Adventurer => ({
+    adventurerId: "", userId: "", name: "", class: advClass, race: "human", collection: "pixel-tiles", assetRef: "",
+    athleticism: aps.athleticism, intellect: aps.intellect, charisma: aps.charisma,
+})
 
 test("Basic requirement calculations", () => {
     const requirement: QuestRequirement = {
@@ -65,7 +36,6 @@ test("Basic requirement calculations", () => {
         genAdventurer("warlock", { athleticism: 5, intellect: 5, charisma: 5 }),
         genAdventurer("cleric", { athleticism: 5, intellect: 5, charisma: 5 }),
     ]
-    const rewardCalculator = new RewardCalculator(assetManagementService)
     const reward = rewardCalculator.baseReward(requirement)
     const expectedReward = {
       "currencies": [
@@ -86,8 +56,6 @@ test("Basic requirement calculations", () => {
 })
 
 test("Playground", () => {
-    const rewardCalculator = new RewardCalculator(assetManagementService)
-    const durationCalculator = new DurationCalculator()
     const requirement: QuestRequirement = {
         ctype: "and-requirement",
         left: {

@@ -12,36 +12,31 @@ import * as assets from "../../service-asset-management"
 
 import { withTracing } from "../base-logger";
 
-import registry from "../assets/registry"
 import { IdentityService } from "../../service-identity";
 import { AssetManagementService } from "../../service-asset-management";
-import { AssetManagementServiceDsl } from "../../service-asset-management/service";
+import { onlyPolicies, WellKnownPolicies } from "../../registry-policies";
 
 /**
  * @param req debe contener coockie de auth
  * @param res
  * @returns un json con la informacion de un usuario basado en coockie
  */
-const getInfo = (identityService: IdentityService, assetManagementService: AssetManagementService) => async (request: Request, res: Response, next: NextFunction) => {
+const getInfo = (identityService: IdentityService, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => async (request: Request, res: Response, next: NextFunction) => {
     const logger = withTracing(request)
     try {
         const sessionId = (request as AuthRequest).auth.sessionId
         const UserInfo = await identityService.resolveSession(sessionId, logger)
-        const policiesList: assets.RegistryPolicy[] = registry.policies
         if (UserInfo.status == "ok"){
             const userId = UserInfo.info.userId
-            const assetList: assets.ListResponse = await assetManagementService.list(userId, logger)
+            const dsPolicyId = wellKnownPolicies.dragonSilver.policyId
+            const assetList: assets.ListResponse = await assetManagementService.list(userId, { policies: onlyPolicies(wellKnownPolicies) }, logger)
             if (assetList.status == "ok"){
                 const inventory: assets.Inventory = assetList.inventory
-                const dsPolicyId = policiesList.find(i => i.name == "Dragon Silver")?.policyId
                 console.log({dsPolicyId});
                 const DSamount = inventory[dsPolicyId!]?.find(i => i.chain === true)?.quantity ?? "0"
                 console.log({DSamount})
                 const DSTC = inventory[dsPolicyId!]?.find(i => i.chain === false)?.quantity ?? "0"
-                const nftAmount = policiesList
-                    .filter((policy) => policy.policyId != dsPolicyId)
-                    .map((policy) => inventory[policy.policyId]?.map((nft) => parseInt(nft.quantity))?.reduce((x,y) => x+y, 0) ?? 0)
-                    .reduce((x,y) => x + y, 0)
+                const nftAmount = 0 // We wont use this anymore (the whole endpoint)
                 return res.status(201).json({
                     amountNFT: nftAmount,
                     nickName: UserInfo.info.nickname,
@@ -58,12 +53,11 @@ const getInfo = (identityService: IdentityService, assetManagementService: Asset
     }
 }
 
-const getDragonSilver = (assetManagementService: AssetManagementService) => async (request: Request, response: Response) => {
+const getDragonSilver = (assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => async (request: Request, response: Response) => {
+    const dsPolicyId = wellKnownPolicies.dragonSilver.policyId
     const logger = withTracing(request)
     const id: string = (request as AuthRequest).auth.userId
-    const assetList: assets.ListResponse = await assetManagementService.list(id, logger)
-    const policiesList: assets.RegistryPolicy[] = registry.policies
-    const dsPolicyId = policiesList.find(i => i.name == "Dragon Silver")?.policyId
+    const assetList: assets.ListResponse = await assetManagementService.list(id, { policies: [ dsPolicyId ] }, logger)
     if (assetList.status == "ok"){
         const inventory: assets.Inventory = assetList.inventory
         const DS = inventory[dsPolicyId!].find(i => i.chain === true)?.quantity ?? "0"

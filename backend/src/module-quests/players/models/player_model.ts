@@ -1,15 +1,13 @@
 import { DataTypes, Model, Optional, Sequelize, Transaction } from "sequelize"
 import { createMintNftTx } from '../faucet'
 import { LoggingContext } from "../../../tools-tracing"
-import { registry } from "../../app/utils"
 import { AssetManagementService } from "../../../service-asset-management"
-import { Adventurer } from "../../adventurers/models"
-import { TakenQuest } from "../../quests/models"
+import { WellKnownPolicies } from "../../../registry-policies"
 
 interface IPlayer {
     user_id: string
     war_effort_points: number
-    addDs(amount: number, assetManagementService: AssetManagementService, logger: LoggingContext, transaction: Transaction): Promise<void>
+    addDs(amount: number, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies, logger: LoggingContext, transaction: Transaction): Promise<void>
     addWep(amount: number, transaction: Transaction): Promise<void>
     mintAsset(assetName: string, metadata: any): Promise<string>
     // Static: Method that creates a player
@@ -30,9 +28,9 @@ class Player extends Model implements IPlayer {
     * @param amount Number of DS tokens to add
     * @returns Nothing
     */
-    async addDs(amount: number, assetManagementService: AssetManagementService,logger: LoggingContext): Promise<void> {
+    async addDs(amount: number, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies, logger: LoggingContext): Promise<void> {
         // await this.update({ dragon_silver: this.dragon_silver + amount }, { transaction: transaction });
-        const dragonSilverPolicy = registry.policies.ds 
+        const dragonSilverPolicy = wellKnownPolicies.dragonSilver.policyId
         if (dragonSilverPolicy == undefined) throw new Error("Dragon Silver policy id not found")
         const options = {
             unit: "DragonSilver",

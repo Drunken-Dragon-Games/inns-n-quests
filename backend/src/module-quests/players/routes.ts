@@ -1,4 +1,5 @@
 import {Router} from "express"
+import { WellKnownPolicies } from "../../registry-policies";
 import { AssetManagementService } from "../../service-asset-management";
 import { IdentityService } from "../../service-identity";
 import { 
@@ -14,16 +15,16 @@ import {
 } from "./controller";
 
 
-export const loadPlayerRoutes = (identityService: IdentityService, assetManagementService: AssetManagementService) => {
+export const loadPlayerRoutes = (identityService: IdentityService, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => {
     const router = Router()
     router.post('/validate', getAuthenticationNonce(identityService))
     router.post('/validate/:nonce', verifySignature(identityService))
     router.post('/refresh/tokens', refreshToken(identityService))
     router.get('/logout', walletLogout)
-    router.get('/vm/dragon-silver', getDragonSilverToClaim(assetManagementService))
-    router.post('/mint-test-nft', mintTestNft(assetManagementService))
+    router.get('/vm/dragon-silver', getDragonSilverToClaim(assetManagementService, wellKnownPolicies))
+    router.post('/mint-test-nft', mintTestNft(assetManagementService, wellKnownPolicies))
     router.post('/submit-tx', signAndSubmitTx(assetManagementService))
     router.post('/tx/status', checkTxStatus)
-    router.post('/claim/dragon-silver', claimDragonSilver(assetManagementService))
+    router.post('/claim/dragon-silver', claimDragonSilver(assetManagementService, wellKnownPolicies))
     return router
 }

@@ -25,7 +25,7 @@ export type TestClaim = {
 
 export default class ServiceTestDsl {
 
-    public readonly testTokenPolicyId = config.stringOrError("POLICY_DRAGON_SILVER")
+    public readonly testTokenPolicyId = "cd597b903fb228d7e3fac443f9ddb19b3d91bf6b552f38f074386307"
 
     private readonly identityService: IdentityServiceMock
     private readonly secureSigningService: SecureSigningServiceMock 
@@ -82,7 +82,7 @@ export default class ServiceTestDsl {
 
     async inventory(user: User): Promise<Inventory> {
         return await expectResponse(
-            this.service.list(user.info.userId),
+            this.service.list(user.info.userId, { policies: [this.testTokenPolicyId] }),
             response =>
                 response.status == "ok" ?
                 success(response.inventory) :

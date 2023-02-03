@@ -2,13 +2,10 @@ import dotenv from "dotenv"
 import { AssetManagementService } from "./service-spec"
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import { QueryInterface, Sequelize } from "sequelize"
-import * as mainnetRegistry from "./registry/registry-mainnet"
-import * as testnetRegistry from "./registry/registry-testnet"
 import { AssetStoreDsl } from "./assets/assets-dsl"
 import { IdentityService } from "../service-identity"
 import { SecureSigningService } from "../service-secure-signing"
 import { AssetClaimDsl, AssetClaimDslConfig } from "./assets/asset-claim-dsl"
-import { CardanoNetwork } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
 import { buildMigrator } from "../tools-database"
 import { config } from "../tools-utils"
@@ -18,15 +15,14 @@ import { AssetManagementServiceLogging } from "./logging"
 
 import { 
     ClaimResponse, ClaimStatusResponse, GrantResponse, HealthStatus, 
-    ListResponse, RegistryPolicy, SubmitClaimSignatureResponse, WellKnownPolicies 
+    ListResponse, SubmitClaimSignatureResponse 
 } from "./models"
 
 import * as offChainStoreDB from "./assets/offchain-store-db"
 import * as assetClaimDB from "./assets/asset-claim-db"
 
 export interface AssetManagementServiceConfig 
-    { network: CardanoNetwork
-    , environment: string
+    { environment: string
     , claimsConfig: AssetClaimDslConfig
     }
 
@@ -42,20 +38,15 @@ export class AssetManagementServiceDsl implements AssetManagementService {
     private readonly assets: AssetStoreDsl
     private readonly claims: AssetClaimDsl
     private readonly migrator: Umzug<QueryInterface>
-    private readonly policyRegistry: RegistryPolicy[]
-    private readonly wellKnownRegistry: WellKnownPolicies
 
     constructor (
-        private readonly network: CardanoNetwork,
-        private readonly assetClaimConfig: AssetClaimDslConfig,
+        assetClaimConfig: AssetClaimDslConfig,
         private readonly database: Sequelize,
-        private readonly blockfrost: BlockFrostAPI,
+        blockfrost: BlockFrostAPI,
         private readonly identityService: IdentityService,
-        private readonly secureSigningService: SecureSigningService,
+        secureSigningService: SecureSigningService,
     ) {
-        this.policyRegistry = network === "mainnet" ? mainnetRegistry.registry : testnetRegistry.registry
-        this.wellKnownRegistry = network === "mainnet" ? mainnetRegistry.wellKnownPolicies : testnetRegistry.wellKnownPolicies
-        this.assets = new AssetStoreDsl(blockfrost, this.policyRegistry)
+        this.assets = new AssetStoreDsl(blockfrost)
         this.claims = new AssetClaimDsl(assetClaimConfig, database, blockfrost, secureSigningService, this.assets)
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -64,8 +55,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
     static async loadFromEnv(dependencies: AssetManagemenetServiceDependencies): Promise<AssetManagementService> {
         dotenv.config()
         return await AssetManagementServiceDsl.loadFromConfig(
-            { network: config.stringOrElse("CARDANO_NETWORK", "testnet") as CardanoNetwork
-            , environment: config.stringOrElse("ENVIRONMENT", "local")
+            { environment: config.stringOrElse("ENVIRONMENT", "local")
             , claimsConfig: 
                 { feeAddress: config.stringOrElse("CLAIM_FEE_ADDRESS", "addr_test1qq4e7rcz9c95shmxale22rkd5flqp2ft7kfvg8mmt7829g5e4ruvq60uyzc0e0u988ypdn96y9jfstgj0xumdt60sekq3wydq9")
                 , feeAmount: config.stringOrElse("CLAIM_FEE_AMOUNT", "1000000")
@@ -76,7 +66,6 @@ export class AssetManagementServiceDsl implements AssetManagementService {
 
     static async loadFromConfig(servConfig: AssetManagementServiceConfig, dependencies: AssetManagemenetServiceDependencies): Promise<AssetManagementService> {
         const service = new AssetManagementServiceLogging(new AssetManagementServiceDsl(
-            servConfig.network,
             servConfig.claimsConfig,
             dependencies.database,
             dependencies.blockfrost,
@@ -108,25 +97,15 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         }
     }
 
-    registry(logger?: LoggingContext): RegistryPolicy[] {
-        return this.policyRegistry
-    }
-
-    wellKnownPolicies(logger?: LoggingContext): WellKnownPolicies {
-        return this.wellKnownRegistry
-    }
-
-    async list(userId: string, logger?: LoggingContext, options?: { count?: number, page?: number, chain?: boolean , policies?: string[] }): Promise<ListResponse> {
+    async list(userId: string, options: { count?: number, page?: number, chain?: boolean, policies: string[] }, logger?: LoggingContext, ): Promise<ListResponse> {
         const userInfo = await this.identityService.resolveUser({ ctype: "user-id", userId }, logger)
         if (userInfo.status == "unknown-user-id") return { status: "unknown-user" }
         const inventory = await this.assets.list(userId, userInfo.info.knownStakeAddresses, 
-            { count: options?.count ?? 100, page: options?.page ?? 0, chain: options?.chain, policies: options?.policies })
+            { count: options?.count ?? 100, page: options?.page ?? 0, chain: options?.chain, policies: options.policies })
         return { status: "ok", inventory }
     }
 
     async grant(userId: string, assets: { unit: string, policyId: string, quantity: string }, logger: LoggingContext): Promise<GrantResponse> {
-        if (!this.policyRegistry.map(p => p.policyId).includes(assets.policyId)) 
-            return { status: "invalid", reason: "unknown policy id" }
         await this.assets.grant(userId, assets.unit, assets.policyId, assets.quantity)
         return { status: "ok" }
     }
