@@ -7,7 +7,7 @@ const durationCalculator = new DurationCalculator()
 
 const adventurer = (advClass: AdventurerClass, athleticism: number, intellect: number, charisma: number): Adventurer => ({
     adventurerId: "", userId: "", name: "", class: advClass, race: "human", collection: "pixel-tiles", assetRef: "",
-    athleticism, intellect, charisma,
+    hp: 1, athleticism, intellect, charisma,
 })
 
 test("Basic requirement calculations", () => {

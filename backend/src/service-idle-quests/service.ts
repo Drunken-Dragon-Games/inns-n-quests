@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 import { IdleQuestsService } from "./service-spec"
-import { QueryInterface, Sequelize } from "sequelize"
+import { Op, QueryInterface, Sequelize } from "sequelize"
 import { LoggingContext } from "../tools-tracing"
 import { buildMigrator } from "../tools-database"
 import path from "path"
@@ -8,7 +8,7 @@ import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
 import { config } from "../tools-utils"
 
-import { AcceptQuestResult, Adventurer, AvailableQuest, ClaimQuestResult, GetAllAdventurersResult, GetAvailableQuestsResult, GetTakenQuestsResult, HealthStatus, Quest } from "./models"
+import { AcceptQuestResult, ClaimQuestResult, GetAllAdventurersResult, GetAvailableQuestsResult, GetTakenQuestsResult, HealthStatus } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
 import * as runningQuestsDB from "./challenges/taken-quest-db"
@@ -19,7 +19,7 @@ import { pickRandomQuestsByLocation, QuestRegistry } from "../registry-quests"
 import Random from "../tools-utils/random"
 import { RewardCalculator, DurationCalculator, baseSuccessRate } from "./challenges/quest-requirement"
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import AdventurersSyncer from "./items/sync-adventurers"
+import AdventurerFun from "./items/adventurer-fun"
 
 export interface IdleQuestsServiceConfig 
     { rewardFactor: number
@@ -38,7 +38,7 @@ export interface IdleQuestServiceDependencies
 export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     private readonly migrator: Umzug<QueryInterface>
-    private readonly adventurerSyncer: AdventurersSyncer
+    private readonly adventurerFun: AdventurerFun 
 
     constructor (
         private readonly random: Random,
@@ -52,7 +52,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
-        this.adventurerSyncer = new AdventurersSyncer(metadataRegistry, wellKnownPolicies)
+        this.adventurerFun = new AdventurerFun(metadataRegistry, wellKnownPolicies)
     }
 
     static async loadFromEnv(dependencies: IdleQuestServiceDependencies): Promise<IdleQuestsService> {
@@ -99,36 +99,111 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         }
     }
 
+    /**
+     * Returns a list of all adventurers that are currently in the inventory of the given user.
+     * This triggers a sync of the adventurers in the asset inventory (managed by the Asset Management Service) 
+     * with the adventurers in the database.
+     * 
+     * @param userId 
+     * @returns 
+     */
     async getAllAdventurers(userId: string): Promise<GetAllAdventurersResult> {
-        
-        const getPixeltileSprite = (adventurer: Adventurer): string => {
-            return `https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_${adventurer.assetRef.replace("PixelTile", "")}.png`
-        }
-
-        const getGmaSprite = (adventurer: Adventurer): string => {
-            return `https://cdn.ddu.gg/gmas/x3/${adventurer.assetRef}.png`
-        }
-
-        const getAdvOfThioldenSprite = (adventurer: Adventurer): string => {
-            const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
-            const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
-            const chromaOrPlain = this.metadataRegistry.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
-            return `https://cdn.ddu.gg/adv-of-thiolden/x6/${adventurerName}-front-${chromaOrPlain}.png`
-        }
-
         const inventoryResult = await this.assetManagementService.list(userId, { policies: onlyPolicies(this.wellKnownPolicies) })
         if (inventoryResult.status == "unknown-user") 
             return { status: "unknown-user" }
-        await this.adventurerSyncer.syncAdventurers(userId, inventoryResult.inventory)
-        const adventurers = (await adventurersDB.DBAdventurer.findAll({ where: { userId } }))
-            .map(adv => {
-                switch (adv.collection) {
-                    case "pixel-tiles": return { ...adv, sprite: getPixeltileSprite(adv) }
-                    case "grandmaster-adventurers": return { ...adv, sprite: getGmaSprite(adv) }
-                    case "adventurers-of-thiolden": return { ...adv, sprite: getAdvOfThioldenSprite(adv) }
-                }
-            })
+        const adventurers = await this.adventurerFun.syncAdventurers(userId, inventoryResult.inventory)
         return { status: "ok", adventurers }
+    }
+
+    /**
+     * Returns a list of quests that are available for the given location.
+     * 
+     * @param location 
+     * @param quantity
+     * @returns 
+     */
+    async getAvailableQuests(location: string, quantity: number = 20): Promise<GetAvailableQuestsResult> {
+        return { status: "ok", quests: pickRandomQuestsByLocation(location, quantity, this.questsRegistry, this.random).map(quest => ({ 
+            questId: quest.questId,
+            name: quest.name,
+            location: quest.location,
+            description: quest.description,
+            requirements: quest.requirements,
+            reward: this.rewardCalculator.baseReward(quest.requirements), 
+            duration: this.durationCalculator.baseDuration(quest.requirements),
+            slots: quest.slots
+        })) }
+    }
+
+    /**
+     * Creates a TakenQuest and updates the Adventurers to be inChallenge. 
+     * If any of the Adventurers are already inChallenge or dead, the transaction is rolled back and the TakenQuest is not created.
+     * 
+     * @param userId 
+     * @param questId 
+     * @param adventurerIds 
+     * @returns 
+     */
+    async acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptQuestResult> {
+        if (this.questsRegistry[questId] === undefined) 
+            return { status: "unknown-quest" }
+        const transaction = await this.database.transaction()
+        const adventurers = await this.adventurerFun.setInChallenge(userId, adventurerIds, transaction)
+        if (adventurers.length != adventurerIds.length) {
+            await transaction.rollback()
+            return { status: "invalid-adventurers" }
+        }
+        const takenQuest = await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId) }, { transaction })
+        await transaction.commit()
+        return { status: "ok", takenQuest }
+    }
+
+    /**
+     * Returns all TakenQuests for the given userId.
+     * 
+     * @param userId 
+     * @returns 
+     */
+    async getTakenQuests(userId: string): Promise<GetTakenQuestsResult> {
+        const quests = await runningQuestsDB.TakenQuestDB.findAll({ where: { userId } })
+        return { status: "ok", quests }
+    }
+
+    /**
+     * Finish a TakenQuest, update the Adventurers to be idle and return the outcome.
+     * The outcome is the reward if successful or a list with dead adventurers if failed.
+     * 
+     * @param userId 
+     * @param questId 
+     * @returns 
+     */
+    async claimQuestResult(userId: string, questId: string): Promise<ClaimQuestResult> {
+        const quest = await runningQuestsDB.TakenQuestDB.findOne({ where: { userId, questId } })
+        if (!quest) 
+            return { status: "unknown-quest" }
+        if (quest.claimedAt !== null)
+            return { status: "quest-already-claimed" }
+        const requirements = this.questsRegistry[quest.questId].requirements
+        const duration = this.durationCalculator.baseDuration(requirements)
+        if (quest.createdAt.getTime() + duration > Date.now()) 
+            return { status: "quest-not-finished" }
+        const transaction = await this.database.transaction()
+        const adventurers = await this.adventurerFun.unsetInChallenge(userId, quest.adventurerIds, transaction)
+        const missing = adventurers.map(a => a.adventurerId!).filter(item => quest.adventurerIds.indexOf(item) < 0)
+        if (missing.length !== 0) {
+            await transaction.rollback()
+            return { status: "missing-adventurers", missing }
+        }
+        await quest.update({ claimedAt: new Date() }, { transaction })
+        await transaction.commit()
+        const successRate = baseSuccessRate(requirements, adventurers)
+        const success = this.random.randomNumberBetween(1, 100) <= Math.floor(successRate * 100)
+        if (success) {
+            const reward = this.rewardCalculator.baseReward(requirements)
+            return { status: "ok", outcome: { status: "success", reward } }
+        } else {
+            return { status: "ok", outcome: { status: "failure", deadAdventurers: [] } }
+        }
     }
 
     async module_getAllAdventurers(userId: string): Promise<object[]> {
@@ -161,115 +236,27 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
                 sprites: "https://cdn.ddu.gg/adv-of-thiolden/x6/perneli-front-plain.png",
                 name: "Perneli"
             },
-            {
-                id: "005f9aaa-1634-44d1-95a8-b4597341d602",
-                on_chain_ref: "AdventurerOfThiolden14073",
-                experience: 130,
-                in_quest: false,
-                type: "aot",
-                metadata: {},
-                race: "worgenkin",
-                class: "ranger",
-                sprites: "https://cdn.ddu.gg/adv-of-thiolden/x6/friga-front-plain.png",
-                name: "Friga"
-            }
         ]
         */
     }
 
-    async getAvailableQuests(location: string): Promise<GetAvailableQuestsResult> {
-        return { status: "ok", quests: pickRandomQuestsByLocation(location, 20, this.questsRegistry, this.random).map(quest => ({ 
-            questId: quest.questId,
-            name: quest.name,
-            location: quest.location,
-            description: quest.description,
-            requirements: quest.requirements,
-            reward: this.rewardCalculator.baseReward(quest.requirements), 
-            duration: this.durationCalculator.baseDuration(quest.requirements),
-            slots: quest.slots
-        })) }
-    }
-
-    async module_getAvailableQuests(userId: string): Promise<object[]> {
-        return (await this.getAvailableQuests("Auristar")).quests.map(quest => {
-            const baseRewardCurrencies = this.rewardCalculator.baseReward(quest.requirements).currencies ?? []
-            return { ...quest,
-                "id": quest.questId,
-                "reward_ds": parseInt(baseRewardCurrencies[0]?.quantity),
-                "reward_xp": 1,
-                "difficulty": 1,
-                "rarity": "townsfolk",
-                "is_war_effort": false
-            }
-        })
-        /*
-        return [
-            {
-                "id": "84daa515-72b4-4f96-916e-0c24bb3c3be2",
-                "name": "SPRITES, CUTE BUT ANNOYING!",
-                "description": "Farmers and miners have reported property damage made by <b>playful and anoying river Sprites</b>. Therefore, help is needed to deal with the infestation. Your adventuring party can find them at the <b>western caverns of Auristar, the cosmic caves known as the Starifjolden</b>. The local farmers and miners promise a <b>modest</b> compensation of <b>3</b> Dragon Silver.",
-                "reward_ds": 3,
-                "reward_xp": 1,
-                "difficulty": 3,
-                "slots": 4,
-                "rarity": "townsfolk",
-                "duration": 161602223,
-                "requirements": {
-                    "character": [
-                        {
-                            "race": "elf",
-                            "class": "cleric"
-                        },
-                        {
-                            "race": "tiefling"
-                        }
-                    ]
+    async module_claimQuestResult(userId: string, questId: string): Promise<object> {
+        return {
+            "adventurers": [
+                {
+                    "id": "6be775ac-821c-4189-b07d-3927686dacb2",
+                    "experience": 395
                 },
-                "is_war_effort": false
-            },
-            {
-                "id": "1c15fe8d-cd04-4996-982a-a784b1d78c7a",
-                "name": "MISSING TOWNFOLK",
-                "description": "Kind adventurers wanted. Our villagers have been disappearing! To the <b>north of Farvirheim, across the river and near the great ruins</b> we have identified <b>a clan of wild Beastmen</b>. It must be related! Our nijmkjold is lacking personel. Neighbours have cooperated with a <b>just</b> reward of <b>3</b> Dragon Silver.",
-                "reward_ds": 3,
-                "reward_xp": 1,
-                "difficulty": 2,
-                "slots": 4,
-                "rarity": "townsfolk",
-                "duration": 120763172,
-                "requirements": {
-                    "party": {
-                        "balanced": true
-                    },
-                    "character": []
+                {
+                    "id": "9a803992-d35d-4e2a-884e-6985f44439d1",
+                    "experience": 395
                 },
-                "is_war_effort": false
-            },
-            {
-                "id": "041c6665-1682-41f6-86dc-8765014ee534",
-                "name": "SPRITES, CUTE BUT ANNOYING!",
-                "description": "Farmers and miners have reported property damage made by <b>rock Sprites</b>. Therefore, help is needed to deal with the infestation. Your adventuring party can find them at the <b>western caverns of Auristar, the cosmic caves known as the Starifjolden</b>. The local farmers and miners promise a <b>just</b> compensation of <b>4</b> Dragon Silver.",
-                "reward_ds": 4,
-                "reward_xp": 1,
-                "difficulty": 3,
-                "slots": 3,
-                "rarity": "townsfolk",
-                "duration": 183308616,
-                "requirements": {},
-                "is_war_effort": false
-            },
-        ]
-        */
-    }
-
-    async acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptQuestResult> {
-        if (this.questsRegistry[questId] === undefined) return { status: "unknown-quest" }
-        const transaction = await this.database.transaction()
-        const [ _, adventurers ] = await adventurersDB.DBAdventurer.update({ inChallenge: true }, { where: { adventurerIds, inChallenge: false }, returning: true, transaction })
-        const takenQuest = await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId) }, { transaction })
-        await transaction.commit()
-        // need to check if it is alive
-        return { status: "ok", takenQuest }
+                {
+                    "id": "3ce7852c-0e2d-4247-8f78-78ba91c75cc9",
+                    "experience": 380
+                }
+            ]
+        }
     }
 
     async module_acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<object> {
@@ -498,53 +485,45 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         ]
     }
 
-    async getTakenQuests(userId: string): Promise<GetTakenQuestsResult> {
-        const quests = await runningQuestsDB.TakenQuestDB.findAll({ where: { userId } })
-        return { status: "ok", quests }
+    async module_getAvailableQuests(userId: string): Promise<object[]> {
+        return (await this.getAvailableQuests("Auristar")).quests.map(quest => {
+            const baseRewardCurrencies = this.rewardCalculator.baseReward(quest.requirements).currencies ?? []
+            return { ...quest,
+                "id": quest.questId,
+                "reward_ds": parseInt(baseRewardCurrencies[0]?.quantity),
+                "reward_xp": 1,
+                "difficulty": 1,
+                "rarity": "townsfolk",
+                "is_war_effort": false
+            }
+        })
+        /*
+        return [
+            {
+                "id": "84daa515-72b4-4f96-916e-0c24bb3c3be2",
+                "name": "SPRITES, CUTE BUT ANNOYING!",
+                "description": "Farmers and miners have reported property damage made by <b>playful and anoying river Sprites</b>. Therefore, help is needed to deal with the infestation. Your adventuring party can find them at the <b>western caverns of Auristar, the cosmic caves known as the Starifjolden</b>. The local farmers and miners promise a <b>modest</b> compensation of <b>3</b> Dragon Silver.",
+                "reward_ds": 3,
+                "reward_xp": 1,
+                "difficulty": 3,
+                "slots": 4,
+                "rarity": "townsfolk",
+                "duration": 161602223,
+                "requirements": {
+                    "character": [
+                        {
+                            "race": "elf",
+                            "class": "cleric"
+                        },
+                        {
+                            "race": "tiefling"
+                        }
+                    ]
+                },
+                "is_war_effort": false
+            },
+        ]
+        */
     }
 
-    async claimQuestResult(userId: string, questId: string): Promise<ClaimQuestResult> {
-        const quest = await runningQuestsDB.TakenQuestDB.findOne({ where: { userId, questId } })
-        if (!quest) return { status: "unknown-quest" }
-        const requirements = this.questsRegistry[quest.questId].requirements
-        const duration = this.durationCalculator.baseDuration(requirements)
-        if (quest.createdAt.getTime() + duration > Date.now()) return { status: "quest-not-finished" }
-        const adventurers = await adventurersDB.DBAdventurer.findAll({ where: { adventurerId: quest.adventurerIds } })
-        const missing = adventurers.map(a => a.adventurerId!).filter(item => quest.adventurerIds.indexOf(item) < 0)
-        if (missing.length !== 0) {
-            await quest.destroy()
-            return { status: "missing-adventurers", missing }
-        } 
-        const transaction = await this.database.transaction()
-        await adventurersDB.DBAdventurer.update({ inQuest: false }, { where: { adventurerId: quest.adventurerIds, transaction } })
-        await quest.destroy({ transaction })
-        await transaction.commit()
-        const successRate = baseSuccessRate(requirements, adventurers)
-        const success = this.random.randomNumberBetween(1, 100) <= Math.floor(successRate * 100)
-        if (success) {
-            const reward = this.rewardCalculator.baseReward(requirements)
-            return { status: "ok", outcome: { status: "success", reward } }
-        } else {
-            return { status: "ok", outcome: { status: "failure", deadAdventurers: [] } }
-        }
-    }
-
-    async module_claimQuestResult(userId: string, questId: string): Promise<object> {
-        return {
-            "adventurers": [
-                {
-                    "id": "6be775ac-821c-4189-b07d-3927686dacb2",
-                    "experience": 395
-                },
-                {
-                    "id": "9a803992-d35d-4e2a-884e-6985f44439d1",
-                    "experience": 395
-                },
-                {
-                    "id": "3ce7852c-0e2d-4247-8f78-78ba91c75cc9",
-                    "experience": 380
-                }
-            ]
-        }
-    }
 }

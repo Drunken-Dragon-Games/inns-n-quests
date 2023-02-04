@@ -1,12 +1,12 @@
 import { wellKnownPoliciesMainnet } from "../../registry-policies"
 import { Inventory } from "../../service-asset-management"
-import { buildMigrator, connectToDB, DBConfig } from "../../tools-database"
+import { buildMigrator, connectToDB } from "../../tools-database"
 import * as adventurersDB from "./adventurer-db"
 import path from "path"
 import { Umzug } from "umzug"
 import { QueryInterface, Sequelize } from "sequelize"
-import AdventurersSyncer from "./sync-adventurers"
 import { MetadataRegistry } from "../../registry-metadata"
+import AdventurerFun from "./adventurer-fun"
 
 const metadataRegistry: MetadataRegistry = {
     advOfThioldenAppMetadata: [{ "adv": "vimtyr", "n": "1", "ath": 10, "int": 11, "cha": 11, "chr": true }, { "adv": "terrorhertz", "n": "2", "ath": 10, "int": 11, "cha": 11, "chr": true }],
@@ -86,7 +86,7 @@ const metadataRegistry: MetadataRegistry = {
 
 let database: Sequelize
 let migrator: Umzug<QueryInterface>
-const adventurerSynchronizer = new AdventurersSyncer(metadataRegistry, wellKnownPoliciesMainnet)
+const adventurerSynchronizer = new AdventurerFun(metadataRegistry, wellKnownPoliciesMainnet)
 
 beforeAll(async () => {
     database = connectToDB({
@@ -125,9 +125,9 @@ test("syncAdventurers path 1", async () => {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile1", quantity: "1", chain: false } ]
     }
     await adventurerSynchronizer.syncAdventurers(userId, assetInventory1)
-    const adventurers1 = await adventurersDB.DBAdventurer.findAll()
+    const adventurers1 = await adventurersDB.AdventurerDB.findAll()
     await adventurerSynchronizer.syncAdventurers(userId, assetInventory2)
-    const adventurers2 = await adventurersDB.DBAdventurer.findAll()
+    const adventurers2 = await adventurersDB.AdventurerDB.findAll()
 
     expect(adventurers1.length).toBe(2)
     expect(adventurers1[0].assetRef).toBe("PixelTile1")
@@ -143,9 +143,9 @@ test("syncAdventurers path 2", async () => {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile1", quantity: "2", chain: false } ]
     }
     await adventurerSynchronizer.syncAdventurers(userId, assetInventory1)
-    const adventurers1 = await adventurersDB.DBAdventurer.findAll()
+    const adventurers1 = await adventurersDB.AdventurerDB.findAll()
     await adventurerSynchronizer.syncAdventurers(userId, assetInventory1)
-    const adventurers2 = await adventurersDB.DBAdventurer.findAll()
+    const adventurers2 = await adventurersDB.AdventurerDB.findAll()
 
     expect(adventurers1.length).toBe(2)
     expect(adventurers1[0].assetRef).toBe("PixelTile1")

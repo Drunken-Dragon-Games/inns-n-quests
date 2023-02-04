@@ -5,6 +5,7 @@ export type ITakenQuestDB = {
     questId: string,
     userId: string,
     adventurerIds: string[],
+    claimedAt?: Date,
     createdAt: Date,
 }
 
@@ -13,6 +14,7 @@ export class TakenQuestDB extends Model implements ITakenQuestDB {
     declare questId: string
     declare userId: string
     declare adventurerIds: string[]
+    declare claimedAt?: Date
     declare createdAt: Date
 }
 
@@ -39,6 +41,11 @@ export const TakenQuestDBTableAttributes = {
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
+    },
+    claimedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null
     },
 }
 

@@ -1,7 +1,7 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
 import { Adventurer, AdventurerClass, adventurerClasses, AdventurerCollection, adventurerCollections, Race, races } from "../models"
 
-export class DBAdventurer extends Model implements Adventurer {
+export class AdventurerDB extends Model implements Adventurer {
     declare adventurerId?: string
     declare userId: string
     declare name: string
@@ -9,15 +9,16 @@ export class DBAdventurer extends Model implements Adventurer {
     declare race: Race
     declare collection: AdventurerCollection
     declare assetRef: string
+    declare hp: number
     declare inChallenge?: boolean
     declare athleticism: number
     declare intellect: number
     declare charisma: number
 }
 
-export const DBAdventurerTableName = "idle_quests_adventurers"
+export const AdventurerDBTableName = "idle_quests_adventurers"
 
-export const DBAdventurerTableAttributes = {
+export const AdventurerDBTableAttributes = {
     adventurerId: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -60,6 +61,11 @@ export const DBAdventurerTableAttributes = {
         type: DataTypes.BOOLEAN,
         allowNull: true
     },
+    hp: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1
+    },
     athleticism: {
         type: DataTypes.INTEGER,
         allowNull: false
@@ -75,9 +81,9 @@ export const DBAdventurerTableAttributes = {
 }
 
 export const configureSequelizeModel = (sequelize: Sequelize): void => {
-    DBAdventurer.init(DBAdventurerTableAttributes, {
+    AdventurerDB.init(AdventurerDBTableAttributes, {
         sequelize, 
-        modelName: 'DBAdventurer', 
-        tableName: DBAdventurerTableName
+        modelName: 'AdventurerDB', 
+        tableName: AdventurerDBTableName
     })
 }

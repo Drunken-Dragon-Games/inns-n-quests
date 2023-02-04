@@ -7,7 +7,7 @@ export type HealthStatus =
         }[]
     }
 
-export type Adventurer = {
+export interface Adventurer {
     adventurerId?: string,
     userId: string,
     name: string,
@@ -16,6 +16,7 @@ export type Adventurer = {
     collection: AdventurerCollection,
     assetRef: string,
     sprite?: string,
+    hp: number,
     inChallenge?: boolean,
     athleticism: number,
     intellect: number,
@@ -133,8 +134,8 @@ export type GetAllAdventurersResult
 
 export type AcceptQuestResult
     = { status: "ok", takenQuest: TakenQuest }
-    | { status: "unknown-user" }
     | { status: "unknown-quest" }
+    | { status: "invalid-adventurers" }
 
 export type GetAvailableQuestsResult
     = { status: "ok", quests: AvailableQuest[] }
@@ -149,5 +150,6 @@ export type ClaimQuestOutcome
 export type ClaimQuestResult
     = { status: "ok", outcome: ClaimQuestOutcome }
     | { status: "unknown-quest" }
+    | { status: "quest-already-claimed" }
     | { status: "quest-not-finished" }
     | { status: "missing-adventurers", missing: string[] }

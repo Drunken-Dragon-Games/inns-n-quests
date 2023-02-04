@@ -1,6 +1,6 @@
 import { DataTypes, ModelAttributes, QueryInterface } from 'sequelize'
 import { TakenQuestDBTableName, TakenQuestDBTableAttributes } from '../challenges/taken-quest-db'
-import { DBAdventurerTableAttributes, DBAdventurerTableName } from '../items/adventurer-db'
+import { AdventurerDBTableAttributes, AdventurerDBTableName } from '../items/adventurer-db'
 
 type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
 
@@ -19,11 +19,11 @@ const addSequelizeColumns = (tableAttributes: ModelAttributes<any, any>): ModelA
 }
 
 export const up: MigrationFun = async ({ context: query }) => {
-  await query.createTable(DBAdventurerTableName, addSequelizeColumns(DBAdventurerTableAttributes))
+  await query.createTable(AdventurerDBTableName, addSequelizeColumns(AdventurerDBTableAttributes))
   await query.createTable(TakenQuestDBTableName, addSequelizeColumns(TakenQuestDBTableAttributes))
 }
 
 export const down: MigrationFun = async ({ context: query }) => {
-  await query.dropTable(DBAdventurerTableName)
+  await query.dropTable(AdventurerDBTableName)
   await query.dropTable(TakenQuestDBTableName)
 }

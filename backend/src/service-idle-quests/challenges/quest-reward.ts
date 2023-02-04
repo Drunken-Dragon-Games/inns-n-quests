@@ -1,3 +1,4 @@
+import { apsSum } from "../items/adventurer-fun";
 import { APS, Reward } from "../models";
 
 export class AssetRewards {
@@ -29,8 +30,6 @@ export const mergeRewards = (a: Reward, b: Reward): Reward => {
     }
     return { currencies, apsExperience }
 }
-
-export const apsSum = (aps: APS): number => aps.athleticism + aps.intellect + aps.charisma
 
 export const bestReward = (a: Reward, b: Reward): Reward => {
     const aAPSsum = apsSum(a.apsExperience ?? { athleticism: 0, intellect: 0, charisma: 0 })

@@ -1,5 +1,6 @@
+import { apsSum } from "../items/adventurer-fun"
 import { Adventurer, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, SuccessBonusRequirement, OrRequirement, QuestRequirement, Reward, EmptyRequirement, NotRequirement } from "../models"
-import { apsReward, apsSum, AssetRewards, bestReward, mergeRewards } from "./reward"
+import { apsReward, AssetRewards, bestReward, mergeRewards } from "./quest-reward"
 
 export const aps = (athleticism: number, intellect: number, charisma: number): APSRequirement => ({
     ctype: "aps-requirement",
