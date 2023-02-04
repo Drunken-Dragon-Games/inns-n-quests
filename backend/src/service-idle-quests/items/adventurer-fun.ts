@@ -66,7 +66,7 @@ export default class AdventurerFun {
     ) { }
 
     async findAdventurers(userId: string, adventurerIds: string[], transaction?: Transaction): Promise<Adventurer[]> {
-        return AdventurerDB.findAll({ where: { adventurerId: adventurerIds, userId }, transaction })
+        return this.cleanAdventurerData(await AdventurerDB.findAll({ where: { adventurerId: adventurerIds, userId }, transaction }))
     }
 
     async createAdventurers(userId: string, adventurersToCreate: AdventurerCreationData[]): Promise<Adventurer[]> {
@@ -136,7 +136,7 @@ export default class AdventurerFun {
             })
         ))
 
-        return this.addSpritesToAdventurers(createdAdventurers)
+        return this.cleanAdventurerData(this.addSpritesToAdventurers(createdAdventurers))
     }
 
     async deleteAdventurers(adventurersIds: string[]): Promise<void> {
@@ -184,21 +184,21 @@ export default class AdventurerFun {
         const { adventurersToCreate, adventurersToDelete, survivingAdventurers } = adventurersToSync(preSyncedAdventurers, assetInventoryAdventurers)
         const createdAdventurers = await this.createAdventurers(userId, adventurersToCreate)
         await this.deleteAdventurers(adventurersToDelete.map(adventurer => adventurer.adventurerId!))
-        return createdAdventurers.concat(survivingAdventurers)
+        return this.cleanAdventurerData(this.addSpritesToAdventurers(createdAdventurers.concat(survivingAdventurers)))
     }
 
     async setInChallenge(userId: string, adventurerIds: string[], transaction?: Transaction): Promise<Adventurer[]> {
         if (adventurerIds.length == 0) return []
         const [_, adventurers] = await AdventurerDB.update({ inChallenge: true }, 
             { where: { userId, adventurerIds, inChallenge: false, hp: { [Op.not]: 0 } }, returning: true, transaction })
-        return adventurers
+        return this.cleanAdventurerData(adventurers)
     }
 
     async unsetInChallenge(userId: string, adventurerIds: string[], transaction?: Transaction): Promise<Adventurer[]> { 
         if (adventurerIds.length == 0) return []
         const [_, adventurers] = await AdventurerDB.update({ inChallenge: false }, 
             { where: { userId, adventurerId: adventurerIds }, returning: true, transaction })
-        return adventurers
+        return this.cleanAdventurerData(adventurers)
     }
 
     private addSpritesToAdventurers(adventurers: Adventurer[]): Adventurer[] {
@@ -227,6 +227,24 @@ export default class AdventurerFun {
         })
 
         return withSprites
+    }
+
+    private cleanAdventurerData(adventurers: Adventurer[]): Adventurer[] {
+        return adventurers.map(adventurer => ({
+            adventurerId: adventurer.adventurerId,
+            userId: adventurer.userId,
+            name: adventurer.name,
+            class: adventurer.class,
+            race: adventurer.race,
+            collection: adventurer.collection,
+            assetRef: adventurer.assetRef,
+            sprite:adventurer.sprite,
+            hp: adventurer.hp,
+            inChallenge:adventurer.inChallenge,
+            athleticism: adventurer.athleticism,
+            intellect: adventurer.intellect,
+            charisma: adventurer.charisma,
+        }))
     }
 
 }

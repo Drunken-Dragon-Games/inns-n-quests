@@ -217,8 +217,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             in_quest: false,
             type: "pxt",
             metadata: {},
-            race: "human",
-            class: "paladin",
+            race: a.race,
+            class: a.class,
             sprites: a.sprite,
             name:a.name
         }))
