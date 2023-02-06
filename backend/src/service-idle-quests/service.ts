@@ -86,7 +86,6 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     async unloadDatabaseModels(): Promise<void> {
         await this.migrator.down()
-        await this.database.close()
     }
 
     async health(logger?: LoggingContext): Promise<HealthStatus> {

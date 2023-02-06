@@ -65,10 +65,27 @@ export default class AdventurerFun {
         private readonly wellKnownPolicies: WellKnownPolicies
     ) { }
 
+    /**
+     * Returns adventurer data only if they belong to the user.
+     * 
+     * @param userId 
+     * @param adventurerIds 
+     * @param transaction 
+     * @returns 
+     */
     async findAdventurers(userId: string, adventurerIds: string[], transaction?: Transaction): Promise<Adventurer[]> {
-        return this.cleanAdventurerData(await AdventurerDB.findAll({ where: { adventurerId: adventurerIds, userId }, transaction }))
+        const adventurers = await AdventurerDB.findAll({ where: { adventurerId: adventurerIds, userId }, transaction })
+        return adventurers.map(adventurer => adventurer.dataValues)
     }
 
+    /**
+     * Bulk creates adventurers and adds them to the user's inventory.
+     * The assetRef and collection must be valid.
+     * 
+     * @param userId 
+     * @param adventurersToCreate 
+     * @returns 
+     */
     async createAdventurers(userId: string, adventurersToCreate: AdventurerCreationData[]): Promise<Adventurer[]> {
 
         const adventurerClass = (adventurer: AdventurerCreationData): AdventurerClass => {
@@ -117,7 +134,7 @@ export default class AdventurerFun {
             }
         }
 
-        const createdAdventurers = await AdventurerDB.bulkCreate(adventurersToCreate.flatMap(adventurer =>
+        const createdAdventurers: AdventurerDB[] = await AdventurerDB.bulkCreate(adventurersToCreate.flatMap(adventurer =>
             [...Array(adventurer.quantity)].map(() => {
                 const aps = adventurerAPS(adventurer)
                 return {
@@ -136,14 +153,28 @@ export default class AdventurerFun {
             })
         ))
 
-        return this.cleanAdventurerData(this.addSpritesToAdventurers(createdAdventurers))
+        return createdAdventurers.map(adventurer => adventurer.dataValues)
     }
 
+    /**
+     * Deletes adventurers from the database without any checks.
+     * 
+     * @param adventurersIds 
+     * @returns 
+     */
     async deleteAdventurers(adventurersIds: string[]): Promise<void> {
         if (adventurersIds.length == 0) return
         await AdventurerDB.destroy({ where: { adventurerId: adventurersIds } })
     }
 
+    /**
+     * Syncs the user's current inventory adventurers with the asset inventory.
+     * The asset inventory comes from querying the Asset Management Service, and is a list of all the assets the user owns, in-chain or off-chain.
+     * 
+     * @param userId 
+     * @param assetInventory 
+     * @returns 
+     */
     async syncAdventurers(userId: string, assetInventory: Inventory): Promise<Adventurer[]> {
         
         const pickInventoryAdventurers = (assetInventory: Inventory): AssetInventoryAdventurer[] => {
@@ -179,28 +210,56 @@ export default class AdventurerFun {
             return { adventurersToCreate, adventurersToDelete, survivingAdventurers }
         }
 
-        const preSyncedAdventurers = await AdventurerDB.findAll({ where: { userId } })
+        const preSyncedDBAdventurers: AdventurerDB[] = await AdventurerDB.findAll({ where: { userId } })
+        const preSyncedAdventurers: Adventurer[] = preSyncedDBAdventurers.map(adventurer => adventurer.dataValues)
         const assetInventoryAdventurers = pickInventoryAdventurers(assetInventory)
         const { adventurersToCreate, adventurersToDelete, survivingAdventurers } = adventurersToSync(preSyncedAdventurers, assetInventoryAdventurers)
         const createdAdventurers = await this.createAdventurers(userId, adventurersToCreate)
         await this.deleteAdventurers(adventurersToDelete.map(adventurer => adventurer.adventurerId!))
-        return this.cleanAdventurerData(this.addSpritesToAdventurers(createdAdventurers.concat(survivingAdventurers)))
+        return this.addSpritesToAdventurers(createdAdventurers.concat(survivingAdventurers))
     }
 
+    /**
+     * Sets the inChallenge flag to true for the given adventurers if they are not in a challenge already,
+     * if their hp is not 0, and if they belong to the given user.
+     * If for a given adventurer the inChallenge flag is already true, or if the other conditions are not met, 
+     * the adventurer is not updated, but the other adventurers are.
+     * 
+     * @param userId 
+     * @param adventurerIds 
+     * @param transaction 
+     * @returns 
+     */
     async setInChallenge(userId: string, adventurerIds: string[], transaction?: Transaction): Promise<Adventurer[]> {
         if (adventurerIds.length == 0) return []
         const [_, adventurers] = await AdventurerDB.update({ inChallenge: true }, 
             { where: { userId, adventurerIds, inChallenge: false, hp: { [Op.not]: 0 } }, returning: true, transaction })
-        return this.cleanAdventurerData(adventurers)
+        return adventurers.map(adventurer => adventurer.dataValues)
     }
 
+    /**
+     * Sets the inChallenge flag to false for the given adventurers if they are in a challenge and belong to the given user.
+     * If for a given adventurer the inChallenge flag is already false, or if the other conditions are not met, 
+     * the adventurer is not updated, but the other adventurers are.
+     * 
+     * @param userId 
+     * @param adventurerIds 
+     * @param transaction 
+     * @returns 
+     */
     async unsetInChallenge(userId: string, adventurerIds: string[], transaction?: Transaction): Promise<Adventurer[]> { 
         if (adventurerIds.length == 0) return []
         const [_, adventurers] = await AdventurerDB.update({ inChallenge: false }, 
             { where: { userId, adventurerId: adventurerIds }, returning: true, transaction })
-        return this.cleanAdventurerData(adventurers)
+        return adventurers.map(adventurer => adventurer.dataValues)
     }
 
+    /**
+     * Computes the sprite image url for each adventurer in the given array and adds it to the adventurer object.
+     * 
+     * @param adventurers 
+     * @returns 
+     */
     private addSpritesToAdventurers(adventurers: Adventurer[]): Adventurer[] {
 
         const pixeltileSprite = (adventurer: Adventurer): string => {
@@ -228,23 +287,4 @@ export default class AdventurerFun {
 
         return withSprites
     }
-
-    private cleanAdventurerData(adventurers: Adventurer[]): Adventurer[] {
-        return adventurers.map(adventurer => ({
-            adventurerId: adventurer.adventurerId,
-            userId: adventurer.userId,
-            name: adventurer.name,
-            class: adventurer.class,
-            race: adventurer.race,
-            collection: adventurer.collection,
-            assetRef: adventurer.assetRef,
-            sprite:adventurer.sprite,
-            hp: adventurer.hp,
-            inChallenge:adventurer.inChallenge,
-            athleticism: adventurer.athleticism,
-            intellect: adventurer.intellect,
-            charisma: adventurer.charisma,
-        }))
-    }
-
 }

@@ -44,7 +44,8 @@
     "umzug": "^3.2.1",
     "uuidv4": "^6.2.13",
     "winston": "^3.8.2",
-    "winston-cloudwatch": "^6.1.1"
+    "winston-cloudwatch": "^6.1.1",
+    "yaml": "^2.2.1"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.3",

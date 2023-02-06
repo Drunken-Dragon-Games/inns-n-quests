@@ -1,0 +1,22 @@
+
+questId: "quest-1"
+name: "Quest 1"
+location: "Autistar"
+description: "This is the description fd quest 1"
+requirements: 
+  classes: 
+  - "fighter"
+  - "paladin"
+  aps: [10, 20, 15]
+
+---
+
+questId: "quest-2"
+name: "Quest 2"
+location: "Autistar"
+description: "This is the description fd quest 2"
+requirements: 
+  or: 
+  - "warlock"
+  - "paladin"
+  aps: [20, 30, 10]

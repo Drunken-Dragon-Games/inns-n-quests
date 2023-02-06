@@ -1,5 +1,5 @@
 import { QuestRequirement, AndRequirement, OrRequirement, BonusRequirement, APSRequirement, ClassRequirement, 
-         adventurerClasses, SuccessBonusRequirement, Reward, AssetReward, APS, Quest } from "../models"
+         adventurerClasses, SuccessBonusRequirement, Reward, AssetReward, APS, Quest, AdventurerClass, EmptyRequirement } from "../models"
 
 export function isQuestRequirement(obj: any): obj is QuestRequirement {
 
@@ -27,12 +27,17 @@ export function isQuestRequirement(obj: any): obj is QuestRequirement {
         return obj.ctype === "only-success-bonus-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
     }
 
+    function isEmptyRequirement(obj: any): obj is EmptyRequirement {
+        return obj.ctype === "empty-requirement"
+    }
+
     return isAndRequirement(obj) 
         || isOrRequirement(obj) 
         || isBonusRequirement(obj) 
         || isAPSRequirement(obj) 
         || isClassRequirement(obj)
         || isSuccessBonus(obj)
+        || isEmptyRequirement(obj)
 }
 
 export function isReward(obj: any): obj is Reward {
@@ -49,5 +54,9 @@ export function isAPS(obj: any): obj is APS {
 }
 
 export function isQuest(obj: any): obj is Quest {
-    return typeof obj.questId === "string" && typeof obj.name === "string" && typeof obj.location === "string" && typeof obj.description === "string" && isQuestRequirement(obj.requirements) && typeof obj.slots === "number"
+    return typeof obj.questId === "string" && typeof obj.name === "string" && typeof obj.location === "string" && typeof obj.description === "string" && isQuestRequirement(obj.requirements)
+}
+
+export function isClass(obj: any): obj is AdventurerClass {
+    return typeof obj === "string" && adventurerClasses.includes(obj)
 }

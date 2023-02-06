@@ -56,7 +56,7 @@ export type Quest = {
     requirements: QuestRequirement,
     timeModifier?: { operator: "multiply" | "add" | "replace", modifier: number },
     rewardModifier?: { operator: "multiply" | "add" | "replace", modifier: Reward },
-    slots: number,
+    slots?: number,
 }
 
 export type AvailableQuest = {
@@ -67,7 +67,7 @@ export type AvailableQuest = {
     requirements: QuestRequirement,
     reward: Reward,
     duration: number,
-    slots: number,
+    slots?: number,
 }
 
 export type TakenQuest = {

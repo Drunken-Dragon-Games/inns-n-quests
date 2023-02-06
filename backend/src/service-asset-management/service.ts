@@ -22,8 +22,7 @@ import * as offChainStoreDB from "./assets/offchain-store-db"
 import * as assetClaimDB from "./assets/asset-claim-db"
 
 export interface AssetManagementServiceConfig 
-    { environment: string
-    , claimsConfig: AssetClaimDslConfig
+    { claimsConfig: AssetClaimDslConfig
     }
 
 export interface AssetManagemenetServiceDependencies 
@@ -55,8 +54,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
     static async loadFromEnv(dependencies: AssetManagemenetServiceDependencies): Promise<AssetManagementService> {
         dotenv.config()
         return await AssetManagementServiceDsl.loadFromConfig(
-            { environment: config.stringOrElse("ENVIRONMENT", "local")
-            , claimsConfig: 
+            { claimsConfig: 
                 { feeAddress: config.stringOrElse("CLAIM_FEE_ADDRESS", "addr_test1qq4e7rcz9c95shmxale22rkd5flqp2ft7kfvg8mmt7829g5e4ruvq60uyzc0e0u988ypdn96y9jfstgj0xumdt60sekq3wydq9")
                 , feeAmount: config.stringOrElse("CLAIM_FEE_AMOUNT", "1000000")
                 , txTTL: config.intOrElse("CLAIM_TX_TTL", 15 * 60)

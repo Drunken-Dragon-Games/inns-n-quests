@@ -2,15 +2,16 @@ import fs from "fs/promises"
 import cbor from "cbor"
 import { v4 } from "uuid"
 import { AssetManagementService, ClaimStatus, Inventory } from "../service-asset-management"
-import { IdentityService, ResolveUserResult, UserInfo } from "../service-identity"
-import { PolicyResult, SecureSigningService, SignTxResult } from "../service-secure-signing"
 
-import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import path from "path"
 import { Transaction } from "@emurgo/cardano-serialization-lib-nodejs"
 import { Wallet, cardano } from "../tools-cardano"
-import { config, failure, success, unit } from "../tools-utils"
+import { failure, success, unit } from "../tools-utils"
 import { expectResponse } from "../tools-utils/api-expectations"
+import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock"
+import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock"
+import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock"
+import { UserInfo } from "../service-identity"
 
 export type User = {
     info: UserInfo
@@ -27,20 +28,12 @@ export default class ServiceTestDsl {
 
     public readonly testTokenPolicyId = "cd597b903fb228d7e3fac443f9ddb19b3d91bf6b552f38f074386307"
 
-    private readonly identityService: IdentityServiceMock
-    private readonly secureSigningService: SecureSigningServiceMock 
-    private readonly blockfrost: BlockFrostAPIMock
-
     constructor(
-        _identityService: IdentityService, 
-        _secureSigningService: SecureSigningService,
-        _blockfrost: BlockFrostAPI,
+        private readonly identityService: IdentityServiceMock,
+        private readonly secureSigningService: SecureSigningServiceMock,
+        private readonly blockfrost: BlockFrostAPIMock,
         public readonly service: AssetManagementService
-    ) {
-        this.identityService = new IdentityServiceMock(_identityService)
-        this.secureSigningService = new SecureSigningServiceMock(_secureSigningService)
-        this.blockfrost = new BlockFrostAPIMock(_blockfrost)
-    }
+    ) {}
 
     async createUser(options?: { nickname?: string, addresses?: string[] }): Promise<User> {
         const wallet = Wallet.recover("testnet", 
@@ -207,146 +200,4 @@ export default class ServiceTestDsl {
 
     private stubPath = (filename: string): string =>
         path.join(__dirname, "..", "..", "stubs", "test-keys", filename)
-}
-
-export class IdentityServiceMock {
-
-    static buildInterface(): IdentityService {
-        return {
-            loadDatabaseModels: jest.fn(),
-            unloadDatabaseModels: jest.fn(),
-            health: jest.fn(),
-            createSigNonce: jest.fn(),
-            authenticate: jest.fn(),
-            register: jest.fn(),
-            associate: jest.fn(),
-            refresh: jest.fn(),
-            listSessions: jest.fn(),
-            signout: jest.fn(),
-            resolveUser: jest.fn(),
-            resolveSession: jest.fn(),
-            updateUser: jest.fn(),
-        }
-    }
-
-    constructor(private service: IdentityService){}
-
-    resolveUserReturns(response: ResolveUserResult) {
-        return jest.spyOn(this.service, "resolveUser")
-            .mockReturnValueOnce(Promise.resolve(response))
-    }
-}
-
-export class SecureSigningServiceMock {
-
-    static buildInterface(): SecureSigningService {
-        return {
-            health: jest.fn(),
-            policy: jest.fn(),
-            signTx: jest.fn(),
-            signWithPolicy: jest.fn(),
-            signData: jest.fn(),
-        }
-    }
-
-    constructor(private service: SecureSigningService){}
-
-    policyReturns(response: PolicyResult) {
-        return jest.spyOn(this.service, "policy")
-            .mockReturnValueOnce(Promise.resolve(response))
-    }
-
-    signWithPolicyReturns(response: SignTxResult) {
-        return jest.spyOn(this.service, "signWithPolicy")
-            .mockReturnValueOnce(Promise.resolve(response))
-    }
-}
-
-class BlockFrostAPIMock {
-
-    constructor(private service: BlockFrostAPI){}
-
-    accountsAddressesAssetsReturns(response: { unit: string, quantity: string }[]) {
-        return jest.spyOn(this.service, "accountsAddressesAssets")
-            .mockReturnValueOnce(Promise.resolve(response))
-    }
-
-    accountsAddressesReturns(response: { address: string }[]) {
-        return jest.spyOn(this.service, "accountsAddresses")
-            .mockReturnValueOnce(Promise.resolve(response))
-    }
-
-    blocksLatestReturs(response: { 
-        time: number, 
-        height: number, 
-        hash: string, 
-        slot: number, 
-        epoch: number, 
-        epoch_slot: number,
-        slot_leader: string,
-        size: number,
-        tx_count: number,
-        output: null,
-        fees: null,
-        block_vrf: string,
-        op_cert: string,
-        op_cert_counter: string,
-        previous_block: string,
-        next_block: null,
-        confirmations: number }) {
-            return jest.spyOn(this.service, "blocksLatest")
-                .mockReturnValueOnce(Promise.resolve(response))
-        }
-    
-    addressesUtxosAllReturns(response: {
-        tx_hash: string,
-        tx_index: number,
-        output_index: number,
-        amount: 
-            {
-                unit: string,
-                quantity: string
-            }[],
-        block: string,
-        data_hash: null,
-        inline_datum: null,
-        reference_script_hash: null }[]) {
-            return jest.spyOn(this.service, "addressesUtxosAll")
-                .mockReturnValueOnce(Promise.resolve(response))
-        }
-    
-    txSubmitReturns(response: string) {
-        return jest.spyOn(this.service, "txSubmit")
-            .mockReturnValueOnce(Promise.resolve(response))
-    }
-
-    txsResponse(response: {
-        hash: string,
-        block: string,
-        block_height: number,
-        block_time: number,
-        slot: number,
-        index: number,
-        output_amount: {
-            unit: string,
-            quantity: string,
-        }[],
-        fees: string,
-        deposit: string,
-        size: number,
-        invalid_before: string | null,
-        invalid_hereafter: string | null,
-        utxo_count: number,
-        withdrawal_count: number,
-        mir_cert_count: number,
-        delegation_count: number,
-        stake_cert_count: number,
-        pool_update_count: number,
-        pool_retire_count: number,
-        asset_mint_or_burn_count: number,
-        redeemer_count: number,
-        valid_contract: boolean},) {
-            return jest.spyOn(this.service, "txs")
-                .mockReturnValueOnce(Promise.resolve(response))
-        }
 }

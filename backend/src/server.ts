@@ -17,6 +17,7 @@ import Random from "./tools-utils/random";
 import { loadQuestRegistry } from "./registry-quests";
 import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./registry-policies";
 import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata";
+import path from "path";
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -30,7 +31,10 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const random = new Random(config.stringOrElse("RANDOM_SEED", Date.now().toString()))
     const metadataRegistry = await loadMetadataCache(loadMetadataLocationsFromEnv())
     const wellKnownPolicies = process.env.CARDANO_NETWORK === "mainnet" ? wellKnownPoliciesMainnet : loadWellKnownPoliciesFromEnv()
-    const questsRegistry = await loadQuestRegistry(config.stringOrElse("QUEST_REGISTRY_LOCATION", "https://cdn.ddu.gg/quests/quest-registry.json"))
+    const questsRegistry = await loadQuestRegistry(
+        config.stringOrElse("QUEST_REGISTRY_LOCATION", path.join(__dirname, "..", "stubs", "test-quest-registry.yaml")), 
+        config.typeOrElse("QUEST_REGISTRY_FORMAT", "yaml", (obj: any): obj is "yaml" | "json" => obj === "yaml" || obj === "json"), 
+    )
     const blockfrost = new BlockFrostAPI({ projectId: config.stringOrError("BLOCKFROST_API_KEY") })    
     const database = connectToDB({ 
         host: config.stringOrError("DB_HOST"),
