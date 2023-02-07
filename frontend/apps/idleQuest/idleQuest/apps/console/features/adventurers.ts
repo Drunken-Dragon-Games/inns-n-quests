@@ -76,7 +76,7 @@ interface initialStateAdventurer{
 
 
 interface AdventurerAfterQuestType{
-    id: string
+    adventurerId: string
     experience?: number
     type?: "pixeltile" | "gma" | 'aot'
     dead_cooldown?: number
@@ -104,7 +104,7 @@ const adventurers = createSlice({
             const adventurerArrays =  state.data.map(adventurer =>{
                 
                 action.payload.forEach((adventurerId) => {
-                    if(adventurerId == adventurer.id){
+                    if(adventurerId == adventurer.adventurerId){
                         adventurer.in_quest = true
                         return adventurer
                     }
@@ -122,13 +122,13 @@ const adventurers = createSlice({
         setFreeAdventurers: (state, action: PayloadAction<AdventurerAfterQuestType []>) => {
 
             //crea un array con todos los id de los aventureros en el array
-            const adventurersIds = action.payload.map (adventurer => adventurer.id)
+            const adventurersIds = action.payload.map (adventurer => adventurer.adventurerId)
 
              //este reducer toma el array con los ids y el estado con el array de los aventureros y cuando tenga el mismo id cambia la propiedad in_quest  a false
         
             const adventurerArrays =  state.data.map (adventurer => {            
                 adventurersIds.forEach(adventurerId => {
-                    if(adventurerId == adventurer.id){
+                    if(adventurerId == adventurer.adventurerId){
                         adventurer.in_quest = false
                         return adventurer
                     }
@@ -148,7 +148,7 @@ const adventurers = createSlice({
             const adventurers =  state.data.map (adventurer =>{            
                 action.payload.forEach(adventurerRewarded => {
 
-                    if(adventurerRewarded.id == adventurer.id){
+                    if(adventurerRewarded.adventurerId == adventurer.adventurerId){
                         adventurer.experience = adventurerRewarded.experience
                         return adventurer
                     }
@@ -167,7 +167,7 @@ const adventurers = createSlice({
     
             const adventurers =  state.data.map ((adventurer ) =>{                            
                 action.payload.forEach((deathAdventurerData: AdventurerAfterQuestType) => {
-                    if(deathAdventurerData.id == adventurer.id){
+                    if(deathAdventurerData.adventurerId == adventurer.adventurerId){
                         if(deathAdventurerData.type == "pixeltile"){
                             adventurer.experience = 0
                         } else if (deathAdventurerData.type == "gma"){
@@ -189,7 +189,7 @@ const adventurers = createSlice({
         setRecruitment: (state) => {
 
             const recruiter: DataAdventurerType = {
-                id: "b9930b53-aed1-4feb-a424-2c75f3f123456d2asdasdafgasd6bf",
+                adventurerId: "b9930b53-aed1-4feb-a424-2c75f3f123456d2asdasdafgasd6bf",
                 name: "placeholeder",
                 experience: 0,
                 in_quest: false,

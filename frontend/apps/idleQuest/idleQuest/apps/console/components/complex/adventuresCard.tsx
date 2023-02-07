@@ -108,14 +108,14 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
 
     const { selectAdventurer, isQuestSelected } = useGetAdventurerSelectClick()
 
-    const position = useGetPositionMedal(data.id)
+    const position = useGetPositionMedal(data.adventurerId)
 
     return(
     <>
         
         {/* <AdventuresCardWrapper ref ={data.in_quest == false  && selectedInQuest == false && (data.metadata.is_alive == true || data.metadata.is_alive == undefined) ? drag : null}> */}
         <AdventuresCardWrapper 
-            onClick={() =>  data.metadata.dead_cooldown ? null : selectAdventurer(data.id, selectedInQuest!)}
+            onClick={() =>  data.metadata.dead_cooldown ? null : selectAdventurer(data.adventurerId, selectedInQuest!)}
             isSelectable = {isQuestSelected}
         >
             <Margin>

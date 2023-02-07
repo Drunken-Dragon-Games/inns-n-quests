@@ -29,19 +29,7 @@ export interface PartyTYpe {
     balanced: boolean
 }
 
-export interface DataAdventurerType{
-    id: string
-    name: string,
-    experience: number
-    in_quest: boolean
-    on_chain_ref: string
-    onRecruitment?: boolean
-    sprites: string
-    type: "pixeltile" | "gma"
-    metadata: MetadataType
-    race: string
-    class: string
-}
+
 
 export interface MetadataType{
     is_alive?: boolean,
@@ -80,7 +68,7 @@ export interface EnrollsType{
 
 interface AdventurerInQuestType{
     experience: number
-    id: string
+    adventurerId: string
     in_quest: boolean
     metadata: MetadataType
     on_chain_ref: string
@@ -88,3 +76,48 @@ interface AdventurerInQuestType{
     type: "pixeltile" | "gma"
 }
 
+
+export interface DataAdventurerType{
+    adventurerId: string
+    name: string,
+    experience: number
+    in_quest: boolean
+    on_chain_ref: string
+    onRecruitment?: boolean
+    sprites: string
+    type: "pixeltile" | "gma"
+    metadata: MetadataType
+    race: string
+    class: string
+    athleticism: number,
+    intellect: number,
+    charisma: number,
+}
+
+export interface Adventurer {
+    adventurerId: string,
+    userId: string,
+    name: string,
+    class: AdventurerClass,
+    race: Race,
+    collection: AdventurerCollection,
+    assetRef: string,
+    sprite?: string,
+    hp: number,
+    inChallenge?: boolean,
+    athleticism: number,
+    intellect: number,
+    charisma: number,
+}
+
+export type Race = "human" | "elf" | "tiefling" | "dragonkin" | "worgenkin" | "undead" | "viera" | "troll" | "vulkin" | "orc" | "tauren"
+
+export const races = ["human", "elf", "tiefling", "dragonkin", "worgenkin", "undead", "viera", "troll", "vulkin", "orc", "tauren"]
+
+export type AdventurerClass = "fighter" | "paladin" | "ranger" | "rogue" | "bard" | "mage" | "warlock" | "cleric" | "druid" | "knight"
+
+export const adventurerClasses = ["fighter", "paladin", "ranger", "rogue", "bard", "mage", "warlock", "cleric", "druid", "knight"]
+
+export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-thiolden" | "pixel-tiles"
+
+export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]

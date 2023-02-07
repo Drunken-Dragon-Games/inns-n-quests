@@ -46,7 +46,7 @@ const [ setFetchGetInProgressQuestStatusIdle, setFetchGetInProgressQuestStatusPe
 //fetch para claimear el reward
 
 interface IdsType{
-    id: string
+    adventurerId: string
 }
 
 const getAdventurers = (enrolls : EnrollsType []): IdsType [] =>{

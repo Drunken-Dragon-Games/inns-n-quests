@@ -6,7 +6,7 @@ export default (adventurerId: string | null) => {
 
     const adventurers = generalSelector.idleQuest.adventurers.data.data
 
-    const dataAdventurer = adventurers.filter( adventurer => adventurerId === adventurer.id )
+    const dataAdventurer = adventurers.filter( adventurer => adventurerId === adventurer.adventurerId )
     
 
     return dataAdventurer[0] ?? {}

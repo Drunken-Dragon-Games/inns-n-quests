@@ -51,7 +51,7 @@ export default (slots: number, adventurerList: (string | null) [] | EnrollsType 
         
         const levelSum = (adventurerList as string []).reduce((acc: number, id: string) => {
             
-            const filterAdventurer = allAdventurer.filter((adventurer) => adventurer.id == id)
+            const filterAdventurer = allAdventurer.filter((adventurer) => adventurer.adventurerId == id)
             
 
             if(filterAdventurer.length == 1){

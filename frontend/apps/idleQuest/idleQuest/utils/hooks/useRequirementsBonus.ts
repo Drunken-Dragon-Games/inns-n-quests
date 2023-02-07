@@ -142,7 +142,7 @@ const adventuresSelectedArray = (adventurerList: string [], allAdventurer: DataA
     const adventurersArray = adventurerList.reduce((acc:DataAdventurerType [] , adventurerId: string) => {
         
         
-        const newAdventurer = allAdventurer.filter( (adventurer) => adventurer.id == adventurerId)
+        const newAdventurer = allAdventurer.filter( (adventurer) => adventurer.adventurerId == adventurerId)
 
         return acc.concat(newAdventurer)
         

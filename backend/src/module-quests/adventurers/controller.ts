@@ -80,7 +80,12 @@ const getAllAdventurers = (thioldenMetadata: any, idleQuestsService: IdleQuestsS
         next(error)
     }
     */
-    return response.status(200).json(await idleQuestsService.module_getAllAdventurers(userId))
+
+    const result = await idleQuestsService.getAllAdventurers(userId)
+    if(result.status == 'ok')
+        return response.status(200).json(result)
+    else
+        return response.status(400).json(result)
 }
 
 export {
