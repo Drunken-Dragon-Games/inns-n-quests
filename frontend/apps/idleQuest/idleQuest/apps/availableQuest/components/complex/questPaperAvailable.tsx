@@ -192,9 +192,7 @@ const QuestPaperAvailable = () => {
 
 
     const questData = useGetAvailableQuestData()  
-
-    const [slots, setSlots] = useState(Array(questData.slots).fill('')) 
-
+    
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const generalDispatch = useGeneralDispatch()    
 
@@ -275,7 +273,7 @@ const QuestPaperAvailable = () => {
                             <Flex>
                                 <Adventurer>
                                     <Flex>
-                                        {slots.map((el, index) => {
+                                        {Array(questData.slots).fill(('') as any).map((el, index) => {
                                             return <DropBox 
                                                 key={index} 
                                                 index ={index} 
