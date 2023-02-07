@@ -35,14 +35,14 @@ export default (index: number, reset: boolean) => {
 
     const addBox = (id: string, src: string, experience: number, type: string) =>{
         SetAdventurer(src)
-        generalDispatch(setSelectAdventurerDrag({index: index , id, unSelect: false}))
+        // generalDispatch(setSelectAdventurerDrag({index: index , id, unSelect: false}))
         setExperience(experience)
         SetType(type)
     }
 
     const removeBox = () => {
         SetAdventurer("")
-        generalDispatch(setSelectAdventurerDrag({index: index , unSelect: true}))
+        // generalDispatch(setSelectAdventurerDrag({index: index , unSelect: true}))
         setExperience(0)
     }
 

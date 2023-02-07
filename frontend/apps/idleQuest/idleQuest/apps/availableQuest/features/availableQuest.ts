@@ -48,7 +48,7 @@ const [ setFetchGetAvailableQuestStatusIdle, setFetchGetAvailableQuestStatusPend
 
 //fetch para tomar a los available quests
 
-export const takeAvailableQuest = (questId: string, adventurers: (string | undefined)  [], questUiidFront: string  ): generalReducerThunk  => async (dispatch) =>{
+export const takeAvailableQuest = (questId: string, adventurers: (string | null)  [], questUiidFront: string  ): generalReducerThunk  => async (dispatch) =>{
 
     dispatch(setFetchTakeAvailableQuestStatusPending())  
 

@@ -99,11 +99,11 @@ const adventurers = createSlice({
 
         },
 
-        setAdventuresInQuest: (state, action: PayloadAction<(string | undefined)[]>) => {
+        setAdventuresInQuest: (state, action: PayloadAction<(string | null)[]>) => {
 
             const adventurerArrays =  state.data.map(adventurer =>{
                 
-                action.payload.forEach((adventurerId: string | undefined) => {
+                action.payload.forEach((adventurerId) => {
                     if(adventurerId == adventurer.id){
                         adventurer.in_quest = true
                         return adventurer
