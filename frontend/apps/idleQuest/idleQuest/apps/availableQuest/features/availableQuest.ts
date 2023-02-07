@@ -183,14 +183,20 @@ const availableQuests = createSlice({
 export const { setAvailableQuest, setDeleteAvailableQuest, setPositionAvailableQuest, setNewExtraQuests } = availableQuests.actions
 
 
+interface SelectAdventurerDragType extends SelectAdventurerType{
+    index: number
+}
+
+interface  SelectAdventurerClickType extends SelectAdventurerType{
+    maxLength: number
+}
+
 interface SelectAdventurerType {
-    index: number,
-    id?: string | undefined,
-    unSelect: boolean,
+    id: string | null,
 }
 
 interface InitialStateSelectAdventurerType{
-    selectAdventurer: (string | undefined) []
+    selectAdventurer: (string | null) []
 }
 
 const initialStateSelectAdventurer: InitialStateSelectAdventurerType = {selectAdventurer: []}
@@ -199,36 +205,67 @@ const selectAdventurer = createSlice({
     name: "selectAdventurer",
     initialState: initialStateSelectAdventurer,
     reducers: {
-        setSelectAdventurer:  (state, action: PayloadAction<SelectAdventurerType>)=> {
+        setSelectAdventurerDrag:  (state, action: PayloadAction<SelectAdventurerDragType>)=> {
             
             // se crea un nuevo array y se igual al anterior
-            let newArray : (string | undefined) [] =  []
+            // let newArray : (string | undefined) [] =  []
                 
-            newArray = state.selectAdventurer
+            // newArray = state.selectAdventurer
     
-            //si la condicion es verdad lo agrega directament al array
-            if(action.payload.unSelect == false){
-                newArray[action.payload.index] = action.payload.id
-            }  
-            //si la condicion es falsa la quita del array
-            else if (action.payload.unSelect == true){
+            // //si la condicion es verdad lo agrega directament al array
+            // if(action.payload.unSelect == false){
+            //     newArray[action.payload.index] = action.payload.id
+            // }  
+            // //si la condicion es falsa la quita del array
+            // else if (action.payload.unSelect == true){
     
-                //marca undefined el indice que viene en el payload
-                newArray[action.payload.index] = undefined
+            //     //marca undefined el indice que viene en el payload
+            //     newArray[action.payload.index] = undefined
 
-                //con esta funcion verifica si el array esta vacio 
-                const isEmpty = newArray.reduce ((acc: boolean [] , originalElement: (string | undefined)) =>{
-                    if(originalElement != undefined){
-                        return [false]
-                    }
-                    return acc
-                },[true])
-                if(isEmpty[0] == true){
-                    state.selectAdventurer = []
-                }
-            }  
+            //     //con esta funcion verifica si el array esta vacio 
+            //     const isEmpty = newArray.reduce ((acc: boolean [] , originalElement: (string | undefined)) =>{
+            //         if(originalElement != undefined){
+            //             return [false]
+            //         }
+            //         return acc
+            //     },[true])
+            //     if(isEmpty[0] == true){
+            //         state.selectAdventurer = []
+            //     }
+            // }  
         },
 
+        setSelectAdventurerClick: (state, action:PayloadAction<SelectAdventurerClickType>) => {
+
+            const newSelectedArray = state.selectAdventurer
+
+            const indexNull = newSelectedArray.indexOf(null)
+
+            if(indexNull === -1){
+                if(state.selectAdventurer.length < action.payload.maxLength){
+                    newSelectedArray.push(action.payload.id)
+                }
+            } else {
+                newSelectedArray[indexNull] = action.payload.id
+            }
+           
+
+            state.selectAdventurer =  newSelectedArray
+        },
+
+        setUnselectAdventurerClick: (state, action:PayloadAction<string>) => {
+
+            const newSelectedAdventurerArray = state.selectAdventurer.map( adventurerId => {
+                if(adventurerId === action.payload){
+                    return null
+                }
+
+                return  adventurerId
+            })
+
+            
+            state.selectAdventurer =  newSelectedAdventurerArray
+        },
         setClearSelectedAdventurers:  ( state )=> {
             
             state.selectAdventurer = []
@@ -237,7 +274,7 @@ const selectAdventurer = createSlice({
     },
 });
 
-export const { setSelectAdventurer, setClearSelectedAdventurers } = selectAdventurer.actions
+export const { setSelectAdventurerDrag, setSelectAdventurerClick, setUnselectAdventurerClick,  setClearSelectedAdventurers } = selectAdventurer.actions
 
 //taken id
 

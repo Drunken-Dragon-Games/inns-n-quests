@@ -1,7 +1,7 @@
 import {  useDrop } from "react-dnd";
 import { useState, useEffect } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
-import { setSelectAdventurer } from "../features/availableQuest"
+import { setSelectAdventurerDrag } from "../features/availableQuest"
 
 
 interface DataAdventurer{
@@ -35,14 +35,14 @@ export default (index: number, reset: boolean) => {
 
     const addBox = (id: string, src: string, experience: number, type: string) =>{
         SetAdventurer(src)
-        generalDispatch(setSelectAdventurer({index: index , id, unSelect: false}))
+        generalDispatch(setSelectAdventurerDrag({index: index , id, unSelect: false}))
         setExperience(experience)
         SetType(type)
     }
 
     const removeBox = () => {
         SetAdventurer("")
-        generalDispatch(setSelectAdventurer({index: index , unSelect: true}))
+        generalDispatch(setSelectAdventurerDrag({index: index , unSelect: true}))
         setExperience(0)
     }
 
