@@ -1,8 +1,8 @@
 import styled from "styled-components";
-import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon } from "../basic_components";
+import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon, PositionMedal } from "../basic_components";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 import { RescalingImg } from "../../../../utils/components/basic_component";
-import { useDragElement, useGetAdventurerSelectClick } from "../../hooks";
+import { useDragElement, useGetAdventurerSelectClick, useGetPositionMedal } from "../../hooks";
 import { DataAdventurerType } from "../../../../../../../types/idleQuest";
 
 
@@ -86,6 +86,14 @@ const CoolDownWrapper = styled.div`
     margin-left: auto;
     margin-top: 0.2vw;
 `
+
+const PositionMedalPosition = styled.div`
+    position: absolute;
+    top: 1vw;
+    left: 1vw;
+
+`
+
 interface IProps_AdventuresCard{
     data: DataAdventurerType
     selectedInQuest?: boolean
@@ -99,12 +107,15 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
     // const drag = useDragElement( data )
 
     const { selectAdventurer, isQuestSelected } = useGetAdventurerSelectClick()
+
+    const position = useGetPositionMedal(data.id)
+
     return(
     <>
         
         {/* <AdventuresCardWrapper ref ={data.in_quest == false  && selectedInQuest == false && (data.metadata.is_alive == true || data.metadata.is_alive == undefined) ? drag : null}> */}
         <AdventuresCardWrapper 
-            onClick={() => selectAdventurer(data.id, selectedInQuest!)}
+            onClick={() =>  data.metadata.dead_cooldown ? null : selectAdventurer(data.id, selectedInQuest!)}
             isSelectable = {isQuestSelected}
         >
             <Margin>
@@ -147,9 +158,17 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
 
                     </CenterVertical>
                 </AttributesWrapper>
-
+              
                     
             </Margin>
+
+            <ConditionalRender condition = {position !== -1}>
+                <PositionMedalPosition>
+                    <PositionMedal>
+                        {(position + 1).toString()}
+                    </PositionMedal>
+                </PositionMedalPosition>
+            </ConditionalRender>
 
             <ConditionalRender condition ={data.type == "gma" && data.metadata.is_alive == false} >
                 <DeathCooldownIconPosition>

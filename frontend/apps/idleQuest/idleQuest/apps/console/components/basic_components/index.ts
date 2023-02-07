@@ -8,3 +8,4 @@ export { default as CooldownDeathTimmer } from "./cooldownDeathTimmer"
 export { default as DeathCooldownIcon } from "./deathCooldownIcon"
 export { default as Timmer } from "./timmer"
 export { default as DragonSilverIconTakenQuest} from "./dragonSilverIconTakenQuest"
+export { default as PositionMedal } from './PositionMedal'

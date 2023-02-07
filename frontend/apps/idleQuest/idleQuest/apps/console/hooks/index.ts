@@ -14,3 +14,4 @@ export { default as useTimmerOverQuestInProgress } from "./useTimmerOverQuestInP
 export { default as useGetQuestCompleted } from "./useGetQuestCompleted"
 export { default as useIsQuestSelected } from "./useIsQuestSelected"
 export { default as useGetAdventurerSelectClick } from './useGetAdventurerSelectClick'
+export { default as useGetPositionMedal } from './useGetPositionMedal'

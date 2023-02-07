@@ -192,7 +192,6 @@ const adventurers = createSlice({
                 id: "b9930b53-aed1-4feb-a424-2c75f3f123456d2asdasdafgasd6bf",
                 name: "placeholeder",
                 experience: 0,
-                adventurer_img: "./images/pixeltiles_props/adventurer_prop",
                 in_quest: false,
                 on_chain_ref: "placeholder",
                 onRecruitment: true,
