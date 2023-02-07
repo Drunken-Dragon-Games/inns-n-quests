@@ -2,12 +2,12 @@ import { createSliceStatus, actionsGenerator } from '../../../utils/features/uti
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { combineReducers } from "redux";
 import { deserializeStakeAddress } from './authentication';
-import { generalReducerThunk } from '../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../features/generalReducer';
 import { cardano_network } from '../../../../setting';
 
 //esta funcion regresa la api dependendiendo de la wallet
 
-export const walletConnection =  (wallet: "nami" | "eternl"): generalReducerThunk => async (dispatch) => {
+export const walletConnection =  (wallet: "nami" | "eternl"): GeneralReducerThunk => async (dispatch) => {
   let api
 
 
@@ -39,7 +39,7 @@ export const walletConnection =  (wallet: "nami" | "eternl"): generalReducerThun
 
 // una conecion local para llamar a la cartera de nami 
 
-export const connectNami = (): generalReducerThunk => async (dispatch, getState) => {
+export const connectNami = (): GeneralReducerThunk => async (dispatch, getState) => {
 
   dispatch(setWalletStatusPending())
 
@@ -88,7 +88,7 @@ export const connectNami = (): generalReducerThunk => async (dispatch, getState)
 
 // una conecion local para llamar a la cartera de eternl
 
-export const connectEternl = (): generalReducerThunk => async (dispatch, getState) => {
+export const connectEternl = (): GeneralReducerThunk => async (dispatch, getState) => {
 
 
   dispatch(setWalletStatusPending())

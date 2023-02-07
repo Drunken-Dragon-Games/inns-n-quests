@@ -30,16 +30,16 @@ export const generalStore = configureStore({
     middleware: (getDefaultMiddleware) => getDefaultMiddleware( {serializableCheck: false}),
 })
 
-export type generalReducerRootState = ReturnType<typeof generalStore.getState>
+export type GeneralReducerRootState = ReturnType<typeof generalStore.getState>
 
-export type generalReducerDispatch = typeof generalStore.dispatch
+export type GeneralReducerDispatch = typeof generalStore.dispatch
 
-export type generalReducerThunk<ReturnType = void> = ThunkAction<
+export type GeneralReducerThunk<ReturnType = void> = ThunkAction<
   ReturnType,
-  generalReducerRootState,
+  GeneralReducerRootState,
   unknown,
   Action<string>
 >
 
 
-export const selectGeneralReducer = (state: generalReducerRootState) => state
+export const selectGeneralReducer = (state: GeneralReducerRootState) => state

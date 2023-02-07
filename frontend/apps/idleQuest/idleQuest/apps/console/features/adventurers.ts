@@ -2,14 +2,14 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { combineReducers } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
-import { generalReducerThunk } from '../../../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from 'axios';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
 import { DataAdventurerType } from '../../../../../../types/idleQuest';
 
 //fetch para obeter a los aventureros
 
-export const getAdventurers = () : generalReducerThunk => async (dispatch) =>{
+export const getAdventurers = () : GeneralReducerThunk => async (dispatch) =>{
   
     dispatch(setFetchGetAdventurersStatusPending())
 
@@ -191,15 +191,26 @@ const adventurers = createSlice({
             const recruiter: DataAdventurerType = {
                 adventurerId: "b9930b53-aed1-4feb-a424-2c75f3f123456d2asdasdafgasd6bf",
                 name: "placeholeder",
+                race: "human",
+                class: "fighter",
+
+                assetRef: "placeholder",
+                sprite: "./images/pixeltiles_props/adventurer_prop",
+                hp: 1,
+                athleticism: 0,
+                intellect: 0,
+                charisma: 0,
+                inChallenge: false,
+                collection: "pixel-tiles",
+
+                // Old properties, remove once the new backend models have been implemented 
                 experience: 0,
                 in_quest: false,
                 on_chain_ref: "placeholder",
                 onRecruitment: true,
-                sprites: "./images/pixeltiles_props/adventurer_prop",
-                type: "pixeltile",
+                //sprites: "./images/pixeltiles_props/adventurer_prop",
+                //type: "pixeltile",
                 metadata: {},
-                race: "undefined",
-                class: "undefined"
             }
 
             state.data =  state.data.concat(recruiter)

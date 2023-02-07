@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { combineReducers } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
-import { generalReducerThunk } from '../../../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { setFreeAdventurers, setExperienceReward, setDeath } from '../../console/features/adventurers';
 import { AxiosError } from 'axios';
 import { setAddDragonSilverToClaim } from '../../console/features/player';
@@ -11,7 +11,7 @@ import { inProgressQuestType, EnrollsType } from '../../../../../../types/idleQu
 
 //fetch para obeter a los in progress quests
 
-export const getInProgressQuest = (): generalReducerThunk => async (dispatch) =>{
+export const getInProgressQuest = (): GeneralReducerThunk => async (dispatch) =>{
 
     dispatch(setFetchGetInProgressQuestStatusPending())
     try {   
@@ -59,7 +59,7 @@ const getAdventurers = (enrolls : EnrollsType []): IdsType [] =>{
 
 }
 
-export const PostClaimInProgressQuest = (quest: inProgressQuestType): generalReducerThunk => async (dispatch) =>{
+export const PostClaimInProgressQuest = (quest: inProgressQuestType): GeneralReducerThunk => async (dispatch) =>{
     
     dispatch(setFetchPostClaimRewardInProgressQuestStatusPending())
     try {

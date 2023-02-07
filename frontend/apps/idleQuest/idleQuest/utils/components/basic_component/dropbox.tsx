@@ -5,12 +5,13 @@ import { useDispatch } from 'react-redux'
 import { Feelings, RescalingImg } from ".";
 import { useGetLevel } from "../../hooks";
 import Image from 'next/image'
+import { AdventurerCollection } from "../../../../../../types/idleQuest";
 
 interface DataAdventurer{
     id: string,
     src: string,
     experience: number,
-    type: string
+    collection: AdventurerCollection
 }
 
 interface DropBox {
@@ -102,7 +103,7 @@ const DropBox = ({index, questLevel}: DropBox ) =>{
     const dispatch = useDispatch()
 
     const [ adventurer, SetAdventurer ] = useState<string>("")
-    const [ type, SetType ] = useState<string>("")
+    const [ collection, SetAdventurerCollection ] = useState<AdventurerCollection>("pixel-tiles")
     const [ experience, setExperience] = useState<number>(0)
     const [ onHover, setOnHover ] =useState<boolean>(false)
     const [ level ] = useGetLevel(experience)
@@ -110,18 +111,18 @@ const DropBox = ({index, questLevel}: DropBox ) =>{
     //un hook del drag and drop lo que toma los datos que se requieren desde el elemento que dropea 
     const [{isOver}, drop] = useDrop(() => ({
         accept: "adventurer",
-        drop: (item: DataAdventurer) => addBox(item.id, item.src, item.experience, item.type),
+        drop: (item: DataAdventurer) => addBox(item.id, item.src, item.experience, item.collection),
         collect:(monitor) => ({
             isOver: !!monitor.isOver()
         })
     }))
 
     //se activa esta funcion cuando un objeto es dejada en estra dropbox
-    const addBox = (id: string, src: string, experience: number, type: string) =>{
+    const addBox = (id: string, src: string, experience: number, collection: AdventurerCollection) =>{
         SetAdventurer(src)
         // dispatch(setSelectAdventurer({index: index , id, unSelect: false}))
         setExperience(experience)
-        SetType(type)
+        SetAdventurerCollection(collection)
     }
 
     //elimina el objeto en este dropbox
@@ -157,7 +158,7 @@ const DropBox = ({index, questLevel}: DropBox ) =>{
                                         <div>                                    
                                             <RescalingImg  
                                                 src= {adventurer}
-                                                type={type} 
+                                                collection={collection} 
                                             />
                                         </div>
 

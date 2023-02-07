@@ -4,9 +4,9 @@ import { axiosCustomInstance } from '../../../../axios/axiosApi';
 import { createSliceStatus, actionsGenerator } from '../../features/utils';
 import { fetchRefreshToken } from '../../../../features/refresh';
 import { AxiosError } from 'axios';
-import { generalReducerThunk } from '../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../features/generalReducer';
 
-export const claimDragonSilver = (amount: number, authenticationMethod: string | null) : generalReducerThunk => async(dispatch) => {
+export const claimDragonSilver = (amount: number, authenticationMethod: string | null) : GeneralReducerThunk => async(dispatch) => {
     
     dispatch(setClaimDragonSilverStatusPending())
     try {  
@@ -33,7 +33,7 @@ const  claimDragonSilverStatus  = createSliceStatus("claimDragonSilverStatus")
 
 const [ setClaimDragonSilverStatusIdle, setClaimDragonSilverStatusPending, setClaimDragonSilverStatusFulfilled, setClaimDragonSilverStatusRejected ] = actionsGenerator(claimDragonSilverStatus.actions)
 
-const signPolicy = (transaction: string, claimId: string, authenticationMethod: string | null): generalReducerThunk => async(dispatch, state) => {
+const signPolicy = (transaction: string, claimId: string, authenticationMethod: string | null): GeneralReducerThunk => async(dispatch, state) => {
   
     let api = null
     console.log(api)
@@ -61,7 +61,7 @@ const signPolicy = (transaction: string, claimId: string, authenticationMethod: 
   
   }
 
-  const submitTransactionPost = (witness: string, tx: string  ,claimId: string): generalReducerThunk => async(dispatch, state) => {
+  const submitTransactionPost = (witness: string, tx: string  ,claimId: string): GeneralReducerThunk => async(dispatch, state) => {
   
   
     try {  

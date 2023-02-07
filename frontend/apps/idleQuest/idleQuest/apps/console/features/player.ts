@@ -2,13 +2,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { combineReducers } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
-import { generalReducerThunk } from '../../../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from 'axios';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
 
 //fetch para obeter a el dragon silver to claim
 
-export const getDragonSilverToClaim = () : generalReducerThunk => async (dispatch) =>{
+export const getDragonSilverToClaim = () : GeneralReducerThunk => async (dispatch) =>{
   
     dispatch(setFetchGetDragonSilverToClaimStatusPending())
     try {  
@@ -40,7 +40,7 @@ const [ setFetchGetDragonSilverToClaimStatusIdle, setFetchGetDragonSilverToClaim
   
 //fetch para obeter a el dragon silver
 
-export const getDragonSilver = () : generalReducerThunk => async (dispatch) =>{
+export const getDragonSilver = () : GeneralReducerThunk => async (dispatch) =>{
   
     dispatch(setFetchGetDragonSilverStatusPending())
     try {  

@@ -79,19 +79,27 @@ interface AdventurerInQuestType{
 
 export interface DataAdventurerType{
     adventurerId: string
-    name: string,
+    name: string
+    class: AdventurerClass
+    race: Race
+
+    assetRef: string
+    sprite: string
+    hp: number
+    athleticism: number
+    intellect: number
+    charisma: number
+    inChallenge: boolean
+    collection: AdventurerCollection
+
+    // Old properties, remove once the new backend models have been implemented 
     experience: number
     in_quest: boolean
     on_chain_ref: string
     onRecruitment?: boolean
-    sprites: string
-    type: "pixeltile" | "gma"
+    //sprites: string
+    //type: "pixeltile" | "gma"
     metadata: MetadataType
-    race: string
-    class: string
-    athleticism: number,
-    intellect: number,
-    charisma: number,
 }
 
 export interface Adventurer {

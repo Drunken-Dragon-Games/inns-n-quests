@@ -4,7 +4,7 @@ import { Feelings, RescalingImg } from "../../../../utils/components/basic_compo
 import { useGetLevel } from "../../../../utils/hooks";
 import Image from 'next/image'
 import {ConditionalRender } from "../../../../../../utils/components/basic_components"
-import { useDropElement, useGetAdventurerData, useRemoveAdventurer } from "../../hooks"
+import { useGetAdventurerData, useRemoveAdventurer } from "../../hooks"
 
 
 const DropBoxElement = styled.div`
@@ -104,10 +104,10 @@ const DropBox: React.FC <DropBoxType> = ({index, questLevel, reset, id}) =>{
         <>
             <DropBoxElement 
                 // ref={drop} 
-                onMouseOver = {adventurerData.sprites != undefined ? () => setOnHover(true) : () => null} 
-                onMouseLeave ={adventurerData.sprites != undefined ? () => setOnHover(false) : () => null}              
+                onMouseOver = {adventurerData.sprite != undefined ? () => setOnHover(true) : () => null} 
+                onMouseLeave ={adventurerData.sprite != undefined ? () => setOnHover(false) : () => null}              
             >
-                <ConditionalRender condition={adventurerData.sprites != undefined }>
+                <ConditionalRender condition={adventurerData.sprite != undefined }>
                     <Center>
                         <AdventureWrapper>
                             <FeelingAnimationWrapper hover ={onHover}>
@@ -127,8 +127,8 @@ const DropBox: React.FC <DropBoxType> = ({index, questLevel, reset, id}) =>{
                             <AdventurerCenterWrapper>
                                 <div>                                    
                                     <RescalingImg  
-                                        src= {adventurerData.sprites}
-                                        type={adventurerData.type} 
+                                        src= {adventurerData.sprite}
+                                        collection={adventurerData.collection} 
                                     />
                                 </div>
 

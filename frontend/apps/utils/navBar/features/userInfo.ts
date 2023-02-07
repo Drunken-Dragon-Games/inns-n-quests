@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'; 
 import { combineReducers } from "redux";
-import { generalReducerThunk } from '../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../features/generalReducer';
 import { axiosCustomInstance } from '../../../../axios/axiosApi';
 import { createSliceStatus, actionsGenerator } from '../../features/utils';
 import { AxiosError } from 'axios';
 import { fetchRefreshToken } from '../../../../features/refresh';
 
 
-export const userDataFetch = () : generalReducerThunk => async(dispatch) => {
+export const userDataFetch = () : GeneralReducerThunk => async(dispatch) => {
     
     dispatch(setFetchUserDataStatusPending())
     try {  

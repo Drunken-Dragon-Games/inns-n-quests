@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { combineReducers } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
-import { generalReducerThunk } from '../../../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from "axios"
 import { setAdventuresInQuest } from '../../console/features/adventurers';
 import { setAvailableQuestUnselect } from '../../../features/interfaceNavigation';
@@ -13,7 +13,7 @@ import { AvailableQuestType } from '../../../../../../types/idleQuest';
 
 //fetch para obeter los available quest si es la primera vez que se piden se realiza una peticion de 10 y posteriormente de 5 en 5 
 
-export const getAvailableQuest = (firstTime? : boolean): generalReducerThunk => async (dispatch) =>{
+export const getAvailableQuest = (firstTime? : boolean): GeneralReducerThunk => async (dispatch) =>{
 
     dispatch(setFetchGetAvailableQuestStatusPending())
 
@@ -48,7 +48,7 @@ const [ setFetchGetAvailableQuestStatusIdle, setFetchGetAvailableQuestStatusPend
 
 //fetch para tomar a los available quests
 
-export const takeAvailableQuest = (questId: string, adventurers: (string | null)  [], questUiidFront: string  ): generalReducerThunk  => async (dispatch) =>{
+export const takeAvailableQuest = (questId: string, adventurers: (string | null)  [], questUiidFront: string  ): GeneralReducerThunk  => async (dispatch) =>{
 
     dispatch(setFetchTakeAvailableQuestStatusPending())  
 

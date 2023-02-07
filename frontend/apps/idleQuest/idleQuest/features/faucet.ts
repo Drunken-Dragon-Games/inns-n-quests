@@ -1,11 +1,11 @@
 
 import { createSliceStatus, actionsGenerator } from '../../../utils/features/utils'; 
-import { generalReducerThunk } from '../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../features/generalReducer';
 import { axiosCustomInstance } from '../../../../axios/axiosApi';
 import { AxiosError } from 'axios';
 import { getAdventurers } from '../apps/console/features/adventurers';
 
-export const fetchMintTest = (): generalReducerThunk => async (dispatch) =>{
+export const fetchMintTest = (): GeneralReducerThunk => async (dispatch) =>{
 
     dispatch(setFetchAddressPostStatusPending())
 

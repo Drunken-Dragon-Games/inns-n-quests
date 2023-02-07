@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { useGetHeightAndWidth, useGetHeightAndWidthAdventurerThiolden } from "../../../apps/console/hooks";
 import Image from "next/image"
 import { ConditionalRender } from "../../../../../explorerOfThiolden/explorerOfThioldenPage/components/basic_components";
+import { AdventurerCollection } from "../../../../../../types/idleQuest";
 
 
 
@@ -51,15 +52,15 @@ interface scalingImageDate{
     inQuest?: boolean
     selectedInQuest?: boolean
     is_alive?: boolean | null
-    type: string
+    collection: AdventurerCollection
 }
 
 
-const RescalingImg  = ({src, inQuest, selectedInQuest, is_alive, type} : scalingImageDate) => {
+const RescalingImg  = ({src, inQuest, selectedInQuest, is_alive, collection} : scalingImageDate) => {
     
     const heightPixelTiles = useGetHeightAndWidth(src, 3.5)
     const heightGMA = useGetHeightAndWidth(src, 5.3)
-    const [aotHeight, aotWidth] = useGetHeightAndWidthAdventurerThiolden(src, type)
+    const [aotHeight, aotWidth] = useGetHeightAndWidthAdventurerThiolden(src, collection)
     
 
     if(src == undefined){
@@ -68,19 +69,19 @@ const RescalingImg  = ({src, inQuest, selectedInQuest, is_alive, type} : scaling
     
     return <>
 
-        <ConditionalRender condition ={type == "pixeltile"}>
+        <ConditionalRender condition ={collection == "pixel-tiles"}>
             <PixelTilesWrapper height ={heightPixelTiles} inQuest = {inQuest} selectedInQuest={selectedInQuest} is_alive = {is_alive} width={3.5}>
                 <Image src= {src} alt="drunken Dragon idel adventurers" width={1000} height={1000} />
             </PixelTilesWrapper>
         </ConditionalRender>
 
-        <ConditionalRender condition ={type == "gma"}>
+        <ConditionalRender condition ={collection == "grandmaster-adventurers"}>
             <PixelTilesWrapper height ={heightGMA} inQuest = {inQuest} selectedInQuest={selectedInQuest} is_alive = {is_alive} width={5.3}>
                 <Image src= {src} alt="drunken Dragon idel adventurers" width={1000} height={1000} />
             </PixelTilesWrapper>
         </ConditionalRender>
 
-        <ConditionalRender condition ={type == "aot"}>
+        <ConditionalRender condition ={collection == "adventurers-of-thiolden"}>
             <PixelTilesWrapper height ={aotHeight} inQuest = {inQuest} selectedInQuest={selectedInQuest} is_alive = {is_alive} width={aotWidth}>
                 <Image src= {src} alt="drunken Dragon idle adventurers" width={1000} height={1000} />
             </PixelTilesWrapper>

@@ -27,7 +27,7 @@ const BackGroundPositionAbsolute = styled.section`
     background-color: #0B1015;
 `
 
-const IdleQuestApp = (): JSX.Element =>{
+const IdleQuestApp = (): JSX.Element => {
 
     const loading = useLoading()
     

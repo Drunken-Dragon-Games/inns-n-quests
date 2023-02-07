@@ -11,7 +11,7 @@ export default (data: DataAdventurerType) => {
     //este elemento hace drageable todo la tarjeta
     const [{isDragging}, drag, preview] = useDrag(()=>({
         type: "adventurer",
-        item:{ id: data.adventurerId, src: data.sprites, experience: data.experience, type: data.type}, 
+        item:{ id: data.adventurerId, src: data.sprite, experience: data.experience, collection: data.collection}, 
         previewOptions,
         collect:(monitor) => ({
             isDragging: !!monitor.isDragging()
@@ -20,7 +20,7 @@ export default (data: DataAdventurerType) => {
     
     const img = new Image()
 
-    img.src = data.sprites
+    img.src = data.sprite
 
     //con esto cambia a un preview personalizado
     preview(img, previewOptions)

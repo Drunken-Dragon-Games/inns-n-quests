@@ -288,7 +288,7 @@ const QuestPaperInProgress = () => {
                                                             >
                                                                 <RescalingImg  
                                                                     src = {adventurerData.src}
-                                                                    type = {adventurerData.type}
+                                                                    collection = {adventurerData.collection}
                                                                 /> 
                                                             </Adventurer>  
                                                 })}  

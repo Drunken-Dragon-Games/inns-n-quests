@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon, PositionMedal } from "../basic_components";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 import { RescalingImg } from "../../../../utils/components/basic_component";
-import { useDragElement, useGetAdventurerSelectClick, useGetPositionMedal } from "../../hooks";
+import { useGetAdventurerSelectClick, useGetPositionMedal } from "../../hooks";
 import { DataAdventurerType } from "../../../../../../../types/idleQuest";
 
 
@@ -124,11 +124,11 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
                     <Center>
                         <div>
                             <RescalingImg  
-                                src= {data.sprites}  
-                                inQuest={data.in_quest} 
+                                src= {data.sprite}  
+                                inQuest={data.inChallenge} 
                                 selectedInQuest = {selectedInQuest} 
-                                is_alive ={data.type == "gma" ? data.metadata.is_alive : null }
-                                type={data.type}
+                                is_alive ={data.collection == "grandmaster-adventurers" ? data.hp > 0 : null }
+                                collection={data.collection}
                             />
                         </div>
                     </Center>
@@ -149,7 +149,7 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
                                 <Level experience={data.experience}/>
                             </LevelPosition>
                             
-                            <ConditionalRender condition={data.type == "gma" && data.metadata.is_alive == false }>
+                            <ConditionalRender condition={data.collection == "grandmaster-adventurers" && data.hp == 0 }>
                                 <CoolDownWrapper>
                                     <CooldownDeathTimmer coolDownTime={data.metadata.dead_cooldown!} />
                                 </CoolDownWrapper>
@@ -170,7 +170,7 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
                 </PositionMedalPosition>
             </ConditionalRender>
 
-            <ConditionalRender condition ={data.type == "gma" && data.metadata.is_alive == false} >
+            <ConditionalRender condition ={data.collection == "grandmaster-adventurers" && data.hp == 0} >
                 <DeathCooldownIconPosition>
                     <DeathCooldownIcon/>
                 </DeathCooldownIconPosition>

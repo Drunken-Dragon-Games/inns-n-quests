@@ -1,14 +1,14 @@
-import { useGetHeightAndWidth } from "./"
 import { useState, useEffect } from "react"
+import { AdventurerCollection } from "../../../../../../types/idleQuest"
 
 
-export default (src: string,  type: string): number [] =>{
+export default (src: string, collection: AdventurerCollection): number [] =>{
     
     const [ width, setWidth ] = useState<number>(0)
     const [ height, setHeight ]  = useState<number>(0)  
     
     useEffect(() => {
-        if(type == "aot"){
+        if(collection == "adventurers-of-thiolden"){
             if(typeof src == "string"){
                const  advName = src.split('/')[5].split('-')[0]
                
