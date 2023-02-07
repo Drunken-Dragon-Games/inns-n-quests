@@ -5,7 +5,7 @@ import { DataAdventurerType } from "../../../../../../types/idleQuest"
 import { EnrollsType } from "../../../../../../types/idleQuest"
 
 
-export default (slots: number, adventurerList: (string | undefined) [] | EnrollsType [], type: "available" | "inProgress") => {
+export default (slots: number, adventurerList: (string | null) [] | EnrollsType [], type: "available" | "inProgress") => {
     
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const allAdventurer = generalSelector.idleQuest.adventurers.data.data

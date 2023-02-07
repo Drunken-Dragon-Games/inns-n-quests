@@ -1,17 +1,24 @@
 import styled from "styled-components";
-import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon } from "../basic_components";
+import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon, PositionMedal } from "../basic_components";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 import { RescalingImg } from "../../../../utils/components/basic_component";
-import { useDragElement } from "../../hooks";
+import { useDragElement, useGetAdventurerSelectClick, useGetPositionMedal } from "../../hooks";
 import { DataAdventurerType } from "../../../../../../../types/idleQuest";
 
-const AdventuresCardWrapper = styled.div`
+
+interface AdventuresCardWrapperType{
+    isSelectable: boolean
+}
+
+const AdventuresCardWrapper = styled.div<AdventuresCardWrapperType>`
     width: 100%;
     height: auto;
-    cursor: pointer;
+    
+    ${props => props.isSelectable ? 'cursor: pointer;': null}
     position: relative;
     &:hover{
-        background-color: rgba(0,0,0,0.2) ;
+        ${props => props.isSelectable ? 'background-color: rgba(0,0,0,0.2) ;': null}
+        
     }
 
 `
@@ -79,6 +86,14 @@ const CoolDownWrapper = styled.div`
     margin-left: auto;
     margin-top: 0.2vw;
 `
+
+const PositionMedalPosition = styled.div`
+    position: absolute;
+    top: 1vw;
+    left: 1vw;
+
+`
+
 interface IProps_AdventuresCard{
     data: DataAdventurerType
     selectedInQuest?: boolean
@@ -89,12 +104,20 @@ interface IProps_AdventuresCard{
 const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
   
     //este elemento hace drageable todo la tarjeta
-    const drag = useDragElement( data )
-    
+    // const drag = useDragElement( data )
+
+    const { selectAdventurer, isQuestSelected } = useGetAdventurerSelectClick()
+
+    const position = useGetPositionMedal(data.id)
+
     return(
     <>
         
-        <AdventuresCardWrapper ref ={data.in_quest == false  && selectedInQuest == false && (data.metadata.is_alive == true || data.metadata.is_alive == undefined) ? drag : null}>
+        {/* <AdventuresCardWrapper ref ={data.in_quest == false  && selectedInQuest == false && (data.metadata.is_alive == true || data.metadata.is_alive == undefined) ? drag : null}> */}
+        <AdventuresCardWrapper 
+            onClick={() =>  data.metadata.dead_cooldown ? null : selectAdventurer(data.id, selectedInQuest!)}
+            isSelectable = {isQuestSelected}
+        >
             <Margin>
                
                 <ImageWrapper>
@@ -135,9 +158,17 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
 
                     </CenterVertical>
                 </AttributesWrapper>
-
+              
                     
             </Margin>
+
+            <ConditionalRender condition = {position !== -1}>
+                <PositionMedalPosition>
+                    <PositionMedal>
+                        {(position + 1).toString()}
+                    </PositionMedal>
+                </PositionMedalPosition>
+            </ConditionalRender>
 
             <ConditionalRender condition ={data.type == "gma" && data.metadata.is_alive == false} >
                 <DeathCooldownIconPosition>

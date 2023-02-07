@@ -275,8 +275,14 @@ const QuestPaperAvailable = () => {
                             <Flex>
                                 <Adventurer>
                                     <Flex>
-                                        {slots.map((el: number, index: number) => {
-                                            return <DropBox key={index} index ={index} questLevel={questData.difficulty} reset ={!isOpen}/>
+                                        {slots.map((el, index) => {
+                                            return <DropBox 
+                                                key={index} 
+                                                index ={index} 
+                                                questLevel={questData.difficulty} 
+                                                reset ={!isOpen} 
+                                                id={selectedAdventurers[index]}
+                                            />
                                         })}    
                                     </Flex>
                                 </Adventurer>

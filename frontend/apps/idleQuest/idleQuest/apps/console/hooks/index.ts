@@ -13,3 +13,5 @@ export { default as useGetTimeLeft } from "./useGetTimeLeft"
 export { default as useTimmerOverQuestInProgress } from "./useTimmerOverQuestInProgress"
 export { default as useGetQuestCompleted } from "./useGetQuestCompleted"
 export { default as useIsQuestSelected } from "./useIsQuestSelected"
+export { default as useGetAdventurerSelectClick } from './useGetAdventurerSelectClick'
+export { default as useGetPositionMedal } from './useGetPositionMedal'

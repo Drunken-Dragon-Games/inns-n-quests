@@ -296,7 +296,7 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
                                             <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progresion_mark.png"  alt="punt image" width={2000} height={1250} />
                                         </GeneralProgressionMark>)
                                 }
-                                return <></>
+                                return <div key ={index}></div>
                             })
                         }
 

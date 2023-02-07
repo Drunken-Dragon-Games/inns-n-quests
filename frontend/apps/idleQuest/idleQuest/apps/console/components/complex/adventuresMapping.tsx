@@ -102,7 +102,7 @@ const AdventureMappingElement = () =>{
                 <ConditionalRender condition = {adventurers !== undefined}>
                     { adventurers.map((elOriginal: DataAdventurerType) => {                    
                         let selectedInQuest = false
-                        selectedAdventurer.forEach((elSelected : string | undefined) =>  elOriginal.id ==  elSelected ? selectedInQuest = true : null )
+                        selectedAdventurer.forEach((elSelected : string | null) =>  elOriginal.id ==  elSelected ? selectedInQuest = true : null )
                         return  <AdventuresCard data={elOriginal} key={elOriginal.id} selectedInQuest ={selectedInQuest}/>
                     })}
                   

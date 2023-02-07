@@ -33,7 +33,6 @@ export interface DataAdventurerType{
     id: string
     name: string,
     experience: number
-    adventurer_img: string
     in_quest: boolean
     on_chain_ref: string
     onRecruitment?: boolean

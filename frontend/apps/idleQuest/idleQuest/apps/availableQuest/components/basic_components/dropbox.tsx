@@ -4,7 +4,8 @@ import { Feelings, RescalingImg } from "../../../../utils/components/basic_compo
 import { useGetLevel } from "../../../../utils/hooks";
 import Image from 'next/image'
 import {ConditionalRender } from "../../../../../../utils/components/basic_components"
-import { useDropElement } from "../../hooks"
+import { useDropElement, useGetAdventurerData, useRemoveAdventurer } from "../../hooks"
+
 
 const DropBoxElement = styled.div`
     width: 7vw;
@@ -87,38 +88,47 @@ interface DropBoxType {
     index: number,
     questLevel: number,
     reset: boolean
+    id: string | null 
 }
 
 
-const DropBox: React.FC <DropBoxType> = ({index, questLevel, reset}) =>{
+const DropBox: React.FC <DropBoxType> = ({index, questLevel, reset, id}) =>{
 
-    const {drop, adventurer, experience, type, removeBox}  = useDropElement(index, reset)
+    // const {drop, adventurer, experience, type, removeBox}  = useDropElement(index, reset)
+    const adventurerData = useGetAdventurerData(id)
+    const {removeAdventurer} = useRemoveAdventurer()
     const [ onHover, setOnHover ] =useState<boolean>(false)
-    const [ level ] = useGetLevel(experience)
-    
+    const [ level ] = useGetLevel(adventurerData ? adventurerData.experience : 0 )
+
     return (
         <>
             <DropBoxElement 
-                ref={drop} 
-                onMouseOver = {adventurer != undefined ? () => setOnHover(true) : () => null} 
-                onMouseLeave ={adventurer != undefined ? () => setOnHover(false) : () => null}              
+                // ref={drop} 
+                onMouseOver = {adventurerData.sprites != undefined ? () => setOnHover(true) : () => null} 
+                onMouseLeave ={adventurerData.sprites != undefined ? () => setOnHover(false) : () => null}              
             >
-                <ConditionalRender condition={adventurer != "" }>
+                <ConditionalRender condition={adventurerData.sprites != undefined }>
                     <Center>
                         <AdventureWrapper>
                             <FeelingAnimationWrapper hover ={onHover}>
                                 <Feelings level = {level} questLevel ={questLevel}/>
                             </FeelingAnimationWrapper>
 
-                            <DeleteAnimationWrapper hover ={onHover} onClick = {removeBox}>
+                            <DeleteAnimationWrapper 
+                                hover ={onHover} 
+                                onClick = {() => {
+                                    removeAdventurer(id!)
+                                    setOnHover(false)
+                                }}
+                            >
                                 <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/close_icon.png"  alt="fail mark image" width={2000} height={1250} />
                             </DeleteAnimationWrapper>
 
                             <AdventurerCenterWrapper>
                                 <div>                                    
                                     <RescalingImg  
-                                        src= {adventurer}
-                                        type={type} 
+                                        src= {adventurerData.sprites}
+                                        type={adventurerData.type} 
                                     />
                                 </div>
 

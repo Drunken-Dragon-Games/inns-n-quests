@@ -46,7 +46,7 @@ interface succeedChance{
     questDifficulty: number
     questSlots: number
     requirementBonus: number
-    adventurersList: (string | undefined) [] | EnrollsType []
+    adventurersList: (string | null) [] | EnrollsType []
     type: "available" | "inProgress"
 }
 

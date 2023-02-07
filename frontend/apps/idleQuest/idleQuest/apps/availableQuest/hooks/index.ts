@@ -10,3 +10,5 @@ export { default as useDropElement } from "./useDropElement"
 export { default as useResetSelectAdventurers } from "./useResetSelectAdventurers"
 export { default as useGetRequirementText } from './useGetRequirementText'
 export { default as useRefreshQuest } from './useRefreshQuest'
+export { default as useGetAdventurerData } from './useGetAdventurerData'
+export { default as useRemoveAdventurer } from './useRemoveAdventurer'
