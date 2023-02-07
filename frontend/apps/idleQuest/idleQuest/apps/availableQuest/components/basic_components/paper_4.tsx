@@ -4,6 +4,7 @@ import {  useState } from "react"
 import { useSetWidthAndHeight, useCloseProps } from "../../hooks";
 import { PropStamp } from "."
 import { RescalingMonster } from "../../../../utils/components/basic_component";
+import { AvailableQuestType } from "../../../../../../../types/idleQuest";
 
 const Placeit = keyframes`
     0% { height: 0vw;  }
@@ -92,6 +93,9 @@ const PageWrapper = styled.div`
         text-transform: uppercase; 
     }
 `
+interface  Hover {
+    Hover: boolean
+}
 
 const OnHover = styled.div<Hover>`
     position: absolute;
@@ -115,72 +119,10 @@ const MonsterWrapper = styled.div`
 
 `
 
-const SealWrapperKingsPlea = styled.div`
-    position: absolute;
-    bottom: 0vw;
-    right: 1vw;
-
-    img{
-        width: 4vw !important;
-        height: 4vw !important;
-    }
-`
-
-const SealWrapperHeroicQuest = styled.div`
-    position: absolute;
-    bottom: 0vw;
-    right: 1.5vw;
-
-    img{
-        width: 2.5vw !important;
-        height: 4vw !important;
-    }
-`
-
-const SealWrapperValiantAdventure = styled.div`
-    position: absolute;
-    bottom: 1.5vw;
-    right: 1.5vw;
-
-    img{
-        width: 2.2vw !important;
-        height: 2.2vw !important;
-    }
-`
-
-const SealWrapperTownsfolk = styled.div`
-    position: absolute;
-    bottom: 2vw;
-    right: 2vw;
-
-    img{
-        width: 4vw !important;
-        height: 1.5vw !important;
-    }
-`
-interface AvailableQuest {
-    uiid?: string
-    id: string
-    name: string
-    description: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    duration: number
-    width?: number
-    height?: number
-}
-
 interface  PaperProp {
-    data: AvailableQuest
+    data: AvailableQuestType
     position: number
     onClick: React.MouseEventHandler<HTMLButtonElement>
-  }
-
-  interface  Hover {
-    Hover: boolean
 }
 
 const Paper_4 = ({data, position, onClick}: PaperProp) => {

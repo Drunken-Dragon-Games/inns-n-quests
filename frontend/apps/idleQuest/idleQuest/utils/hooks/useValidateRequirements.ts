@@ -1,45 +1,12 @@
 import { useState, useEffect } from "react"
 import { useGeneralSelector } from "../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../features/generalReducer"
+import { DataAdventurerType } from "../../../../../types/idleQuest"
+import { RequirementType, CharacterType } from "../../../../../types/idleQuest"
 
 
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
 
-
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
-}
-
-interface DataAdventurer{
-    id: string
-    name: string,
-    experience: number
-    adventurer_img: string
-    in_quest: boolean
-    on_chain_ref: string
-    onRecruitment?: boolean
-    sprites: string
-    type: "pixeltile" | "gma"
-    metadata: metadata
-    race: string
-    class: string
-  }
-
-  interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-  }
-
-export default (adventurerList: string [], requirements: requirement  ) => {
+export default (adventurerList: string [], requirements: RequirementType  ) => {
 
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
@@ -59,12 +26,12 @@ export default (adventurerList: string [], requirements: requirement  ) => {
 
 
     //transforma una lista de ids de aventureros a una array con los aventurersos
-    const adventuresSelectedArray = (adventurerList: string [], allAdventurer: DataAdventurer []) =>{
+    const adventuresSelectedArray = (adventurerList: string [], allAdventurer: DataAdventurerType []) =>{
 
-        const adventurersArray = adventurerList.reduce((acc:DataAdventurer [] , adventurerId: string) => {
+        const adventurersArray = adventurerList.reduce((acc:DataAdventurerType [] , adventurerId: string) => {
             
             
-            const newAdventurer = allAdventurer.filter( (adventurer: DataAdventurer) => adventurer.id == adventurerId)
+            const newAdventurer = allAdventurer.filter( (adventurer) => adventurer.id == adventurerId)
 
             return acc.concat(newAdventurer)
             
@@ -85,7 +52,7 @@ export default (adventurerList: string [], requirements: requirement  ) => {
         // esta condicional verifica que por lo menos haya un aventurero seleccionado
         if(adventurer.length > 0){
             //este reduce verifica si todos cumplen con la espesificaciones requeridas de razas y classes
-            isValidatedBool = adventurer.reduce((acc: boolean, adventurer: DataAdventurer ) => {
+            isValidatedBool = adventurer.reduce((acc: boolean, adventurer ) => {
             
                 if(requirements.character![0].race != undefined && requirements.character![0].race != adventurer.race){
                     return false
@@ -112,11 +79,11 @@ export default (adventurerList: string [], requirements: requirement  ) => {
         const requirementsKeys : string []= Object.keys(requirements.character![0])
 
         //este reducer comprueba que exista por lo menos un aventurero con las especificaciones requeridas
-        const isValidatedBool = adventurer.reduce((acc: boolean , adventurer: DataAdventurer ) => {
+        const isValidatedBool = adventurer.reduce((acc: boolean , adventurer ) => {
             
             const isTrue = requirementsKeys.reduce((acc: boolean [] , requirementKey: string) => {
                 
-                if(requirements.character![0][requirementKey as keyof character] == adventurer[requirementKey  as keyof DataAdventurer]){
+                if(requirements.character![0][requirementKey as keyof CharacterType] == adventurer[requirementKey  as keyof DataAdventurerType]){
 
                     return acc.concat(true)
                     
@@ -149,7 +116,7 @@ export default (adventurerList: string [], requirements: requirement  ) => {
         if(adventurers.length > 0){
             
             //agrega todas las clases de los aventureros en el objeto set
-            adventurers.forEach((adventurer: DataAdventurer)=> {
+            adventurers.forEach((adventurer)=> {
                 partyClasses.add(adventurer.class)
             })
 

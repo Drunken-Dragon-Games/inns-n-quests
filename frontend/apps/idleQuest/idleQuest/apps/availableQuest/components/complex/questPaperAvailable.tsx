@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { takeAvailableQuest } from "../../features/availableQuest"
 import Image from 'next/image'
 import { useIsOpenAvailableQuest, useGetAvailableQuestData, useResetSelectAdventurers } from "../../hooks";
@@ -12,9 +12,6 @@ import { QuestRequirementsSection, ProgressionQuest } from "../../../../utils/co
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { DropBox } from "../basic_components";
-import { ConditionalRender } from "../../../../../../utils/components/basic_components";
-
-
 
 
 const AnimationWrapper = styled.div`

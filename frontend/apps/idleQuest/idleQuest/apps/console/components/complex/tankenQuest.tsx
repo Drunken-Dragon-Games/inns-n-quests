@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import Image from "next/image"
-
 import { useState } from "react";
 import { Timmer } from "../basic_components";
 import { rolls, stamps } from "../../../../../settings";
@@ -9,7 +8,11 @@ import { DragonSilverIconTakenQuest } from "../basic_components"
 import {  useGeneralDispatch } from "../../../../../../../features/hooks"
 import { setInProgressQuestSelected } from "../../../../features/interfaceNavigation";
 import { useIsQuestSelected } from "../../hooks";
+import { inProgressQuestType } from "../../../../../../../types/idleQuest";
 
+interface card{
+    onClick: any,
+}
 
 const Card = styled.div<card>`
     width: 95%;
@@ -58,6 +61,10 @@ const Center = styled.div`
     margin: auto;
 `
 
+interface title {
+    succeeded: boolean,
+}
+
 const Title = styled.h2 <title>`
     color: ${props => props.succeeded  ? "#cba044": "white"};
     font-size: 0.9vw;
@@ -91,69 +98,16 @@ const StampWrapper = styled.div`
     top: 0vw;
 `
 
-interface title {
-    succeeded: boolean,
-}
 
-interface card{
-    onClick: any,
-}
+
 
 interface inProgressCard {
-    data: inProgressQuest
+    data: inProgressQuestType
     index: number
 }
 
 
-interface inProgressQuest{
-    enrolls: enrolls []
-    id: string
-    is_claimed: boolean
-    player_stake_address: string
-    quest: quest
-    quest_id: string
-    started_on: string
-    state: "failed" | "succeeded" | "in_progress" | null
-}
-
-interface quest{
-    description: string
-    difficulty: number
-    duration: number
-    id: string
-    name: string
-    rarity: string
-    reward_ds: number
-    reward_xp: number
-    slots: number
-}
-
-interface enrolls{
-    adventurer: adventurer
-    adventurer_id: string
-    taken_quest_id: string
-}
-
-interface adventurer{
-    experience: number
-    id: string
-    in_quest: boolean
-    metadata: metadata
-    on_chain_ref: string
-    player_stake_address: string
-    type: "pixeltile" | "gma"
-} 
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
-
-
-
 const TakeQuest = ({data, index}: inProgressCard) => {
-
-    // FIXME: add this when inProgress is ready 
-
 
     const [onHover, setOnHover] = useState<boolean>(false)
 

@@ -69,7 +69,6 @@ const QuestButtonsContainer = () =>{
                             <QuestTypeButton selected = {selectedPage == "available"} action ={() => generalDispatch(setPage("available"))}>AVAILABLE</QuestTypeButton>
                         </ButtonLeft>
                         <ButtonRight>
-                            {/* FIXME: falta agregar el glow condition */}
                             <QuestTypeButton selected = {selectedPage == "in_progress"} action ={() => generalDispatch(setPage("in_progress"))} glowCondition ={questCompletedNumber > 0}>IN PROGRESS</QuestTypeButton>
                         </ButtonRight>
                     </ButtonsWrappers>

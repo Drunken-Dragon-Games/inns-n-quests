@@ -1,9 +1,9 @@
 import styled from "styled-components";
-import { useDrag } from "react-dnd";
 import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon } from "../basic_components";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 import { RescalingImg } from "../../../../utils/components/basic_component";
 import { useDragElement } from "../../hooks";
+import { DataAdventurerType } from "../../../../../../../types/idleQuest";
 
 const AdventuresCardWrapper = styled.div`
     width: 100%;
@@ -80,38 +80,16 @@ const CoolDownWrapper = styled.div`
     margin-top: 0.2vw;
 `
 interface IProps_AdventuresCard{
-    data: DataAdventurer
+    data: DataAdventurerType
     selectedInQuest?: boolean
     
 }
-
-interface DataAdventurer{
-    id: string
-    name: string,
-    experience: number
-    adventurer_img: string
-    in_quest: boolean
-    on_chain_ref: string
-    onRecruitment?: boolean
-    sprites: string
-    type: "pixeltile" | "gma"
-    metadata: metadata
-    race: string
-    class: string
-  }
-
-  interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-  }
 
 
 const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
   
     //este elemento hace drageable todo la tarjeta
     const drag = useDragElement( data )
-
-  
     
     return(
     <>

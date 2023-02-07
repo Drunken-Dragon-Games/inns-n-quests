@@ -48,7 +48,7 @@ interface MapButton {
     action: () => void
 }
 
-const MapButton = ({action}:MapButton) => {
+const MapButton : React.FC<MapButton> = ({action}) => {
 
     const [onHover, setOnHover] = useState(false)
 
