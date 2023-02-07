@@ -1,40 +1,10 @@
 import { useState, useEffect } from "react"
 import { useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-
-interface availableQuest {
-    uiid?: string
-    id: string
-    name: string
-    description: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    duration: number
-    requirements: requirement
-    width?: number
-    height?: number
-}
-
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
+import { AvailableQuestType } from "../../../../../../types/idleQuest" 
 
 
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
-}
-
-const placeHolder: availableQuest ={
+const placeHolder ={
     uiid: "123wqe1452662retwqet",
     id: "qwe12342315412352351234",
     name: "placeholder",
@@ -49,7 +19,7 @@ const placeHolder: availableQuest ={
 }
 
 
-export default ():availableQuest  =>{
+export default ():AvailableQuestType  =>{
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
@@ -57,7 +27,7 @@ export default ():availableQuest  =>{
     
     const quests = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
 
-    const [questData, setQuestData] = useState<availableQuest>(placeHolder)
+    const [questData, setQuestData] = useState<AvailableQuestType>(placeHolder)
 
     useEffect(()=>{
         if(questNumber != null){

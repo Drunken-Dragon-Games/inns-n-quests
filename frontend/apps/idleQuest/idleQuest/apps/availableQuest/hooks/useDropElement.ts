@@ -3,13 +3,13 @@ import { useState, useEffect } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
 import { setSelectAdventurer } from "../features/availableQuest"
 
+
 interface DataAdventurer{
     id: string,
     src: string,
     experience: number,
     type: string
 }
-
 
 export default (index: number, reset: boolean) => {
     const [ adventurer, SetAdventurer ] = useState<string>("")

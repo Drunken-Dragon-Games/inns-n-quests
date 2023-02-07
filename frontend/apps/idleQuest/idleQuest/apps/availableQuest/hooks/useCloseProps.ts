@@ -3,23 +3,10 @@ import { useGeneralSelector, useGeneralDispatch } from "../../../../../../featur
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
 import { setDeleteAvailableQuest } from "../features/availableQuest"
 import { setTakenIdReset } from "../features/availableQuest"
+import { AvailableQuestType } from "../../../../../../types/idleQuest" 
 
-interface AvailableQuest {
-    uiid?: string
-    id: string
-    name: string
-    description: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    duration: number
-    width?: number
-    height?: number
-}
 
-export default ( data : AvailableQuest ) : boolean => {
+export default ( data : AvailableQuestType ) : boolean => {
 
     //este efecto se activa cuando un quest ha sido tomado y si es el mismo quest renderizada en este element activa la animacion de salida
     const [ isClose, setIsClose ] = useState<boolean>(false)

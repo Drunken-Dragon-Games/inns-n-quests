@@ -1,6 +1,7 @@
 import styled from "styled-components"
 import { PixelCheckbox } from "."
 import { useValidateRequirements } from "../../hooks"
+import { RequirementType } from "../../../../../../types/idleQuest"
 
 
 const RequirementWrapper = styled.div`
@@ -26,20 +27,9 @@ const TextRequirement = styled.p`
 `
 
 interface questRequirement{
-    data: requirement 
+    data: RequirementType 
     children: string [] | string
     adventuresSelected: string []
-}
-
-interface requirement{
-    character?: character []
-    all?: boolean
-}
-
-
-interface character {
-    class?: string
-    race?: string
 }
 
 

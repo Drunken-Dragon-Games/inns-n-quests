@@ -1,26 +1,8 @@
-import styled, {keyframes} from "styled-components";
-import { useDispatch, useSelector} from 'react-redux'
-// import { selectGeneralPageReducer } from "../../features/generalPage";
-// import { RescalingMonster,
-//         Seals,
-//         Signature, 
-//         ProgressionQuest, 
-//         Adventurer, 
-//         RescalingImg,
-//         SucceedChance,
-//         QuestRequirementsSection,
-//         QuestLabelLevel
-//      } from "../basic_component";
-import { useEffect, useState, useRef } from "react";
-// import { setIsInProgressAnimation } from "../../features/interfaceNavigation";
-// import { setClaimRewardDefault,
-//         setDeleteInProgressQuest, 
-//         setFetchPostClaimRewardInProgressQuestStatusIdle } from "../../features/inProgressQuest";
-// import { setInProgressQuestUnselect } from "../../features/interfaceNavigation";
-// import { useGetAdventurerPng, useGetClaimRewardShadow, useGetArrayIdAdventurersInprogress } from "../../hooks";
+import styled from "styled-components";
+import { useState } from "react";
 import Image from 'next/image'
 import { useOpenInProgressPaper } from "../../hooks";
-import { useGeneralSelector, useGeneralDispatch } from "../../../../../../../features/hooks"
+import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { useGetInProgressData, useGetAdventurerPng, useGetClaimRewardShadow, useGetAdventurersEnrollsRequirements } from "../../hooks"
 import { QuestLabelLevel, 
@@ -31,8 +13,6 @@ import { QuestLabelLevel,
     Signature } from "../../../../utils/components/basic_component";
 import { QuestRequirementsSection, ProgressionQuest } from "../../../../utils/components/complex";
 import { Adventurer } from "."
-
-
 
 
 const CardWrapper = styled.div<animation>`
@@ -194,30 +174,7 @@ const SucceedChanceWrapper = styled.div`
 `
 
 
-interface enrolls{
-    adventurer: adventurer
-    adventurer_id: string
-    taken_quest_id: string
-}
 
-interface adventurer{
-    experience: number
-    id: string
-    in_quest: boolean
-    metadata: metadata
-    on_chain_ref: string
-    player_stake_address: string
-    type: "pixeltile" | "gma"
-}
-
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
-interface Sprites {
-    src: string
-    type: string
-}
 
 const QuestPaperInProgress = () => {
             
@@ -315,10 +272,10 @@ const QuestPaperInProgress = () => {
                                         <AdventurerWrapper>
                                             <Flex>
                                         
-                                                {adventurersEnrolls.map((el: enrolls) =>{
+                                                {adventurersEnrolls.map((el) =>{
                                                     
                                                     
-                                                    const adventurerData: Sprites = pngAdvernturer(el.adventurer_id, generalSelector.idleQuest.adventurers.data.data)
+                                                    const adventurerData = pngAdvernturer(el.adventurer_id, generalSelector.idleQuest.adventurers.data.data)
                                                                 
                                                                 
                                                     return  <Adventurer data ={el} 

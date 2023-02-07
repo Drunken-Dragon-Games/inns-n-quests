@@ -52,11 +52,6 @@ export const getDragonSilver = () : generalReducerThunk => async (dispatch) =>{
         dispatch(setDragonSilver(response.data.DS))
         dispatch(setFetchGetDragonSilverStatusFulfilled())
 
-        // Mock to test Without backend
-        // dispatch(setDragonSilver(10))
-        // dispatch(setFetchGetDragonSilverStatusFulfilled())
-    
-              
     } catch (err: unknown) {
         
         if(err instanceof AxiosError ){

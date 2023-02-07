@@ -1,29 +1,14 @@
 import { QuestRequirement} from "../basic_component"
 import { useRequirementsBonus } from "../../hooks"
 import { useGetRequirementText } from "../../../apps/availableQuest/hooks"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { ConditionalRender } from "../../../../../utils/components/basic_components"
+import { RequirementType, CharacterType } from "../../../../../../types/idleQuest"
 
 interface questRequirementsSection{
-    requirements: requirement 
+    requirements: RequirementType 
     adventuresSelected: any
     callbackBonus: (bonus: number) => void
-}
-
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
-
-
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
 }
 
 
@@ -48,7 +33,7 @@ const QuestRequirementsSection = ({requirements, adventuresSelected, callbackBon
 
             <ConditionalRender condition={requirements.all == undefined }>
                 {
-                    requirements.character!.map((requirementData: character, index: number )=>{
+                    requirements.character!.map((requirementData: CharacterType, index: number )=>{
                         const parseData = {character:[requirementData]}
                         return <QuestRequirement data={parseData} adventuresSelected={adventuresSelected} key={index}>{requirementData.race!} {requirementData.class!} needed</QuestRequirement>
                     })

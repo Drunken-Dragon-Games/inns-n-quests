@@ -1,4 +1,3 @@
-import styled from "styled-components"
 import { ConditionalRender } from "../../../../../../utils/components/basic_components"
 import { AdventuresMapping, InProgressQuestMapping } from "."
 import { useGeneralSelector } from "../../../../../../../features/hooks"

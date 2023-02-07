@@ -1,12 +1,11 @@
 import styled from "styled-components";
-import { useGeneralSelector, useGeneralDispatch } from "../../../../../../../features/hooks"
+import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { useRef } from "react";
 import Image from 'next/image'
 import { useIsScroll } from "../../hooks";
 import { ConditionalRender } from '../../../../../../utils/components/basic_components';
 import { TakenQuest } from ".";
-
 
 
 const InProgressMappingWrapper = styled.div`
@@ -84,51 +83,6 @@ const NoQuestWaring = styled.div`
     }
 `
 
-interface inProgressQuest{
-  enrolls: enrolls []
-  id: string
-  is_claimed: boolean
-  player_stake_address: string
-  quest: quest
-  quest_id: string
-  started_on: string
-  state: "failed" | "succeeded" | "in_progress" | null
-}
-
-interface quest{
-  description: string
-  difficulty: number
-  duration: number
-  id: string
-  name: string
-  rarity: string
-  reward_ds: number
-  reward_xp: number
-  slots: number
-}
-
-interface enrolls{
-  adventurer: adventurer
-  adventurer_id: string
-  taken_quest_id: string
-}
-
-interface adventurer{
-  experience: number
-  id: string
-  in_quest: boolean
-  metadata: metadata
-  on_chain_ref: string
-  player_stake_address: string
-  type: "pixeltile" | "gma"
-}
-
-interface metadata{
-  is_alive?: boolean,
-  dead_cooldown?: number
-}
-
-
 const InProgressQuest = () =>{
 
    
@@ -154,7 +108,7 @@ const InProgressQuest = () =>{
                 <InProgressMapping ref={scrolling}>
 
                     <ConditionalRender condition = {numberOfQuests > 0}>
-                        { quests.map((el: inProgressQuest,  index: number) => {
+                        { quests.map((el,  index) => {
 
                             return  <TakenQuest 
                                         key={el.id} 

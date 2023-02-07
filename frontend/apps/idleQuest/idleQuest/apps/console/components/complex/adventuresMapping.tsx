@@ -2,32 +2,13 @@ import styled from "styled-components";
 import { CreateAdventurerButton } from "../basic_components";
 import { useRef } from "react";
 import Image from 'next/image'
-import { useGeneralSelector, useGeneralDispatch } from "../../../../../../../features/hooks"
+import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { useIsScroll } from "../../hooks"
 import { cardano_network } from "../../../../../../../setting"
 import { ConditionalRender } from '../../../../../../utils/components/basic_components';
 import { AdventuresCard } from "."
-
-interface DataAdventurer{
-  id: string
-  name: string,
-  experience: number
-  adventurer_img: string
-  in_quest: boolean
-  on_chain_ref: string
-  onRecruitment?: boolean
-  sprites: string
-  type: "pixeltile" | "gma"
-  metadata: metadata
-  race: string
-  class: string
-}
-
-interface metadata{
-  is_alive?: boolean,
-  dead_cooldown?: number
-}
+import { DataAdventurerType } from "../../../../../../../types/idleQuest";
 
 const AdventuresMappingWrapper = styled.div`
 
@@ -105,8 +86,6 @@ const AdventureMappingElement = () =>{
     
     const renderArrows =  useIsScroll(scrolling, numberOfAdventurer)
   
-
-
     return(
       <>
         <AdventuresMappingWrapper>
@@ -121,24 +100,11 @@ const AdventureMappingElement = () =>{
             <AdventuresMapping ref={scrolling}>
 
                 <ConditionalRender condition = {adventurers !== undefined}>
-                    { adventurers.map((elOriginal: DataAdventurer) => {
-                        
-                            //  FIXME: onRecruiment card
-                            let selectedInQuest = false
-                                    
-                            selectedAdventurer.forEach((elSelected : string | undefined) =>  elOriginal.id ==  elSelected ? selectedInQuest = true : null )
-                            
-                            if(elOriginal.onRecruitment == undefined){
-                                return  <AdventuresCard data={elOriginal} key={elOriginal.id} selectedInQuest ={selectedInQuest}/>
-                            } 
-      
-                            else if (elOriginal.onRecruitment == true){
-                            //   return <OnRecruitChampionCard  key={elOriginal.id} />
-                            } 
-                            
-                          
-                            return <></>
-                        })}
+                    { adventurers.map((elOriginal: DataAdventurerType) => {                    
+                        let selectedInQuest = false
+                        selectedAdventurer.forEach((elSelected : string | undefined) =>  elOriginal.id ==  elSelected ? selectedInQuest = true : null )
+                        return  <AdventuresCard data={elOriginal} key={elOriginal.id} selectedInQuest ={selectedInQuest}/>
+                    })}
                   
                 </ConditionalRender>
         

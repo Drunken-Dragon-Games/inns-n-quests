@@ -4,6 +4,7 @@ import { useGetLevel } from "../../../../utils/hooks";
 import { useGetRewardExp, useGetLevelUp, useIsDead } from "../../hooks";
 import { useState, useEffect } from "react"
 import Image from "next/image";
+import { EnrollsType } from "../../../../../../../types/idleQuest";
 
 const outOpacityDeadMark = keyframes`
     0% {opacity: 0}
@@ -184,33 +185,8 @@ const EmojiWrapper = styled.div<EmojiWrapper>`
 `
 
 
-
-
-
-
-interface enrolls{
-    adventurer: adventurer
-    adventurer_id: string
-    taken_quest_id: string
-}
-
-interface adventurer{
-    experience: number
-    id: string
-    in_quest: boolean
-    metadata: metadata
-    on_chain_ref: string
-    player_stake_address: string
-    type: "pixeltile" | "gma"
-}
-
-interface metadata{
-    is_alive?: boolean,
-    dead_cooldown?: number
-}
-
 interface interfaceEnrolled {
-    data: enrolls
+    data: EnrollsType
     questLevel: number
     claimed: claimed
     isDead: string [] | null
