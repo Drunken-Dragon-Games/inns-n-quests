@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react"
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-import { DataAdventurerType } from "../../../../../../types/idleQuest"
-import { EnrollsType } from "../../../../../../types/idleQuest"
 
 
-export default (slots: number, adventurerList: (string | null) [] | EnrollsType [], type: "available" | "inProgress") => {
+export default (slots: number, adventurerList: (string | null) [], type: "available" | "inProgress") => {
     
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const allAdventurer = generalSelector.idleQuest.adventurers.data.data
@@ -28,6 +26,7 @@ export default (slots: number, adventurerList: (string | null) [] | EnrollsType 
     //funcion cuando es inProgress el quest cambia la forma de sumar debido al cambio de lista
     const getAverageLevelInProgress = () =>{
         
+        /*
         const levelSum = (adventurerList as EnrollsType []).reduce((acc: number, adventurer) => {
             
             const level = getLevelFromXp(adventurer.adventurer.experience)
@@ -40,6 +39,8 @@ export default (slots: number, adventurerList: (string | null) [] | EnrollsType 
         const average = levelSum / slots
 
         setAverageLevel(average)
+        */
+        setAverageLevel(1)
         
     }
 
@@ -49,6 +50,7 @@ export default (slots: number, adventurerList: (string | null) [] | EnrollsType 
     //funcion cuando es available el quest cambia la forma de sumar debido al cambio de lista
     const getAverageLevelAvailable = () =>{
         
+        /*
         const levelSum = (adventurerList as string []).reduce((acc: number, id: string) => {
             
             const filterAdventurer = allAdventurer.filter((adventurer) => adventurer.adventurerId == id)
@@ -67,6 +69,8 @@ export default (slots: number, adventurerList: (string | null) [] | EnrollsType 
         const average = levelSum / slots
 
         setAverageLevel(average)
+        */
+        setAverageLevel(1)
         
     }
 

@@ -67,7 +67,7 @@ export type AvailableQuest = {
     requirements: QuestRequirement,
     reward: Reward,
     duration: number,
-    slots?: number,
+    slots: number,
 }
 
 export type TakenQuest = {

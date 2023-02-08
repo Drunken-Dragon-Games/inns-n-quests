@@ -5,6 +5,8 @@ import { useGetLevel } from "../../../../utils/hooks";
 import Image from 'next/image'
 import {ConditionalRender } from "../../../../../../utils/components/basic_components"
 import { useGetAdventurerData, useRemoveAdventurer } from "../../hooks"
+import { useGeneralSelector } from "../../../../../../../features/hooks";
+import { selectGeneralReducer } from "../../../../../../../features/generalReducer";
 
 
 const DropBoxElement = styled.div`
@@ -95,7 +97,12 @@ interface DropBoxType {
 const DropBox: React.FC <DropBoxType> = ({index, questLevel, reset, id}) =>{
 
     // const {drop, adventurer, experience, type, removeBox}  = useDropElement(index, reset)
-    const adventurerData = useGetAdventurerData(id)
+    //const adventurerData = useGetAdventurerData(id)
+    const generalSelector = useGeneralSelector(selectGeneralReducer)
+    const adventurers = generalSelector.idleQuest.adventurers.data.data
+    const dataAdventurer = adventurers.filter( adventurer => id === adventurer.adventurerId )
+    const adventurerData = dataAdventurer[0] ?? {}
+
     const {removeAdventurer} = useRemoveAdventurer()
     const [ onHover, setOnHover ] =useState<boolean>(false)
     const [ level ] = useGetLevel(adventurerData ? adventurerData.experience : 0 )

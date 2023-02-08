@@ -4,7 +4,7 @@ import { useGetLevel } from "../../../../utils/hooks";
 import { useGetRewardExp, useGetLevelUp, useIsDead } from "../../hooks";
 import { useState, useEffect } from "react"
 import Image from "next/image";
-import { EnrollsType } from "../../../../../../../types/idleQuest";
+import { DataAdventurerType, EnrollsType } from "../../../../../../../types/idleQuest";
 
 const outOpacityDeadMark = keyframes`
     0% {opacity: 0}
@@ -186,7 +186,7 @@ const EmojiWrapper = styled.div<EmojiWrapper>`
 
 
 interface interfaceEnrolled {
-    data: EnrollsType
+    data: DataAdventurerType
     questLevel: number
     claimed: claimed
     isDead: string [] | null
@@ -208,10 +208,10 @@ interface exp_given {
 
 const Adventurer = ({data, questLevel, claimed , isDead, rewardExp, children} : interfaceEnrolled ) =>{
     
-    const newExperience  = useGetRewardExp(data.adventurer_id, rewardExp, 500 )
-    const [ level ] = useGetLevel(data.adventurer.experience)
-    const [ newLevel, levelBar] = useGetLevelUp(data.adventurer.experience, level , newExperience, 4000)
-    const  isAdventureDead  = useIsDead(data.adventurer_id, isDead)
+    const newExperience  = useGetRewardExp(data.adventurerId, rewardExp, 500 )
+    const [ level ] = useGetLevel(1)//data.adventurer.experience)
+    const [ newLevel, levelBar] = useGetLevelUp(1/*data.adventurer.experience*/, level , newExperience, 4000)
+    const  isAdventureDead  = useIsDead(data.adventurerId, isDead)
     
 
     const [ isAdventurerDeadAnimation, setIsAdventurerDeadAnimation ] =useState<boolean>(false)
@@ -264,7 +264,7 @@ const Adventurer = ({data, questLevel, claimed , isDead, rewardExp, children} : 
                         </ExperienceWrapper>
                         
                         <EmojiWrapper isAnimationFailing={isAnimationFailed} isAnimationSucceeded={isAnimationSucceeded}>
-                            <Emoji  questStatus = {claimed.state} isAdventureDead={isAdventureDead} type={data.adventurer.type}/>
+                            <Emoji  questStatus = {claimed.state} isAdventureDead={isAdventureDead} type={data.collection}/>
                         </EmojiWrapper>
                 
 

@@ -1,7 +1,7 @@
 import styled from "styled-components"
 import Image from "next/image"
 import { useGetSucceedChance, useGetAverageLevel } from "../../../apps/availableQuest/hooks"
-import { EnrollsType } from "../../../../../../types/idleQuest" 
+import { DataAdventurerType, EnrollsType } from "../../../../../../types/idleQuest" 
 
 const SucceedChanceWrapper = styled.div`
     width: 9vw;
@@ -46,14 +46,14 @@ interface succeedChance{
     questDifficulty: number
     questSlots: number
     requirementBonus: number
-    adventurersList: (string | null) [] | EnrollsType []
+    adventurersList: (string | null) []
     type: "available" | "inProgress"
 }
 
 
 const SucceedChance = ({questDifficulty, questSlots, requirementBonus, adventurersList, type} : succeedChance) =>{
 
-    const [ averageLevel] =useGetAverageLevel(questSlots, adventurersList, type)
+    const [ averageLevel ] = useGetAverageLevel(questSlots, adventurersList, type)
     
     
     const [percentage] = useGetSucceedChance(questDifficulty, questSlots, averageLevel, requirementBonus)

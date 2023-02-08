@@ -102,16 +102,21 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         }
     }
 
-    private makeAvailableQuest(questId: string): AvailableQuest {
+    private makeAvailableQuestById(questId: string, rewardCalculator: RewardCalculator, durationCalculator: DurationCalculator): AvailableQuest {
         const originalQuest = this.questsRegistry[questId]
+        return this.makeAvailableQuest(originalQuest, rewardCalculator, durationCalculator)
+    }
+
+    private makeAvailableQuest(originalQuest: Quest, rewardCalculator: RewardCalculator, durationCalculator: DurationCalculator): AvailableQuest {
         return {
             questId: originalQuest.questId,
             name: originalQuest.name,
             location: originalQuest.location,
             description: originalQuest.description,
             requirements: originalQuest.requirements,
-            reward: this.rewardCalculator.baseReward(originalQuest.requirements),
-            duration: this.durationCalculator.baseDuration(originalQuest.requirements),
+            reward: rewardCalculator.baseReward(originalQuest.requirements),
+            duration: durationCalculator.baseDuration(originalQuest.requirements),
+            slots: 5
         }
     }
 
@@ -139,16 +144,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @returns 
      */
     async getAvailableQuests(location: string, quantity: number = 20): Promise<GetAvailableQuestsResult> {
-        return { status: "ok", quests: pickRandomQuestsByLocation(location, quantity, this.questsRegistry, this.random).map(quest => ({ 
-            questId: quest.questId,
-            name: quest.name,
-            location: quest.location,
-            description: quest.description,
-            requirements: quest.requirements,
-            reward: this.rewardCalculator.baseReward(quest.requirements), 
-            duration: this.durationCalculator.baseDuration(quest.requirements),
-            slots: quest.slots
-        })) }
+        return { status: "ok", quests: pickRandomQuestsByLocation(location, quantity, this.questsRegistry, this.random)
+            .map(q => this.makeAvailableQuest(q, this.rewardCalculator, this.durationCalculator)) }
     }
 
     /**
@@ -170,7 +167,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             return { status: "invalid-adventurers" }
         }
         const quest = (await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId), createdAt: this.calendar.now() }, { transaction })).dataValues
-        const takenQuest = { ...quest, quest: this.makeAvailableQuest(quest.questId) }
+        const takenQuest = { ...quest, quest: this.makeAvailableQuestById(quest.questId, this.rewardCalculator, this.durationCalculator) }
         await transaction.commit()
         return { status: "ok", takenQuest }
     }
@@ -183,7 +180,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      */
     async getTakenQuests(userId: string): Promise<GetTakenQuestsResult> {
         const quests = await runningQuestsDB.TakenQuestDB.findAll({ where: { userId, claimedAt: null } })
-        const takenQuests = quests.map(quest => ({ ...(quest.dataValues), quest: this.makeAvailableQuest(quest.questId) }))
+        const takenQuests = quests.map(quest => ({ ...(quest.dataValues), quest: this.makeAvailableQuestById(quest.questId, this.rewardCalculator, this.durationCalculator) }))
         return { status: "ok", quests: takenQuests }
     }
 
@@ -359,6 +356,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         if (result.status !== "ok") return []
         return result.quests.map(takenQuest => {
             return {
+                ...takenQuest,
                 "id": takenQuest.takenQuestId,
                 "is_claimed": false,
                 "player_stake_address": "",
@@ -529,7 +527,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
                 "reward_xp": 1,
                 "difficulty": 1,
                 "rarity": "townsfolk",
-                "is_war_effort": false
+                "is_war_effort": false,
             }
         })
         /*

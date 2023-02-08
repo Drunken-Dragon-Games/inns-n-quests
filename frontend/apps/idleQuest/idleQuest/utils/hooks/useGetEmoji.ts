@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
+import { AdventurerCollection } from "../../../models"
 
 
 //tiene tres input el status del quest si el aventurero murio y el tipo del aventurero el output es un string que completa el path para el renderizado de una imagen
-export default (questStatus: "failed" | "succeeded" | null, isAdventureDead: boolean, type: string ) : string=>{
+export default (questStatus: "failed" | "succeeded" | null, isAdventureDead: boolean, type: AdventurerCollection) : string=>{
     
     const [emoji, setEmoji] = useState<string>("1")
 
@@ -15,9 +16,9 @@ export default (questStatus: "failed" | "succeeded" | null, isAdventureDead: boo
             if(isAdventureDead == true){
                 
                 // esta condicional regresa dependiendo del tipo de aventurero que tiene
-                if(type == "gma"){
+                if(type == "grandmaster-adventurers"){
                     setEmoji("healing")
-                } else if(type == "pixeltile"){
+                } else if(type == "pixel-tiles"){
                     setEmoji("death")
                 }
             }

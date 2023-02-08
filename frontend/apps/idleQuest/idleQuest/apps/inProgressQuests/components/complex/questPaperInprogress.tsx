@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { useOpenInProgressPaper } from "../../hooks";
 import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
-import { useGetInProgressData, useGetAdventurerPng, useGetClaimRewardShadow, useGetAdventurersEnrollsRequirements } from "../../hooks"
+import { useGetInProgressData, useGetClaimRewardShadow } from "../../hooks"
 import { QuestLabelLevel, 
     RescalingMonster, 
     SucceedChance, 
@@ -187,17 +187,18 @@ const QuestPaperInProgress = () => {
         
     const requirements = inProgressQuestData.quest.requirements
 
-    const adventurersEnrollsRequirements = useGetAdventurersEnrollsRequirements(inProgressQuestData.enrolls)
+    const adventurersIds = inProgressQuestData.adventurerIds
 
-    const adventurersEnrolls = inProgressQuestData.enrolls
-
-    const [pngAdvernturer] = useGetAdventurerPng()   
+    //const adventurersEnrolls = inProgressQuestData.enrolls
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     const isClaimedData = generalSelector.idleQuest.questsInProgress.data.claimReward
 
     const questClaimStatus = generalSelector.idleQuest.questsInProgress.Status.claimReward.status
+
+    const adventurerData = generalSelector.idleQuest.adventurers.data.data
+        .filter(adventurer => adventurersIds.indexOf(adventurer.adventurerId) !== -1)
 
     const  claimShadowEffect  =useGetClaimRewardShadow(inProgressQuestData.state, questClaimStatus)
 
@@ -230,7 +231,7 @@ const QuestPaperInProgress = () => {
                                         <QuestRequirementsSectionPosition>
                                             <QuestRequirementsSection 
                                                 requirements ={ {} } 
-                                                adventuresSelected={adventurersEnrollsRequirements}
+                                                adventuresSelected={adventurersIds}
                                                 callbackBonus = {(bonus: number) => setBonus(bonus)}
                                             />
                                         </QuestRequirementsSectionPosition>
@@ -251,7 +252,7 @@ const QuestPaperInProgress = () => {
                                                 questDifficulty = {0}//inProgressQuestData.quest.difficulty}
                                                 questSlots = {5}//inProgressQuestData.quest.slots}
                                                 requirementBonus = {bonus}
-                                                adventurersList = {adventurersEnrolls}
+                                                adventurersList = {adventurersIds}
                                                 type = "inProgress"
                                             />
                                         </SucceedChanceWrapper>
@@ -272,26 +273,17 @@ const QuestPaperInProgress = () => {
                                         <AdventurerWrapper>
                                             <Flex>
                                         
-                                                {adventurersEnrolls.map((el) =>{
+                                                {adventurerData.map((adv) =>
                                                     
-                                                    
-                                                    const adventurerData = pngAdvernturer(el.adventurer_id, generalSelector.idleQuest.adventurers.data.data)
-                                                                
-                                                                
-                                                    return  <Adventurer data ={el} 
-                                                                        questLevel = {0}//inProgressQuestData.quest.difficulty} 
-                                                                        key = {el.adventurer_id} 
-                                                                        claimed = {isClaimedData} 
-                                                                        isDead = {isClaimedData.dead_adventurers}
-                                                                        rewardExp={isClaimedData.exp_given}
-                                                                    
-                                                            >
-                                                                <RescalingImg  
-                                                                    src = {adventurerData.src}
-                                                                    collection = {adventurerData.collection}
-                                                                /> 
-                                                            </Adventurer>  
-                                                })}  
+                                                    <Adventurer data ={adv} 
+                                                                questLevel = {0}//inProgressQuestData.quest.difficulty} 
+                                                                key = {adv.adventurerId} 
+                                                                claimed = {isClaimedData} 
+                                                                isDead = {isClaimedData.dead_adventurers}
+                                                                rewardExp={isClaimedData.exp_given} >
+                                                        <RescalingImg src={adv.sprite} collection={adv.collection} /> 
+                                                    </Adventurer>  
+                                                )}  
                                             </Flex>
                                         </AdventurerWrapper>
                                         <CornerRightDown>

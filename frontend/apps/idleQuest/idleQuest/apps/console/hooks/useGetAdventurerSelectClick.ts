@@ -26,7 +26,7 @@ export default () => {
         const questNumber = generalSelector.idleQuest.navigator.availableQuest.availableQuest
         const quests = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
         if(questNumber != null){
-          return quests[questNumber].slots
+            return quests[questNumber].slots
         }
     }
 
