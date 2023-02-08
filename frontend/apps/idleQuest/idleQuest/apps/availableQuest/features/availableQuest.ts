@@ -240,6 +240,8 @@ const selectAdventurer = createSlice({
             const newSelectedArray = state.selectAdventurer
 
             const indexNull = newSelectedArray.indexOf(null)
+            
+            console.log(action.payload.maxLength)
 
             if(indexNull === -1){
                 if(state.selectAdventurer.length < action.payload.maxLength){
