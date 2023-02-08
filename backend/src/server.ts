@@ -18,6 +18,7 @@ import { loadQuestRegistry } from "./registry-quests";
 import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./registry-policies";
 import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata";
 import path from "path";
+import { commonCalendar } from "./tools-utils/calendar";
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -29,6 +30,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
 (async () => {
     dotenv.config()
     const random = new Random(config.stringOrElse("RANDOM_SEED", Date.now().toString()))
+    const calendar = commonCalendar
     const metadataRegistry = await loadMetadataCache(loadMetadataLocationsFromEnv())
     const wellKnownPolicies = process.env.CARDANO_NETWORK === "mainnet" ? wellKnownPoliciesMainnet : loadWellKnownPoliciesFromEnv()
     const questsRegistry = await loadQuestRegistry(
@@ -47,7 +49,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
-    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ random, database, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
+    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ random, calendar, database, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
     
     // Soon to be deprecated
     await loadQuestModuleModels(database)

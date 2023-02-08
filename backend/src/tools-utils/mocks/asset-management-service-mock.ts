@@ -1,4 +1,4 @@
-import { AssetManagementService } from "../../service-asset-management";
+import { AssetManagementService, ListResponse } from "../../service-asset-management";
 
 export default class AssetManagementServiceMock {
 
@@ -16,5 +16,10 @@ export default class AssetManagementServiceMock {
             claimStatus: jest.fn(),
             revertStaledClaims: jest.fn(),
         }
+    }
+    
+    listReturns(response: ListResponse) {
+        return jest.spyOn(this.service, "list")
+            .mockReturnValueOnce(Promise.resolve(response))
     }
 }

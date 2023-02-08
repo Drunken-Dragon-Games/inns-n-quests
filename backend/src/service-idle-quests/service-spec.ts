@@ -27,5 +27,5 @@ export interface IdleQuestsService {
 
     getTakenQuests(userId: string): Promise<models.GetTakenQuestsResult>
 
-    claimQuestResult(userId: string, questId: string): Promise<models.ClaimQuestResult>
+    claimQuestResult(userId: string, takenQuestId: string): Promise<models.ClaimQuestResult>
 }

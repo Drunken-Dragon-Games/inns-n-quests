@@ -20,6 +20,7 @@ import Random from "../tools-utils/random"
 import { RewardCalculator, DurationCalculator, baseSuccessRate } from "./challenges/quest-requirement"
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import AdventurerFun from "./items/adventurer-fun"
+import { Calendar } from "../tools-utils/calendar"
 
 export interface IdleQuestsServiceConfig 
     { rewardFactor: number
@@ -28,6 +29,7 @@ export interface IdleQuestsServiceConfig
 
 export interface IdleQuestServiceDependencies 
     { random: Random
+    , calendar: Calendar
     , database: Sequelize
     , assetManagementService: AssetManagementService
     , metadataRegistry: MetadataRegistry
@@ -42,6 +44,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     constructor (
         private readonly random: Random,
+        private readonly calendar: Calendar,
         private readonly database: Sequelize,
         private readonly assetManagementService: AssetManagementService,
         private readonly questsRegistry: QuestRegistry,
@@ -66,6 +69,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     static async loadFromConfig(servConfig: IdleQuestsServiceConfig, dependencies: IdleQuestServiceDependencies): Promise<IdleQuestsService> {
         const service = new IdleQuestsServiceLogging(new IdleQuestsServiceDsl(
             dependencies.random,
+            dependencies.calendar,
             dependencies.database,
             dependencies.assetManagementService,
             dependencies.questsRegistry,
@@ -165,7 +169,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             await transaction.rollback()
             return { status: "invalid-adventurers" }
         }
-        const quest = await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId) }, { transaction })
+        const quest = (await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId), createdAt: this.calendar.now() }, { transaction })).dataValues
         const takenQuest = { ...quest, quest: this.makeAvailableQuest(quest.questId) }
         await transaction.commit()
         return { status: "ok", takenQuest }
@@ -179,7 +183,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      */
     async getTakenQuests(userId: string): Promise<GetTakenQuestsResult> {
         const quests = await runningQuestsDB.TakenQuestDB.findAll({ where: { userId, claimedAt: null } })
-        const takenQuests = quests.map(quest => ({ ...quest, quest: this.makeAvailableQuest(quest.questId) }))
+        const takenQuests = quests.map(quest => ({ ...(quest.dataValues), quest: this.makeAvailableQuest(quest.questId) }))
         return { status: "ok", quests: takenQuests }
     }
 
@@ -188,18 +192,19 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * The outcome is the reward if successful or a list with dead adventurers if failed.
      * 
      * @param userId 
-     * @param questId 
+     * @param takenQuestId 
      * @returns 
      */
-    async claimQuestResult(userId: string, questId: string): Promise<ClaimQuestResult> {
-        const quest = await runningQuestsDB.TakenQuestDB.findOne({ where: { userId, questId } })
+    async claimQuestResult(userId: string, takenQuestId: string): Promise<ClaimQuestResult> {
+        const quest = await runningQuestsDB.TakenQuestDB.findOne({ where: { userId, takenQuestId } })
         if (!quest) 
             return { status: "unknown-quest" }
         if (quest.claimedAt !== null)
             return { status: "quest-already-claimed" }
         const requirements = this.questsRegistry[quest.questId].requirements
         const duration = this.durationCalculator.baseDuration(requirements)
-        if (quest.createdAt.getTime() + duration > Date.now()) 
+        const now = this.calendar.now()
+        if (quest.createdAt.getTime() + duration > now.getTime()) 
             return { status: "quest-not-finished" }
         const transaction = await this.database.transaction()
         const adventurers = await this.adventurerFun.unsetInChallenge(userId, quest.adventurerIds, transaction)
@@ -208,7 +213,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             await transaction.rollback()
             return { status: "missing-adventurers", missing }
         }
-        await quest.update({ claimedAt: new Date() }, { transaction })
+        await quest.update({ claimedAt: now }, { transaction })
         await transaction.commit()
         const successRate = baseSuccessRate(requirements, adventurers)
         const success = this.random.randomNumberBetween(1, 100) <= Math.floor(successRate * 100)

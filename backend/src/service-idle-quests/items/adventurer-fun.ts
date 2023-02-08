@@ -233,7 +233,7 @@ export default class AdventurerFun {
     async setInChallenge(userId: string, adventurerIds: string[], transaction?: Transaction): Promise<Adventurer[]> {
         if (adventurerIds.length == 0) return []
         const [_, adventurers] = await AdventurerDB.update({ inChallenge: true }, 
-            { where: { userId, adventurerIds, inChallenge: false, hp: { [Op.not]: 0 } }, returning: true, transaction })
+            { where: { userId, adventurerId: adventurerIds, inChallenge: false, hp: { [Op.not]: 0 } }, returning: true, transaction })
         return adventurers.map(adventurer => adventurer.dataValues)
     }
 
