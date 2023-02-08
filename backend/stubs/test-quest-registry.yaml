@@ -1,7 +1,7 @@
 
 questId: "quest-1"
 name: "Quest 1"
-location: "Autistar"
+location: "Auristar"
 description: "This is the description fd quest 1"
 requirements: 
   classes: 
@@ -13,10 +13,7 @@ requirements:
 
 questId: "quest-2"
 name: "Quest 2"
-location: "Autistar"
+location: "Auristar"
 description: "This is the description fd quest 2"
 requirements: 
-  or: 
-  - "warlock"
-  - "paladin"
   aps: [20, 30, 10]

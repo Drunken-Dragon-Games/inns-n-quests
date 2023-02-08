@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { AdventurerCollection } from "../../../../../../types/idleQuest"
+import { AdventurerCollection } from "../../../../models"
 
 
 export default (src: string, collection: AdventurerCollection): number [] =>{

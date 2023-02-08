@@ -235,7 +235,7 @@ const QuestPaperAvailable = () => {
 
                                 <QuestRequirementsSectionPosition>
                                     <QuestRequirementsSection 
-                                        requirements ={questData.requirements} 
+                                        requirements ={ {} }//questData.requirements} 
                                         adventuresSelected={selectedAdventurers!}
                                         callbackBonus = {(bonus: number) => setBonus(bonus)}
                                     />

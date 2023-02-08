@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux'
 import { Feelings, RescalingImg } from ".";
 import { useGetLevel } from "../../hooks";
 import Image from 'next/image'
-import { AdventurerCollection } from "../../../../../../types/idleQuest";
+import { AdventurerCollection } from "../../../../models";
 
 interface DataAdventurer{
     id: string,

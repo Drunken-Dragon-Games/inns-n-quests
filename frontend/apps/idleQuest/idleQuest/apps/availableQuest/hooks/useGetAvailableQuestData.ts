@@ -4,7 +4,7 @@ import { selectGeneralReducer } from "../../../../../../features/generalReducer"
 import { AvailableQuestType } from "../../../../../../types/idleQuest" 
 
 
-const placeHolder ={
+const placeHolder: AvailableQuestType = {
     uiid: "123wqe1452662retwqet",
     id: "qwe12342315412352351234",
     name: "placeholder",
@@ -15,7 +15,10 @@ const placeHolder ={
     slots: 3,
     rarity: "townsfolk",
     duration: 12312421,
-    requirements: {}
+    requirements: { ctype: "empty-requirement" },
+    questId: "quest-id",
+    location: "location",
+    reward: {},
 }
 
 

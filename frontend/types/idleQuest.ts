@@ -1,17 +1,26 @@
+import { AdventurerClass, AdventurerCollection, QuestRequirement, Race, Reward } from "../apps/idleQuest"
+
 export interface AvailableQuestType {
-    uiid?: string
-    id: string
     name: string
     description: string
+    duration: number
+
+    questId: string
+    location: string
+    reward: Reward
+    requirements: QuestRequirement
+
+    // Deprecated, remove asap
+    uiid?: string
+    id: string
     reward_ds: number
     reward_xp: number
     difficulty: number
     slots: number
     rarity: string
-    duration: number
     width?: number
     height?: number
-    requirements: RequirementType
+    //requirements: RequirementType
 }
 
 export interface RequirementType{
@@ -76,7 +85,6 @@ interface AdventurerInQuestType{
     type: "pixeltile" | "gma"
 }
 
-
 export interface DataAdventurerType{
     adventurerId: string
     name: string
@@ -101,31 +109,3 @@ export interface DataAdventurerType{
     //type: "pixeltile" | "gma"
     metadata: MetadataType
 }
-
-export interface Adventurer {
-    adventurerId: string,
-    userId: string,
-    name: string,
-    class: AdventurerClass,
-    race: Race,
-    collection: AdventurerCollection,
-    assetRef: string,
-    sprite?: string,
-    hp: number,
-    inChallenge?: boolean,
-    athleticism: number,
-    intellect: number,
-    charisma: number,
-}
-
-export type Race = "human" | "elf" | "tiefling" | "dragonkin" | "worgenkin" | "undead" | "viera" | "troll" | "vulkin" | "orc" | "tauren"
-
-export const races = ["human", "elf", "tiefling", "dragonkin", "worgenkin", "undead", "viera", "troll", "vulkin", "orc", "tauren"]
-
-export type AdventurerClass = "fighter" | "paladin" | "ranger" | "rogue" | "bard" | "mage" | "warlock" | "cleric" | "druid" | "knight"
-
-export const adventurerClasses = ["fighter", "paladin", "ranger", "rogue", "bard", "mage", "warlock", "cleric", "druid", "knight"]
-
-export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-thiolden" | "pixel-tiles"
-
-export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
