@@ -78,7 +78,7 @@ export const PostClaimInProgressQuest = (quest: inProgressQuestType): GeneralRed
 
             dispatch(setFreeAdventurers(response.data.adventurers))
 
-            dispatch(setAddDragonSilverToClaim(quest.quest.reward_ds))
+            //dispatch(setAddDragonSilverToClaim(quest.quest.reward_ds))
             dispatch(setExperienceReward(response.data.adventurers))
 
 

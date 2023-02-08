@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 import { IdleQuestsService } from "./service-spec"
-import { Op, QueryInterface, Sequelize } from "sequelize"
+import { QueryInterface, Sequelize } from "sequelize"
 import { LoggingContext } from "../tools-tracing"
 import { buildMigrator } from "../tools-database"
 import path from "path"
@@ -8,7 +8,7 @@ import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
 import { config } from "../tools-utils"
 
-import { AcceptQuestResult, ClaimQuestResult, GetAllAdventurersResult, GetAvailableQuestsResult, GetTakenQuestsResult, HealthStatus } from "./models"
+import { AcceptQuestResult, AvailableQuest, ClaimQuestResult, GetAllAdventurersResult, GetAvailableQuestsResult, GetTakenQuestsResult, HealthStatus, Quest } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
 import * as runningQuestsDB from "./challenges/taken-quest-db"
@@ -98,6 +98,19 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         }
     }
 
+    private makeAvailableQuest(questId: string): AvailableQuest {
+        const originalQuest = this.questsRegistry[questId]
+        return {
+            questId: originalQuest.questId,
+            name: originalQuest.name,
+            location: originalQuest.location,
+            description: originalQuest.description,
+            requirements: originalQuest.requirements,
+            reward: this.rewardCalculator.baseReward(originalQuest.requirements),
+            duration: this.durationCalculator.baseDuration(originalQuest.requirements),
+        }
+    }
+
     /**
      * Returns a list of all adventurers that are currently in the inventory of the given user.
      * This triggers a sync of the adventurers in the asset inventory (managed by the Asset Management Service) 
@@ -152,7 +165,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             await transaction.rollback()
             return { status: "invalid-adventurers" }
         }
-        const takenQuest = await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId) }, { transaction })
+        const quest = await runningQuestsDB.TakenQuestDB.create({ userId, questId, adventurerIds: adventurers.map(a => a.adventurerId) }, { transaction })
+        const takenQuest = { ...quest, quest: this.makeAvailableQuest(quest.questId) }
         await transaction.commit()
         return { status: "ok", takenQuest }
     }
@@ -164,8 +178,9 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @returns 
      */
     async getTakenQuests(userId: string): Promise<GetTakenQuestsResult> {
-        const quests = await runningQuestsDB.TakenQuestDB.findAll({ where: { userId } })
-        return { status: "ok", quests }
+        const quests = await runningQuestsDB.TakenQuestDB.findAll({ where: { userId, claimedAt: null } })
+        const takenQuests = quests.map(quest => ({ ...quest, quest: this.makeAvailableQuest(quest.questId) }))
+        return { status: "ok", quests: takenQuests }
     }
 
     /**
@@ -269,7 +284,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             "state": "in_progress",
             "is_claimed": false,
             "user_id": userId,
-            "quest_id": result.takenQuest.questId,
+            "quest_id": result.takenQuest.quest.questId,
             "quest": {
                 "id": quest.questId,
                 "name": quest.name,
@@ -334,6 +349,21 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async module_getTakenQuests(userId: string): Promise<object[]> {
+
+        const result = await this.getTakenQuests(userId)
+        if (result.status !== "ok") return []
+        return result.quests.map(takenQuest => {
+            return {
+                "id": takenQuest.takenQuestId,
+                "is_claimed": false,
+                "player_stake_address": "",
+                //"quest": takenQuest.quest,
+                //"quest_id": string,
+                "started_on": takenQuest.createdAt,
+                "state": "in_progress"
+            }
+        })
+        /*
         return [
             {
                 "id": "2861f7b0-3e09-43dd-bcba-1304c10d9956",
@@ -482,6 +512,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
                 ]
             }
         ]
+        */
     }
 
     async module_getAvailableQuests(userId: string): Promise<object[]> {

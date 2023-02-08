@@ -72,9 +72,11 @@ export type AvailableQuest = {
 
 export type TakenQuest = {
     takenQuestId?: string,
-    questId: string,
     userId: string,
     adventurerIds: string[],
+    claimedAt?: Date,
+    createdAt: Date,
+    quest: AvailableQuest,
 }
 
 export type QuestRequirement 

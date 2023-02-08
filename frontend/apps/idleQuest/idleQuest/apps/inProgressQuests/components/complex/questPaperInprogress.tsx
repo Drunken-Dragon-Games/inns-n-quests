@@ -221,7 +221,7 @@ const QuestPaperInProgress = () => {
                                     
                                     <LabelWrapper>
                                         <QuestLabelLevel>
-                                            {inProgressQuestData.quest.difficulty.toString()}
+                                            {"0"}
                                         </QuestLabelLevel>
                                     </LabelWrapper>
                                     
@@ -229,7 +229,7 @@ const QuestPaperInProgress = () => {
                                         <Title>{inProgressQuestData.quest.name}</Title>
                                         <QuestRequirementsSectionPosition>
                                             <QuestRequirementsSection 
-                                                requirements ={requirements} 
+                                                requirements ={ {} } 
                                                 adventuresSelected={adventurersEnrollsRequirements}
                                                 callbackBonus = {(bonus: number) => setBonus(bonus)}
                                             />
@@ -248,8 +248,8 @@ const QuestPaperInProgress = () => {
 
                                         <SucceedChanceWrapper>
                                             <SucceedChance
-                                                questDifficulty = {inProgressQuestData.quest.difficulty}
-                                                questSlots = {inProgressQuestData.quest.slots}
+                                                questDifficulty = {0}//inProgressQuestData.quest.difficulty}
+                                                questSlots = {5}//inProgressQuestData.quest.slots}
                                                 requirementBonus = {bonus}
                                                 adventurersList = {adventurersEnrolls}
                                                 type = "inProgress"
@@ -264,7 +264,7 @@ const QuestPaperInProgress = () => {
                                             inProgress = {true} 
                                             questState={inProgressQuestData.state}
                                             selected = {inProgressQuestData}
-                                            dsReward={inProgressQuestData.quest.reward_ds}
+                                            dsReward={0}//inProgressQuestData.quest.reward_ds}
                                         />
                                     </ProgressionWrapper>
                                 
@@ -279,7 +279,7 @@ const QuestPaperInProgress = () => {
                                                                 
                                                                 
                                                     return  <Adventurer data ={el} 
-                                                                        questLevel = {inProgressQuestData.quest.difficulty} 
+                                                                        questLevel = {0}//inProgressQuestData.quest.difficulty} 
                                                                         key = {el.adventurer_id} 
                                                                         claimed = {isClaimedData} 
                                                                         isDead = {isClaimedData.dead_adventurers}
@@ -295,7 +295,7 @@ const QuestPaperInProgress = () => {
                                             </Flex>
                                         </AdventurerWrapper>
                                         <CornerRightDown>
-                                            <Seals seal = {inProgressQuestData.quest.rarity}/>
+                                            <Seals seal = {"kings_plea"} />
                                         </CornerRightDown>
                                     </Flex>
                                     <Signature />

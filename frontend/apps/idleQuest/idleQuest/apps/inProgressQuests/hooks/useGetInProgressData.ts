@@ -5,6 +5,11 @@ import { inProgressQuestType } from "../../../../../../types/idleQuest"
 
 
 const placeHolder: inProgressQuestType  = {
+    takenQuestId: "asdasdasfgqhwyhhqfadh",
+    userId: "asdasdasfgqhwyhhqfadh",
+    adventurerIds: [],
+    createdAt: "25/11/22",
+
     enrolls:[],
     id: "asdasdasfgqhwyhhqfadh",
     is_claimed: false,
@@ -14,15 +19,17 @@ const placeHolder: inProgressQuestType  = {
     state: "in_progress",
     quest:{
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-        difficulty: 3,
+        //difficulty: 3,
         duration: 12351263147,
-        id: "qe123qwr123123asd12",
+        questId: "qe123qwr123123asd12",
+        location: "Auristar",
+        reward: {},
         name: "Kill the wolf",
-        rarity: "townsfolk",
-        reward_ds: 4,
-        reward_xp: 1245,
+        //rarity: "townsfolk",
+        //reward_ds: 4,
+        //reward_xp: 1245,
         slots: 2,
-        requirements:{}
+        requirements:{ ctype: "empty-requirement" }
     }
 }
 

@@ -1,4 +1,4 @@
-import { AdventurerClass, AdventurerCollection, QuestRequirement, Race, Reward } from "../apps/idleQuest"
+import { AdventurerClass, AdventurerCollection, QuestRequirement, Race, Reward, TakenQuest } from "../apps/idleQuest"
 
 export interface AvailableQuestType {
     name: string
@@ -45,12 +45,14 @@ export interface MetadataType{
     dead_cooldown?: number
 }
 
-export interface inProgressQuestType{
+export interface inProgressQuestType extends TakenQuest {
+
+    // Deprecated
     enrolls: EnrollsType []
     id: string
     is_claimed: boolean
     player_stake_address: string
-    quest: QuestType
+    //quest: QuestType
     quest_id: string
     started_on: string
     state: "failed" | "succeeded" | "in_progress" | null

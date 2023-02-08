@@ -127,7 +127,7 @@ const TakeQuest = ({data, index}: inProgressCard) => {
                 <Flex>
                     <ScrollWrapper>
                         
-                        <Image src= {rolls[data.quest.rarity ]}  alt="corner detail" width={50} height={50} layout ="responsive"/>
+                        <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/kings_plea.png"  alt="corner detail" width={50} height={50} layout ="responsive"/>
                         
                         <ConditionalRender condition={data.state == "succeeded" || data.state == "failed"}>
                             <StampWrapper>
@@ -143,7 +143,7 @@ const TakeQuest = ({data, index}: inProgressCard) => {
                             <Flex>
                                 <CenterFlex>
 
-                                    <DragonSilverIconTakenQuest dragonSilverReward={data.quest.reward_ds}/>
+                                    <DragonSilverIconTakenQuest dragonSilverReward={0}/>
                 
                                     <Timmer startTime={data.started_on} duration={data.quest.duration} questStatus={data.state}/>
                     
