@@ -12,7 +12,7 @@ const placeHolder: AvailableQuestType = {
     reward_ds: 23,
     reward_xp: 23,
     difficulty: 1,
-    slots: 3,
+    slots: 4,
     rarity: "townsfolk",
     duration: 12312421,
     requirements: { ctype: "empty-requirement" },
