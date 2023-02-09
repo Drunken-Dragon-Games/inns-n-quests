@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Image from "next/image"
-import { useGetAvailableQuest, useRefreshQuest, useResetSelectAdventurers } from "./hooks";
-import { QuestBoard, WorldMap, QuestCard } from "./components/complex";
+import { useGetAvailableQuest } from "./hooks";
+import { QuestBoardArea, WorldMap, QuestCard } from "./components/complex";
 import { RefreshButton } from "./components/basic_components";
 import { getAvailableQuests, clearSelectedAdventurers, takeAvailableQuest } from "./features/quest-board";
 import { useGeneralDispatch, useGeneralSelector } from "../../../../../features/hooks";
@@ -11,7 +11,7 @@ import { notEmpty } from "../../../../utils";
 import { useEffect } from "react";
 import { AvailableQuest } from "../../../dsl";
 
-const QuestDashboardContainer =styled.div`
+const QuestBoardContainer =styled.div`
     width: 85%;
     height: 100vh;
     background-color: #523438;
@@ -20,13 +20,11 @@ const QuestDashboardContainer =styled.div`
     overflow: hidden;
 `
 
-const QuestDashboardWrapper = styled.div`
+const QuestDashboardAreaWrapper = styled.div`
     width: 80vw;
     height: 50vw;
     position: relative;
     margin: auto;
-    // background-image: url(./images/dashboard.png);
-    background-repeat: no-repeat;
 `
 
 const Center = styled.div`
@@ -40,7 +38,7 @@ const ImageWrapper = styled.div`
     top: 1vw;
 `
 
-const AvailableQuests = () => {
+const QuestBoard = () => {
     //const setRefresh = useRefreshQuest()
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const generalDispatch = useGeneralDispatch()    
@@ -60,34 +58,32 @@ const AvailableQuests = () => {
         generalDispatch(clearSelectedAdventurers())
     }, [quest])
 
-    return (<>
-        <QuestDashboardContainer>
-
-            <QuestDashboardWrapper>
-                <Center> 
+    return (
+        <QuestBoardContainer>
+            <QuestDashboardAreaWrapper>
+                <Center>
                     <ImageWrapper>
-                        <Image 
-                            src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp"  
-                            alt="dashboard" 
-                            width={2100} 
-                            height={1250} 
-                            layout ="responsive" />
+                        <Image
+                            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp"
+                            alt="quest board background"
+                            width={2100}
+                            height={1250}
+                            layout="responsive" />
                     </ImageWrapper>
-                    <QuestBoard availableQuests={availableQuests} onQuestClick={onAvailableQuestClick}/>
-                    <WorldMap/>
+                    <QuestBoardArea availableQuests={availableQuests} onQuestClick={onAvailableQuestClick} />
+                    <WorldMap />
                 </Center>
-                <RefreshButton onClick ={() => generalDispatch(getAvailableQuests(true))} />
-            </QuestDashboardWrapper>
-                        
+                <RefreshButton onClick={() => generalDispatch(getAvailableQuests(true))} />
+            </QuestDashboardAreaWrapper>
+
             <QuestCard
                 quest={quest}
                 selectedAdventurers={selectedAdventurers}
                 onSign={onSign}
                 onClose={onClose}
             />
-    
-        </QuestDashboardContainer>
-    </>)
+        </QuestBoardContainer>
+    )
 }
 
-export default AvailableQuests
+export default QuestBoard 

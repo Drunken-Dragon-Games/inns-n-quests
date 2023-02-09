@@ -191,7 +191,6 @@ const ProgressionQuest = () => { //{takenQuest}: ProgressionQuest) => {//{startT
     const [ timeMarkLeft ] = useGetMarkTimeLeft( (timeLeft as number), (completeDuration as number), 2)
 
     const [ isClaimed, setIsClaimed ] = useState<boolean>(false)
-    */
 
     const generalDispatch = useGeneralDispatch()   
 
@@ -200,7 +199,6 @@ const ProgressionQuest = () => { //{takenQuest}: ProgressionQuest) => {//{startT
     // const index = generalSelector.navigator.inProgressQuestSelected
     const index = generalSelector.idleQuest.navigator.inProgress.inProgressQuest
 
-    /*
     let isSuccessful = false;
 
     let questStateActual: "failed" | "succeeded" | "in_progress" | null = null
@@ -224,7 +222,6 @@ const ProgressionQuest = () => { //{takenQuest}: ProgressionQuest) => {//{startT
 
     return (<>
                 <PositionWrapper>
-                    <RescalingProgression src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progression.svg" />
                     <ChestWrapper> 
                         <RescalingChest src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_progression.svg"/>
                         <CoinRewardWrapper>
@@ -232,6 +229,8 @@ const ProgressionQuest = () => { //{takenQuest}: ProgressionQuest) => {//{startT
                         </CoinRewardWrapper>
                     </ChestWrapper>
 
+                    {/*
+                    <RescalingProgression src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progression.svg" />
                     <FirstPunt>
                         <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progression_punt.png"  alt="punt image" width={2000} height={1250} />
                     </FirstPunt>
@@ -239,7 +238,6 @@ const ProgressionQuest = () => { //{takenQuest}: ProgressionQuest) => {//{startT
                     <ProgressionMarkFirst>
                         <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progresion_mark.png" alt="punt image" width={2000} height={1250} />
                     </ProgressionMarkFirst>
-                    {/*
                     <ConditionalRender condition = {inProgress == true}>
                         <ProgressionMarkFirst>
                             <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progresion_mark.png"  alt="punt image" width={2000} height={1250} />
@@ -267,7 +265,6 @@ const ProgressionQuest = () => { //{takenQuest}: ProgressionQuest) => {//{startT
                             <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_mark_fail.png"  alt="punt image" width={2000} height={1250} />
                         </ChestMarkWrapper>
                     </ConditionalRender>
-                    */}
 
 
                     <LastPunt>

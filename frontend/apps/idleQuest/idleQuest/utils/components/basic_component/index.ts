@@ -1,6 +1,6 @@
 export { default as RescalingImg } from "./rescalingImg"
 export { default as Feelings } from "./feeling"
-export { default as QuestLabelLevel } from "./questLabelLevel"
+export { default as QuestLabelLevel } from "./quest-label-level"
 export { default as PixelCheckbox } from "./pixelCheckbox"
 export { default as QuestRequirement } from "./questRequirement"
 export { default as RescalingMonster } from "./rescalingMonster"

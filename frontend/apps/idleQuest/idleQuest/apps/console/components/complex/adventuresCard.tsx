@@ -106,7 +106,7 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
     //este elemento hace drageable todo la tarjeta
     // const drag = useDragElement( data )
 
-    const { selectAdventurer, isQuestSelected } = useGetAdventurerSelectClick()
+    const { selAdventurer, isQuestSelected } = useGetAdventurerSelectClick()
 
     const position = useGetPositionMedal(data.adventurerId)
 
@@ -115,7 +115,7 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
         
         {/* <AdventuresCardWrapper ref ={data.in_quest == false  && selectedInQuest == false && (data.metadata.is_alive == true || data.metadata.is_alive == undefined) ? drag : null}> */}
         <AdventuresCardWrapper 
-            onClick={() =>  data.metadata.dead_cooldown ? null : selectAdventurer(data.adventurerId, selectedInQuest!)}
+            onClick={() =>  data.metadata.dead_cooldown ? null : selAdventurer(data.adventurerId, selectedInQuest!)}
             isSelectable = {isQuestSelected}
         >
             <Margin>

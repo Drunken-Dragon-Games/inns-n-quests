@@ -1,14 +1,14 @@
 import { useGeneralDispatch, useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-import { setSelectAdventurerDrag, selectAdventurer, unselectAdventurer } from "../../availableQuest/features/quest-board"
+import { selectAdventurer, unselectAdventurer } from "../../availableQuest/features/quest-board"
 
 export default () => {
     const generalDispatch = useGeneralDispatch()
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     
-    const isQuestSelected =  generalSelector.idleQuest.navigator.availableQuest.availableQuest != null 
+    const isQuestSelected =  generalSelector.idleQuest.navigator.availableQuest.availableQuest !== undefined
 
-    const selectAdventurer = ( id: string , unSelect: boolean) =>{
+    const selAdventurer = ( id: string , unSelect: boolean) =>{
 
         if(isQuestSelected){
             if(!unSelect){
@@ -24,13 +24,11 @@ export default () => {
 
     const getSlotsNumber = () => {
         const questNumber = generalSelector.idleQuest.navigator.availableQuest.availableQuest
-        const quests = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
-        if(questNumber != null){
-            return quests[questNumber].slots
-        }
+        if(questNumber != null)
+            return questNumber.slots
     }
 
-    return {selectAdventurer, isQuestSelected }
+    return {selAdventurer, isQuestSelected }
     
 }
 

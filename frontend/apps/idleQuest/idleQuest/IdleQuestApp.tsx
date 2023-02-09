@@ -1,14 +1,11 @@
 import styled from "styled-components"
 import Console from "./apps/console/console"
-import AvailableQuests from "./apps/availableQuest/availableQuests"
+import QuestBoard from "./apps/availableQuest/quest-board"
 import InProgressQuest from "./apps/inProgressQuests/inProgressQuest"
 import { ErrorHandler } from "./utils/components/complex"
 import { useLoading } from "./utils/hooks"
 import { Loading } from "../../utils/components/basic_components"
 import { ConditionalRender } from "../../explorerOfThiolden/explorerOfThioldenPage/components/basic_components"
-
-
-
 
 const Relative = styled.section`
   position: relative;
@@ -41,7 +38,7 @@ const IdleQuestApp = (): JSX.Element => {
             <Relative>
                 <Flex>
                     <Console/>
-                    <AvailableQuests/>
+                    <QuestBoard/>
                     <InProgressQuest/>
                 </Flex>
             </Relative>

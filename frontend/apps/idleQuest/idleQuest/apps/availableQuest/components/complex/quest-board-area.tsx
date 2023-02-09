@@ -1,7 +1,9 @@
-import { PropStamp } from "../basic_components";
+import { PropStamp } from "../basic_components"
 import Image from 'next/image'
-import { AvailableQuest } from "../../../../../dsl";
-import styled from "styled-components";
+import { AvailableQuest } from "../../../../../dsl"
+import styled, { css } from "styled-components"
+import { useState } from "react"
+import { CrispPixelArtCss, CrispPixelArtImage } from "../../../../../../utils"
 
 const Area = styled.div`
     display: flex;
@@ -14,7 +16,7 @@ const Area = styled.div`
     padding: 10vw;
 `
 
-const MiniQuestCardWrapper = styled.div`
+const QuestPreviewCardContainer = styled.div`
     cursor: pointer;
     width: 16vw;
     height: 16vw;
@@ -37,8 +39,51 @@ const Title = styled.h2`
     -webkit-font-smoothing : none;
 `
 
-const PaperBackground = styled(Image)`
+const PaperBackground = styled.div`
     position: absolute;
+    width: 16vw;
+    height: 16vw;
+    ${CrispPixelArtCss}
+`
+
+const PaperBackgroundHoverCommon = css<{ hovering: boolean }>`
+    position: absolute;
+    opacity: ${props => props.hovering ? 1 : 0};
+    transition: opacity 0.3s;
+    outline:none;
+    box-shadow:0 0 10px yellow;
+    ${CrispPixelArtCss}
+`
+const PaperBackgroundHover1 = styled.div<{hovering: boolean}>`
+    top: 0.3vw;
+    left: 0.5vw;
+    width: 15.2vw;
+    height: 15.4vw;
+    ${PaperBackgroundHoverCommon}
+`
+
+const PaperBackgroundHover2 = styled.div<{hovering: boolean}>`
+    top: 0.3vw;
+    left: 0.4vw;
+    width: 15.2vw;
+    height: 15.4vw;
+    ${PaperBackgroundHoverCommon}
+`
+
+const PaperBackgroundHover3 = styled.div<{hovering: boolean}>`
+    top: 0.2vw;
+    left: 0.2vw;
+    width: 15.7vw;
+    height: 15.9vw;
+    ${PaperBackgroundHoverCommon}
+`
+
+const PaperBackgroundHover4 = styled.div<{hovering: boolean}>`
+    top: 0.2vw;
+    left: 0.3vw;
+    width: 15.4vw;
+    height: 15.6vw;
+    ${PaperBackgroundHoverCommon}
 `
 
 const MonsterWrapper = styled.div`
@@ -47,13 +92,7 @@ const MonsterWrapper = styled.div`
     left: 6vw;
     height: 8vw;
     width: 4vw;
-`
-
-const ScaledMoster = styled(Image)`
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-crisp-edges;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;  
+    ${CrispPixelArtCss}
 `
 
 interface QuestBoardAreaProps {
@@ -62,29 +101,46 @@ interface QuestBoardAreaProps {
     onQuestClick: (quest: AvailableQuest) => void
 }
 
-export default ({ className, availableQuests, onQuestClick }: QuestBoardAreaProps) =>
-    <Area className={className}>
-        {availableQuests.map((quest: AvailableQuest, index: number) => {
-            if (index < 5)
-                return (
-                    <MiniQuestCardWrapper onClick={() => onQuestClick(quest)}>
-                        <PaperBackground
-                            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/paper/paper_prop_1_reverse.webp"
-                            alt="quest paper image"
-                            layout="fill"
-                        />
-                        <Title>{quest.name}</Title>
-                        <MonsterWrapper>
-                            <ScaledMoster
-                                src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/monsters/monstruo.webp"
-                                alt="quest monster preview"
-                                layout="fill"
-                            />
-                        </MonsterWrapper>
-                        <PropStamp rarity="kings_plea" />
-                    </MiniQuestCardWrapper>
-                )
-            else
-                return <></>
-        })}
-    </Area>
+const QuestBoardArea = ({ className, availableQuests, onQuestClick }: QuestBoardAreaProps) => {
+
+    const QuestPreviewCard = ({ quest, index }: { quest: AvailableQuest, index: number }) => {
+        const questStyle = index % 4 + 1
+        const [hovering, setHovering] = useState(false)
+        const PaperBackgroundHover = [PaperBackgroundHover1, PaperBackgroundHover2, PaperBackgroundHover3, PaperBackgroundHover4][questStyle-1]!
+        return (
+            <QuestPreviewCardContainer onClick={() => onQuestClick(quest)} onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)}>
+                <PaperBackgroundHover hovering={hovering}>
+                    <Image
+                        src={`https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/paper/paper_prop_${questStyle}_onhover.webp`}
+                        alt="quest hover image"
+                        layout="fill"
+                    />
+                </PaperBackgroundHover>
+                <PaperBackground>
+                    <Image
+                        src={`https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/paper/paper_prop_${questStyle}.webp`}
+                        alt="quest paper image"
+                        layout="fill"
+                    />
+                </PaperBackground>
+                <Title>{quest.name}</Title>
+                <MonsterWrapper>
+                    <CrispPixelArtImage
+                        src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/monsters/monstruo.webp"
+                        alt="quest monster preview"
+                        layout="fill"
+                    />
+                </MonsterWrapper>
+                <PropStamp rarity="kings_plea" />
+            </QuestPreviewCardContainer>
+        )
+    }
+
+    return (
+        <Area className={className}>
+            {availableQuests.slice(0, 5).map((quest: AvailableQuest, index: number) => <QuestPreviewCard quest={quest} index={index} key={"quest-"+index} />)}
+        </Area>
+    )
+}
+
+export default QuestBoardArea
