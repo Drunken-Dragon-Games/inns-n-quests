@@ -1,7 +1,7 @@
 import {  useDrop } from "react-dnd";
 import { useState, useEffect } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
-import { setSelectAdventurerDrag } from "../features/availableQuest"
+import { setSelectAdventurerDrag } from "../features/quest-board"
 
 
 interface DataAdventurer{

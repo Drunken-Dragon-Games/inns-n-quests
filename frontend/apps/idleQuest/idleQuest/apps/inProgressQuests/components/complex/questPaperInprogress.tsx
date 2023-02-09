@@ -2,17 +2,19 @@ import styled from "styled-components";
 import { useState } from "react";
 import Image from 'next/image'
 import { useOpenInProgressPaper } from "../../hooks";
-import { useGeneralSelector } from "../../../../../../../features/hooks"
+import { useGeneralDispatch, useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
-import { useGetInProgressData, useGetClaimRewardShadow } from "../../hooks"
+import { useGetInProgressData } from "../../hooks"
 import { QuestLabelLevel, 
     RescalingMonster, 
-    SucceedChance, 
+    SuccessChance, 
     Seals, 
     RescalingImg,
     Signature } from "../../../../utils/components/basic_component";
 import { QuestRequirementsSection, ProgressionQuest } from "../../../../utils/components/complex";
 import { Adventurer } from "."
+import { PostClaimInProgressQuest } from "../../features/inProgressQuest";
+import { takenQuestStatus } from "../../../../../dsl";
 
 
 const CardWrapper = styled.div<animation>`
@@ -95,6 +97,7 @@ const Flex = styled.div`
 const Details = styled.div`
     margin-top: 2vw;
     width: 60%;
+    height: 10.5vw;
     padding: 0vw 1.5vw 0vw 3vw;
     
     p{
@@ -167,23 +170,19 @@ const LabelWrapper = styled.div`
     right: 1vw;
 `
 
-const SucceedChanceWrapper = styled.div`
+const StyledSuccessChance = styled(SuccessChance)`
     position: absolute;
     right: -1vw;
     top: 15.5vw;
 `
 
-
-
-
 const QuestPaperInProgress = () => {
             
-
-    const [ bonus, setBonus] = useState<number>(0)
-
     const inProgressQuestData = useGetInProgressData()
 
-    const isClose = useOpenInProgressPaper(inProgressQuestData.id)
+    const generalDispatch = useGeneralDispatch()
+
+    const isClose = useOpenInProgressPaper(inProgressQuestData.takenQuestId)
         
     const requirements = inProgressQuestData.quest.requirements
 
@@ -200,7 +199,7 @@ const QuestPaperInProgress = () => {
     const adventurerData = generalSelector.idleQuest.adventurers.data.data
         .filter(adventurer => adventurersIds.indexOf(adventurer.adventurerId) !== -1)
 
-    const  claimShadowEffect  =useGetClaimRewardShadow(inProgressQuestData.state, questClaimStatus)
+    const status = takenQuestStatus(inProgressQuestData)
 
     return(<>
             
@@ -214,7 +213,7 @@ const QuestPaperInProgress = () => {
                             <CardWrapper isClose = {isClose}>
                                 
                                 <Card>
-                                    <Shadow successful={claimShadowEffect}/>
+                                    <Shadow successful={status == "finished"}/>
                                     <PaperBackground>
                                         <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png"  alt="paper prop" width={406} height={466} layout="responsive"/>
                                     </PaperBackground>
@@ -232,7 +231,6 @@ const QuestPaperInProgress = () => {
                                             <QuestRequirementsSection 
                                                 requirements ={ {} } 
                                                 adventuresSelected={adventurersIds}
-                                                callbackBonus = {(bonus: number) => setBonus(bonus)}
                                             />
                                         </QuestRequirementsSectionPosition>
                                     </TitleSection>
@@ -247,26 +245,11 @@ const QuestPaperInProgress = () => {
                                             <RescalingMonster src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg"/>
                                         </MonsterWrapper>
 
-                                        <SucceedChanceWrapper>
-                                            <SucceedChance
-                                                questDifficulty = {0}//inProgressQuestData.quest.difficulty}
-                                                questSlots = {5}//inProgressQuestData.quest.slots}
-                                                requirementBonus = {bonus}
-                                                adventurersList = {adventurersIds}
-                                                type = "inProgress"
-                                            />
-                                        </SucceedChanceWrapper>
+                                        <StyledSuccessChance percentage={0} />
                                     </Flex>
 
                                     <ProgressionWrapper>
-                                        <ProgressionQuest 
-                                            startTime ={inProgressQuestData.started_on} 
-                                            duration ={inProgressQuestData.quest.duration} 
-                                            inProgress = {true} 
-                                            questState={inProgressQuestData.state}
-                                            selected = {inProgressQuestData}
-                                            dsReward={0}//inProgressQuestData.quest.reward_ds}
-                                        />
+                                        <ProgressionQuest />
                                     </ProgressionWrapper>
                                 
                                     <Flex>
@@ -290,7 +273,9 @@ const QuestPaperInProgress = () => {
                                             <Seals seal = {"kings_plea"} />
                                         </CornerRightDown>
                                     </Flex>
-                                    <Signature />
+                                    <Signature 
+                                        questType={status == "in-progress" ? "in-progress" : "finished" } 
+                                        onClick={ () => generalDispatch(PostClaimInProgressQuest(inProgressQuestData)) }/>
                                 </Card>
                             </CardWrapper>
                         </AnimationWrapper>

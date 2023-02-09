@@ -8,13 +8,10 @@ import { DragonSilverIconTakenQuest } from "../basic_components"
 import {  useGeneralDispatch } from "../../../../../../../features/hooks"
 import { setInProgressQuestSelected } from "../../../../features/interfaceNavigation";
 import { useIsQuestSelected } from "../../hooks";
-import { inProgressQuestType } from "../../../../../../../types/idleQuest";
+import { TakenQuest } from "../../../../../dsl/models";
+import { takenQuestStatus } from "../../../../../dsl";
 
-interface card{
-    onClick: any,
-}
-
-const Card = styled.div<card>`
+const Card = styled.div<{ onClick: any }>`
     width: 95%;
     height: 6vw;
     cursor:pointer;
@@ -61,15 +58,11 @@ const Center = styled.div`
     margin: auto;
 `
 
-interface title {
-    succeeded: boolean,
-}
-
-const Title = styled.h2 <title>`
-    color: ${props => props.succeeded  ? "#cba044": "white"};
+const Title = styled.h2 <{ finished: boolean }>`
+    color: ${props => props.finished  ? "#cba044": "white"};
     font-size: 0.9vw;
     font-family: Oswald;
-    font-weight: ${props => props.succeeded  ? "500": "200"};
+    font-weight: ${props => props.finished  ? "500": "200"};
     text-align: center;
     margin-bottom: 0.6vw;
     text-transform: uppercase;
@@ -102,17 +95,18 @@ const StampWrapper = styled.div`
 
 
 interface inProgressCard {
-    data: inProgressQuestType
+    takenQuest: TakenQuest
     index: number
 }
 
 
-const TakeQuest = ({data, index}: inProgressCard) => {
+const TakeQuest = ({takenQuest: quest, index}: inProgressCard) => {
 
     const [onHover, setOnHover] = useState<boolean>(false)
 
     const generalDispatch = useGeneralDispatch()
-    const selected = useIsQuestSelected(index)    
+    const selected = useIsQuestSelected(index)
+    const status = takenQuestStatus(quest)    
 
     return (
         <>
@@ -129,9 +123,9 @@ const TakeQuest = ({data, index}: inProgressCard) => {
                         
                         <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/kings_plea.png"  alt="corner detail" width={50} height={50} layout ="responsive"/>
                         
-                        <ConditionalRender condition={data.state == "succeeded" || data.state == "failed"}>
+                        <ConditionalRender condition={status == "finished"}>
                             <StampWrapper>
-                                <Image src= {stamps[data.state!]}  alt="corner detail" width={50} height={50} />
+                                <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/claim_reward.png" alt="corner detail" width={50} height={50} />
                             </StampWrapper>
                         </ConditionalRender>
                         
@@ -139,18 +133,18 @@ const TakeQuest = ({data, index}: inProgressCard) => {
 
                     <QuestDetails>
                         <Center>
-                            <Title succeeded ={data.state == "succeeded"}> {data.quest.name}</Title>
+                            <Title finished={status == "finished"}>{quest.quest.name}</Title>
                             <Flex>
                                 <CenterFlex>
 
                                     <DragonSilverIconTakenQuest dragonSilverReward={0}/>
                 
-                                    <Timmer startTime={data.started_on} duration={data.quest.duration} questStatus={data.state}/>
+                                    <Timmer takenQuest={quest} />
                     
                                 </CenterFlex>
                             </Flex>
                         
-                            <ConditionalRender condition={data.state == "in_progress"}>
+                            <ConditionalRender condition={status == "in-progress"}>
                                 <HappeningText><TextOswald fontsize={0.8} color="white" textAlign="center">happening</TextOswald></HappeningText>
                             </ConditionalRender>
 

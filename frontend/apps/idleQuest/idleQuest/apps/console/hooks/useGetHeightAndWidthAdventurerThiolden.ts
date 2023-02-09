@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { AdventurerCollection } from "../../../../models"
+import { AdventurerCollection } from "../../../../dsl/models"
 
 
 export default (src: string, collection: AdventurerCollection): number [] =>{

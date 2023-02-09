@@ -1,27 +1,4 @@
-import { AdventurerClass, AdventurerCollection, QuestRequirement, Race, Reward, TakenQuest } from "../apps/idleQuest"
-
-export interface AvailableQuestType {
-    name: string
-    description: string
-    duration: number
-
-    questId: string
-    location: string
-    reward: Reward
-    requirements: QuestRequirement
-
-    // Deprecated, remove asap
-    uiid?: string
-    id: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    width?: number
-    height?: number
-    //requirements: RequirementType
-}
+import { AdventurerClass, AdventurerCollection, AvailableQuest, QuestRequirement, Race, Reward, TakenQuest } from "../apps/idleQuest"
 
 export interface RequirementType{
     character?: CharacterType []
@@ -45,17 +22,18 @@ export interface MetadataType{
     dead_cooldown?: number
 }
 
+/*
 export interface inProgressQuestType extends TakenQuest {
 
     // Deprecated
-    enrolls: EnrollsType []
-    id: string
-    is_claimed: boolean
-    player_stake_address: string
+    //enrolls: EnrollsType []
+    //id: string
+    //is_claimed: boolean
+    //player_stake_address: string
     //quest: QuestType
-    quest_id: string
-    started_on: string
-    state: "failed" | "succeeded" | "in_progress" | null
+    //quest_id: string
+    //started_on: string
+    //state: "failed" | "succeeded" | "in_progress" | null
 }
 
 interface QuestType{
@@ -86,6 +64,7 @@ interface AdventurerInQuestType{
     player_stake_address: string
     type: "pixeltile" | "gma"
 }
+*/
 
 export interface DataAdventurerType{
     adventurerId: string

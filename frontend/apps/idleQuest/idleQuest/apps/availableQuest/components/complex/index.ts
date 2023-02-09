@@ -1,3 +1,3 @@
-export { default as AvailableQuestMapping} from "./availableQuestMapping"
-export { default as MapDrunkenDragon } from "./mapDrunkenDragon"
-export { default as QuestPaperAvailable } from "./questPaperAvailable"
+export { default as QuestBoard } from "./quest-board-area"
+export { default as WorldMap } from "./world-map"
+export { default as QuestCard } from "./quest-card"

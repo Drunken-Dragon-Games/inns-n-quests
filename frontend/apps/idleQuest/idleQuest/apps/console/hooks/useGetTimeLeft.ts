@@ -8,7 +8,7 @@ export default (startTime: Date , duration: number, displayed?: boolean) =>{
 
     
       //obtiene en milisegundos el tiempo total
-    initialDate.setMilliseconds(initialDate.getMilliseconds() + duration)
+    initialDate.setSeconds(initialDate.getSeconds() + duration)
 
     const date = new Date()
     

@@ -1,26 +1,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'; 
 import { combineReducers } from "redux";
+import { AvailableQuest } from '../../dsl';
 
 //reducer para controlar la navegacion de los quest available
 
 interface initialStateAvailableQuestSelected{
-    availableQuest: null | number
+    availableQuest?: AvailableQuest 
 }
 
-const initialStateNavigationConsole: initialStateAvailableQuestSelected = { availableQuest: null }
+const initialStateNavigationConsole: initialStateAvailableQuestSelected = { availableQuest: undefined }
 
 const availableQuestSelected = createSlice({
     name: "availableQuestSelected",
     initialState: initialStateNavigationConsole,
     reducers: {
-        setAvailableQuestSelected:  (state, action: PayloadAction<number>)=> {
+        setAvailableQuestSelected:  (state, action: PayloadAction<AvailableQuest>)=> {
             
             state.availableQuest = action.payload
             
         },
         setAvailableQuestUnselect:  (state)=> {
             
-            state.availableQuest =null
+            state.availableQuest = undefined
             
         },
     },

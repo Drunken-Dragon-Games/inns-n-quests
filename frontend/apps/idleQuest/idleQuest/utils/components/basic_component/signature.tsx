@@ -51,49 +51,46 @@ const SignatureImageWrapper = style.div`
 `
 
 interface Signature {
-    available?: boolean
+    questType: "in-progress" | "finished" | "available"
     onClick?: React.MouseEventHandler<HTMLDivElement> & React.MouseEventHandler<HTMLButtonElement>,
 }
 
-const Signature = ({available, onClick}: Signature) => {
+const Signature = ({questType, onClick}: Signature) => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const [ onHover,setOnHover ] = useState<boolean>(false)   
     const numberAdventurers = generalSelector.idleQuest.questAvailable.data.selectAdventurer.selectAdventurer.length
     
-
-    if(available){
-
+    if(questType == "available" && numberAdventurers > 0)
         return(
-            <>
-                <ConditionalRender condition ={numberAdventurers > 0}>
-                    <SignatureWrapper onClick={onClick} onMouseLeave ={ () => setOnHover(false)} onMouseOver = {() => setOnHover(true)} hover={onHover} >
-                        <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png"  alt = "signature" width={2000} height={1250} />
-                        <p>Tap here to sign</p>
-                    </SignatureWrapper>
-                </ConditionalRender>
-    
-                <ConditionalRender condition ={numberAdventurers == 0}>
-                    <SignatureWrapper notClickable = {true}>
-                        <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png"  alt = "signature" width={2000} height={1250} />
-                        <p>choose any adventurer</p>
-                    </SignatureWrapper>
-                </ConditionalRender>
-            </>
-        )
-    }
-
-    return(
-        <>
-            <SignatureWrapper notClickable = {true}>
-                <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png"  alt = "signature" width={2000} height={1250} />
-                <SignatureImageWrapper>
-                    <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/signature/drunken_dragon_signature.webp"  alt = "signature" width={20000} height={12500} />
-                </SignatureImageWrapper>
+            <SignatureWrapper onClick={onClick} onMouseLeave={() => setOnHover(false)} onMouseOver={() => setOnHover(true)} hover={onHover} >
+                <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png" alt="signature" width={2000} height={1250} />
+                <p>Tap here to sign</p>
             </SignatureWrapper>
-            
-        </>
-    )
+        )
+    else if (questType == "available" && numberAdventurers == 0) 
+        return (
+            <SignatureWrapper notClickable={true}>
+                <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png" alt="signature" width={2000} height={1250} />
+                <p>Pick adventurers</p>
+            </SignatureWrapper>
+        )
+    else if (questType == "finished")
+        return (
+            <SignatureWrapper onClick={onClick} onMouseLeave={() => setOnHover(false)} onMouseOver={() => setOnHover(true)} hover={onHover} >
+                <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png" alt="signature" width={2000} height={1250} />
+                <p>Complete quest</p>
+            </SignatureWrapper>
+        )
+    else //questType == "in-progress"
+        return (
+                <SignatureWrapper notClickable={true}>
+                    <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png" alt="signature" width={2000} height={1250} />
+                    <SignatureImageWrapper>
+                        <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/signature/drunken_dragon_signature.webp" alt="signature" width={20000} height={12500} />
+                    </SignatureImageWrapper>
+                </SignatureWrapper>
+        )
 }
 
 export default Signature

@@ -1,7 +1,7 @@
 import styled from "styled-components"
 import Image from "next/image"
 import { useGetEmoji } from "../../hooks"
-import { AdventurerCollection } from "../../../../models"
+import { AdventurerCollection } from "../../../../dsl/models"
 
 const EmojiWrapper = styled.div`
     position: relative;

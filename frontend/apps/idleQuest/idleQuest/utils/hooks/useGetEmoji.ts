@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { AdventurerCollection } from "../../../models"
+import { AdventurerCollection } from "../../../dsl/models"
 
 
 //tiene tres input el status del quest si el aventurero murio y el tipo del aventurero el output es un string que completa el path para el renderizado de una imagen

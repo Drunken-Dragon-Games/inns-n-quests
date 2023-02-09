@@ -1,6 +1,6 @@
 export { default as useGetAvailableQuest} from "./useGetAvailableQuest"
 export { default as useGetRandomNumber } from "./useGetRandomNumber"
-export { default as useSetWidthAndHeight } from "./useSetWidthAndHeight"
+//export { default as useSetWidthAndHeight } from "./useSetWidthAndHeight"
 export { default as useCloseProps } from "./useCloseProps"
 export { default as useIsOpenAvailableQuest }  from "./useIsOpenAvailableQuest"
 export { default as useGetAvailableQuestData } from "./useGetAvailableQuestData"

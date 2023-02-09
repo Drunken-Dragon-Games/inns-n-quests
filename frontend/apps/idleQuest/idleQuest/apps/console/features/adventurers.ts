@@ -6,6 +6,7 @@ import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from 'axios';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
 import { DataAdventurerType } from '../../../../../../types/idleQuest';
+import { Adventurer } from '../../../../dsl/models';
 
 //fetch para obeter a los aventureros
 
@@ -99,7 +100,7 @@ const adventurers = createSlice({
 
         },
 
-        setAdventuresInQuest: (state, action: PayloadAction<(string | null)[]>) => {
+        setAdventuresInQuest: (state, action: PayloadAction<string[]>) => {
 
             const adventurerArrays =  state.data.map(adventurer =>{
                 
@@ -119,10 +120,10 @@ const adventurers = createSlice({
             state.data = adventurersSorted
         },
 
-        setFreeAdventurers: (state, action: PayloadAction<AdventurerAfterQuestType []>) => {
+        setFreeAdventurers: (state, action: PayloadAction<string[]>) => {
 
             //crea un array con todos los id de los aventureros en el array
-            const adventurersIds = action.payload.map (adventurer => adventurer.adventurerId)
+            const adventurersIds = action.payload
 
              //este reducer toma el array con los ids y el estado con el array de los aventureros y cuando tenga el mismo id cambia la propiedad in_quest  a false
         
@@ -163,15 +164,15 @@ const adventurers = createSlice({
         },
 
         //este caso setea la muerte llega un array con los heroes muertos y se compara con el estado el array de aventureros se comparan los id y enn caso de que el tipo sea pixeltile se setea la experioencia a 0 y en casa gma se setea el cooldown de muerto
-        setDeath: (state, action: PayloadAction<DataAdventurerType[]>) => {
+        setDeath: (state, action: PayloadAction<Adventurer[]>) => {
     
             const adventurers =  state.data.map ((adventurer ) =>{                            
-                action.payload.forEach((deathAdventurerData: AdventurerAfterQuestType) => {
+                action.payload.forEach((deathAdventurerData) => {
                     if(deathAdventurerData.adventurerId == adventurer.adventurerId){
-                        if(deathAdventurerData.type == "pixeltile"){
+                        if(deathAdventurerData.collection == "pixel-tiles"){
                             adventurer.experience = 0
-                        } else if (deathAdventurerData.type == "gma"){
-                            adventurer.metadata.dead_cooldown = deathAdventurerData.dead_cooldown
+                        } else if (deathAdventurerData.collection == "grandmaster-adventurers"){
+                            adventurer.metadata.dead_cooldown = 10000//deathAdventurerData.dead_cooldown
                             adventurer.metadata.is_alive = false;
                         }
                         return adventurer

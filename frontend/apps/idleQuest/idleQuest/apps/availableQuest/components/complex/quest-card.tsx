@@ -1,18 +1,18 @@
 import styled from "styled-components";
 import { useState, useRef } from "react";
-import { takeAvailableQuest } from "../../features/availableQuest"
+import { takeAvailableQuest } from "../../features/quest-board"
 import Image from 'next/image'
 import { useIsOpenAvailableQuest, useGetAvailableQuestData, useResetSelectAdventurers } from "../../hooks";
 import { QuestLabelLevel, 
         RescalingMonster, 
-        SucceedChance, 
         Seals, 
+        SuccessChance,
         Signature } from "../../../../utils/components/basic_component";
 import { QuestRequirementsSection, ProgressionQuest } from "../../../../utils/components/complex";
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { DropBox } from "../basic_components";
-
+import { AvailableQuest } from "../../../../../dsl";
 
 const AnimationWrapper = styled.div`
     width: 38vw;
@@ -21,18 +21,12 @@ const AnimationWrapper = styled.div`
     display: Flex;
 `
 
-interface animation {
-    isClose: boolean
-}
-
-
 const AnimationWrapperRelative = styled.div`
     position: relative;
     margin: auto 0vw;
 `
 
-
-const PaperAnimation = styled.div<animation>`
+const PaperAnimation = styled.div`
     width: 38vw;
     height: 0vw;
     position: absolute;
@@ -40,22 +34,17 @@ const PaperAnimation = styled.div<animation>`
     left: 22vw;
     z-index: 10;
     overflow: hidden;
-    top: ${props => props.isClose == true  ? "-40"  : " 43.4"}vw;
-    height: ${props => props.isClose == true  ? "43.4"  : "0"}vw;
-    transition: top ${props => props.isClose == true  ? "0.8s"  : "1s"}, height ${props => props.isClose == true  ? "0.8s"  : "1s"};
+    top: 43.4vw;
+    height: 43.4vw;
+    transition: top 1s, height 1s;
 `
 
-interface cardWrapper {
-    isClose: boolean
-    ref: any
-}
-
-const CardWrapper = styled.div<cardWrapper>`
+const CardWrapper = styled.div`
     display: Flex;
     overflow: hidden;
     width: inherit;
-    height: ${props => props.isClose == true  ? "0"  : "43.4"}vw;
-    transition: height ${props => props.isClose == true  ? "0.8s"  : "1s"};
+    height: 43.4;
+    transition: height 1s;
 `
 
 const PaperBackground = styled.div`
@@ -69,7 +58,6 @@ const Card = styled.div`
     position: relative;
     width: inherit;    
 `
-
 
 const Title = styled.h2`
     text-align: left;
@@ -129,12 +117,7 @@ const Adventurer = styled.div`
     z-index: 2;
 `
 
-interface ShadowWrapper {
-    isClose: boolean
-    ref: any
-}
-
-const ShadowWrapper = styled.section<ShadowWrapper>`
+const ShadowWrapper = styled.section`
     position: absolute;
     top: 0px;
     left: 0px;
@@ -143,12 +126,9 @@ const ShadowWrapper = styled.section<ShadowWrapper>`
     height: 100vh;
     z-index: 5;
     background-color: rgba(0,0,0,0.8);
-    visibility: ${props => props.isClose == true  ? "hidden"  : "visible "};
-    opacity: ${props => props.isClose == true  ? "0"  : "1"};
+    opacity: 1;
     transition: opacity 1s, visibility 0.5s;
 `
-
-
 
 const TitleSection = styled.div`
     display: flex;
@@ -176,129 +156,111 @@ const  CornerRightDown = styled.div`
 
 `
 
-const SucceedChanceWrapper = styled.div`
+const StyledSuccessChance = styled(SuccessChance)`
     position: absolute;
     right: -1vw;
     top: 15.5vw;
 `
 
-const QuestPaperAvailable = () => {
-    
+interface QuestPaperAvailableProps {
+    className?: string,
+    quest?: AvailableQuest
+    selectedAdventurers: string[],
+    onSign?: () => void,
+    onClose?: () => void,
+}
+
+export default ({ className, quest, selectedAdventurers, onSign, onClose }: QuestPaperAvailableProps) => {
+    if (!quest) return (<></>)
+    /*
     const shadowWrapper = useRef<HTMLDivElement | null>(null)
     const questPaper = useRef<HTMLDivElement | null>(null)
-    const [bonus, setBonus] = useState<number>(0)
 
-    const isOpen = useIsOpenAvailableQuest(shadowWrapper, questPaper)
+    //const isOpen = useIsOpenAvailableQuest(shadowWrapper, questPaper)
 
-
-    const questData = useGetAvailableQuestData()  
-    
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const generalDispatch = useGeneralDispatch()    
 
+    useResetSelectAdventurers(!open)
     const selectedAdventurers = generalSelector.idleQuest.questAvailable.data.selectAdventurer.selectAdventurer
     
-    useResetSelectAdventurers(!isOpen)
+    () => generalDispatch(takeAvailableQuest(quest.id, selectedAdventurers, questData.uiid!)
+    */
 
-    return(<>
-        <ShadowWrapper  isClose ={!isOpen} ref={shadowWrapper}>
+    return (
+        <ShadowWrapper onClick={onClose}>
             <AnimationWrapperRelative>
 
-                <PaperAnimation isClose ={!isOpen}>
-                    <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png"  width={406} height={466} layout="responsive" />
+                {/*
+                <PaperAnimation open={open}>
+                    <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png" width={406} height={466} layout="responsive" />
                 </PaperAnimation>
+                */}
 
                 <AnimationWrapper>
-                    <CardWrapper isClose ={!isOpen} ref ={questPaper}> 
+                    <CardWrapper >
                         <Card>
 
                             <PaperBackground>
-                                <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png"  alt="paper prop" width={406} height={466} layout="responsive" />
+                                <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png" alt="paper prop" width={406} height={466} layout="responsive" />
                             </PaperBackground>
-                            
 
                             <LabelWrapper>
                                 <QuestLabelLevel>
-                                    {questData.difficulty.toString()}
+                                    1
                                 </QuestLabelLevel>
                             </LabelWrapper>
-                            
 
                             <TitleSection>
-                          
-
-                                <Title>{questData.name}</Title>
-                                
-                            
-
+                                <Title>{quest.name}</Title>
                                 <QuestRequirementsSectionPosition>
-                                    <QuestRequirementsSection 
-                                        requirements ={ {} }//questData.requirements} 
+                                    <QuestRequirementsSection
+                                        requirements={{}}//quest.requirements} 
                                         adventuresSelected={selectedAdventurers!}
-                                        callbackBonus = {(bonus: number) => setBonus(bonus)}
                                     />
                                 </QuestRequirementsSectionPosition>
-
                             </TitleSection>
 
                             <Flex>
                                 <Details >
-                                    <p  dangerouslySetInnerHTML={{__html: questData.description}}/> 
+                                    <p dangerouslySetInnerHTML={{ __html: quest.description }} />
                                 </Details>
 
                                 <MonsterWrapper>
-                                    <RescalingMonster src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg" />
+                                    <RescalingMonster src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg" />
                                 </MonsterWrapper>
 
-                                <SucceedChanceWrapper>
-                                    <SucceedChance 
-                                        questDifficulty={questData.difficulty}
-                                        questSlots={questData.slots}
-                                        requirementBonus= {bonus}
-                                        adventurersList ={selectedAdventurers}
-                                        type = "available"
-                                    />
-                                </SucceedChanceWrapper>
+                                <StyledSuccessChance percentage={0} />
 
                             </Flex>
 
                             <ProgressionWrapper>
-                                <ProgressionQuest 
-                                    startTime ={new Date()} 
-                                    duration ={questData.duration} 
-                                    dsReward={questData.reward_ds}
-                                /> 
+                                <ProgressionQuest />
                             </ProgressionWrapper>
 
                             <Flex>
                                 <Adventurer>
                                     <Flex>
-                                        {Array(questData.slots).fill(('') as any).map((el, index) => {
-                                            return <DropBox 
-                                                key={index} 
-                                                index ={index} 
-                                                questLevel={questData.difficulty} 
-                                                reset ={!isOpen} 
+                                        {Array(quest.slots).fill(('') as any).map((el, index) => {
+                                            return <DropBox
+                                                key={index}
+                                                index={index}
+                                                questLevel={1}
                                                 id={selectedAdventurers[index]}
                                             />
-                                        })}    
+                                        })}
                                     </Flex>
                                 </Adventurer>
-
                                 <CornerRightDown>
-                                    <Seals seal = {questData.rarity}/>
+                                    <Seals seal="kings_plea" />
                                 </CornerRightDown>
-                                
                             </Flex>
 
-                            <Signature available ={true} onClick = {() => generalDispatch(takeAvailableQuest(questData.id, selectedAdventurers, questData.uiid! )) }/>
-                        
+                            <Signature questType="available" onClick={onSign} />
                         </Card>
-                    </CardWrapper> 
+                    </CardWrapper>
                 </AnimationWrapper>
             </AnimationWrapperRelative>
         </ShadowWrapper>
-    </>)
+    )
 }
-
-export default QuestPaperAvailable

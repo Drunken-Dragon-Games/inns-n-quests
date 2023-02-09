@@ -65,7 +65,7 @@ const ShadowWrapper = styled.section<ShadowWrapper>`
     transition: opacity 1s, visibility 0.8s;
 `
 
-const MapDrunkenDragon = ( ) => {
+export default () => {
 
 
     const drunkenDragonMap = useRef <HTMLDivElement>(null)
@@ -105,5 +105,3 @@ const MapDrunkenDragon = ( ) => {
     </>
     )
 }
-
-export default MapDrunkenDragon

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 
-//Input una string y su output es un boolean
-export default (questSuccessful: "failed" | "succeeded" | "in_progress" | null, claimStatus: string) : boolean=>{
+export default (questSuccessful: "in-progress" | "finished" | "claimed") : boolean=>{
 
+    /*
     const [claimShadow, setClaimShadow ] =useState<boolean>(false)
 
     console.log(questSuccessful)
@@ -24,4 +24,6 @@ export default (questSuccessful: "failed" | "succeeded" | "in_progress" | null, 
     
 
     return claimShadow
+    */
+   return true
 }

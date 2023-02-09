@@ -5,9 +5,8 @@ import { createSliceStatus, actionsGenerator } from "../../../../../utils/featur
 import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { setFreeAdventurers, setExperienceReward, setDeath } from '../../console/features/adventurers';
 import { AxiosError } from 'axios';
-import { setAddDragonSilverToClaim } from '../../console/features/player';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
-import { inProgressQuestType, EnrollsType } from '../../../../../../types/idleQuest';
+import { ClaimQuestOutcome, TakenQuest } from '../../../../dsl/models';
 
 //fetch para obeter a los in progress quests
 
@@ -44,56 +43,44 @@ const [ setFetchGetInProgressQuestStatusIdle, setFetchGetInProgressQuestStatusPe
 
 
 //fetch para claimear el reward
-
-interface IdsType{
-    adventurerId: string
-}
-
-const getAdventurers = (enrolls : EnrollsType []): IdsType [] =>{
-
-    const adventurers = enrolls.map(el => {
-        return el.adventurer
-    })
-
-    return adventurers
-
-}
-
-export const PostClaimInProgressQuest = (quest: inProgressQuestType): GeneralReducerThunk => async (dispatch) =>{
+export const PostClaimInProgressQuest = (quest: TakenQuest): GeneralReducerThunk => async (dispatch) =>{
     
     dispatch(setFetchPostClaimRewardInProgressQuestStatusPending())
     try {
             
         //fetch para claimear los inprogress quest 
-        const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: quest.id, stake_address: quest.player_stake_address })
+        const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: quest.takenQuestId })
+        const outcome = response.data.outcome as ClaimQuestOutcome
             
         dispatch(setFetchPostClaimRewardInProgressQuestStatusFulfilled())
+        
+
+        console.log(outcome)
         //condicional depenende de si el quest es exitoso o fallido 
-        if(quest.state == "succeeded"){
+        if (outcome.status == "success") {
+        //if(quest.state == "succeeded"){
             //se activa esta funcion para realizar las animaciones correspondientes
 
-            dispatch(setRewardClaimSucceed(response.data.adventurers))
+            dispatch(setRewardClaimSucceed([]))//response.data.adventurers))
 
             //estas funciones actualizan los datos del estado
 
-            dispatch(setFreeAdventurers(response.data.adventurers))
+            dispatch(setFreeAdventurers(quest.adventurerIds))
 
             //dispatch(setAddDragonSilverToClaim(quest.quest.reward_ds))
-            dispatch(setExperienceReward(response.data.adventurers))
+            //dispatch(setExperienceReward(response.data.adventurers))
 
 
 
-        } else if(quest.state == "failed"){
+        } else if(outcome.status == "failure"){
             
             //se activa esta funcion para realizar las animaciones correspondientes
-            dispatch(setRewardClaimFail(response.data.dead_adventurers))
+            dispatch(setRewardClaimFail(outcome.deadAdventurers.map(el => el.adventurerId)))
             
             //estas funciones actualizan los datos del estado
-            dispatch( setDeath(response.data.dead_adventurers) )
+            dispatch( setDeath(outcome.deadAdventurers) )
 
-            const adventurers  = getAdventurers(quest.enrolls)
-           
-            dispatch(setFreeAdventurers(adventurers))   
+            dispatch(setFreeAdventurers(quest.adventurerIds))   
         }
        
     } catch (err: unknown) {
@@ -115,7 +102,7 @@ export const [ setFetchPostClaimRewardInProgressQuestStatusIdle, setFetchPostCla
 
 
 interface InitialStateNavigationConsoleType{
-    quests: inProgressQuestType []
+    quests: TakenQuest []
 }
 
 const initialInProgressQuest: InitialStateNavigationConsoleType = {quests : []}
@@ -124,7 +111,7 @@ const inProgressQuests = createSlice({
     name: "inProgressQuests",
     initialState: initialInProgressQuest,
     reducers: {
-        setInProgressQuest:  (state, action: PayloadAction<inProgressQuestType []>)=> {
+        setInProgressQuest:  (state, action: PayloadAction<TakenQuest []>)=> {
             
             state.quests = action.payload
             
@@ -132,12 +119,12 @@ const inProgressQuests = createSlice({
 
         setDeleteInProgressQuest:  (state, action: PayloadAction<string>)=> {
             
-            const filterState = state.quests.filter((quest) => quest.id !== action.payload)
+            const filterState = state.quests.filter((quest) => quest.takenQuestId !== action.payload)
 
             state.quests = filterState
         },
 
-        setAddInProgressQuest:  (state, action: PayloadAction<inProgressQuestType>)=> {
+        setAddInProgressQuest:  (state, action: PayloadAction<TakenQuest>)=> {
             
             state.quests = state.quests.concat(action.payload)
         }
@@ -188,6 +175,7 @@ const inProgressReward = createSlice({
 
         setRewardClaimSucceed:  (state, action: PayloadAction<ExpGivenType []>)=> {
 
+            console.log("SUCCEEEEEEEED")
             state.isClaimed = true
             state.dead_adventurers =  null
             state.exp_given= action.payload

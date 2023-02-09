@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"
 import { useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-import { AvailableQuestType } from "../../../../../../types/idleQuest" 
+import { LocalAvailableQuest } from "../../../../../../types/idleQuest" 
 
 
-const placeHolder: AvailableQuestType = {
+const placeHolder: LocalAvailableQuest = {
     uiid: "123wqe1452662retwqet",
     id: "qwe12342315412352351234",
     name: "placeholder",
@@ -22,7 +22,7 @@ const placeHolder: AvailableQuestType = {
 }
 
 
-export default ():AvailableQuestType  =>{
+export default ():LocalAvailableQuest  =>{
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
@@ -30,7 +30,7 @@ export default ():AvailableQuestType  =>{
     
     const quests = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
 
-    const [questData, setQuestData] = useState<AvailableQuestType>(placeHolder)
+    const [questData, setQuestData] = useState<LocalAvailableQuest>(placeHolder)
 
     useEffect(()=>{
         if(questNumber != null){

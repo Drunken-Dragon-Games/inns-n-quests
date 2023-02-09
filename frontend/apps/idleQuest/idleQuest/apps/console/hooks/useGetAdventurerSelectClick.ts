@@ -1,6 +1,6 @@
 import { useGeneralDispatch, useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-import { setSelectAdventurerDrag, setSelectAdventurerClick, setUnselectAdventurerClick } from "../../availableQuest/features/availableQuest"
+import { setSelectAdventurerDrag, selectAdventurer, unselectAdventurer } from "../../availableQuest/features/quest-board"
 
 export default () => {
     const generalDispatch = useGeneralDispatch()
@@ -14,9 +14,9 @@ export default () => {
             if(!unSelect){
                 let maxLength = getSlotsNumber()
                 if(maxLength)
-                    generalDispatch(setSelectAdventurerClick({id, maxLength }))
+                    generalDispatch(selectAdventurer({id, maxLength }))
             } else {
-                generalDispatch(setUnselectAdventurerClick(id))
+                generalDispatch(unselectAdventurer(id))
             }
         }
     }

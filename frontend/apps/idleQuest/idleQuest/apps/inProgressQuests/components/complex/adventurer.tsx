@@ -4,7 +4,7 @@ import { useGetLevel } from "../../../../utils/hooks";
 import { useGetRewardExp, useGetLevelUp, useIsDead } from "../../hooks";
 import { useState, useEffect } from "react"
 import Image from "next/image";
-import { DataAdventurerType, EnrollsType } from "../../../../../../../types/idleQuest";
+import { DataAdventurerType } from "../../../../../../../types/idleQuest";
 
 const outOpacityDeadMark = keyframes`
     0% {opacity: 0}

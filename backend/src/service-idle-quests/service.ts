@@ -257,8 +257,13 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async module_claimQuestResult(userId: string, questId: string): Promise<object> {
+        const result = await this.claimQuestResult(userId, questId)
+        if (result.status != "unknown-quest") return { "status": "error", "error": result.status } 
         return {
-            "adventurers": [
+            ...result,
+            "adventurers": []
+            /*
+            [
                 {
                     "id": "6be775ac-821c-4189-b07d-3927686dacb2",
                     "experience": 395
@@ -272,6 +277,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
                     "experience": 380
                 }
             ]
+            */
         }
     }
 

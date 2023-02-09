@@ -3,6 +3,7 @@ import { useGetTimeLeft } from "../../hooks"
 import { useTimmerOverQuestInProgress } from "../../hooks"
 import Image from "next/image";
 import { TextOswald } from "../../../../../../utils/components/basic_components";
+import { TakenQuest, takenQuestTimeLeft } from "../../../../../dsl";
 
 const DetailWrapper = styled.div`
     display: flex;
@@ -20,19 +21,12 @@ const TimeIconWrapper = styled.div`
     height: 1vw;
 `
 
-interface Timmer {
-    startTime: any,
-    duration: any,
-    questStatus: "failed" | "succeeded" | "in_progress" | null
-}
 
-
-const Timmer = ({startTime, duration, questStatus}:Timmer ) => {
+const Timmer = ({takenQuest}: { takenQuest: TakenQuest } ) => {
     
     //esta funcion regresa el tiempo restante que queda para que un evento acabe
-    const [ timeLeft, completeDuration ] = useGetTimeLeft(startTime, duration, true)
-
-    useTimmerOverQuestInProgress(timeLeft, questStatus)
+    //const [ timeLeft, completeDuration ] = useGetTimeLeft(startTime, duration, true)
+    const timeLeft = takenQuestTimeLeft(takenQuest)
     
     return(<>
 

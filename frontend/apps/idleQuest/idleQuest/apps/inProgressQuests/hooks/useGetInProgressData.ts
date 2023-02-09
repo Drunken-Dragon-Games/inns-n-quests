@@ -1,22 +1,21 @@
 import { useEffect, useState } from "react"
 import { useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-import { inProgressQuestType } from "../../../../../../types/idleQuest"
+import { TakenQuest } from "../../../../dsl"
 
-
-const placeHolder: inProgressQuestType  = {
+const placeHolder: TakenQuest  = {
     takenQuestId: "asdasdasfgqhwyhhqfadh",
     userId: "asdasdasfgqhwyhhqfadh",
     adventurerIds: [],
-    createdAt: "25/11/22",
+    createdAt: new Date().toISOString(),
 
-    enrolls:[],
-    id: "asdasdasfgqhwyhhqfadh",
-    is_claimed: false,
-    player_stake_address: "ASdasdasfafasgsdgsadgsdg",
-    quest_id: "124twqrgv3416aregtq",
-    started_on: "25/11/22",
-    state: "in_progress",
+    //enrolls:[],
+    //id: "asdasdasfgqhwyhhqfadh",
+    //is_claimed: false,
+    //player_stake_address: "ASdasdasfafasgsdgsadgsdg",
+    //quest_id: "124twqrgv3416aregtq",
+    //started_on: "25/11/22",
+    //state: "in_progress",
     quest:{
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
         //difficulty: 3,
@@ -33,17 +32,17 @@ const placeHolder: inProgressQuestType  = {
     }
 }
 
-export default (): inProgressQuestType => {
+export default (): TakenQuest => {
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
-    const [inProgressQuestData, setInProgressQuestData] = useState<inProgressQuestType>(placeHolder)
+    const [inProgressQuestData, setInProgressQuestData] = useState<TakenQuest>(placeHolder)
 
     const index = generalSelector.idleQuest.navigator.inProgress.inProgressQuest
     const inProgressQuest = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests
 
     useEffect(()=>{
         if(index != null){
-            if(inProgressQuestData.id === 'asdasdasfgqhwyhhqfadh'){
+            if(inProgressQuestData.takenQuestId === 'asdasdasfgqhwyhhqfadh'){
                 setInProgressQuestData(inProgressQuest[index])
             } else{
                 setTimeout(()=>  setInProgressQuestData(inProgressQuest[index]), 300)

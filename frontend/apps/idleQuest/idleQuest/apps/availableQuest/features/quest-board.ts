@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'; 
 import { combineReducers } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
@@ -9,31 +8,30 @@ import { setAdventuresInQuest } from '../../console/features/adventurers';
 import { setAvailableQuestUnselect } from '../../../features/interfaceNavigation';
 import { setAddInProgressQuest } from '../../inProgressQuests/features/inProgressQuest';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
-import { AvailableQuestType } from '../../../../../../types/idleQuest';
+import { AvailableQuest } from '../../../../dsl';
 
 //fetch para obeter los available quest si es la primera vez que se piden se realiza una peticion de 10 y posteriormente de 5 en 5 
 
-export const getAvailableQuest = (firstTime? : boolean): GeneralReducerThunk => async (dispatch) =>{
-
+export const getAvailableQuests = (firstTime? : boolean): GeneralReducerThunk => async (dispatch) =>{
     dispatch(setFetchGetAvailableQuestStatusPending())
-
     try { 
-
         const response = await axiosCustomInstance('/quests/api/quests').get('/quests/api/quests')
         dispatch(setFetchGetAvailableQuestStatusFulfilled())
-
+        dispatch(addAvailableQuests(response.data))
+        /*
         //dependiendo si es la primera vez o no que se piden los quest durante el renderizado
         if(firstTime == true){
             dispatch(setAvailableQuest(response.data))
         } else{
             dispatch(setNewExtraQuests(response.data))
         }     
+        */
         
     } catch (err: unknown) {
         
         if(err instanceof AxiosError ){
             dispatch(setFetchGetAvailableQuestStatusErrors(err.response))
-            dispatch(fetchRefreshToken( () => dispatch(getAvailableQuest(firstTime)), err))
+            dispatch(fetchRefreshToken( () => dispatch(getAvailableQuests(firstTime)), err))
         }
     }
 
@@ -48,25 +46,20 @@ const [ setFetchGetAvailableQuestStatusIdle, setFetchGetAvailableQuestStatusPend
 
 //fetch para tomar a los available quests
 
-export const takeAvailableQuest = (questId: string, adventurers: (string | null)  [], questUiidFront: string  ): GeneralReducerThunk  => async (dispatch) =>{
+export const takeAvailableQuest = (questId: string, adventurersIds: string[]): GeneralReducerThunk  => async (dispatch) =>{
 
     dispatch(setFetchTakeAvailableQuestStatusPending())  
 
-    //filtrar si en el array hay undefined
-
-    const adventurers_id = adventurers.filter(originalElement => originalElement !== undefined)
-
-    
     try {  
 
         //fetch para aceptar el quest
-        const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: questId, adventurer_ids: adventurers_id})
+        const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: questId, adventurer_ids: adventurersIds})
 
         // se agrega a los ques in progress
         dispatch(setAddInProgressQuest(response.data))
             
         //se agrega a los aventureros en el quest la propiedad de in_quest
-        dispatch(setAdventuresInQuest(adventurers))
+        dispatch(setAdventuresInQuest(adventurersIds))
 
         //deseleciona al available quest
         dispatch(setAvailableQuestUnselect())
@@ -75,13 +68,13 @@ export const takeAvailableQuest = (questId: string, adventurers: (string | null)
             
         dispatch(setFetchTakeAvailableQuestStatusFulfilled())
 
-        dispatch(setTakenId(questUiidFront))
+        dispatch(setTakenId(questId))
                     
     } catch (err: unknown) {
 
         if(err instanceof AxiosError ){
             dispatch(setFetchTakeAvailableQuestStatusErrors(err.response))
-            dispatch(fetchRefreshToken( () => dispatch(takeAvailableQuest(questId, adventurers, questUiidFront)), err))
+            dispatch(fetchRefreshToken(() => dispatch(takeAvailableQuest(questId, adventurersIds)), err))
         }
     }
 
@@ -102,73 +95,48 @@ interface PositionType{
     uiid: string
 }
 
-interface AvailableInitialQuestType {
-    availableQuest: AvailableQuestType []
-    shownQuest: AvailableQuestType [] 
+interface AvailableQuestsState {
+    availableQuests: AvailableQuest[]
 }
 
-const initialStateAvailableQuest: AvailableInitialQuestType = {availableQuest: [], shownQuest: []}
-
-
-const AddUuid = (quests: AvailableQuestType []): AvailableQuestType [] =>{
-
-    quests.map((availableQuest) => {
-        const uiid = uuidv4()
-        availableQuest.uiid = uiid
-    });
-
-    return quests
-}
-
+const availableQuestsInitialState: AvailableQuestsState = 
+    { availableQuests: [] }
 
 const availableQuests = createSlice({
     name: "availableQuests",
-    initialState: initialStateAvailableQuest,
+    initialState: availableQuestsInitialState,
     reducers: {
 
-        setAvailableQuest:  (state, action: PayloadAction<AvailableQuestType[]>)=> {
-
-            const questWithUuid = AddUuid(action.payload)
-
-            state.availableQuest = questWithUuid
-            state.shownQuest = questWithUuid.length > 4 ? questWithUuid.slice(0, 4) : questWithUuid
+        addAvailableQuests: (state, action: PayloadAction<AvailableQuest[]>) => {
+            state.availableQuests = [...state.availableQuests, ...action.payload]
         },
 
-        setDeleteAvailableQuest:  (state, action: PayloadAction<string>)=> {
-
-            // con este reducer se eliminan el quest que tenga el id igual al payload
-            const newArray = state.availableQuest.filter( quest => quest.uiid !== action.payload)
-
-            const index = state.shownQuest.findIndex((el) => el.uiid === action.payload)
-
-            // remplaza el siguiente quest en la posicion del quest eliminado
-            state.shownQuest[index] = newArray[3] 
-
-            state.availableQuest = newArray
-        
+        removeAvailableQuest: (state, action: PayloadAction<string>) => {
+            state.availableQuests = state.availableQuests.filter(quest => quest.questId !== action.payload)
         },
 
-        setPositionAvailableQuest:  (state, action: PayloadAction<PositionType>)=> {
-
+        /*
+        setPositionAvailableQuest: (state, action: PayloadAction<PositionType>) => {
             state.shownQuest.forEach((quest) =>{
-                if(quest.uiid == action.payload.uiid){
+                if(quest.questId == action.payload.questId){
                     quest.width = action.payload.width
                     quest.height = action.payload.height
                 }
             })
-        
         },
+        */
 
-        setNewExtraQuests:  (state, action: PayloadAction<AvailableQuestType[]>)=> {
+        /*
+        setNewExtraQuests:  (state, action: PayloadAction<AvailableQuest[]>)=> {
 
-             //se asigna el uiid a los nuevos quest llegados;
+             //se asigna el questId a los nuevos quest llegados;
             const questWithUuid = AddUuid(action.payload)
 
             //se agregan los nuevos quest al availableQuestArray
             state.availableQuest = state.availableQuest.concat(questWithUuid)
 
             //agrega los quest restantes al shownQuest array
-            const rePlaced = state.shownQuest.reduce ((acc: AvailableQuestType [] , originalElement) =>{
+            const rePlaced = state.shownQuest.reduce ((acc: AvailableQuest [] , originalElement) =>{
                 if (originalElement == undefined){
                     return acc.concat(questWithUuid[0])
                 }
@@ -177,17 +145,17 @@ const availableQuests = createSlice({
 
             state.shownQuest = rePlaced        
         }
+        */
     },
 });
 
-export const { setAvailableQuest, setDeleteAvailableQuest, setPositionAvailableQuest, setNewExtraQuests } = availableQuests.actions
+export const { addAvailableQuests, removeAvailableQuest } = availableQuests.actions
 
-
-interface SelectAdventurerDragType extends SelectAdventurerType{
+interface SelectAdventurerDragType extends SelectAdventurerType {
     index: number
 }
 
-interface  SelectAdventurerClickType extends SelectAdventurerType{
+interface SelectAdventurerClickType extends SelectAdventurerType {
     maxLength: number
 }
 
@@ -195,30 +163,30 @@ interface SelectAdventurerType {
     id: string | null,
 }
 
-interface InitialStateSelectAdventurerType{
-    selectAdventurer: (string | null) []
+interface InitialStateSelectAdventurerType {
+    selectAdventurer: (string | null)[]
 }
 
-const initialStateSelectAdventurer: InitialStateSelectAdventurerType = {selectAdventurer: []}
+const initialStateSelectAdventurer: InitialStateSelectAdventurerType = { selectAdventurer: [] }
 
-const selectAdventurer = createSlice({
+const selectAdventurerSlice = createSlice({
     name: "selectAdventurer",
     initialState: initialStateSelectAdventurer,
     reducers: {
-        setSelectAdventurerDrag:  (state, action: PayloadAction<SelectAdventurerDragType>)=> {
-            
+        setSelectAdventurerDrag: (state, action: PayloadAction<SelectAdventurerDragType>) => {
+
             // se crea un nuevo array y se igual al anterior
             // let newArray : (string | undefined) [] =  []
-                
+
             // newArray = state.selectAdventurer
-    
+
             // //si la condicion es verdad lo agrega directament al array
             // if(action.payload.unSelect == false){
             //     newArray[action.payload.index] = action.payload.id
             // }  
             // //si la condicion es falsa la quita del array
             // else if (action.payload.unSelect == true){
-    
+
             //     //marca undefined el indice que viene en el payload
             //     newArray[action.payload.index] = undefined
 
@@ -235,48 +203,37 @@ const selectAdventurer = createSlice({
             // }  
         },
 
-        setSelectAdventurerClick: (state, action:PayloadAction<SelectAdventurerClickType>) => {
-
+        selectAdventurer: (state, action: PayloadAction<SelectAdventurerClickType>) => {
             const newSelectedArray = state.selectAdventurer
-
             const indexNull = newSelectedArray.indexOf(null)
-            
             console.log(action.payload.maxLength)
-
-            if(indexNull === -1){
-                if(state.selectAdventurer.length < action.payload.maxLength){
+            if (indexNull === -1) {
+                if (state.selectAdventurer.length < action.payload.maxLength) {
                     newSelectedArray.push(action.payload.id)
                 }
             } else {
                 newSelectedArray[indexNull] = action.payload.id
             }
-           
-
-            state.selectAdventurer =  newSelectedArray
+            state.selectAdventurer = newSelectedArray
         },
 
-        setUnselectAdventurerClick: (state, action:PayloadAction<string>) => {
-
-            const newSelectedAdventurerArray = state.selectAdventurer.map( adventurerId => {
-                if(adventurerId === action.payload){
+        unselectAdventurer: (state, action: PayloadAction<string>) => {
+            const newSelectedAdventurerArray = state.selectAdventurer.map(adventurerId => {
+                if (adventurerId === action.payload) {
                     return null
                 }
-
-                return  adventurerId
+                return adventurerId
             })
-
-            
-            state.selectAdventurer =  newSelectedAdventurerArray
+            state.selectAdventurer = newSelectedAdventurerArray
         },
-        setClearSelectedAdventurers:  ( state )=> {
-            
+
+        clearSelectedAdventurers: (state) => {
             state.selectAdventurer = []
-            
         }
     },
 });
 
-export const { setSelectAdventurerDrag, setSelectAdventurerClick, setUnselectAdventurerClick,  setClearSelectedAdventurers } = selectAdventurer.actions
+export const { setSelectAdventurerDrag, selectAdventurer, unselectAdventurer, clearSelectedAdventurers } = selectAdventurerSlice.actions
 
 //taken id
 
@@ -307,7 +264,7 @@ export const { setTakenId, setTakenIdReset } = takenId.actions
 export const availableQuestGeneralReducer = combineReducers({
     data: combineReducers({
         quest: availableQuests.reducer,
-        selectAdventurer: selectAdventurer.reducer,
+        selectAdventurer: selectAdventurerSlice.reducer,
         takenId: takenId.reducer
     }),
     status: combineReducers({

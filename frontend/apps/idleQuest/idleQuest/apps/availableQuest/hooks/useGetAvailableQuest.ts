@@ -1,22 +1,22 @@
 import { useEffect } from "react"
 import { useGeneralDispatch, useGeneralSelector } from "../../../../../../features/hooks"
-import { getAvailableQuest } from "../features/availableQuest"
+import { getAvailableQuests } from "../features/quest-board"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
 
 export default () => {
 
     const generalDispatch = useGeneralDispatch()
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-    const numberOfAvailableQuest = generalSelector.idleQuest.questAvailable.data.quest.availableQuest.length
+    const numberOfAvailableQuest = generalSelector.idleQuest.questAvailable.data.quest.availableQuests.length
 
     useEffect(()=>{
-        generalDispatch(getAvailableQuest(true))
+        generalDispatch(getAvailableQuests(true))
     },[])
 
     useEffect(()=>{
 
         if(numberOfAvailableQuest < 5){
-            generalDispatch(getAvailableQuest())
+            generalDispatch(getAvailableQuests())
         }
     },[numberOfAvailableQuest])
 }

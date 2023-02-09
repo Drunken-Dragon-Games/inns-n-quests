@@ -110,11 +110,7 @@ const InProgressQuest = () =>{
                     <ConditionalRender condition = {numberOfQuests > 0}>
                         { quests.map((el,  index) => {
 
-                            return  <TakenQuest 
-                                        key={el.id} 
-                                        index = {index}
-                                        data ={el} 
-                                    />
+                            return  <TakenQuest index={index} takenQuest={el} />
                         })}
                     </ConditionalRender>
 

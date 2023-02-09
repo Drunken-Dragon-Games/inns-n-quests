@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useGetHeightAndWidth, useGetHeightAndWidthAdventurerThiolden } from "../../../apps/console/hooks";
 import Image from "next/image"
 import { ConditionalRender } from "../../../../../explorerOfThiolden/explorerOfThioldenPage/components/basic_components";
-import { AdventurerCollection } from "../../../../models";
+import { AdventurerCollection } from "../../../../dsl/models";
 
 
 

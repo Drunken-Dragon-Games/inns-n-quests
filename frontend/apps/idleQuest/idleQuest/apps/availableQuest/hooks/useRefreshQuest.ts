@@ -1,6 +1,6 @@
 import { useState, useEffect, SetStateAction } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
-import { getAvailableQuest } from "../features/availableQuest"
+import { getAvailableQuests } from "../features/quest-board"
 
 export default () => {
     const generalDispatch = useGeneralDispatch()
@@ -9,7 +9,7 @@ export default () => {
     useEffect(()=>{
 
         if(refresh === true){
-            generalDispatch(getAvailableQuest(true))
+            generalDispatch(getAvailableQuests(true))
             setTimeout(() => setRefresh(false), 2000)
         }
 

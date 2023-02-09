@@ -3,7 +3,7 @@ import { adventurersGeneralReducer } from "../apps/console/features/adventurers"
 import { playerReducer } from "../apps/console/features/player";
 import { navigationConsoleReducer } from "../apps/console/features/navigationConsole";
 import { inProgressGeneralReducer } from "../apps/inProgressQuests/features/inProgressQuest";
-import { availableQuestGeneralReducer } from "../apps/availableQuest/features/availableQuest";
+import { availableQuestGeneralReducer } from "../apps/availableQuest/features/quest-board";
 import { navigatorAppReducer } from "./interfaceNavigation";
 
 export const idleQuest = combineReducers({
@@ -13,5 +13,4 @@ export const idleQuest = combineReducers({
     questsInProgress: inProgressGeneralReducer,
     questAvailable : availableQuestGeneralReducer,
     navigator: navigatorAppReducer
-    
 })

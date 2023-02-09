@@ -1,25 +1,16 @@
 import { QuestRequirement} from "../basic_component"
-import { useRequirementsBonus } from "../../hooks"
 import { useGetRequirementText } from "../../../apps/availableQuest/hooks"
-import { useEffect } from "react"
 import { ConditionalRender } from "../../../../../utils/components/basic_components"
 import { RequirementType, CharacterType } from "../../../../../../types/idleQuest"
 
 interface questRequirementsSection{
     requirements: RequirementType 
     adventuresSelected: any
-    callbackBonus: (bonus: number) => void
 }
 
 
 
-const QuestRequirementsSection = ({requirements, adventuresSelected, callbackBonus} : questRequirementsSection) =>{
-    
-    const bonus = useRequirementsBonus(adventuresSelected, requirements)
-    
-    useEffect(() => {
-        callbackBonus(bonus)
-    }, [bonus])
+const QuestRequirementsSection = ({requirements, adventuresSelected} : questRequirementsSection) =>{
     
     const text = useGetRequirementText(requirements)
 

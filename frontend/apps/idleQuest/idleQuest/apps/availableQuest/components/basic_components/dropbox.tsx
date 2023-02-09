@@ -89,12 +89,11 @@ const AdventurerCenterWrapper = styled.div`
 interface DropBoxType {
     index: number,
     questLevel: number,
-    reset: boolean
     id: string | null 
 }
 
 
-const DropBox: React.FC <DropBoxType> = ({index, questLevel, reset, id}) =>{
+const DropBox: React.FC <DropBoxType> = ({index, questLevel, id}) =>{
 
     // const {drop, adventurer, experience, type, removeBox}  = useDropElement(index, reset)
     //const adventurerData = useGetAdventurerData(id)

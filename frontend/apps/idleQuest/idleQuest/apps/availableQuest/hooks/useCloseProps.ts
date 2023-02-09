@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { useGeneralSelector, useGeneralDispatch } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-import { setDeleteAvailableQuest } from "../features/availableQuest"
-import { setTakenIdReset } from "../features/availableQuest"
-import { AvailableQuestType } from "../../../../../../types/idleQuest" 
+import { removeAvailableQuest } from "../features/quest-board"
+import { setTakenIdReset } from "../features/quest-board"
+import { LocalAvailableQuest } from "../../../../../../types/idleQuest" 
 
 
-export default ( data : AvailableQuestType ) : boolean => {
+export default ( data : LocalAvailableQuest ) : boolean => {
 
     //este efecto se activa cuando un quest ha sido tomado y si es el mismo quest renderizada en este element activa la animacion de salida
     const [ isClose, setIsClose ] = useState<boolean>(false)
@@ -34,7 +34,7 @@ export default ( data : AvailableQuestType ) : boolean => {
 
         if(isClose == true){
             setTimeout(function(){
-                generalDispatch(setDeleteAvailableQuest((questTaken!)))
+                generalDispatch(removeAvailableQuest((questTaken!)))
                 generalDispatch(setTakenIdReset())
                 
             }, 650);

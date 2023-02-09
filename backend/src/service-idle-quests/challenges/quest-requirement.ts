@@ -312,7 +312,7 @@ export class DurationCalculator {
 
     baseDuration(requirement: QuestRequirement): number {
         if (requirement.ctype === "aps-requirement")
-            return apsSum({ athleticism: requirement.athleticism, intellect: requirement.intellect, charisma: requirement.charisma }) * 1000 * this.durationFactor
+            return 30//apsSum({ athleticism: requirement.athleticism, intellect: requirement.intellect, charisma: requirement.charisma }) * 1000 * this.durationFactor
         else if (requirement.ctype === "bonus-requirement")
             return this.baseDuration(requirement.right)
         else if (requirement.ctype === "success-bonus-requirement")

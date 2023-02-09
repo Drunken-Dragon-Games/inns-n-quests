@@ -51,14 +51,45 @@ export type AvailableQuest = {
     slots: number,
 }
 
+/*
+export type LocalAvailableQuest = {
+    localQuestId: string,
+    availableQuest: AvailableQuest
+
+    name: string
+    description: string
+    duration: number
+
+    questId: string
+    location: string
+    reward: Reward
+    requirements: QuestRequirement
+
+    // Deprecated, remove asap
+    uiid?: string
+    id: string
+    reward_ds: number
+    reward_xp: number
+    difficulty: number
+    slots: number
+    rarity: string
+    width?: number
+    height?: number
+    //requirements: RequirementType
+}
+*/
+
+
 export type TakenQuest = {
-    takenQuestId?: string,
+    takenQuestId: string,
     userId: string,
     quest: AvailableQuest,
     adventurerIds: string[],
     claimedAt?: string,
     createdAt: string,
 }
+
+export type TakenQuestStatus = "in-progress" | "finished" | "claimed"
 
 export type QuestRequirement 
     = APSRequirement | ClassRequirement | OrRequirement | AndRequirement 

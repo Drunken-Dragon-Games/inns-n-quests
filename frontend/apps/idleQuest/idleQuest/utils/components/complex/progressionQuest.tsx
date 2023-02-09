@@ -11,6 +11,7 @@ import { useGeneralSelector } from "../../../../../../features/hooks"
 import {  selectGeneralReducer } from "../../../../../../features/generalReducer"
 import { useGeneralDispatch } from "../../../../../../features/hooks";
 import { PostClaimInProgressQuest } from "../../../apps/inProgressQuests/features/inProgressQuest";
+import { TakenQuest, TakenQuestStatus } from "../../../../dsl/models";
 
 const PositionWrapper = styled.div`
     position: relative;
@@ -84,20 +85,13 @@ const GeneralProgressionMark = styled.div <GeneralProgressionMark>`
     }
 
 `
-interface ChestWrapper{
-    onClick: any
-    successful: boolean
-}
-
-
-const ChestWrapper = styled.div<ChestWrapper>`
+const ChestWrapper = styled.div`
     position: absolute;
     top: 0vw;
     left: 22.5vw;
     width: 13vw;
     height: 7vw;
     z-index: 7;
-    ${props => props.successful ? "cursor: pointer;" : null}
 `
 
 const ChestMarkWrapper = styled.div`
@@ -176,18 +170,20 @@ const CoinRewardWrapper = styled.div`
 
 
 interface ProgressionQuest {
-
+    //takenQuest: TakenQuest
+    /*
     startTime: any
     duration: any
     inProgress?: boolean
-    questState?: "failed" | "succeeded" | "in_progress" | null
+    questStatus: TakenQuestStatus
     selected?: any
     dsReward: number
-
+    */
 }
 
-const ProgressionQuest = ({startTime, duration, inProgress, questState, selected, dsReward}: ProgressionQuest) => {
+const ProgressionQuest = () => { //{takenQuest}: ProgressionQuest) => {//{startTime, duration, inProgress, questStatus, selected, dsReward}: ProgressionQuest) => {
 
+    /*
     const [ timeLeft, completeDuration ] = useGetTimeLeft(startTime, duration)    
 
     const [ distance, numberOfPunts, slots ] = useGetPuntDistance( completeDuration, 2, 18.5)
@@ -195,6 +191,7 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
     const [ timeMarkLeft ] = useGetMarkTimeLeft( (timeLeft as number), (completeDuration as number), 2)
 
     const [ isClaimed, setIsClaimed ] = useState<boolean>(false)
+    */
 
     const generalDispatch = useGeneralDispatch()   
 
@@ -203,6 +200,7 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
     // const index = generalSelector.navigator.inProgressQuestSelected
     const index = generalSelector.idleQuest.navigator.inProgress.inProgressQuest
 
+    /*
     let isSuccessful = false;
 
     let questStateActual: "failed" | "succeeded" | "in_progress" | null = null
@@ -211,7 +209,6 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
         isSuccessful = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests[index].state === "succeeded"
         questStateActual = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests[index].state
     }
-
 
     const ClaimQuest = () =>{
 
@@ -223,14 +220,15 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
 
         }
     }
+    */
 
     return (<>
                 <PositionWrapper>
                     <RescalingProgression src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progression.svg" />
-                    <ChestWrapper onClick= {questStateActual === 'in_progress' ?  null  :isSuccessful == true ? ClaimQuest : null} successful={isSuccessful} >
+                    <ChestWrapper> 
                         <RescalingChest src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_progression.svg"/>
                         <CoinRewardWrapper>
-                            <CoinReward>{dsReward.toString()}</CoinReward>
+                            <CoinReward>0</CoinReward>
                         </CoinRewardWrapper>
                     </ChestWrapper>
 
@@ -238,6 +236,10 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
                         <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progression_punt.png"  alt="punt image" width={2000} height={1250} />
                     </FirstPunt>
 
+                    <ProgressionMarkFirst>
+                        <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progresion_mark.png" alt="punt image" width={2000} height={1250} />
+                    </ProgressionMarkFirst>
+                    {/*
                     <ConditionalRender condition = {inProgress == true}>
                         <ProgressionMarkFirst>
                             <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/progresion_mark.png"  alt="punt image" width={2000} height={1250} />
@@ -265,6 +267,7 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
                             <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_mark_fail.png"  alt="punt image" width={2000} height={1250} />
                         </ChestMarkWrapper>
                     </ConditionalRender>
+                    */}
 
 
                     <LastPunt>
@@ -272,6 +275,7 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
                     </LastPunt>
 
 
+                    {/*
                     <ConditionalRender condition = {numberOfPunts > 0}>
                         { (slots as string[]).map((el: string, index: number) => {
 
@@ -301,6 +305,7 @@ const ProgressionQuest = ({startTime, duration, inProgress, questState, selected
                         }
 
                     </ConditionalRender>
+                    */}
                 </PositionWrapper>
 
     </>)

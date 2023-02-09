@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
-import { setClearSelectedAdventurers } from "../features/availableQuest"
+import { clearSelectedAdventurers } from "../features/quest-board"
 
 
 export default (isReset: boolean) =>{
@@ -10,7 +10,7 @@ export default (isReset: boolean) =>{
     useEffect(() => {
         
         if(isReset == true){
-            generalDispatch(setClearSelectedAdventurers())
+            generalDispatch(clearSelectedAdventurers())
         }
         
 
