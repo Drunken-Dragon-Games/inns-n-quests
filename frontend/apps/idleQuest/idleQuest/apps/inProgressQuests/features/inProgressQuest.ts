@@ -1,24 +1,24 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'; 
-import { combineReducers } from "redux";
+import { combineReducers, compose } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
 import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
-import { setFreeAdventurers, setExperienceReward, setDeath } from '../../console/features/adventurers';
+import { setFreeAdventurers, setDeath } from '../../console/features/adventurers';
 import { AxiosError } from 'axios';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
 import { ClaimQuestOutcome, TakenQuest } from '../../../../dsl/models';
+import { addTakenQuests, addVisualQuestData } from '../../availableQuest/features/quest-board';
+import { tagTakenQuest } from '../../../../dsl';
 
-//fetch para obeter a los in progress quests
+const addVisualDataToTakenQuests = (quest: any) =>
+    ({ ...quest, quest: addVisualQuestData(quest.quest) })
 
-export const getInProgressQuest = (): GeneralReducerThunk => async (dispatch) =>{
-
+export const getInProgressQuests = (): GeneralReducerThunk => async (dispatch) =>{
     dispatch(setFetchGetInProgressQuestStatusPending())
     try {   
-            //fetch para obtener los inprogress quest
         const response = await axiosCustomInstance('/quests/api/taken-quests').get('/quests/api/taken-quests')  
-        
-        //funcion para setear los ques in progress
-        dispatch(setInProgressQuest(response.data))
+        const takenQuests = response.data.map(compose(addVisualDataToTakenQuests, tagTakenQuest))
+        dispatch(addTakenQuests(takenQuests))
 
         
         dispatch(setFetchGetInProgressQuestStatusFulfilled())
@@ -27,7 +27,7 @@ export const getInProgressQuest = (): GeneralReducerThunk => async (dispatch) =>
         
         if(err instanceof AxiosError ){
             dispatch(setFetchGetInProgressQuestStatusErrors(err.response))
-            dispatch(fetchRefreshToken( () => dispatch(getInProgressQuest()), err))
+            dispatch(fetchRefreshToken( () => dispatch(getInProgressQuests()), err))
         }
     }
 
@@ -43,7 +43,7 @@ const [ setFetchGetInProgressQuestStatusIdle, setFetchGetInProgressQuestStatusPe
 
 
 //fetch para claimear el reward
-export const PostClaimInProgressQuest = (quest: TakenQuest): GeneralReducerThunk => async (dispatch) =>{
+export const claimTakenQuest = (quest: TakenQuest): GeneralReducerThunk => async (dispatch) =>{
     
     dispatch(setFetchPostClaimRewardInProgressQuestStatusPending())
     try {
@@ -53,7 +53,6 @@ export const PostClaimInProgressQuest = (quest: TakenQuest): GeneralReducerThunk
         const outcome = response.data.outcome as ClaimQuestOutcome
             
         dispatch(setFetchPostClaimRewardInProgressQuestStatusFulfilled())
-        
 
         console.log(outcome)
         //condicional depenende de si el quest es exitoso o fallido 
@@ -87,7 +86,7 @@ export const PostClaimInProgressQuest = (quest: TakenQuest): GeneralReducerThunk
         
         if(err instanceof AxiosError ){
             dispatch(setFetchPostClaimRewardInProgressQuestStatusErrors(err.response))
-            dispatch(fetchRefreshToken( () => dispatch(PostClaimInProgressQuest(quest)), err))
+            dispatch(fetchRefreshToken( () => dispatch(claimTakenQuest(quest)), err))
         }
     }
 
@@ -99,40 +98,6 @@ export const PostClaimInProgressQuest = (quest: TakenQuest): GeneralReducerThunk
 const  fetchPostClaimRewardInProgressQuestStatus  = createSliceStatus("fetchPostClaimRewardInProgressQuestStatus")
 
 export const [ setFetchPostClaimRewardInProgressQuestStatusIdle, setFetchPostClaimRewardInProgressQuestStatusPending, setFetchPostClaimRewardInProgressQuestStatusFulfilled, setFetchPostClaimRewardInProgressQuestStatusErrors ] = actionsGenerator(fetchPostClaimRewardInProgressQuestStatus.actions)
-
-
-interface InitialStateNavigationConsoleType{
-    quests: TakenQuest []
-}
-
-const initialInProgressQuest: InitialStateNavigationConsoleType = {quests : []}
-
-const inProgressQuests = createSlice({
-    name: "inProgressQuests",
-    initialState: initialInProgressQuest,
-    reducers: {
-        setInProgressQuest:  (state, action: PayloadAction<TakenQuest []>)=> {
-            
-            state.quests = action.payload
-            
-        },
-
-        setDeleteInProgressQuest:  (state, action: PayloadAction<string>)=> {
-            
-            const filterState = state.quests.filter((quest) => quest.takenQuestId !== action.payload)
-
-            state.quests = filterState
-        },
-
-        setAddInProgressQuest:  (state, action: PayloadAction<TakenQuest>)=> {
-            
-            state.quests = state.quests.concat(action.payload)
-        }
-
-    },
-});
-
-export const { setInProgressQuest, setDeleteInProgressQuest,  setAddInProgressQuest } = inProgressQuests.actions
 
 
 interface IsClaimRewardDataType {
@@ -191,7 +156,6 @@ export const { setRewardClaimDefault, setRewardClaimFail, setRewardClaimSucceed 
 
 export const inProgressGeneralReducer = combineReducers({
     data: combineReducers({
-        inProgressQuest: inProgressQuests.reducer,
         claimReward: inProgressReward.reducer
     }),
     Status: combineReducers({

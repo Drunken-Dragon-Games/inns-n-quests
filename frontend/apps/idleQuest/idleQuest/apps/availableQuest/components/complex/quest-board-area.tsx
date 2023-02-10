@@ -132,7 +132,7 @@ const QuestBoardArea = ({ className, availableQuests, onQuestClick }: QuestBoard
                         layout="fill"
                     />
                 </MonsterWrapper>
-                <PropStamp rarity={quest.stamp} />
+                <PropStamp rarity={quest.seal} />
             </QuestPreviewCardContainer>
         )
     }

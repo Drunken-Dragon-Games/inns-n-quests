@@ -4,7 +4,7 @@ import { useGetLevel } from "../../../../utils/hooks";
 import { useGetRewardExp, useGetLevelUp, useIsDead } from "../../hooks";
 import { useState, useEffect } from "react"
 import Image from "next/image";
-import { DataAdventurerType } from "../../../../../../../types/idleQuest";
+import { Adventurer } from "../../../../../dsl";
 
 const outOpacityDeadMark = keyframes`
     0% {opacity: 0}
@@ -186,7 +186,7 @@ const EmojiWrapper = styled.div<EmojiWrapper>`
 
 
 interface interfaceEnrolled {
-    data: DataAdventurerType
+    data: Adventurer
     questLevel: number
     claimed: claimed
     isDead: string [] | null

@@ -47,6 +47,7 @@ export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-t
 export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
 
 export type AvailableQuest = {
+    ctype: "available-quest",
     questId: string,
     name: string,
     location: string,
@@ -55,40 +56,12 @@ export type AvailableQuest = {
     reward: Reward,
     duration: number,
     slots: number,
-    stamp: SealType,
+    seal: SealType,
     paper: 1 | 2 | 3 | 4
 }
 
-/*
-export type LocalAvailableQuest = {
-    localQuestId: string,
-    availableQuest: AvailableQuest
-
-    name: string
-    description: string
-    duration: number
-
-    questId: string
-    location: string
-    reward: Reward
-    requirements: QuestRequirement
-
-    // Deprecated, remove asap
-    uiid?: string
-    id: string
-    reward_ds: number
-    reward_xp: number
-    difficulty: number
-    slots: number
-    rarity: string
-    width?: number
-    height?: number
-    //requirements: RequirementType
-}
-*/
-
-
 export type TakenQuest = {
+    ctype: "taken-quest",
     takenQuestId: string,
     userId: string,
     quest: AvailableQuest,
@@ -96,6 +69,8 @@ export type TakenQuest = {
     claimedAt?: string,
     createdAt: string,
 }
+
+export type SelectedQuest = AvailableQuest | TakenQuest
 
 export type TakenQuestStatus = "in-progress" | "finished" | "claimed"
 

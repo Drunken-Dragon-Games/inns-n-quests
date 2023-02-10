@@ -9,11 +9,11 @@ import { QuestLabelLevel,
     RescalingMonster, 
     SuccessChance, 
     Seals, 
-    RescalingImg,
+    AdventurerSprite,
     Signature } from "../../../../utils/components/basic_component";
 import { QuestRequirementsSection, ProgressionQuest } from "../../../../utils/components/complex";
 import { Adventurer } from "."
-import { PostClaimInProgressQuest } from "../../features/inProgressQuest";
+import { claimTakenQuest } from "../../features/inProgressQuest";
 import { takenQuestStatus } from "../../../../../dsl";
 
 
@@ -196,7 +196,7 @@ const QuestPaperInProgress = () => {
 
     const questClaimStatus = generalSelector.idleQuests.questsInProgress.Status.claimReward.status
 
-    const adventurerData = generalSelector.idleQuests.adventurers.data.data
+    const adventurerData = generalSelector.idleQuests.adventurers.data.adventurers
         .filter(adventurer => adventurersIds.indexOf(adventurer.adventurerId) !== -1)
 
     const status = takenQuestStatus(inProgressQuestData)
@@ -264,18 +264,18 @@ const QuestPaperInProgress = () => {
                                                                 claimed = {isClaimedData} 
                                                                 isDead = {isClaimedData.dead_adventurers}
                                                                 rewardExp={isClaimedData.exp_given} >
-                                                        <RescalingImg src={adv.sprite} collection={adv.collection} /> 
+                                                        <AdventurerSprite adventurer={adv} render="normal" /> 
                                                     </Adventurer>  
                                                 )}  
                                             </Flex>
                                         </AdventurerWrapper>
                                         <CornerRightDown>
-                                            <Seals seal = {"kings_plea"} />
+                                            <Seals seal={"kings-plea"} />
                                         </CornerRightDown>
                                     </Flex>
                                     <Signature 
                                         signatureType={status == "in-progress" ? "in-progress" : "finished" } 
-                                        onClick={ () => generalDispatch(PostClaimInProgressQuest(inProgressQuestData)) }/>
+                                        onClick={ () => generalDispatch(claimTakenQuest(inProgressQuestData)) }/>
                                 </Card>
                             </CardWrapper>
                         </AnimationWrapper>

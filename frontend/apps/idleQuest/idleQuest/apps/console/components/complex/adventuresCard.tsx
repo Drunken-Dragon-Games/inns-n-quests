@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon, PositionMedal } from "../basic_components";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 import { AdventurerSprite } from "../../../../utils/components/basic_component";
-import { useGetAdventurerSelectClick, useGetPositionMedal } from "../../hooks";
+import { useGetAdventurerSelectClick } from "../../hooks";
 import { Adventurer } from "../../../../../dsl";
 
 
@@ -94,25 +94,23 @@ const PositionMedalPosition = styled.div`
 
 `
 
-interface IProps_AdventuresCard{
+interface AdventurerCardProps {
     data: Adventurer
-    selectedInQuest?: boolean
-    
+    slotIndex?: number
 }
 
-
-const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
+const AdventurerCard = ({data, slotIndex}:AdventurerCardProps ) =>{
   
     //este elemento hace drageable todo la tarjeta
     // const drag = useDragElement( data )
 
     const { selAdventurer, isQuestSelected } = useGetAdventurerSelectClick()
 
-    const position = useGetPositionMedal(data.adventurerId)
+    const selected = slotIndex !== undefined
     const render
         = data.hp == 0 && data.collection !== "grandmaster-adventurers" ? "dead" 
         : data.inChallenge ? "questing"
-        : selectedInQuest ? "selected"
+        : selected ? "selected"
         : "normal"
 
     return(
@@ -120,7 +118,7 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
         
         {/* <AdventuresCardWrapper ref ={data.in_quest == false  && selectedInQuest == false && (data.metadata.is_alive == true || data.metadata.is_alive == undefined) ? drag : null}> */}
         <AdventuresCardWrapper 
-            onClick={() =>  data.hp > 0 ? selAdventurer(data, selectedInQuest!) : null}
+            onClick={() =>  data.hp > 0 ? selAdventurer(data, selected) : null}
             isSelectable = {isQuestSelected}
         >
             <Margin>
@@ -164,10 +162,10 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
                     
             </Margin>
 
-            <ConditionalRender condition = {position !== -1}>
+            <ConditionalRender condition = {selected}>
                 <PositionMedalPosition>
                     <PositionMedal>
-                        {(position + 1).toString()}
+                        {(slotIndex! + 1).toString()}
                     </PositionMedal>
                 </PositionMedalPosition>
             </ConditionalRender>
@@ -183,4 +181,4 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
 
 }
 
-export default AdventuresCard
+export default AdventurerCard

@@ -6,7 +6,7 @@ import { selectGeneralReducer } from "../../../../../../features/generalReducer"
 export default (slots: number, adventurerList: (string | null) [], type: "available" | "inProgress") => {
     
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-    const allAdventurer = generalSelector.idleQuests.adventurers.data.data
+    const allAdventurer = generalSelector.idleQuests.adventurers.data.adventurers
     
     const [averageLevel, setAverageLevel] = useState<number>(0)
     

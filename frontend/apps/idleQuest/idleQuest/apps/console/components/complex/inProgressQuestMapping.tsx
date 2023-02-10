@@ -5,7 +5,8 @@ import { useRef } from "react";
 import Image from 'next/image'
 import { useIsScroll } from "../../hooks";
 import { ConditionalRender } from '../../../../../../utils/components/basic_components';
-import { TakenQuest } from ".";
+import { takenQuestId } from "../../../../../dsl";
+import TakenQuestCard from "./tankenQuestCard";
 
 
 const InProgressMappingWrapper = styled.div`
@@ -89,8 +90,9 @@ const InProgressQuest = () =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     const scrolling = useRef<HTMLDivElement | null>(null)
-    const numberOfQuests = generalSelector.idleQuests.questsInProgress.data.inProgressQuest.quests.length
-    const quests = generalSelector.idleQuests.questsInProgress.data.inProgressQuest.quests  
+    const numberOfQuests = generalSelector.idleQuests.questBoard.questBoard.takenQuests.length
+    const quests = generalSelector.idleQuests.questBoard.questBoard.takenQuests
+    const selectedQuest = generalSelector.idleQuests.questBoard.questBoard.selectedQuest
     
     const renderArrows =  useIsScroll(scrolling, numberOfQuests)
 
@@ -108,9 +110,9 @@ const InProgressQuest = () =>{
                 <InProgressMapping ref={scrolling}>
 
                     <ConditionalRender condition = {numberOfQuests > 0}>
-                        { quests.map((el,  index) => {
-
-                            return  <TakenQuest index={index} takenQuest={el} />
+                        { quests.map((quest, index) => {
+                            const selected = takenQuestId(selectedQuest) == quest.takenQuestId
+                            return  <TakenQuestCard takenQuest={quest} selected={selected} key={"taken-quest-"+index} />
                         })}
                     </ConditionalRender>
 

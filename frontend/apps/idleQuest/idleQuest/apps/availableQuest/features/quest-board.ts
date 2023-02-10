@@ -1,26 +1,28 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'; 
-import { combineReducers } from "redux";
+import { combineReducers, compose } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
 import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from "axios"
 import { setAdventuresInQuest } from '../../console/features/adventurers';
-import { setAddInProgressQuest } from '../../inProgressQuests/features/inProgressQuest';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
-import { Adventurer, AvailableQuest, sealTypes } from '../../../../dsl';
+import { Adventurer, AvailableQuest, sealTypes, SelectedQuest, tagAvailableQuest, TakenQuest } from '../../../../dsl';
 import { simpleHash } from '../../../../../utils';
 
+export const addVisualQuestData = (quest: any) => {
+    return ({
+        ...quest,
+        stamp: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
+        paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
+    })
+}
+
 export const getAvailableQuests = (firstTime? : boolean): GeneralReducerThunk => async (dispatch) =>{
-    const addVisualQuestData = (quest: any) => {
-        return ({...quest, 
-            stamp: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
-            paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
-        })
-    }
     dispatch(setFetchGetAvailableQuestStatusPending())
     try { 
         const response = await axiosCustomInstance('/quests/api/quests').get('/quests/api/quests')
-        const availableQuests = response.data.map(addVisualQuestData)
+        const availableQuests = response.data
+            .map(compose(addVisualQuestData, tagAvailableQuest))
         console.log(availableQuests)
         dispatch(setFetchGetAvailableQuestStatusFulfilled())
         dispatch(addAvailableQuests(availableQuests))
@@ -52,19 +54,19 @@ export const takeAvailableQuest = (questId: string, adventurers: Adventurer[]): 
         const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: questId, adventurer_ids})
 
         // se agrega a los ques in progress
-        dispatch(setAddInProgressQuest(response.data))
+        dispatch(addTakenQuests([response.data]))
             
         //se agrega a los aventureros en el quest la propiedad de in_quest
         dispatch(setAdventuresInQuest(adventurer_ids))
 
         //deseleciona al available quest
-        dispatch(unselectAvailableQuest())
+        dispatch(unselectQuest())
 
         // dispatch(setQuestTakenId(questUiidFront))
             
         dispatch(setFetchTakeAvailableQuestStatusFulfilled())
 
-        dispatch(setTakenId(questId))
+        //dispatch(setTakenId(questId))
                     
     } catch (err: unknown) {
 
@@ -86,20 +88,36 @@ const [ setFetchTakeAvailableQuestStatusIdle, setFetchTakeAvailableQuestStatusPe
 
 
 interface QuestBoardState {
+    inventory: Adventurer[]
+    takenQuests: TakenQuest[]
     availableQuests: AvailableQuest[]
-    selectedAvailableQuest?: AvailableQuest
+    selectedQuest?: SelectedQuest
     adventurerSlots: (Adventurer | null)[]
 }
 
 const questBoardInitialState: QuestBoardState = { 
+    inventory: [],
+    takenQuests: [],
     availableQuests: [],
-    adventurerSlots: []
+    adventurerSlots: [],
 }
 
 const questBoardState = createSlice({
     name: "quest-board-state",
     initialState: questBoardInitialState,
     reducers: {
+
+        setInventory: (state, action: PayloadAction<Adventurer[]>) => {
+            state.inventory = action.payload
+        },
+
+        addTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
+            state.takenQuests = [...state.takenQuests, ...action.payload]
+        },
+
+        removeTakenQuest: (state, action: PayloadAction<TakenQuest>) => {
+            state.takenQuests = state.takenQuests.filter(quest => quest.takenQuestId !== action.payload.takenQuestId)
+        },
 
         addAvailableQuests: (state, action: PayloadAction<AvailableQuest[]>) => {
             state.availableQuests = [...state.availableQuests, ...action.payload]
@@ -113,13 +131,18 @@ const questBoardState = createSlice({
             state.availableQuests = []
         },
 
-        selectAvailableQuest: (state, action: PayloadAction<AvailableQuest>) => {
-            state.selectedAvailableQuest = action.payload
-            state.adventurerSlots = Array(action.payload.slots).fill(null)
+        selectQuest: (state, action: PayloadAction<SelectedQuest>) => {
+            const quest = action.payload
+            state.selectedQuest = quest
+            if (quest.ctype === "available-quest")
+                state.adventurerSlots = Array(quest.slots).fill(null)
+            else
+                state.adventurerSlots = Array(quest.quest.slots).fill(null).map((_, index) => 
+                    state.inventory.find(adventurer => adventurer.adventurerId === quest.adventurerIds[index]) ?? null)
         },
 
-        unselectAvailableQuest: (state) => {
-            state.selectedAvailableQuest = undefined
+        unselectQuest: (state) => {
+            state.selectedQuest = undefined
             state.adventurerSlots = []
         },
 
@@ -137,56 +160,30 @@ const questBoardState = createSlice({
         },
 
         clearSelectedAdventurers: (state) => {
-            if (state.selectedAvailableQuest)
-                state.adventurerSlots = Array(state.selectedAvailableQuest.slots).fill(null)
+            if (state.selectedQuest && state.selectedQuest.ctype === "available-quest")
+                state.adventurerSlots = Array(state.selectedQuest.slots).fill(null)
             else 
                 state.adventurerSlots = []
         }
     },
 });
 
-export const { 
+export const {
+    setInventory,
+    addTakenQuests,
+    removeTakenQuest,
     addAvailableQuests,
     removeAvailableQuest,
     clearAvailableQuests,
-    selectAvailableQuest,
-    unselectAvailableQuest,
+    selectQuest,
+    unselectQuest,
     selectAdventurer,
     unselectAdventurer,
     clearSelectedAdventurers
 } = questBoardState.actions
 
-//taken id
-
-interface TakenIdType {
-    id: string | null
-}
-
-const initialTakenId: TakenIdType = {id: null}
-
-const takenId = createSlice({
-    name: "takenId",
-    initialState: initialTakenId,
-    reducers: {
-        setTakenId:  (state, action: PayloadAction<string>)=> {
-            state.id = action.payload    
-        },
-
-        setTakenIdReset:  ( state )=> {
-            state.id = null   
-        }
-    },
-});
-
-export const { setTakenId, setTakenIdReset } = takenId.actions
-
-//combinacion de Reducers
-
-export const availableQuestGeneralReducer = combineReducers({
-    data: combineReducers({
-        questBoard: questBoardState.reducer,
-        takenId: takenId.reducer
-    }),
+export const questBoardGeneralReducer = combineReducers({
+    questBoard: questBoardState.reducer,
     status: combineReducers({
         getAvailableQuestStatus: fetchGetAvailableQuestStatus.reducer,
         takeAvailableQuestStatus: fetchTakeAvailableQuestStatus.reducer

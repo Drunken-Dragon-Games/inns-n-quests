@@ -1,8 +1,8 @@
 import styled from "styled-components"
 import { useGeneralSelector } from "../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../features/generalReducer"
-import { QuestPaperInprogress } from "./components/complex"
-import { ConditionalRender } from "../../../../utils/components/basic_components"
+import { QuestCard } from "../availableQuest/components/complex"
+import { notEmpty } from "../../../../utils"
 
 const ShadowWrapperAnimation = styled.section<{ display: boolean }>`
     position: absolute;
@@ -21,14 +21,12 @@ const ShadowWrapperAnimation = styled.section<{ display: boolean }>`
 const InProgressQuest = (): JSX.Element => {
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const pageSelected = generalSelector.idleQuests.navigationConsole.page
-    const inProgressQuest = generalSelector.idleQuests.navigator.inProgress.inProgressQuest
+    const allAdventurers = generalSelector.idleQuests.adventurers.data.adventurers
+
     return(
         <ShadowWrapperAnimation display= {pageSelected == "in_progress"}>
-            <ConditionalRender condition={inProgressQuest != null}>
-                <QuestPaperInprogress/>
-            </ConditionalRender>
         </ShadowWrapperAnimation>
-    ) 
+    )
 }
 
 export default InProgressQuest

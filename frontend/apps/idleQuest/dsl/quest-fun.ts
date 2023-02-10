@@ -1,4 +1,4 @@
-import { TakenQuest, TakenQuestStatus } from "./models"
+import { SealType, SelectedQuest, TakenQuest, TakenQuestStatus } from "./models"
 
 export function takenQuestStatus(takenQuest: TakenQuest): TakenQuestStatus {
     if (takenQuest.claimedAt) return "claimed"
@@ -20,3 +20,27 @@ export function takenQuestTimeLeft(takenQuest: TakenQuest): string {
     else if (secondsLeft > 0) return `${secondsLeft}s`
     else return "Finished"
 }
+
+export const tagTakenQuest = (takenQuest: object): object => 
+    ({...takenQuest, ctype: "taken-quest"})
+
+export const tagAvailableQuest = (availableQuest: object): object =>
+    ({...availableQuest, ctype: "available-quest"})
+
+export const takenQuestId = (quest?: SelectedQuest): string =>
+    quest?.ctype === "taken-quest" ? quest.takenQuestId : ""
+
+export const questId = (quest: SelectedQuest): string =>
+    quest.ctype === "taken-quest" ? quest.quest.questId : quest.questId
+
+export const questName = (quest: SelectedQuest): string =>
+    quest.ctype === "taken-quest" ? quest.quest.name : quest.name
+
+export const questDescription = (quest: SelectedQuest): string =>
+    quest.ctype === "taken-quest" ? quest.quest.description : quest.description
+
+export const questPaper = (quest: SelectedQuest): number =>
+    quest.ctype === "taken-quest" ? quest.quest.paper : quest.paper
+
+export const questSeal = (quest: SelectedQuest): SealType =>
+    quest.ctype === "taken-quest" ? quest.quest.seal : quest.seal

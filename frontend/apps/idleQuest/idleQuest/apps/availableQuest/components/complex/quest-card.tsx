@@ -1,6 +1,7 @@
+import { CurveType } from "@emurgo/cardano-message-signing-asmjs"
 import styled from "styled-components"
 import { CrispPixelArtBackground, CrispPixelArtImage, notEmpty } from "../../../../../../utils"
-import { Adventurer, AvailableQuest } from "../../../../../dsl"
+import { Adventurer, questDescription, questName, questSeal, SelectedQuest, takenQuestSecondsLeft } from "../../../../../dsl"
 import { QuestLabelLevel, Seals, Signature, SuccessChance } from "../../../../utils/components/basic_component"
 import { ProgressionQuest } from "../../../../utils/components/complex"
 import { AdventurerSlot } from "../basic_components"
@@ -105,15 +106,23 @@ const Monster = () =>
 
 interface QuestPaperAvailableProps {
     className?: string,
-    quest?: AvailableQuest
+    quest?: SelectedQuest, 
     adventurerSlots: (Adventurer | null)[],
-    onSign?: () => void,
+    onSign?: (selectedQuest: SelectedQuest) => void,
     onClose?: () => void,
     onUnselectAdventurer?: (adventurer: Adventurer) => void,
 }
 
-const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnselectAdventurer }: QuestPaperAvailableProps) =>
-    <BackShadow 
+const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnselectAdventurer }: QuestPaperAvailableProps) => {
+    const signatureType 
+        = quest?.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0 
+            ? "available" 
+        : quest?.ctype == "available-quest" 
+            ? "available-no-adventurers"
+        : quest?.ctype == "taken-quest" && takenQuestSecondsLeft(quest) <= 0 
+            ? "finished"
+        : "in-progress"
+    return <BackShadow 
         onClick={(e) => { if (e.target === e.currentTarget && onClose) onClose() }} 
         open={quest !== undefined} 
         className={className}>
@@ -127,8 +136,8 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
                 />
 
                 <StyledQuestLabelLevel>1</StyledQuestLabelLevel>
-                <Title>{quest.name}</Title>
-                <Details dangerouslySetInnerHTML={{ __html: quest.description }} />
+                <Title>{questName(quest)}</Title>
+                <Details dangerouslySetInnerHTML={{ __html: questDescription(quest) }} />
                 <StyledSuccessChance percentage={0} />
                 <Monster />
 
@@ -146,15 +155,16 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
                     )} 
                 </AdventurersWrapper>
                 <CornerRightDown>
-                    <Seals seal={quest.stamp} />
+                    <Seals seal={questSeal(quest)} />
                 </CornerRightDown>
 
                 <Signature 
-                    signatureType={ adventurerSlots.filter(notEmpty).length > 0 ? "available" : "available-no-adventurers" } 
-                    onClick={onSign} 
+                    signatureType={signatureType} 
+                    onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest)} 
                 />
             </CardContainer>
             : <></>}
     </BackShadow>
+}
 
 export default QuestCard

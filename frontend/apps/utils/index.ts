@@ -26,9 +26,3 @@ export const simpleHash = (s: string): number => {
       h = (h << 5) - h + s.charCodeAt(i++) | 0
   return h
 }
-
-export const compose = <A, B, C>(f: (a: A) => B) => (g: (b: B) => C): (a: A) => C =>
-    (a: A) => g(f(a))
-
-export const sequentially = (actions: (() => void)[]): () => void =>
-    () => actions.forEach(action => action())

@@ -38,7 +38,7 @@ export default (): TakenQuest => {
     const [inProgressQuestData, setInProgressQuestData] = useState<TakenQuest>(placeHolder)
 
     const index = generalSelector.idleQuests.navigator.inProgress.inProgressQuest
-    const inProgressQuest = generalSelector.idleQuests.questsInProgress.data.inProgressQuest.quests
+    const inProgressQuest = generalSelector.idleQuests.questBoard.questBoard.takenQuests
 
     useEffect(()=>{
         if(index != null){

@@ -60,7 +60,6 @@ const sortingLevel = (adventurersArray: Adventurer []) => {
 
 }
 
-
 const adventurersSorting = (adventurers: Adventurer[] ) =>{
     const adventurersFree = adventurers.filter((element) => element.inChallenge == false);
     const adventurersInQuest = adventurers.filter((element) => element.inChallenge == true);
@@ -71,21 +70,11 @@ const adventurersSorting = (adventurers: Adventurer[] ) =>{
     return adventurersFree.concat(adventurersInQuest)
 }
 
-
 interface initialStateAdventurer{
-    data:  Adventurer [] 
+    adventurers: Adventurer [] 
 }
 
-
-interface AdventurerAfterQuestType{
-    adventurerId: string
-    experience?: number
-    type?: "pixeltile" | "gma" | 'aot'
-    dead_cooldown?: number
-}
-
-
-const initialStateAdventurer:  initialStateAdventurer = {data: []}
+const initialStateAdventurer:  initialStateAdventurer = {adventurers: []}
 
 const adventurers = createSlice({
     name: "adventurers ",
@@ -97,13 +86,13 @@ const adventurers = createSlice({
         setAdventurers: (state, action: PayloadAction<Adventurer[]>) => {
 
             const adventurersSorted = adventurersSorting(action.payload)
-            state.data = adventurersSorted
+            state.adventurers = adventurersSorted
 
         },
 
         setAdventuresInQuest: (state, action: PayloadAction<string[]>) => {
 
-            const adventurerArrays =  state.data.map(adventurer =>{
+            const adventurerArrays =  state.adventurers.map(adventurer =>{
                 
                 action.payload.forEach((adventurerId) => {
                     if(adventurerId == adventurer.adventurerId){
@@ -118,7 +107,7 @@ const adventurers = createSlice({
     
             const adventurersSorted = adventurersSorting(adventurerArrays)
 
-            state.data = adventurersSorted
+            state.adventurers = adventurersSorted
         },
 
         setFreeAdventurers: (state, action: PayloadAction<string[]>) => {
@@ -128,7 +117,7 @@ const adventurers = createSlice({
 
              //este reducer toma el array con los ids y el estado con el array de los aventureros y cuando tenga el mismo id cambia la propiedad inChallenge  a false
         
-            const adventurerArrays =  state.data.map (adventurer => {            
+            const adventurerArrays =  state.adventurers.map (adventurer => {            
                 adventurersIds.forEach(adventurerId => {
                     if(adventurerId == adventurer.adventurerId){
                         adventurer.inChallenge = false
@@ -140,14 +129,14 @@ const adventurers = createSlice({
 
             const adventurersSorted = adventurersSorting(adventurerArrays)
 
-            state.data = adventurersSorted
+            state.adventurers = adventurersSorted
 
         },
 
           //Este caso recibe un array de aventureros para dar expericia de un quest y cambia la propiedad de experience a la nueva expericia y el nuevo nivel
         setExperienceReward: (state, action: PayloadAction<Adventurer[]>) => {
     
-            const adventurers =  state.data.map (adventurer =>{            
+            const adventurers =  state.adventurers.map (adventurer =>{            
                 action.payload.forEach(adventurerRewarded => {
 
                     if(adventurerRewarded.adventurerId == adventurer.adventurerId){
@@ -160,14 +149,14 @@ const adventurers = createSlice({
 
             const adventurersSorted = adventurersSorting(adventurers)
 
-            state.data = adventurersSorted
+            state.adventurers = adventurersSorted
 
         },
 
         //este caso setea la muerte llega un array con los heroes muertos y se compara con el estado el array de aventureros se comparan los id y enn caso de que el tipo sea pixeltile se setea la experioencia a 0 y en casa gma se setea el cooldown de muerto
         setDeath: (state, action: PayloadAction<Adventurer[]>) => {
     
-            const adventurers =  state.data.map ((adventurer ) =>{                            
+            const adventurers =  state.adventurers.map ((adventurer ) =>{                            
                 action.payload.forEach((deathAdventurerData) => {
                     if(deathAdventurerData.adventurerId == adventurer.adventurerId){
                         if(deathAdventurerData.collection == "pixel-tiles"){
@@ -184,7 +173,7 @@ const adventurers = createSlice({
             
             const adventurersSorted = adventurersSorting(adventurers)
 
-            state.data = adventurersSorted
+            state.adventurers = adventurersSorted
         },
 
         //este caso esta hecho para meter un placeholder en cuando se recluta un aventurero en el faucet
@@ -216,7 +205,7 @@ const adventurers = createSlice({
                 //metadata: {},
             }
 
-            state.data =  state.data.concat(recruiter)
+            state.adventurers =  state.adventurers.concat(recruiter)
 
         },
     },

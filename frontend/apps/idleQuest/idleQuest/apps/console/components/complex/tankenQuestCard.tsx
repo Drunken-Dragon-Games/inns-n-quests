@@ -2,14 +2,12 @@ import styled from "styled-components";
 import Image from "next/image"
 import { useState } from "react";
 import { Timmer } from "../basic_components";
-import { rolls, stamps } from "../../../../../settings";
 import { ConditionalRender, TextOswald } from "../../../../../../utils/components/basic_components";
 import { DragonSilverIconTakenQuest } from "../basic_components"
 import {  useGeneralDispatch } from "../../../../../../../features/hooks"
-import { setInProgressQuestSelected } from "../../../../features/interfaceNavigation";
-import { useIsQuestSelected } from "../../hooks";
 import { TakenQuest } from "../../../../../dsl/models";
 import { takenQuestStatus } from "../../../../../dsl";
+import { selectQuest } from "../../../availableQuest/features/quest-board";
 
 const Card = styled.div<{ onClick: any }>`
     width: 95%;
@@ -94,23 +92,22 @@ const StampWrapper = styled.div`
 
 
 
-interface inProgressCard {
-    takenQuest: TakenQuest
-    index: number
+interface TakenQuestCardProp {
+    takenQuest: TakenQuest,
+    selected: boolean
 }
 
 
-const TakeQuest = ({takenQuest: quest, index}: inProgressCard) => {
+const TakenQuestCard = ({takenQuest, selected}: TakenQuestCardProp) => {
 
     const [onHover, setOnHover] = useState<boolean>(false)
 
     const generalDispatch = useGeneralDispatch()
-    const selected = useIsQuestSelected(index)
-    const status = takenQuestStatus(quest)    
+    const status = takenQuestStatus(takenQuest)    
 
     return (
         <>
-            <Card onClick={selected ==false ? () => generalDispatch(setInProgressQuestSelected(index)) : null} onMouseOver={()=> setOnHover(true)} onMouseLeave={()=> setOnHover(false)}>
+            <Card onClick={selected ==false ? () => generalDispatch(selectQuest(takenQuest)) : null} onMouseOver={()=> setOnHover(true)} onMouseLeave={()=> setOnHover(false)}>
                 <LeftCornerWrapper>
                     <Image src= {selected || onHover ?"https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/selected_left_corner.png" : "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/unselected_left_corner.png"}  alt="corner detail" width={400} height={65} />
                 </LeftCornerWrapper>
@@ -133,13 +130,13 @@ const TakeQuest = ({takenQuest: quest, index}: inProgressCard) => {
 
                     <QuestDetails>
                         <Center>
-                            <Title finished={status == "finished"}>{quest.quest.name}</Title>
+                            <Title finished={status == "finished"}>{takenQuest.quest.name}</Title>
                             <Flex>
                                 <CenterFlex>
 
                                     <DragonSilverIconTakenQuest dragonSilverReward={0}/>
                 
-                                    <Timmer takenQuest={quest} />
+                                    <Timmer takenQuest={takenQuest} />
                     
                                 </CenterFlex>
                             </Flex>
@@ -157,4 +154,4 @@ const TakeQuest = ({takenQuest: quest, index}: inProgressCard) => {
     )
 }
 
-export default TakeQuest
+export default TakenQuestCard

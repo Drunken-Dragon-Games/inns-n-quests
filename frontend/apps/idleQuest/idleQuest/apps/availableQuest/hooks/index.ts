@@ -1,5 +1,4 @@
 export { default as useCloseProps } from "./useCloseProps"
-export { default as useIsOpenAvailableQuest }  from "./useIsOpenAvailableQuest"
 export { default as useGetAvailableQuestData } from "./useGetAvailableQuestData"
 export { default as useGetSucceedChance } from "./useGetSucceedChance"
 export { default as useGetAverageLevel } from "./useGetAverageLevel"

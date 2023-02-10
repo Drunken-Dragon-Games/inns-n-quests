@@ -50,7 +50,7 @@ const QuestButtonsContainer = () =>{
 
     const selectedPage = generalSelector.idleQuests.navigationConsole.page
 
-    const inProgressQuest = generalSelector.idleQuests.questsInProgress.data.inProgressQuest.quests
+    const inProgressQuest = generalSelector.idleQuests.questBoard.questBoard.takenQuests
 
     const questCompletedNumber = useGetQuestCompleted(inProgressQuest)
 

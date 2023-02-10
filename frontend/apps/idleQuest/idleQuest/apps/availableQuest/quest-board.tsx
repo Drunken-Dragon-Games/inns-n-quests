@@ -1,6 +1,6 @@
 import styled from "styled-components"
-import { CrispPixelArtImage, sequentially } from "../../../../utils"
-import { Adventurer, AvailableQuest } from "../../../dsl"
+import { CrispPixelArtImage } from "../../../../utils"
+import { Adventurer, AvailableQuest, SelectedQuest } from "../../../dsl"
 import { RefreshButton } from "./components/basic_components"
 import { AvailableQuestsArea, QuestCard, WorldMap } from "./components/complex"
 
@@ -38,10 +38,10 @@ const QuestBoardBackground = () =>
     </Background>
 
 interface QuestBoardProps {
-    selectedQuest?: AvailableQuest,
+    selectedQuest?: SelectedQuest,
     adventurerSlots: (Adventurer | null)[],
     availableQuests: AvailableQuest[],
-    onSignQuest: () => void,
+    onSignQuest: (quest: SelectedQuest) => void,
     onCloseQuest: () => void,
     onSelectQuest: (quest: AvailableQuest) => void,
     onFetchMoreQuests: () => void

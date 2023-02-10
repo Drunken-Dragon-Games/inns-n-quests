@@ -10,7 +10,7 @@ import { ConditionalRender } from "../../../../../utils/components/basic_compone
 import { useGeneralSelector } from "../../../../../../features/hooks"
 import {  selectGeneralReducer } from "../../../../../../features/generalReducer"
 import { useGeneralDispatch } from "../../../../../../features/hooks";
-import { PostClaimInProgressQuest } from "../../../apps/inProgressQuests/features/inProgressQuest";
+import { claimTakenQuest } from "../../../apps/inProgressQuests/features/inProgressQuest";
 import { TakenQuest, TakenQuestStatus } from "../../../../dsl/models";
 
 const PositionWrapper = styled.div`
@@ -204,8 +204,8 @@ const ProgressionQuest = () => { //{takenQuest}: ProgressionQuest) => {//{startT
     let questStateActual: "failed" | "succeeded" | "in_progress" | null = null
 
     if(index !== null){
-        isSuccessful = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests[index].state === "succeeded"
-        questStateActual = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests[index].state
+        isSuccessful = generalSelector.idleQuest.questBoard.questBoard.takenQuests[index].state === "succeeded"
+        questStateActual = generalSelector.idleQuest.questBoard.questBoard.takenQuests[index].state
     }
 
     const ClaimQuest = () =>{

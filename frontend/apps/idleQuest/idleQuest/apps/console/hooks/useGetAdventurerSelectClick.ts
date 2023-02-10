@@ -8,15 +8,15 @@ export default () => {
     const generalDispatch = useGeneralDispatch()
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     
-    const selectedAvailableQuest =  generalSelector.idleQuests.questBoard.data.questBoard.selectedAvailableQuest
+    const selectedAvailableQuest =  generalSelector.idleQuests.questBoard.questBoard.selectedQuest
 
-    const selAdventurer = ( adventurer: Adventurer, unSelect: boolean) =>{
+    const selAdventurer = ( adventurer: Adventurer, selected: boolean) =>{
 
         if(notEmpty(selectedAvailableQuest)){
-            if(!unSelect){
-                generalDispatch(selectAdventurer(adventurer))
-            } else {
+            if(selected){
                 generalDispatch(unselectAdventurer(adventurer))
+            } else {
+                generalDispatch(selectAdventurer(adventurer))
             }
         }
     }

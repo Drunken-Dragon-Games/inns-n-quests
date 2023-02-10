@@ -9,9 +9,10 @@ import { ConditionalRender } from "../../explorerOfThiolden/explorerOfThioldenPa
 import { useGeneralDispatch, useGeneralSelector } from "../../../features/hooks"
 import { selectGeneralReducer } from "../../../features/generalReducer"
 import { notEmpty } from "../../utils"
-import { clearAvailableQuests, getAvailableQuests, removeAvailableQuest, selectAvailableQuest, takeAvailableQuest, unselectAdventurer, unselectAvailableQuest } from "./apps/availableQuest/features/quest-board"
-import { Adventurer, AvailableQuest } from "../dsl"
+import { clearAvailableQuests, getAvailableQuests, removeAvailableQuest, selectQuest, takeAvailableQuest, unselectAdventurer, unselectQuest } from "./apps/availableQuest/features/quest-board"
+import { Adventurer, SelectedQuest } from "../dsl"
 import { useEffect } from "react"
+import { claimTakenQuest } from "./apps/inProgressQuests/features/inProgressQuest"
 
 const Relative = styled.section`
   position: relative;
@@ -37,20 +38,22 @@ const IdleQuestsApp = () => {
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const generalDispatch = useGeneralDispatch()    
     
-    const selectedAvailableQuest = generalSelector.idleQuests.questBoard.data.questBoard.selectedAvailableQuest
-    const adventurerSlots = generalSelector.idleQuests.questBoard.data.questBoard.adventurerSlots
-    const availableQuests = generalSelector.idleQuests.questBoard.data.questBoard.availableQuests
+    const selectedAvailableQuest = generalSelector.idleQuests.questBoard.questBoard.selectedQuest
+    const adventurerSlots = generalSelector.idleQuests.questBoard.questBoard.adventurerSlots
+    const availableQuests = generalSelector.idleQuests.questBoard.questBoard.availableQuests
 
-    const onSelectQuest = (quest: AvailableQuest) => 
-        generalDispatch(selectAvailableQuest(quest))
-    const onSignAvailableQuest = () => {
-        if (notEmpty(selectedAvailableQuest)) {
-            generalDispatch(takeAvailableQuest(selectedAvailableQuest.questId, adventurerSlots.filter(notEmpty)))
-            generalDispatch(removeAvailableQuest(selectedAvailableQuest))
+    const onSelectQuest = (quest: SelectedQuest) => 
+        generalDispatch(selectQuest(quest))
+    const onSignQuest = (quest: SelectedQuest) => {
+        if (quest.ctype == "available-quest") {
+            generalDispatch(takeAvailableQuest(quest.questId, adventurerSlots.filter(notEmpty)))
+            generalDispatch(removeAvailableQuest(quest))
+        } else {
+            generalDispatch(claimTakenQuest(quest))
         }
     }
     const onCloseAvailableQuest = () => 
-        generalDispatch(unselectAvailableQuest())
+        generalDispatch(unselectQuest())
     const onFetchMoreQuests = () => 
         generalDispatch(clearAvailableQuests())
     const onUnselectAdventurer = (adventurer: Adventurer) =>
@@ -77,13 +80,12 @@ const IdleQuestsApp = () => {
                     availableQuests={availableQuests}
                     selectedQuest={selectedAvailableQuest}
                     adventurerSlots={adventurerSlots}
-                    onSignQuest={onSignAvailableQuest}
+                    onSignQuest={onSignQuest}
                     onCloseQuest={onCloseAvailableQuest}
                     onSelectQuest={onSelectQuest}
                     onFetchMoreQuests={onFetchMoreQuests}
                     onUnselectAdventurer={onUnselectAdventurer}
                 />
-                <InProgressQuest />
             </Flex>
         </Relative>
         <ErrorHandler />
