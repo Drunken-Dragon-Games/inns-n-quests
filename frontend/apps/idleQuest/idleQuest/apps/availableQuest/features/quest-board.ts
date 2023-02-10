@@ -29,7 +29,7 @@ const [ setFetchGetAdventurersStatusIdle, setFetchGetAdventurersStatusPending, s
 export const addVisualQuestData = (quest: any) => {
     return ({
         ...quest,
-        stamp: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
+        seal: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
         paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
     })
 }

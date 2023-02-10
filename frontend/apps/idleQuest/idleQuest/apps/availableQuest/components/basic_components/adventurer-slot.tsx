@@ -3,6 +3,7 @@ import styled from "styled-components"
 import { CrispPixelArtImage, notEmpty } from "../../../../../../utils"
 import { Adventurer, EmojiName } from "../../../../../dsl"
 import { AdventurerSprite } from "../../../../utils/components/basic_component"
+import AdventurerCard from "../complex/adventurer-card"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
     height: 8vw;
@@ -19,6 +20,18 @@ const EmptySlotContainer = styled.div`
     position: absolute;
 `
 
+const EmptySlot = () =>
+    <EmptySlotContainer>
+        <CrispPixelArtImage
+            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/dropbox.png"
+            alt="adventurer slot in quest"
+            width={100}
+            height={100}
+            layout="responsive"
+        />
+    </EmptySlotContainer>
+
+/*
 const AdventurerWrapper = styled.div`
     display: flex;
     height: inherit;
@@ -38,17 +51,6 @@ const EmojiContainer = styled.div`
 const StyledAdventurerSprite = styled(AdventurerSprite)`
     margin-top: auto;
 `
-
-const EmptySlot = () =>
-    <EmptySlotContainer>
-        <CrispPixelArtImage
-            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/dropbox.png"
-            alt="adventurer slot in quest"
-            width={100}
-            height={100}
-            layout="responsive"
-        />
-    </EmptySlotContainer>
 
 const Emoji = ({ emoji }: { emoji?: EmojiName }) => {
     const image = (() => {
@@ -74,6 +76,7 @@ const Emoji = ({ emoji }: { emoji?: EmojiName }) => {
         </EmojiContainer>
     : <></>
 }
+*/
 
 interface AdventurerSlotProps {
     adventurer: Adventurer | null,
@@ -95,6 +98,13 @@ const AdventurerSlot = ({ adventurer, emoji, onUnselectAdventurer }: AdventurerS
         >
             <EmptySlot />
             {notEmpty(adventurer) ?
+                <AdventurerCard
+                    adventurer={adventurer}
+                    emoji={displayedEmoji}
+                    render={render}
+                    displayAPS={true}
+                />
+                /*
                 <AdventurerWrapper>
                     <Emoji emoji={displayedEmoji} />
                     <StyledAdventurerSprite
@@ -102,6 +112,7 @@ const AdventurerSlot = ({ adventurer, emoji, onUnselectAdventurer }: AdventurerS
                         render={render}
                     />
                 </AdventurerWrapper>
+                */
             : <></> }
         </AdventurerSlotContainer>
     )

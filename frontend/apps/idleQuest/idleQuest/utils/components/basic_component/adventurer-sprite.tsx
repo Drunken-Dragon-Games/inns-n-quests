@@ -3,7 +3,7 @@ import { useComputeHeightFromOriginalImage } from "../../../apps/console/hooks"
 import { Adventurer } from "../../../../dsl/models"
 import { CrispPixelArtImage } from "../../../../../utils"
 
-type SpriteRenderOptions = "normal" | "questing" | "selected" | "dead" | "hovered"
+export type SpriteRenderOptions = "normal" | "questing" | "selected" | "dead" | "hovered"
 
 const renderOptionsFilters = (render: SpriteRenderOptions) => {
     switch (render) {
