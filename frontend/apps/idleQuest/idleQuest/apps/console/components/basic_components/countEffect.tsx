@@ -1,4 +1,3 @@
-import { useEffectCounting } from "../../hooks";
 import styled from 'styled-components';
 import { TextElMessiri } from '../../../../../../utils/components/basic_components';
 
@@ -10,7 +9,8 @@ const DragonSilverTextWrapper = styled.div`
 const CountEffect = () => {
     
     //realiza el efecto de contador de dragon silver
-    const dragonSilver  = useEffectCounting(10, 15, 10)
+    //const dragonSilver  = useEffectCounting(10, 15, 10)
+    const dragonSilver = 10
    
     return (
         <>

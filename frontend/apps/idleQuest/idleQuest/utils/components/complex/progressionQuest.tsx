@@ -10,7 +10,7 @@ import { ConditionalRender } from "../../../../../utils/components/basic_compone
 import { useGeneralSelector } from "../../../../../../features/hooks"
 import {  selectGeneralReducer } from "../../../../../../features/generalReducer"
 import { useGeneralDispatch } from "../../../../../../features/hooks";
-import { claimTakenQuest } from "../../../apps/inProgressQuests/features/inProgressQuest";
+//import { claimTakenQuest } from "../../../apps/inProgressQuests/features/inProgressQuest";
 import { TakenQuest, TakenQuestStatus } from "../../../../dsl/models";
 
 const PositionWrapper = styled.div`

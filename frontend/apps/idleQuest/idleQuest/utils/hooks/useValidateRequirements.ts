@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { useGeneralSelector } from "../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../features/generalReducer"
-import { DataAdventurerType } from "../../../../../types/idleQuest"
+//import { Adventurer } from "../../../../../types/idleQuest"
 import { RequirementType, CharacterType } from "../../../../../types/idleQuest"
+import { Adventurer } from "../../../dsl"
 
 
 
@@ -26,9 +27,9 @@ export default (adventurerList: string [], requirements: RequirementType  ) => {
 
 
     //transforma una lista de ids de aventureros a una array con los aventurersos
-    const adventuresSelectedArray = (adventurerList: string [], allAdventurer: DataAdventurerType []) =>{
+    const adventuresSelectedArray = (adventurerList: string [], allAdventurer: Adventurer []) =>{
 
-        const adventurersArray = adventurerList.reduce((acc:DataAdventurerType [] , adventurerId: string) => {
+        const adventurersArray = adventurerList.reduce((acc:Adventurer [] , adventurerId: string) => {
             
             
             const newAdventurer = allAdventurer.filter( (adventurer) => adventurer.adventurerId == adventurerId)
@@ -83,7 +84,7 @@ export default (adventurerList: string [], requirements: RequirementType  ) => {
             
             const isTrue = requirementsKeys.reduce((acc: boolean [] , requirementKey: string) => {
                 
-                if(requirements.character![0][requirementKey as keyof CharacterType] == adventurer[requirementKey  as keyof DataAdventurerType]){
+                if(requirements.character![0][requirementKey as keyof CharacterType] == adventurer[requirementKey  as keyof Adventurer]){
 
                     return acc.concat(true)
                     
