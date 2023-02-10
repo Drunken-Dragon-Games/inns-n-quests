@@ -86,12 +86,11 @@ const StyledQuestLabelLevel = styled(QuestLabelLevel)`
     right: 1vw;
 `
 
-const  CornerRightDown = styled.div`
+const CornerRightDown = styled.div`
     position: absolute;
     right: 1vw;
     top: 33vw;
-    z-index: 0;
-
+    z-index: -1;
 `
 
 const Monster = () =>

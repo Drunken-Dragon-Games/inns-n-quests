@@ -6,25 +6,13 @@ import { Adventurer, EmojiName } from "../../../../../dsl"
 import { AdventurerSprite } from "../../../../utils/components/basic_component"
 import { SpriteRenderOptions } from "../../../../utils/components/basic_component/adventurer-sprite"
 
-const emojiMapping = (emoji?: EmojiName) => {
-    switch (emoji) {
-        case "over-confident": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/over_confident.webp"
-        case "confident": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/confident.webp"
-        case "insecure": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/insecure.webp"
-        case "fearful": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/fearful.webp"
-        case "panicking": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/panicking.webp"
-        case "terrified": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/terrified.webp"
-        default: return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/close_icon.png"
-    }
-}
-
 type ExperienceBarColor = "r" | "g" | "b"
 
 const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
     if (color == "r" && background) return "rgb(255, 150, 150)"
     if (color == "r" && !background) return "rgb(255, 80, 80)"
-    if (color == "g" && background) return "rgb(150, 255, 150)"
-    if (color == "g" && !background) return "rgb(80, 255, 80)"
+    if (color == "g" && background) return "rgb(200, 200, 200)"
+    if (color == "g" && !background) return "rgb(80, 180, 80)"
     if (color == "b" && background) return "rgb(150, 150, 255)"
     if (color == "b" && !background) return "rgb(80, 80, 255)"
 }
@@ -41,6 +29,13 @@ const NameTitle = styled.div<{ display: boolean }>`
     display: ${props => props.display ? "block" : "none"};
 `
 
+const APSWrapper = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+`
+
 const ExperienceAnimation = (experience: number) => keyframes`
     0% {width: 0%;}
     100% {width: ${experience}%;}
@@ -48,8 +43,9 @@ const ExperienceAnimation = (experience: number) => keyframes`
 
 const ExperienceBar = styled.div<{ display: boolean, color: ExperienceBarColor }>`
     margin-top: 0.1vh;
-    width: 100%;
-    height: 0.7vh;
+    flex: 1;
+    height: 1.2vh;
+    overflow: hidden;
     border-radius: 0vw 1vw 0vw 1vw;
     background-color: ${props => rgbMapping(props.color, true)}};
     display: ${props => props.display ? "block" : "none"};
@@ -61,6 +57,37 @@ const Experience = styled.div<{ experience: number, animate: boolean, color: Exp
     background-color: ${props => rgbMapping(props.color, false)};
     width: ${props => props.experience}%;
     animation: ${props => props.animate ? ExperienceAnimation(props.experience) : "none"} 2s;
+    position: relative;
+    filter: drop-shadow(0px 0px 0.2vh rgba(0, 0, 0, 0.5));
+    span {
+        filter: drop-shadow(0px 0px 0.2vh ${props => rgbMapping(props.color, false)});
+        font-family: Oswald;
+        position: absolute;
+        display: block;
+        padding: 0;
+        margin: -0.4vh 0 0 0.4vw;
+        font-size: 1.3vh;
+        font-weight: bold;
+        color: ${props => rgbMapping(props.color, true)};
+    }
+`
+
+const MedalWrapper = styled.div<{ display: boolean }>`
+    position: absolute;
+    background-color: #ca9a3a;
+    width: 2vw;
+    height: 2vw;
+    border-radius: 50%;
+    z-index: 3;
+    display: ${props => props.display ? "flex" : "none"};
+    justify-content: center;
+    align-items: center;
+`
+
+const Medal = styled.span`
+    color: white;
+    font-family: arial;
+    font-size: 0.9vw;
 `
 
 const AdventurerContainer = styled.div`
@@ -70,44 +97,8 @@ const AdventurerContainer = styled.div`
     width: inherit;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
 `
-
-const EnteringEmojiAnimation = keyframes`
-    0% {opacity: 0; margin-top: -1vh;}
-    100% {opacity: 1}
-`
-
-const LeavingEmojiAnimation = keyframes`
-    0% {opacity: 1;}
-    100% {opacity: 0; margin-top: -3vh;}
-`
-
-const EmojiContainer = styled.div<{ display: boolean }>`
-    position: absolute;
-    margin-top: -2vh;
-    z-index: 5;
-    width: 1.8vw;
-    height: 1.5vw;
-    opacity: ${props => props.display ? 1 : 0};
-    animation ${props => props.display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
-`
-
-const Emoji = ({ emoji }: { emoji?: EmojiName }) => {
-    const [lastEmoji, setLastEmoji] = useState<EmojiName | undefined>(undefined)
-    const renderEmoji = emoji ?? lastEmoji
-    useEffect(() => { if (emoji) setLastEmoji(emoji) }, [emoji])
-    return notEmpty(renderEmoji) ?
-        <EmojiContainer display={emoji !== undefined}>
-            <CrispPixelArtImage
-                src={emojiMapping(renderEmoji)}
-                alt="adventurer emoji bubble"
-                width={1.8}
-                height={1.5}
-                layout="responsive"
-            />
-        </EmojiContainer>
-    : <></>
-}
 
 const DeadMarkAnimation = keyframes`
     0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 
@@ -129,7 +120,16 @@ const DeadMark = styled.div <{ display: boolean }>`
 `
 
 const StyledAdventurerSprite = styled(AdventurerSprite)`
-    margin-top: auto;
+    position: absolute;
+`
+
+const AdventurerWrapper = styled.div`
+    width: 100%;
+    height: 1px;
+    display: flex;
+    margin-top: 9vh;
+    flex-direction: column;
+    align-items: center;
 `
 
 interface AdventurerProps {
@@ -139,7 +139,7 @@ interface AdventurerProps {
     displayDeadMark?: boolean,
     displayAPS?: boolean,
     animateAPS?: boolean,
-    experience?: number,
+    medalNumber?: number,
     displayNameColor?: string,
 }
 
@@ -148,13 +148,12 @@ const AdventurerCard = ({
     emoji, 
     render = "normal", 
     displayDeadMark = false, 
-    displayAPS: displayExperienceBar = false, 
-    animateAPS: animateExperienceBar = true, 
-    experience = 70,
+    displayAPS = false, 
+    animateAPS = true, 
+    medalNumber,
     displayNameColor// = "rgb(121, 51, 18)",
 }: AdventurerProps) =>
     <AdventurerContainer>
-        <Emoji emoji={emoji} />
 
         <DeadMark display={displayDeadMark} >
             <CrispPixelArtImage 
@@ -165,24 +164,39 @@ const AdventurerCard = ({
             />
         </DeadMark>
 
-        <StyledAdventurerSprite
-            adventurer={adventurer}
-            render={render}
-        />
+        <MedalWrapper display={medalNumber !== undefined}>
+            <Medal>{medalNumber}</Medal>
+        </MedalWrapper>
 
-        <InfoWrapper> 
+        <AdventurerWrapper>
+            <StyledAdventurerSprite
+                adventurer={adventurer}
+                render={render}
+                emoji={emoji}
+            />
+        </AdventurerWrapper>
+
+        <InfoWrapper>
             <NameTitle display={displayNameColor !== undefined}>
                 <TextOswald fontsize={0.8} color={displayNameColor ?? "white"}>{adventurer.name}</TextOswald>
             </NameTitle>
-            <ExperienceBar display={displayExperienceBar} color="r" key="ath">
-                <Experience experience={adventurer.athleticism * 100 / 10} animate={animateExperienceBar} color="r" />
-            </ExperienceBar>
-            <ExperienceBar display={displayExperienceBar} color="b" key="int">
-                <Experience experience={adventurer.intellect * 100 / 10} animate={animateExperienceBar} color="b"/>
-            </ExperienceBar>
-            <ExperienceBar display={displayExperienceBar} color="g" key="cha">
-                <Experience experience={adventurer.charisma * 100 / 10} animate={animateExperienceBar} color="g"/>
-            </ExperienceBar>
+            <APSWrapper>
+                <ExperienceBar display={displayAPS} color="r" key="ath">
+                    <Experience experience={adventurer.athleticism * 100 / 10} animate={animateAPS} color="r">
+                        <span>{adventurer.athleticism}</span>
+                    </Experience>
+                </ExperienceBar>
+                <ExperienceBar display={displayAPS} color="b" key="int">
+                    <Experience experience={adventurer.intellect * 100 / 10} animate={animateAPS} color="b">
+                        <span>{adventurer.intellect}</span>
+                    </Experience>
+                </ExperienceBar>
+                <ExperienceBar display={displayAPS} color="g" key="cha">
+                    <Experience experience={adventurer.charisma * 100 / 10} animate={animateAPS} color="g">
+                        <span>{adventurer.charisma}</span>
+                    </Experience>
+                </ExperienceBar>
+            </APSWrapper>
         </InfoWrapper>
 
     </AdventurerContainer>

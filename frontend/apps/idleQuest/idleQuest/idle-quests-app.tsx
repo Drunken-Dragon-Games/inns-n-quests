@@ -7,10 +7,10 @@ import { Loading } from "../../utils/components/basic_components"
 import { ConditionalRender } from "../../explorerOfThiolden/explorerOfThioldenPage/components/basic_components"
 import { useGeneralDispatch, useGeneralSelector } from "../../../features/hooks"
 import { selectGeneralReducer } from "../../../features/generalReducer"
-import { clearAvailableQuests, getAvailableQuests, removeAvailableQuest, selectQuest, takeAvailableQuest, unselectAdventurer, unselectQuest } from "./apps/availableQuest/features/quest-board"
+import { clearAvailableQuests, getAdventurers, getAvailableQuests, removeAvailableQuest, selectAdventurer, selectQuest, takeAvailableQuest, unselectAdventurer, unselectQuest } from "./apps/availableQuest/features/quest-board"
 import { Adventurer, SelectedQuest } from "../dsl"
 import { useEffect } from "react"
-import { claimTakenQuest } from "./apps/inProgressQuests/features/inProgressQuest"
+import { claimTakenQuest, getInProgressQuests } from "./apps/inProgressQuests/features/inProgressQuest"
 
 const Relative = styled.section`
   position: relative;
@@ -36,6 +36,7 @@ const IdleQuestsApp = () => {
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const generalDispatch = useGeneralDispatch()    
     
+    const adventurers = generalSelector.idleQuests.questBoard.questBoard.inventory
     const selectedAvailableQuest = generalSelector.idleQuests.questBoard.questBoard.selectedQuest
     const adventurerSlots = generalSelector.idleQuests.questBoard.questBoard.adventurerSlots
     const availableQuests = generalSelector.idleQuests.questBoard.questBoard.availableQuests
@@ -56,6 +57,8 @@ const IdleQuestsApp = () => {
         generalDispatch(clearAvailableQuests())
     const onUnselectAdventurer = (adventurer: Adventurer) =>
         generalDispatch(unselectAdventurer(adventurer))
+    const onSelectAdventurer = (adventurer: Adventurer) => 
+        generalDispatch(selectAdventurer(adventurer))
     
     // Ensures there is always at least 5 quests available
     useEffect(()=>{
@@ -63,6 +66,10 @@ const IdleQuestsApp = () => {
             generalDispatch(getAvailableQuests())
         }
     },[availableQuests.length])
+    useEffect(()=>{
+        generalDispatch(getAdventurers())
+        generalDispatch(getInProgressQuests())
+    },[])
     
     return(<>
         <ConditionalRender condition={loading}>
@@ -73,7 +80,12 @@ const IdleQuestsApp = () => {
 
         <Relative>
             <Flex>
-                <Console />
+                <Console 
+                    adventurers={adventurers} 
+                    adventurerSlots={adventurerSlots}
+                    onAdventurerClick={onSelectAdventurer}
+                    availableQuestOpen={selectedAvailableQuest != null && selectedAvailableQuest.ctype == "available-quest"}
+                />
                 <QuestBoard
                     availableQuests={availableQuests}
                     selectedQuest={selectedAvailableQuest}

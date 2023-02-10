@@ -3,20 +3,19 @@ import { AdventuresMapping, InProgressQuestMapping } from "."
 import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { useGetAdventurers, useGetQuestsInProgress } from "../../hooks"
+import { Adventurer } from "../../../../../dsl"
 
 interface PagesProps {
-
+    adventurers: Adventurer[],
+    adventurerSlots: (Adventurer | null)[],
+    onAdventurerClick: (adventurer: Adventurer) => void
 }
 
-const Pages = () => {
+const Pages = ({ adventurers, adventurerSlots, onAdventurerClick }: PagesProps) => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     const page = generalSelector.idleQuests.navigationConsole.page
-
-    useGetAdventurers()
-
-    useGetQuestsInProgress()
 
     return(<>
     

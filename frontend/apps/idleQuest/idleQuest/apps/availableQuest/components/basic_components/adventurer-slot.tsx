@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import styled from "styled-components"
 import { CrispPixelArtImage, notEmpty } from "../../../../../../utils"
 import { Adventurer, EmojiName } from "../../../../../dsl"
@@ -79,40 +79,33 @@ const Emoji = ({ emoji }: { emoji?: EmojiName }) => {
 */
 
 interface AdventurerSlotProps {
+    className?: string,
     adventurer: Adventurer | null,
     emoji?: EmojiName,
     onUnselectAdventurer?: (adventurer: Adventurer) => void
 }
 
-const AdventurerSlot = ({ adventurer, emoji, onUnselectAdventurer }: AdventurerSlotProps) => {
+const AdventurerSlot = ({ className, adventurer, emoji, onUnselectAdventurer }: AdventurerSlotProps) => {
     const [hovering, setHovering] = useState<boolean>(false)
-    const interactuable = notEmpty(onUnselectAdventurer)
+    const interactuable = notEmpty(onUnselectAdventurer) && notEmpty(adventurer)
     const displayedEmoji = interactuable && hovering ? "cross" : emoji
-    const render = "hovered"//interactuable && hovering ? "hovered" : "normal"
+    const render = interactuable && hovering ? "hovered" : "normal"
     return (
         <AdventurerSlotContainer
+            className={className}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
-            onClick={() => notEmpty(onUnselectAdventurer) ? onUnselectAdventurer(adventurer!) : null}
+            onClick={() => interactuable ? onUnselectAdventurer(adventurer) : null}
             interactuable={interactuable}
         >
             <EmptySlot />
-            {notEmpty(adventurer) ?
+            {interactuable ?
                 <AdventurerCard
                     adventurer={adventurer}
                     emoji={displayedEmoji}
                     render={render}
                     displayAPS={true}
                 />
-                /*
-                <AdventurerWrapper>
-                    <Emoji emoji={displayedEmoji} />
-                    <StyledAdventurerSprite
-                        adventurer={adventurer}
-                        render={render}
-                    />
-                </AdventurerWrapper>
-                */
             : <></> }
         </AdventurerSlotContainer>
     )

@@ -174,7 +174,14 @@ const questBoardState = createSlice({
 
         selectAdventurer: (state, action: PayloadAction<Adventurer>) => {
             const indexNull = state.adventurerSlots.indexOf(null)
-            if (indexNull === -1) 
+            const indexAdventurer = state.adventurerSlots
+                .map(a => a ? a.adventurerId : a)
+                .indexOf(action.payload.adventurerId)
+            const alreadySelected = indexAdventurer !== -1
+            const partyFull = indexNull === -1
+            if (alreadySelected)
+                state.adventurerSlots[indexAdventurer] = null
+            else if (partyFull) 
                 state.adventurerSlots[0] = action.payload
             else 
                 state.adventurerSlots[indexNull] = action.payload
