@@ -45,8 +45,9 @@ export function takenQuestStatus(takenQuest: TakenQuest): TakenQuestStatus {
 }
 
 export function takenQuestSecondsLeft(takenQuest: TakenQuest): number {
-    const nowSeconds = Date.now() / 1000
-    return new Date(takenQuest.createdAt).getSeconds() + takenQuest.quest.duration - nowSeconds
+    const nowSeconds = Math.round(Date.now() / 1000)
+    const createdOn = Math.round(new Date(takenQuest.createdAt).getTime() / 1000)
+    return createdOn + takenQuest.quest.duration - nowSeconds
 }
 
 export function takenQuestTimeLeft(takenQuest: TakenQuest): string {
