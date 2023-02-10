@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
-import { getAdventurers } from "../../availableQuest/features/quest-board"
+import { getAdventurers } from "../../availableQuest/quest-board-state"
 
 export default (timeLeft: number) =>{
 

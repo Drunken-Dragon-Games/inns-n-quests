@@ -1,5 +1,4 @@
 import { QuestRequirement} from "../basic_component"
-import { useGetRequirementText } from "../../../apps/availableQuest/hooks"
 import { ConditionalRender } from "../../../../../utils/components/basic_components"
 import { RequirementType, CharacterType } from "../../../../../../types/idleQuest"
 
@@ -12,8 +11,6 @@ interface questRequirementsSection{
 
 const QuestRequirementsSection = ({requirements, adventuresSelected} : questRequirementsSection) =>{
     
-    const text = useGetRequirementText(requirements)
-
     //si el objeto esta vacio no renderiza nada 
     if(Object.keys(requirements).length == 0){
         return <></>
@@ -35,7 +32,7 @@ const QuestRequirementsSection = ({requirements, adventuresSelected} : questRequ
                     data={requirements}
                     adventuresSelected={adventuresSelected}    
                 >
-                    {text}
+                    {"some requirement text"}
                 </QuestRequirement>
             </ConditionalRender>
 

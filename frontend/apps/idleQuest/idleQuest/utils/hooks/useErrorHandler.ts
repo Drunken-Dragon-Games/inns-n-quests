@@ -23,10 +23,10 @@ export default () =>{
     const takeAvailableQuestStatus = generalSelector.idleQuests.questBoard.status.takeAvailableQuestStatus.status
     const takeAvailableQuestError = generalSelector.idleQuests.questBoard.status.takeAvailableQuestStatus.error
 
-    const claimRewardInProgressQuestStatus = generalSelector.idleQuests.questsInProgress.Status.claimReward.status
-    const claimRewardInProgressQuestError = generalSelector.idleQuests.questsInProgress.Status.claimReward.error
-    const getInProgressQuestStatus = generalSelector.idleQuests.questsInProgress.Status.inProgress.status
-    const getInProgressQuestError = generalSelector.idleQuests.questsInProgress.Status.inProgress.error
+    const claimRewardInProgressQuestStatus = generalSelector.idleQuests.questBoard.status.claimReward.status
+    const claimRewardInProgressQuestError = generalSelector.idleQuests.questBoard.status.claimReward.error
+    const getInProgressQuestStatus = generalSelector.idleQuests.questBoard.status.inProgress.status
+    const getInProgressQuestError = generalSelector.idleQuests.questBoard.status.inProgress.error
 
     const dragonSilverToClaim = generalSelector.idleQuests.player.status.dragonSilverToClaim.status
     const dragonSilverToClaimError = generalSelector.idleQuests.player.status.dragonSilverToClaim.error

@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
-import { getInProgressQuests } from "../../inProgressQuests/features/inProgressQuest"
+import { getInProgressQuests } from "../../availableQuest/quest-board-state"
 
 type questStatus = "failed" | "succeeded" | "in_progress" | null
 

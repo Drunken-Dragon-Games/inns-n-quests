@@ -9,7 +9,7 @@ import { SpriteRenderOptions } from "../../../../utils/components/basic_componen
 type ExperienceBarColor = "r" | "g" | "b"
 
 const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
-    if (color == "r" && background) return "rgb(255, 150, 150)"
+    if (color == "r" && background) return "rgb(255, 170, 170)"
     if (color == "r" && !background) return "rgb(255, 80, 80)"
     if (color == "g" && background) return "rgb(200, 200, 200)"
     if (color == "g" && !background) return "rgb(80, 180, 80)"

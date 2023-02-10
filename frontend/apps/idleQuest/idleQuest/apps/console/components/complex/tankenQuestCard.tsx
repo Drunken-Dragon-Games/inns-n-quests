@@ -7,7 +7,7 @@ import { DragonSilverIconTakenQuest } from "../basic_components"
 import {  useGeneralDispatch } from "../../../../../../../features/hooks"
 import { TakenQuest } from "../../../../../dsl/models";
 import { takenQuestStatus } from "../../../../../dsl";
-import { selectQuest } from "../../../availableQuest/features/quest-board";
+import { selectQuest } from "../../../availableQuest/quest-board-state";
 
 const Card = styled.div<{ onClick: any }>`
     width: 95%;

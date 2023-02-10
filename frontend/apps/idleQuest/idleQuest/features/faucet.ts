@@ -3,7 +3,7 @@ import { createSliceStatus, actionsGenerator } from '../../../utils/features/uti
 import { GeneralReducerThunk } from '../../../../features/generalReducer';
 import { axiosCustomInstance } from '../../../../axios/axiosApi';
 import { AxiosError } from 'axios';
-import { getAdventurers } from '../apps/availableQuest/features/quest-board';
+import { getAdventurers } from '../apps/availableQuest/quest-board-state';
 
 export const fetchMintTest = (): GeneralReducerThunk => async (dispatch) =>{
 

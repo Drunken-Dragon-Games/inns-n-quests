@@ -21,6 +21,8 @@ const BackShadow = styled.section<{ open: boolean }>`
 
 const CardContainer = styled.div`
     position: relative;
+    display: flex;
+    flex-direction: column;
     left: -10vw;
     width: 38vw;
     height: 43.4vw;
@@ -79,7 +81,7 @@ const AdventurersWrapper = styled.div`
     width: 100%;
     display: flex;
     padding: 0vw 1vw;
-    margin-top: 1vw;
+    margin-top: auto;
 `
 
 const StyledQuestLabelLevel = styled(QuestLabelLevel)`
@@ -91,6 +93,11 @@ const CornerRightDown = styled.div`
     right: 1vw;
     top: 33vw;
     z-index: -1;
+`
+
+const Footer = styled.div`
+    width: 100%;
+    height: 6vw;
 `
 
 const Monster = () =>
@@ -139,9 +146,11 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
                 <StyledSuccessChance percentage={0} />
                 <Monster />
 
+                {/*
                 <ProgressionWrapper>
                     <ProgressionQuest />
                 </ProgressionWrapper>
+                */}
 
                 <AdventurersWrapper>
                     {adventurerSlots.map((adventurer, index) => 
@@ -152,14 +161,17 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
                         />
                     )} 
                 </AdventurersWrapper>
-                <CornerRightDown>
-                    <Seals seal={questSeal(quest)} />
-                </CornerRightDown>
 
-                <Signature 
-                    signatureType={signatureType} 
-                    onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest, adventurerSlots.filter(notEmpty))} 
-                />
+                <Footer>
+                    <CornerRightDown>
+                        <Seals seal={questSeal(quest)} />
+                    </CornerRightDown>
+
+                    <Signature
+                        signatureType={signatureType}
+                        onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest, adventurerSlots.filter(notEmpty))}
+                    />
+                </Footer>
             </CardContainer>
             : <></>}
     </BackShadow>

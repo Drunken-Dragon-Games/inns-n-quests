@@ -1,105 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'; 
-import { combineReducers, compose } from "redux";
-import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
-import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
-import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
-import { AxiosError } from "axios"
-import { fetchRefreshToken } from '../../../../../../features/refresh';
-import { Adventurer, AvailableQuest, sealTypes, SelectedQuest, tagAvailableQuest, TakenQuest } from '../../../../dsl';
-import { simpleHash } from '../../../../../utils';
-
-export const getAdventurers = () : GeneralReducerThunk => async (dispatch) =>{
-    dispatch(setFetchGetAdventurersStatusPending())
-    try {  
-        //fetch para obeter a los aventureros
-        const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
-        dispatch(setInventory(response.data))  
-        dispatch(setFetchGetAdventurersStatusFulfilled())
-    } catch (err: unknown) {
-        if(err instanceof AxiosError ){
-            dispatch(setFetchGetAdventurersStatusErrors(err.response))
-            dispatch(fetchRefreshToken( () => dispatch(getAdventurers()), err))
-        }
-    }
-}
-
-const  fetchGetAdventurersStatus  = createSliceStatus("fetchGetAdventurersStatus")
-const [ setFetchGetAdventurersStatusIdle, setFetchGetAdventurersStatusPending, setFetchGetAdventurersStatusFulfilled, setFetchGetAdventurersStatusErrors ] = actionsGenerator(fetchGetAdventurersStatus.actions)
-
-export const addVisualQuestData = (quest: any) => {
-    return ({
-        ...quest,
-        seal: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
-        paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
-    })
-}
-
-export const getAvailableQuests = (firstTime? : boolean): GeneralReducerThunk => async (dispatch) =>{
-    dispatch(setFetchGetAvailableQuestStatusPending())
-    try { 
-        const response = await axiosCustomInstance('/quests/api/quests').get('/quests/api/quests')
-        const availableQuests = response.data
-            .map(compose(addVisualQuestData, tagAvailableQuest))
-        dispatch(setFetchGetAvailableQuestStatusFulfilled())
-        dispatch(addAvailableQuests(availableQuests))
-    } catch (err: unknown) {
-        
-        if(err instanceof AxiosError ){
-            dispatch(setFetchGetAvailableQuestStatusErrors(err.response))
-            dispatch(fetchRefreshToken( () => dispatch(getAvailableQuests(firstTime)), err))
-        }
-    }
-}
-
-//reducer para monitorear el estado del request para los available quest 
-
-const  fetchGetAvailableQuestStatus  = createSliceStatus("fetchGetAvailableQuestStatus")
-const [ setFetchGetAvailableQuestStatusIdle, setFetchGetAvailableQuestStatusPending, setFetchGetAvailableQuestStatusFulfilled, setFetchGetAvailableQuestStatusErrors ] = actionsGenerator(fetchGetAvailableQuestStatus.actions)
-
-
-//fetch para tomar a los available quests
-
-export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventurer[]): GeneralReducerThunk  => async (dispatch) =>{
-
-    dispatch(setFetchTakeAvailableQuestStatusPending())  
-
-    try {  
-
-        const adventurer_ids = adventurers.map(adventurer => adventurer.adventurerId)
-        //fetch para aceptar el quest
-        const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: quest.questId, adventurer_ids})
-
-        // se agrega a los ques in progress
-        dispatch(addTakenQuests([response.data]))
-            
-        //se agrega a los aventureros en el quest la propiedad de in_quest
-        dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: true }))
-
-        //deseleciona al available quest
-        dispatch(unselectQuest())
-
-        // dispatch(setQuestTakenId(questUiidFront))
-            
-        dispatch(setFetchTakeAvailableQuestStatusFulfilled())
-
-        //dispatch(setTakenId(questId))
-                    
-    } catch (err: unknown) {
-
-        if(err instanceof AxiosError ){
-            dispatch(setFetchTakeAvailableQuestStatusErrors(err.response))
-            dispatch(fetchRefreshToken(() => dispatch(takeAvailableQuest(quest, adventurers)), err))
-        }
-    }
-
-}
-
-//reducer para monitorear el estado del request para los available quest 
-
-const  fetchTakeAvailableQuestStatus  = createSliceStatus("fetchTakeAvailableQuestStatus")
-
-const [ setFetchTakeAvailableQuestStatusIdle, setFetchTakeAvailableQuestStatusPending, setFetchTakeAvailableQuestStatusFulfilled, setFetchTakeAvailableQuestStatusErrors ] = actionsGenerator(fetchTakeAvailableQuestStatus.actions)
-
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { combineReducers } from "redux";
+import { Adventurer, AvailableQuest, SelectedQuest, TakenQuest } from '../../../dsl';
+import { fetchGetAdventurersStatus, fetchGetAvailableQuestStatus, fetchGetInProgressQuestStatus, fetchPostClaimRewardInProgressQuestStatus, fetchTakeAvailableQuestStatus } from "./quest-board-thunks"
 
 const sortAdventurers = (adventurers: Adventurer[]) => {
     return adventurers.sort((a, b) => {
@@ -239,6 +141,8 @@ export const questBoardGeneralReducer = combineReducers({
         getAvailableQuestStatus: fetchGetAvailableQuestStatus.reducer,
         takeAvailableQuestStatus: fetchTakeAvailableQuestStatus.reducer,
         getAdventurersStatus: fetchGetAdventurersStatus.reducer,
+        inProgress: fetchGetInProgressQuestStatus.reducer,
+        claimReward: fetchPostClaimRewardInProgressQuestStatus.reducer
     })   
 })
 

@@ -10,7 +10,7 @@ export default (): boolean => {
 
     const getAdventurersStatus = generalSelector.idleQuests.questBoard.status.getAdventurersStatus.status
     const getAvailableQuestStatus = generalSelector.idleQuests.questBoard.status.getAvailableQuestStatus.status
-    const getInProgressQuestStatus = generalSelector.idleQuests.questsInProgress.Status.inProgress.status
+    const getInProgressQuestStatus = generalSelector.idleQuests.questBoard.status.inProgress.status
 
     useEffect(()=>{
 

@@ -7,11 +7,10 @@ import { Loading } from "../../utils/components/basic_components"
 import { ConditionalRender } from "../../explorerOfThiolden/explorerOfThioldenPage/components/basic_components"
 import { useGeneralDispatch, useGeneralSelector } from "../../../features/hooks"
 import { selectGeneralReducer } from "../../../features/generalReducer"
-import { clearAvailableQuests, getAdventurers, getAvailableQuests, removeAvailableQuest, selectAdventurer, selectQuest, takeAvailableQuest, unselectAdventurer, unselectQuest } from "./apps/availableQuest/features/quest-board"
 import { Adventurer, SelectedQuest } from "../dsl"
 import { useEffect } from "react"
-import { claimTakenQuest, getInProgressQuests } from "./apps/inProgressQuests/features/inProgressQuest"
-import { notEmpty } from "../../utils"
+import { selectQuest, removeAvailableQuest, unselectQuest, clearAvailableQuests, unselectAdventurer, selectAdventurer } from "./apps/availableQuest/quest-board-state"
+import { takeAvailableQuest, claimTakenQuest, getAvailableQuests, getAdventurers, getInProgressQuests } from "./apps/availableQuest/quest-board-thunks"
 
 const Relative = styled.section`
   position: relative;

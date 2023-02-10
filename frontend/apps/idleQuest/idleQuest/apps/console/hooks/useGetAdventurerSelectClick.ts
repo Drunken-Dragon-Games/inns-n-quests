@@ -1,6 +1,6 @@
 import { useGeneralDispatch, useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
-import { selectAdventurer, unselectAdventurer } from "../../availableQuest/features/quest-board"
+import { selectAdventurer, unselectAdventurer } from "../../availableQuest/quest-board-state"
 import { notEmpty } from "../../../../../utils"
 import { Adventurer } from "../../../../dsl"
 
