@@ -2,7 +2,7 @@ import styled from "styled-components"
 import { useState } from "react"
 import Image from "next/image"
 import { useGeneralDispatch } from "../../../../../../../features/hooks"
-import { fetchMintTest } from "../../../../features/faucet"
+import { fetchMintTest } from "../../../availableQuest/faucet"
 
 const AdventuresButtonWrapper = styled.div`
     width: 100%;

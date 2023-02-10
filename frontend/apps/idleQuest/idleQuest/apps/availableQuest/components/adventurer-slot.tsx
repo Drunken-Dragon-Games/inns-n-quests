@@ -1,8 +1,8 @@
 import styled from "styled-components"
 import { useState } from "react"
-import { CrispPixelArtImage, notEmpty } from "../../../../../../utils"
-import { Adventurer, EmojiName } from "../../../../../dsl"
-import AdventurerCard from "../complex/adventurer-card"
+import { CrispPixelArtImage, notEmpty } from "../../../../../utils"
+import { Adventurer, EmojiName } from "../../../../dsl"
+import AdventurerCard from "./adventurer-card"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
     height: 8vw;

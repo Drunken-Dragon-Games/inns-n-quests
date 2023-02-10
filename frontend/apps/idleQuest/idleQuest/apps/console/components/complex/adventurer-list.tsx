@@ -6,7 +6,7 @@ import { useIsScroll } from "../../hooks"
 import { cardano_network } from "../../../../../../../setting"
 import { Adventurer, SelectedQuest } from "../../../../../dsl";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
-import AdventurerCard from "../../../availableQuest/components/complex/adventurer-card";
+import AdventurerCard from "../../../availableQuest/components/adventurer-card";
 import { notEmpty } from "../../../../../../utils";
 
 const AdventurerListContainer = styled.div`

@@ -1,9 +1,9 @@
-import { PropStamp } from "../basic_components"
+import { PropStamp } from "."
 import Image from 'next/image'
-import { AvailableQuest } from "../../../../../dsl"
+import { AvailableQuest } from "../../../../dsl"
 import styled, { css } from "styled-components"
 import { useState } from "react"
-import { CrispPixelArtCss, CrispPixelArtImage } from "../../../../../../utils"
+import { CrispPixelArtCss, CrispPixelArtImage } from "../../../../../utils"
 
 const Area = styled.div`
     display: flex;

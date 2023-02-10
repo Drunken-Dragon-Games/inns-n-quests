@@ -1,9 +1,8 @@
-
-import { createSliceStatus, actionsGenerator } from '../../../utils/features/utils'; 
-import { GeneralReducerThunk } from '../../../../features/generalReducer';
-import { axiosCustomInstance } from '../../../../axios/axiosApi';
+import { createSliceStatus, actionsGenerator } from '../../../../utils/features/utils'; 
+import { axiosCustomInstance } from '../../../../../axios/axiosApi';
 import { AxiosError } from 'axios';
-import { getAdventurers } from '../apps/availableQuest/quest-board-state';
+import { getAdventurers } from './quest-board-thunks';
+import { GeneralReducerThunk } from '../../../../../features/generalReducer';
 
 export const fetchMintTest = (): GeneralReducerThunk => async (dispatch) =>{
 
@@ -34,4 +33,3 @@ export const fetchMintTest = (): GeneralReducerThunk => async (dispatch) =>{
 const  fetchAddressPostStatus  = createSliceStatus("fetchAddressPostStatus")
 
 const [ setFetchAddressPostStatusIdle, setFetchAddressPostStatusPending, setFetchAddressPostStatusFulfilled, setFetchAddressPostStatusErrors ] = actionsGenerator(fetchAddressPostStatus.actions)
-

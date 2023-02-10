@@ -1,9 +1,9 @@
 import styled from "styled-components"
-import { CrispPixelArtBackground, CrispPixelArtImage, notEmpty } from "../../../../../../utils"
-import { Adventurer, questDescription, questName, questSeal, SelectedQuest, takenQuestSecondsLeft } from "../../../../../dsl"
-import { QuestLabelLevel, Seals, Signature, SuccessChance } from "../../../../utils/components/basic_component"
-import { ProgressionQuest } from "../../../../utils/components/complex"
-import { AdventurerSlot } from "../basic_components"
+import { CrispPixelArtBackground, CrispPixelArtImage, notEmpty } from "../../../../../utils"
+import { Adventurer, questDescription, questName, questSeal, SelectedQuest, takenQuestSecondsLeft } from "../../../../dsl"
+import { QuestLabelLevel, Seals, Signature, SuccessChance } from "../../../utils/components/basic_component"
+import { ProgressionQuest } from "../../../utils/components/complex"
+import { AdventurerSlot } from "."
 
 const BackShadow = styled.section<{ open: boolean }>`
     position: absolute;

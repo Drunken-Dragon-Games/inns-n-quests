@@ -1,6 +1,4 @@
 import styled from "styled-components";
-import { useGetTimeLeft } from "../../hooks"
-import { useTimmerOverQuestInProgress } from "../../hooks"
 import Image from "next/image";
 import { TextOswald } from "../../../../../../utils/components/basic_components";
 import { TakenQuest, takenQuestTimeLeft } from "../../../../../dsl";

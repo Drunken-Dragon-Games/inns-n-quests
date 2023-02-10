@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react"
 import styled, { keyframes } from "styled-components"
-import { CrispPixelArtImage, notEmpty } from "../../../../../../utils"
-import { TextOswald } from "../../../../../../utils/components/basic_components"
-import { Adventurer, EmojiName } from "../../../../../dsl"
-import { AdventurerSprite } from "../../../../utils/components/basic_component"
-import { SpriteRenderOptions } from "../../../../utils/components/basic_component/adventurer-sprite"
+import { CrispPixelArtImage } from "../../../../../utils"
+import { TextOswald } from "../../../../../utils/components/basic_components"
+import { Adventurer, EmojiName } from "../../../../dsl"
+import { AdventurerSprite } from "../../../utils/components/basic_component"
+import { SpriteRenderOptions } from "../../../utils/components/basic_component/adventurer-sprite"
 
 type ExperienceBarColor = "r" | "g" | "b"
 

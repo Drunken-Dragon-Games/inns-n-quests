@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import Image from "next/image"
-import { SealType } from "../../../../../dsl"
+import { SealType } from "../../../../dsl"
 
 const SealWrapperKingsPlea = styled.div`
     position: absolute;

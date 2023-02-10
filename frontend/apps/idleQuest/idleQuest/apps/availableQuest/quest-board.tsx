@@ -1,8 +1,8 @@
 import styled from "styled-components"
 import { CrispPixelArtImage } from "../../../../utils"
 import { Adventurer, AvailableQuest, SelectedQuest } from "../../../dsl"
-import { RefreshButton } from "./components/basic_components"
-import { AvailableQuestsArea, QuestCard, WorldMap } from "./components/complex"
+import { RefreshButton } from "./components"
+import { AvailableQuestsArea, QuestCard, WorldMap } from "./components"
 
 const QuestBoardContainer = styled.div`
     width: 85%;

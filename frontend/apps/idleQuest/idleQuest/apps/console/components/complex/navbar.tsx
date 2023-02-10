@@ -6,7 +6,6 @@ import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { useGetDragonSilver } from "../../hooks";
 
-
 const Flex = styled.div`
     display: flex;
     padding: 0.8vw 1vw;
