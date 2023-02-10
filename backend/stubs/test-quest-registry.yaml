@@ -1,19 +1,196 @@
 
 questId: "quest-1"
-name: "Quest 1"
+name: "Lost in the woods"
 location: "Auristar"
-description: "This is the description fd quest 1"
+description: "Thelas has become seperated from Aki and Arin in the deep undergrowth of the dense Thiolden forest. You stumble across a tavern and require 2 hunters to track them down."
 requirements: 
-  classes: 
-  - "fighter"
-  - "paladin"
   aps: [10, 20, 15]
 
 ---
 
 questId: "quest-2"
-name: "Quest 2"
+name: "The Best in the West"
 location: "Auristar"
-description: "This is the description fd quest 2"
+description: "Thiolden is holding its annual fighting championships over this week and you must enter your best fighter to try and win the tournament!"
 requirements: 
-  aps: [20, 30, 10]
+  aps: [6, 5, 1]
+
+---
+
+questId: "quest-3"
+name: "Marlanye's Honeymead"
+location: "Auristar"
+description: "Marlanye requires the best ingredients for her famous Honeymead. Travel the Thiolden plains and collect 10 vials of the sweetest honey."
+requirements: 
+  aps: [10, 10, 10]
+
+---
+
+questId: "quest-4"
+name: "The Drunken Dragon Adventure - Part 1"
+location: "Auristar"
+description: "Terrorhertz & Vimtyr set off to protect the people of Thiolden. Gather your supplies and get ready to begin this epic tale of two friends."
+requirements: 
+  aps: [21, 30, 10]
+
+---
+
+questId: "quest-5"
+name: "The Lost Treasure of the Mountain King"
+location: "Auristar"
+description: "The Mountain King's treasure has been lost for centuries. Filgrald, Runesmith of Nilflys, heard rumors of its location. You must navigate treacherous terrain and battle fierce creatures to find the treasure and claim it as your own."
+requirements: 
+  aps: [27, 31, 44]
+
+---
+
+questId: "quest-6"
+name: "The Witch's Curse"
+location: "Auristar"
+description: "A powerful witch, Mare the Soul Treasurer, has placed a curse on the nearby village, causing crops to fail, animals to sicken, and villagers to disappear, all for her pleasure of collecting souls, well, to befriend them, of course, and gain their knowledge. You must journey to her lair, deep in the Kullmyr region, and defeat her to lift the curse."
+requirements: 
+  aps: [10, 2, 66]
+
+---
+
+questId: "quest-7"
+name: "The Dragon's Hoard"
+location: "Auristar"
+description: "A dragon has taken up residence in an ancient ruin, hoarding treasure and terrorizing the nearby countryside. You must brave the dragon's flames and claim its treasure."
+requirements: 
+  aps: [40, 10, 5]
+
+---
+
+questId: "quest-8"
+name: "The Lost City of Gold"
+location: "Auristar"
+description: "The lost city of Kull'landen is said to be hidden deep in the Kullmyr jungle, filled with gold and riches beyond imagination. Navigating through dangerous terrain and fending off wild beasts are the least of your concerns as you'll be facing hostile horde of undead to find the city and claim its treasures."
+requirements: 
+  aps: [11, 30, 9]
+
+---
+
+questId: "quest-9"
+name: "The Siege of the Auristar"
+location: "Auristar"
+description: "Tyr, Spearhead of the Seven Lights of Auristar, and his Seven Lights guides and guards the capital. You, having sold your soul to the Kullmyr, now, must lead or rather "misguide" a team of adventurers and siege the capital, facing off against deadly "enemies" and powerful magic to disrupt its peace."
+requirements: 
+  aps: [40, 50, 12]
+
+---
+
+questId: "quest-11"
+name: "Syonirs Search"
+location: "Auristar"
+description: "Syonir, the Soul Harvester requires a junior Warlock to gather some souls to assist in his next major conjuration. Travel to the land of the undead and return with 15 undead souls."
+requirements: 
+  aps: [10, 20, 15]
+
+---
+
+questId: "quest-12"
+name: "Bodica's Bounty"
+location: "Auristar"
+description: "Bodica wants you to head into Nurmyr land and purge any outsiders, even those just travelling through, in an effort to cleanse the forest of any unwanted visitors. "
+requirements: 
+  aps: [6, 5, 1]
+
+---
+
+questId: "quest-13"
+name: "The Betrayal of the Council"
+location: "Auristar"
+description: "You have been a member of the Council of the Elronidas for years, but have grown tired of their politics and inefficiencies. Gather a team of powerful allies and launch a surprise attack on the council chambers during a meeting, wiping out the members and taking control of the council as the new leaders."
+requirements: 
+  aps: [10, 10, 10]
+
+---
+
+questId: "quest-14"
+name: "The Fall of the Third Light"
+location: "Auristar"
+description: "Adaross, The Third Light of Auristar, better known as "The Tide of the Night" who serve alongside Tyr, Spearhead of the Seven Lights of Auristar, is getting old and weak, and the time is ripe for taking. Gather a team of rogue, and infiltrate Auristar, taking out Adaross to absorb his knowledge and strength."
+requirements: 
+  aps: [21, 30, 10]
+
+---
+
+questId: "quest-15"
+name: "The Rise of the Necromancer's Apprentice"
+location: "Auristar"
+description: "You have been studying aether for years, and are now ready to take your rightful place as a disciple of Dethiol, The Crucible of Souls. Gather an army and march on the nearest city, use your magic and taking control of the city as your own. Collect aether, by any means neccessary."
+requirements: 
+  aps: [27, 31, 44]
+
+---
+
+questId: "quest-16"
+name: "The Tavern Crawl"
+location: "Auristar"
+description: "You have heard of a legendary tavern crawl that takes you through the most famous taverns in the land, sampling the best food and drink, and meeting the most interesting characters. You must embark on this journey, visiting a minimum of 10 taverns (or drop by Winterbeard's Sigil the very least) and completing various challenges and tasks along the way."
+requirements: 
+  aps: [10, 2, 66]
+
+---
+
+questId: "quest-17"
+name: "The Tavern Master"
+location: "Auristar"
+description: "You have set your sights on becoming the most renowned tavern owner in the land, and to do so, you must visit different taverns, learn their secrets and gain their support. You have to visit at least 10 taverns and complete various challenges, like winning a drinking contest, or solving a riddle, to gain their support."
+requirements: 
+  aps: [40, 10, 5]
+
+---
+
+questId: "quest-18"
+name: "The Smithing Quest"
+location: "Auristar"
+description: "Filgrald, Runesmith of Nilflys, is in need of materials to smelt Iron Ingots. He tasks you with collecting 3 Iron ores. You will have to navigate to the nearby mines to collect the materials."
+requirements: 
+  aps: [11, 30, 9]
+
+---
+
+questId: "quest-19"
+name: ""
+location: "Auristar"
+description: ""
+requirements: 
+  aps: [40, 50, 12]
+
+---
+
+questId: "quest-21"
+name: "The Alchemist Quest"
+location: "Auristar"
+description: "Haakon, Voice of the Seven Lights of Auristar, is in need of materials to create healing potions. He tasks you with collecting 3 herbs. You will have to navigate to the nearby forest to collect the materials."
+requirements: 
+  aps: [10, 20, 15]
+
+---
+
+questId: "quest-22"
+name: "The Woodcutting Quest"
+location: "Auristar"
+description: "Hilana, Carpenter of Nilheim, is in need of wood for his crafting. She tasks you with collecting 10 logs from the nearby forest."
+requirements: 
+  aps: [6, 5, 1]
+
+---
+
+questId: "quest-23"
+name: "The Mining Quest"
+location: "Auristar"
+description: "Filgrald, Runesmith of Nilflys, is in need of gems for his crafting. He tasks you with collecting 3 gems from the nearby mine."
+requirements: 
+  aps: [10, 10, 10]
+
+---
+
+questId: "quest-24"
+name: "Assisting Lars"
+location: "Auristar"
+description: "Lars Brunjes needs your help! You're required  to share your magic to help ad power to his Orb. Send your strongest magic casting GMA to assist!"
+requirements: 
+  aps: [21, 30, 10]
