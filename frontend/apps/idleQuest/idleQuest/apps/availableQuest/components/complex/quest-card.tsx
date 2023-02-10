@@ -1,15 +1,9 @@
-import styled from "styled-components";
-import Image from 'next/image'
-import { QuestLabelLevel, 
-        RescalingMonster, 
-        Seals, 
-        SuccessChance,
-        Signature } from "../../../../utils/components/basic_component";
-import { QuestRequirementsSection, ProgressionQuest } from "../../../../utils/components/complex";
-import { AdventurerSlot } from "../basic_components";
-import { Adventurer, AvailableQuest } from "../../../../../dsl";
-import { CrispPixelArtBackground, CrispPixelArtImage, notEmpty } from "../../../../../../utils";
-import { adventurer } from "../../../../dummy_data";
+import styled from "styled-components"
+import { CrispPixelArtBackground, CrispPixelArtImage, notEmpty } from "../../../../../../utils"
+import { Adventurer, AvailableQuest } from "../../../../../dsl"
+import { QuestLabelLevel, Seals, Signature, SuccessChance } from "../../../../utils/components/basic_component"
+import { ProgressionQuest } from "../../../../utils/components/complex"
+import { AdventurerSlot } from "../basic_components"
 
 const BackShadow = styled.section<{ open: boolean }>`
     position: absolute;
@@ -49,10 +43,6 @@ const Title = styled.h2`
     white-space: nowrap;
 `
 
-const Flex = styled.div`
-    display: flex;
-`
-
 const Details = styled.p`
     margin-top: 2vw;
     width: 65%;
@@ -90,18 +80,6 @@ const AdventurersWrapper = styled.div`
     display: flex;
     padding: 0vw 1vw;
     margin-top: 1vw;
-`
-
-const TitleSection = styled.div`
-    display: flex;
-    position: relative;
-`
-
-const QuestRequirementsSectionPosition = styled.div`
-    position: absolute;
-    left: 22vw;
-    top: 1.5vw;
-
 `
 
 const StyledQuestLabelLevel = styled(QuestLabelLevel)`
@@ -171,7 +149,10 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
                     <Seals seal={quest.stamp} />
                 </CornerRightDown>
 
-                <Signature questType="available" onClick={onSign} />
+                <Signature 
+                    signatureType={ adventurerSlots.filter(notEmpty).length > 0 ? "available" : "available-no-adventurers" } 
+                    onClick={onSign} 
+                />
             </CardContainer>
             : <></>}
     </BackShadow>

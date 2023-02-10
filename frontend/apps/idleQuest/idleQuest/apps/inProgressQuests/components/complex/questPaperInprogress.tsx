@@ -274,7 +274,7 @@ const QuestPaperInProgress = () => {
                                         </CornerRightDown>
                                     </Flex>
                                     <Signature 
-                                        questType={status == "in-progress" ? "in-progress" : "finished" } 
+                                        signatureType={status == "in-progress" ? "in-progress" : "finished" } 
                                         onClick={ () => generalDispatch(PostClaimInProgressQuest(inProgressQuestData)) }/>
                                 </Card>
                             </CardWrapper>
