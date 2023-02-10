@@ -26,9 +26,9 @@ export default ():LocalAvailableQuest  =>{
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
-    const questNumber = generalSelector.idleQuest.navigator.availableQuest.availableQuest
+    const questNumber = generalSelector.idleQuests.navigator.availableQuest.availableQuest
     
-    const quests = generalSelector.idleQuest.questAvailable.data.quest.shownQuest
+    const quests = generalSelector.idleQuests.questBoard.data.questBoard.shownQuest
 
     const [questData, setQuestData] = useState<LocalAvailableQuest>(placeHolder)
 

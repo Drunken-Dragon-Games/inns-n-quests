@@ -6,9 +6,10 @@ import { QuestLabelLevel,
         SuccessChance,
         Signature } from "../../../../utils/components/basic_component";
 import { QuestRequirementsSection, ProgressionQuest } from "../../../../utils/components/complex";
-import { DropBox } from "../basic_components";
-import { AvailableQuest } from "../../../../../dsl";
+import { AdventurerSlot } from "../basic_components";
+import { Adventurer, AvailableQuest } from "../../../../../dsl";
 import { CrispPixelArtBackground, CrispPixelArtImage, notEmpty } from "../../../../../../utils";
+import { adventurer } from "../../../../dummy_data";
 
 const BackShadow = styled.section<{ open: boolean }>`
     position: absolute;
@@ -65,7 +66,7 @@ const Details = styled.p`
     font-weight: 100;
 `
 
-const Monster = styled.div`
+const MonsterContainer = styled.div`
     width: 9vw;
     height: 14vw;
     position: absolute;
@@ -84,12 +85,11 @@ const ProgressionWrapper = styled.div`
     margin: 4vw 0vw 1vw 0vw;
 `
 
-const Adventurer = styled.div`
+const AdventurersWrapper = styled.div`
+    width: 100%;
     display: flex;
     padding: 0vw 1vw;
     margin-top: 1vw;
-    width: 100%;
-    z-index: 2;
 `
 
 const TitleSection = styled.div`
@@ -116,15 +116,25 @@ const  CornerRightDown = styled.div`
 
 `
 
+const Monster = () =>
+    <MonsterContainer>
+        <CrispPixelArtImage
+            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg"
+            alt="quest monster"
+            layout="fill"
+        />
+    </MonsterContainer>
+
 interface QuestPaperAvailableProps {
     className?: string,
     quest?: AvailableQuest
-    selectedAdventurers: string[],
+    adventurerSlots: (Adventurer | null)[],
     onSign?: () => void,
     onClose?: () => void,
+    onUnselectAdventurer?: (adventurer: Adventurer) => void,
 }
 
-const QuestCard = ({ className, quest, selectedAdventurers, onSign, onClose }: QuestPaperAvailableProps) =>
+const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnselectAdventurer }: QuestPaperAvailableProps) =>
     <BackShadow 
         onClick={(e) => { if (e.target === e.currentTarget && onClose) onClose() }} 
         open={quest !== undefined} 
@@ -141,31 +151,24 @@ const QuestCard = ({ className, quest, selectedAdventurers, onSign, onClose }: Q
                 <StyledQuestLabelLevel>1</StyledQuestLabelLevel>
                 <Title>{quest.name}</Title>
                 <Details dangerouslySetInnerHTML={{ __html: quest.description }} />
-                <Monster>
-                    <CrispPixelArtImage
-                        src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg"
-                        alt="quest monster"
-                        layout="fill"
-                    />
-                </Monster>
                 <StyledSuccessChance percentage={0} />
+                <Monster />
 
                 <ProgressionWrapper>
                     <ProgressionQuest />
                 </ProgressionWrapper>
 
-                <Adventurer>
-                    {Array(quest.slots).fill(('') as any).map((el, index) => {
-                        return <DropBox
-                            key={index}
-                            index={index}
-                            questLevel={1}
-                            id={selectedAdventurers[index]}
+                <AdventurersWrapper>
+                    {adventurerSlots.map((adventurer, index) => 
+                        <AdventurerSlot 
+                            key={"adventurer-slot-"+index} 
+                            adventurer={adventurer}
+                            onUnselectAdventurer={onUnselectAdventurer}
                         />
-                    })}
-                </Adventurer>
+                    )} 
+                </AdventurersWrapper>
                 <CornerRightDown>
-                    <Seals seal="kings_plea" />
+                    <Seals seal={quest.stamp} />
                 </CornerRightDown>
 
                 <Signature questType="available" onClick={onSign} />

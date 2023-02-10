@@ -90,8 +90,8 @@ export default class AdventurerFun {
 
         const adventurerClass = (adventurer: AdventurerCreationData): AdventurerClass => {
             switch (adventurer.collection) {
-                case "pixel-tiles": return this.metadataRegistry.pixelTilesGameMetadata[adventurer.assetRef].class as AdventurerClass
-                case "grandmaster-adventurers": return this.metadataRegistry.gmasMetadata[adventurer.assetRef].class as AdventurerClass
+                case "pixel-tiles": return this.metadataRegistry.pixelTilesGameMetadata[adventurer.assetRef].class.toLowerCase() as AdventurerClass
+                case "grandmaster-adventurers": return this.metadataRegistry.gmasMetadata[adventurer.assetRef].class.toLowerCase() as AdventurerClass
                 case "adventurers-of-thiolden":
                     const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
                     const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv

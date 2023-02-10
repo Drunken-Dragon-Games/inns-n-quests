@@ -1,35 +1,27 @@
 import { useGeneralDispatch, useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
 import { selectAdventurer, unselectAdventurer } from "../../availableQuest/features/quest-board"
+import { notEmpty } from "../../../../../utils"
+import { Adventurer } from "../../../../dsl"
 
 export default () => {
     const generalDispatch = useGeneralDispatch()
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     
-    const isQuestSelected =  generalSelector.idleQuest.navigator.availableQuest.availableQuest !== undefined
+    const selectedAvailableQuest =  generalSelector.idleQuests.questBoard.data.questBoard.selectedAvailableQuest
 
-    const selAdventurer = ( id: string , unSelect: boolean) =>{
+    const selAdventurer = ( adventurer: Adventurer, unSelect: boolean) =>{
 
-        if(isQuestSelected){
+        if(notEmpty(selectedAvailableQuest)){
             if(!unSelect){
-                let maxLength = getSlotsNumber()
-                if(maxLength)
-                    generalDispatch(selectAdventurer({id, maxLength }))
+                generalDispatch(selectAdventurer(adventurer))
             } else {
-                generalDispatch(unselectAdventurer(id))
+                generalDispatch(unselectAdventurer(adventurer))
             }
         }
     }
 
-
-    const getSlotsNumber = () => {
-        const questNumber = generalSelector.idleQuest.navigator.availableQuest.availableQuest
-        if(questNumber != null)
-            return questNumber.slots
-    }
-
-    return {selAdventurer, isQuestSelected }
-    
+    return {selAdventurer, isQuestSelected: notEmpty(selectedAvailableQuest) }
 }
 
 

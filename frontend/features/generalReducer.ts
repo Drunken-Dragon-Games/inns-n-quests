@@ -9,7 +9,7 @@ import { ProfileDataReducer } from "../apps/accountSettings/accountSettings/feat
 import { refreshReducer } from "./refresh";
 import { logoutReducer } from "../apps/accountSettings/accountSettings/features/logout";
 import { exploreOfThioldenReducer } from "../apps/explorerOfThiolden/explorerOfThioldenPage/features/explorerOfThiolden";
-import { idleQuest } from "../apps/idleQuest/idleQuest/features/idelQuest";
+import { idleQuests } from "../apps/idleQuest/idleQuest/features/idelQuest";
 
 export const generalReducer = combineReducers({
     userDataNavBar: userInfoReducer,
@@ -21,7 +21,7 @@ export const generalReducer = combineReducers({
     refresh: refreshReducer,
     logout: logoutReducer,
     exploreOfThioldenReducer: exploreOfThioldenReducer,
-    idleQuest: idleQuest
+    idleQuests: idleQuests
 })
 
 

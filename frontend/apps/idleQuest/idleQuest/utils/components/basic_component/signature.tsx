@@ -4,6 +4,7 @@ import { useGeneralSelector } from "../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../features/generalReducer"
 import { useState } from "react"
 import { ConditionalRender } from "../../../../../utils/components/basic_components"
+import { notEmpty } from "../../../../../utils"
 
 interface SignatureWrapper {
     notClickable?: boolean
@@ -59,7 +60,7 @@ const Signature = ({questType, onClick}: Signature) => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const [ onHover,setOnHover ] = useState<boolean>(false)   
-    const numberAdventurers = generalSelector.idleQuest.questAvailable.data.selectAdventurer.selectAdventurer.length
+    const numberAdventurers = generalSelector.idleQuests.questBoard.data.questBoard.adventurerSlots.filter(notEmpty).length
     
     if(questType == "available" && numberAdventurers > 0)
         return(

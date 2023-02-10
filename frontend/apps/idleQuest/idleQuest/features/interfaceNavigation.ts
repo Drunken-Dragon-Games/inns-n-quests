@@ -4,6 +4,7 @@ import { AvailableQuest } from '../../dsl';
 
 //reducer para controlar la navegacion de los quest available
 
+/*
 interface initialStateAvailableQuestSelected{
     availableQuest?: AvailableQuest 
 }
@@ -28,6 +29,7 @@ const availableQuestSelected = createSlice({
 });
 
 export const { setAvailableQuestSelected, setAvailableQuestUnselect } = availableQuestSelected.actions
+*/
 
 interface initialStateInProgressQuestSelected{
     inProgressQuest: null | number
@@ -55,6 +57,6 @@ export const { setInProgressQuestSelected, setInProgressQuestUnselect } = inProg
 
 
 export const navigatorAppReducer = combineReducers({
-    availableQuest: availableQuestSelected.reducer,
+    //availableQuest: availableQuestSelected.reducer,
     inProgress: inProgressQuestSelected.reducer
 })

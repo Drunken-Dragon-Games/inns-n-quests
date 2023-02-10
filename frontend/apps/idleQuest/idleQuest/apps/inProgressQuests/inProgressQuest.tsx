@@ -20,8 +20,8 @@ const ShadowWrapperAnimation = styled.section<{ display: boolean }>`
 
 const InProgressQuest = (): JSX.Element => {
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-    const pageSelected = generalSelector.idleQuest.navigationConsole.page
-    const inProgressQuest = generalSelector.idleQuest.navigator.inProgress.inProgressQuest
+    const pageSelected = generalSelector.idleQuests.navigationConsole.page
+    const inProgressQuest = generalSelector.idleQuests.navigator.inProgress.inProgressQuest
     return(
         <ShadowWrapperAnimation display= {pageSelected == "in_progress"}>
             <ConditionalRender condition={inProgressQuest != null}>

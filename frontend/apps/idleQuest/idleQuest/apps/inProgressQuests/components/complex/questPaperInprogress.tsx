@@ -192,11 +192,11 @@ const QuestPaperInProgress = () => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
-    const isClaimedData = generalSelector.idleQuest.questsInProgress.data.claimReward
+    const isClaimedData = generalSelector.idleQuests.questsInProgress.data.claimReward
 
-    const questClaimStatus = generalSelector.idleQuest.questsInProgress.Status.claimReward.status
+    const questClaimStatus = generalSelector.idleQuests.questsInProgress.Status.claimReward.status
 
-    const adventurerData = generalSelector.idleQuest.adventurers.data.data
+    const adventurerData = generalSelector.idleQuests.adventurers.data.data
         .filter(adventurer => adventurersIds.indexOf(adventurer.adventurerId) !== -1)
 
     const status = takenQuestStatus(inProgressQuestData)

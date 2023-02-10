@@ -8,7 +8,7 @@ import { useIsScroll } from "../../hooks"
 import { cardano_network } from "../../../../../../../setting"
 import { ConditionalRender } from '../../../../../../utils/components/basic_components';
 import { AdventuresCard } from "."
-import { DataAdventurerType } from "../../../../../../../types/idleQuest";
+import { Adventurer } from "../../../../../dsl";
 
 const AdventuresMappingWrapper = styled.div`
 
@@ -79,9 +79,9 @@ const AdventureMappingElement = () =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     
     const scrolling = useRef<HTMLDivElement | null>(null)
-    const numberOfAdventurer = generalSelector.idleQuest.adventurers.data.data.length
-    const adventurers = generalSelector.idleQuest.adventurers.data.data
-    const selectedAdventurer = generalSelector.idleQuest.questAvailable.data.selectAdventurer.selectAdventurer
+    const numberOfAdventurer = generalSelector.idleQuests.adventurers.data.data.length
+    const adventurers = generalSelector.idleQuests.adventurers.data.data
+    const selectedAdventurer = generalSelector.idleQuests.questBoard.data.questBoard.adventurerSlots
     
     
     const renderArrows =  useIsScroll(scrolling, numberOfAdventurer)
@@ -100,9 +100,9 @@ const AdventureMappingElement = () =>{
             <AdventuresMapping ref={scrolling}>
 
                 <ConditionalRender condition = {adventurers !== undefined}>
-                    { adventurers.map((elOriginal: DataAdventurerType) => {                    
+                    { adventurers.map((elOriginal: Adventurer) => {                    
                         let selectedInQuest = false
-                        selectedAdventurer.forEach((elSelected : string | null) =>  elOriginal.adventurerId ==  elSelected ? selectedInQuest = true : null )
+                        selectedAdventurer.forEach((elSelected : Adventurer | null) =>  elOriginal.adventurerId ==  elSelected?.adventurerId ? selectedInQuest = true : null )
                         return  <AdventuresCard data={elOriginal} key={elOriginal.adventurerId} selectedInQuest ={selectedInQuest}/>
                     })}
                   

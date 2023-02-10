@@ -1,4 +1,4 @@
-export { default as RescalingImg } from "./rescalingImg"
+export { default as AdventurerSprite } from "./adventurer-sprite"
 export { default as Feelings } from "./feeling"
 export { default as QuestLabelLevel } from "./quest-label-level"
 export { default as PixelCheckbox } from "./pixelCheckbox"

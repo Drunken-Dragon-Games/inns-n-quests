@@ -89,8 +89,8 @@ const InProgressQuest = () =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     const scrolling = useRef<HTMLDivElement | null>(null)
-    const numberOfQuests = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests.length
-    const quests = generalSelector.idleQuest.questsInProgress.data.inProgressQuest.quests  
+    const numberOfQuests = generalSelector.idleQuests.questsInProgress.data.inProgressQuest.quests.length
+    const quests = generalSelector.idleQuests.questsInProgress.data.inProgressQuest.quests  
     
     const renderArrows =  useIsScroll(scrolling, numberOfQuests)
 

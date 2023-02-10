@@ -8,7 +8,7 @@ const Pages = () : JSX.Element => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
-    const page = generalSelector.idleQuest.navigationConsole.page
+    const page = generalSelector.idleQuests.navigationConsole.page
 
     useGetAdventurers()
 

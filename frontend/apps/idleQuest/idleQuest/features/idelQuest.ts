@@ -6,11 +6,11 @@ import { inProgressGeneralReducer } from "../apps/inProgressQuests/features/inPr
 import { availableQuestGeneralReducer } from "../apps/availableQuest/features/quest-board";
 import { navigatorAppReducer } from "./interfaceNavigation";
 
-export const idleQuest = combineReducers({
+export const idleQuests = combineReducers({
     adventurers: adventurersGeneralReducer,
     player: playerReducer,
     navigationConsole: navigationConsoleReducer,
     questsInProgress: inProgressGeneralReducer,
-    questAvailable : availableQuestGeneralReducer,
+    questBoard : availableQuestGeneralReducer,
     navigator: navigatorAppReducer
 })

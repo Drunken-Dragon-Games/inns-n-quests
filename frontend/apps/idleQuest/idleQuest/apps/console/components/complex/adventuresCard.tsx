@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import { ExperienceBar, Level, CooldownDeathTimmer, DeathCooldownIcon, PositionMedal } from "../basic_components";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
-import { RescalingImg } from "../../../../utils/components/basic_component";
+import { AdventurerSprite } from "../../../../utils/components/basic_component";
 import { useGetAdventurerSelectClick, useGetPositionMedal } from "../../hooks";
-import { DataAdventurerType } from "../../../../../../../types/idleQuest";
+import { Adventurer } from "../../../../../dsl";
 
 
 interface AdventuresCardWrapperType{
@@ -95,7 +95,7 @@ const PositionMedalPosition = styled.div`
 `
 
 interface IProps_AdventuresCard{
-    data: DataAdventurerType
+    data: Adventurer
     selectedInQuest?: boolean
     
 }
@@ -109,13 +109,18 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
     const { selAdventurer, isQuestSelected } = useGetAdventurerSelectClick()
 
     const position = useGetPositionMedal(data.adventurerId)
+    const render
+        = data.hp == 0 && data.collection !== "grandmaster-adventurers" ? "dead" 
+        : data.inChallenge ? "questing"
+        : selectedInQuest ? "selected"
+        : "normal"
 
     return(
     <>
         
         {/* <AdventuresCardWrapper ref ={data.in_quest == false  && selectedInQuest == false && (data.metadata.is_alive == true || data.metadata.is_alive == undefined) ? drag : null}> */}
         <AdventuresCardWrapper 
-            onClick={() =>  data.metadata.dead_cooldown ? null : selAdventurer(data.adventurerId, selectedInQuest!)}
+            onClick={() =>  data.hp > 0 ? selAdventurer(data, selectedInQuest!) : null}
             isSelectable = {isQuestSelected}
         >
             <Margin>
@@ -123,12 +128,9 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
                 <ImageWrapper>
                     <Center>
                         <div>
-                            <RescalingImg  
-                                src= {data.sprite}  
-                                inQuest={data.inChallenge} 
-                                selectedInQuest = {selectedInQuest} 
-                                is_alive ={data.collection == "grandmaster-adventurers" ? data.hp > 0 : null }
-                                collection={data.collection}
+                            <AdventurerSprite  
+                                adventurer={data}  
+                                render={render}
                             />
                         </div>
                     </Center>
@@ -141,17 +143,17 @@ const AdventuresCard = ({data, selectedInQuest}:IProps_AdventuresCard ) =>{
                             {data.name}
                         </AdventuresName>
                 
-                        <ExperienceBar experience={data.experience} />
+                        <ExperienceBar experience={0} />
                         
                         <FlexLevelAndCoolDown>
 
                             <LevelPosition>
-                                <Level experience={data.experience}/>
+                                <Level experience={0}/>
                             </LevelPosition>
                             
                             <ConditionalRender condition={data.collection == "grandmaster-adventurers" && data.hp == 0 }>
                                 <CoolDownWrapper>
-                                    <CooldownDeathTimmer coolDownTime={data.metadata.dead_cooldown!} />
+                                    <CooldownDeathTimmer coolDownTime={0} />
                                 </CoolDownWrapper>
                             </ConditionalRender>
                         </FlexLevelAndCoolDown>

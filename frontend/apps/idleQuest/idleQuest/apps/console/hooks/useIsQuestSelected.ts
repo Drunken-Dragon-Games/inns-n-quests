@@ -6,7 +6,7 @@ export default (index: number): boolean=>{
     const [selected, setSelected] = useState<boolean>(false)
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-    const inProgressQuestSelected = generalSelector.idleQuest.navigator.inProgress.inProgressQuest
+    const inProgressQuestSelected = generalSelector.idleQuests.navigator.inProgress.inProgressQuest
 
     useEffect(() => {
         

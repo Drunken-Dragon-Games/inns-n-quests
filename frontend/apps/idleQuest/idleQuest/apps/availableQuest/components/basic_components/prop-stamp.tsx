@@ -1,5 +1,6 @@
 import styled from "styled-components"
 import Image from "next/image"
+import { SealType } from "../../../../../dsl"
 
 const SealWrapperKingsPlea = styled.div`
     position: absolute;
@@ -50,12 +51,8 @@ const SealWrapperTownsfolk = styled.div`
     image-rendering: crisp-edges;  
 `
 
-interface PropStamp {
-    rarity: "kings_plea" | "heroic_quest" | "valiant_adventure" | "townsfolk"
-}
-
-export default ({ rarity }: PropStamp) => {
-    if (rarity == "kings_plea")
+export default ({ rarity }: { rarity: SealType }) => {
+    if (rarity == "kings-plea")
         return (
             <SealWrapperKingsPlea>
                 <Image
@@ -67,7 +64,7 @@ export default ({ rarity }: PropStamp) => {
                 />
             </SealWrapperKingsPlea>
         )
-    else if (rarity == "heroic_quest")
+    else if (rarity == "heroic-quest")
         return (
             <SealWrapperHeroicQuest>
                 <Image
@@ -78,7 +75,7 @@ export default ({ rarity }: PropStamp) => {
                     layout="responsive" />
             </SealWrapperHeroicQuest>
         )
-    else if (rarity == "valiant_adventure")
+    else if (rarity == "valiant-adventure")
         return (
             <SealWrapperValiantAdventure>
                 <Image

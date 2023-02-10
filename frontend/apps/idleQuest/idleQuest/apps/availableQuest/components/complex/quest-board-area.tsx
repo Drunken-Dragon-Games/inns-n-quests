@@ -51,7 +51,8 @@ const PaperBackgroundHoverCommon = css<{ hovering: boolean }>`
     opacity: ${props => props.hovering ? 1 : 0};
     transition: opacity 0.3s;
     outline:none;
-    box-shadow:0 0 10px yellow;
+    filter: drop-shadow(0px 0px 10px yellow);
+    -webkit-filter: drop-shadow(0px 0px 10px yellow);
     ${CrispPixelArtCss}
 `
 const PaperBackgroundHover1 = styled.div<{hovering: boolean}>`
@@ -103,8 +104,8 @@ interface QuestBoardAreaProps {
 
 const QuestBoardArea = ({ className, availableQuests, onQuestClick }: QuestBoardAreaProps) => {
 
-    const QuestPreviewCard = ({ quest, index }: { quest: AvailableQuest, index: number }) => {
-        const questStyle = index % 4 + 1
+    const QuestPreviewCard = ({ quest }: { quest: AvailableQuest }) => {
+        const questStyle = quest.paper
         const [hovering, setHovering] = useState(false)
         const PaperBackgroundHover = [PaperBackgroundHover1, PaperBackgroundHover2, PaperBackgroundHover3, PaperBackgroundHover4][questStyle-1]!
         return (
@@ -131,14 +132,14 @@ const QuestBoardArea = ({ className, availableQuests, onQuestClick }: QuestBoard
                         layout="fill"
                     />
                 </MonsterWrapper>
-                <PropStamp rarity="kings_plea" />
+                <PropStamp rarity={quest.stamp} />
             </QuestPreviewCardContainer>
         )
     }
 
     return (
         <Area className={className}>
-            {availableQuests.slice(0, 5).map((quest: AvailableQuest, index: number) => <QuestPreviewCard quest={quest} index={index} key={"quest-"+index} />)}
+            {availableQuests.slice(0, 5).map((quest: AvailableQuest, index: number) => <QuestPreviewCard quest={quest} key={"quest-"+index} />)}
         </Area>
     )
 }

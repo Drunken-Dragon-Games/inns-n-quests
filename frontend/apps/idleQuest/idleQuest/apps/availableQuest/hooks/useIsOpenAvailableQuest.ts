@@ -12,8 +12,8 @@ export default ( clickInRef: any, avoidRef: any): boolean =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const generalDispatch = useGeneralDispatch()
 
-    const numberOfQuestOpen = generalSelector.idleQuest.navigator.availableQuest.availableQuest
-    const pageSelector = generalSelector.idleQuest.navigationConsole.page
+    const numberOfQuestOpen = generalSelector.idleQuests.navigator.availableQuest.availableQuest
+    const pageSelector = generalSelector.idleQuests.navigationConsole.page
 
     const escapePress = useKeyPress("Escape");
 

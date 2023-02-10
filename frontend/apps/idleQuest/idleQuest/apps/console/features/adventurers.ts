@@ -5,7 +5,6 @@ import { createSliceStatus, actionsGenerator } from "../../../../../utils/featur
 import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from 'axios';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
-import { DataAdventurerType } from '../../../../../../types/idleQuest';
 import { Adventurer } from '../../../../dsl/models';
 
 //fetch para obeter a los aventureros
@@ -43,16 +42,18 @@ const [ setFetchGetAdventurersStatusIdle, setFetchGetAdventurersStatusPending, s
 
 
 //funcion para ordenar por nivel los aventureros INPUT array de aventureros 
-const sortingLevel = (adventurersArray: DataAdventurerType []) => {
+const sortingLevel = (adventurersArray: Adventurer []) => {
     
 
-    adventurersArray.sort(function (a: DataAdventurerType , b: DataAdventurerType) {
+    adventurersArray.sort(function (a: Adventurer , b: Adventurer) {
+        /*
         if (a.experience > b.experience) {
           return -1;
         }
         if (a.experience < b.experience) {
           return 1;
         }
+        */
 
         return 0;
     });
@@ -60,9 +61,9 @@ const sortingLevel = (adventurersArray: DataAdventurerType []) => {
 }
 
 
-const adventurersSorting = (adventurers: DataAdventurerType[] ) =>{
-    const adventurersFree = adventurers.filter((element) => element.in_quest  == false);
-    const adventurersInQuest = adventurers.filter((element) => element.in_quest  == true);
+const adventurersSorting = (adventurers: Adventurer[] ) =>{
+    const adventurersFree = adventurers.filter((element) => element.inChallenge == false);
+    const adventurersInQuest = adventurers.filter((element) => element.inChallenge == true);
 
     sortingLevel(adventurersFree);
     sortingLevel(adventurersInQuest);
@@ -72,7 +73,7 @@ const adventurersSorting = (adventurers: DataAdventurerType[] ) =>{
 
 
 interface initialStateAdventurer{
-    data:  DataAdventurerType [] 
+    data:  Adventurer [] 
 }
 
 
@@ -93,7 +94,7 @@ const adventurers = createSlice({
         
         //Este caso primero se hacen dos arrays dividiendo entre los aventureros disponibles y los que no y posteriormente se ordena por cantidad de experiencia
 
-        setAdventurers: (state, action: PayloadAction<DataAdventurerType[]>) => {
+        setAdventurers: (state, action: PayloadAction<Adventurer[]>) => {
 
             const adventurersSorted = adventurersSorting(action.payload)
             state.data = adventurersSorted
@@ -106,7 +107,7 @@ const adventurers = createSlice({
                 
                 action.payload.forEach((adventurerId) => {
                     if(adventurerId == adventurer.adventurerId){
-                        adventurer.in_quest = true
+                        adventurer.inChallenge = true
                         return adventurer
                     }
                 })
@@ -125,12 +126,12 @@ const adventurers = createSlice({
             //crea un array con todos los id de los aventureros en el array
             const adventurersIds = action.payload
 
-             //este reducer toma el array con los ids y el estado con el array de los aventureros y cuando tenga el mismo id cambia la propiedad in_quest  a false
+             //este reducer toma el array con los ids y el estado con el array de los aventureros y cuando tenga el mismo id cambia la propiedad inChallenge  a false
         
             const adventurerArrays =  state.data.map (adventurer => {            
                 adventurersIds.forEach(adventurerId => {
                     if(adventurerId == adventurer.adventurerId){
-                        adventurer.in_quest = false
+                        adventurer.inChallenge = false
                         return adventurer
                     }
                 })
@@ -144,13 +145,13 @@ const adventurers = createSlice({
         },
 
           //Este caso recibe un array de aventureros para dar expericia de un quest y cambia la propiedad de experience a la nueva expericia y el nuevo nivel
-        setExperienceReward: (state, action: PayloadAction<DataAdventurerType[]>) => {
+        setExperienceReward: (state, action: PayloadAction<Adventurer[]>) => {
     
             const adventurers =  state.data.map (adventurer =>{            
                 action.payload.forEach(adventurerRewarded => {
 
                     if(adventurerRewarded.adventurerId == adventurer.adventurerId){
-                        adventurer.experience = adventurerRewarded.experience
+                        //adventurer.experience = adventurerRewarded.experience
                         return adventurer
                     }
                 })
@@ -170,10 +171,10 @@ const adventurers = createSlice({
                 action.payload.forEach((deathAdventurerData) => {
                     if(deathAdventurerData.adventurerId == adventurer.adventurerId){
                         if(deathAdventurerData.collection == "pixel-tiles"){
-                            adventurer.experience = 0
+                            //adventurer.experience = 0
                         } else if (deathAdventurerData.collection == "grandmaster-adventurers"){
-                            adventurer.metadata.dead_cooldown = 10000//deathAdventurerData.dead_cooldown
-                            adventurer.metadata.is_alive = false;
+                            //adventurer.metadata.dead_cooldown = 10000//deathAdventurerData.dead_cooldown
+                            //adventurer.metadata.is_alive = false;
                         }
                         return adventurer
                     }
@@ -189,8 +190,9 @@ const adventurers = createSlice({
         //este caso esta hecho para meter un placeholder en cuando se recluta un aventurero en el faucet
         setRecruitment: (state) => {
 
-            const recruiter: DataAdventurerType = {
+            const recruiter: Adventurer = {
                 adventurerId: "b9930b53-aed1-4feb-a424-2c75f3f123456d2asdasdafgasd6bf",
+                userId: "c9930b53-aed1-4feb-a424-2c75f3f123456d2asdasdafgasd6bf",
                 name: "placeholeder",
                 race: "human",
                 class: "fighter",
@@ -205,13 +207,13 @@ const adventurers = createSlice({
                 collection: "pixel-tiles",
 
                 // Old properties, remove once the new backend models have been implemented 
-                experience: 0,
-                in_quest: false,
-                on_chain_ref: "placeholder",
-                onRecruitment: true,
+                //experience: 0,
+                //inChallenge: false,
+                //on_chain_ref: "placeholder",
+                //onRecruitment: true,
                 //sprites: "./images/pixeltiles_props/adventurer_prop",
                 //type: "pixeltile",
-                metadata: {},
+                //metadata: {},
             }
 
             state.data =  state.data.concat(recruiter)

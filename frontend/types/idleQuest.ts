@@ -64,7 +64,6 @@ interface AdventurerInQuestType{
     player_stake_address: string
     type: "pixeltile" | "gma"
 }
-*/
 
 export interface DataAdventurerType{
     adventurerId: string
@@ -90,3 +89,4 @@ export interface DataAdventurerType{
     //type: "pixeltile" | "gma"
     metadata: MetadataType
 }
+*/

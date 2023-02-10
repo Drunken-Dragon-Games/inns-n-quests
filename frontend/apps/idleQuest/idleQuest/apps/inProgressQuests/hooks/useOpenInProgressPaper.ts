@@ -10,12 +10,12 @@ export default (questId: string): boolean =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     const generalDispatch = useGeneralDispatch()
     
-    const isClaim = generalSelector.idleQuest.questsInProgress.data.claimReward.isClaimed
-    const isClaimState = generalSelector.idleQuest.questsInProgress.data.claimReward.state
+    const isClaim = generalSelector.idleQuests.questsInProgress.data.claimReward.isClaimed
+    const isClaimState = generalSelector.idleQuests.questsInProgress.data.claimReward.state
 
 
-    const inProgressSelected = generalSelector.idleQuest.navigator.inProgress.inProgressQuest
-    const pageSelected = generalSelector.idleQuest.navigationConsole.page
+    const inProgressSelected = generalSelector.idleQuests.navigator.inProgress.inProgressQuest
+    const pageSelected = generalSelector.idleQuests.navigationConsole.page
     
 
 

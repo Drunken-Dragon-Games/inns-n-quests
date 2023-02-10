@@ -15,7 +15,7 @@ export default ( data : LocalAvailableQuest ) : boolean => {
 
     const generalDispatch = useGeneralDispatch()
     
-    const questTaken = generalSelector.idleQuest.questAvailable.data.takenId.id
+    const questTaken = generalSelector.idleQuests.questBoard.data.takenId.id
 
     useEffect(()=>{
 
