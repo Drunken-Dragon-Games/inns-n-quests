@@ -137,6 +137,10 @@ const questBoardState = createSlice({
             state.inventory = sortAdventurers(action.payload)
         },
 
+        setTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
+            state.takenQuests = action.payload
+        },
+
         addTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
             state.takenQuests = [...state.takenQuests, ...action.payload]
         },
@@ -215,6 +219,7 @@ const questBoardState = createSlice({
 
 export const {
     setInventory,
+    setTakenQuests,
     addTakenQuests,
     removeTakenQuest,
     addAvailableQuests,

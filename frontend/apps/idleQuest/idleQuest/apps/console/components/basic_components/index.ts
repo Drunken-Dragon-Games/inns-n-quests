@@ -1,6 +1,5 @@
 export { default as DragonSilverIcon } from "./dragonSilverIcon"
 export { default as CountEffect } from "./countEffect"
-export { default as QuestTypeButton } from "./questTypeButton"
 export { default as CreateAdventurerButton} from "./createAdventurerButton"
 export { default as ExperienceBar } from "./experienceBar"
 export { default as Level } from "./level"

@@ -11,6 +11,7 @@ import { clearAvailableQuests, getAdventurers, getAvailableQuests, removeAvailab
 import { Adventurer, SelectedQuest } from "../dsl"
 import { useEffect } from "react"
 import { claimTakenQuest, getInProgressQuests } from "./apps/inProgressQuests/features/inProgressQuest"
+import { notEmpty } from "../../utils"
 
 const Relative = styled.section`
   position: relative;
@@ -37,9 +38,10 @@ const IdleQuestsApp = () => {
     const generalDispatch = useGeneralDispatch()    
     
     const adventurers = generalSelector.idleQuests.questBoard.questBoard.inventory
-    const selectedAvailableQuest = generalSelector.idleQuests.questBoard.questBoard.selectedQuest
+    const selectedQuest = generalSelector.idleQuests.questBoard.questBoard.selectedQuest
     const adventurerSlots = generalSelector.idleQuests.questBoard.questBoard.adventurerSlots
     const availableQuests = generalSelector.idleQuests.questBoard.questBoard.availableQuests
+    const takenQuests = generalSelector.idleQuests.questBoard.questBoard.takenQuests
 
     const onSelectQuest = (quest: SelectedQuest) => 
         generalDispatch(selectQuest(quest))
@@ -84,11 +86,12 @@ const IdleQuestsApp = () => {
                     adventurers={adventurers} 
                     adventurerSlots={adventurerSlots}
                     onAdventurerClick={onSelectAdventurer}
-                    availableQuestOpen={selectedAvailableQuest != null && selectedAvailableQuest.ctype == "available-quest"}
+                    selectedQuest={selectedQuest}
+                    takenQuests={takenQuests}
                 />
                 <QuestBoard
                     availableQuests={availableQuests}
-                    selectedQuest={selectedAvailableQuest}
+                    selectedQuest={selectedQuest}
                     adventurerSlots={adventurerSlots}
                     onSignQuest={onSignQuest}
                     onCloseQuest={onCloseAvailableQuest}

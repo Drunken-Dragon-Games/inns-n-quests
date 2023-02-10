@@ -6,7 +6,7 @@ import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from 'axios';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
 import { Adventurer, ClaimQuestOutcome, TakenQuest } from '../../../../dsl/models';
-import { addTakenQuests, addVisualQuestData, changeAdventurersInChallenge } from '../../availableQuest/features/quest-board';
+import { addVisualQuestData, changeAdventurersInChallenge, setTakenQuests } from '../../availableQuest/features/quest-board';
 import { tagTakenQuest } from '../../../../dsl';
 
 const addVisualDataToTakenQuests = (quest: any) =>
@@ -17,9 +17,7 @@ export const getInProgressQuests = (): GeneralReducerThunk => async (dispatch) =
     try {   
         const response = await axiosCustomInstance('/quests/api/taken-quests').get('/quests/api/taken-quests')  
         const takenQuests = response.data.map(compose(addVisualDataToTakenQuests, tagTakenQuest))
-        dispatch(addTakenQuests(takenQuests))
-
-        
+        dispatch(setTakenQuests(takenQuests))
         dispatch(setFetchGetInProgressQuestStatusFulfilled())
 
     } catch (err: unknown) {

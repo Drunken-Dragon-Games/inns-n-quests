@@ -18,8 +18,7 @@ const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
 }
 
 const InfoWrapper = styled.div`
-    position: absolute;
-    bottom: -3vh;
+    margin-top: 0.5vh;
     width: inherit;
 `
 

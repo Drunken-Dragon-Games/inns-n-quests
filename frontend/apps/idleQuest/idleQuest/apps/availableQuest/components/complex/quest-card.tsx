@@ -148,7 +148,7 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
                         <AdventurerSlot 
                             key={"adventurer-slot-"+index} 
                             adventurer={adventurer}
-                            onUnselectAdventurer={onUnselectAdventurer}
+                            onUnselectAdventurer={ quest?.ctype === "available-quest" ? onUnselectAdventurer : undefined }
                         />
                     )} 
                 </AdventurersWrapper>

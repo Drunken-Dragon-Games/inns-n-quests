@@ -4,9 +4,10 @@ import { CreateAdventurerButton } from "../basic_components";
 import { useRef, useState } from "react";
 import { useIsScroll } from "../../hooks"
 import { cardano_network } from "../../../../../../../setting"
-import { Adventurer } from "../../../../../dsl";
+import { Adventurer, SelectedQuest } from "../../../../../dsl";
 import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 import AdventurerCard from "../../../availableQuest/components/complex/adventurer-card";
+import { notEmpty } from "../../../../../../utils";
 
 const AdventurerListContainer = styled.div`
     position: relative;
@@ -81,24 +82,26 @@ const AdventurerCardContainer = styled.div<{ interactuable: boolean }>`
 interface AdventurerCardWrapperProps {
     adventurer: Adventurer,
     adventurerSlots: (Adventurer | null)[],
-    availableQuestOpen: boolean,
+    selectedQuest?: SelectedQuest,
     onAdventurerClick: (adventurer: Adventurer) => void
 }
 
-const AdventurerCardWrapper = ({ adventurer, adventurerSlots, availableQuestOpen, onAdventurerClick }: AdventurerCardWrapperProps) => {
+const AdventurerCardWrapper = ({ adventurer, adventurerSlots, selectedQuest, onAdventurerClick }: AdventurerCardWrapperProps) => {
     const slotIndex = adventurerSlots.indexOf(adventurer) + 1
     const [hovering, setHovering] = useState(false)
-    const interactuable = availableQuestOpen && !adventurer.inChallenge && adventurer.hp !== 0
+    const dead = adventurer.hp === 0
+    const inChallenge = adventurer.inChallenge
     const selected = adventurerSlots.some(slot => slot?.adventurerId == adventurer.adventurerId)
+    const interactuable = notEmpty(selectedQuest) && selectedQuest.ctype == "available-quest" && !inChallenge && !dead 
     const render 
-        = adventurer.hp === 0 ? "dead"
+        = dead ? "dead"
         : selected ? "selected"
-        : adventurer.inChallenge ? "in-challenge"
-        : hovering ? "hovered" 
+        : inChallenge ? "in-challenge"
+        : interactuable && hovering ? "hovered" 
         : "normal"
     return (
         <AdventurerCardContainer 
-            onClick={() => onAdventurerClick(adventurer)} 
+            onClick={() => interactuable && onAdventurerClick(adventurer)} 
             onMouseEnter={() => setHovering(true)} 
             onMouseLeave={() => setHovering(false)}
             interactuable={interactuable}
@@ -117,11 +120,11 @@ const AdventurerCardWrapper = ({ adventurer, adventurerSlots, availableQuestOpen
 interface AdventurerListProps {
     adventurers: Adventurer[],
     adventurerSlots: (Adventurer | null)[],
-    availableQuestOpen: boolean,
+    selectedQuest?: SelectedQuest,
     onAdventurerClick: (adventurer: Adventurer) => void
 }
 
-const AdventurerList = ({ adventurers, adventurerSlots, availableQuestOpen, onAdventurerClick }: AdventurerListProps) =>{
+const AdventurerList = ({ adventurers, adventurerSlots, selectedQuest, onAdventurerClick }: AdventurerListProps) =>{
     const scrolling = useRef<HTMLDivElement | null>(null)
     const renderArrows = useIsScroll(scrolling, adventurers.length)
     return(
@@ -139,7 +142,7 @@ const AdventurerList = ({ adventurers, adventurerSlots, availableQuestOpen, onAd
                     <AdventurerCardWrapper 
                         adventurer={adventurer} 
                         adventurerSlots={adventurerSlots} 
-                        availableQuestOpen={availableQuestOpen}
+                        selectedQuest={selectedQuest}
                         onAdventurerClick={onAdventurerClick} 
                     />
                 )}

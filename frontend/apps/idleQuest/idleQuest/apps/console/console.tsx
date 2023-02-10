@@ -1,10 +1,12 @@
 import styled from "styled-components";
 import Image from 'next/image'
-import { QuestButtonsContainer, Navbar, Pages, AdventurerList, InProgressQuestMapping } from "./components/complex"
-import { Adventurer } from "../../../dsl";
+import { Navbar, AdventurerList, InProgressQuestMapping, ConsoleTabs } from "./components/complex"
+import { Adventurer, SelectedQuest, TakenQuest } from "../../../dsl";
 import { useGeneralSelector } from "../../../../../features/hooks";
 import { selectGeneralReducer } from "../../../../../features/generalReducer";
 import { ConditionalRender } from "../../../../utils/components/basic_components";
+import { TabNames } from "./components/complex/console-tabs";
+import { useState } from "react";
 
 const AdventuresConsoleContainer =styled.div`
     width: 15%;
@@ -38,13 +40,13 @@ const PaddingVertical = styled.div`
 interface ConsoleProps {
     adventurers: Adventurer[],
     adventurerSlots: (Adventurer | null)[],
-    availableQuestOpen: boolean,
+    selectedQuest?: SelectedQuest,
+    takenQuests: TakenQuest[],
     onAdventurerClick: (adventurer: Adventurer) => void
 }
 
-const Console = ({ adventurers, adventurerSlots, availableQuestOpen, onAdventurerClick }: ConsoleProps) => {
-    const generalSelector = useGeneralSelector(selectGeneralReducer)
-    const page = generalSelector.idleQuests.navigationConsole.page
+const Console = ({ adventurers, adventurerSlots, selectedQuest, takenQuests, onAdventurerClick }: ConsoleProps) => {
+    const [page, setPage] = useState<TabNames>("inventory")
     return(<>
         <AdventuresConsoleContainer>
             <ImageWrapper>
@@ -55,18 +57,22 @@ const Console = ({ adventurers, adventurerSlots, availableQuestOpen, onAdventure
 
             <PaddingVertical>
                 <Navbar/>
-                <QuestButtonsContainer/>
+                <ConsoleTabs
+                    page={page}
+                    completedQuests={takenQuests.length} 
+                    onTabClick={(page) => setPage(page)}
+                />
 
-                <ConditionalRender condition={ page == "available" }>
+                <ConditionalRender condition={ page == "inventory" }>
                     <AdventurerList
                         adventurers={adventurers}
                         adventurerSlots={adventurerSlots}
                         onAdventurerClick={onAdventurerClick} 
-                        availableQuestOpen={availableQuestOpen}
+                        selectedQuest={selectedQuest}
                     />
                 </ConditionalRender>
 
-                <ConditionalRender condition={ page == "in_progress"}>
+                <ConditionalRender condition={ page == "quests-in-progress"}>
                     <InProgressQuestMapping/>
                 </ConditionalRender>
             </PaddingVertical>
