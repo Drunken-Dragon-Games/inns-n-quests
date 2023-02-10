@@ -1,5 +1,5 @@
 import styled, { keyframes } from "styled-components"
-import { CrispPixelArtImage } from "../../../../../utils"
+import { CrispPixelArtImage, notEmpty } from "../../../../../utils"
 import { TextOswald } from "../../../../../utils/components/basic_components"
 import { Adventurer } from "../../../../dsl"
 import AdventurerSprite, { SpriteRenderOptions } from "./adventurer-sprite"
@@ -20,10 +20,10 @@ const InfoWrapper = styled.div`
     width: inherit;
 `
 
-const NameTitle = styled.div<{ display: boolean }>`
+const NameTitle = styled.div<{ $display: boolean }>`
     font-weight: bold;
     text-transform: uppercase;
-    display: ${props => props.display ? "block" : "none"};
+    display: ${props => props.$display ? "block" : "none"};
 `
 
 const APSWrapper = styled.div`
@@ -38,14 +38,14 @@ const ExperienceAnimation = (experience: number) => keyframes`
     100% {width: ${experience}%;}
 `
 
-const ExperienceBar = styled.div<{ display: boolean, color: ExperienceBarColor }>`
+const ExperienceBar = styled.div<{ $display: boolean, color: ExperienceBarColor }>`
     margin-top: 0.1vw;
     flex: 1;
     height: 1.2vw;
     overflow: hidden;
     border-radius: 0vw 1vw 0vw 1vw;
     background-color: ${props => rgbMapping(props.color, true)}};
-    display: ${props => props.display ? "block" : "none"};
+    display: ${props => props.$display ? "block" : "none"};
 `
 
 const Experience = styled.div<{ experience: number, animate: boolean, color: ExperienceBarColor }>`
@@ -69,14 +69,14 @@ const Experience = styled.div<{ experience: number, animate: boolean, color: Exp
     }
 `
 
-const MedalWrapper = styled.div<{ display: boolean }>`
+const MedalWrapper = styled.div<{ $display: boolean }>`
     position: absolute;
     background-color: #ca9a3a;
     width: 2vw;
     height: 2vw;
     border-radius: 50%;
     z-index: 3;
-    display: ${props => props.display ? "flex" : "none"};
+    display: ${props => props.$display ? "flex" : "none"};
     justify-content: center;
     align-items: center;
 `
@@ -105,7 +105,7 @@ const DeadMarkAnimation = keyframes`
     50% {opacity: 1;}
 `
 
-const DeadMark = styled.div <{ display: boolean }>`
+const DeadMark = styled.div <{ $display: boolean }>`
     position: absolute;
     top: 3vw;
     left: 0.5vw;
@@ -113,7 +113,7 @@ const DeadMark = styled.div <{ display: boolean }>`
     height: 4vw;
     z-index: 2;
     animation: ${DeadMarkAnimation} 1.2s;
-    ${props => props.display == true  ? "" : "display: none;"}
+    ${props => props.$display ? "" : "display: none;"}
 `
 
 const StyledAdventurerSprite = styled(AdventurerSprite)`
@@ -152,7 +152,7 @@ const AdventurerCard = ({
 }: AdventurerProps) =>
     <AdventurerContainer>
 
-        <DeadMark display={displayDeadMark} >
+        <DeadMark $display={displayDeadMark} >
             <CrispPixelArtImage 
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_mark_fail.png" 
                 alt="fail mark image" 
@@ -161,7 +161,7 @@ const AdventurerCard = ({
             />
         </DeadMark>
 
-        <MedalWrapper display={medalNumber !== undefined}>
+        <MedalWrapper $display={notEmpty(medalNumber)}>
             <Medal>{medalNumber}</Medal>
         </MedalWrapper>
 
@@ -174,21 +174,21 @@ const AdventurerCard = ({
         </AdventurerWrapper>
 
         <InfoWrapper>
-            <NameTitle display={displayNameColor !== undefined}>
+            <NameTitle $display={notEmpty(displayNameColor)}>
                 <TextOswald fontsize={0.8} color={displayNameColor ?? "white"}>{adventurer.name}</TextOswald>
             </NameTitle>
             <APSWrapper>
-                <ExperienceBar display={displayAPS} color="r" key="ath">
+                <ExperienceBar $display={displayAPS} color="r" key="ath">
                     <Experience experience={adventurer.athleticism * 100 / 10} animate={animateAPS} color="r">
                         <span>{adventurer.athleticism}</span>
                     </Experience>
                 </ExperienceBar>
-                <ExperienceBar display={displayAPS} color="b" key="int">
+                <ExperienceBar $display={displayAPS} color="b" key="int">
                     <Experience experience={adventurer.intellect * 100 / 10} animate={animateAPS} color="b">
                         <span>{adventurer.intellect}</span>
                     </Experience>
                 </ExperienceBar>
-                <ExperienceBar display={displayAPS} color="g" key="cha">
+                <ExperienceBar $display={displayAPS} color="g" key="cha">
                     <Experience experience={adventurer.charisma * 100 / 10} animate={animateAPS} color="g">
                         <span>{adventurer.charisma}</span>
                     </Experience>

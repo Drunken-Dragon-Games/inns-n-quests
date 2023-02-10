@@ -72,8 +72,6 @@ const questBoardState = createSlice({
             else
                 state.adventurerSlots = Array(quest.quest.slots).fill(null).map((_, index) => 
                     state.inventory.find(adventurer => adventurer.adventurerId === quest.adventurerIds[index]) ?? null)
-            console.log(quest)
-            console.log(state.adventurerSlots)
         },
 
         unselectQuest: (state) => {

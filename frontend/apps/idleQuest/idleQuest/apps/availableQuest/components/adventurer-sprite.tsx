@@ -33,8 +33,10 @@ const adventurerOfThioldenCustomWidthAndOffset = (adventurer: Adventurer): [numb
         return [3.7, -2.2] 
     else if (advName == 'filgrald' || advName == 'gadrull' || advName == 'gulnim' || advName == 'rundir' || advName == 'thelas')
         return [4.6, -2.2] 
-    else if (advName == 'volggan' || advName == 'marlanye' || advName == 'friga' || advName == 'astrid' || advName == 'tyr' || advName == 'ulf')
-        return [3.5, -2.2] 
+    else if (advName == 'volggan')
+        return [4.3, -2.2] 
+    else if (advName == 'marlanye' || advName == 'friga' || advName == 'astrid' || advName == 'tyr' || advName == 'ulf')
+        return [4.1, -2.2] 
     else if (advName == 'mey' || advName == 'delthamar'  || advName == "ude'namvar" || advName == 'vadanna'|| advName == "avva_fire" )
         return [4.1, -2.2] 
     else if (advName == 'milnim'  || advName == 'terrorhertz'  || advName == "arun'na" )
@@ -48,11 +50,11 @@ const adventurerOfThioldenCustomWidthAndOffset = (adventurer: Adventurer): [numb
     else if (advName == 'lyskyr')
         return [5.4, -2.2] 
     else if (advName == 'perneli' || advName == 'eify')
-        return [3.9, -2.2] 
+        return [4.5, -2.2] 
     else if (advName == 'abbelka')
         return [5.7, -2.2] 
     else if (advName == 'aumara')
-        return [4.4, -2.2] 
+        return [5.1, -2.2] 
     else if (advName == 'mare' || advName == 'bo')
         return [5.1, -2.2] 
     else if (advName == 'dethiol')
@@ -138,24 +140,24 @@ const LeavingEmojiAnimation = keyframes`
     100% {opacity: 0; margin-top: -3vh;}
 `
 
-const EmojiBackground = styled.div<{ display: boolean, offset: number }>`
+const EmojiBackground = styled.div<{ $display: boolean, offset: number }>`
     position: absolute;
     z-index: 5;
     width: 3vw;
     height: 2.7vw;
     margin-top: ${props => props.offset}vw;
-    opacity: ${props => props.display ? 1 : 0};
-    animation ${props => props.display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
+    opacity: ${props => props.$display ? 1 : 0};
+    animation ${props => props.$display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
 `
 
-const EmojiContainer = styled.div<{ display: boolean, offset: number }>`
+const EmojiContainer = styled.div<{ $display: boolean, offset: number }>`
     position: absolute;
     z-index: 5;
     width: 2.3vw;
     height: 2.0vw;
     margin-top: ${props => props.offset + 0.2}vw;
-    opacity: ${props => props.display ? 1 : 0};
-    animation ${props => props.display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
+    opacity: ${props => props.$display ? 1 : 0};
+    animation ${props => props.$display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
 `
 
 const Emoji = ({ emoji, offset }: { emoji?: string, offset: number }) => {
@@ -163,14 +165,14 @@ const Emoji = ({ emoji, offset }: { emoji?: string, offset: number }) => {
     const renderEmoji = emoji ?? lastEmoji
     useEffect(() => { if (emoji) setLastEmoji(emoji) }, [emoji])
     return notEmpty(renderEmoji) ? <>
-        <EmojiBackground display={emoji !== undefined} offset={offset}>
+        <EmojiBackground $display={emoji !== undefined} offset={offset}>
             <CrispPixelArtImage 
                 src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"  
                 alt="emoji buble" 
                 layout="fill" 
             />
         </EmojiBackground>
-        <EmojiContainer display={emoji !== undefined} offset={offset}>
+        <EmojiContainer $display={emoji !== undefined} offset={offset}>
             <CrispPixelArtImage
                 src={emojiMapping(renderEmoji)}
                 alt="adventurer emoji bubble"
@@ -190,7 +192,7 @@ interface AdventurerSpriteProps {
 
 const AdventurerSprite = ({className, adventurer, render = "normal", scale = 1, emoji} : AdventurerSpriteProps) => {
     if (adventurer.collection == "pixel-tiles") {
-        const width = 4.3 * scale
+        const width = 4.6 * scale
         const height = useComputeHeightFromOriginalImage(adventurer.sprite, width)
         return (
             <AdventurerSpriteContainer className={className} height={height} width={width} render={render}>
