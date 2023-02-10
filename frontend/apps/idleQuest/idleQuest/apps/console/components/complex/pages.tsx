@@ -4,7 +4,11 @@ import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { useGetAdventurers, useGetQuestsInProgress } from "../../hooks"
 
-const Pages = () : JSX.Element => {
+interface PagesProps {
+
+}
+
+const Pages = () => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 

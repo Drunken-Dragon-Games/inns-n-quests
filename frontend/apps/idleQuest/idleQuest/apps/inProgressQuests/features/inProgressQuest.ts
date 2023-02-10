@@ -3,11 +3,10 @@ import { combineReducers, compose } from "redux";
 import { axiosCustomInstance } from '../../../../../../axios/axiosApi'; 
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
 import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
-import { setFreeAdventurers, setDeath } from '../../console/features/adventurers';
 import { AxiosError } from 'axios';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
-import { ClaimQuestOutcome, TakenQuest } from '../../../../dsl/models';
-import { addTakenQuests, addVisualQuestData } from '../../availableQuest/features/quest-board';
+import { Adventurer, ClaimQuestOutcome, TakenQuest } from '../../../../dsl/models';
+import { addTakenQuests, addVisualQuestData, changeAdventurersInChallenge } from '../../availableQuest/features/quest-board';
 import { tagTakenQuest } from '../../../../dsl';
 
 const addVisualDataToTakenQuests = (quest: any) =>
@@ -43,7 +42,7 @@ const [ setFetchGetInProgressQuestStatusIdle, setFetchGetInProgressQuestStatusPe
 
 
 //fetch para claimear el reward
-export const claimTakenQuest = (quest: TakenQuest): GeneralReducerThunk => async (dispatch) =>{
+export const claimTakenQuest = (quest: TakenQuest, adventurers: Adventurer[]): GeneralReducerThunk => async (dispatch) =>{
     
     dispatch(setFetchPostClaimRewardInProgressQuestStatusPending())
     try {
@@ -64,7 +63,7 @@ export const claimTakenQuest = (quest: TakenQuest): GeneralReducerThunk => async
 
             //estas funciones actualizan los datos del estado
 
-            dispatch(setFreeAdventurers(quest.adventurerIds))
+            dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: false }))
 
             //dispatch(setAddDragonSilverToClaim(quest.quest.reward_ds))
             //dispatch(setExperienceReward(response.data.adventurers))
@@ -77,16 +76,16 @@ export const claimTakenQuest = (quest: TakenQuest): GeneralReducerThunk => async
             dispatch(setRewardClaimFail(outcome.deadAdventurers.map(el => el.adventurerId)))
             
             //estas funciones actualizan los datos del estado
-            dispatch( setDeath(outcome.deadAdventurers) )
+            //dispatch( setDeath(outcome.deadAdventurers) )
 
-            dispatch(setFreeAdventurers(quest.adventurerIds))   
+            //dispatch(setFreeAdventurers(quest.adventurerIds))   
         }
        
     } catch (err: unknown) {
         
         if(err instanceof AxiosError ){
             dispatch(setFetchPostClaimRewardInProgressQuestStatusErrors(err.response))
-            dispatch(fetchRefreshToken( () => dispatch(claimTakenQuest(quest)), err))
+            dispatch(fetchRefreshToken( () => dispatch(claimTakenQuest(quest, adventurers)), err))
         }
     }
 

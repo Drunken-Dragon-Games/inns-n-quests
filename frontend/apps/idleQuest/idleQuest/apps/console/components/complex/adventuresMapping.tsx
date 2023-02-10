@@ -79,8 +79,8 @@ const AdventureMappingElement = () =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
     
     const scrolling = useRef<HTMLDivElement | null>(null)
-    const numberOfAdventurer = generalSelector.idleQuests.adventurers.data.adventurers.length
-    const adventurers = generalSelector.idleQuests.adventurers.data.adventurers
+    const numberOfAdventurer = generalSelector.idleQuests.questBoard.questBoard.inventory.length
+    const adventurers = generalSelector.idleQuests.questBoard.questBoard.inventory
     const selectedAdventurers = generalSelector.idleQuests.questBoard.questBoard.adventurerSlots
     
     

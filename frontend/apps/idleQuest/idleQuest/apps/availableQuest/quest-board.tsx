@@ -41,7 +41,7 @@ interface QuestBoardProps {
     selectedQuest?: SelectedQuest,
     adventurerSlots: (Adventurer | null)[],
     availableQuests: AvailableQuest[],
-    onSignQuest: (quest: SelectedQuest) => void,
+    onSignQuest: (quest: SelectedQuest, adventurers: Adventurer[]) => void,
     onCloseQuest: () => void,
     onSelectQuest: (quest: AvailableQuest) => void,
     onFetchMoreQuests: () => void

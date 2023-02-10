@@ -7,7 +7,7 @@ import { RequirementType, CharacterType } from "../../../../../types/idleQuest"
 export default (adventurerList: string [], requirements: RequirementType ): number => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-    const allAdventurer = generalSelector.idleQuests.adventurers.data.adventurers
+    const allAdventurer = generalSelector.idleQuests.questBoard.questBoard.inventory
 
     const [bonus, setBonus] = useState<number>(0)
 

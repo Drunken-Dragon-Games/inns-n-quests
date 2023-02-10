@@ -1,14 +1,12 @@
 import styled from "styled-components"
 import Console from "./apps/console/console"
 import QuestBoard from "./apps/availableQuest/quest-board"
-import InProgressQuest from "./apps/inProgressQuests/inProgressQuest"
 import { ErrorHandler } from "./utils/components/complex"
 import { useLoading } from "./utils/hooks"
 import { Loading } from "../../utils/components/basic_components"
 import { ConditionalRender } from "../../explorerOfThiolden/explorerOfThioldenPage/components/basic_components"
 import { useGeneralDispatch, useGeneralSelector } from "../../../features/hooks"
 import { selectGeneralReducer } from "../../../features/generalReducer"
-import { notEmpty } from "../../utils"
 import { clearAvailableQuests, getAvailableQuests, removeAvailableQuest, selectQuest, takeAvailableQuest, unselectAdventurer, unselectQuest } from "./apps/availableQuest/features/quest-board"
 import { Adventurer, SelectedQuest } from "../dsl"
 import { useEffect } from "react"
@@ -44,12 +42,12 @@ const IdleQuestsApp = () => {
 
     const onSelectQuest = (quest: SelectedQuest) => 
         generalDispatch(selectQuest(quest))
-    const onSignQuest = (quest: SelectedQuest) => {
+    const onSignQuest = (quest: SelectedQuest, adventurers: Adventurer[]) => {
         if (quest.ctype == "available-quest") {
-            generalDispatch(takeAvailableQuest(quest.questId, adventurerSlots.filter(notEmpty)))
+            generalDispatch(takeAvailableQuest(quest, adventurers))
             generalDispatch(removeAvailableQuest(quest))
         } else {
-            generalDispatch(claimTakenQuest(quest))
+            generalDispatch(claimTakenQuest(quest, adventurers))
         }
     }
     const onCloseAvailableQuest = () => 

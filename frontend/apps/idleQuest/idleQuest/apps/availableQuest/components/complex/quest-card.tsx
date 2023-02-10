@@ -1,4 +1,3 @@
-import { CurveType } from "@emurgo/cardano-message-signing-asmjs"
 import styled from "styled-components"
 import { CrispPixelArtBackground, CrispPixelArtImage, notEmpty } from "../../../../../../utils"
 import { Adventurer, questDescription, questName, questSeal, SelectedQuest, takenQuestSecondsLeft } from "../../../../../dsl"
@@ -108,7 +107,7 @@ interface QuestPaperAvailableProps {
     className?: string,
     quest?: SelectedQuest, 
     adventurerSlots: (Adventurer | null)[],
-    onSign?: (selectedQuest: SelectedQuest) => void,
+    onSign?: (selectedQuest: SelectedQuest, adventurers: Adventurer[]) => void,
     onClose?: () => void,
     onUnselectAdventurer?: (adventurer: Adventurer) => void,
 }
@@ -160,7 +159,7 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
 
                 <Signature 
                     signatureType={signatureType} 
-                    onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest)} 
+                    onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest, adventurerSlots.filter(notEmpty))} 
                 />
             </CardContainer>
             : <></>}

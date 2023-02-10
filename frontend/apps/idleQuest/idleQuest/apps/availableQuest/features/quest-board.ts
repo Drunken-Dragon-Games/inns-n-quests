@@ -4,10 +4,27 @@ import { axiosCustomInstance } from '../../../../../../axios/axiosApi';
 import { createSliceStatus, actionsGenerator } from "../../../../../utils/features/utils"
 import { GeneralReducerThunk } from '../../../../../../features/generalReducer';
 import { AxiosError } from "axios"
-import { setAdventuresInQuest } from '../../console/features/adventurers';
 import { fetchRefreshToken } from '../../../../../../features/refresh';
 import { Adventurer, AvailableQuest, sealTypes, SelectedQuest, tagAvailableQuest, TakenQuest } from '../../../../dsl';
 import { simpleHash } from '../../../../../utils';
+
+export const getAdventurers = () : GeneralReducerThunk => async (dispatch) =>{
+    dispatch(setFetchGetAdventurersStatusPending())
+    try {  
+        //fetch para obeter a los aventureros
+        const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
+        dispatch(setInventory(response.data))  
+        dispatch(setFetchGetAdventurersStatusFulfilled())
+    } catch (err: unknown) {
+        if(err instanceof AxiosError ){
+            dispatch(setFetchGetAdventurersStatusErrors(err.response))
+            dispatch(fetchRefreshToken( () => dispatch(getAdventurers()), err))
+        }
+    }
+}
+
+const  fetchGetAdventurersStatus  = createSliceStatus("fetchGetAdventurersStatus")
+const [ setFetchGetAdventurersStatusIdle, setFetchGetAdventurersStatusPending, setFetchGetAdventurersStatusFulfilled, setFetchGetAdventurersStatusErrors ] = actionsGenerator(fetchGetAdventurersStatus.actions)
 
 export const addVisualQuestData = (quest: any) => {
     return ({
@@ -23,7 +40,6 @@ export const getAvailableQuests = (firstTime? : boolean): GeneralReducerThunk =>
         const response = await axiosCustomInstance('/quests/api/quests').get('/quests/api/quests')
         const availableQuests = response.data
             .map(compose(addVisualQuestData, tagAvailableQuest))
-        console.log(availableQuests)
         dispatch(setFetchGetAvailableQuestStatusFulfilled())
         dispatch(addAvailableQuests(availableQuests))
     } catch (err: unknown) {
@@ -43,7 +59,7 @@ const [ setFetchGetAvailableQuestStatusIdle, setFetchGetAvailableQuestStatusPend
 
 //fetch para tomar a los available quests
 
-export const takeAvailableQuest = (questId: string, adventurers: Adventurer[]): GeneralReducerThunk  => async (dispatch) =>{
+export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventurer[]): GeneralReducerThunk  => async (dispatch) =>{
 
     dispatch(setFetchTakeAvailableQuestStatusPending())  
 
@@ -51,13 +67,13 @@ export const takeAvailableQuest = (questId: string, adventurers: Adventurer[]): 
 
         const adventurer_ids = adventurers.map(adventurer => adventurer.adventurerId)
         //fetch para aceptar el quest
-        const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: questId, adventurer_ids})
+        const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: quest.questId, adventurer_ids})
 
         // se agrega a los ques in progress
         dispatch(addTakenQuests([response.data]))
             
         //se agrega a los aventureros en el quest la propiedad de in_quest
-        dispatch(setAdventuresInQuest(adventurer_ids))
+        dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: true }))
 
         //deseleciona al available quest
         dispatch(unselectQuest())
@@ -72,7 +88,7 @@ export const takeAvailableQuest = (questId: string, adventurers: Adventurer[]): 
 
         if(err instanceof AxiosError ){
             dispatch(setFetchTakeAvailableQuestStatusErrors(err.response))
-            dispatch(fetchRefreshToken(() => dispatch(takeAvailableQuest(questId, adventurers)), err))
+            dispatch(fetchRefreshToken(() => dispatch(takeAvailableQuest(quest, adventurers)), err))
         }
     }
 
@@ -164,7 +180,18 @@ const questBoardState = createSlice({
                 state.adventurerSlots = Array(state.selectedQuest.slots).fill(null)
             else 
                 state.adventurerSlots = []
-        }
+        },
+        
+        changeAdventurersInChallenge: (state, action: PayloadAction<{ adventurers: Adventurer[], inChallenge: boolean }>) => {
+            state.inventory.forEach(adventurer => {
+                action.payload.adventurers.forEach((actionAdventurer) => {
+                    if(actionAdventurer.adventurerId == adventurer.adventurerId){
+                        adventurer.inChallenge = action.payload.inChallenge
+                        return 
+                    }
+                })
+            })
+        },
     },
 });
 
@@ -179,14 +206,16 @@ export const {
     unselectQuest,
     selectAdventurer,
     unselectAdventurer,
-    clearSelectedAdventurers
+    clearSelectedAdventurers,
+    changeAdventurersInChallenge,
 } = questBoardState.actions
 
 export const questBoardGeneralReducer = combineReducers({
     questBoard: questBoardState.reducer,
     status: combineReducers({
         getAvailableQuestStatus: fetchGetAvailableQuestStatus.reducer,
-        takeAvailableQuestStatus: fetchTakeAvailableQuestStatus.reducer
+        takeAvailableQuestStatus: fetchTakeAvailableQuestStatus.reducer,
+        getAdventurersStatus: fetchGetAdventurersStatus.reducer,
     })   
 })
 

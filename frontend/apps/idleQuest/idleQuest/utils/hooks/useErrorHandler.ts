@@ -15,8 +15,8 @@ export default () =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     //todos los status de los diferentes fetch 
-    const getAdventurersStatus = generalSelector.idleQuests.adventurers.getAdventurersStatus.status
-    const getAdventurersError = generalSelector.idleQuests.adventurers.getAdventurersStatus.error
+    const getAdventurersStatus = generalSelector.idleQuests.questBoard.status.getAdventurersStatus.status
+    const getAdventurersError = generalSelector.idleQuests.questBoard.status.getAdventurersStatus
 
     const getAvailableQuestStatus = generalSelector.idleQuests.questBoard.status.getAvailableQuestStatus.status
     const getAvailableQuestError =  generalSelector.idleQuests.questBoard.status.getAvailableQuestStatus.error

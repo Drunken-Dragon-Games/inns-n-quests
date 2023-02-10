@@ -196,7 +196,7 @@ const QuestPaperInProgress = () => {
 
     const questClaimStatus = generalSelector.idleQuests.questsInProgress.Status.claimReward.status
 
-    const adventurerData = generalSelector.idleQuests.adventurers.data.adventurers
+    const adventurerData = generalSelector.idleQuests.questBoard.questBoard.inventory
         .filter(adventurer => adventurersIds.indexOf(adventurer.adventurerId) !== -1)
 
     const status = takenQuestStatus(inProgressQuestData)
@@ -275,7 +275,7 @@ const QuestPaperInProgress = () => {
                                     </Flex>
                                     <Signature 
                                         signatureType={status == "in-progress" ? "in-progress" : "finished" } 
-                                        onClick={ () => generalDispatch(claimTakenQuest(inProgressQuestData)) }/>
+                                        onClick={ () => generalDispatch(claimTakenQuest(inProgressQuestData, [])) }/>
                                 </Card>
                             </CardWrapper>
                         </AnimationWrapper>

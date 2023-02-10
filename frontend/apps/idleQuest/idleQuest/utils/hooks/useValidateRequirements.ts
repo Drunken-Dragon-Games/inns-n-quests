@@ -10,7 +10,7 @@ export default (adventurerList: string [], requirements: RequirementType  ) => {
 
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-    const allAdventurer = generalSelector.idleQuests.adventurers.data.adventurers
+    const allAdventurer = generalSelector.idleQuests.questBoard.questBoard.inventory
 
     const [isValidate, setIsValidate ] = useState<boolean>(false)
 
