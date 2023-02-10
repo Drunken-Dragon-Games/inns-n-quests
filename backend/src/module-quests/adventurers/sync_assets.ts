@@ -15,6 +15,7 @@ import { ADVENTURER_PIXELTILES } from "../app/settings";
 import { LoggingContext } from "../../tools-tracing"
 import { Enrolled, Quest, TakenQuest } from "../quests/models";
 import { Player } from "../players/models";
+import { onlyPolicies, WellKnownPolicies } from "../../registry-policies";
 
 /////////// SYNCHRONIZATION CLASS //////////
 /* 
@@ -31,7 +32,7 @@ class SyncAssets {
     constructor(
         private readonly userId: string,
         private readonly thioldenMetadata: any,
-        private readonly policies: Policy,
+        private readonly wellKnownPolicies: WellKnownPolicies,
         private readonly logger: LoggingContext
     ){}
 
@@ -43,7 +44,7 @@ class SyncAssets {
     }
 
     // REQUEST WALLET NFTs
-    async requestCurrentNFT(assetManagementService: AssetManagementService,logger: LoggingContext): Promise<IApiNFTs | undefined> {
+    async requestCurrentNFT(assetManagementService: AssetManagementService, logger: LoggingContext): Promise<IApiNFTs | undefined> {
         if (process.env.USE_MOCK == "true") {            
             let NFTs = await axios.get(NFT_MOCK_URL, {
                 proxy: false,
@@ -61,18 +62,17 @@ class SyncAssets {
                 gmas: [],
                 adv_of_thiolden: []
             }
-            const policyIds = Object.keys(this.policies).map((policy: string) => this.policies[policy])
             // const assetResponse = await assetManagementServiceClient.list(this.userId, logger, { chain: true, policies: policyIds}) 
-            const assetResponse = await assetManagementService.list(this.userId, logger)  
+            const assetResponse = await assetManagementService.list(this.userId, { policies: onlyPolicies(this.wellKnownPolicies) }, logger)  
             logger.log.info({message: "Adventurer response from asset manager", response: assetResponse})
             if (assetResponse.status == "unknown-user") throw new ApiError(404, "unknown_user", "The user was not found")
             const inventory: Inventory = assetResponse.inventory
             logger.log.info({message: "NFTInventory Begins"})
-            nftInventory.pixeltiles = inventory[this.policies.pixeltiles]?.map(asset => { return { name: asset.unit, quantity: parseInt(asset.quantity) }}) ?? []         
+            nftInventory.pixeltiles = inventory[this.wellKnownPolicies.pixelTiles.policyId]?.map(asset => { return { name: asset.unit, quantity: parseInt(asset.quantity) }}) ?? []         
             logger.log.info({message: "Pixeltiles Done"})
-            nftInventory.gmas = inventory[this.policies.gmas]?.map(asset => { return { name: asset.unit, quantity: parseInt(asset.quantity) }}) ?? []
+            nftInventory.gmas = inventory[this.wellKnownPolicies.grandMasterAdventurers.policyId]?.map(asset => { return { name: asset.unit, quantity: parseInt(asset.quantity) }}) ?? []
             logger.log.info({message: "GMA Done"})
-            nftInventory.adv_of_thiolden = inventory[this.policies.aots]?.map(asset => { return { name: asset.unit, quantity: parseInt(asset.quantity) }}) ?? []
+            nftInventory.adv_of_thiolden = inventory[this.wellKnownPolicies.adventurersOfThiolden.policyId]?.map(asset => { return { name: asset.unit, quantity: parseInt(asset.quantity) }}) ?? []
             logger.log.info({message: "Adv Of Thiolden Done"})
             return nftInventory
         }  

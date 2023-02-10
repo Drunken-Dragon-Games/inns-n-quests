@@ -1,5 +1,4 @@
 import styled from "styled-components" 
-import { useSelector, useDispatch } from 'react-redux'
 import Image from "next/image"
 import { useState } from "react"
 import { CountEffect } from "./"
@@ -20,7 +19,6 @@ const ClaimRewardButton = styled.div<ClaimRewardButton>`
 
     ${props => props.isClickable ?  "&:hover{ background-color:  #475261;}": ""}
     
-
 `
 
 const DragonSilverWrapperToClaim = styled.div`
@@ -65,10 +63,6 @@ interface ClaimDragonSilverButton{
 
 const DragonSilverIcon = ({src, dragonSilver, tooltip, toClaim} : ClaimDragonSilverButton) => {
 
-    // const generalSelector = useSelector(selectGeneralPageReducer)
-    // const dispatch = useDispatch()
-
-    // const dragonSilverToClaim = generalSelector.player.data.dragonSilver.toClaim
    
     const [ onHoverDragonSilverToClaim, setOnHoverDragonSilverToClaim ] = useState<boolean>(false) 
 

@@ -1,6 +1,7 @@
 import styled from "styled-components"
 import Image from 'next/image'
 import { ConditionalRender } from "../../../../../utils/components/basic_components"
+import { SealType } from "../../../../dsl"
 
 const SealWrapperHeroicQuest = styled.div`
 
@@ -43,27 +44,22 @@ const SealWrapperTownsfolk = styled.div`
     }
 `
 
-
-interface seals {
-    seal: string
-}
-
-const Seals =({seal}: seals) => {      
+const Seals =({seal}: { seal: SealType }) => {      
     return(
         <>
-            <ConditionalRender condition = {seal == "heroic_quest"}>
+            <ConditionalRender condition = {seal == "heroic-quest"}>
                 <SealWrapperHeroicQuest>
                     <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/heroic_quest_big.png"  alt="paper prop" width={2000} height={1250} />
                 </SealWrapperHeroicQuest>
             </ConditionalRender>
     
-            <ConditionalRender condition = {seal == "kings_plea"}>
+            <ConditionalRender condition = {seal == "kings-plea"}>
                 <SealWrapperKingsPlea>
                     <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/kings_plea_big.png"  alt="paper prop" width={2000} height={1250} />
                 </SealWrapperKingsPlea>
             </ConditionalRender>
 
-            <ConditionalRender condition = {seal == "valiant_adventure"}>
+            <ConditionalRender condition = {seal == "valiant-adventure"}>
                 <SealWrapperValiantAdventure>
                     <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/valiant_adventure_big.png"  alt="paper prop" width={2000} height={1250} />
                 </SealWrapperValiantAdventure>

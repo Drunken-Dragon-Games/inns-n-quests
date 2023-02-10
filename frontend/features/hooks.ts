@@ -1,5 +1,5 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import { generalReducerRootState, generalReducerDispatch } from './generalReducer';
+import { GeneralReducerRootState, GeneralReducerDispatch } from './generalReducer';
 
-export const useGeneralDispatch = () => useDispatch<generalReducerDispatch>();
-export const useGeneralSelector: TypedUseSelectorHook<generalReducerRootState> = useSelector;
+export const useGeneralDispatch = () => useDispatch<GeneralReducerDispatch>();
+export const useGeneralSelector: TypedUseSelectorHook<GeneralReducerRootState> = useSelector;

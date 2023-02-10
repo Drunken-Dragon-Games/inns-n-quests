@@ -26,16 +26,9 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return status 
     }
 
-    async registry(logger?: LoggingContext): Promise<models.RegistryPolicy[]> {
+    async list(userId: string, options: { count?: number, page?: number, chain?: boolean , policies?: string[] }, logger?: LoggingContext): Promise<models.ListResponse> {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.log.info("fetching asset registry")
-        const response = await this.base.registry(serviceLogger)
-        return response
-    }
-
-    async list(userId: string, logger?: LoggingContext, options?: { count?: number, page?: number, chain?: boolean , policies?: string[] }): Promise<models.ListResponse> {
-        const serviceLogger = this.withComponent(logger)
-        const response = await this.base.list(userId, serviceLogger, options)
+        const response = await this.base.list(userId, options, serviceLogger)
         serviceLogger?.log.info(`listing assets for user ${userId}, result was ${response.status}`, options)
         return response
     }

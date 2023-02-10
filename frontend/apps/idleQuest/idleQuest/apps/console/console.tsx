@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import Image from 'next/image'
-import { QuestButtonsContainer, Navbar, Pages } from "./components/complex"
+import { Navbar, AdventurerList, InProgressList, ConsoleTabs } from "./components/complex"
+import { Adventurer, SelectedQuest, TakenQuest } from "../../../dsl";
+import { ConditionalRender } from "../../../../utils/components/basic_components";
+import { TabNames } from "./components/complex/console-tabs";
+import { useState } from "react";
 
 const AdventuresConsoleContainer =styled.div`
     width: 15%;
@@ -9,9 +13,6 @@ const AdventuresConsoleContainer =styled.div`
     z-index: 0;
     position: relative;
 `
-interface IProps_adventureConsole {
-    children:  JSX.Element [] | JSX.Element,
-}
 
 const ImageWrapper = styled.div`
     position: absolute;
@@ -29,14 +30,23 @@ const ImageWrapper = styled.div`
         height: 36vw !important;
     }
 `
+
 const PaddingVertical = styled.div`
     padding: 0vw 0px 2vw 0vw;
 `
 
-const Console = (): JSX.Element =>{
+interface ConsoleProps {
+    adventurers: Adventurer[],
+    adventurerSlots: (Adventurer | null)[],
+    selectedQuest?: SelectedQuest,
+    takenQuests: TakenQuest[],
+    onAdventurerClick: (adventurer: Adventurer) => void
+}
+
+const Console = ({ adventurers, adventurerSlots, selectedQuest, takenQuests, onAdventurerClick }: ConsoleProps) => {
+    const [page, setPage] = useState<TabNames>("inventory")
     return(<>
         <AdventuresConsoleContainer>
-
             <ImageWrapper>
                 <div>
                     <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/adventurers_console.png"  alt="ornament" width={300} height={700} />
@@ -45,10 +55,25 @@ const Console = (): JSX.Element =>{
 
             <PaddingVertical>
                 <Navbar/>
-                <QuestButtonsContainer/>
-                <Pages/>
+                <ConsoleTabs
+                    page={page}
+                    completedQuests={takenQuests.length} 
+                    onTabClick={(page) => setPage(page)}
+                />
+
+                <ConditionalRender condition={ page == "inventory" }>
+                    <AdventurerList
+                        adventurers={adventurers}
+                        adventurerSlots={adventurerSlots}
+                        onAdventurerClick={onAdventurerClick} 
+                        selectedQuest={selectedQuest}
+                    />
+                </ConditionalRender>
+
+                <ConditionalRender condition={ page == "quests-in-progress"}>
+                    <InProgressList/>
+                </ConditionalRender>
             </PaddingVertical>
-            
         </AdventuresConsoleContainer>
     </>)
 }

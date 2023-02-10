@@ -1,6 +1,7 @@
 import styled from "styled-components"
 import Image from "next/image"
 import { useGetEmoji } from "../../hooks"
+import { AdventurerCollection } from "../../../../dsl/models"
 
 const EmojiWrapper = styled.div`
     position: relative;
@@ -37,7 +38,7 @@ const EmojiImg = styled.div`
 interface emoji{
     questStatus: "failed" | "succeeded" | null
     isAdventureDead:boolean
-    type: string
+    type: AdventurerCollection
 }
 const Emoji = ({questStatus, isAdventureDead, type}:emoji) =>{
 

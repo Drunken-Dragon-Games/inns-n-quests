@@ -15,21 +15,21 @@ export default () =>{
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
     //todos los status de los diferentes fetch 
-    const getAdventurersStatus = generalSelector.idleQuest.adventurers.getAdventurersStatus.status
-    const getAdventurersError = generalSelector.idleQuest.adventurers.getAdventurersStatus.error
+    const getAdventurersStatus = generalSelector.idleQuests.questBoard.status.getAdventurersStatus.status
+    const getAdventurersError = generalSelector.idleQuests.questBoard.status.getAdventurersStatus
 
-    const getAvailableQuestStatus = generalSelector.idleQuest.questAvailable.status.getAvailableQuestStatus.status
-    const getAvailableQuestError =  generalSelector.idleQuest.questAvailable.status.getAvailableQuestStatus.error
-    const takeAvailableQuestStatus = generalSelector.idleQuest.questAvailable.status.takeAvailableQuestStatus.status
-    const takeAvailableQuestError = generalSelector.idleQuest.questAvailable.status.takeAvailableQuestStatus.error
+    const getAvailableQuestStatus = generalSelector.idleQuests.questBoard.status.getAvailableQuestStatus.status
+    const getAvailableQuestError =  generalSelector.idleQuests.questBoard.status.getAvailableQuestStatus.error
+    const takeAvailableQuestStatus = generalSelector.idleQuests.questBoard.status.takeAvailableQuestStatus.status
+    const takeAvailableQuestError = generalSelector.idleQuests.questBoard.status.takeAvailableQuestStatus.error
 
-    const claimRewardInProgressQuestStatus = generalSelector.idleQuest.questsInProgress.Status.claimReward.status
-    const claimRewardInProgressQuestError = generalSelector.idleQuest.questsInProgress.Status.claimReward.error
-    const getInProgressQuestStatus = generalSelector.idleQuest.questsInProgress.Status.inProgress.status
-    const getInProgressQuestError = generalSelector.idleQuest.questsInProgress.Status.inProgress.error
+    const claimRewardInProgressQuestStatus = generalSelector.idleQuests.questBoard.status.claimReward.status
+    const claimRewardInProgressQuestError = generalSelector.idleQuests.questBoard.status.claimReward.error
+    const getInProgressQuestStatus = generalSelector.idleQuests.questBoard.status.inProgress.status
+    const getInProgressQuestError = generalSelector.idleQuests.questBoard.status.inProgress.error
 
-    const dragonSilverToClaim = generalSelector.idleQuest.player.status.dragonSilverToClaim.status
-    const dragonSilverToClaimError = generalSelector.idleQuest.player.status.dragonSilverToClaim.error
+    const dragonSilverToClaim = generalSelector.idleQuests.player.status.dragonSilverToClaim.status
+    const dragonSilverToClaimError = generalSelector.idleQuests.player.status.dragonSilverToClaim.error
 
 
     //detecta cuando el statur ha cambiado y manda un mensaje ya sea error o se logro realizar exitosamente

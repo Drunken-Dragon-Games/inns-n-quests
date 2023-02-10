@@ -2,11 +2,11 @@ import styled from 'styled-components';
 import Image from 'next/image';
 import { LoginButton } from './components';
 import { TitleElMessiri, TextElMessiri } from '../utils/components/basic_components';
-import { useRedirect} from '../utils/hooks';
+import { useRedirect, useIsCookie, useRedirectWithBoolean } from '../utils/hooks';
 import { useRedirectRoute } from './hooks';
 import { selectLoginPageReducer } from './features/appLogin';
 import { useLoginDispatch, useLoginSelector } from './features/hooks';
-import { connectNami, connectEternl, walletConnection} from './features/walletsConnect';
+import { walletConnection} from './features/walletsConnect';
 import { handleDiscordAuth } from './features/discordConnect';
 import { useRedirectLogin } from './hooks';
  
@@ -95,7 +95,6 @@ const LoginApp = (): JSX.Element =>{
 
     const LoginDispatch = useLoginDispatch()
 
-
     const loginSelector = useLoginSelector(selectLoginPageReducer)
     
     const walletError = loginSelector.wallet.connectWalletStatus.error
@@ -105,6 +104,12 @@ const LoginApp = (): JSX.Element =>{
     const route = useRedirectRoute()
 
     useRedirectLogin(route)
+    
+    const isCookieActive = useIsCookie('access')
+
+    useRedirectWithBoolean(isCookieActive, '/')
+
+
 
     return (
         <>

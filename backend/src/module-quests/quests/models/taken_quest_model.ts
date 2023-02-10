@@ -10,6 +10,7 @@ import { handleQuestsByAdventurerLevel,
 import { IFilteredAdventurers } from "../../app/types";
 import { LoggingContext } from "../../../tools-tracing"
 import { AssetManagementService } from "../../../service-asset-management";
+import { WellKnownPolicies } from "../../../registry-policies";
 
 interface ITakenQuest {
     id?: string
@@ -22,7 +23,7 @@ interface ITakenQuest {
     is_claimed?: boolean
     player?: IPlayer
     calculateQuestOutcome(): void
-    claim(sequelize: Sequelize, assetManagementService: AssetManagementService, logger: LoggingContext): Promise<{ id: string, experience: number}[]>
+    claim(sequelize: Sequelize, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies, logger: LoggingContext): Promise<{ id: string, experience: number}[]>
     checkAdventurersStatus(transaction?: Transaction): Promise<IDeadAdventurerData[]>
     getRewardMultiplicator(): Promise<number>
     levelAdventurers(multiplicator: number, transaction: Transaction): Promise<{ id: string, experience: number}[]>
@@ -53,7 +54,7 @@ class TakenQuest extends Model implements ITakenQuest{
         await this.save()        
     }
 
-    async claim(sequelize: Sequelize, assetManagementService: AssetManagementService, logger: LoggingContext) {
+    async claim(sequelize: Sequelize, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies, logger: LoggingContext) {
         const player: Player | null = await Player.findOne({
             where: {
                 user_id: this.user_id
@@ -74,7 +75,7 @@ class TakenQuest extends Model implements ITakenQuest{
                 },
                 transaction: t
             })
-            await player?.addDs(Math.round(this.quest.reward_ds * multiplicator), assetManagementService, logger)
+            await player?.addDs(Math.round(this.quest.reward_ds * multiplicator), assetManagementService, wellKnownPolicies, logger)
             return adventurerData
         });
         return adventurerData

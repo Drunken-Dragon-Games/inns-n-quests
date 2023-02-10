@@ -17,6 +17,7 @@ import { Enrolled,
 import { withTracing } from "../base-logger";
 import { AssetManagementService } from "../../service-asset-management";
 import { config } from '../../tools-utils'
+import { IdleQuestsService } from "../../service-idle-quests";
 
 const { Op } = require("sequelize");
 
@@ -26,10 +27,11 @@ GETS PLAYER ADVENTURERS
 QUERIES RANDOM QUESTS FROM THE DB BASED ON ADVENTURER LEVEL BUCKETS
 RETURN QUESTS TO THE CLIENT
 */
-const getRandomQuestsV2 = (sequelize: Sequelize) => async (request: Request, response: Response, next: NextFunction) => {
+const getRandomQuestsV2 = (sequelize: Sequelize, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const userId = request.auth!.userId
     const numberOfQuests = 20;
 
+    /*
     try {
         // GETS THE MAX AND MIN LEVEL OF THE PLAYER ADVENTURERS
         let xpMin: number = await Adventurer.min('experience', { where: { 
@@ -120,6 +122,8 @@ const getRandomQuestsV2 = (sequelize: Sequelize) => async (request: Request, res
     } catch (error: any) { 
         next(error);
     }
+    */
+    return response.status(200).send(await idleQuestsService.module_getAvailableQuests(userId));
 }
 
 
@@ -129,11 +133,12 @@ RECEIVES QUEST ID
 CREATED ENROLLMENT AND TAKEN QUEST TO DB
 CHANGES ADVENTURER STATUS
 */
-const acceptQuest = (database: Sequelize) => async (request: Request, response: Response, next: NextFunction) => {
+const acceptQuest = (database: Sequelize, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const questId: string = request.body.quest_id;
     const adventurerIds: string[] = request.body.adventurer_ids;
     const userId: string = request.auth!.userId
     
+    /*
     // GETS ADVENTURERS AND CHECKS IF THEY ARE AVAILABLE, IF NOT STATUS 400
     let adventurers: Model<IAdventurer>[];
 
@@ -168,13 +173,11 @@ const acceptQuest = (database: Sequelize) => async (request: Request, response: 
 
         if (!adventurers.every(adventurer => { return !adventurer.getDataValue("in_quest")})) throw new ApiError(400, "adventurer_not_available", "Not every adventurer is available")
 
-        /*
-            TRANSACTION THAT:
-             - CREATES TAKEN QUEST
-             - CREATES QUEST ENROLLMENT
-             - SETS ADVENTURERS TO IN QUEST
-            OTHERWISE DB ROLLBACK
-        */
+            //TRANSACTION THAT:
+            // - CREATES TAKEN QUEST
+            // - CREATES QUEST ENROLLMENT
+            // - SETS ADVENTURERS TO IN QUEST
+            //OTHERWISE DB ROLLBACK
         const takenQuest = await quest.accept(userId, adventurerIds, database)
         takenQuest.quest!.duration *= config.floatOrElse("QUEST_TIME", 1)
             
@@ -182,6 +185,8 @@ const acceptQuest = (database: Sequelize) => async (request: Request, response: 
     } catch (error: any) {
         next(error)
     }
+    */
+    return response.status(201).send(await idleQuestsService.module_acceptQuest(userId, questId, adventurerIds));
 }
 
 ////////////////// GETS TAKEN QUESTS  ////////////////////
@@ -190,9 +195,10 @@ GETS PLAYER TAKEN QUESTS
 CHECKS THE STATUS OF THE TAKEN QUEST
 CHANGES STATUS IF NEEDED
 */
-const getTakenQuest = async (request: Request, response: Response, next: NextFunction) => {
+const getTakenQuest = (idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const userId: string = request.auth!.userId
 
+    /*
     try {
     // GETS TAKEN QUESTS FROM PLAYER
     const takenQuests: TakenQuest[] = await TakenQuest.findAll({
@@ -236,6 +242,8 @@ const getTakenQuest = async (request: Request, response: Response, next: NextFun
     } catch (error: any) {
         next(error);
     }
+    */
+    return response.status(200).json(await idleQuestsService.module_getTakenQuests(userId));
 }
 
 ////////////////// CLAIMS QUEST REWARDS  ////////////////////
@@ -244,11 +252,13 @@ GETS SPECIFIC TAKEN QUEST FROM PLAYER
 UPDATES DB: DELETES ENROLLMENTS, CHANGES TAKEN QUEST STATUS, CHANGES ADVENTURER STATUS
 DISTRIBUTES REWARDS
 */
-const claimQuestReward = (sequelize: Sequelize, assetManagementService: AssetManagementService) => async (request: Request, response: Response, next: NextFunction) => {
+const claimQuestReward = (sequelize: Sequelize, assetManagementService: AssetManagementService, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     // const stakeAddress: string  = request.auth!.stake_address!
     const userId: string = request.auth!.userId
     const takenQuestId: string = request.body.taken_quest_id;
+
+    /*
     let quest_status = false;
     let data = new Array;
 
@@ -300,6 +310,8 @@ const claimQuestReward = (sequelize: Sequelize, assetManagementService: AssetMan
     } catch (error: any) {
         next(error);
     }
+    */
+    return response.status(200).json(await idleQuestsService.module_claimQuestResult(userId, takenQuestId));
 }
 
 export {

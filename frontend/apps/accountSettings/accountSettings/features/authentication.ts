@@ -7,14 +7,14 @@ import {
 import { createSliceStatus, actionsGenerator } from '../../../utils/features/utils';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { setStakeAddress } from "../features/accountData"
-import { generalReducerThunk } from '../../../../features/generalReducer';
+import { GeneralReducerThunk } from '../../../../features/generalReducer';
 import { AxiosError } from "axios";
 import { fetchRefreshToken } from "../../../../features/refresh";
 import { userDataFetch } from '../../../utils/navBar/features/userInfo';
 
 // funcion para obtener y deserializar los datos de la cartera y obtener el address INPUT raw data Wallet
 
-export const deserializeStakeAddress = (): generalReducerThunk => async (dispatch, getState) =>{
+export const deserializeStakeAddress = (): GeneralReducerThunk => async (dispatch, getState) =>{
   
     dispatch(setDeserializeStakeAddressStatusPending())
 
@@ -52,7 +52,7 @@ export const deserializeStakeAddress = (): generalReducerThunk => async (dispatc
 
 //fetch para mandar el reward address y el stake address
 
-export const fetchPostStakeAddresses = (stakeAddress: string, rewardAddress: string ): generalReducerThunk => async (dispatch) => {
+export const fetchPostStakeAddresses = (stakeAddress: string, rewardAddress: string ): GeneralReducerThunk => async (dispatch) => {
 
     dispatch(setFetchPostStakeAddressesStatusPending())
     
@@ -84,7 +84,7 @@ const [ setFetchPostStakeAddressesStatusIdle, setFetchPostStakeAddressesStatusPe
 
 //funcion para firmar el NONCE y atenticar
 
-export const signatureMessage = (rewardAddress: string, nonce: string): generalReducerThunk => async (dispatch, getState) =>{
+export const signatureMessage = (rewardAddress: string, nonce: string): GeneralReducerThunk => async (dispatch, getState) =>{
   
     // se requiere el el tipo de cifrado hexadecimal
     const hex = require('string-hex')
@@ -118,7 +118,7 @@ const [ setSignatureMessageStatusIdle, setSignatureMessageStatusPending, setSign
 
  // fetch para mandar el mensaje ya firmada por la wallet
 
-export const fetchSignedMessage = (nonce: string, messageSigned: string) : generalReducerThunk => async (dispatch) =>{
+export const fetchSignedMessage = (nonce: string, messageSigned: string) : GeneralReducerThunk => async (dispatch) =>{
   
     dispatch(setFetchSignedMessageStatusPending())
     try {  

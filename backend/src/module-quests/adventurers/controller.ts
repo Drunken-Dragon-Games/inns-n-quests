@@ -6,9 +6,10 @@ import { IAdventurerRes } from "../adventurers/models/adventurer_model";
 import { AuthRequest } from "../app/types";
 import { Model, Sequelize } from "sequelize/types";
 import { getAdventurerToReturn } from "./app-logic/get-adventurer-sprite";
-import { registry } from "../app/utils";
 import { withTracing } from "../base-logger";
 import { AssetManagementService } from "../../service-asset-management";
+import { IdleQuestsService } from "../../service-idle-quests";
+import { WellKnownPolicies } from "../../registry-policies";
 
 ///////////////////// ASSET SYNCHRONIZATION  //////////////////////////
 /*
@@ -20,11 +21,10 @@ TO THE ADVENTURER NFT IN CARANO WALLET
 THE FUNCTION USES A SYNCASSETS CLASS TO PERFORM SYNCHRONIZATION
 
 */
-const syncCardanoWallet =  (database: Sequelize, assetManagementService: AssetManagementService, thioldenMetadata: any) => async (request: Request, response: Response, next: NextFunction) => {
+const syncCardanoWallet =  (database: Sequelize, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies, thioldenMetadata: any) => async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     const userId = request.auth!.userId
-    let policies = registry.policies
-    let assets = new SyncAssets(userId, thioldenMetadata, policies, logger);
+    let assets = new SyncAssets(userId, thioldenMetadata, wellKnownPolicies, logger);
     try {
         await assets.init(assetManagementService, logger);
         await assets.sync(database, logger);
@@ -42,9 +42,10 @@ VIEW THAT QUERIES ALL THE ADVENTURERS FROM THE DB
 ADDS THE CORRESPONDING SPRITE AND RETURNS INSTANCES
 
 */
-const getAllAdventurers = (thioldenMetadata: any) => async (request: Request, response: Response, next: NextFunction) => {
+const getAllAdventurers = (thioldenMetadata: any, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const userId: string  = (request as AuthRequest).auth.userId!
     const logger = withTracing(request)
+    /*
     try {   
         // QUERY TO THE DB
         logger.log.info({message: "trying to get all adventurers"})
@@ -78,6 +79,17 @@ const getAllAdventurers = (thioldenMetadata: any) => async (request: Request, re
     } catch (error) {
         next(error)
     }
+    */
+
+    /*
+    const result = await idleQuestsService.getAllAdventurers(userId)
+    if(result.status == 'ok')
+        return response.status(200).json(result)
+    else
+        return response.status(400).json(result)
+        */
+    const result = await idleQuestsService.module_getAllAdventurers(userId)
+    return response.status(200).json(result)
 }
 
 export {

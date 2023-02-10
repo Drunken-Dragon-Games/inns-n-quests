@@ -1,43 +1,16 @@
 import { QuestRequirement} from "../basic_component"
-import { useRequirementsBonus } from "../../hooks"
-import { useGetRequirementText } from "../../../apps/availableQuest/hooks"
-import { useEffect, useState } from "react"
 import { ConditionalRender } from "../../../../../utils/components/basic_components"
+import { RequirementType, CharacterType } from "../../../../../../types/idleQuest"
 
 interface questRequirementsSection{
-    requirements: requirement 
+    requirements: RequirementType 
     adventuresSelected: any
-    callbackBonus: (bonus: number) => void
-}
-
-interface requirement{
-    character?: character []
-    all?: boolean
-    party?: party
-}
-
-
-interface character {
-    class?: string
-    race?: string
-}
-
-interface party {
-    balanced: boolean
 }
 
 
 
-const QuestRequirementsSection = ({requirements, adventuresSelected, callbackBonus} : questRequirementsSection) =>{
+const QuestRequirementsSection = ({requirements, adventuresSelected} : questRequirementsSection) =>{
     
-    const bonus = useRequirementsBonus(adventuresSelected, requirements)
-    
-    useEffect(() => {
-        callbackBonus(bonus)
-    }, [bonus])
-    
-    const text = useGetRequirementText(requirements)
-
     //si el objeto esta vacio no renderiza nada 
     if(Object.keys(requirements).length == 0){
         return <></>
@@ -48,7 +21,7 @@ const QuestRequirementsSection = ({requirements, adventuresSelected, callbackBon
 
             <ConditionalRender condition={requirements.all == undefined }>
                 {
-                    requirements.character!.map((requirementData: character, index: number )=>{
+                    requirements.character!.map((requirementData: CharacterType, index: number )=>{
                         const parseData = {character:[requirementData]}
                         return <QuestRequirement data={parseData} adventuresSelected={adventuresSelected} key={index}>{requirementData.race!} {requirementData.class!} needed</QuestRequirement>
                     })
@@ -59,7 +32,7 @@ const QuestRequirementsSection = ({requirements, adventuresSelected, callbackBon
                     data={requirements}
                     adventuresSelected={adventuresSelected}    
                 >
-                    {text}
+                    {"some requirement text"}
                 </QuestRequirement>
             </ConditionalRender>
 

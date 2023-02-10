@@ -2,7 +2,7 @@ import { getRandomElement } from "../../../app/utils";
 import { ADVENTURER_PIXELTILES } from "../../../app/settings";
 import { pixelTileMetaData, gmasMetadata, getAdvofThioldenMetadata } from "../../../app/metadata/metadata";
 import { IPixelTileMetaData, IGMAMetadata, IAdvOfThioldenMetadata } from "../../../app/metadata/metadata";
-import { registry } from "../../../app/utils"
+import { WellKnownPolicies } from "../../../../registry-policies";
 
 type NFTMetadata = IPixelTileMetaData | IGMAMetadata | IAdvOfThioldenMetadata
 
@@ -24,14 +24,14 @@ const getRandomNFT = async (): Promise<[string, string]> => {
     return [assetName!, nftType!]
 }
 
-const getCollectionPolicy = async (collection: string): Promise<string> => {
+const getCollectionPolicy = async (collection: string, wellKnownPolicies: WellKnownPolicies): Promise<string> => {
     let policy: string | undefined
     if (collection == "PixelTile") {
-        policy = registry.policies.pixeltiles
+        policy = wellKnownPolicies.pixelTiles.policyId
     } else if (collection == "GrandmasterAdventurer")
-       policy = registry.policies.gmas
+       policy = wellKnownPolicies.grandMasterAdventurers.policyId
     else {
-        policy = registry.policies.aots
+        policy = wellKnownPolicies.adventurersOfThiolden.policyId
     }
     if (policy == undefined) throw new Error("Policy is undefined")
     return policy

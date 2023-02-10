@@ -1,4 +1,4 @@
-import { generalReducerThunk } from "./generalReducer"
+import { GeneralReducerThunk } from "./generalReducer"
 import { axiosCustomInstance } from "../axios/axiosApi"
 import { AxiosError } from "axios"
 import { createSliceStatus } from "../apps/utils/features/utils"
@@ -6,7 +6,7 @@ import { actionsGenerator } from "../apps/utils/features/utils"
 import { combineReducers } from "redux";
 
 
-export const fetchRefreshToken = (action: ()=> void, error: AxiosError ) : generalReducerThunk => async(dispatch) => {
+export const fetchRefreshToken = (action: ()=> void, error: AxiosError ) : GeneralReducerThunk => async(dispatch) => {
     
     if(error.response?.status == 401){
 

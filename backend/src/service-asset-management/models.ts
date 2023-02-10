@@ -7,13 +7,6 @@ export type HealthStatus =
         }[]
     }
 
-export type RegistryPolicy =
-    { policyId: string
-    , name: string
-    , description: string
-    , tags: string[]
-    }
-
 export type Inventory = 
     { [policyId: string]: { unit: string, quantity: string, chain: boolean }[] }
 

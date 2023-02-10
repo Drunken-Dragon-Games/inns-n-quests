@@ -8,9 +8,9 @@ export default (): boolean => {
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
 
-    const getAdventurersStatus = generalSelector.idleQuest.adventurers.getAdventurersStatus.status
-    const getAvailableQuestStatus = generalSelector.idleQuest.questAvailable.status.getAvailableQuestStatus.status
-    const getInProgressQuestStatus = generalSelector.idleQuest.questsInProgress.Status.inProgress.status
+    const getAdventurersStatus = generalSelector.idleQuests.questBoard.status.getAdventurersStatus.status
+    const getAvailableQuestStatus = generalSelector.idleQuests.questBoard.status.getAvailableQuestStatus.status
+    const getInProgressQuestStatus = generalSelector.idleQuests.questBoard.status.inProgress.status
 
     useEffect(()=>{
 
