@@ -84,7 +84,7 @@ const NoQuestWaring = styled.div`
     }
 `
 
-const InProgressQuest = () =>{
+const InProgressList = () =>{
 
    
     const generalSelector = useGeneralSelector(selectGeneralReducer)
@@ -139,4 +139,4 @@ const InProgressQuest = () =>{
     )
 }
 
-export default InProgressQuest
+export default InProgressList

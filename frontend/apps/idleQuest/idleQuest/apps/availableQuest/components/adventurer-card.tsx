@@ -1,9 +1,8 @@
 import styled, { keyframes } from "styled-components"
 import { CrispPixelArtImage } from "../../../../../utils"
 import { TextOswald } from "../../../../../utils/components/basic_components"
-import { Adventurer, EmojiName } from "../../../../dsl"
-import { AdventurerSprite } from "../../../utils/components/basic_component"
-import { SpriteRenderOptions } from "../../../utils/components/basic_component/adventurer-sprite"
+import { Adventurer } from "../../../../dsl"
+import AdventurerSprite, { SpriteRenderOptions } from "./adventurer-sprite"
 
 type ExperienceBarColor = "r" | "g" | "b"
 
@@ -17,7 +16,7 @@ const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
 }
 
 const InfoWrapper = styled.div`
-    margin-top: 0.5vh;
+    margin-top: 0.5vw;
     width: inherit;
 `
 
@@ -40,9 +39,9 @@ const ExperienceAnimation = (experience: number) => keyframes`
 `
 
 const ExperienceBar = styled.div<{ display: boolean, color: ExperienceBarColor }>`
-    margin-top: 0.1vh;
+    margin-top: 0.1vw;
     flex: 1;
-    height: 1.2vh;
+    height: 1.2vw;
     overflow: hidden;
     border-radius: 0vw 1vw 0vw 1vw;
     background-color: ${props => rgbMapping(props.color, true)}};
@@ -56,15 +55,15 @@ const Experience = styled.div<{ experience: number, animate: boolean, color: Exp
     width: ${props => props.experience}%;
     animation: ${props => props.animate ? ExperienceAnimation(props.experience) : "none"} 2s;
     position: relative;
-    filter: drop-shadow(0px 0px 0.2vh rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0px 0px 0.2vw rgba(0, 0, 0, 0.5));
     span {
-        filter: drop-shadow(0px 0px 0.2vh ${props => rgbMapping(props.color, false)});
+        filter: drop-shadow(0px 0px 0.2vw ${props => rgbMapping(props.color, false)});
         font-family: Oswald;
         position: absolute;
         display: block;
         padding: 0;
-        margin: -0.4vh 0 0 0.4vw;
-        font-size: 1.3vh;
+        margin: -0.4vw 0 0 0.4vw;
+        font-size: 1.3vw;
         font-weight: bold;
         color: ${props => rgbMapping(props.color, true)};
     }
@@ -108,10 +107,10 @@ const DeadMarkAnimation = keyframes`
 
 const DeadMark = styled.div <{ display: boolean }>`
     position: absolute;
-    top: 3vh;
+    top: 3vw;
     left: 0.5vw;
     width: 5vw;
-    height: 4vh;
+    height: 4vw;
     z-index: 2;
     animation: ${DeadMarkAnimation} 1.2s;
     ${props => props.display == true  ? "" : "display: none;"}
@@ -125,14 +124,14 @@ const AdventurerWrapper = styled.div`
     width: 100%;
     height: 1px;
     display: flex;
-    margin-top: 9vh;
+    margin-top: 9vw;
     flex-direction: column;
     align-items: center;
 `
 
 interface AdventurerProps {
     adventurer: Adventurer,
-    emoji?: EmojiName,
+    emoji?: string,
     render?: SpriteRenderOptions,
     displayDeadMark?: boolean,
     displayAPS?: boolean,

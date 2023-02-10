@@ -43,8 +43,9 @@ const questBoardState = createSlice({
             state.takenQuests = action.payload
         },
 
-        addTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
-            state.takenQuests = [...state.takenQuests, ...action.payload]
+        addTakenQuest: (state, action: PayloadAction<TakenQuest>) => {
+            state.takenQuests = [...state.takenQuests, action.payload]
+            console.log(state.takenQuests)
         },
 
         removeTakenQuest: (state, action: PayloadAction<TakenQuest>) => {
@@ -71,6 +72,8 @@ const questBoardState = createSlice({
             else
                 state.adventurerSlots = Array(quest.quest.slots).fill(null).map((_, index) => 
                     state.inventory.find(adventurer => adventurer.adventurerId === quest.adventurerIds[index]) ?? null)
+            console.log(quest)
+            console.log(state.adventurerSlots)
         },
 
         unselectQuest: (state) => {
@@ -122,7 +125,7 @@ const questBoardState = createSlice({
 export const {
     setInventory,
     setTakenQuests,
-    addTakenQuests,
+    addTakenQuest,
     removeTakenQuest,
     addAvailableQuests,
     removeAvailableQuest,

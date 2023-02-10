@@ -21,8 +21,6 @@ export type APS = {
     charisma: number,
 }
 
-export type EmojiName = "cross" | "over-confident" | "confident" | "insecure" | "fearful" | "panicking" | "terrified"
-
 export type SealType = "kings-plea" | "heroic-quest" | "valiant-adventure" | "townsfolk"
 
 export const sealTypes = ["kings-plea", "heroic-quest", "valiant-adventure", "townsfolk"] 

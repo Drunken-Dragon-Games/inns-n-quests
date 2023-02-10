@@ -1,10 +1,10 @@
-import styled, { css, keyframes } from "styled-components"
-import { useComputeHeightFromOriginalImage } from "../../../apps/console/hooks"
-import { Adventurer, EmojiName } from "../../../../dsl/models"
-import { CrispPixelArtImage, notEmpty } from "../../../../../utils"
+import styled, { keyframes } from "styled-components"
+import { useComputeHeightFromOriginalImage } from "../../console/hooks"
+import { Adventurer } from "../../../../dsl/models"
+import { CrispPixelArtImage, notEmpty, simpleHash } from "../../../../../utils"
 import { useEffect, useState } from "react"
 
-const emojiMapping = (emoji?: EmojiName) => {
+const emojiMapping = (emoji?: string) => {
     switch (emoji) {
         case "over-confident": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/over_confident.webp"
         case "confident": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/confident.webp"
@@ -12,7 +12,8 @@ const emojiMapping = (emoji?: EmojiName) => {
         case "fearful": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/fearful.webp"
         case "panicking": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/panicking.webp"
         case "terrified": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/terrified.webp"
-        default: return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/close_icon.png"
+        case "cross": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/close_icon.png"
+        default: return `https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/emoji_${(Math.abs(simpleHash(emoji ?? "") % 6) + 1)}.webp`
     }
 }
 
@@ -21,7 +22,7 @@ const adventurerOfThioldenCustomWidthAndOffset = (adventurer: Adventurer): [numb
     if(advName == "drignir" || advName == "arne" || advName == "aztuneio" || advName == "vimtyr")
         return [5.5, -2.2] 
     else if (advName == 'ilinmyr')
-        return [8.5, -2.2] 
+        return [8.5, -2.2]
     else if (advName == 'aragren' || advName == 'bodica' || advName == 'kilia' || advName == 'rando')
         return [4.3, -2.2] 
     else if (advName == 'vale')
@@ -137,21 +138,38 @@ const LeavingEmojiAnimation = keyframes`
     100% {opacity: 0; margin-top: -3vh;}
 `
 
-const EmojiContainer = styled.div<{ display: boolean, offset: number }>`
+const EmojiBackground = styled.div<{ display: boolean, offset: number }>`
     position: absolute;
     z-index: 5;
-    width: 2.5vw;
-    height: 2.2vw;
+    width: 3vw;
+    height: 2.7vw;
     margin-top: ${props => props.offset}vw;
     opacity: ${props => props.display ? 1 : 0};
     animation ${props => props.display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
 `
 
-const Emoji = ({ emoji, offset }: { emoji?: EmojiName, offset: number }) => {
-    const [lastEmoji, setLastEmoji] = useState<EmojiName | undefined>(undefined)
+const EmojiContainer = styled.div<{ display: boolean, offset: number }>`
+    position: absolute;
+    z-index: 5;
+    width: 2.3vw;
+    height: 2.0vw;
+    margin-top: ${props => props.offset + 0.2}vw;
+    opacity: ${props => props.display ? 1 : 0};
+    animation ${props => props.display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
+`
+
+const Emoji = ({ emoji, offset }: { emoji?: string, offset: number }) => {
+    const [lastEmoji, setLastEmoji] = useState<string | undefined>(undefined)
     const renderEmoji = emoji ?? lastEmoji
     useEffect(() => { if (emoji) setLastEmoji(emoji) }, [emoji])
-    return notEmpty(renderEmoji) ?
+    return notEmpty(renderEmoji) ? <>
+        <EmojiBackground display={emoji !== undefined} offset={offset}>
+            <CrispPixelArtImage 
+                src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"  
+                alt="emoji buble" 
+                layout="fill" 
+            />
+        </EmojiBackground>
         <EmojiContainer display={emoji !== undefined} offset={offset}>
             <CrispPixelArtImage
                 src={emojiMapping(renderEmoji)}
@@ -159,7 +177,7 @@ const Emoji = ({ emoji, offset }: { emoji?: EmojiName, offset: number }) => {
                 layout="fill"
             />
         </EmojiContainer>
-    : <></>
+    </> : <></>
 }
 
 interface AdventurerSpriteProps {
@@ -167,7 +185,7 @@ interface AdventurerSpriteProps {
     adventurer: Adventurer
     render: SpriteRenderOptions
     scale?: number
-    emoji?: EmojiName
+    emoji?: string
 }
 
 const AdventurerSprite = ({className, adventurer, render = "normal", scale = 1, emoji} : AdventurerSpriteProps) => {

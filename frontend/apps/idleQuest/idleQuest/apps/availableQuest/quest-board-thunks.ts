@@ -6,7 +6,18 @@ import { fetchRefreshToken } from "../../../../../features/refresh"
 import { simpleHash } from "../../../../utils"
 import { createSliceStatus, actionsGenerator } from "../../../../utils/features/utils"
 import { sealTypes, tagAvailableQuest, AvailableQuest, Adventurer, tagTakenQuest, TakenQuest, ClaimQuestOutcome } from "../../../dsl"
-import { setInventory, addAvailableQuests, addTakenQuests, changeAdventurersInChallenge, unselectQuest, setTakenQuests, removeTakenQuest } from "./quest-board-state"
+import { setInventory, addAvailableQuests, addTakenQuest, changeAdventurersInChallenge, unselectQuest, setTakenQuests, removeTakenQuest } from "./quest-board-state"
+
+const addVisualQuestData = (quest: any) => {
+    return ({
+        ...quest,
+        seal: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
+        paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
+    })
+}
+
+const addVisualDataToTakenQuests = (quest: any) =>
+    ({ ...quest, quest: addVisualQuestData(quest.quest) })
 
 export const getAdventurers = (): GeneralReducerThunk => async (dispatch) =>{
     dispatch(setFetchGetAdventurersStatusPending())
@@ -25,14 +36,6 @@ export const getAdventurers = (): GeneralReducerThunk => async (dispatch) =>{
 
 export const  fetchGetAdventurersStatus  = createSliceStatus("fetchGetAdventurersStatus")
 export const [ setFetchGetAdventurersStatusIdle, setFetchGetAdventurersStatusPending, setFetchGetAdventurersStatusFulfilled, setFetchGetAdventurersStatusErrors ] = actionsGenerator(fetchGetAdventurersStatus.actions)
-
-export const addVisualQuestData = (quest: any) => {
-    return ({
-        ...quest,
-        seal: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
-        paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
-    })
-}
 
 export const getAvailableQuests = (firstTime? : boolean): GeneralReducerThunk => async (dispatch) =>{
     dispatch(setFetchGetAvailableQuestStatusPending())
@@ -58,7 +61,8 @@ export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventure
     try {  
         const adventurer_ids = adventurers.map(adventurer => adventurer.adventurerId)
         const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: quest.questId, adventurer_ids})
-        dispatch(addTakenQuests([response.data]))
+        const takenQuest = tagTakenQuest(addVisualDataToTakenQuests(response.data)) as TakenQuest
+        dispatch(addTakenQuest(takenQuest))
         dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: true }))
         dispatch(unselectQuest())
         dispatch(setFetchTakeAvailableQuestStatusFulfilled())
@@ -73,9 +77,6 @@ export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventure
 
 export const  fetchTakeAvailableQuestStatus  = createSliceStatus("fetchTakeAvailableQuestStatus")
 export const [ setFetchTakeAvailableQuestStatusIdle, setFetchTakeAvailableQuestStatusPending, setFetchTakeAvailableQuestStatusFulfilled, setFetchTakeAvailableQuestStatusErrors ] = actionsGenerator(fetchTakeAvailableQuestStatus.actions)
-
-const addVisualDataToTakenQuests = (quest: any) =>
-    ({ ...quest, quest: addVisualQuestData(quest.quest) })
 
 export const getInProgressQuests = (): GeneralReducerThunk => async (dispatch) =>{
     dispatch(setFetchGetInProgressQuestStatusPending())

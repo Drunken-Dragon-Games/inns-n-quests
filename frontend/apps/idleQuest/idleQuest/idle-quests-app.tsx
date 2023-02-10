@@ -42,6 +42,7 @@ const IdleQuestsApp = () => {
     const availableQuests = generalSelector.idleQuests.questBoard.questBoard.availableQuests
     const takenQuests = generalSelector.idleQuests.questBoard.questBoard.takenQuests
 
+    console.log(adventurerSlots)
     const onSelectQuest = (quest: SelectedQuest) => 
         generalDispatch(selectQuest(quest))
     const onSignQuest = (quest: SelectedQuest, adventurers: Adventurer[]) => {

@@ -15,11 +15,12 @@ const AdventurerListContainer = styled.div`
 
 const AdventurerListWrapper = styled.div`
     width: 97%;
-    height: 82vh;
+    height: 91vh;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: space-between;
-    gap: 6vh;
+    gap: 20px;
 
     overflow: auto;
     z-index: 1;
@@ -52,7 +53,7 @@ const AdventurerListWrapper = styled.div`
 
 const ArrowDecreseContainer = styled.div`
       position: absolute;
-      bottom: -2vh;
+      bottom: -2vw;
       right: 0.15vw;
       cursor: pointer;  
 
@@ -75,7 +76,8 @@ const ArrowIncreseContainer = styled.div`
 `
 
 const AdventurerCardContainer = styled.div<{ interactuable: boolean }>`
-    width: 100%;
+    width: 83%;
+    margin-left: 1.8vw;
     ${props => props.interactuable ? "cursor: pointer;" : ""}
 `
 
@@ -93,6 +95,7 @@ const AdventurerCardWrapper = ({ adventurer, adventurerSlots, selectedQuest, onA
     const inChallenge = adventurer.inChallenge
     const selected = adventurerSlots.some(slot => slot?.adventurerId == adventurer.adventurerId)
     const interactuable = notEmpty(selectedQuest) && selectedQuest.ctype == "available-quest" && !inChallenge && !dead 
+    const emoji = hovering ? adventurer.adventurerId : undefined
     const render 
         = dead ? "dead"
         : selected ? "selected"
@@ -112,6 +115,7 @@ const AdventurerCardWrapper = ({ adventurer, adventurerSlots, selectedQuest, onA
                 medalNumber={slotIndex === 0 ? undefined : slotIndex}
                 displayAPS={true}
                 render={render}
+                emoji={emoji}
             />
         </AdventurerCardContainer>
     )
@@ -140,6 +144,7 @@ const AdventurerList = ({ adventurers, adventurerSlots, selectedQuest, onAdventu
             <AdventurerListWrapper ref={scrolling}>
                 {adventurers.map((adventurer: Adventurer) =>
                     <AdventurerCardWrapper 
+                        key={adventurer.adventurerId}
                         adventurer={adventurer} 
                         adventurerSlots={adventurerSlots} 
                         selectedQuest={selectedQuest}

@@ -1,9 +1,7 @@
 import styled from "styled-components";
 import Image from 'next/image'
-import { Navbar, AdventurerList, InProgressQuestMapping, ConsoleTabs } from "./components/complex"
+import { Navbar, AdventurerList, InProgressList, ConsoleTabs } from "./components/complex"
 import { Adventurer, SelectedQuest, TakenQuest } from "../../../dsl";
-import { useGeneralSelector } from "../../../../../features/hooks";
-import { selectGeneralReducer } from "../../../../../features/generalReducer";
 import { ConditionalRender } from "../../../../utils/components/basic_components";
 import { TabNames } from "./components/complex/console-tabs";
 import { useState } from "react";
@@ -73,7 +71,7 @@ const Console = ({ adventurers, adventurerSlots, selectedQuest, takenQuests, onA
                 </ConditionalRender>
 
                 <ConditionalRender condition={ page == "quests-in-progress"}>
-                    <InProgressQuestMapping/>
+                    <InProgressList/>
                 </ConditionalRender>
             </PaddingVertical>
         </AdventuresConsoleContainer>

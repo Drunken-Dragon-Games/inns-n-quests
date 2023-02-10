@@ -1,7 +1,7 @@
 import styled from "styled-components"
 import { useState } from "react"
 import { CrispPixelArtImage, notEmpty } from "../../../../../utils"
-import { Adventurer, EmojiName } from "../../../../dsl"
+import { Adventurer } from "../../../../dsl"
 import AdventurerCard from "./adventurer-card"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
@@ -33,7 +33,7 @@ const EmptySlot = () =>
 interface AdventurerSlotProps {
     className?: string,
     adventurer: Adventurer | null,
-    emoji?: EmojiName,
+    emoji?: string,
     onUnselectAdventurer?: (adventurer: Adventurer) => void
 }
 
