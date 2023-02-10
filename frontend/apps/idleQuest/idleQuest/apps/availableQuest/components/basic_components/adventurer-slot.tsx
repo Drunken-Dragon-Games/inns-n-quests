@@ -85,7 +85,7 @@ const AdventurerSlot = ({ adventurer, emoji, onUnselectAdventurer }: AdventurerS
     const [hovering, setHovering] = useState<boolean>(false)
     const interactuable = notEmpty(onUnselectAdventurer)
     const displayedEmoji = interactuable && hovering ? "cross" : emoji
-    const render = interactuable && hovering ? "hovered" : "normal"
+    const render = "hovered"//interactuable && hovering ? "hovered" : "normal"
     return (
         <AdventurerSlotContainer
             onMouseEnter={() => setHovering(true)}

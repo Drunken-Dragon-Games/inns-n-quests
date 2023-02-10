@@ -101,7 +101,17 @@ const  fetchTakeAvailableQuestStatus  = createSliceStatus("fetchTakeAvailableQue
 const [ setFetchTakeAvailableQuestStatusIdle, setFetchTakeAvailableQuestStatusPending, setFetchTakeAvailableQuestStatusFulfilled, setFetchTakeAvailableQuestStatusErrors ] = actionsGenerator(fetchTakeAvailableQuestStatus.actions)
 
 
-
+const sortAdventurers = (adventurers: Adventurer[]) => {
+    return adventurers.sort((a, b) => {
+        if(a.inChallenge && !b.inChallenge){
+            return 1
+        }
+        if(!a.inChallenge && b.inChallenge){
+            return -1
+        }
+        return 0
+    })
+}
 
 interface QuestBoardState {
     inventory: Adventurer[]
@@ -124,7 +134,7 @@ const questBoardState = createSlice({
     reducers: {
 
         setInventory: (state, action: PayloadAction<Adventurer[]>) => {
-            state.inventory = action.payload
+            state.inventory = sortAdventurers(action.payload)
         },
 
         addTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
@@ -191,6 +201,7 @@ const questBoardState = createSlice({
                     }
                 })
             })
+            state.inventory = sortAdventurers(state.inventory)
         },
     },
 });
