@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { useGeneralSelector } from "../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../features/generalReducer"
-import { DataAdventurerType } from "../../../../../types/idleQuest"
+//import { Adventurer } from "../../../../../types/idleQuest"
 import { RequirementType, CharacterType } from "../../../../../types/idleQuest"
+import { Adventurer } from "../../../dsl"
 
 export default (adventurerList: string [], requirements: RequirementType ): number => {
 
@@ -38,7 +39,7 @@ export default (adventurerList: string [], requirements: RequirementType ): numb
         // esta condicional verifica que por lo menos haya un aventurero seleccionado
         if(adventurer.length > 0){
             //este reduce verifica si todos cumplen con la espesificaciones requeridas de razas y classes
-            isValidatedBool = adventurer.reduce((acc: boolean, adventurer: DataAdventurerType ) => {
+            isValidatedBool = adventurer.reduce((acc: boolean, adventurer: Adventurer ) => {
             
                 if(requirements.character![0].race != undefined && requirements.character![0].race != adventurer.race){
                     return false
@@ -67,7 +68,7 @@ export default (adventurerList: string [], requirements: RequirementType ): numb
         if(adventurers.length > 0){
             
             //agrega todas las clases de los aventureros en el objeto set
-            adventurers.forEach((adventurer: DataAdventurerType)=> {
+            adventurers.forEach((adventurer: Adventurer)=> {
                 partyClasses.add(adventurer.class)
             })
 
@@ -137,9 +138,9 @@ export default (adventurerList: string [], requirements: RequirementType ): numb
 
 //transforma una lista de ids de aventureros a una array con los aventurersos
 
-const adventuresSelectedArray = (adventurerList: string [], allAdventurer: DataAdventurerType []) =>{
+const adventuresSelectedArray = (adventurerList: string [], allAdventurer: Adventurer []) =>{
 
-    const adventurersArray = adventurerList.reduce((acc:DataAdventurerType [] , adventurerId: string) => {
+    const adventurersArray = adventurerList.reduce((acc:Adventurer [] , adventurerId: string) => {
         
         
         const newAdventurer = allAdventurer.filter( (adventurer) => adventurer.adventurerId == adventurerId)
@@ -152,7 +153,7 @@ const adventuresSelectedArray = (adventurerList: string [], allAdventurer: DataA
 
 }
 
-const singleRequirement = (requirements:CharacterType, adventurerList:  DataAdventurerType []) =>{
+const singleRequirement = (requirements:CharacterType, adventurerList:  Adventurer []) =>{
 
 
   //se obtienen las propiedades del objeto del rquerimiento
@@ -163,7 +164,7 @@ const singleRequirement = (requirements:CharacterType, adventurerList:  DataAdve
       
       const isTrue = requirementsKeys.reduce((acc: boolean [] , requirementKey: string) => {
           
-          if(requirements[requirementKey as keyof CharacterType] == adventurer[requirementKey  as keyof DataAdventurerType]){
+          if(requirements[requirementKey as keyof CharacterType] == adventurer[requirementKey  as keyof Adventurer]){
 
               return acc.concat(true)
               

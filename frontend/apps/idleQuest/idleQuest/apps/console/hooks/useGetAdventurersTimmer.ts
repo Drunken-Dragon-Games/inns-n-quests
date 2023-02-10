@@ -1,6 +1,5 @@
 import { useEffect } from "react"
 import { useGeneralDispatch } from "../../../../../../features/hooks"
-import { getAdventurers } from "../../availableQuest/quest-board-state"
 
 export default (timeLeft: number) =>{
 
@@ -10,7 +9,7 @@ export default (timeLeft: number) =>{
     useEffect(() => {
     
         if( timeLeft == 0){
-                generalDispatch(getAdventurers())
+                //generalDispatch(getAdventurers())
         }
 
     }, [timeLeft])
