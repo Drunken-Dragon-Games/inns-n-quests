@@ -137,8 +137,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             )
 
         for (const server of servers) {
-            if (!server.leaderboardNotificationChannelId) continue
-            const channel = this.client.channels.resolve(server.leaderboardNotificationChannelId)
+            if (!server.questsNotificationChannelId) continue
+            const channel = this.client.channels.resolve(server.questsNotificationChannelId)
             if (!channel || !channel.isTextBased()) continue
             await channel.send({ embeds: [ embed ] })
         }
@@ -161,8 +161,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             .addFields(embedFields)
 
         for (const server of servers) {
-            if (!server.questsNotificationChannelId) continue
-            const channel = this.client.channels.resolve(server.questsNotificationChannelId)
+            if (!server.leaderboardNotificationChannelId) continue
+            const channel = this.client.channels.resolve(server.leaderboardNotificationChannelId)
             if (!channel || !channel.isTextBased()) continue
             await channel.send({ embeds: [ embed ] })
         }
