@@ -1,13 +1,27 @@
 import { Adventurer, TakenQuest } from "../service-idle-quests"
 
-export type EvenstatEvent = EvenstatClaimedQuest
+export interface EvenstatsSubscriber {
+    onEvenstatsEvent: (event: EvenstatsEvent) => Promise<void>
+}
 
-export type EvenstatClaimedQuest = {
-    ctype: "evenstat-claimed-quest",
+export type EvenstatsEvent = ClaimedQuestEvent | QuestsSucceededLeaderboardChangedEvent
+
+export type ClaimedQuestEvent = {
+    ctype: "claimed-quest-event",
     quest: TakenQuest,
     adventurers: Adventurer[], 
 }
 
-export interface EvenstatSubscriber {
-    onEvenstatEvent: (event: EvenstatEvent) => Promise<void>
+export type QuestsSucceededLeaderboardChangedEvent = {
+    ctype: "quests-succeeded-leaderboard-changed-event",
+    leaderboard: QuestSucceededEntry[],
+}
+
+export type Leaderboard = {
+    questsSucceeded: QuestSucceededEntry[],
+}
+
+export type QuestSucceededEntry = {
+    userId: string,
+    count: number,
 }

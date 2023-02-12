@@ -227,7 +227,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         await quest.update({ claimedAt: now, outcome }, { transaction })
         await transaction.commit()
         this.evenstatsService.publish({
-            ctype: "evenstat-claimed-quest",
+            ctype: "claimed-quest-event",
             quest: { ...this.makeTakenQuestFromDB(quest), claimedAt: now, outcome },
             adventurers, 
         })

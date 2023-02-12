@@ -17,6 +17,7 @@ export default class IdentityServiceMock {
             listSessions: jest.fn(),
             signout: jest.fn(),
             resolveUser: jest.fn(),
+            resolveUsers: jest.fn(),
             resolveSession: jest.fn(),
             updateUser: jest.fn(),
         }

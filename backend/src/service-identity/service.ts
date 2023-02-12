@@ -14,7 +14,8 @@ import { config, HealthStatus } from "../tools-utils"
 import { 
     CreateNonceResult, Credentials, AuthenticationResult, RegistrationResult, AssociationResult, 
     RefreshResult, ListSessionsResult, SignOutResult, ResolveUserResult, ResolveSesionResult, 
-    UpdateUserResult 
+    UpdateUserResult, 
+    UserInfo
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -180,6 +181,10 @@ export class IdentityServiceDsl implements IdentityService {
         const user = await Users.resolve(info)
         if (user.ctype == "failure") return { status: "unknown-user-id" }
         else return { status: "ok", info: user.result }
+    }
+
+    async resolveUsers(userIds: string[], logger?: LoggingContext): Promise<UserInfo[]> {
+        return await Users.resolveUsersNoStakeAddresses(userIds)
     }
 
     async resolveSession(sessionId: string, logger?: LoggingContext): Promise<ResolveSesionResult> {

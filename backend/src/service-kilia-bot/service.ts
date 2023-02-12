@@ -1,6 +1,6 @@
 import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
-import { EvenstatEvent, EvenstatsService, EvenstatSubscriber } from "../service-evenstats"
+import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
 import { Adventurer, TakenQuest } from "../service-idle-quests"
 import { config } from "../tools-utils"
 import { QueryInterface, Sequelize } from "sequelize"
@@ -37,7 +37,7 @@ const commandsBuilder = (): Command[] => {
     return [ config ]
 }
 
-export class KiliaBotServiceDsl implements EvenstatSubscriber {
+export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
     private readonly migrator: Umzug<QueryInterface>
     private readonly configCache: { [ key: string ]: configDB.IConfigDB } = {}
@@ -67,7 +67,10 @@ export class KiliaBotServiceDsl implements EvenstatSubscriber {
             dependencies.identityService,
         )
         await service.loadDatabaseModels()
-        dependencies.evenstatsService.subscribe(service, "evenstat-claimed-quest")
+        dependencies.evenstatsService.subscribe(service, 
+            "claimed-quest-event",
+            "quests-succeeded-leaderboard-changed-event",
+        )
         client.once(Events.ClientReady, async (client) => {
             if (!client.user) return
             await client.application.commands.set(commandsBuilder())
@@ -99,9 +102,12 @@ export class KiliaBotServiceDsl implements EvenstatSubscriber {
         await this.migrator.down()
     }
 
-    async onEvenstatEvent(event: EvenstatEvent): Promise<void> {
+    async onEvenstatsEvent(event: EvenstatsEvent): Promise<void> {
         switch (event.ctype) {
-            case "evenstat-claimed-quest": return this.notifyQuestClaimed(event.quest, event.adventurers)
+            case "claimed-quest-event": 
+                return this.notifyQuestClaimed(event.quest, event.adventurers)
+            case "quests-succeeded-leaderboard-changed-event": 
+                return this.notifyQuestsSucceededLeaderboardChanged(event.leaderboard)
         }
     }
 
@@ -125,6 +131,30 @@ export class KiliaBotServiceDsl implements EvenstatSubscriber {
             .addFields(
                 { name: "Adventurers", value: adventurers.map(a => `${a.name}(${a.athleticism}/${a.intellect}/${a.charisma})`).join(", ") },
             )
+
+        for (const server of servers) {
+            if (!server.questsNotificationChannelId) continue
+            const channel = this.client.channels.resolve(server.questsNotificationChannelId)
+            if (!channel || !channel.isTextBased()) continue
+            await channel.send({ embeds: [ embed ] })
+        }
+    }
+
+    async notifyQuestsSucceededLeaderboardChanged(leaderboard: QuestSucceededEntry[]): Promise<void> {
+        const servers = Object.values(this.configCache)
+
+        const players = await this.identityService.resolveUsers(
+            leaderboard.map((position) => position.userId))
+        const withPlayers = leaderboard.map((position, index) =>
+            ({ player: players[index], count: position.count }))
+        const embedFields = withPlayers.map((position, index) => 
+            ({ name: `${index+1}. ${position.player.nickname}`, value: `${position.count} quests succeded` }))
+
+        const embed = new EmbedBuilder()
+            .setColor(0xFF0000)
+            .setTitle(`Leaderboard changed!`)
+            .setDescription("The most successful Adventurer Inn Keepers of Thiolden")
+            .addFields(embedFields)
 
         for (const server of servers) {
             if (!server.questsNotificationChannelId) continue

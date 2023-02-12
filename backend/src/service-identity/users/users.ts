@@ -85,6 +85,17 @@ export class Users {
         }
     }
 
+    static resolveUsersNoStakeAddresses = async (userIds: string[]): Promise<UserInfo[]> => {
+        const users = await User.findAll({ where: { userId: userIds } })
+        const usersInfo: UserInfo[] = users.map(user => ({
+            userId: user.userId,
+            nickname: user.nickname + "#" + user.nameIdentifier,
+            knownDiscord: user.discordUserName,
+            knownStakeAddresses: []
+        }))
+        return usersInfo
+    }
+
     static getinfo = async (userId: string): Promise<Attempt<UserFullInfo>> => {
         const user = await User.findOne({ where: { userId } })
         if (user == null) return failed
