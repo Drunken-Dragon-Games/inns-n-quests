@@ -8,7 +8,8 @@ import { Umzug } from "umzug"
 import { IdleQuestsServiceLogging } from "./logging"
 import { config } from "../tools-utils"
 
-import { AcceptQuestResult, AvailableQuest, ClaimQuestResult, GetAllAdventurersResult, GetAvailableQuestsResult, GetTakenQuestsResult, HealthStatus, Quest } from "./models"
+import { AcceptQuestResult, AvailableQuest, BattleReport, ClaimQuestResult, GetAllAdventurersResult, 
+         GetAvailableQuestsResult, GetTakenQuestsResult, HealthStatus, Outcome, Quest, TakenQuest } from "./models"
 
 import * as adventurersDB from "./items/adventurer-db"
 import * as runningQuestsDB from "./challenges/taken-quest-db"
@@ -21,6 +22,7 @@ import { RewardCalculator, DurationCalculator, baseSuccessRate } from "./challen
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import AdventurerFun from "./items/adventurer-fun"
 import { Calendar } from "../tools-utils/calendar"
+import { EvenstatsService } from "../service-evenstats"
 
 export interface IdleQuestsServiceConfig 
     { rewardFactor: number
@@ -31,6 +33,7 @@ export interface IdleQuestServiceDependencies
     { random: Random
     , calendar: Calendar
     , database: Sequelize
+    , evenstatsService: EvenstatsService
     , assetManagementService: AssetManagementService
     , metadataRegistry: MetadataRegistry
     , questsRegistry: QuestRegistry
@@ -46,6 +49,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         private readonly random: Random,
         private readonly calendar: Calendar,
         private readonly database: Sequelize,
+        private readonly evenstatsService: EvenstatsService,
         private readonly assetManagementService: AssetManagementService,
         private readonly questsRegistry: QuestRegistry,
         private readonly metadataRegistry: MetadataRegistry,
@@ -71,6 +75,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             dependencies.random,
             dependencies.calendar,
             dependencies.database,
+            dependencies.evenstatsService,
             dependencies.assetManagementService,
             dependencies.questsRegistry,
             dependencies.metadataRegistry,
@@ -118,6 +123,10 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             duration: durationCalculator.baseDuration(originalQuest.requirements),
             slots: 5
         }
+    }
+
+    private makeTakenQuestFromDB(takenQuest: runningQuestsDB.TakenQuestDB): TakenQuest {
+        return { ...takenQuest.dataValues, quest: this.questsRegistry[takenQuest.questId] }
     }
 
     /**
@@ -210,15 +219,22 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             await transaction.rollback()
             return { status: "missing-adventurers", missing }
         }
-        await quest.update({ claimedAt: now }, { transaction })
-        await transaction.commit()
         const successRate = baseSuccessRate(requirements, adventurers)
         const success = this.random.randomNumberBetween(1, 100) <= Math.floor(successRate * 100)
+        const outcome: Outcome = success 
+            ? { ctype: "success-outcome", reward: this.rewardCalculator.baseReward(requirements) } 
+            : { ctype: "failure-outcome", hpLoss: [] }
+        await quest.update({ claimedAt: now, outcome }, { transaction })
+        await transaction.commit()
+        this.evenstatsService.publish({
+            ctype: "evenstat-claimed-quest",
+            quest: { ...this.makeTakenQuestFromDB(quest), claimedAt: now, outcome },
+            adventurers, 
+        })
         if (success) {
-            const reward = this.rewardCalculator.baseReward(requirements)
-            return { status: "ok", outcome: { status: "success", reward } }
+            return { status: "ok", outcome }
         } else {
-            return { status: "ok", outcome: { status: "failure", deadAdventurers: [] } }
+            return { status: "ok", outcome }
         }
     }
 
@@ -238,38 +254,18 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             sprites: a.sprite,
             name:a.name
         }))
-        /*
-        return [
-            {
-                id: "9ce8eb80-2ecc-4e1a-a9db-254439920b50",
-                on_chain_ref: "AdventurerOfThiolden6176",
-                experience: 3940,
-                in_quest: false,
-                type: "aot",
-                metadata: {},
-                race: "human",
-                class: "rogue",
-                sprites: "https://cdn.ddu.gg/adv-of-thiolden/x6/perneli-front-plain.png",
-                name: "Perneli"
-            },
-        ]
-        */
     }
 
     async module_claimQuestResult(userId: string, questId: string): Promise<object> {
         const result = await this.claimQuestResult(userId, questId)
         if (result.status != "unknown-quest") return { "status": "error", "error": result.status } 
-        return {
-            ...result,
-        }
+        return { ...result }
     }
 
     async module_acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<object> {
         const result = await this.acceptQuest(userId, questId, adventurerIds)
         if (result.status !== "ok") return { "status": "error", "error": result.status }
-        return {
-            ...result.takenQuest,
-        }
+        return { ...result.takenQuest }
     }
 
     async module_getTakenQuests(userId: string): Promise<object[]> {
@@ -277,35 +273,13 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         const result = await this.getTakenQuests(userId)
         if (result.status !== "ok") return []
         return result.quests.map(takenQuest => {
-            return {
-                ...takenQuest,
-                /*
-                "id": takenQuest.takenQuestId,
-                "is_claimed": false,
-                "player_stake_address": "",
-                //"quest": takenQuest.quest,
-                //"quest_id": string,
-                "started_on": takenQuest.createdAt,
-                "state": "in_progress"
-                */
-            }
+            return { ...takenQuest }
         })
     }
 
     async module_getAvailableQuests(userId: string): Promise<object[]> {
         return (await this.getAvailableQuests("Auristar")).quests.map(quest => {
-            const baseRewardCurrencies = this.rewardCalculator.baseReward(quest.requirements).currencies ?? []
-            return { ...quest,
-                /*
-                "id": quest.questId,
-                "reward_ds": parseInt(baseRewardCurrencies[0]?.quantity),
-                "reward_xp": 1,
-                "difficulty": 1,
-                "rarity": "townsfolk",
-                "is_war_effort": false,
-                */
-            }
+            return { ...quest }
         })
     }
-
 }

@@ -73,7 +73,7 @@ export default class AdventurerFun {
      * @param transaction 
      * @returns 
      */
-    async findAdventurers(userId: string, adventurerIds: string[], transaction?: Transaction): Promise<Adventurer[]> {
+    async findAdventurers(adventurerIds: string[], userId?: string, transaction?: Transaction): Promise<Adventurer[]> {
         const adventurers = await AdventurerDB.findAll({ where: { adventurerId: adventurerIds, userId }, transaction })
         return adventurers.map(adventurer => adventurer.dataValues)
     }

@@ -5,11 +5,12 @@ import { loadQuestRegistryFromFs } from "../registry-quests"
 import { connectToDB } from "../tools-database"
 import { failure, success } from "../tools-utils"
 import { expectResponse } from "../tools-utils/api-expectations"
-import { Calendar, MutableCalendar } from "../tools-utils/calendar"
+import { MutableCalendar } from "../tools-utils/calendar"
 import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-service-mock"
+import EvenstatsServiceMock from "../tools-utils/mocks/evenstats-service-mock"
 import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registry"
 import Random from "../tools-utils/random"
-import { Adventurer, AvailableQuest, ClaimQuestOutcome, TakenQuest } from "./models"
+import { Adventurer, AvailableQuest, Outcome, TakenQuest } from "./models"
 import { IdleQuestsServiceDsl } from "./service"
 import { IdleQuestsService } from "./service-spec"
 
@@ -19,6 +20,7 @@ let calendar: MutableCalendar = new MutableCalendar(new Date(0))
 
 beforeAll(async () => {
     const assetManagementService = new AssetManagementServiceMock()
+    const evenstatsService = new EvenstatsServiceMock()
     assetManagementService.listReturns({ status: "ok", inventory: {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [
             { unit: "PixelTile1", quantity: "2", chain: false },
@@ -47,6 +49,7 @@ beforeAll(async () => {
         random: new Random("test"),
         calendar,
         database,
+        evenstatsService: evenstatsService.service,
         assetManagementService: assetManagementService.service,
         metadataRegistry: testMetadataRegistry,
         questsRegistry: await loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "stubs", "test-quest-registry.yaml"), "yaml"),
@@ -90,7 +93,7 @@ test("Normal user flow 1", async () => {
     expect(takenQuests1[0].quest.questId).toEqual(availableQuests[0].questId)
     expect(claimBeforeTimeResponse.status).toBe("quest-not-finished")
     expect(takenQuests2.length).toBe(0)
-    expect(outcome.status).toBe("success")
+    expect(outcome.ctype).toBe("success-outcome")
 })
 
 async function getAllAdventurers(userId: string): Promise<Adventurer[]> {
@@ -137,7 +140,7 @@ async function getTakenQuests(userId: string): Promise<TakenQuest[]> {
     )
 }
 
-async function claimQuestResult(userId: string, takenQuestId: string): Promise<ClaimQuestOutcome> {
+async function claimQuestResult(userId: string, takenQuestId: string): Promise<Outcome> {
     return await expectResponse(
         service.claimQuestResult(userId, takenQuestId),
         response =>
