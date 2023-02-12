@@ -65,7 +65,7 @@ export class EvenstatsServiceDsl implements EvenstatsService {
         const subscribers = this.subscribers[event.ctype]
         if (subscribers) 
             await Promise.all(subscribers.map(subscriber => subscriber.onEvenstatsEvent(event)))
-        if (event.ctype === "claimed-quest-event")
+        if (event.ctype === "claimed-quest-event" && event.quest.outcome && event.quest.outcome.ctype === "success-outcome")
             await this.updateQuestsSucceededLeaderboard(event.quest.userId)
     }
 

@@ -94,8 +94,6 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         await this.migrator.up()
         const loadedConfig: configDB.ConfigDB[] = await configDB.ConfigDB.findAll()
         loadedConfig.forEach(config => this.configCache[config.serverId] = config.dataValues)
-        console.log(`Kilia loaded ${loadedConfig.length} config entries.`)
-        console.log(this.configCache)
     }
 
     async unloadDatabaseModels(): Promise<void> {
@@ -153,7 +151,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         const embed = new EmbedBuilder()
             .setColor(0xFF0000)
             .setTitle(`Leaderboard changed!`)
-            .setDescription("The most successful Adventurer Inn Keepers of Thiolden")
+            .setDescription("The most successful Adventurer Inn Keepers of Thiolden.")
             .addFields(embedFields)
 
         for (const server of servers) {
