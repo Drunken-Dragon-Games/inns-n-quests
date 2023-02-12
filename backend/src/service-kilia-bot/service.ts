@@ -32,6 +32,12 @@ const commandsBuilder = (): Command[] => {
             .setDescription("Set the channel where quests notifications will be sent.")
             .addChannelOption(option => option
                 .setName("channel")
+                .setDescription("The channel where notifications will be sent.")))
+        .addSubcommand(subcommand => subcommand
+            .setName("leaderboard-channel")
+            .setDescription("Set the channel where the leaderboard updates will be sent.")
+            .addChannelOption(option => option
+                .setName("channel")
                 .setDescription("The channel where notifications will be sent."))
         ).toJSON()
     return [ config ]
@@ -131,8 +137,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             )
 
         for (const server of servers) {
-            if (!server.questsNotificationChannelId) continue
-            const channel = this.client.channels.resolve(server.questsNotificationChannelId)
+            if (!server.leaderboardNotificationChannelId) continue
+            const channel = this.client.channels.resolve(server.leaderboardNotificationChannelId)
             if (!channel || !channel.isTextBased()) continue
             await channel.send({ embeds: [ embed ] })
         }
@@ -151,7 +157,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         const embed = new EmbedBuilder()
             .setColor(0xFF0000)
             .setTitle(`Leaderboard changed!`)
-            .setDescription("The most successful Adventurer Inn Keepers of Thiolden.")
+            .setDescription("The most successful Adventurer Inn Keepers of Thiolden. \n (These are notifications from the Idle Quests @Council of Elronidas alpha tests, if you want to join please ask an @Inkeepers on how to join the council!)")
             .addFields(embedFields)
 
         for (const server of servers) {
@@ -165,6 +171,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     async commandConfig(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) return
         const subcommand = interaction.options.getSubcommand()
+
         if (subcommand === "quests-channel") {
             const channel = interaction.options.getChannel("channel")
             if (!channel || !interaction.guildId) return
@@ -172,9 +179,14 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             this.configCache[interaction.guildId].questsNotificationChannelId = channel.id
             await configDB.ConfigDB.upsert({ serverId: interaction.guildId, questsNotificationChannelId: channel.id, returning: true })
             await interaction.reply(`Quests channel set to ${channel.name}`)
-            return
-        }
-
-        await interaction.reply("Pong!")
+        } else if (subcommand === "leaderboard-channel") {
+            const channel = interaction.options.getChannel("channel")
+            if (!channel || !interaction.guildId) return
+            if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
+            this.configCache[interaction.guildId].leaderboardNotificationChannelId = channel.id
+            await configDB.ConfigDB.upsert({ serverId: interaction.guildId, leaderboardNotificationChannelId: channel.id, returning: true })
+            await interaction.reply(`Leaderboard channel set to ${channel.name}`)
+        } else 
+            await interaction.reply("Pong!")
     }
 }
