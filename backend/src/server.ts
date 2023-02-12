@@ -48,7 +48,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
         password: config.stringOrError("DB_PASSWORD"),
         database: config.stringOrError("DB_DATABASE"),
     })
-    const evenstatsService = await EvenstatsServiceDsl.loadFromEnv()
+    const evenstatsService = await EvenstatsServiceDsl.loadFromEnv({ database })
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })

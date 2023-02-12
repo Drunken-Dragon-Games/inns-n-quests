@@ -1,8 +1,12 @@
-import { EvenstatEvent, EvenstatSubscriber } from "./models"
+import { EvenstatsEvent, EvenstatsSubscriber } from "./models"
 
 export interface EvenstatsService {
 
-    subscribe(subscriber: EvenstatSubscriber, ...events: EvenstatEvent["ctype"][]): void
+    loadDatabaseModels(): Promise<void>
+
+    unloadDatabaseModels(): Promise<void>
+
+    subscribe(subscriber: EvenstatsSubscriber, ...events: EvenstatsEvent["ctype"][]): void
     
-    publish(event: EvenstatEvent): void
+    publish(event: EvenstatsEvent): Promise<void>
 }
