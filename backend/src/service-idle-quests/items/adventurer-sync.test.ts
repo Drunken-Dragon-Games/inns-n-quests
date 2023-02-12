@@ -23,18 +23,12 @@ beforeAll(async () => {
     adventurersDB.configureSequelizeModel(database)
     const migrationsPath: string = path.join(__dirname, "..", "migrations").replace(/\\/g, "/")
     migrator = buildMigrator(database, migrationsPath)
-})
-
-afterAll(async () => {
-    await database.close()
-})
-
-beforeEach(async () => {
     await migrator.up()
 })
 
-afterEach(async () => {
+afterAll(async () => {
     await migrator.down()
+    await database.close()
 })
 
 test("syncAdventurers path 1", async () => {
@@ -49,9 +43,9 @@ test("syncAdventurers path 1", async () => {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile1", quantity: "1", chain: false } ]
     }
     await adventurerSynchronizer.syncAdventurers(userId, assetInventory1)
-    const adventurers1 = await adventurersDB.AdventurerDB.findAll()
+    const adventurers1 = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
     await adventurerSynchronizer.syncAdventurers(userId, assetInventory2)
-    const adventurers2 = await adventurersDB.AdventurerDB.findAll()
+    const adventurers2 = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
 
     expect(adventurers1.length).toBe(2)
     expect(adventurers1[0].assetRef).toBe("PixelTile1")
@@ -67,9 +61,9 @@ test("syncAdventurers path 2", async () => {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile1", quantity: "2", chain: false } ]
     }
     await adventurerSynchronizer.syncAdventurers(userId, assetInventory1)
-    const adventurers1 = await adventurersDB.AdventurerDB.findAll()
+    const adventurers1 = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
     await adventurerSynchronizer.syncAdventurers(userId, assetInventory1)
-    const adventurers2 = await adventurersDB.AdventurerDB.findAll()
+    const adventurers2 = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
 
     expect(adventurers1.length).toBe(2)
     expect(adventurers1[0].assetRef).toBe("PixelTile1")

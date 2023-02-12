@@ -19,6 +19,8 @@ import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./regist
 import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata";
 import path from "path";
 import { commonCalendar } from "./tools-utils/calendar";
+import { KiliaBotServiceDsl } from "./service-kilia-bot";
+import { EvenstatsServiceDsl } from "./service-evenstats/service";
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -46,10 +48,12 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
         password: config.stringOrError("DB_PASSWORD"),
         database: config.stringOrError("DB_DATABASE"),
     })
+    const evenstatsService = await EvenstatsServiceDsl.loadFromEnv()
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
-    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ random, calendar, database, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
+    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ random, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
+    const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService })
     
     // Soon to be deprecated
     await loadQuestModuleModels(database)

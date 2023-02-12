@@ -77,6 +77,19 @@ export type TakenQuest = {
     adventurerIds: string[],
     claimedAt?: Date,
     createdAt: Date,
+    outcome?: Outcome,
+}
+
+export type Outcome = SuccessOutcome | FailureOutcome
+
+export type SuccessOutcome = {
+    ctype: "success-outcome",
+    reward: Reward
+}
+
+export type FailureOutcome = {
+    ctype: "failure-outcome",
+    hpLoss: { adventurerId: string, hp: number }[],
 }
 
 export type QuestRequirement 
@@ -130,6 +143,10 @@ export type EmptyRequirement = {
     ctype: "empty-requirement",
 }
 
+export type BattleReport = {
+    latestFinishedQuest?: TakenQuest & { adventurers: Adventurer[] },
+}
+
 export type GetAllAdventurersResult 
     = { status: "ok", adventurers: Adventurer[] }
     | { status: "unknown-user" }
@@ -145,12 +162,8 @@ export type GetAvailableQuestsResult
 export type GetTakenQuestsResult
     = { status: "ok", quests: TakenQuest[] }
 
-export type ClaimQuestOutcome
-    = { status: "success", reward: Reward }
-    | { status: "failure", deadAdventurers: Adventurer[] }
-
 export type ClaimQuestResult
-    = { status: "ok", outcome: ClaimQuestOutcome }
+    = { status: "ok", outcome: Outcome }
     | { status: "unknown-quest" }
     | { status: "quest-already-claimed" }
     | { status: "quest-not-finished" }

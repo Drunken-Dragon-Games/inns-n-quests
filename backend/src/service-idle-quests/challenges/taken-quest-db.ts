@@ -1,12 +1,14 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
+import { Outcome } from "../models"
 
-export type ITakenQuestDB = {
-    takenQuestId: string,
-    questId: string,
-    userId: string,
-    adventurerIds: string[],
-    claimedAt?: Date,
-    createdAt: Date,
+export interface ITakenQuestDB {
+    takenQuestId: string
+    questId: string
+    userId: string
+    adventurerIds: string[]
+    claimedAt?: Date
+    createdAt: Date
+    outcome? : Outcome
 }
 
 export class TakenQuestDB extends Model implements ITakenQuestDB {
@@ -16,6 +18,7 @@ export class TakenQuestDB extends Model implements ITakenQuestDB {
     declare adventurerIds: string[]
     declare claimedAt?: Date
     declare createdAt: Date
+    declare outcome? : Outcome
 }
 
 export const TakenQuestDBTableName = "idle_quests_taken_quests"
@@ -47,6 +50,11 @@ export const TakenQuestDBTableAttributes = {
         allowNull: true,
         defaultValue: null
     },
+    outcome: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+        defaultValue: null
+    }
 }
 
 export function configureSequelizeModel(sequelize: Sequelize): void {

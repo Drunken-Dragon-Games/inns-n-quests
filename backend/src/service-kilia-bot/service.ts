@@ -1,0 +1,152 @@
+import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js"
+import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
+import { EvenstatEvent, EvenstatsService, EvenstatSubscriber } from "../service-evenstats"
+import { Adventurer, TakenQuest } from "../service-idle-quests"
+import { config } from "../tools-utils"
+import { QueryInterface, Sequelize } from "sequelize"
+
+import * as configDB from "./config/config-db"
+import { Umzug } from "umzug"
+import { buildMigrator } from "../tools-database"
+import path from "path"
+import { IdentityService } from "../service-identity"
+
+export type KiliaBotServiceDependencies = {
+    database: Sequelize
+    evenstatsService: EvenstatsService,
+    identityService: IdentityService,
+}
+
+export type KiliaBotServiceConfig = {
+    token: string,
+}
+
+type Command = RESTPostAPIChatInputApplicationCommandsJSONBody
+
+const commandsBuilder = (): Command[] => {
+    const config = new SlashCommandBuilder()
+        .setName("kilia-config")
+        .setDescription("Configure Kilia.")
+        .addSubcommand(subcommand => subcommand
+            .setName("quests-channel")
+            .setDescription("Set the channel where quests notifications will be sent.")
+            .addChannelOption(option => option
+                .setName("channel")
+                .setDescription("The channel where notifications will be sent."))
+        ).toJSON()
+    return [ config ]
+}
+
+export class KiliaBotServiceDsl implements EvenstatSubscriber {
+
+    private readonly migrator: Umzug<QueryInterface>
+    private readonly configCache: { [ key: string ]: configDB.IConfigDB } = {}
+
+    constructor(
+        private readonly database: Sequelize,
+        private readonly client: Client,
+        private readonly identityService: IdentityService,
+    ){
+        const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
+        this.migrator = buildMigrator(database, migrationsPath)
+    }
+
+    static async loadFromEnv(dependencies: KiliaBotServiceDependencies): Promise<KiliaBotServiceDsl | undefined> {
+        const token = config.stringOrElse("KILIA_BOT_TOKEN", "unset")
+        if (token === "unset") return undefined
+        return await KiliaBotServiceDsl.loadFromConfig({
+            token,
+        }, dependencies)
+    }
+
+    static async loadFromConfig(config: KiliaBotServiceConfig, dependencies: KiliaBotServiceDependencies): Promise<KiliaBotServiceDsl> {
+        const client = new Client({ intents: GatewayIntentBits.Guilds })
+        const service = new KiliaBotServiceDsl(
+            dependencies.database, 
+            client,
+            dependencies.identityService,
+        )
+        await service.loadDatabaseModels()
+        dependencies.evenstatsService.subscribe(service, "evenstat-claimed-quest")
+        client.once(Events.ClientReady, async (client) => {
+            if (!client.user) return
+            await client.application.commands.set(commandsBuilder())
+            console.log(`${client.user.tag} is ready to listen and sing!`)
+            console.log(`Invite link: https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot%20applications.commands`)
+        })
+        client.login(config.token)
+        client.on(Events.InteractionCreate, async (interaction) => {
+            if (!interaction.isCommand()) return
+            try { service.onDiscordBotEvent(interaction) } 
+            catch (error) {
+                console.error(error)
+                await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true })
+            }
+        })
+        return service
+    }
+
+    async loadDatabaseModels(): Promise<void> {
+        configDB.configureSequelizeModel(this.database)
+        await this.migrator.up()
+        const loadedConfig: configDB.ConfigDB[] = await configDB.ConfigDB.findAll()
+        loadedConfig.forEach(config => this.configCache[config.serverId] = config.dataValues)
+        console.log(`Kilia loaded ${loadedConfig.length} config entries.`)
+        console.log(this.configCache)
+    }
+
+    async unloadDatabaseModels(): Promise<void> {
+        await this.migrator.down()
+    }
+
+    async onEvenstatEvent(event: EvenstatEvent): Promise<void> {
+        switch (event.ctype) {
+            case "evenstat-claimed-quest": return this.notifyQuestClaimed(event.quest, event.adventurers)
+        }
+    }
+
+    async onDiscordBotEvent(interaction: CommandInteraction): Promise<void> {
+        switch (interaction.commandName) {
+            case "kilia-config": return this.commandConfig(interaction)
+        }
+    }
+
+    async notifyQuestClaimed(quest: TakenQuest, adventurers: Adventurer[]): Promise<void> {
+        const servers = Object.values(this.configCache)
+        const player = await this.identityService.resolveUser({ ctype: "user-id", userId: quest.userId })
+        if (player.status !== "ok" || !quest.outcome) return
+
+        const success = quest.outcome.ctype === "success-outcome" ? "succeded" : "failed"
+        //const outcome = quest.outcome.ctype === "success-outcome" ? quest.outcome.reward.currencies[0]!.unit : quest.outcome!.reason
+        const embed = new EmbedBuilder()
+            .setColor(0xF5CD1B)
+            .setTitle(`${player.info.nickname} just ${success} ${quest.quest.name}!`)
+            .setDescription(quest.quest.description)
+            .addFields(
+                { name: "Adventurers", value: adventurers.map(a => `${a.name}(${a.athleticism}/${a.intellect}/${a.charisma})`).join(", ") },
+            )
+
+        for (const server of servers) {
+            if (!server.questsNotificationChannelId) continue
+            const channel = this.client.channels.resolve(server.questsNotificationChannelId)
+            if (!channel || !channel.isTextBased()) continue
+            await channel.send({ embeds: [ embed ] })
+        }
+    }
+
+    async commandConfig(interaction: CommandInteraction): Promise<void> {
+        if (!interaction.isChatInputCommand()) return
+        const subcommand = interaction.options.getSubcommand()
+        if (subcommand === "quests-channel") {
+            const channel = interaction.options.getChannel("channel")
+            if (!channel || !interaction.guildId) return
+            if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
+            this.configCache[interaction.guildId].questsNotificationChannelId = channel.id
+            await configDB.ConfigDB.upsert({ serverId: interaction.guildId, questsNotificationChannelId: channel.id, returning: true })
+            await interaction.reply(`Quests channel set to ${channel.name}`)
+            return
+        }
+
+        await interaction.reply("Pong!")
+    }
+}
