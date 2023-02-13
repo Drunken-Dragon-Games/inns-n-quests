@@ -2,16 +2,16 @@ import styled from "styled-components"
 import Console from "./apps/console/console"
 import QuestBoard from "./apps/availableQuest/quest-board"
 import { ErrorHandler } from "./utils/components/complex"
-import { useLoading } from "./utils/hooks"
 import { Loading } from "../../utils/components/basic_components"
 import { ConditionalRender } from "../../explorerOfThiolden/explorerOfThioldenPage/components/basic_components"
 import { useGeneralDispatch, useGeneralSelector } from "../../../features/hooks"
 import { selectGeneralReducer } from "../../../features/generalReducer"
-import { Adventurer, SelectedQuest } from "../dsl"
-import { useEffect } from "react"
+import { Adventurer, SelectedQuest, TakenQuest } from "../dsl"
+import { useEffect, useState } from "react"
 import { selectQuest, removeAvailableQuest, unselectQuest, clearAvailableQuests, unselectAdventurer, selectAdventurer } from "./apps/availableQuest/quest-board-state"
 import { takeAvailableQuest, claimTakenQuest, getAvailableQuests, getAdventurers, getInProgressQuests } from "./apps/availableQuest/quest-board-thunks"
 import { fetchMintTest } from "./apps/availableQuest/faucet"
+import { getDragonSilver, getDragonSilverToClaim } from "./apps/console/features/player"
 
 const Container = styled.section`
     position: relative;
@@ -27,6 +27,24 @@ const BackGroundPositionAbsolute = styled.section`
     background-color: #0B1015;
 `
 
+const useLoading = (): boolean => {
+    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const generalSelector = useGeneralSelector(selectGeneralReducer)
+    const getAdventurersStatus = generalSelector.idleQuests.questBoard.status.getAdventurersStatus.status
+    const getAvailableQuestStatus = generalSelector.idleQuests.questBoard.status.getAvailableQuestStatus.status
+    const getInProgressQuestStatus = generalSelector.idleQuests.questBoard.status.inProgress.status
+    useEffect(()=>{
+        if((getAdventurersStatus === 'fulfilled' ||getAdventurersStatus === 'rejected') && 
+        (getAvailableQuestStatus === 'fulfilled' || getAvailableQuestStatus === 'rejected') &&
+        (getInProgressQuestStatus === 'fulfilled' || getInProgressQuestStatus === 'rejected')){
+            setTimeout(() => setIsLoading(false), 500)
+        }
+    },[getAdventurersStatus, 
+        getAvailableQuestStatus, 
+        getInProgressQuestStatus ])
+    return isLoading
+}
+
 const IdleQuestsApp = () => {
 
     const loading = useLoading()
@@ -39,6 +57,8 @@ const IdleQuestsApp = () => {
     const adventurerSlots = generalSelector.idleQuests.questBoard.questBoard.adventurerSlots
     const availableQuests = generalSelector.idleQuests.questBoard.questBoard.availableQuests
     const takenQuests = generalSelector.idleQuests.questBoard.questBoard.takenQuests
+    const dragonSilver = generalSelector.idleQuests.player.data.dragonSilver
+    const dragonSilverToClaim = generalSelector.idleQuests.player.data.dragonSilverToClaim
 
     const onSelectQuest = (quest: SelectedQuest) => 
         generalDispatch(selectQuest(quest))
@@ -58,7 +78,8 @@ const IdleQuestsApp = () => {
         generalDispatch(unselectAdventurer(adventurer))
     const onSelectAdventurer = (adventurer: Adventurer) => 
         generalDispatch(selectAdventurer(adventurer))
-
+    const onSelectTakenQuest = (takenQuest: TakenQuest) =>
+        generalDispatch(selectQuest(takenQuest))
     const onRecruitAdventurer = () => 
         generalDispatch(fetchMintTest())
     
@@ -72,6 +93,10 @@ const IdleQuestsApp = () => {
         generalDispatch(getAdventurers())
         generalDispatch(getInProgressQuests())
     },[])
+    useEffect(()=>{
+        generalDispatch(getDragonSilver())
+        generalDispatch(getDragonSilverToClaim())
+    },[])
     
     return(
         <Container>
@@ -84,10 +109,13 @@ const IdleQuestsApp = () => {
             <Console
                 adventurers={adventurers}
                 adventurerSlots={adventurerSlots}
-                onAdventurerClick={onSelectAdventurer}
                 selectedQuest={selectedQuest}
                 takenQuests={takenQuests}
+                dragonSilver={dragonSilver}
+                dragonSilverToClaim={dragonSilverToClaim}
                 onAdventurerRecruit={onRecruitAdventurer}
+                onAdventurerClick={onSelectAdventurer}
+                onSelectTakenQuest={onSelectTakenQuest}
             />
             <QuestBoard
                 availableQuests={availableQuests}

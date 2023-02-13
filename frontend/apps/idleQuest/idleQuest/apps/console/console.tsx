@@ -7,7 +7,7 @@ import { useState } from "react";
 import { cardano_network } from "../../../../../setting";
 import BigHopsButton from "../availableQuest/components/big-hops-button";
 
-const Container =styled.div`
+const ConsoleContainer =styled.div`
     position: relative;
     width: 15vmax;
     height: 100vh;
@@ -15,8 +15,8 @@ const Container =styled.div`
     flex-direction: column;
     align-items: center;
     background-color: #14212C;
-    z-index: 0;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    z-index: 1;
+    box-shadow: 0 0.5vmax 1.5vmax 0 rgba(0, 0, 0, 0.8), 0 1vmax 3vmax 0 rgba(0, 0, 0, 0.19);
 `
 
 interface ConsoleProps {
@@ -24,15 +24,21 @@ interface ConsoleProps {
     adventurerSlots: (Adventurer | null)[],
     selectedQuest?: SelectedQuest,
     takenQuests: TakenQuest[],
+    dragonSilver: number,
+    dragonSilverToClaim: number,
     onAdventurerClick: (adventurer: Adventurer) => void
     onAdventurerRecruit: () => void
+    onSelectTakenQuest: (takenQuest: TakenQuest) => void
 }
 
-const Console = ({ adventurers, adventurerSlots, selectedQuest, takenQuests, onAdventurerClick, onAdventurerRecruit }: ConsoleProps) => {
+const Console = ({ adventurers, adventurerSlots, selectedQuest, takenQuests, dragonSilver, dragonSilverToClaim, onAdventurerClick, onAdventurerRecruit, onSelectTakenQuest }: ConsoleProps) => {
     const [page, setPage] = useState<TabNames>("inventory")
     return(
-        <Container>
-            <Navbar />
+        <ConsoleContainer>
+            <Navbar 
+                dragonSilver={dragonSilver}
+                dragonSilverToClaim={dragonSilverToClaim}
+            />
             <ConsoleTabs
                 page={page}
                 completedQuests={takenQuests.length}
@@ -50,9 +56,12 @@ const Console = ({ adventurers, adventurerSlots, selectedQuest, takenQuests, onA
                 />
             </ConditionalRender>
             <ConditionalRender condition={page == "quests-in-progress"}>
-                <InProgressList />
+                <InProgressList 
+                    takenQuests={takenQuests}
+                    onSelectTakenQuest={onSelectTakenQuest} 
+                />
             </ConditionalRender>
-        </Container>
+        </ConsoleContainer>
     )
 }
 

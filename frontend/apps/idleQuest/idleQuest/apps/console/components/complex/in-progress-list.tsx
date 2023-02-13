@@ -3,9 +3,8 @@ import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { useRef } from "react";
 import { ConditionalRender } from '../../../../../../utils/components/basic_components';
-import { takenQuestId } from "../../../../../dsl";
+import { TakenQuest, takenQuestId } from "../../../../../dsl";
 import TakenQuestCard from "./tankenQuestCard";
-
 
 const InProgressListContainer = styled.div`
     position: relative;
@@ -46,31 +45,6 @@ const InProgressMapping = styled.div`
 
 `
 
-const ArrowDecreseContainer = styled.div`
-      position: absolute;
-      bottom: -2vh;
-      right: 0.15vw;
-      cursor: pointer;  
-
-      img{
-          width: 1vw !important;
-          height: 1vw !important;
-      }
-`
-
-const ArrowIncreseContainer = styled.div`
-      position: absolute;
-      top: -0.9vw;
-      right: 0.15vw;
-      cursor: pointer;  
-
-      img{
-          width: 1vw !important;
-          height: 1vw !important;
-      }
-`
-
-
 const NoQuestWaring = styled.div`
     display: flex;
     height: 82vh;
@@ -83,40 +57,19 @@ const NoQuestWaring = styled.div`
     }
 `
 
-const InProgressList = () =>{
-
-   
-    const generalSelector = useGeneralSelector(selectGeneralReducer)
-
-    const scrolling = useRef<HTMLDivElement | null>(null)
-    const numberOfQuests = generalSelector.idleQuests.questBoard.questBoard.takenQuests.length
-    const quests = generalSelector.idleQuests.questBoard.questBoard.takenQuests
-    const selectedQuest = generalSelector.idleQuests.questBoard.questBoard.selectedQuest
-
-    return (
-        <InProgressListContainer>
-
-            <InProgressMapping ref={scrolling}>
-
-                <ConditionalRender condition={numberOfQuests > 0}>
-                    {quests.map((quest, index) => {
-                        const selected = takenQuestId(selectedQuest) == quest.takenQuestId
-                        return <TakenQuestCard takenQuest={quest} selected={selected} key={"taken-quest-" + index} />
-                    })}
-                </ConditionalRender>
-
-                <ConditionalRender condition={numberOfQuests == 0}>
-                    <NoQuestWaring>
-                        <div>
-                            There is no Quest in progress
-                        </div>
-                    </NoQuestWaring>
-                </ConditionalRender>
-
-            </InProgressMapping>
-
-        </InProgressListContainer>
-    )
+interface InProgressListProps {
+    takenQuests: TakenQuest[]
+    onSelectTakenQuest?: (takenQuest: TakenQuest) => void
 }
+
+const InProgressList = ({ takenQuests, onSelectTakenQuest }: InProgressListProps) =>
+    <InProgressListContainer>
+        {takenQuests.map((quest, index) => {
+            return <TakenQuestCard takenQuest={quest} onSelectTakenQuest={onSelectTakenQuest} key={"taken-quest-" + index} />
+        })}
+        <ConditionalRender condition={takenQuests.length == 0}>
+            <NoQuestWaring><span>No quests in progress...</span></NoQuestWaring>
+        </ConditionalRender>
+    </InProgressListContainer>
 
 export default InProgressList

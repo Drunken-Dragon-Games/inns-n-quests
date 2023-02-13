@@ -1,11 +1,8 @@
 import styled from "styled-components";
 import { useState } from "react";
-import { cardano_network } from "../../../../../../../setting"
 import { Adventurer, SelectedQuest } from "../../../../../dsl";
-import { ConditionalRender } from "../../../../../../utils/components/basic_components";
 import AdventurerCard from "../../../availableQuest/components/adventurer-card";
 import { notEmpty } from "../../../../../../utils";
-import BigHopsButton from "../../../availableQuest/components/big-hops-button";
 
 const AdventurerListContainer = styled.div`
     position: relative;
@@ -52,11 +49,11 @@ const AdventurerListContainer = styled.div`
 const AdventurerCardContainer = styled.div<{ interactuable: boolean }>`
     width: 100%;
     background-color: rgb(51,65,74);
-    padding: 0.5vmax;
-    border-radius: 0.3vmax;
+    padding: 0.5vmax 0 0 0;
     display: flex;
     justify-content: center;
     align-items: center;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     ${props => props.interactuable ? "cursor: pointer;" : ""}
 `
 
@@ -107,20 +104,17 @@ interface AdventurerListProps {
     onAdventurerClick: (adventurer: Adventurer) => void
 }
 
-const AdventurerList = ({ adventurers, adventurerSlots, selectedQuest, onAdventurerClick }: AdventurerListProps) => {
-    return (
-        <AdventurerListContainer>
-            {adventurers.map((adventurer: Adventurer) =>
-                <AdventurerCardWrapper
-                    key={adventurer.adventurerId}
-                    adventurer={adventurer}
-                    adventurerSlots={adventurerSlots}
-                    selectedQuest={selectedQuest}
-                    onAdventurerClick={onAdventurerClick}
-                />
-            )}
-        </AdventurerListContainer>
-    )
-}
+const AdventurerList = ({ adventurers, adventurerSlots, selectedQuest, onAdventurerClick }: AdventurerListProps) =>
+    <AdventurerListContainer>
+        {adventurers.map((adventurer: Adventurer) =>
+            <AdventurerCardWrapper
+                key={adventurer.adventurerId}
+                adventurer={adventurer}
+                adventurerSlots={adventurerSlots}
+                selectedQuest={selectedQuest}
+                onAdventurerClick={onAdventurerClick}
+            />
+        )}
+    </AdventurerListContainer>
 
 export default AdventurerList

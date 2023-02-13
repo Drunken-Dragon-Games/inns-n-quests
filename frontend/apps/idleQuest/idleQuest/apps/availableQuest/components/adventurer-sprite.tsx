@@ -1,8 +1,7 @@
 import styled, { keyframes } from "styled-components"
-import { useComputeHeightFromOriginalImage } from "../../console/hooks"
 import { Adventurer } from "../../../../dsl/models"
 import { CrispPixelArtImage, notEmpty, simpleHash } from "../../../../../utils"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 const emojiMapping = (emoji?: string) => {
     switch (emoji) {
@@ -91,9 +90,9 @@ const AdventurerSpriteContainer = styled.div<{ height: number, width: number, re
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin-top: -${props => props.height}vw;
-    width: ${props => props.width + 0.2}vw;
-    height: ${props => props.height}vw;
+    margin-top: -${props => props.height}vmax;
+    width: ${props => props.width + 0.2}vmax;
+    height: ${props => props.height}vmax;
 
     ${({ render }) => { switch (render) {
         case "in-challenge":
@@ -131,55 +130,62 @@ const AdventurerSpriteContainer = styled.div<{ height: number, width: number, re
 `
 
 const EnteringEmojiAnimation = keyframes`
-    0% {opacity: 0; margin-top: -1vh;}
+    0% {opacity: 0; margin-top: -1vmax;}
     100% {opacity: 1}
 `
 
 const LeavingEmojiAnimation = keyframes`
     0% {opacity: 1;}
-    100% {opacity: 0; margin-top: -3vh;}
-`
-
-const EmojiBackground = styled.div<{ $display: boolean, offset: number }>`
-    position: absolute;
-    z-index: 5;
-    width: 3vw;
-    height: 2.7vw;
-    margin-top: ${props => props.offset}vw;
-    opacity: ${props => props.$display ? 1 : 0};
-    animation ${props => props.$display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
+    100% {opacity: 0; margin-top: -3vmax;}
 `
 
 const EmojiContainer = styled.div<{ $display: boolean, offset: number }>`
     position: absolute;
-    z-index: 5;
-    width: 2.3vw;
-    height: 2.0vw;
-    margin-top: ${props => props.offset + 0.2}vw;
+    width: 3.1vmax;
+    height: 2.7vmax;
+    z-index: 100;
+    margin-top: ${props => props.offset + 0.2}vmax;
     opacity: ${props => props.$display ? 1 : 0};
     animation ${props => props.$display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
 `
 
 const Emoji = ({ emoji, offset }: { emoji?: string, offset: number }) => {
-    const [lastEmoji, setLastEmoji] = useState<string | undefined>(undefined)
-    const renderEmoji = emoji ?? lastEmoji
-    useEffect(() => { if (emoji) setLastEmoji(emoji) }, [emoji])
-    return notEmpty(renderEmoji) ? <>
-        <EmojiBackground $display={emoji !== undefined} offset={offset}>
-            <CrispPixelArtImage 
-                src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"  
-                alt="emoji buble" 
-                layout="fill" 
-            />
-        </EmojiBackground>
+    const lastEmoji = useRef<string | undefined>(undefined)
+    const renderEmoji = emoji ?? lastEmoji.current
+    useEffect(() => { lastEmoji.current = emoji }, [emoji])
+    return notEmpty(renderEmoji) ? 
         <EmojiContainer $display={emoji !== undefined} offset={offset}>
+            <CrispPixelArtImage
+                src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"
+                alt="emoji buble"
+                layout="fill"
+            />
             <CrispPixelArtImage
                 src={emojiMapping(renderEmoji)}
                 alt="adventurer emoji bubble"
                 layout="fill"
             />
         </EmojiContainer>
-    </> : <></>
+    : <></>
+}
+
+/**
+ * Computes the height of an image based on its width and the original image's width and height
+ * 
+ * @param src The image source
+ * @param desiredWidth The intended width of the image
+ */
+const useComputeHeightFromOriginalImage = (src: string, desiredWidth: number): number => {
+    const [desiredHeight, setHeight] = useState<number>(0)
+    useEffect(() => {
+        const img = new Image()
+        img.src = src
+        img.onload = () => {
+            const height = (desiredWidth * img.height) / img.width
+            setHeight(Math.round(height * 10) / 10)
+        }
+    }, [src])
+    return desiredHeight
 }
 
 interface AdventurerSpriteProps {

@@ -16,7 +16,7 @@ const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
 }
 
 const InfoWrapper = styled.div`
-    margin-top: 0.5vw;
+    margin-top: 0.5vmax;
     width: inherit;
 `
 
@@ -39,31 +39,30 @@ const ExperienceAnimation = (experience: number) => keyframes`
 `
 
 const ExperienceBar = styled.div<{ $display: boolean, color: ExperienceBarColor }>`
-    margin-top: 0.1vw;
+    overflow: visible;
     flex: 1;
-    height: 1.2vw;
-    overflow: hidden;
-    border-radius: 0vw 1vw 0vw 1vw;
+    height: 0.3vmax;
     background-color: ${props => rgbMapping(props.color, true)}};
     display: ${props => props.$display ? "block" : "none"};
 `
 
 const Experience = styled.div<{ experience: number, animate: boolean, color: ExperienceBarColor }>`
     height: inherit;
-    border-radius: 0vw 1vw 0vw 1vw;
+    overflow: visible;
     background-color: ${props => rgbMapping(props.color, false)};
     width: ${props => props.experience}%;
     animation: ${props => props.animate ? ExperienceAnimation(props.experience) : "none"} 2s;
     position: relative;
-    filter: drop-shadow(0px 0px 0.2vw rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0px 0px 0.2vmax rgba(0, 0, 0, 0.5));
     span {
-        filter: drop-shadow(0px 0px 0.2vw ${props => rgbMapping(props.color, false)});
+        filter: drop-shadow(0px 0px 0.2vmax ${props => rgbMapping(props.color, false)});
         font-family: Oswald;
         position: absolute;
         display: block;
+        overflow: visible;
         padding: 0;
-        margin: -0.4vw 0 0 0.4vw;
-        font-size: 1.3vw;
+        margin: -1vmax 0 0 0.5vmax;
+        font-size: 1vmax;
         font-weight: bold;
         color: ${props => rgbMapping(props.color, true)};
     }
@@ -72,8 +71,8 @@ const Experience = styled.div<{ experience: number, animate: boolean, color: Exp
 const MedalWrapper = styled.div<{ $display: boolean }>`
     position: absolute;
     background-color: #ca9a3a;
-    width: 2vw;
-    height: 2vw;
+    width: 2vmax;
+    height: 2vmax;
     border-radius: 50%;
     z-index: 3;
     display: ${props => props.$display ? "flex" : "none"};
@@ -84,7 +83,7 @@ const MedalWrapper = styled.div<{ $display: boolean }>`
 const Medal = styled.span`
     color: white;
     font-family: arial;
-    font-size: 0.9vw;
+    font-size: 0.9vmax;
 `
 
 const AdventurerContainer = styled.div`
@@ -107,10 +106,10 @@ const DeadMarkAnimation = keyframes`
 
 const DeadMark = styled.div <{ $display: boolean }>`
     position: absolute;
-    top: 3vw;
-    left: 0.5vw;
-    width: 5vw;
-    height: 4vw;
+    top: 3vmax;
+    left: 0.5vmax;
+    width: 5vmax;
+    height: 4vmax;
     z-index: 2;
     animation: ${DeadMarkAnimation} 1.2s;
     ${props => props.$display ? "" : "display: none;"}
@@ -124,7 +123,7 @@ const AdventurerWrapper = styled.div`
     width: 100%;
     height: 1px;
     display: flex;
-    margin-top: 9vw;
+    margin-top: 9vmax;
     flex-direction: column;
     align-items: center;
 `

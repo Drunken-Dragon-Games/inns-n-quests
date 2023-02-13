@@ -3,11 +3,8 @@ import Image from "next/image"
 import { useState } from "react";
 import { Timmer } from "../basic_components";
 import { ConditionalRender, TextOswald } from "../../../../../../utils/components/basic_components";
-import { DragonSilverIconTakenQuest } from "../basic_components"
-import {  useGeneralDispatch } from "../../../../../../../features/hooks"
 import { TakenQuest } from "../../../../../dsl/models";
 import { takenQuestStatus } from "../../../../../dsl";
-import { selectQuest } from "../../../availableQuest/quest-board-state";
 
 const Card = styled.div<{ onClick: any }>`
     width: 95%;
@@ -89,68 +86,74 @@ const StampWrapper = styled.div`
     top: 0vw;
 `
 
+const DetailWrapper = styled.div`
+    display: flex;
+    margin-right: 0.5vw;
+    p{
+        font-weight: 200;
+        margin-left: 0.2vw;
+    }
+`
 
+const DragonSilverIconWrapper = styled.div`
+    width: 1.2vw;
+    height: 1.2vw;
+`
 
+const DragonSilverIconTakenQuest = ({ dragonSilverReward }: { dragonSilverReward: number }) =>
+    <DetailWrapper>
+        <DragonSilverIconWrapper>
+            <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/ds_icon.png" alt="corner detail" width={10} height={10} layout="responsive" />
+        </DragonSilverIconWrapper>
+        <TextOswald color="white" fontsize={0.8}>{dragonSilverReward}</TextOswald>
+    </DetailWrapper>
 
-interface TakenQuestCardProp {
+interface TakenQuestCardProps {
     takenQuest: TakenQuest,
-    selected: boolean
+    onSelectTakenQuest?: (takenQuest: TakenQuest) => void
 }
 
-
-const TakenQuestCard = ({takenQuest, selected}: TakenQuestCardProp) => {
-
+const TakenQuestCard = ({ takenQuest, onSelectTakenQuest }: TakenQuestCardProps) => {
     const [onHover, setOnHover] = useState<boolean>(false)
-
-    const generalDispatch = useGeneralDispatch()
-    const status = takenQuestStatus(takenQuest)    
-
+    const status = takenQuestStatus(takenQuest)
     return (
-        <>
-            <Card onClick={selected ==false ? () => generalDispatch(selectQuest(takenQuest)) : null} onMouseOver={()=> setOnHover(true)} onMouseLeave={()=> setOnHover(false)}>
-                <LeftCornerWrapper>
-                    <Image src= {selected || onHover ?"https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/selected_left_corner.png" : "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/unselected_left_corner.png"}  alt="corner detail" width={400} height={65} />
-                </LeftCornerWrapper>
-                <RightCornerWrapper>
-                    <Image src= {selected || onHover ?"https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/selected_right_corner.png" : "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/unselected_right_corner.png"}   alt="corner detail" width={400} height={65} />
-                </RightCornerWrapper>
+        <Card onClick={onSelectTakenQuest} onMouseOver={() => setOnHover(true)} onMouseLeave={() => setOnHover(false)}>
+            <LeftCornerWrapper>
+                <Image src={onHover ? "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/selected_left_corner.png" : "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/unselected_left_corner.png"} alt="corner detail" width={400} height={65} />
+            </LeftCornerWrapper>
+            <RightCornerWrapper>
+                <Image src={onHover ? "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/selected_right_corner.png" : "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/unselected_right_corner.png"} alt="corner detail" width={400} height={65} />
+            </RightCornerWrapper>
 
-                <Flex>
-                    <ScrollWrapper>
-                        
-                        <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/kings_plea.png"  alt="corner detail" width={50} height={50} layout ="responsive"/>
-                        
-                        <ConditionalRender condition={status == "finished"}>
-                            <StampWrapper>
-                                <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/claim_reward.png" alt="corner detail" width={50} height={50} />
-                            </StampWrapper>
+            <Flex>
+                <ScrollWrapper>
+                    <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/kings_plea.png" alt="corner detail" width={50} height={50} layout="responsive" />
+                    <ConditionalRender condition={status == "finished"}>
+                        <StampWrapper>
+                            <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/claim_reward.png" alt="corner detail" width={50} height={50} />
+                        </StampWrapper>
+                    </ConditionalRender>
+                </ScrollWrapper>
+
+                <QuestDetails>
+                    <Center>
+
+                        <Title finished={status == "finished"}>{takenQuest.quest.name}</Title>
+                        <Flex>
+                            <CenterFlex>
+                                <DragonSilverIconTakenQuest dragonSilverReward={0} />
+                                <Timmer takenQuest={takenQuest} />
+                            </CenterFlex>
+                        </Flex>
+
+                        <ConditionalRender condition={status == "in-progress"}>
+                            <HappeningText><TextOswald fontsize={0.8} color="white" textAlign="center">happening</TextOswald></HappeningText>
                         </ConditionalRender>
-                        
-                    </ScrollWrapper>
 
-                    <QuestDetails>
-                        <Center>
-                            <Title finished={status == "finished"}>{takenQuest.quest.name}</Title>
-                            <Flex>
-                                <CenterFlex>
-
-                                    <DragonSilverIconTakenQuest dragonSilverReward={0}/>
-                
-                                    <Timmer takenQuest={takenQuest} />
-                    
-                                </CenterFlex>
-                            </Flex>
-                        
-                            <ConditionalRender condition={status == "in-progress"}>
-                                <HappeningText><TextOswald fontsize={0.8} color="white" textAlign="center">happening</TextOswald></HappeningText>
-                            </ConditionalRender>
-
-                        </Center>   
-                    </QuestDetails>
-                </Flex>
-        
-            </Card>
-        </>
+                    </Center>
+                </QuestDetails>
+            </Flex>
+        </Card>
     )
 }
 

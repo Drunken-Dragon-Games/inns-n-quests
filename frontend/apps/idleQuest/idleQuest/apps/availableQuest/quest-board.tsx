@@ -1,5 +1,4 @@
 import styled from "styled-components"
-import { CrispPixelArtImage } from "../../../../utils"
 import { Adventurer, AvailableQuest, SelectedQuest } from "../../../dsl"
 import { RefreshButton } from "./components"
 import { AvailableQuestsArea, QuestCard, WorldMap } from "./components"
@@ -21,13 +20,6 @@ const AvailableQuestsWrapper = styled.div`
     height: 50vw;
     position: relative;
     margin: auto;
-`
-
-const Background = styled.div`
-    position: absolute;
-    width: 80vw;
-    height: inherit;
-    top: 1vw;
 `
 
 interface QuestBoardProps {
