@@ -11,12 +11,10 @@ import { Adventurer, SelectedQuest } from "../dsl"
 import { useEffect } from "react"
 import { selectQuest, removeAvailableQuest, unselectQuest, clearAvailableQuests, unselectAdventurer, selectAdventurer } from "./apps/availableQuest/quest-board-state"
 import { takeAvailableQuest, claimTakenQuest, getAvailableQuests, getAdventurers, getInProgressQuests } from "./apps/availableQuest/quest-board-thunks"
+import { fetchMintTest } from "./apps/availableQuest/faucet"
 
-const Relative = styled.section`
-  position: relative;
-`
-
-const Flex = styled.div`
+const Container = styled.section`
+    position: relative;
     display: flex;
 `
 
@@ -60,6 +58,9 @@ const IdleQuestsApp = () => {
         generalDispatch(unselectAdventurer(adventurer))
     const onSelectAdventurer = (adventurer: Adventurer) => 
         generalDispatch(selectAdventurer(adventurer))
+
+    const onRecruitAdventurer = () => 
+        generalDispatch(fetchMintTest())
     
     // Ensures there is always at least 5 quests available
     useEffect(()=>{
@@ -72,36 +73,35 @@ const IdleQuestsApp = () => {
         generalDispatch(getInProgressQuests())
     },[])
     
-    return(<>
-        <ConditionalRender condition={loading}>
-            <BackGroundPositionAbsolute>
-                <Loading size={8} />
-            </BackGroundPositionAbsolute>
-        </ConditionalRender>
+    return(
+        <Container>
+            <ConditionalRender condition={loading}>
+                <BackGroundPositionAbsolute>
+                    <Loading size={8} />
+                </BackGroundPositionAbsolute>
+            </ConditionalRender>
 
-        <Relative>
-            <Flex>
-                <Console 
-                    adventurers={adventurers} 
-                    adventurerSlots={adventurerSlots}
-                    onAdventurerClick={onSelectAdventurer}
-                    selectedQuest={selectedQuest}
-                    takenQuests={takenQuests}
-                />
-                <QuestBoard
-                    availableQuests={availableQuests}
-                    selectedQuest={selectedQuest}
-                    adventurerSlots={adventurerSlots}
-                    onSignQuest={onSignQuest}
-                    onCloseQuest={onCloseAvailableQuest}
-                    onSelectQuest={onSelectQuest}
-                    onFetchMoreQuests={onFetchMoreQuests}
-                    onUnselectAdventurer={onUnselectAdventurer}
-                />
-            </Flex>
-        </Relative>
-        <ErrorHandler />
-    </>)
+            <Console
+                adventurers={adventurers}
+                adventurerSlots={adventurerSlots}
+                onAdventurerClick={onSelectAdventurer}
+                selectedQuest={selectedQuest}
+                takenQuests={takenQuests}
+                onAdventurerRecruit={onRecruitAdventurer}
+            />
+            <QuestBoard
+                availableQuests={availableQuests}
+                selectedQuest={selectedQuest}
+                adventurerSlots={adventurerSlots}
+                onSignQuest={onSignQuest}
+                onCloseQuest={onCloseAvailableQuest}
+                onSelectQuest={onSelectQuest}
+                onFetchMoreQuests={onFetchMoreQuests}
+                onUnselectAdventurer={onUnselectAdventurer}
+            />
+            <ErrorHandler />
+        </Container>
+    )
 }
 
 export default IdleQuestsApp

@@ -25,10 +25,10 @@ const CardContainer = styled.div`
     position: relative;
     display: flex;
     flex-direction: column;
-    left: -10vw;
-    width: 38vw;
-    height: 43.4vw;
-    filter: drop-shadow(0px 0px 1vw rgba(0, 0, 0, 0.8));
+    left: -10vmax;
+    width: 38vmax;
+    height: 43.4vmax;
+    filter: drop-shadow(0px 0px 1vmax rgba(0, 0, 0, 0.8));
 `
 
 const InsideColumnWrapper = styled.div`
@@ -52,44 +52,44 @@ const InsideRightColumn = styled.div`
     flex-direction: column;
     width: 100%;
     height: 100%;
-    padding-top: 2vw;
-    padding-right: 1vw;
+    padding-top: 2vmax;
+    padding-right: 1vmax;
 `
 
 const Title = styled.h2`
     text-align: left;
     font-family: VT323;
-    font-size: 1.7vw;
+    font-size: 1.7vmax;
     font-weight: 900;
     color: #793312;
     text-transform: uppercase; 
     font-smooth: never;
     -webkit-font-smoothing : none;
-    padding: 0vw 3.5vw;
-    margin-top: 1.5vw;
+    padding: 0vmax 3.5vmax;
+    margin-top: 1.5vmax;
     overflow: hidden;
-    max-width: 25vw;
+    max-width: 25vmax;
     text-overflow: ellipsis;
     white-space: nowrap;
 `
 
 const Details = styled.p`
-    margin-top: 2vw;
+    margin-top: 2vmax;
     width: 65%;
-    height: 10.5vw;
-    padding: 0vw 1.5vw 0vw 3vw;
+    height: 10.5vmax;
+    padding: 0vmax 1.5vmax 0vmax 3vmax;
     
     font-family: VT323;
-    font-size: 1vw;
+    font-size: 1vmax;
     color: #793312;
-    line-height: 1.5vw;
+    line-height: 1.5vmax;
     font-weight: 100;
 `
 
 const MonsterContainer = styled.div`
     position: relative;
-    width: 9vw;
-    height: 14vw;
+    width: 9vmax;
+    height: 14vmax;
 `
 
 type ExperienceBarColor = "r" | "g" | "b" | "y"
@@ -122,11 +122,11 @@ const ExperienceAnimation = (start: number, experience: number) => keyframes`
 `
 
 const ExperienceBar = styled.div<{ $display: boolean, color: ExperienceBarColor, $glow: boolean }>`
-    margin-top: 0.1vw;
+    margin-top: 0.1vmax;
     flex: 1;
-    height: 1.2vw;
+    height: 1.2vmax;
     overflow: hidden;
-    border-radius: 0vw 1vw 0vw 1vw;
+    border-radius: 0vmax 1vmax 0vmax 1vmax;
     background-color: ${props => rgbMapping(props.color, true)}};
     display: ${props => props.$display ? "block" : "none"};
     animation: ${props => props.$glow ? glow : "none"} 1s infinite;
@@ -134,20 +134,20 @@ const ExperienceBar = styled.div<{ $display: boolean, color: ExperienceBarColor,
 
 const Experience = styled.div<{ start: number, experience: number, animate: boolean, color: ExperienceBarColor, $glow: boolean }>`
     height: inherit;
-    border-radius: 0vw 1vw 0vw 1vw;
+    border-radius: 0vmax 1vmax 0vmax 1vmax;
     background-color: ${props => rgbMapping(props.color, false)};
     width: ${props => props.experience}%;
     animation: ${props => props.animate ? ExperienceAnimation(props.start, props.experience) : "none"} 2s;
     position: relative;
-    filter: drop-shadow(0px 0px 0.2vw rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0px 0px 0.2vmax rgba(0, 0, 0, 0.5));
     span {
-        filter: drop-shadow(0px 0px 0.2vw ${props => rgbMapping(props.$glow ? "y" : props.color, false)});
+        filter: drop-shadow(0px 0px 0.2vmax ${props => rgbMapping(props.$glow ? "y" : props.color, false)});
         font-family: Oswald;
         position: absolute;
         display: block;
         padding: 0;
-        margin: -0.4vw 0 0 0.4vw;
-        font-size: 1.3vw;
+        margin: -0.4vmax 0 0 0.4vmax;
+        font-size: 1.3vmax;
         font-weight: bold;
         color: ${props => rgbMapping(props.$glow ? "y" : props.color, true)};
     }
@@ -185,36 +185,36 @@ const APSReq = ({ apsRequired, apsAccumulated }: { apsRequired: APS, apsAccumula
 
 const StyledSuccessChance = styled(SuccessChance)`
     position: absolute;
-    right: -1vw;
-    top: 15.5vw;
+    right: -1vmax;
+    top: 15.5vmax;
 `
 
 const ProgressionWrapper = styled.div`
-    padding: 0vw 0vw;
-    margin: 4vw 0vw 1vw 0vw;
+    padding: 0vmax 0vmax;
+    margin: 4vmax 0vmax 1vmax 0vmax;
 `
 
 const AdventurersWrapper = styled.div`
     width: 100%;
     display: flex;
-    padding: 0vw 1vw;
+    padding: 0vmax 1vmax;
     margin-top: auto;
 `
 
 const StyledQuestLabelLevel = styled(QuestLabelLevel)`
-    right: 1vw;
+    right: 1vmax;
 `
 
 const CornerRightDown = styled.div`
     position: absolute;
-    right: 1vw;
-    top: 33vw;
+    right: 1vmax;
+    top: 33vmax;
     z-index: -1;
 `
 
 const Footer = styled.div`
     width: 100%;
-    height: 8vw;
+    height: 8vmax;
 `
 
 const Monster = () =>

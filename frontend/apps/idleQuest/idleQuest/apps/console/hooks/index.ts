@@ -1,6 +1,6 @@
 export { default as useGetDragonSilver } from "./useGetDragonSilver"
-export { default as useIsScroll} from "./useIsScroll"
-export { default as useGetLevel } from "./useGetLevel"
+//export { default as useIsScroll} from "./useIsScroll"
+//export { default as useGetLevel } from "./useGetLevel"
 export { default as useDeadCoolDown } from "./useDeadCoolDown"
 export { default as useGetAdventurersTimmer } from "./useGetAdventurersTimmer"
 export { default as useComputeHeightFromOriginalImage } from "./useComputeHeightFromOriginalImage"

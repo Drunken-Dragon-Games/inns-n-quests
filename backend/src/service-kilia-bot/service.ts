@@ -126,7 +126,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         const player = await this.identityService.resolveUser({ ctype: "user-id", userId: quest.userId })
         if (player.status !== "ok" || !quest.outcome) return
 
-        const success = quest.outcome.ctype === "success-outcome" ? "succeded" : "failed"
+        const success = quest.outcome.ctype === "success-outcome" ? "succeeded" : "failed"
         //const outcome = quest.outcome.ctype === "success-outcome" ? quest.outcome.reward.currencies[0]!.unit : quest.outcome!.reason
         const embed = new EmbedBuilder()
             .setColor(0xF5CD1B)
@@ -152,7 +152,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         const withPlayers = leaderboard.map((position, index) =>
             ({ player: players[index], count: position.count }))
         const embedFields = withPlayers.map((position, index) => 
-            ({ name: `${index+1}. ${position.player.nickname}`, value: `${position.count} quests succeded` }))
+            ({ name: `${index+1}. ${position.player.nickname}`, value: `${position.count} quests succeeded` }))
 
         const embed = new EmbedBuilder()
             .setColor(0xFF0000)

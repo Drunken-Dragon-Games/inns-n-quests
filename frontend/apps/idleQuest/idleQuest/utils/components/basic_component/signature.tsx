@@ -8,39 +8,39 @@ const glow = keyframes`
 
 const SignatureWrapper = style.div<{ interactuable?: boolean, hover?: boolean, glow?: boolean }>`
     position: absolute;
-    top: 40vw;
-    left: 4vw;
+    top: 40vmax;
+    left: 4vmax;
     cursor: ${props => props.interactuable ? "pointer" : "context-menu"};
     animation: ${props => props.glow ? glow : ""} 0.5s ease-in-out infinite alternate;
     img{
-        width: 11vw !important;
-        height: 2vw !important;
+        width: 11vmax !important;
+        height: 2vmax !important;
         img{
-            width: 9vw !important;
-            height: 2.1vw !important;
+            width: 9vmax !important;
+            height: 2.1vmax !important;
 
         }
     }
 
     p{
-        width: 9vw; 
-        font-size: 1vw;
+        width: 9vmax; 
+        font-size: 1vmax;
         color: #D99F59;
         font-family: VT323;
         position: absolute;
-        top: 0.6vw;
-        left:${props => props.interactuable ? "3.5" : " 2.5"}vw;
+        top: 0.6vmax;
+        left:${props => props.interactuable ? "3.5" : " 2.5"}vmax;
         opacity: ${props => props.hover ? "0.5": "1"};
     }
 `
 
 const SignatureImageWrapper = style.div`
     position: absolute;
-    bottom: -0.2vw;
-    left: 3vw;
+    bottom: -0.2vmax;
+    left: 3vmax;
     img{
-        width: 9vw !important;
-        height: 2.1vw !important;
+        width: 9vmax !important;
+        height: 2.1vmax !important;
     }
 `
 

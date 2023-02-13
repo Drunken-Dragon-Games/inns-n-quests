@@ -5,42 +5,42 @@ import { SealType } from "../../../../dsl"
 
 const SealWrapperHeroicQuest = styled.div`
 
-    margin: 4vw 2vw 0vw auto;
+    margin: 4vmax 2vmax 0vmax auto;
 
     img{
-        width: 6vw !important;
-        height: 9vw !important;
+        width: 6vmax !important;
+        height: 9vmax !important;
     }
 `
 
 const SealWrapperKingsPlea = styled.div`
 
-    margin: 4vw 1vw 0vw auto;
-    // padding: 5vw 0vw;
+    margin: 4vmax 1vmax 0vmax auto;
+    // padding: 5vmax 0vmax;
 
     img{
-        width: 9vw !important;
-        height: 9.5vw !important;
+        width: 9vmax !important;
+        height: 9.5vmax !important;
     }
 `
 
 const SealWrapperValiantAdventure = styled.div`
 
-    margin: 4vw 1.5vw 0vw auto;
+    margin: 4vmax 1.5vmax 0vmax auto;
 
     img{
-        width: 6vw !important;
-        height: 6vw !important;
+        width: 6vmax !important;
+        height: 6vmax !important;
     }
 `
 
 const SealWrapperTownsfolk = styled.div`
 
-    margin: 5.9vw 2.5vw 0vw auto;
+    margin: 5.9vmax 2.5vmax 0vmax auto;
 
     img{
-        width: 8vw !important;
-        height: 3vw !important;
+        width: 8vmax !important;
+        height: 3vmax !important;
     }
 `
 

@@ -8,16 +8,16 @@ import { useGetDragonSilver } from "../../hooks";
 
 const Flex = styled.div`
     display: flex;
-    padding: 0.8vw 1vw;
+    padding: 0.8vmax 1vmax;
 `
 
 const ImageWrapper = styled.div`
     display: block;
-    height: 1.5vw !important;
+    height: 1.5vmax !important;
     position: relative;
     img{
-        width: 1.5vw !important;
-        height: 1.5vw !important;
+        width: 1.5vmax !important;
+        height: 1.5vmax !important;
     }
 `
 
@@ -32,8 +32,8 @@ const BackWrapper = styled.div`
 
 
 const DragonSilverWrapper = styled.div`
-    margin-left: 1vw;
-    margin-top: 0.3vw;
+    margin-left: 1vmax;
+    margin-top: 0.3vmax;
     display: flex;
     
 `
@@ -44,8 +44,8 @@ interface ToolTip{
 
 
 const ClaimDragonSilverButtonWrapper = styled.div`
-    margin-left: 1vw;
-    margin-top: 0.3vw;
+    margin-left: 1vmax;
+    margin-top: 0.3vmax;
 `
 
 const Navbar = () =>{

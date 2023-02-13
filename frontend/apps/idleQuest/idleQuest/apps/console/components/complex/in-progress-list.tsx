@@ -2,16 +2,15 @@ import styled from "styled-components";
 import { useGeneralSelector } from "../../../../../../../features/hooks"
 import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
 import { useRef } from "react";
-import Image from 'next/image'
-import { useIsScroll } from "../../hooks";
 import { ConditionalRender } from '../../../../../../utils/components/basic_components';
 import { takenQuestId } from "../../../../../dsl";
 import TakenQuestCard from "./tankenQuestCard";
 
 
-const InProgressMappingWrapper = styled.div`
-
+const InProgressListContainer = styled.div`
     position: relative;
+    flex: 1;
+    width: 100%;
 `
 
 const InProgressMapping = styled.div`
@@ -93,49 +92,30 @@ const InProgressList = () =>{
     const numberOfQuests = generalSelector.idleQuests.questBoard.questBoard.takenQuests.length
     const quests = generalSelector.idleQuests.questBoard.questBoard.takenQuests
     const selectedQuest = generalSelector.idleQuests.questBoard.questBoard.selectedQuest
-    
-    const renderArrows =  useIsScroll(scrolling, numberOfQuests)
-
 
     return (
-        <>
-          <InProgressMappingWrapper>
+        <InProgressListContainer>
 
-            <ConditionalRender condition = {renderArrows}>
-                <ArrowIncreseContainer>
-                    <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scroll_arrow_increse.png"  alt="Dragon silver icon" width={20} height={20}  />
-                </ArrowIncreseContainer>
-            </ConditionalRender>
+            <InProgressMapping ref={scrolling}>
 
-                <InProgressMapping ref={scrolling}>
-
-                    <ConditionalRender condition = {numberOfQuests > 0}>
-                        { quests.map((quest, index) => {
-                            const selected = takenQuestId(selectedQuest) == quest.takenQuestId
-                            return  <TakenQuestCard takenQuest={quest} selected={selected} key={"taken-quest-"+index} />
-                        })}
-                    </ConditionalRender>
-
-                    <ConditionalRender condition = {numberOfQuests == 0}>
-                        <NoQuestWaring>
-                              <div>
-                                There is no Quest in progress
-                              </div>
-                        </NoQuestWaring>
-                    </ConditionalRender>
-
-                </InProgressMapping>
-
-          
-
-                <ConditionalRender condition = {renderArrows}>
-                    <ArrowDecreseContainer>
-                        <Image src= "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scroll_arrow_decrese.png"  alt="Dragon silver icon" width={20} height={20}  />
-                    </ArrowDecreseContainer>
+                <ConditionalRender condition={numberOfQuests > 0}>
+                    {quests.map((quest, index) => {
+                        const selected = takenQuestId(selectedQuest) == quest.takenQuestId
+                        return <TakenQuestCard takenQuest={quest} selected={selected} key={"taken-quest-" + index} />
+                    })}
                 </ConditionalRender>
-          </InProgressMappingWrapper>
 
-        </>
+                <ConditionalRender condition={numberOfQuests == 0}>
+                    <NoQuestWaring>
+                        <div>
+                            There is no Quest in progress
+                        </div>
+                    </NoQuestWaring>
+                </ConditionalRender>
+
+            </InProgressMapping>
+
+        </InProgressListContainer>
     )
 }
 

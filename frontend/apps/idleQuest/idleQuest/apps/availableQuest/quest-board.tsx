@@ -5,12 +5,15 @@ import { RefreshButton } from "./components"
 import { AvailableQuestsArea, QuestCard, WorldMap } from "./components"
 
 const QuestBoardContainer = styled.div`
-    width: 85%;
     height: 100vh;
+    flex: 1;
     background-color: #523438;
     display: flex;
     position: relative;
     overflow: hidden;
+    background-image: url("https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp");
+    background-repeat: no-repeat;
+    background-position: center;
 `
 
 const AvailableQuestsWrapper = styled.div`
@@ -27,16 +30,6 @@ const Background = styled.div`
     top: 1vw;
 `
 
-const QuestBoardBackground = () =>
-    <Background>
-        <CrispPixelArtImage
-            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp"
-            alt="quest board background"
-            width={2100}
-            height={1250}
-            layout="responsive" />
-    </Background>
-
 interface QuestBoardProps {
     selectedQuest?: SelectedQuest,
     adventurerSlots: (Adventurer | null)[],
@@ -51,7 +44,6 @@ interface QuestBoardProps {
 const QuestBoard = ({ selectedQuest, adventurerSlots, availableQuests, onSignQuest, onCloseQuest, onSelectQuest, onFetchMoreQuests, onUnselectAdventurer }: QuestBoardProps) =>
     <QuestBoardContainer>
         <AvailableQuestsWrapper>
-            <QuestBoardBackground />
             <AvailableQuestsArea availableQuests={availableQuests} onQuestClick={onSelectQuest} />
             <WorldMap />
             <RefreshButton onClick={onFetchMoreQuests} />
