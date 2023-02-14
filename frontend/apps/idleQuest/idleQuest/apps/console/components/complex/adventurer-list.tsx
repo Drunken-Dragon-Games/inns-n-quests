@@ -3,9 +3,9 @@ import { useState } from "react";
 import { Adventurer, SelectedQuest } from "../../../../../dsl";
 import AdventurerCard from "../../../availableQuest/components/adventurer-card";
 import { notEmpty } from "../../../../../../utils";
+import InventoryBox from "./inventory-box";
 
 const AdventurerListContainer = styled.div`
-    position: relative;
     width: 100%;
     padding: 0 0.5vmax;
     flex: 1;
@@ -46,14 +46,11 @@ const AdventurerListContainer = styled.div`
     }
 `
 
-const AdventurerCardContainer = styled.div<{ interactuable: boolean }>`
+const AdventurerCardContainer = styled(InventoryBox)<{ interactuable: boolean }>`
     width: 100%;
-    background-color: rgb(51,65,74);
-    padding: 0.5vmax 0 0 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     ${props => props.interactuable ? "cursor: pointer;" : ""}
 `
 

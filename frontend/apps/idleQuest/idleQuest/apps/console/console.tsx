@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Navbar, AdventurerList, InProgressList, ConsoleTabs } from "./components/complex"
+import { DragonSilverDisplay, AdventurerList, InProgressList, ConsoleTabs } from "./components/complex"
 import { Adventurer, SelectedQuest, TakenQuest } from "../../../dsl";
 import { ConditionalRender } from "../../../../utils/components/basic_components";
 import { TabNames } from "./components/complex/console-tabs";
@@ -8,7 +8,6 @@ import { cardano_network } from "../../../../../setting";
 import BigHopsButton from "../availableQuest/components/big-hops-button";
 
 const ConsoleContainer =styled.div`
-    position: relative;
     width: 15vmax;
     height: 100vh;
     display: flex;
@@ -35,12 +34,12 @@ const Console = ({ adventurers, adventurerSlots, selectedQuest, takenQuests, dra
     const [page, setPage] = useState<TabNames>("inventory")
     return(
         <ConsoleContainer>
-            <Navbar 
+            <DragonSilverDisplay 
                 dragonSilver={dragonSilver}
                 dragonSilverToClaim={dragonSilverToClaim}
             />
             <ConsoleTabs
-                page={page}
+                activeTab={page}
                 completedQuests={takenQuests.length}
                 onTabClick={(page) => setPage(page)}
             />

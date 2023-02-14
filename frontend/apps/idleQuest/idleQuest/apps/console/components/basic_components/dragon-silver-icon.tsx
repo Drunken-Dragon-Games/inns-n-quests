@@ -1,10 +1,9 @@
 import styled from "styled-components" 
 import Image from "next/image"
 import { useState } from "react"
-import { CountEffect } from "."
 import { TextElMessiri, ConditionalRender } from '../../../../../../utils/components/basic_components';
 
-const DragonSilverWrapperToClaim = styled.div`
+const DragonSilverIconContainer = styled.div`
     display: flex;
     width: 4vw;
     p{
@@ -44,7 +43,7 @@ interface DragonSilverIconProps{
 const DragonSilverIcon = ({ src, dragonSilver, tooltip, toClaim }: DragonSilverIconProps) => {
     const [onHoverDragonSilverToClaim, setOnHoverDragonSilverToClaim] = useState<boolean>(false)
     return (
-        <DragonSilverWrapperToClaim>
+        <DragonSilverIconContainer>
             <ImageWrapper>
                 <Image
                     src={src}
@@ -58,15 +57,11 @@ const DragonSilverIcon = ({ src, dragonSilver, tooltip, toClaim }: DragonSilverI
                 <ToolTipDragonSilverToClaim $hover={onHoverDragonSilverToClaim}><TextElMessiri fontsize={0.9} color="#23303B">{tooltip}</TextElMessiri></ToolTipDragonSilverToClaim>
             </ImageWrapper>
 
-            <ConditionalRender condition={toClaim == true}>
-                <CountEffect />
-            </ConditionalRender>
-
             <ConditionalRender condition={toClaim == false}>
                 <TextElMessiri fontsize={0.9} color="white">{dragonSilver}</TextElMessiri>
             </ConditionalRender>
 
-        </DragonSilverWrapperToClaim>
+        </DragonSilverIconContainer>
     )
 }
 

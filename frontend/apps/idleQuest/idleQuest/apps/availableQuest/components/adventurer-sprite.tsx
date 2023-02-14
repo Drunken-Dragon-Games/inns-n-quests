@@ -1,6 +1,6 @@
 import styled, { keyframes } from "styled-components"
 import { Adventurer } from "../../../../dsl/models"
-import { CrispPixelArtImage, notEmpty, simpleHash } from "../../../../../utils"
+import { PixelArtImage, notEmpty, simpleHash } from "../../../../../utils"
 import { useEffect, useRef, useState } from "react"
 
 const emojiMapping = (emoji?: string) => {
@@ -86,11 +86,11 @@ const grandmasterAdventurerCustomOffer = (adventurer: Adventurer): number => {
 export type SpriteRenderOptions = "normal" | "in-challenge" | "selected" | "dead" | "hovered"
 
 const AdventurerSpriteContainer = styled.div<{ height: number, width: number, render: SpriteRenderOptions }>`
+    margin-top: auto;
     position: relative;
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin-top: -${props => props.height}vmax;
     width: ${props => props.width + 0.2}vmax;
     height: ${props => props.height}vmax;
 
@@ -141,13 +141,19 @@ const LeavingEmojiAnimation = keyframes`
 
 const EmojiContainer = styled.div<{ $display: boolean, offset: number }>`
     position: absolute;
-    width: 3.1vmax;
-    height: 2.7vmax;
+    width: 3.4vmax;
+    height: 3.4vmax;
     z-index: 100;
-    margin-top: ${props => props.offset + 0.2}vmax;
+    overflow: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: ${props => props.offset}vmax;
     opacity: ${props => props.$display ? 1 : 0};
     animation ${props => props.$display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
 `
+
+const EmojiBubble = styled(PixelArtImage)`padding-top: 0.3vmax;`
 
 const Emoji = ({ emoji, offset }: { emoji?: string, offset: number }) => {
     const lastEmoji = useRef<string | undefined>(undefined)
@@ -155,15 +161,18 @@ const Emoji = ({ emoji, offset }: { emoji?: string, offset: number }) => {
     useEffect(() => { lastEmoji.current = emoji }, [emoji])
     return notEmpty(renderEmoji) ? 
         <EmojiContainer $display={emoji !== undefined} offset={offset}>
-            <CrispPixelArtImage
+            <EmojiBubble
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"
                 alt="emoji buble"
-                layout="fill"
+                width={3.4}
+                height={3.4}
+                absolute
             />
-            <CrispPixelArtImage
+            <PixelArtImage
                 src={emojiMapping(renderEmoji)}
-                alt="adventurer emoji bubble"
-                layout="fill"
+                alt="adventurer emoji"
+                width={2.8}
+                height={2.5}
             />
         </EmojiContainer>
     : <></>
@@ -203,7 +212,7 @@ const AdventurerSprite = ({className, adventurer, render = "normal", scale = 1, 
         return (
             <AdventurerSpriteContainer className={className} height={height} width={width} render={render}>
                 <Emoji emoji={emoji} offset={-2.5}/>
-                <CrispPixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} layout="fill" />
+                <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill />
             </AdventurerSpriteContainer>
         )
     } else if (adventurer.collection == "grandmaster-adventurers") {
@@ -213,7 +222,7 @@ const AdventurerSprite = ({className, adventurer, render = "normal", scale = 1, 
         return (
             <AdventurerSpriteContainer className={className} height={height} width={width} render={render}>
                 <Emoji emoji={emoji} offset={offset} />
-                <CrispPixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} layout="fill" />
+                <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill />
             </AdventurerSpriteContainer>
         )
     } else if (adventurer.collection == "adventurers-of-thiolden") {
@@ -223,7 +232,7 @@ const AdventurerSprite = ({className, adventurer, render = "normal", scale = 1, 
         return (
             <AdventurerSpriteContainer className={className} height={height} width={width} render={render}>
                 <Emoji emoji={emoji} offset={emojiOffset} />
-                <CrispPixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} layout="fill" />
+                <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill />
             </AdventurerSpriteContainer>
         )
     } else return <></>

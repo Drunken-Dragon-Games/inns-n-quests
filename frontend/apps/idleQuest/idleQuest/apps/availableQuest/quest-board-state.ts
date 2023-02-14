@@ -67,6 +67,7 @@ const questBoardState = createSlice({
         selectQuest: (state, action: PayloadAction<SelectedQuest>) => {
             const quest = action.payload
             state.selectedQuest = quest
+            console.log(quest)
             if (quest.ctype === "available-quest")
                 state.adventurerSlots = Array(quest.slots).fill(null)
             else

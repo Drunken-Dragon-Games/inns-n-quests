@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { CrispPixelArtBackground } from "../../../../../utils"
+import { PixelArtImage } from "../../../../../utils"
 
 const LabelComponent = styled.div`
     position: absolute;
@@ -35,10 +35,13 @@ const LabelTextLevel = styled.p`
 
 const QuestLabelLevel = ({ className, children}: { className?: string, children: string }) => 
     <LabelComponent className={className}>
-        <CrispPixelArtBackground
+        <PixelArtImage
             src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/label.svg"
-            layout="fill"
-            alt="Label level drunken dragon" />
+            alt="Label level drunken dragon" 
+            absolute
+            fill
+            zIndex={-1}
+        />
 
         <TextWrapper>
             <LabelText>Level</LabelText>

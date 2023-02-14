@@ -1,7 +1,7 @@
-import Image from "next/image"
 import styled from "styled-components";
 import { DragonSilverIcon } from "../basic_components";
 import { LinkDisable } from "../../../../../../utils/components/basic_components";
+import { NoDragImage } from "../../../../../../utils";
 
 const NavbarContainer = styled.div`
     display: flex;
@@ -22,6 +22,7 @@ const BackWrapper = styled.div`
     margin-left: auto;
     cursor: pointer;
 
+    background-image: url("https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/back.png");
     &:hover{
         opacity: 0.5;
     }
@@ -44,7 +45,7 @@ interface NavbarProps {
     dragonSilverToClaim: number,
 }
 
-const Navbar = ({ dragonSilver, dragonSilverToClaim }: NavbarProps) =>
+const DragonSilverDisplay = ({ dragonSilver, dragonSilverToClaim }: NavbarProps) =>
     <NavbarContainer>
         <DragonSilverWrapper>
             <DragonSilverIcon
@@ -66,11 +67,14 @@ const Navbar = ({ dragonSilver, dragonSilverToClaim }: NavbarProps) =>
 
         <BackWrapper>
             <LinkDisable url={`${process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:3000/login"}`}>
-                <ImageWrapper>
-                    <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/logout.png" alt="Loagout icon" width={30} height={30} />
-                </ImageWrapper>
+                <NoDragImage 
+                    src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/logout.png" 
+                    alt="Loagout icon" 
+                    width={1.8} 
+                    height={1.8} 
+                />
             </LinkDisable>
         </BackWrapper>
     </NavbarContainer>
 
-export default Navbar
+export default DragonSilverDisplay

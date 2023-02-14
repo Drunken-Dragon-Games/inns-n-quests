@@ -1,48 +1,47 @@
 import styled from "styled-components";
-import { useGeneralSelector } from "../../../../../../../features/hooks"
-import { selectGeneralReducer } from "../../../../../../../features/generalReducer"
-import { useRef } from "react";
 import { ConditionalRender } from '../../../../../../utils/components/basic_components';
-import { TakenQuest, takenQuestId } from "../../../../../dsl";
-import TakenQuestCard from "./tankenQuestCard";
+import { TakenQuest } from "../../../../../dsl";
+import TakenQuestCard from "./taken-quest-card";
 
 const InProgressListContainer = styled.div`
-    position: relative;
-    flex: 1;
     width: 100%;
-`
+    padding: 0 0.5vmax;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1vmax;
 
-const InProgressMapping = styled.div`
-    width: 97%;
-    height: 82vh;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: scroll;
     z-index: 1;
+
     ::-webkit-scrollbar {
-        width: 0.4vw; 
+        width: 0.4vmax; 
       }
       
-      /* Track */
+    /* Track */
     ::-webkit-scrollbar-track {
         background: #495362;
         background-clip: padding-box;
-        border-left: 0.1vw solid transparent;
-        border-right: 0.1vw solid transparent;
-      }
-      
-      /* Handle */
+        border-left: 0.1vmax solid transparent;
+        border-right: 0.1vmax solid transparent;
+    }
+       
+    /* Handle */
     ::-webkit-scrollbar-thumb {
         background: rgba(0, 0, 0, 0);
-        border-top: 0.3vw solid rgba(0, 0, 0, 0);
-        border-right: 0.8vw  solid #8A8780;
-        border-bottom: 0.3vw  solid rgba(0, 0, 0, 0);;
-        border-left: 0.8vw  solid #8A8780;
-      }
+        border-top: 0.3vmax solid rgba(0, 0, 0, 0);
+        border-right: 0.5vmax  solid #8A8780;
+        border-bottom: 0.3vmax  solid rgba(0, 0, 0, 0);;
+        border-left: 0.5vmax  solid #8A8780;
+    }
       
-      /* Handle on hover */
+    /* Handle on hover */
     ::-webkit-scrollbar-thumb:hover {
         background: #585652; 
-      }
-
+    }
 `
 
 const NoQuestWaring = styled.div`

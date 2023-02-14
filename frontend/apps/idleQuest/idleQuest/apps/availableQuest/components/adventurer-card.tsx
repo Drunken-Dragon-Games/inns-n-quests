@@ -1,5 +1,5 @@
 import styled, { keyframes } from "styled-components"
-import { CrispPixelArtImage, notEmpty } from "../../../../../utils"
+import { PixelArtImage, notEmpty } from "../../../../../utils"
 import { TextOswald } from "../../../../../utils/components/basic_components"
 import { Adventurer } from "../../../../dsl"
 import AdventurerSprite, { SpriteRenderOptions } from "./adventurer-sprite"
@@ -15,6 +15,16 @@ const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
     if (color == "b" && !background) return "rgb(80, 80, 255)"
 }
 
+const AdventurerContainer = styled.div`
+    position: relative;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`
+
 const InfoWrapper = styled.div`
     margin-top: 0.5vmax;
     width: inherit;
@@ -24,6 +34,11 @@ const NameTitle = styled.div<{ $display: boolean }>`
     font-weight: bold;
     text-transform: uppercase;
     display: ${props => props.$display ? "block" : "none"};
+`
+
+const AdventurerSpriteWrapper = styled.div`
+    display: flex;
+    height: 100%;
 `
 
 const APSWrapper = styled.div`
@@ -86,16 +101,6 @@ const Medal = styled.span`
     font-size: 0.9vmax;
 `
 
-const AdventurerContainer = styled.div`
-    position: relative;
-    display: flex;
-    height: inherit;
-    width: inherit;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`
-
 const DeadMarkAnimation = keyframes`
     0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 
     40% {transform: translateY(-15px);} 
@@ -113,19 +118,6 @@ const DeadMark = styled.div <{ $display: boolean }>`
     z-index: 2;
     animation: ${DeadMarkAnimation} 1.2s;
     ${props => props.$display ? "" : "display: none;"}
-`
-
-const StyledAdventurerSprite = styled(AdventurerSprite)`
-    position: absolute;
-`
-
-const AdventurerWrapper = styled.div`
-    width: 100%;
-    height: 1px;
-    display: flex;
-    margin-top: 9vmax;
-    flex-direction: column;
-    align-items: center;
 `
 
 interface AdventurerProps {
@@ -152,11 +144,9 @@ const AdventurerCard = ({
     <AdventurerContainer>
 
         <DeadMark $display={displayDeadMark} >
-            <CrispPixelArtImage 
+            <PixelArtImage 
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_mark_fail.png" 
                 alt="fail mark image" 
-                //width={2000} height={1250} 
-                layout="fill"
             />
         </DeadMark>
 
@@ -164,13 +154,13 @@ const AdventurerCard = ({
             <Medal>{medalNumber}</Medal>
         </MedalWrapper>
 
-        <AdventurerWrapper>
-            <StyledAdventurerSprite
+        <AdventurerSpriteWrapper>
+            <AdventurerSprite
                 adventurer={adventurer}
                 render={render}
                 emoji={emoji}
             />
-        </AdventurerWrapper>
+        </AdventurerSpriteWrapper>
 
         <InfoWrapper>
             <NameTitle $display={notEmpty(displayNameColor)}>

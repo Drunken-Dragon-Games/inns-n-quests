@@ -1,4 +1,3 @@
-import Image from "next/image"
 import styled, { keyframes } from "styled-components"
 import { TextElMessiri } from "../../../../../../utils/components/basic_components"
 
@@ -8,6 +7,10 @@ const TabsContainer = styled.div`
     height: 2.3vmax;
     display: flex;
     align-items: center;
+    background-image: url("https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/quest_buttons_container.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 `
 
 const glow = keyframes`
@@ -15,7 +18,7 @@ const glow = keyframes`
 `
 
 const TabButton = styled.div<{ glow: boolean }>`
-    height: 2.3vmax;
+    height: inherit;
     flex: 1;
     display: flex;
     align-items: center;
@@ -32,30 +35,21 @@ const TabButton = styled.div<{ glow: boolean }>`
     }
 `
 
-const BackgroundImage = styled(Image)`
-    position: absolute;
-`
-
 export type TabNames = "inventory" | "quests-in-progress"
 
 interface ConsoleTabsProps {
-    page: TabNames,
+    activeTab: TabNames,
     completedQuests: number,
     onTabClick: (tab: TabNames) => void
 }
 
-const ConsoleTabs = ({ page, completedQuests, onTabClick }: ConsoleTabsProps) =>
+const ConsoleTabs = ({ activeTab, completedQuests, onTabClick }: ConsoleTabsProps) =>
     <TabsContainer>
-        <BackgroundImage
-            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/quest_buttons_container.png"
-            alt="ornament" //width={400} height={75} layout="responsive" 
-            layout="fill"
-        />
         <TabButton onClick={() => onTabClick("inventory")} glow={false}>
-            <TextElMessiri fontsize={0.8} color={page == "inventory" ? "white" : "#5B646C"}>ADVENTURERS</TextElMessiri>
+            <TextElMessiri fontsize={0.8} color={activeTab == "inventory" ? "white" : "#5B646C"}>ADVENTURERS</TextElMessiri>
         </TabButton>
         <TabButton onClick={() => onTabClick("quests-in-progress")} glow={completedQuests > 0}>
-            <TextElMessiri fontsize={0.8} color={page == "quests-in-progress" ? "white" : "#5B646C"}>IN PROGRESS</TextElMessiri>
+            <TextElMessiri fontsize={0.8} color={activeTab == "quests-in-progress" ? "white" : "#5B646C"}>TAKEN QUESTS</TextElMessiri>
         </TabButton>
     </TabsContainer>
 

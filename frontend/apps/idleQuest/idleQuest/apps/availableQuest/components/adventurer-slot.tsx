@@ -1,34 +1,27 @@
 import styled from "styled-components"
 import { useState } from "react"
-import { CrispPixelArtImage, notEmpty } from "../../../../../utils"
+import { PixelArtImage, notEmpty } from "../../../../../utils"
 import { Adventurer } from "../../../../dsl"
 import AdventurerCard from "./adventurer-card"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
-    height: 8vw;
     width: 100%;
+    min-height: 11.6vmax;
+    max-width: 7.25vmax;
     display: flex;
     align-items: center;
     justify-content: center;
     ${props => props.interactuable ? `cursor: pointer;` : ``}
 `
 
-const EmptySlotContainer = styled.div`
-    width: 2.3vw;
-    height: 2.3vw;
-    position: absolute;
-`
-
 const EmptySlot = () =>
-    <EmptySlotContainer>
-        <CrispPixelArtImage
-            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/dropbox.png"
-            alt="adventurer slot in quest"
-            width={100}
-            height={100}
-            layout="responsive"
-        />
-    </EmptySlotContainer>
+    <PixelArtImage
+        src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/dropbox.png"
+        alt="adventurer slot in quest"
+        width={2.3}
+        height={2.3}
+        absolute
+    />
 
 interface AdventurerSlotProps {
     className?: string,
