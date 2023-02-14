@@ -12,7 +12,14 @@ export const NoDragImageCss = css`
 
 export const NoDragImageExt = styled(Image)`
     ${NoDragImageCss}
-    img { ${NoDragImageCss} }
+`
+
+const Wrapper = styled.div<{ position: "absolute" | "relative", fill?: boolean, height?: number, width?: number, zIndex?: number, units?: string }>`
+    position: ${props => props.position};
+    ${props => props.fill ? "width: 100%; height: 100%;" : ""}
+    ${props => props.height ? `height: ${props.height}${props.units ? props.units : "vmax"};` : ""}
+    ${props => props.width ? `width: ${props.width}${props.units ? props.units : "vmax"};` : ""}
+    ${props => props.zIndex ? `z-index: ${props.zIndex};` : ""}
 `
 
 export const NoDragImage = (props: {
@@ -26,24 +33,17 @@ export const NoDragImage = (props: {
     units?: string,
     zIndex?: number,
 }) => {
-    const Wrapper = styled.div<{ position: "absolute" | "relative" }>`
-        position: ${props => props.position};
-        ${props.fill ? "width: 100%; height: 100%;" : ""}
-        ${props.height ? `height: ${props.height}${props.units ? props.units : "vmax"};` : ""}
-        ${props.width ? `width: ${props.width}${props.units ? props.units : "vmax"};` : ""}
-        ${props.zIndex ? `z-index: ${props.zIndex};` : ""}
-    `
     if (props.absolute) {
         return (
-            <Wrapper position="absolute" className={props.className}>
-                <Wrapper position="relative">
+            <Wrapper position="absolute" className={props.className} fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={props.units}>
+                <Wrapper position="relative" fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={props.units}>
                     <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
                 </Wrapper>
             </Wrapper>
         )
     } else {
         return (
-            <Wrapper position="relative" className={props.className}>
+            <Wrapper position="relative" className={props.className} fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={props.units}>
                 <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
             </Wrapper>
         )
