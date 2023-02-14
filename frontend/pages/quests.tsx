@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import IdleQuest from '../apps/idleQuest/idleQuests'
+import IdleQuestsApp from '../apps/idleQuest/idle-quests-app'
 
 const Quests: NextPage = () => {
   return (
@@ -9,7 +9,7 @@ const Quests: NextPage = () => {
               <title>Idle Quest | Drunken Dragon</title>
               <meta name="Drunken dragon entreta" content="A drunken Dragon Game" />
           </Head>
-          <IdleQuest/>
+          <IdleQuestsApp/>
         </>
   )
 }

@@ -1,7 +1,8 @@
+import { ReactNode } from "react"
 
 interface ConditionalRender {
     condition: boolean
-    children: JSX.Element | JSX.Element [] |  void[] | void
+    children: ReactNode
 }
 
 const ConditionalRender = ({ condition , children }:ConditionalRender) : JSX.Element => {
