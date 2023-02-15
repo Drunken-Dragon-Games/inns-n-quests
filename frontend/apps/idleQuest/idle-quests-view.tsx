@@ -6,6 +6,7 @@ import Inventory from "./components/inventory/inventory"
 import { Notifications } from "./components/notifications"
 import QuestBoard from "./components/quest-board"
 import { Adventurer, SelectedQuest, TakenQuest } from "./dsl"
+import { useIdleQuestsKeyMap } from "./idle-quests-key-map"
 import {
     clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, removeAvailableQuest, removeTimedOutNotifications, selectAdventurer,
     selectQuest, unselectAdventurer, unselectQuest
@@ -32,7 +33,8 @@ const BackGroundPositionAbsolute = styled.section`
 
 const IdleQuestsView = () => {
 
-    const questBoardState = useSelector((state: IdleQuestsState) => state.questBoard)
+    const globalState = useSelector((state: IdleQuestsState) => state)
+    const questBoardState = globalState.questBoard
     const dispatch = useDispatch<IdleQuestsDispatch>()    
     
     const dragonSilver = 0
@@ -63,6 +65,7 @@ const IdleQuestsView = () => {
     const onRecruitAdventurer = () => 
         dispatch(fetchMintTest())
     
+    useIdleQuestsKeyMap(globalState)
     // Ensures there is always at least 5 quests available
     useEffect(()=>{
         if(questBoardState.availableQuests.length < 5){
@@ -78,7 +81,6 @@ const IdleQuestsView = () => {
     useClockSeconds((now) => {
         dispatch(removeTimedOutNotifications(now))
     })
-
     
     return(
         <IdleQuestsContainer>
