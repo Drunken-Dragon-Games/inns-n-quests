@@ -11,7 +11,7 @@ import { claimTakenQuest, takeAvailableQuest } from "./idle-quests-transitions"
  * @param state 
  * @param dispatch 
  */
-const keyMap = (key: string, state: IdleQuestsState, dispatch: IdleQuestsDispatch) => { 
+const GlobalKeyMap = (key: string, state: IdleQuestsState, dispatch: IdleQuestsDispatch) => { 
 
     if (key == "Escape" && state.questBoard.selectedQuest) {
         dispatch(unselectQuest())
@@ -34,7 +34,7 @@ const keyMap = (key: string, state: IdleQuestsState, dispatch: IdleQuestsDispatc
 export const useIdleQuestsKeyMap = (state: IdleQuestsState) => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => 
-            keyMap(e.key, state, idleQuestsStore.dispatch)
+            GlobalKeyMap(e.key, state, idleQuestsStore.dispatch)
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
     }, [state])
