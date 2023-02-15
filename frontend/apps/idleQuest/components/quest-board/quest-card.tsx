@@ -1,11 +1,12 @@
 import styled, { keyframes } from "styled-components"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import Signature from "./signature"
 import { notEmpty, PixelArtCss, PixelArtImage } from "../../../utils"
 import AdventurerSlot from "./adventurer-slot"
 import { APS, zeroAPS, sameOrBetterAPS, SelectedQuest, questSeal, Adventurer, 
          takenQuestSecondsLeft, getQuestAPSRequirement, mergeAPSSum, questName, 
-         questDescription } from "../../dsl"
+         questDescription, 
+         mapSealImage} from "../../dsl"
 
 const BackShadow = styled.section<{ open: boolean }>`
     position: absolute;
@@ -200,48 +201,25 @@ interface QuestPaperTakenState {
     sealImage: { src: string, width: number, height: number }
 }
 
-const mapSealImage = (quest: SelectedQuest): { src: string, width: number, height: number } => {
-    switch (questSeal(quest)) {
-        case "heroic-quest": return { 
-            src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/heroic_quest_big.png",
-            width: 6, height: 9
-        }
-        case "kings-plea": return {
-            src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/kings_plea_big.png",
-            width: 9, height: 9.5
-        }
-        case "valiant-adventure": return {
-            src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/valiant_adventure_big.png",
-            width: 6, height: 6
-        }
-        default: return {
-            src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/townsfolk_big.png",
-            width: 8, height: 3
-        }
-    }
-}
-
-const useQuestCardState = (quest: SelectedQuest, adventurerSlots: (Adventurer | null)[]): QuestPaperTakenState | null => {
-    const [state, setState] = useState<QuestPaperTakenState | null>(null)
-    useEffect(() => {
-        const signatureType
-            = quest.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0
-                ? "available"
-            : quest.ctype == "available-quest"
-                ? "available-no-adventurers"
-            : quest.ctype == "taken-quest" && takenQuestSecondsLeft(quest) <= 0
-                ? "finished"
-            : "in-progress"
-        const apsRequired = getQuestAPSRequirement(quest)
-        const apsAccumulated = adventurerSlots
-            .filter(notEmpty)
-            .reduce((acc, adventurer) =>
-                mergeAPSSum(acc, { athleticism: adventurer.athleticism, intellect: adventurer.intellect, charisma: adventurer.charisma }), zeroAPS)
-        const sealImage = mapSealImage(quest)
-        setState({ signatureType, apsRequired, apsAccumulated, sealImage })
-    }, [quest, adventurerSlots])
-    return state
-}
+const memoQuestCardState = (quest: SelectedQuest, adventurerSlots: (Adventurer | null)[]): QuestPaperTakenState => 
+    useMemo(() => ({
+        signatureType: 
+            quest.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
+            quest.ctype == "available-quest" ? "available-no-adventurers" : 
+            quest.ctype == "taken-quest" && takenQuestSecondsLeft(quest) <= 0 ? "finished" : 
+            "in-progress",
+        apsRequired: 
+            getQuestAPSRequirement(quest),
+        apsAccumulated: 
+            adventurerSlots.filter(notEmpty).reduce((acc, adventurer) =>
+                mergeAPSSum(acc, { 
+                    athleticism: adventurer.athleticism, 
+                    intellect: adventurer.intellect, 
+                    charisma: adventurer.charisma 
+                }), zeroAPS),
+        sealImage: 
+            mapSealImage(quest)
+    }), [quest, adventurerSlots])
 
 interface QuestPaperAvailableProps {
     className?: string,
@@ -254,8 +232,7 @@ interface QuestPaperAvailableProps {
 
 const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnselectAdventurer }: QuestPaperAvailableProps) => {
     if (!quest) return <></>
-    const state = useQuestCardState(quest, adventurerSlots)
-    if (!state) return <></>
+    const state = memoQuestCardState(quest, adventurerSlots)
     return (
         <BackShadow
             onClick={(e) => { if (e.target === e.currentTarget && onClose) onClose() }}
@@ -298,7 +275,8 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
                     <SealImage 
                         src={state.sealImage.src} 
                         alt="quest seal"
-                        width={state.sealImage.width} height={state.sealImage.height}
+                        width={state.sealImage.width} 
+                        height={state.sealImage.height}
                         absolute
                     />
                 </Footer>

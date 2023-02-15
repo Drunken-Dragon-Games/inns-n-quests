@@ -1,8 +1,7 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from '@reduxjs/toolkit'
 import { combineReducers } from "redux"
-import { Adventurer, AvailableQuest, SelectedQuest, TakenQuest } from './dsl'
-import { fetchGetAdventurersStatus, fetchGetAvailableQuestStatus, fetchGetInProgressQuestStatus,
-         fetchPostClaimRewardInProgressQuestStatus, fetchTakeAvailableQuestStatus } from "./idle-quests-transitions"
+import { v4 as uuidv4 } from 'uuid'
+import { Adventurer, AppNotification, AvailableQuest, SelectedQuest, TakenQuest } from './dsl'
 
 const sortAdventurers = (adventurers: Adventurer[]) => {
     return adventurers.sort((a, b) => {
@@ -17,6 +16,7 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
 }
 
 interface QuestBoardState {
+    initLoading: boolean
     inventory: Adventurer[]
     takenQuests: TakenQuest[]
     availableQuests: AvailableQuest[]
@@ -25,6 +25,7 @@ interface QuestBoardState {
 }
 
 const questBoardInitialState: QuestBoardState = { 
+    initLoading: true,
     inventory: [],
     takenQuests: [],
     availableQuests: [],
@@ -35,6 +36,10 @@ const questBoardState = createSlice({
     name: "quest-board-state",
     initialState: questBoardInitialState,
     reducers: {
+
+        setInitLoading: (state, action: PayloadAction<boolean>) => {
+            state.initLoading = action.payload
+        },
 
         setInventory: (state, action: PayloadAction<Adventurer[]>) => {
             state.inventory = sortAdventurers(action.payload)
@@ -68,7 +73,6 @@ const questBoardState = createSlice({
         selectQuest: (state, action: PayloadAction<SelectedQuest>) => {
             const quest = action.payload
             state.selectedQuest = quest
-            console.log(quest)
             if (quest.ctype === "available-quest")
                 state.adventurerSlots = Array(quest.slots).fill(null)
             else
@@ -123,6 +127,7 @@ const questBoardState = createSlice({
 });
 
 export const {
+    setInitLoading,
     setInventory,
     setTakenQuests,
     addTakenQuest,
@@ -138,15 +143,45 @@ export const {
     changeAdventurersInChallenge,
 } = questBoardState.actions
 
+type NotificationsState = {
+    notifications: AppNotification[]
+}
+
+const notificationsInitialState: NotificationsState = { 
+    notifications: [
+        { ctype: "info", message: "Welcome back adventurer!", notificationId: uuidv4(), createdAt: new Date() }
+    ]
+}
+
+const notificationsState = createSlice({
+    name: "notifications-state",
+    initialState: notificationsInitialState,
+    reducers: {
+
+        notify: (state, action: PayloadAction<{ message: string, ctype: AppNotification["ctype"] }>) => {
+            state.notifications.push({
+                ctype: action.payload.ctype,
+                message: action.payload.message,
+                notificationId: uuidv4(),
+                createdAt: new Date()
+            })
+        },
+
+        removeTimedOutNotifications: (state, action: PayloadAction<Date>) => {
+            state.notifications = state.notifications.filter(notification =>
+                notification.createdAt.getTime() + 5000 > action.payload.getTime())
+        }
+    }
+})
+
+export const {
+    notify,
+    removeTimedOutNotifications
+} = notificationsState.actions
+
 export const idleQuestsReducer = combineReducers({
     questBoard: questBoardState.reducer,
-    status: combineReducers({
-        getAvailableQuestStatus: fetchGetAvailableQuestStatus.reducer,
-        takeAvailableQuestStatus: fetchTakeAvailableQuestStatus.reducer,
-        getAdventurersStatus: fetchGetAdventurersStatus.reducer,
-        inProgress: fetchGetInProgressQuestStatus.reducer,
-        claimReward: fetchPostClaimRewardInProgressQuestStatus.reducer
-    })   
+    notifications: notificationsState.reducer,
 })
 
 export const idleQuestsStore = configureStore({

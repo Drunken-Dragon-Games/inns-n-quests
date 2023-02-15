@@ -1,11 +1,10 @@
-import styled from "styled-components";
+import { useState } from "react"
+import styled from "styled-components"
 import { PixelArtImage } from "../../../utils"
-import { useState } from "react";
-import Timer from "./timer";
-import { ConditionalRender, TextOswald } from "../../../utils/components/basic_components";
-import { TakenQuest } from "../../dsl/models";
-import { takenQuestStatus } from "../../dsl";
-import InventoryBox from "./inventory-box";
+import { ConditionalRender, TextOswald } from "../../../utils/components/basic_components"
+import { TakenQuest, takenQuestStatus } from "../../dsl"
+import InventoryBox from "./inventory-box"
+import Timer from "./timer"
 
 const TakenQuestCardContainer = styled(InventoryBox)`
     position: relative;

@@ -1,5 +1,5 @@
 import styled, { keyframes } from "styled-components"
-import { Adventurer } from "../../dsl/models"
+import { Adventurer } from "../../dsl/adventurer"
 import { PixelArtImage, notEmpty, simpleHash } from "../../../utils"
 import { useEffect, useRef, useState } from "react"
 

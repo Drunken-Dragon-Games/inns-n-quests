@@ -1,23 +1,24 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import styled from "styled-components"
 import { ConditionalRender, Loading } from "../utils/components/basic_components"
-import ErrorHandler from "./components/error-handler"
-import Console from "./components/inventory/inventory"
+import Inventory from "./components/inventory/inventory"
+import { Notifications } from "./components/notifications"
 import QuestBoard from "./components/quest-board"
 import { Adventurer, SelectedQuest, TakenQuest } from "./dsl"
 import {
-    clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, removeAvailableQuest, selectAdventurer,
+    clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, removeAvailableQuest, removeTimedOutNotifications, selectAdventurer,
     selectQuest, unselectAdventurer, unselectQuest
 } from "./idle-quests-state"
 import {
     claimTakenQuest, fetchMintTest, getAdventurers, getAvailableQuests,
     getInProgressQuests, takeAvailableQuest
 } from "./idle-quests-transitions"
+import { useClockSeconds } from "./utils"
 
-const Container = styled.section`
+const IdleQuestsContainer = styled.section`
     position: relative;
-    display: flex;
+    overflow: hidden;
 `
 
 const BackGroundPositionAbsolute = styled.section`
@@ -29,33 +30,15 @@ const BackGroundPositionAbsolute = styled.section`
     background-color: #0B1015;
 `
 
-const useLoading = (): boolean => {
-    const [isLoading, setIsLoading] = useState<boolean>(true)
-    const questBoardStatus = useSelector((state: IdleQuestsState) => state.status)
-    const getAdventurersStatus = questBoardStatus.getAdventurersStatus.status
-    const getAvailableQuestStatus = questBoardStatus.getAvailableQuestStatus.status
-    const getInProgressQuestStatus = questBoardStatus.inProgress.status
-    useEffect(()=>{
-        if((getAdventurersStatus === 'fulfilled' ||getAdventurersStatus === 'rejected') && 
-        (getAvailableQuestStatus === 'fulfilled' || getAvailableQuestStatus === 'rejected') &&
-        (getInProgressQuestStatus === 'fulfilled' || getInProgressQuestStatus === 'rejected')){
-            setTimeout(() => setIsLoading(false), 500)
-        }
-    },[getAdventurersStatus, 
-        getAvailableQuestStatus, 
-        getInProgressQuestStatus ])
-    return isLoading
-}
-
 const IdleQuestsView = () => {
 
-    const loading = useLoading()
-    //const setRefresh = useRefreshQuest()
     const questBoardState = useSelector((state: IdleQuestsState) => state.questBoard)
     const dispatch = useDispatch<IdleQuestsDispatch>()    
     
     const dragonSilver = 0
     const dragonSilverToClaim = 0
+
+    const notifications = useSelector((state: IdleQuestsState) => state.notifications.notifications)
 
     const onSelectQuest = (quest: SelectedQuest) => 
         dispatch(selectQuest(quest))
@@ -86,20 +69,27 @@ const IdleQuestsView = () => {
             dispatch(getAvailableQuests())
         }
     },[questBoardState.availableQuests.length])
+    // Initial load of adventurers and quests in progress
     useEffect(()=>{
-        dispatch(getAdventurers())
+        dispatch(getAdventurers(true))
         dispatch(getInProgressQuests())
     },[])
+    // Continuous clock
+    useClockSeconds((now) => {
+        dispatch(removeTimedOutNotifications(now))
+    })
+
     
     return(
-        <Container>
-            <ConditionalRender condition={loading}>
+        <IdleQuestsContainer>
+            <ConditionalRender condition={questBoardState.initLoading}>
                 <BackGroundPositionAbsolute>
                     <Loading size={8} />
                 </BackGroundPositionAbsolute>
             </ConditionalRender>
 
-            <Console
+            <Notifications notifications={notifications} />
+            <Inventory
                 adventurers={questBoardState.inventory}
                 adventurerSlots={questBoardState.adventurerSlots}
                 selectedQuest={questBoardState.selectedQuest}
@@ -120,8 +110,7 @@ const IdleQuestsView = () => {
                 onFetchMoreQuests={onFetchMoreQuests}
                 onUnselectAdventurer={onUnselectAdventurer}
             />
-            <ErrorHandler />
-        </Container>
+        </IdleQuestsContainer>
     )
 }
 

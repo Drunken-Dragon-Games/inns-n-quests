@@ -1,7 +1,7 @@
-import styled from "styled-components" 
 import Image from "next/image"
 import { useState } from "react"
-import { TextElMessiri, ConditionalRender } from '../../../utils/components/basic_components'
+import styled from "styled-components"
+import { ConditionalRender, TextElMessiri } from '../../../utils/components/basic_components'
 
 const DragonSilverIconContainer = styled.div`
     display: flex;

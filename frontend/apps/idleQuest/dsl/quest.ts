@@ -1,25 +1,63 @@
-import { APS, APSRequirement, QuestRequirement, SealType, SelectedQuest, TakenQuest, TakenQuestStatus } from "./models"
+import { APS } from "./aptitude-points-system"
+import { QuestRequirement, APSRequirement, mergeAPSRequirementMax } from "./quest-requirements"
 
-export const zeroAPS: APS = { athleticism: 0, intellect: 0, charisma: 0 }
-
-export function sameOrBetterAPS(a: APS, b: APS): boolean {
-    return a.athleticism >= b.athleticism && a.intellect >= b.intellect && a.charisma >= b.charisma
+export type AvailableQuest = {
+    ctype: "available-quest",
+    questId: string,
+    name: string,
+    location: string,
+    description: string,
+    requirements: QuestRequirement,
+    reward: Reward,
+    duration: number,
+    slots: number,
+    seal: SealType,
+    paper: 1 | 2 | 3 | 4
 }
 
-export function mergeAPSRequirementMax(a: APSRequirement, b: APSRequirement): APSRequirement {
-    return {
-        ctype: "aps-requirement",
-        athleticism: Math.max(a.athleticism, b.athleticism),
-        intellect: Math.max(a.intellect, b.intellect),
-        charisma: Math.max(a.charisma, b.charisma),
-    }
+export type TakenQuest = {
+    ctype: "taken-quest",
+    takenQuestId: string,
+    userId: string,
+    quest: AvailableQuest,
+    adventurerIds: string[],
+    claimedAt?: string,
+    createdAt: string,
 }
 
-export function mergeAPSSum(a: APS, b: APS): APS {
-    return {
-        athleticism: a.athleticism + b.athleticism,
-        intellect: a.intellect + b.intellect,
-        charisma: a.charisma + b.charisma,
+export type SelectedQuest = AvailableQuest | TakenQuest
+
+export type TakenQuestStatus = "in-progress" | "finished" | "claimed"
+
+export type SealType = "kings-plea" | "heroic-quest" | "valiant-adventure" | "townsfolk"
+
+export const sealTypes = ["kings-plea", "heroic-quest", "valiant-adventure", "townsfolk"] 
+
+export type AssetReward = { policyId: string, unit: string, quantity: string }
+
+export type Reward = { 
+    currencies?: AssetReward[], 
+    apsExperience?: APS 
+}
+
+export const mapSealImage = (quest: SelectedQuest): { src: string, width: number, height: number } => {
+    switch (questSeal(quest)) {
+        case "heroic-quest": return { 
+            src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/heroic_quest_big.png",
+            width: 6, height: 9
+        }
+        case "kings-plea": return {
+            src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/kings_plea_big.png",
+            width: 9, height: 9.5
+        }
+        case "valiant-adventure": return {
+            src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/valiant_adventure_big.png",
+            width: 6, height: 6
+        }
+        default: return {
+            src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/townsfolk_big.png",
+            width: 8, height: 3
+        }
     }
 }
 
