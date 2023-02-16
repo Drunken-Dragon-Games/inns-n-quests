@@ -1,14 +1,9 @@
-import { Children, useState } from "react"
+import { useState } from "react"
 import styled, { keyframes } from "styled-components"
-import { cardano_network } from "../../../../setting"
-import { ConditionalRender } from "../../../utils/components/basic_components"
 import { Adventurer, SelectedQuest, TakenQuest } from "../../dsl"
 import { InventoryItem } from "../../dsl/inventory"
-import AdventurerList from "./adventurer-list"
-import BigHopsButton from "./big-hops-button"
-import ConsoleTabs, { TabNames } from "./console-tabs"
+import { TabNames } from "./console-tabs"
 import DragonSilverDisplay from "./dragon-silver-display"
-import InProgressList from "./in-progress-list"
 import InventoryBrowser from "./inventory-browser"
 
 const openAnimation = keyframes`

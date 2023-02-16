@@ -62,7 +62,6 @@ const questBoardState = createSlice({
 
         addTakenQuest: (state, action: PayloadAction<TakenQuest>) => {
             state.takenQuests = [...state.takenQuests, action.payload]
-            console.log(state.takenQuests)
         },
 
         removeTakenQuest: (state, action: PayloadAction<TakenQuest>) => {

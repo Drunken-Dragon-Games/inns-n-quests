@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 import styled from "styled-components"
 import { PixelArtImage } from "../../../utils"
 import { Adventurer, mapQuestScroll, SelectedQuest, TakenQuest, takenQuestTimeLeft } from "../../dsl"
-import { InventoryItem, itemId } from "../../dsl/inventory"
+import { InventoryItem } from "../../dsl/inventory"
 import AdventurerSprite from "../adventurer-card/adventurer-sprite"
 import InventoryBox from "./inventory-box"
 
@@ -56,28 +56,41 @@ const ItemBox = styled(InventoryBox)`
     height: 8vmax;
 `
 
-type InventoryItemViewState = [string | undefined, boolean | undefined]
+type InventoryItemViewState = [string | undefined, boolean | undefined, boolean | undefined]
 
-const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItemViewState => 
-    useMemo(() => {
+const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItemViewState => {
+    const [info, selected, disabled] = useMemo(() => {
         const item = props.item
+        const selectedQuest = props.selectedQuest?.ctype
         if (item && item.ctype === "adventurer") {
             return [
+                // info
                 `${item.athleticism}/${item.intellect}/${item.charisma}`,
+                // selected
                 props.adventurerSlots?.some((a) => a && a.adventurerId === item.adventurerId) ||
-                props.selectedAdventurer?.adventurerId === item.adventurerId
+                props.selectedAdventurer?.adventurerId === item.adventurerId,
+                // disabled
+                props.selectedQuest && props.selectedQuest.ctype === "available-quest" && item.inChallenge
             ]
         } else if (item && item.ctype === "taken-quest") {
             return [
-                takenQuestTimeLeft(item),
+                // info
+                "", //takenQuestTimeLeft(item), We actially dont want to memo this one
+                // selected
                 props.selectedQuest &&
                 props.selectedQuest.ctype === "taken-quest" &&
-                props.selectedQuest.takenQuestId === item.takenQuestId
+                props.selectedQuest.takenQuestId === item.takenQuestId,
+                // disabled
+                false
             ]
         } else {
-            return [undefined, undefined]
+            return [undefined, undefined, undefined]
         }
     }, [props.item, props.selectedQuest, props.adventurerSlots, props.selectedAdventurer])
+    // Calculate the time left for the quest every time we render
+    const timerInfo = props.item && props.item.ctype === "taken-quest" ? takenQuestTimeLeft(props.item) : info
+    return [timerInfo, selected, disabled]
+}
 
 interface InventoryItemViewProps {
     item?: InventoryItem,
@@ -89,13 +102,14 @@ interface InventoryItemViewProps {
 
 const InventoryItemView = (props: InventoryItemViewProps) => {
     const [hover, setHover] = useState(false)
-    const [info, selected] = useInventoryItemViewState(props)
+    const [info, selected, disabled] = useInventoryItemViewState(props)
     return (
         <ItemBox
             onClick={() => props.onItemClick && props.item && props.onItemClick(props.item)}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
             selected={selected}
+            disabled={disabled}
             hover={hover}
             empty={!props.item}
             info={info}
@@ -148,6 +162,7 @@ const InventoryBrowser = (props: InventoryBrowserProps) => {
                         item={item} 
                         adventurerSlots={props.adventurerSlots}
                         selectedAdventurer={props.selectedAdventurer}
+                        selectedQuest={props.selectedQuest}
                         onItemClick={props.onItemClick} 
                     />
                 )}
@@ -155,8 +170,9 @@ const InventoryBrowser = (props: InventoryBrowserProps) => {
                     <InventoryItemView 
                         key={item.takenQuestId} 
                         item={item} 
-                        selectedQuest={props.selectedQuest}
                         adventurerSlots={props.adventurerSlots}
+                        selectedAdventurer={props.selectedAdventurer}
+                        selectedQuest={props.selectedQuest}
                         onItemClick={props.onItemClick} 
                     />
                 )}

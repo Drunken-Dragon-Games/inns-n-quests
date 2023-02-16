@@ -1,8 +1,6 @@
 import { ReactNode } from "react"
 import styled, { css, keyframes } from "styled-components"
-import { NoDragImage } from "../../../utils"
-import { ConditionalRender } from "../../../utils/components/basic_components"
-import { OswaldFontFamily, SansSerifFontFamily } from "../common-css"
+import { OswaldFontFamily } from "../common-css"
 
 const BoxCss = css`
     position: relative;
@@ -10,10 +8,11 @@ const BoxCss = css`
     border-radius: 0.15vmax;
 `
 
-const InventoryBoxContainer = styled.div<{ $empty?: boolean }>`
+const InventoryBoxContainer = styled.div<{ $empty?: boolean, $disabled?: boolean }>`
     ${BoxCss}
     padding: 0.15vmax;
-    cursor: ${props => props.$empty ? "default" : "pointer"};
+    cursor: ${props => props.$empty || props.$disabled ? "default" : "pointer"};
+    filter: ${props => props.$disabled ? "grayscale(100%)" : "none"};
     background-color: ${props => props.$empty ? "rgba(30,30,30,0.8)" : "rgba(20,20,20,0.9)" };
 `
 
@@ -122,6 +121,7 @@ interface InventoryBoxProps {
     className?: string,
     children?: ReactNode,
     selected?: boolean,
+    disabled?: boolean,
     hover?: boolean,
     empty?: boolean,
     info?: string,
@@ -130,22 +130,23 @@ interface InventoryBoxProps {
     onMouseLeave?: () => void
 }
 
-const InventoryBox = ({ className, children, selected, hover, empty, info, onClick, onMouseEnter, onMouseLeave }: InventoryBoxProps) => {
+const InventoryBox = ({ className, children, selected, disabled, hover, empty, info, onClick, onMouseEnter, onMouseLeave }: InventoryBoxProps) => {
     return (
         <InventoryBoxContainer 
             className={className} 
             onClick={onClick} 
             onMouseEnter={onMouseEnter} 
             onMouseLeave={onMouseLeave}
+            $disabled={disabled}
             $empty={empty}
         >
-            <InnerBorderBox $hover={hover && !empty}>
-                <InnerBackgroundBox $selected={selected && !empty}>
+            <InnerBorderBox $hover={hover && !empty && !disabled}>
+                <InnerBackgroundBox $selected={selected && !empty && !disabled}>
                     {children}
                 </InnerBackgroundBox>
                 {info ? <InfoBox><InfoInnerBox><span>{info}</span></InfoInnerBox></InfoBox> : <></>}
             </InnerBorderBox>
-            {hover && !empty ?
+            {hover && !empty && !disabled ?
                 <>
                     <CornerImage side="top-left" />
                     <CornerImage side="top-right" />
