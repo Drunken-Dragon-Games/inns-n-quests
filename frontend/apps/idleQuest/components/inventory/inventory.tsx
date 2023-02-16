@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { Children, useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { cardano_network } from "../../../../setting"
 import { ConditionalRender } from "../../../utils/components/basic_components"
@@ -31,29 +31,40 @@ const InventoryContainer =styled.div<{ open: boolean }>`
     background-color: rgba(20,20,20,0.5);
     backdrop-filter: blur(5px);
     z-index: 10;
-    #box-shadow: 0 0.5vmax 1.5vmax 0 rgba(0, 0, 0, 0.8), 0 1vmax 3vmax 0 rgba(0, 0, 0, 0.19);
+    ${props => props.open ? "top: 0;" : "top: -100vh;"}
     opacity: ${props => props.open ? "1" : "0"};
     animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 `
 
-const InventoryBody = styled.div`
+const InventoryBody = styled.div<{ open: boolean }>`
     width: 100%;
     height: 100%;
     display: flex;
+    opacity: ${props => props.open ? "1" : "0"};
+`
+
+const ActivityContainer = styled.div`
+    flex: 1;
+    padding: 2vmax 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 `
 
 interface InventoryProps {
+    children?: React.ReactNode,
     open: boolean,
     adventurers: Adventurer[],
     takenQuests: TakenQuest[],
     adventurerSlots: (Adventurer | null)[],
     selectedQuest?: SelectedQuest,
+    selectedAdventurer?: Adventurer,
     dragonSilver: number,
     dragonSilverToClaim: number,
-    onAdventurerClick: (adventurer: Adventurer) => void
     onAdventurerRecruit: () => void
-    onSelectTakenQuest: (takenQuest: TakenQuest) => void
     onItemClick: (item: InventoryItem) => void
+    onClickClose: () => void
 }
 
 const Inventory = (props: InventoryProps) => {
@@ -63,12 +74,21 @@ const Inventory = (props: InventoryProps) => {
             <DragonSilverDisplay 
                 dragonSilver={props.dragonSilver}
                 dragonSilverToClaim={props.dragonSilverToClaim}
+                onClickClose={props.onClickClose}
+                onAdventurerRecruit={props.onAdventurerRecruit}
             />
-            <InventoryBody>
+            <InventoryBody open={props.open}>
                 <InventoryBrowser 
-                    inventory={(props.adventurers as InventoryItem[]).concat(props.takenQuests)} 
+                    adventurers={props.adventurers}
+                    takenQuests={props.takenQuests}
+                    adventurerSlots={props.adventurerSlots}
+                    selectedQuest={props.selectedQuest}
+                    selectedAdventurer={props.selectedAdventurer}
                     onItemClick={props.onItemClick}
                 />
+                <ActivityContainer>
+                    {props.children}
+                </ActivityContainer>
             </InventoryBody>
         </InventoryContainer>
     )

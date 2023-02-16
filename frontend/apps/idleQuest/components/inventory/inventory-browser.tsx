@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import styled from "styled-components"
 import { PixelArtImage } from "../../../utils"
-import { Adventurer, mapQuestScroll, TakenQuest, takenQuestTimeLeft } from "../../dsl"
+import { Adventurer, mapQuestScroll, SelectedQuest, TakenQuest, takenQuestTimeLeft } from "../../dsl"
 import { InventoryItem, itemId } from "../../dsl/inventory"
 import AdventurerSprite from "../adventurer-card/adventurer-sprite"
 import InventoryBox from "./inventory-box"
@@ -56,55 +56,97 @@ const ItemBox = styled(InventoryBox)`
     height: 8vmax;
 `
 
-const InventoryItemView = (props: { item?: InventoryItem, onItemClick?: (item: InventoryItem) => void }) => {
-    const [hover, setHover] = useState(false)
-    const info = useMemo(() => {
-        if (props.item?.ctype === "adventurer") {
-            return `${props.item.athleticism}/${props.item.intellect}/${props.item.charisma}`
-        } else if (props.item?.ctype === "taken-quest") {
-            return takenQuestTimeLeft(props.item)
+type InventoryItemViewState = [string | undefined, boolean | undefined]
+
+const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItemViewState => 
+    useMemo(() => {
+        const item = props.item
+        if (item && item.ctype === "adventurer") {
+            return [
+                `${item.athleticism}/${item.intellect}/${item.charisma}`,
+                props.adventurerSlots?.some((a) => a && a.adventurerId === item.adventurerId) ||
+                props.selectedAdventurer?.adventurerId === item.adventurerId
+            ]
+        } else if (item && item.ctype === "taken-quest") {
+            return [
+                takenQuestTimeLeft(item),
+                props.selectedQuest &&
+                props.selectedQuest.ctype === "taken-quest" &&
+                props.selectedQuest.takenQuestId === item.takenQuestId
+            ]
         } else {
-            return undefined
+            return [undefined, undefined]
         }
-    }, [props.item])
+    }, [props.item, props.selectedQuest, props.adventurerSlots, props.selectedAdventurer])
+
+interface InventoryItemViewProps {
+    item?: InventoryItem,
+    adventurerSlots?: (Adventurer | null)[],
+    selectedQuest?: SelectedQuest,
+    selectedAdventurer?: Adventurer,
+    onItemClick?: (item: InventoryItem) => void
+}
+
+const InventoryItemView = (props: InventoryItemViewProps) => {
+    const [hover, setHover] = useState(false)
+    const [info, selected] = useInventoryItemViewState(props)
     return (
         <ItemBox
             onClick={() => props.onItemClick && props.item && props.onItemClick(props.item)}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            selected={props.item && hover}
+            selected={selected}
             hover={hover}
             empty={!props.item}
             info={info}
         > { 
-            props.item?.ctype === "adventurer" ? 
-                <AdventurerSprite
-                    adventurer={props.item}
-                    emoji={hover ? props.item.adventurerId : undefined}
-                    scale={0.7}
-                /> :
-            props.item?.ctype === "taken-quest" ? 
-                <PixelArtImage
-                    src={mapQuestScroll(props.item)}
-                    alt="quest scroll"
-                    width={7.3} height={6}
-                /> :
-            <></>
-        } </ItemBox>
+        props.item?.ctype === "adventurer" ? 
+            <AdventurerSprite
+                adventurer={props.item}
+                emoji={hover ? props.item.adventurerId : undefined}
+                scale={0.7}
+            /> :
+        props.item?.ctype === "taken-quest" ? 
+            <PixelArtImage
+                src={mapQuestScroll(props.item)}
+                alt="quest scroll"
+                width={7.3} height={6}
+            /> :
+        <></> } </ItemBox>
     )
 }
 
 interface InventoryBrowserProps {
-    inventory: InventoryItem[]
+    adventurers: Adventurer[],
+    takenQuests: TakenQuest[],
+    adventurerSlots: (Adventurer | null)[],
+    selectedQuest?: SelectedQuest,
+    selectedAdventurer?: Adventurer,
     onItemClick?: (item: InventoryItem) => void
 }
 
-const InventoryBrowser = ({ inventory, onItemClick }: InventoryBrowserProps) => {
+const InventoryBrowser = (props: InventoryBrowserProps) => {
+    
     return (
         <InventoryBrowserContainer>
             <DirectionFix>
-                {inventory.map((item) => (
-                    <InventoryItemView item={item} onItemClick={onItemClick} />
+                {props.adventurers.map((item) => (
+                    <InventoryItemView 
+                        key={item.adventurerId} 
+                        item={item} 
+                        adventurerSlots={props.adventurerSlots}
+                        selectedAdventurer={props.selectedAdventurer}
+                        onItemClick={props.onItemClick} 
+                    />
+                ))}
+                {props.takenQuests.map((item) => (
+                    <InventoryItemView 
+                        key={item.takenQuestId} 
+                        item={item} 
+                        selectedQuest={props.selectedQuest}
+                        adventurerSlots={props.adventurerSlots}
+                        onItemClick={props.onItemClick} 
+                    />
                 ))}
                 <InventoryItemView />
                 <InventoryItemView />

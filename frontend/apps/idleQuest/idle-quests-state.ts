@@ -24,6 +24,7 @@ interface QuestBoardState {
 
     availableQuests: AvailableQuest[]
     selectedQuest?: SelectedQuest
+    selectedAdventurer?: Adventurer
     adventurerSlots: (Adventurer | null)[]
 }
 
@@ -95,7 +96,7 @@ const questBoardState = createSlice({
             state.adventurerSlots = []
         },
 
-        selectAdventurer: (state, action: PayloadAction<Adventurer>) => {
+        pickAdventurerForQuest: (state, action: PayloadAction<Adventurer>) => {
             if (!state.selectedQuest) return
             const indexNull = state.adventurerSlots.indexOf(null)
             const indexAdventurer = state.adventurerSlots
@@ -111,7 +112,7 @@ const questBoardState = createSlice({
                 state.adventurerSlots[indexNull] = action.payload
         },
 
-        unselectAdventurer: (state, action: PayloadAction<Adventurer>) => {
+        unPickAdventurerForQuest: (state, action: PayloadAction<Adventurer>) => {
             state.adventurerSlots = state.adventurerSlots.map(adventurer => 
                 adventurer?.adventurerId === action.payload.adventurerId ? null : adventurer)
         },
@@ -134,6 +135,10 @@ const questBoardState = createSlice({
             })
             state.adventurers = sortAdventurers(state.adventurers)
         },
+
+        selectAdventurer: (state, action: PayloadAction<Adventurer | undefined>) => {
+            state.selectedAdventurer = action.payload
+        },
     },
 });
 
@@ -149,10 +154,11 @@ export const {
     clearAvailableQuests,
     selectQuest,
     unselectQuest,
-    selectAdventurer,
-    unselectAdventurer,
+    pickAdventurerForQuest,
+    unPickAdventurerForQuest,
     clearSelectedAdventurers,
     changeAdventurersInChallenge,
+    selectAdventurer,
 } = questBoardState.actions
 
 type NotificationsState = {

@@ -18,6 +18,10 @@ const GlobalKeyMap = (key: string, state: IdleQuestsState, dispatch: IdleQuestsD
 
     } else if (key == "Escape" && state.questBoard.selectedQuest) {
         dispatch(unselectQuest())
+        dispatch(toggleInventory())
+
+    } else if (key == "Escape" && state.questBoard.inventoryOpen) {
+        dispatch(toggleInventory())
 
     } else if (key == "Enter" && state.questBoard.selectedQuest) {
         const quest = state.questBoard.selectedQuest

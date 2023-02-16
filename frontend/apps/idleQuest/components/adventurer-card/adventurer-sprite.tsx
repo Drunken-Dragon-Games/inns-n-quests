@@ -1,8 +1,7 @@
 import styled, { keyframes } from "styled-components"
+import { notEmpty, PixelArtImage, simpleHash } from "../../../utils"
 import { Adventurer } from "../../dsl/adventurer"
-import { PixelArtImage, notEmpty, simpleHash } from "../../../utils"
-import { useEffect, useMemo, useRef, useState } from "react"
-import { useRememberLastValue } from "../../utils"
+import { useComputeHeightFromOriginalImage, useRememberLastValue } from "../../utils"
 
 const emojiMapping = (emoji?: string) => {
     switch (emoji) {
@@ -176,25 +175,6 @@ const Emoji = ({ emoji, offset, scale }: { emoji?: string, offset: number, scale
             />
         </EmojiContainer>
     : <></>
-}
-
-/**
- * Computes the height of an image based on its width and the original image's width and height
- * 
- * @param src The image source
- * @param desiredWidth The intended width of the image
- */
-const useComputeHeightFromOriginalImage = (src: string, desiredWidth: number): number => {
-    const [desiredHeight, setHeight] = useState<number>(0)
-    useEffect(() => {
-        const img = new Image()
-        img.src = src
-        img.onload = () => {
-            const height = (desiredWidth * img.height) / img.width
-            setHeight(Math.round(height * 10) / 10)
-        }
-    }, [src])
-    return desiredHeight
 }
 
 interface AdventurerSpriteProps {

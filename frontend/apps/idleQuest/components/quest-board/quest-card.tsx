@@ -8,29 +8,16 @@ import { APS, zeroAPS, sameOrBetterAPS, SelectedQuest, questSeal, Adventurer,
          questDescription, 
          mapSealImage} from "../../dsl"
 
-const BackShadow = styled.section<{ open: boolean }>`
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    background-color: rgba(0,0,0,0.2);
-    opacity: ${props => props.open ? 1 : 0};
-    visibility: ${props => props.open ? "visible" : "hidden"};
-    transition: opacity 1s, visibility 0.5s;
-`
-
 const CardContainer = styled.div`
     position: relative;
     display: flex;
+    min-height: 50vmax;
+    max-height: 80vh;
     flex-direction: column;
     gap: 1.8vmax;
     padding: 3vmax;
     width: 44vmax;
-    min-height: 50vmax;
-    max-height: 80vh;
+    z-index: 20;
     filter: drop-shadow(0px 0px 1vmax rgba(0, 0, 0, 0.8));
     background: url(https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png);
     background-size: cover;
@@ -226,11 +213,10 @@ interface QuestPaperAvailableProps {
     quest?: SelectedQuest, 
     adventurerSlots: (Adventurer | null)[],
     onSign?: (selectedQuest: SelectedQuest, adventurers: Adventurer[]) => void,
-    onClose?: () => void,
     onUnselectAdventurer?: (adventurer: Adventurer) => void,
 }
 
-const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnselectAdventurer }: QuestPaperAvailableProps) => {
+const QuestCard = ({ className, quest, adventurerSlots, onSign, onUnselectAdventurer }: QuestPaperAvailableProps) => {
     if (!quest) return <></>
     const state = memoQuestCardState(quest, adventurerSlots)
     return (

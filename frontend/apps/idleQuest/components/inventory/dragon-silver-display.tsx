@@ -2,6 +2,8 @@ import Link from "next/link"
 import React from "react"
 import styled from "styled-components"
 import { NoDragImage } from "../../../utils"
+import { OswaldFontFamily, SansSerifFontFamily } from "../common-css"
+import BigHopsButton from "./big-hops-button"
 import DragonSilverIcon from "./dragon-silver-icon"
 
 const DragonSilverDisplayContainer = styled.div`
@@ -13,9 +15,17 @@ const DragonSilverDisplayContainer = styled.div`
     align-items: right;
 `
 
+const Push = styled.div`
+    flex: 1;
+`
+
 const BackLink = styled.div`
     cursor: pointer;
-    &:hover{ opacity: 0.5; }
+    color: white;
+    font-size: 1.5vmax;
+    font-weight: bold;
+    ${SansSerifFontFamily}
+    &:hover{ text-shadow: 0 0 0.5vmax white; }
 `
 
 const DragonSilverWrapper = styled.div`
@@ -42,12 +52,16 @@ const ReturnButton = React.forwardRef(() =>
 interface NavbarProps {
     dragonSilver: number,
     dragonSilverToClaim: number,
+    onClickClose: () => void,
+    onAdventurerRecruit: () => void
 }
 
-const DragonSilverDisplay = ({ dragonSilver, dragonSilverToClaim }: NavbarProps) => {
+const DragonSilverDisplay = ({ dragonSilver, dragonSilverToClaim, onClickClose, onAdventurerRecruit }: NavbarProps) => {
     const returnLink = process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:3000/login"
     return (
         <DragonSilverDisplayContainer>
+            <BigHopsButton onClick={onAdventurerRecruit} text="Recruit"/>
+            <Push />
             <DragonSilverWrapper>
                 <DragonSilverIcon
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/dragon_silver.png"
@@ -66,8 +80,8 @@ const DragonSilverDisplay = ({ dragonSilver, dragonSilverToClaim }: NavbarProps)
                 />
             </ClaimDragonSilverButtonWrapper>
 
-            <BackLink>
-                <Link href={returnLink} passHref><ReturnButton /></Link>
+            <BackLink onClick={onClickClose}>
+                <span>X</span>
             </BackLink>
         </DragonSilverDisplayContainer>
     )

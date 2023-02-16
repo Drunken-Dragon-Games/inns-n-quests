@@ -1,3 +1,4 @@
+import { APS } from "./aptitude-points-system"
 
 export interface Adventurer {
     ctype: "adventurer",
@@ -30,3 +31,9 @@ export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of
 
 export const tagAdventurer = (adventurer: any): any => 
     ({...adventurer, ctype: "adventurer" })
+
+export const adventurerAPS = (adventurer: Adventurer): APS => ({
+    athleticism: adventurer.athleticism,
+    intellect: adventurer.intellect,
+    charisma: adventurer.charisma,
+})

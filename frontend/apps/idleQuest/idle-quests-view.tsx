@@ -2,6 +2,8 @@ import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import styled from "styled-components"
 import { ConditionalRender, Loading } from "../utils/components/basic_components"
+import AdventurerCard from "./components/adventurer-card/adventurer-card"
+import AdventurerSplashArt from "./components/inventory/adventurer-splash-art"
 import Inventory from "./components/inventory/inventory"
 import { Notifications } from "./components/notifications"
 import QuestBoard from "./components/quest-board"
@@ -10,8 +12,8 @@ import { Adventurer, SelectedQuest, TakenQuest } from "./dsl"
 import { InventoryItem } from "./dsl/inventory"
 import { useIdleQuestsKeyMap } from "./idle-quests-key-map"
 import {
-    clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, removeAvailableQuest, removeTimedOutNotifications, selectAdventurer,
-    selectQuest, unselectAdventurer, unselectQuest
+    clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, removeAvailableQuest, removeTimedOutNotifications, pickAdventurerForQuest,
+    selectQuest, toggleInventory, unPickAdventurerForQuest, unselectQuest, selectAdventurer
 } from "./idle-quests-state"
 import {
     claimTakenQuest, fetchMintTest, getAdventurers, getAvailableQuests,
@@ -44,8 +46,11 @@ const IdleQuestsView = () => {
 
     const notifications = useSelector((state: IdleQuestsState) => state.notifications.notifications)
 
-    const onSelectQuest = (quest: SelectedQuest) => 
+    const onSelectQuest = (quest: SelectedQuest) => {
         dispatch(selectQuest(quest))
+        dispatch(toggleInventory())
+    }
+    
     const onSignQuest = (quest: SelectedQuest, adventurers: Adventurer[]) => {
         if (quest.ctype == "available-quest") {
             dispatch(takeAvailableQuest(quest, adventurers))
@@ -54,20 +59,56 @@ const IdleQuestsView = () => {
             dispatch(claimTakenQuest(quest, adventurers))
         }
     }
-    const onCloseAvailableQuest = () => 
-        dispatch(unselectQuest())
+
     const onFetchMoreQuests = () => 
         dispatch(clearAvailableQuests())
+
     const onUnselectAdventurer = (adventurer: Adventurer) =>
-        dispatch(unselectAdventurer(adventurer))
-    const onSelectAdventurer = (adventurer: Adventurer) => 
-        dispatch(selectAdventurer(adventurer))
-    const onSelectTakenQuest = (takenQuest: TakenQuest) =>
-        dispatch(selectQuest(takenQuest))
+        dispatch(unPickAdventurerForQuest(adventurer))
+
     const onItemClick = (item: InventoryItem) =>
-        item.ctype == "adventurer" ? onSelectAdventurer(item) : onSelectTakenQuest(item)
+        item.ctype == "adventurer" && 
+        questBoardState.selectedQuest && 
+        questBoardState.selectedQuest.ctype === "available-quest" ? 
+            dispatch(pickAdventurerForQuest(item)) :
+
+        item.ctype == "adventurer" && 
+        questBoardState.selectedQuest && 
+        questBoardState.selectedQuest.ctype === "taken-quest" ? 
+            (() => { 
+                dispatch(selectAdventurer(item)); 
+                dispatch(unselectQuest()) 
+            })():
+
+        item.ctype == "adventurer" && 
+        questBoardState.selectedAdventurer && 
+        questBoardState.selectedAdventurer.adventurerId === item.adventurerId ?
+            dispatch(selectAdventurer(undefined)) :
+
+        item.ctype == "adventurer" && 
+        !questBoardState.selectedQuest ?
+            dispatch(selectAdventurer(item)) :
+
+        item.ctype == "taken-quest" && 
+        questBoardState.selectedQuest && 
+        questBoardState.selectedQuest.ctype === "taken-quest" && 
+        questBoardState.selectedQuest.takenQuestId === item.takenQuestId ? 
+            dispatch(unselectQuest()) :
+
+        item.ctype == "taken-quest" ? 
+            (() => { 
+                dispatch(selectQuest(item))
+                dispatch(selectAdventurer(undefined))
+            })():
+
+        null
+
     const onRecruitAdventurer = () => 
         dispatch(fetchMintTest())
+    
+    const onToggleInventory = () =>
+        dispatch(toggleInventory())
+    
     
     useIdleQuestsKeyMap(globalState)
     // Ensures there is always at least 5 quests available
@@ -101,24 +142,29 @@ const IdleQuestsView = () => {
                 adventurerSlots={questBoardState.adventurerSlots}
                 selectedQuest={questBoardState.selectedQuest}
                 takenQuests={questBoardState.takenQuests}
+                selectedAdventurer={questBoardState.selectedAdventurer}
                 dragonSilver={dragonSilver}
                 dragonSilverToClaim={dragonSilverToClaim}
                 onAdventurerRecruit={onRecruitAdventurer}
-                onAdventurerClick={onSelectAdventurer}
-                onSelectTakenQuest={onSelectTakenQuest}
                 onItemClick={onItemClick}
-            />
+                onClickClose={onToggleInventory}
+            > { questBoardState.selectedQuest ?
+                <QuestCard
+                    quest={questBoardState.selectedQuest}
+                    adventurerSlots={questBoardState.adventurerSlots}
+                    onSign={onSignQuest}
+                    onUnselectAdventurer={onUnselectAdventurer}
+                />
+            : questBoardState.selectedAdventurer ?
+                <AdventurerSplashArt
+                    adventurer={questBoardState.selectedAdventurer}
+                />
+            : <></>} </Inventory>
+
             <QuestBoard
                 availableQuests={questBoardState.availableQuests}
                 onSelectQuest={onSelectQuest}
                 onFetchMoreQuests={onFetchMoreQuests}
-            />
-            <QuestCard
-                quest={questBoardState.selectedQuest}
-                adventurerSlots={questBoardState.adventurerSlots}
-                onSign={onSignQuest}
-                onClose={onCloseAvailableQuest}
-                onUnselectAdventurer={onUnselectAdventurer}
             />
         </IdleQuestsContainer>
     )
