@@ -1,9 +1,8 @@
 import styled from "styled-components"
 
 const Container = styled.div`
-    width: 100%;
-    height: 4vmax;
-    margin: 1vmax 0;
+    width: 7vmax;
+    height: 2vmax;
     display: flex;
     cursor: pointer;
     background-size: 100% 100%;
@@ -17,7 +16,7 @@ const Text = styled.p`
     margin: auto;
     font-weight: bold;
     font-family: El Messiri;
-    font-size: 1.3vmax; 
+    font-size: 0.7vmax; 
     color white;
     text-shadow: 0px 0px 3px #000000;
     user-select: none;

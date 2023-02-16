@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import { axiosCustomInstance } from "../../axios/axiosApi"
 import { simpleHash } from "../utils"
 import {
-    Adventurer, AvailableQuest, ClaimQuestOutcome, sealTypes, tagAvailableQuest,
+    Adventurer, AvailableQuest, ClaimQuestOutcome, sealTypes, tagAdventurer, tagAvailableQuest,
     tagTakenQuest, TakenQuest
 } from "./dsl"
 import {
@@ -27,7 +27,7 @@ const addVisualDataToTakenQuests = (quest: any) =>
 export const getAdventurers = (firstLoad: boolean): IdleQuestsThunk => async (dispatch) =>
     await withTokenRefresh(async () => {
         const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
-        dispatch(setInventory(response.data))
+        dispatch(setInventory(response.data.map(tagAdventurer)))
         if (firstLoad) 
             setTimeout(() => dispatch(setInitLoading(false)), 1000)
     }, 
@@ -67,7 +67,6 @@ export const claimTakenQuest = (quest: TakenQuest, adventurers: Adventurer[]): I
    await withTokenRefresh(async () => {
         const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: quest.takenQuestId })
         const outcome = response.data.outcome as ClaimQuestOutcome
-        console.log(outcome)
         dispatch(removeTakenQuest(quest))
         dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: false }))
         dispatch(unselectQuest())
@@ -86,10 +85,14 @@ export const fetchMintTest = (): IdleQuestsThunk => async (dispatch) =>
 const withTokenRefresh = async (fn: () => Promise<void>, continuation: () => void): Promise<void> => {
     try { await fn() }
     catch (err) { 
-        if (await refreshToken(err)) continuation()
-        if (err instanceof Error)
+        if (await refreshToken(err)) {
+            return continuation()
+        } else if (err instanceof Error) {
             idleQuestsStore.dispatch(notify({ message: err.message, ctype: "alert" }))
-        throw err 
+            throw err 
+        } else {
+            throw err 
+        }
     }
 }
 

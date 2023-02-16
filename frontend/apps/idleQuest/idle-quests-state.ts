@@ -17,17 +17,24 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
 
 interface QuestBoardState {
     initLoading: boolean
-    inventory: Adventurer[]
+
+    inventoryOpen: boolean
+    adventurers: Adventurer[]
     takenQuests: TakenQuest[]
+
     availableQuests: AvailableQuest[]
     selectedQuest?: SelectedQuest
+    selectedAdventurer?: Adventurer
     adventurerSlots: (Adventurer | null)[]
 }
 
 const questBoardInitialState: QuestBoardState = { 
     initLoading: true,
-    inventory: [],
+
+    inventoryOpen: false,
+    adventurers: [],
     takenQuests: [],
+
     availableQuests: [],
     adventurerSlots: [],
 }
@@ -41,8 +48,12 @@ const questBoardState = createSlice({
             state.initLoading = action.payload
         },
 
+        toggleInventory: (state) => {
+            state.inventoryOpen = !state.inventoryOpen
+        },
+
         setInventory: (state, action: PayloadAction<Adventurer[]>) => {
-            state.inventory = sortAdventurers(action.payload)
+            state.adventurers = sortAdventurers(action.payload)
         },
 
         setTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
@@ -51,7 +62,6 @@ const questBoardState = createSlice({
 
         addTakenQuest: (state, action: PayloadAction<TakenQuest>) => {
             state.takenQuests = [...state.takenQuests, action.payload]
-            console.log(state.takenQuests)
         },
 
         removeTakenQuest: (state, action: PayloadAction<TakenQuest>) => {
@@ -77,7 +87,7 @@ const questBoardState = createSlice({
                 state.adventurerSlots = Array(quest.slots).fill(null)
             else
                 state.adventurerSlots = Array(quest.quest.slots).fill(null).map((_, index) => 
-                    state.inventory.find(adventurer => adventurer.adventurerId === quest.adventurerIds[index]) ?? null)
+                    state.adventurers.find(adventurer => adventurer.adventurerId === quest.adventurerIds[index]) ?? null)
         },
 
         unselectQuest: (state) => {
@@ -85,7 +95,8 @@ const questBoardState = createSlice({
             state.adventurerSlots = []
         },
 
-        selectAdventurer: (state, action: PayloadAction<Adventurer>) => {
+        pickAdventurerForQuest: (state, action: PayloadAction<Adventurer>) => {
+            if (!state.selectedQuest) return
             const indexNull = state.adventurerSlots.indexOf(null)
             const indexAdventurer = state.adventurerSlots
                 .map(a => a ? a.adventurerId : a)
@@ -100,7 +111,7 @@ const questBoardState = createSlice({
                 state.adventurerSlots[indexNull] = action.payload
         },
 
-        unselectAdventurer: (state, action: PayloadAction<Adventurer>) => {
+        unPickAdventurerForQuest: (state, action: PayloadAction<Adventurer>) => {
             state.adventurerSlots = state.adventurerSlots.map(adventurer => 
                 adventurer?.adventurerId === action.payload.adventurerId ? null : adventurer)
         },
@@ -113,7 +124,7 @@ const questBoardState = createSlice({
         },
         
         changeAdventurersInChallenge: (state, action: PayloadAction<{ adventurers: Adventurer[], inChallenge: boolean }>) => {
-            state.inventory.forEach(adventurer => {
+            state.adventurers.forEach(adventurer => {
                 action.payload.adventurers.forEach((actionAdventurer) => {
                     if(actionAdventurer.adventurerId == adventurer.adventurerId){
                         adventurer.inChallenge = action.payload.inChallenge
@@ -121,13 +132,18 @@ const questBoardState = createSlice({
                     }
                 })
             })
-            state.inventory = sortAdventurers(state.inventory)
+            state.adventurers = sortAdventurers(state.adventurers)
+        },
+
+        selectAdventurer: (state, action: PayloadAction<Adventurer | undefined>) => {
+            state.selectedAdventurer = action.payload
         },
     },
 });
 
 export const {
     setInitLoading,
+    toggleInventory,
     setInventory,
     setTakenQuests,
     addTakenQuest,
@@ -137,10 +153,11 @@ export const {
     clearAvailableQuests,
     selectQuest,
     unselectQuest,
-    selectAdventurer,
-    unselectAdventurer,
+    pickAdventurerForQuest,
+    unPickAdventurerForQuest,
     clearSelectedAdventurers,
     changeAdventurersInChallenge,
+    selectAdventurer,
 } = questBoardState.actions
 
 type NotificationsState = {
