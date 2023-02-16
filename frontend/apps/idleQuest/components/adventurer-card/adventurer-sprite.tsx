@@ -1,7 +1,8 @@
 import styled, { keyframes } from "styled-components"
 import { Adventurer } from "../../dsl/adventurer"
 import { PixelArtImage, notEmpty, simpleHash } from "../../../utils"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useRememberLastValue } from "../../utils"
 
 const emojiMapping = (emoji?: string) => {
     switch (emoji) {
@@ -19,61 +20,61 @@ const emojiMapping = (emoji?: string) => {
 const adventurerOfThioldenCustomWidthAndOffset = (adventurer: Adventurer): [number, number] => {
     const advName = adventurer.sprite.split('/')[5].split('-')[0]
     if(advName == "drignir" || advName == "arne" || advName == "aztuneio" || advName == "vimtyr")
-        return [5.5, -2.2] 
+        return [5.*1.2, -2.2] 
     else if (advName == 'ilinmyr')
-        return [8.5, -2.2]
+        return [8.*1.2, -2.2]
     else if (advName == 'aragren' || advName == 'bodica' || advName == 'kilia' || advName == 'rando')
-        return [4.3, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'vale')
-        return [5.7, -2.2] 
+        return [5.*1.2, -2.2] 
     else if (advName == 'naya')
-        return [5.8, -2.2]
+        return [5.*1.2, -2.2]
     else if (advName == 'mili')
-        return [3.7, -2.2] 
+        return [3.*1.2, -2.2] 
     else if (advName == 'filgrald' || advName == 'gadrull' || advName == 'gulnim' || advName == 'rundir' || advName == 'thelas')
-        return [4.6, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'volggan')
-        return [4.3, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'marlanye' || advName == 'friga' || advName == 'astrid' || advName == 'tyr' || advName == 'ulf')
-        return [4.1, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'mey' || advName == 'delthamar'  || advName == "ude'namvar" || advName == 'vadanna'|| advName == "avva_fire" )
-        return [4.1, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'milnim'  || advName == 'terrorhertz'  || advName == "arun'na" )
-        return [4.5, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'marendil')
-        return [6.1, -2.2] 
+        return [6.*1.2, -2.2] 
     else if (advName == 'shaden' || advName == 'ferra')
-        return [3.8, -2.2] 
+        return [3.*1.2, -2.2] 
     else if (advName == 'syonir' || advName == 'fjolnaer')
-        return [6.2, -2.2] 
+        return [6.*1.2, -2.2] 
     else if (advName == 'lyskyr')
-        return [5.4, -2.2] 
+        return [5.*1.2, -2.2] 
     else if (advName == 'perneli' || advName == 'eify')
-        return [4.5, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'abbelka')
-        return [5.7, -2.2] 
+        return [5.*1.2, -2.2] 
     else if (advName == 'aumara')
-        return [5.1, -2.2] 
+        return [5.*1.2, -2.2] 
     else if (advName == 'mare' || advName == 'bo')
-        return [5.1, -2.2] 
+        return [5.*1.2, -2.2] 
     else if (advName == 'dethiol')
-        return [10, -2.2] 
+        return [10*1.2,-2.2] 
     else if (advName == 'haakon')
-        return [5, -2.2] 
+        return [5*1.2, -2.2] 
     else if (advName == 'avva_ice')
-        return [4.2, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'hilana')
-        return [5.6, -2.2] 
+        return [5.*1.2, -2.2] 
     else if (advName == 'rei')
-        return [4.8, -2.2] 
+        return [4.*1.2, -2.2] 
     else if (advName == 'othil')
-        return [3.6, -2.2] 
+        return [3.*1.2, -2.2] 
     else if (advName == 'arin')
-        return [5.3, -2.2] 
+        return [5.*1.2, -2.2] 
     else if (advName == 'aki')
-        return [5.5, -2.2] 
+        return [5.*1.2, -2.2] 
     else 
-        return [5.5, -2.2] 
+        return [5.*1.2, -2.2] 
 }
 
 const grandmasterAdventurerCustomOffer = (adventurer: Adventurer): number => {
@@ -139,10 +140,10 @@ const LeavingEmojiAnimation = keyframes`
     100% {opacity: 0; margin-top: -3vmax;}
 `
 
-const EmojiContainer = styled.div<{ $display: boolean, offset: number }>`
+const EmojiContainer = styled.div<{ $display: boolean, offset: number, scale: number }>`
     position: absolute;
-    width: 3.4vmax;
-    height: 3.4vmax;
+    width: ${props => 3.4 * props.scale}vmax;
+    height: ${props => 3.4 * props.scale}vmax;
     z-index: 100;
     overflow: visible;
     display: flex;
@@ -155,24 +156,23 @@ const EmojiContainer = styled.div<{ $display: boolean, offset: number }>`
 
 const EmojiBubble = styled(PixelArtImage)`padding-top: 0.3vmax;`
 
-const Emoji = ({ emoji, offset }: { emoji?: string, offset: number }) => {
-    const lastEmoji = useRef<string | undefined>(undefined)
-    const renderEmoji = emoji ?? lastEmoji.current
-    useEffect(() => { lastEmoji.current = emoji }, [emoji])
+const Emoji = ({ emoji, offset, scale }: { emoji?: string, offset: number, scale: number }) => {
+    const lastEmoji = useRememberLastValue(emoji, undefined)
+    const renderEmoji = emoji ?? lastEmoji
     return notEmpty(renderEmoji) ? 
-        <EmojiContainer $display={emoji !== undefined} offset={offset}>
+        <EmojiContainer $display={emoji !== undefined} offset={offset} scale={scale}>
             <EmojiBubble
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"
                 alt="emoji buble"
-                width={3.4}
-                height={3.4}
+                width={3.4 * scale}
+                height={3.4 * scale}
                 absolute
             />
             <PixelArtImage
                 src={emojiMapping(renderEmoji)}
                 alt="adventurer emoji"
-                width={2.8}
-                height={2.5}
+                width={2.8 * scale}
+                height={2.5 * scale}
             />
         </EmojiContainer>
     : <></>
@@ -200,42 +200,26 @@ const useComputeHeightFromOriginalImage = (src: string, desiredWidth: number): n
 interface AdventurerSpriteProps {
     className?: string
     adventurer: Adventurer
-    render: SpriteRenderOptions
+    render?: SpriteRenderOptions
     scale?: number
     emoji?: string
 }
 
 const AdventurerSprite = ({className, adventurer, render = "normal", scale = 1, emoji} : AdventurerSpriteProps) => {
-    if (adventurer.collection == "pixel-tiles") {
-        const width = 4.6 * scale
-        const height = useComputeHeightFromOriginalImage(adventurer.sprite, width)
-        return (
-            <AdventurerSpriteContainer className={className} height={height} width={width} render={render}>
-                <Emoji emoji={emoji} offset={-2.5}/>
-                <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill />
-            </AdventurerSpriteContainer>
-        )
-    } else if (adventurer.collection == "grandmaster-adventurers") {
-        const offset = grandmasterAdventurerCustomOffer(adventurer)
-        const width = 7.7
-        const height = useComputeHeightFromOriginalImage(adventurer.sprite, width)
-        return (
-            <AdventurerSpriteContainer className={className} height={height} width={width} render={render}>
-                <Emoji emoji={emoji} offset={offset} />
-                <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill />
-            </AdventurerSpriteContainer>
-        )
-    } else if (adventurer.collection == "adventurers-of-thiolden") {
-        const [width1, emojiOffset] = adventurerOfThioldenCustomWidthAndOffset(adventurer)
-        const width = width1 * 1.2 * scale
-        const height = useComputeHeightFromOriginalImage(adventurer.sprite, width)
-        return (
-            <AdventurerSpriteContainer className={className} height={height} width={width} render={render}>
-                <Emoji emoji={emoji} offset={emojiOffset} />
-                <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill />
-            </AdventurerSpriteContainer>
-        )
-    } else return <></>
+    const [width, offset] =
+        adventurer.collection == "pixel-tiles" ? 
+            [4.6, -2.5] :
+        adventurer.collection == "grandmaster-adventurers" ? 
+            [7.7, grandmasterAdventurerCustomOffer(adventurer)] :
+        // adventurer.collection == "adventurers-of-thiolden" ?
+            adventurerOfThioldenCustomWidthAndOffset(adventurer)
+    const height = useComputeHeightFromOriginalImage(adventurer.sprite, width)
+    return (
+        <AdventurerSpriteContainer className={className} height={height * scale} width={width * scale} render={render}>
+            <Emoji emoji={emoji} offset={offset} scale={scale} />
+            <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill />
+        </AdventurerSpriteContainer>
+    )
 }
 
 export default AdventurerSprite

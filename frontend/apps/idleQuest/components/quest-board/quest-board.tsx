@@ -1,7 +1,6 @@
 import styled from "styled-components"
-import { Adventurer, AvailableQuest, SelectedQuest } from "../../dsl"
+import { AvailableQuest } from "../../dsl"
 import QuestBoardArea from "./quest-board-area"
-import QuestCard from "./quest-card"
 import RefreshButton from "./refresh-button"
 import WorldMap from "./world-map"
 
@@ -25,30 +24,18 @@ const AvailableQuestsWrapper = styled.div`
 `
 
 interface QuestBoardProps {
-    selectedQuest?: SelectedQuest,
-    adventurerSlots: (Adventurer | null)[],
     availableQuests: AvailableQuest[],
-    onSignQuest: (quest: SelectedQuest, adventurers: Adventurer[]) => void,
-    onCloseQuest: () => void,
     onSelectQuest: (quest: AvailableQuest) => void,
     onFetchMoreQuests: () => void
-    onUnselectAdventurer: (adventurer: Adventurer) => void,
 }
 
-const QuestBoard = ({ selectedQuest, adventurerSlots, availableQuests, onSignQuest, onCloseQuest, onSelectQuest, onFetchMoreQuests, onUnselectAdventurer }: QuestBoardProps) =>
+const QuestBoard = ({ availableQuests, onSelectQuest, onFetchMoreQuests }: QuestBoardProps) =>
     <QuestBoardContainer>
         <AvailableQuestsWrapper>
             <QuestBoardArea availableQuests={availableQuests} onQuestClick={onSelectQuest} />
             <WorldMap />
             <RefreshButton onClick={onFetchMoreQuests} />
         </AvailableQuestsWrapper>
-        <QuestCard
-            quest={selectedQuest}
-            adventurerSlots={adventurerSlots}
-            onSign={onSignQuest}
-            onClose={onCloseQuest}
-            onUnselectAdventurer={onUnselectAdventurer}
-        />
     </QuestBoardContainer>
 
 export default QuestBoard 

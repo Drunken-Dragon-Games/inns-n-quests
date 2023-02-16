@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import { axiosCustomInstance } from "../../axios/axiosApi"
 import { simpleHash } from "../utils"
 import {
-    Adventurer, AvailableQuest, ClaimQuestOutcome, sealTypes, tagAvailableQuest,
+    Adventurer, AvailableQuest, ClaimQuestOutcome, sealTypes, tagAdventurer, tagAvailableQuest,
     tagTakenQuest, TakenQuest
 } from "./dsl"
 import {
@@ -27,7 +27,7 @@ const addVisualDataToTakenQuests = (quest: any) =>
 export const getAdventurers = (firstLoad: boolean): IdleQuestsThunk => async (dispatch) =>
     await withTokenRefresh(async () => {
         const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
-        dispatch(setInventory(response.data))
+        dispatch(setInventory(response.data.map(tagAdventurer)))
         if (firstLoad) 
             setTimeout(() => dispatch(setInitLoading(false)), 1000)
     }, 

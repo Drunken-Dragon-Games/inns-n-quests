@@ -61,6 +61,15 @@ export const mapSealImage = (quest: SelectedQuest): { src: string, width: number
     }
 }
 
+export const mapQuestScroll = (takenQuest: TakenQuest) => {
+    switch (takenQuest.quest.seal) {
+        case "kings-plea": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/kings_plea.png"
+        case "heroic-quest": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/heroic_quest.png"
+        case "valiant-adventure": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/valiant_adventure.png"
+        case "townsfolk": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/townsfolk.png"
+    }
+}
+
 export function getQuestAPSRequirement(selectedQuest: SelectedQuest): APS {
     const search = (requirement: QuestRequirement): APSRequirement => {
         if (requirement.ctype === "aps-requirement") return requirement
@@ -92,10 +101,10 @@ export function takenQuestTimeLeft(takenQuest: TakenQuest): string {
     const secondsLeft = takenQuestSecondsLeft(takenQuest)
     const minutesLeft = Math.floor(secondsLeft / 60)
     const hoursLeft = Math.floor(minutesLeft / 60)
-    if (hoursLeft > 0) return `${hoursLeft}h ${minutesLeft}m`
-    else if (minutesLeft > 0) return `${minutesLeft}m ${secondsLeft}s`
+    if (hoursLeft > 0) return `${hoursLeft}h ${minutesLeft % 60}m`
+    else if (minutesLeft > 0) return `${minutesLeft}m ${secondsLeft % 60}s`
     else if (secondsLeft > 0) return `${secondsLeft}s`
-    else return "Finished"
+    else return "finished"
 }
 
 export const tagTakenQuest = (takenQuest: object): object => 

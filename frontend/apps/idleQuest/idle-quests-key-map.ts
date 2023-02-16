@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { notEmpty } from "../utils"
 import { takenQuestSecondsLeft } from "./dsl"
-import { IdleQuestsDispatch, IdleQuestsState, idleQuestsStore, unselectQuest } from "./idle-quests-state"
+import { IdleQuestsDispatch, IdleQuestsState, idleQuestsStore, toggleInventory, unselectQuest } from "./idle-quests-state"
 import { claimTakenQuest, takeAvailableQuest } from "./idle-quests-transitions"
 
 /**
@@ -13,7 +13,10 @@ import { claimTakenQuest, takeAvailableQuest } from "./idle-quests-transitions"
  */
 const GlobalKeyMap = (key: string, state: IdleQuestsState, dispatch: IdleQuestsDispatch) => { 
 
-    if (key == "Escape" && state.questBoard.selectedQuest) {
+    if (key == "b") {
+        dispatch(toggleInventory())
+
+    } else if (key == "Escape" && state.questBoard.selectedQuest) {
         dispatch(unselectQuest())
 
     } else if (key == "Enter" && state.questBoard.selectedQuest) {

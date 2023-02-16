@@ -28,6 +28,7 @@ export const SuccessScheme = css`
 export const fontFamilies = {
     sansSerif: "Roboto, sans-serif",
     mesiri: "El Messiri, sans-serif",
+    oswald: "Oswald, sans-serif",
     pixel:  "VT323, monospace"
 }
 
@@ -41,4 +42,8 @@ export const MessiriFontFamily = css`
 
 export const PixelFontFamily = css`
     font-family: ${fontFamilies.pixel};
+`
+
+export const OswaldFontFamily = css`
+    font-family: ${fontFamilies.oswald};
 `

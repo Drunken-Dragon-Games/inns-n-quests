@@ -17,8 +17,11 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
 
 interface QuestBoardState {
     initLoading: boolean
-    inventory: Adventurer[]
+
+    inventoryOpen: boolean
+    adventurers: Adventurer[]
     takenQuests: TakenQuest[]
+
     availableQuests: AvailableQuest[]
     selectedQuest?: SelectedQuest
     adventurerSlots: (Adventurer | null)[]
@@ -26,8 +29,11 @@ interface QuestBoardState {
 
 const questBoardInitialState: QuestBoardState = { 
     initLoading: true,
-    inventory: [],
+
+    inventoryOpen: false,
+    adventurers: [],
     takenQuests: [],
+
     availableQuests: [],
     adventurerSlots: [],
 }
@@ -41,8 +47,12 @@ const questBoardState = createSlice({
             state.initLoading = action.payload
         },
 
+        toggleInventory: (state) => {
+            state.inventoryOpen = !state.inventoryOpen
+        },
+
         setInventory: (state, action: PayloadAction<Adventurer[]>) => {
-            state.inventory = sortAdventurers(action.payload)
+            state.adventurers = sortAdventurers(action.payload)
         },
 
         setTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
@@ -77,7 +87,7 @@ const questBoardState = createSlice({
                 state.adventurerSlots = Array(quest.slots).fill(null)
             else
                 state.adventurerSlots = Array(quest.quest.slots).fill(null).map((_, index) => 
-                    state.inventory.find(adventurer => adventurer.adventurerId === quest.adventurerIds[index]) ?? null)
+                    state.adventurers.find(adventurer => adventurer.adventurerId === quest.adventurerIds[index]) ?? null)
         },
 
         unselectQuest: (state) => {
@@ -86,6 +96,7 @@ const questBoardState = createSlice({
         },
 
         selectAdventurer: (state, action: PayloadAction<Adventurer>) => {
+            if (!state.selectedQuest) return
             const indexNull = state.adventurerSlots.indexOf(null)
             const indexAdventurer = state.adventurerSlots
                 .map(a => a ? a.adventurerId : a)
@@ -113,7 +124,7 @@ const questBoardState = createSlice({
         },
         
         changeAdventurersInChallenge: (state, action: PayloadAction<{ adventurers: Adventurer[], inChallenge: boolean }>) => {
-            state.inventory.forEach(adventurer => {
+            state.adventurers.forEach(adventurer => {
                 action.payload.adventurers.forEach((actionAdventurer) => {
                     if(actionAdventurer.adventurerId == adventurer.adventurerId){
                         adventurer.inChallenge = action.payload.inChallenge
@@ -121,13 +132,14 @@ const questBoardState = createSlice({
                     }
                 })
             })
-            state.inventory = sortAdventurers(state.inventory)
+            state.adventurers = sortAdventurers(state.adventurers)
         },
     },
 });
 
 export const {
     setInitLoading,
+    toggleInventory,
     setInventory,
     setTakenQuests,
     addTakenQuest,

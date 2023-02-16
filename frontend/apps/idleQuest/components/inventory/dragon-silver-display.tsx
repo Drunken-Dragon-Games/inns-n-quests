@@ -4,9 +4,13 @@ import styled from "styled-components"
 import { NoDragImage } from "../../../utils"
 import DragonSilverIcon from "./dragon-silver-icon"
 
-const NavbarContainer = styled.div`
+const DragonSilverDisplayContainer = styled.div`
     display: flex;
     padding: 0.8vmax 1vmax;
+    width: 100%;
+    background-color: rgba(20,20,20,0.5);
+    display: flex-inline;
+    align-items: right;
 `
 
 const BackLink = styled.div`
@@ -43,7 +47,7 @@ interface NavbarProps {
 const DragonSilverDisplay = ({ dragonSilver, dragonSilverToClaim }: NavbarProps) => {
     const returnLink = process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:3000/login"
     return (
-        <NavbarContainer>
+        <DragonSilverDisplayContainer>
             <DragonSilverWrapper>
                 <DragonSilverIcon
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/dragon_silver.png"
@@ -65,7 +69,7 @@ const DragonSilverDisplay = ({ dragonSilver, dragonSilverToClaim }: NavbarProps)
             <BackLink>
                 <Link href={returnLink} passHref><ReturnButton /></Link>
             </BackLink>
-        </NavbarContainer>
+        </DragonSilverDisplayContainer>
     )
 }
 

@@ -1,5 +1,6 @@
 
 export interface Adventurer {
+    ctype: "adventurer",
     adventurerId: string,
     userId: string,
     name: string,
@@ -26,3 +27,6 @@ export const adventurerClasses = ["fighter", "paladin", "ranger", "rogue", "bard
 export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-thiolden" | "pixel-tiles"
 
 export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
+
+export const tagAdventurer = (adventurer: any): any => 
+    ({...adventurer, ctype: "adventurer" })

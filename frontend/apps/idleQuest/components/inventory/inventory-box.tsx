@@ -1,55 +1,159 @@
 import { ReactNode } from "react"
-import styled from "styled-components"
+import styled, { css, keyframes } from "styled-components"
 import { NoDragImage } from "../../../utils"
+import { ConditionalRender } from "../../../utils/components/basic_components"
+import { OswaldFontFamily, SansSerifFontFamily } from "../common-css"
 
-const InventoryBoxContainer = styled.div`
+const BoxCss = css`
     position: relative;
+    overflow: visible;
+    border-radius: 0.15vmax;
+`
+
+const InventoryBoxContainer = styled.div<{ $empty?: boolean }>`
+    ${BoxCss}
+    padding: 0.15vmax;
+    cursor: ${props => props.$empty ? "default" : "pointer"};
+    background-color: ${props => props.$empty ? "rgba(30,30,30,0.8)" : "rgba(20,20,20,0.9)" };
+`
+
+const InnerBorderBox = styled.div<{ $hover?: boolean }>`
+    ${BoxCss}
+    padding: 0.2vmax;
     width: 100%;
-    cursor:pointer;
-    padding: 1.3vmax 1vmax;
-    background-color: rgba(0,0,0,0.2);
-    &:hover{ background-color: rgba(255,255,255,0.1); }
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    height: 100%;
+
+    border: 0.15vmax solid ${props => props.$hover ? "rgba(255,255,255,0.7)" : "rgba(50,50,50,0.8)"};
+    background-color: ${props => props.$hover ? "rgba(20,20,20,0.5)" : "rgba(0,0,0,0)"};
 `
 
-const LeftCornerImage = styled(NoDragImage)`
-    left: -0.2vmax;
-    bottom: -0.2vmax;
+const InnerBackgroundBox = styled.div<{ $selected?: boolean }>`
+    ${BoxCss}
+    width: 100%;
+    height: 100%;
+
+    #box-shadow: 0 4px -8px 0 rgba(0, 0, 0, 0.5);
+    background-color: ${props => props.$selected ? "#1976d2" : "rgba(0,0,0,0)"};
+    box-shadow: inset 0 0 0.5vmax ${props => props.$selected ? "#90caf9" : "rgba(0,0,0,0)"};
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    & > * { position: absolute; };
 `
 
-const RightCornerImage = styled(NoDragImage)`
-    right: -0.2vmax;
-    top: -0.2vmax;
+const InfoBox = styled.div`
+    position: absolute;
+    right: -0.5vmax;
+    bottom: -0.5vmax;
+    padding: 0.15vmax;
+    background-color: rgba(20,20,20,0.9);
+    border-radius: 0.15vmax;
+`
+
+const InfoInnerBox = styled.div`
+    padding: 0 0.3vmax;
+    border: 0.15vmax solid rgba(50,50,50,0.7);
+    border-radius: 0.15vmax;
+    span {
+        ${OswaldFontFamily}
+        font-size: 0.8vmax;
+        text-align: center;
+        color: white !important;
+    };
+`
+
+const cornerTopLeftAnimation = keyframes`
+    0% { transform: translate(0vmax, 0vmax) rotate(-45deg) }
+    100% { transform: translate(-0.30vmax, -0.30vmax) rotate(-45deg) }
+`
+
+const cornerTopRightAnimation = keyframes`
+    0% { transform: translate(0vmax, 0vmax) rotate(45deg) }
+    100% { transform: translate(0.30vmax, -0.30vmax) rotate(45deg) }
+`
+
+const cornerBottomRightAnimation = keyframes`
+    0% { transform: translate(0vmax, 0vmax) rotate(135deg) }
+    100% { transform: translate(0.30vmax, 0.30vmax) rotate(135deg) }
+`
+
+const cornerBottomLeftAnimation = keyframes`
+    0% { transform: translate(0vmax, 0vmax) rotate(225deg) }
+    100% { transform: translate(-0.30vmax, 0.30vmax) rotate(225deg) }
+`
+
+const CornerImage = styled.div<{ side: "top-left" | "top-right" | "bottom-right" | "bottom-left" }>`
+    position: absolute;
+    width: 0; 
+    height: 0; 
+    border-left: 0.5vmax solid transparent;
+    border-right: 0.5vmax solid transparent;
+    border-bottom: 0.5vmax solid white;
+    box-shadow: 0 0.1vmax 0.3vmax 0 rgba(255, 255, 255, 0.5);
+    border-radius: 0.2vmax;
+
+    ${props => props.side === "top-left" ? `
+        top: 0.15vmax;
+        left: -0.15vmax;
+        transform: rotate(-45deg);
+    ` : props.side === "top-right" ? `
+        top: 0.15vmax;
+        right: -0.15vmax;
+        transform: rotate(45deg);
+    ` : props.side === "bottom-right" ? `
+        bottom: 0.15vmax;
+        right: -0.15vmax;
+        transform: rotate(135deg);
+    ` : `
+        bottom: 0.15vmax;
+        left: -0.15vmax;
+        transform: rotate(225deg);
+    `}
+
+    animation: ${props => props.side === "top-left" ? cornerTopLeftAnimation : 
+        props.side === "top-right" ? cornerTopRightAnimation : 
+        props.side === "bottom-right" ? cornerBottomRightAnimation :
+        cornerBottomLeftAnimation
+    } 0.25s infinite ease-in-out alternate;
 `
 
 interface InventoryBoxProps {
     className?: string,
     children?: ReactNode,
     selected?: boolean,
+    hover?: boolean,
+    empty?: boolean,
+    info?: string,
     onClick?: () => void 
     onMouseEnter?: () => void
     onMouseLeave?: () => void
 }
 
-const InventoryBox = (props: InventoryBoxProps) =>
-    <InventoryBoxContainer className={props.className} onClick={props.onClick} onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave}>
-        <LeftCornerImage
-            src={props.selected ?
-                "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/selected_left_corner.png" :
-                "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/unselected_left_corner.png"
-            }
-            width={3} height={3}
-            absolute
-        />
-        <RightCornerImage
-            src={props.selected ?
-                "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/selected_right_corner.png" :
-                "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/unselected_right_corner.png"
-            }
-            width={3} height={3}
-            absolute
-        />
-        {props.children}
-    </InventoryBoxContainer>
-
+const InventoryBox = ({ className, children, selected, hover, empty, info, onClick, onMouseEnter, onMouseLeave }: InventoryBoxProps) => {
+    return (
+        <InventoryBoxContainer 
+            className={className} 
+            onClick={onClick} 
+            onMouseEnter={onMouseEnter} 
+            onMouseLeave={onMouseLeave}
+            $empty={empty}
+        >
+            <InnerBorderBox $hover={hover && !empty}>
+                <InnerBackgroundBox $selected={selected && !empty}>
+                    {children}
+                </InnerBackgroundBox>
+                {info ? <InfoBox><InfoInnerBox><span>{info}</span></InfoInnerBox></InfoBox> : <></>}
+            </InnerBorderBox>
+            {hover && !empty ?
+                <>
+                    <CornerImage side="top-left" />
+                    <CornerImage side="top-right" />
+                    <CornerImage side="bottom-right" />
+                    <CornerImage side="bottom-left" />
+                </>
+                : <></>}
+        </InventoryBoxContainer>
+    )
+}
 export default InventoryBox

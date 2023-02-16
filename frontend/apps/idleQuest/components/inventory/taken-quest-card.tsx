@@ -2,13 +2,13 @@ import { useState } from "react"
 import styled from "styled-components"
 import { PixelArtImage } from "../../../utils"
 import { ConditionalRender, TextOswald } from "../../../utils/components/basic_components"
-import { TakenQuest, takenQuestStatus } from "../../dsl"
+import { mapQuestScroll, TakenQuest, takenQuestStatus } from "../../dsl"
 import InventoryBox from "./inventory-box"
 import Timer from "./timer"
 
 const TakenQuestCardContainer = styled(InventoryBox)`
     position: relative;
-    cursor:pointer;
+    cursor: pointer;
     display: flex;
     gap: 1vmax;
 `
@@ -40,15 +40,6 @@ interface TakenQuestCardProps {
     onSelectTakenQuest?: (takenQuest: TakenQuest) => void
 }
 
-const mapSeal = (takenQuest: TakenQuest) => {
-    switch (takenQuest.quest.seal) {
-        case "kings-plea": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/kings_plea.png"
-        case "heroic-quest": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/heroic_quest.png"
-        case "valiant-adventure": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/valiant_adventure.png"
-        case "townsfolk": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/townsfolk.png"
-    }
-}
-
 const TakenQuestCard = ({ takenQuest, onSelectTakenQuest }: TakenQuestCardProps) => {
     const [onHover, setOnHover] = useState<boolean>(false)
     const status = takenQuestStatus(takenQuest)
@@ -60,7 +51,7 @@ const TakenQuestCard = ({ takenQuest, onSelectTakenQuest }: TakenQuestCardProps)
             selected={onHover}
         >
             <PixelArtImage
-                src={mapSeal(takenQuest)}
+                src={mapQuestScroll(takenQuest)}
                 alt="unopened quest" 
                 width={5} height={4.2}
             />

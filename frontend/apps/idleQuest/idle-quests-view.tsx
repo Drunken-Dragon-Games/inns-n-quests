@@ -5,7 +5,9 @@ import { ConditionalRender, Loading } from "../utils/components/basic_components
 import Inventory from "./components/inventory/inventory"
 import { Notifications } from "./components/notifications"
 import QuestBoard from "./components/quest-board"
+import QuestCard from "./components/quest-board/quest-card"
 import { Adventurer, SelectedQuest, TakenQuest } from "./dsl"
+import { InventoryItem } from "./dsl/inventory"
 import { useIdleQuestsKeyMap } from "./idle-quests-key-map"
 import {
     clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, removeAvailableQuest, removeTimedOutNotifications, selectAdventurer,
@@ -62,6 +64,8 @@ const IdleQuestsView = () => {
         dispatch(selectAdventurer(adventurer))
     const onSelectTakenQuest = (takenQuest: TakenQuest) =>
         dispatch(selectQuest(takenQuest))
+    const onItemClick = (item: InventoryItem) =>
+        item.ctype == "adventurer" ? onSelectAdventurer(item) : onSelectTakenQuest(item)
     const onRecruitAdventurer = () => 
         dispatch(fetchMintTest())
     
@@ -92,7 +96,8 @@ const IdleQuestsView = () => {
 
             <Notifications notifications={notifications} />
             <Inventory
-                adventurers={questBoardState.inventory}
+                open={questBoardState.inventoryOpen}
+                adventurers={questBoardState.adventurers}
                 adventurerSlots={questBoardState.adventurerSlots}
                 selectedQuest={questBoardState.selectedQuest}
                 takenQuests={questBoardState.takenQuests}
@@ -101,15 +106,18 @@ const IdleQuestsView = () => {
                 onAdventurerRecruit={onRecruitAdventurer}
                 onAdventurerClick={onSelectAdventurer}
                 onSelectTakenQuest={onSelectTakenQuest}
+                onItemClick={onItemClick}
             />
             <QuestBoard
                 availableQuests={questBoardState.availableQuests}
-                selectedQuest={questBoardState.selectedQuest}
-                adventurerSlots={questBoardState.adventurerSlots}
-                onSignQuest={onSignQuest}
-                onCloseQuest={onCloseAvailableQuest}
                 onSelectQuest={onSelectQuest}
                 onFetchMoreQuests={onFetchMoreQuests}
+            />
+            <QuestCard
+                quest={questBoardState.selectedQuest}
+                adventurerSlots={questBoardState.adventurerSlots}
+                onSign={onSignQuest}
+                onClose={onCloseAvailableQuest}
                 onUnselectAdventurer={onUnselectAdventurer}
             />
         </IdleQuestsContainer>

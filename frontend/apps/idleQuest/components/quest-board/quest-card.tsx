@@ -30,7 +30,7 @@ const CardContainer = styled.div`
     padding: 3vmax;
     width: 44vmax;
     min-height: 50vmax;
-    max-height: 100vh;
+    max-height: 80vh;
     filter: drop-shadow(0px 0px 1vmax rgba(0, 0, 0, 0.8));
     background: url(https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png);
     background-size: cover;
@@ -234,54 +234,48 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onClose, onUnsel
     if (!quest) return <></>
     const state = memoQuestCardState(quest, adventurerSlots)
     return (
-        <BackShadow
-            onClick={(e) => { if (e.target === e.currentTarget && onClose) onClose() }}
-            open={quest !== undefined}
-            className={className}
-        >
-            <CardContainer>
-                <QuestInfo>
-                    <QuestInfoLeft>
-                        <Title>{questName(quest)}</Title>
-                        <Details dangerouslySetInnerHTML={{ __html: questDescription(quest) }} />
-                    </QuestInfoLeft>
+        <CardContainer className={className}>
+            <QuestInfo>
+                <QuestInfoLeft>
+                    <Title>{questName(quest)}</Title>
+                    <Details dangerouslySetInnerHTML={{ __html: questDescription(quest) }} />
+                </QuestInfoLeft>
 
-                    <QuestInfoRight>
-                        <PixelArtImage
-                            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg"
-                            alt="quest monster"
-                            width={15} height={15}
-                        />
-                        <APSReq apsAccumulated={state.apsAccumulated} apsRequired={state.apsRequired} />
-                    </QuestInfoRight>
-                </QuestInfo>
-
-                <AdventurersWrapper>
-                    {adventurerSlots.map((adventurer, index) =>
-                        <AdventurerSlot
-                            key={"adventurer-slot-" + index}
-                            adventurer={adventurer}
-                            onUnselectAdventurer={quest?.ctype === "available-quest" ? onUnselectAdventurer : undefined}
-                        />
-                    )}
-                </AdventurersWrapper>
-
-                <Footer>
-                    <Signature
-                        signatureType={state.signatureType}
-                        onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest, adventurerSlots.filter(notEmpty))}
+                <QuestInfoRight>
+                    <PixelArtImage
+                        src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg"
+                        alt="quest monster"
+                        width={15} height={15}
                     />
+                    <APSReq apsAccumulated={state.apsAccumulated} apsRequired={state.apsRequired} />
+                </QuestInfoRight>
+            </QuestInfo>
 
-                    <SealImage 
-                        src={state.sealImage.src} 
-                        alt="quest seal"
-                        width={state.sealImage.width} 
-                        height={state.sealImage.height}
-                        absolute
+            <AdventurersWrapper>
+                {adventurerSlots.map((adventurer, index) =>
+                    <AdventurerSlot
+                        key={"adventurer-slot-" + index}
+                        adventurer={adventurer}
+                        onUnselectAdventurer={quest?.ctype === "available-quest" ? onUnselectAdventurer : undefined}
                     />
-                </Footer>
-            </CardContainer>
-        </BackShadow>
+                )}
+            </AdventurersWrapper>
+
+            <Footer>
+                <Signature
+                    signatureType={state.signatureType}
+                    onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest, adventurerSlots.filter(notEmpty))}
+                />
+
+                <SealImage
+                    src={state.sealImage.src}
+                    alt="quest seal"
+                    width={state.sealImage.width}
+                    height={state.sealImage.height}
+                    absolute
+                />
+            </Footer>
+        </CardContainer>
     )
 }
 

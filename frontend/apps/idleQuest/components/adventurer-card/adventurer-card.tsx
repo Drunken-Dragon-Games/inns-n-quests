@@ -162,6 +162,7 @@ const AdventurerCard = ({
             />
         </AdventurerSpriteWrapper>
 
+        {/*
         <InfoWrapper>
             <NameTitle $display={notEmpty(displayNameColor)}>
                 <TextOswald fontsize={0.8} color={displayNameColor ?? "white"}>{adventurer.name}</TextOswald>
@@ -184,6 +185,7 @@ const AdventurerCard = ({
                 </ExperienceBar>
             </APSWrapper>
         </InfoWrapper>
+        */}
 
     </AdventurerContainer>
 
