@@ -116,6 +116,18 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
     )
 }
 
+const useInventoryBrowserState = (props: InventoryBrowserProps) => 
+    useMemo(() => {
+        const itemsSum = props.adventurers.length + props.takenQuests.length
+        const slotsTail = itemsSum % 4
+        const extraSlots = slotsTail === 0 ? 4 : 4 - slotsTail
+        const amountIfWithExtraSlots = itemsSum + extraSlots
+        const amountIfWithoutExtraSlots = (4 * 8) - itemsSum
+        const totalExtraSlots = amountIfWithExtraSlots >= 4 * 8 ? extraSlots : amountIfWithoutExtraSlots
+        const extraSlotsArray = Array(totalExtraSlots).fill(0)
+        return extraSlotsArray
+    }, [props.adventurers, props.takenQuests])
+
 interface InventoryBrowserProps {
     adventurers: Adventurer[],
     takenQuests: TakenQuest[],
@@ -126,11 +138,11 @@ interface InventoryBrowserProps {
 }
 
 const InventoryBrowser = (props: InventoryBrowserProps) => {
-    
+    const extraSlotsArray = useInventoryBrowserState(props)
     return (
         <InventoryBrowserContainer>
             <DirectionFix>
-                {props.adventurers.map((item) => (
+                {props.adventurers.map((item) => 
                     <InventoryItemView 
                         key={item.adventurerId} 
                         item={item} 
@@ -138,8 +150,8 @@ const InventoryBrowser = (props: InventoryBrowserProps) => {
                         selectedAdventurer={props.selectedAdventurer}
                         onItemClick={props.onItemClick} 
                     />
-                ))}
-                {props.takenQuests.map((item) => (
+                )}
+                {props.takenQuests.map((item) => 
                     <InventoryItemView 
                         key={item.takenQuestId} 
                         item={item} 
@@ -147,16 +159,10 @@ const InventoryBrowser = (props: InventoryBrowserProps) => {
                         adventurerSlots={props.adventurerSlots}
                         onItemClick={props.onItemClick} 
                     />
-                ))}
-                <InventoryItemView />
-                <InventoryItemView />
-                <InventoryItemView />
-                <InventoryItemView />
-                <InventoryItemView />
-                <InventoryItemView />
-                <InventoryItemView />
-                <InventoryItemView />
-                <InventoryItemView />
+                )}
+                {extraSlotsArray.map((_, i) => 
+                    <InventoryItemView key={i} />
+                )}
             </DirectionFix>
         </InventoryBrowserContainer>
     )

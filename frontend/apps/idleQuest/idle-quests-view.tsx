@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import styled from "styled-components"
 import { ConditionalRender, Loading } from "../utils/components/basic_components"
+import AlphaNotes from "./alpha-notes"
 import AdventurerCard from "./components/adventurer-card/adventurer-card"
 import AdventurerSplashArt from "./components/inventory/adventurer-splash-art"
 import Inventory from "./components/inventory/inventory"
@@ -166,6 +167,7 @@ const IdleQuestsView = () => {
                 onSelectQuest={onSelectQuest}
                 onFetchMoreQuests={onFetchMoreQuests}
             />
+            <AlphaNotes />
         </IdleQuestsContainer>
     )
 }

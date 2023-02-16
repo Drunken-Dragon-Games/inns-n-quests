@@ -34,12 +34,12 @@ const AdventurerSplashArt = ({ adventurer, scale = 1 }: { adventurer: Adventurer
             { adventurer.collection === "adventurers-of-thiolden" ?
             <NoDragImage
                 src={src}
-                alt="adventurer splashart"
+                alt={ adventurer.name + " splashart" }
                 width={baseWidth * scale} height={height * scale}
             /> :
             <PixelArtImage
                 src={src}
-                alt="adventurer splashart"
+                alt={ adventurer.name + " splashart" }
                 width={baseWidth * scale} height={height * scale}
             /> }
         </AdventurerSplashArtContainer>

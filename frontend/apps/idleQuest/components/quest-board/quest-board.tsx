@@ -33,7 +33,6 @@ const QuestBoard = ({ availableQuests, onSelectQuest, onFetchMoreQuests }: Quest
     <QuestBoardContainer>
         <AvailableQuestsWrapper>
             <QuestBoardArea availableQuests={availableQuests} onQuestClick={onSelectQuest} />
-            <WorldMap />
             <RefreshButton onClick={onFetchMoreQuests} />
         </AvailableQuestsWrapper>
     </QuestBoardContainer>

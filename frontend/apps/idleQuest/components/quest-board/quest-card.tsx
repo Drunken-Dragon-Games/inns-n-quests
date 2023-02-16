@@ -8,11 +8,10 @@ import { APS, zeroAPS, sameOrBetterAPS, SelectedQuest, questSeal, Adventurer,
          questDescription, 
          mapSealImage} from "../../dsl"
 
-const CardContainer = styled.div`
+const QuestCardContainer = styled.div`
     position: relative;
     display: flex;
-    min-height: 50vmax;
-    max-height: 80vh;
+    height: 90vh;
     flex-direction: column;
     gap: 1.8vmax;
     padding: 3vmax;
@@ -188,7 +187,7 @@ interface QuestPaperTakenState {
     sealImage: { src: string, width: number, height: number }
 }
 
-const memoQuestCardState = (quest: SelectedQuest, adventurerSlots: (Adventurer | null)[]): QuestPaperTakenState => 
+const useQuestCardState = (quest: SelectedQuest, adventurerSlots: (Adventurer | null)[]): QuestPaperTakenState => 
     useMemo(() => ({
         signatureType: 
             quest.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
@@ -218,9 +217,9 @@ interface QuestPaperAvailableProps {
 
 const QuestCard = ({ className, quest, adventurerSlots, onSign, onUnselectAdventurer }: QuestPaperAvailableProps) => {
     if (!quest) return <></>
-    const state = memoQuestCardState(quest, adventurerSlots)
+    const state = useQuestCardState(quest, adventurerSlots)
     return (
-        <CardContainer className={className}>
+        <QuestCardContainer className={className}>
             <QuestInfo>
                 <QuestInfoLeft>
                     <Title>{questName(quest)}</Title>
@@ -261,7 +260,7 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onUnselectAdvent
                     absolute
                 />
             </Footer>
-        </CardContainer>
+        </QuestCardContainer>
     )
 }
 

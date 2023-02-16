@@ -45,9 +45,8 @@ const InventoryBody = styled.div<{ open: boolean }>`
 
 const ActivityContainer = styled.div`
     flex: 1;
-    padding: 2vmax 0;
-    display: flex;
-    flex-direction: column;
+    display: inline-flex;
+    padding: 2vh 0;
     align-items: center;
     justify-content: center;
 `
