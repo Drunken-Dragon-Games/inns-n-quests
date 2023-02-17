@@ -7,8 +7,8 @@ import Inventory from "./components/inventory/inventory"
 import { Notifications } from "./components/notifications"
 import QuestBoard from "./components/quest-board"
 import QuestCard from "./components/quest-board/quest-card"
-import { IdleQuestsState, idleQuestsStore } from "./idle-quests-state"
-import IdleQuestsTransitions from "./idle-quests-transitions"
+import { IdleQuestsState, idleQuestsStore } from "./state/idle-quests-state"
+import { IdleQuestsTransitions } from "./state"
 
 const IdleQuestsContainer = styled.section`
     position: relative;

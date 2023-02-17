@@ -1,19 +1,19 @@
 import { compose } from "@reduxjs/toolkit"
 import { AxiosError } from "axios"
-import { axiosCustomInstance } from "../../axios/axiosApi"
-import { simpleHash } from "../utils"
-import {
-    Adventurer, AvailableQuest, Outcome, sealTypes, tagAdventurer, tagAvailableQuest,
-    tagRealAPS,
-    tagTakenQuest, TakenQuest
-} from "./dsl"
 import {
     addAvailableQuests, addTakenQuest, changeAdventurersInChallenge,
     claimQuestOutcome,
     idleQuestsStore,
     IdleQuestsThunk, notify, removeTakenQuest, setInitLoading, setInventory, setTakenQuests,
     unselectQuest
-} from "./idle-quests-state"
+} from "."
+import { axiosCustomInstance } from "../../../axios/axiosApi"
+import { simpleHash } from "../../utils"
+import {
+    Adventurer, AvailableQuest, Outcome, sealTypes, tagAdventurer, tagAvailableQuest,
+    tagRealAPS,
+    tagTakenQuest, TakenQuest
+} from "../dsl"
 
 const addVisualQuestData = (quest: any) => {
     return ({

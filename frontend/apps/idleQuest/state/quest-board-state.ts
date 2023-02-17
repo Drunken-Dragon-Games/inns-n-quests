@@ -1,7 +1,5 @@
-import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from '@reduxjs/toolkit'
-import { combineReducers } from "redux"
-import { v4 as uuidv4 } from 'uuid'
-import { Adventurer, AppNotification, AvailableQuest, individualXPReward, Outcome, SelectedQuest, tagRealAPS, TakenQuest } from './dsl'
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { Adventurer, TakenQuest, AvailableQuest, SelectedQuest, Outcome, individualXPReward, tagRealAPS } from "../dsl"
 
 const sortAdventurers = (adventurers: Adventurer[]) => {
     return adventurers.sort((a, b) => {
@@ -15,7 +13,7 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
     })
 }
 
-interface QuestBoardState {
+export interface QuestBoardState {
     initLoading: boolean
 
     inventoryOpen: boolean
@@ -39,7 +37,7 @@ const questBoardInitialState: QuestBoardState = {
     adventurerSlots: [],
 }
 
-const questBoardState = createSlice({
+export const questBoardState = createSlice({
     name: "quest-board-state",
     initialState: questBoardInitialState,
     reducers: {
@@ -190,55 +188,3 @@ export const {
     selectAdventurer,
 } = questBoardState.actions
 
-type NotificationsState = {
-    notifications: AppNotification[]
-}
-
-const notificationsInitialState: NotificationsState = { 
-    notifications: [
-        { ctype: "info", message: "Welcome back adventurer!", notificationId: uuidv4(), createdAt: new Date() }
-    ]
-}
-
-const notificationsState = createSlice({
-    name: "notifications-state",
-    initialState: notificationsInitialState,
-    reducers: {
-
-        notify: (state, action: PayloadAction<{ message: string, ctype: AppNotification["ctype"] }>) => {
-            state.notifications.push({
-                ctype: action.payload.ctype,
-                message: action.payload.message,
-                notificationId: uuidv4(),
-                createdAt: new Date()
-            })
-        },
-
-        removeTimedOutNotifications: (state, action: PayloadAction<Date>) => {
-            state.notifications = state.notifications.filter(notification =>
-                notification.createdAt.getTime() + 5000 > action.payload.getTime())
-        }
-    }
-})
-
-export const {
-    notify,
-    removeTimedOutNotifications
-} = notificationsState.actions
-
-export const idleQuestsReducer = combineReducers({
-    questBoard: questBoardState.reducer,
-    notifications: notificationsState.reducer,
-})
-
-export const idleQuestsStore = configureStore({
-    reducer: idleQuestsReducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware({serializableCheck: false}),
-})
-
-export type IdleQuestsState = 
-    ReturnType<typeof idleQuestsStore.getState>
-export type IdleQuestsDispatch = 
-    typeof idleQuestsStore.dispatch
-export type IdleQuestsThunk<ReturnType = void> = 
-    ThunkAction<ReturnType, IdleQuestsState, unknown, Action<string>>

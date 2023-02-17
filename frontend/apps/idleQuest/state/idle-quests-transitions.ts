@@ -1,24 +1,24 @@
 import { useEffect } from "react"
-import { Adventurer, SelectedQuest, takenQuestSecondsLeft } from "./dsl"
-import { InventoryItem } from "./dsl/inventory"
-import { useIdleQuestsKeyMap } from "./idle-quests-key-map"
+import { Adventurer, SelectedQuest, takenQuestSecondsLeft } from "../dsl"
+import { InventoryItem } from "../dsl/inventory"
+import { useIdleQuestsKeyMap } from "../idle-quests-key-map"
 import {
     clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, pickAdventurerForQuest, removeAvailableQuest,
     removeTimedOutNotifications, selectAdventurer, selectQuest, toggleInventory, unPickAdventurerForQuest,
     unselectQuest
-} from "./idle-quests-state"
+} from "../state"
 import {
     claimTakenQuest, fetchMintTest, getAdventurers, getAvailableQuests, getInProgressQuests,
     takeAvailableQuest
 } from "./idle-quests-thunks"
-import { useClockSeconds } from "./utils"
+import { useClockSeconds } from "../utils"
 
 export type IdleQuestsStateAndDispatch = {
     state: IdleQuestsState,
     dispatch: IdleQuestsDispatch
 }
 
-export default class IdleQuestsTransitions {
+export class IdleQuestsTransitions {
     
     static useInitEffects = (snd: IdleQuestsStateAndDispatch) => {
         // Binds keyboard keys to actions
