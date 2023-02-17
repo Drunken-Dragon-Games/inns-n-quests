@@ -1,13 +1,14 @@
 import styled from "styled-components"
 import { useState } from "react"
-import { PixelArtImage, notEmpty } from "../../../utils"
+import { notEmpty } from "../../../utils"
 import { Adventurer } from "../../dsl"
-import AdventurerCard from "../adventurer-card/adventurer-card"
+import AdventurerMiniWithInfo from "../adventurer-card/adventurer-card"
+import { PixelArtImage, vh1 } from "../../utils"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
     width: 100%;
-    min-height: 11.6vmax;
-    max-width: 7.25vmax;
+    height: 22vh;
+    width: 8vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -18,8 +19,9 @@ const EmptySlot = () =>
     <PixelArtImage
         src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/dropbox.png"
         alt="adventurer slot in quest"
-        width={2.3}
-        height={2.3}
+        width={3}
+        height={3}
+        units={vh1}
         absolute
     />
 
@@ -45,11 +47,12 @@ const AdventurerSlot = ({ className, adventurer, emoji, onUnselectAdventurer }: 
         >
             <EmptySlot />
             {notEmpty(adventurer) ?
-                <AdventurerCard
+                <AdventurerMiniWithInfo
                     adventurer={adventurer}
                     emoji={displayedEmoji}
                     render={render}
                     displayAPS={true}
+                    units={vh1}
                 />
             : <></> }
         </AdventurerSlotContainer>

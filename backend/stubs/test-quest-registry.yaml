@@ -153,9 +153,9 @@ requirements:
 ---
 
 questId: "quest-19"
-name: ""
+name: "Some Bugged Quest"
 location: "Auristar"
-description: ""
+description: "LOL"
 requirements: 
   aps: [40, 50, 12]
 

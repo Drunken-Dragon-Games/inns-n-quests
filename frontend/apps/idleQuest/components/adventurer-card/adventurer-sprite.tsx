@@ -1,7 +1,7 @@
 import styled, { keyframes } from "styled-components"
-import { notEmpty, PixelArtImage, simpleHash } from "../../../utils"
+import { notEmpty, simpleHash } from "../../../utils"
 import { Adventurer } from "../../dsl/adventurer"
-import { useComputeHeightFromOriginalImage, useRememberLastValue } from "../../utils"
+import { Units, useComputeHeightFromOriginalImage, useRememberLastValue, vmax1, PixelArtImage } from "../../utils"
 
 const emojiMapping = (emoji?: string) => {
     switch (emoji) {
@@ -85,14 +85,14 @@ const grandmasterAdventurerCustomOffer = (adventurer: Adventurer): number => {
 
 export type SpriteRenderOptions = "normal" | "in-challenge" | "selected" | "dead" | "hovered"
 
-const AdventurerSpriteContainer = styled.div<{ height: number, width: number, render: SpriteRenderOptions }>`
+const AdventurerSpriteContainer = styled.div<{ height: number, width: number, render: SpriteRenderOptions, units: Units }>`
     margin-top: auto;
     position: relative;
     display: flex;
     align-items: center;
     flex-direction: column;
-    width: ${props => props.width + 0.2}vmax;
-    height: ${props => props.height}vmax;
+    width: ${props => props.units.u(props.width + 0.2)};
+    height: ${props => props.units.u(props.height)};
 
     ${({ render }) => { switch (render) {
         case "in-challenge":
@@ -139,39 +139,41 @@ const LeavingEmojiAnimation = keyframes`
     100% {opacity: 0; margin-top: -3vmax;}
 `
 
-const EmojiContainer = styled.div<{ $display: boolean, offset: number, scale: number }>`
+const EmojiContainer = styled.div<{ $display: boolean, offset: number, units: Units }>`
     position: absolute;
-    width: ${props => 3.4 * props.scale}vmax;
-    height: ${props => 3.4 * props.scale}vmax;
+    width: ${props => props.units.u(3.4)};
+    height: ${props => props.units.u(3.4)};
     z-index: 100;
     overflow: visible;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: ${props => props.offset}vmax;
+    margin-top: ${props => props.units.u(props.offset)};
     opacity: ${props => props.$display ? 1 : 0};
     animation ${props => props.$display ? EnteringEmojiAnimation : LeavingEmojiAnimation} 1s;
 `
 
 const EmojiBubble = styled(PixelArtImage)`padding-top: 0.3vmax;`
 
-const Emoji = ({ emoji, offset, scale }: { emoji?: string, offset: number, scale: number }) => {
+const Emoji = ({ emoji, offset, units }: { emoji?: string, offset: number, units: Units }) => {
     const lastEmoji = useRememberLastValue(emoji, undefined)
     const renderEmoji = emoji ?? lastEmoji
     return notEmpty(renderEmoji) ? 
-        <EmojiContainer $display={emoji !== undefined} offset={offset} scale={scale}>
+        <EmojiContainer $display={emoji !== undefined} offset={offset} units={units}>
             <EmojiBubble
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"
                 alt="emoji buble"
-                width={3.4 * scale}
-                height={3.4 * scale}
+                width={3.4}
+                height={3.4}
+                units={units}
                 absolute
             />
             <PixelArtImage
                 src={emojiMapping(renderEmoji)}
                 alt="adventurer emoji"
-                width={2.8 * scale}
-                height={2.5 * scale}
+                width={2.8}
+                height={2.5}
+                units={units}
             />
         </EmojiContainer>
     : <></>
@@ -181,11 +183,11 @@ interface AdventurerSpriteProps {
     className?: string
     adventurer: Adventurer
     render?: SpriteRenderOptions
-    scale?: number
     emoji?: string
+    units?: Units
 }
 
-const AdventurerSprite = ({className, adventurer, render = "normal", scale = 1, emoji} : AdventurerSpriteProps) => {
+const AdventurerSprite = ({className, adventurer, render = "normal", emoji, units = vmax1 } : AdventurerSpriteProps) => {
     const [width, offset] =
         adventurer.collection == "pixel-tiles" ? 
             [4.6, -2.5] :
@@ -195,9 +197,9 @@ const AdventurerSprite = ({className, adventurer, render = "normal", scale = 1, 
             adventurerOfThioldenCustomWidthAndOffset(adventurer)
     const height = useComputeHeightFromOriginalImage(adventurer.sprite, width)
     return (
-        <AdventurerSpriteContainer className={className} height={height * scale} width={width * scale} render={render}>
-            <Emoji emoji={emoji} offset={offset} scale={scale} />
-            <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill />
+        <AdventurerSpriteContainer className={className} height={height} width={width} render={render} units={units}>
+            <Emoji emoji={emoji} offset={offset} units={units} />
+            <PixelArtImage src={adventurer.sprite} alt={adventurer.assetRef} fill units={units} />
         </AdventurerSpriteContainer>
     )
 }

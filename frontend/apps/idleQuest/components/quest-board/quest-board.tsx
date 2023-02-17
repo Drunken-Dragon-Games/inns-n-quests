@@ -2,11 +2,10 @@ import styled from "styled-components"
 import { AvailableQuest } from "../../dsl"
 import QuestBoardArea from "./quest-board-area"
 import RefreshButton from "./refresh-button"
-import WorldMap from "./world-map"
 
 const QuestBoardContainer = styled.div`
-    height: 100vh;
-    flex: 1;
+    height: 100%;
+    width: 100%;
     background-color: #523438;
     display: flex;
     position: relative;

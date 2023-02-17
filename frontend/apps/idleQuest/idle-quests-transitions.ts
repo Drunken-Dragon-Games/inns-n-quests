@@ -1,114 +1,116 @@
-import { compose } from "@reduxjs/toolkit"
-import { AxiosError } from "axios"
-import { axiosCustomInstance } from "../../axios/axiosApi"
-import { simpleHash } from "../utils"
+import { useEffect } from "react"
+import { Adventurer, SelectedQuest, takenQuestSecondsLeft } from "./dsl"
+import { InventoryItem } from "./dsl/inventory"
+import { useIdleQuestsKeyMap } from "./idle-quests-key-map"
 import {
-    Adventurer, AvailableQuest, ClaimQuestOutcome, sealTypes, tagAdventurer, tagAvailableQuest,
-    tagTakenQuest, TakenQuest
-} from "./dsl"
-import {
-    addAvailableQuests, addTakenQuest, changeAdventurersInChallenge,
-    idleQuestsStore,
-    IdleQuestsThunk, notify, removeTakenQuest, setInitLoading, setInventory, setTakenQuests,
+    clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, pickAdventurerForQuest, removeAvailableQuest,
+    removeTimedOutNotifications, selectAdventurer, selectQuest, toggleInventory, unPickAdventurerForQuest,
     unselectQuest
 } from "./idle-quests-state"
+import {
+    claimTakenQuest, fetchMintTest, getAdventurers, getAvailableQuests, getInProgressQuests,
+    takeAvailableQuest
+} from "./idle-quests-thunks"
+import { useClockSeconds } from "./utils"
 
-const addVisualQuestData = (quest: any) => {
-    return ({
-        ...quest,
-        seal: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
-        paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
-    })
+export type IdleQuestsStateAndDispatch = {
+    state: IdleQuestsState,
+    dispatch: IdleQuestsDispatch
 }
 
-const addVisualDataToTakenQuests = (quest: any) =>
-    ({ ...quest, quest: addVisualQuestData(quest.quest) })
+export default class IdleQuestsTransitions {
+    
+    static useInitEffects = (snd: IdleQuestsStateAndDispatch) => {
+        // Binds keyboard keys to actions
+        useIdleQuestsKeyMap(snd)
+        // Ensures there is always at least 5 quests available
+        useEffect(() => {
+            if (snd.state.questBoard.availableQuests.length < 5) {
+                snd.dispatch(getAvailableQuests())
+            }
+        }, [snd.state.questBoard.availableQuests.length])
+        // Initial load of adventurers and quests in progress
+        useEffect(() => {
+            snd.dispatch(getAdventurers(true))
+            snd.dispatch(getInProgressQuests())
+        }, [])
+        // Continuous clock (seconds)
+        useClockSeconds((now) => {
+            snd.dispatch(removeTimedOutNotifications(now))
+        })
+    }
 
-export const getAdventurers = (firstLoad: boolean): IdleQuestsThunk => async (dispatch) =>
-    await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
-        dispatch(setInventory(response.data.map(tagAdventurer)))
-        if (firstLoad) 
-            setTimeout(() => dispatch(setInitLoading(false)), 1000)
-    }, 
-    () => dispatch(getAdventurers(firstLoad)))
+    static onToggleInventory = ({ state, dispatch }: IdleQuestsStateAndDispatch) => () => {
+        dispatch(toggleInventory())
+    }
 
-export const getAvailableQuests = (firstTime? : boolean): IdleQuestsThunk => async (dispatch) => 
-    await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/quests').get('/quests/api/quests')
-        const availableQuests = response.data
-            .map(compose(addVisualQuestData, tagAvailableQuest))
-        dispatch(addAvailableQuests(availableQuests))
-    }, 
-    () => dispatch(getAvailableQuests(firstTime)))
+    static onSelectQuest = ({ state, dispatch }: IdleQuestsStateAndDispatch) => (quest: SelectedQuest) => {
+        dispatch(selectQuest(quest))
+        dispatch(toggleInventory())
+    }
 
-export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventurer[]): IdleQuestsThunk  => async (dispatch) =>
-    await withTokenRefresh(async () => {
-        const adventurer_ids = adventurers.map(adventurer => adventurer.adventurerId)
-        const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: quest.questId, adventurer_ids})
-        const takenQuest = tagTakenQuest(addVisualDataToTakenQuests(response.data)) as TakenQuest
-        dispatch(addTakenQuest(takenQuest))
-        dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: true }))
+    static onCloseSelectedQuestAndInventory = ({ state, dispatch }: IdleQuestsStateAndDispatch) => () => {
         dispatch(unselectQuest())
-        dispatch(notify({ message: "Quest accepted", ctype: "info" }))
-    }, 
-    () => dispatch(takeAvailableQuest(quest, adventurers)))
-
-export const getInProgressQuests = (): IdleQuestsThunk => async (dispatch) =>
-    await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/taken-quests').get('/quests/api/taken-quests')  
-        const takenQuests = response.data.map(compose(addVisualDataToTakenQuests, tagTakenQuest))
-        dispatch(setTakenQuests(takenQuests))
-    }, 
-    () => dispatch(getInProgressQuests()))
-
-
-export const claimTakenQuest = (quest: TakenQuest, adventurers: Adventurer[]): IdleQuestsThunk => async (dispatch) =>
-   await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: quest.takenQuestId })
-        const outcome = response.data.outcome as ClaimQuestOutcome
-        dispatch(removeTakenQuest(quest))
-        dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: false }))
-        dispatch(unselectQuest())
-        dispatch(notify({ message: "Quest finished", ctype: "info" }))
-    }, 
-    () => dispatch(claimTakenQuest(quest, adventurers)))
-
-export const fetchMintTest = (): IdleQuestsThunk => async (dispatch) => 
-    await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/mint-test-nft').post('/quests/api/mint-test-nft')
-        dispatch(getAdventurers(false))
-        dispatch(notify({ message: "Adventurer recruited", ctype: "info" }))
-    }, 
-    () => dispatch(fetchMintTest()))
-
-const withTokenRefresh = async (fn: () => Promise<void>, continuation: () => void): Promise<void> => {
-    try { await fn() }
-    catch (err) { 
-        if (await refreshToken(err)) {
-            return continuation()
-        } else if (err instanceof Error) {
-            idleQuestsStore.dispatch(notify({ message: err.message, ctype: "alert" }))
-            throw err 
-        } else {
-            throw err 
+        dispatch(toggleInventory())
+    }
+    
+    static onSignQuest = ({ state, dispatch }: IdleQuestsStateAndDispatch) => (quest: SelectedQuest, adventurers: Adventurer[]) => {
+        if (quest.ctype == "available-quest" && adventurers.length > 0) {
+            dispatch(takeAvailableQuest(quest, adventurers))
+            dispatch(removeAvailableQuest(quest))
+            dispatch(toggleInventory())
+        } else if (quest.ctype == "taken-quest" && takenQuestSecondsLeft(quest) <= 0) {
+            dispatch(claimTakenQuest(quest, adventurers))
         }
     }
-}
 
-async function refreshToken(error: any): Promise<boolean> {
-    const refreshToken = localStorage.getItem("refresh");
-    if(error instanceof AxiosError && error.response?.status == 401 && refreshToken){
-        try {
-            const response = await axiosCustomInstance('/api/refreshSession/').post('/api/refreshSession/', { "fullRefreshToken": refreshToken })
-            localStorage.setItem("refresh", response.data.refreshToken)
-            return true
-        }
-        catch (err) { 
-            if (err instanceof AxiosError)
-                idleQuestsStore.dispatch(notify({ message: err.message, ctype: "alert" }))
-            return false 
-        }
-    } else 
-        return false
+    static onFetchMoreQuests = ({ state, dispatch }: IdleQuestsStateAndDispatch) => () => {
+        dispatch(clearAvailableQuests())
+    }
+
+    static onUnselectAdventurer = ({ state, dispatch }: IdleQuestsStateAndDispatch) => (adventurer: Adventurer) => {
+        dispatch(unPickAdventurerForQuest(adventurer))
+    }
+
+    static onItemClick = ({ state, dispatch }: IdleQuestsStateAndDispatch) => (item: InventoryItem)=> {
+        item.ctype == "adventurer" && 
+        state.questBoard.selectedQuest && 
+        state.questBoard.selectedQuest.ctype === "available-quest" ? 
+            dispatch(pickAdventurerForQuest(item)) :
+
+        item.ctype == "adventurer" && 
+        state.questBoard.selectedQuest && 
+        state.questBoard.selectedQuest.ctype === "taken-quest" ? 
+            (() => { 
+                dispatch(selectAdventurer(item)); 
+                dispatch(unselectQuest()) 
+            })() :
+
+        item.ctype == "adventurer" && 
+        state.questBoard.selectedAdventurer && 
+        state.questBoard.selectedAdventurer.adventurerId === item.adventurerId ?
+            dispatch(selectAdventurer(undefined)) :
+
+        item.ctype == "adventurer" && 
+        !state.questBoard.selectedQuest ?
+            dispatch(selectAdventurer(item)) :
+
+        item.ctype == "taken-quest" && 
+        state.questBoard.selectedQuest && 
+        state.questBoard.selectedQuest.ctype === "taken-quest" && 
+        state.questBoard.selectedQuest.takenQuestId === item.takenQuestId ? 
+            dispatch(unselectQuest()) :
+
+        item.ctype == "taken-quest" ? 
+            (() => { 
+                dispatch(selectQuest(item))
+                dispatch(selectAdventurer(undefined))
+            })() :
+
+        null
+    }
+
+    static onRecruitAdventurer = ({ state, dispatch }: IdleQuestsStateAndDispatch) => () => {
+        dispatch(fetchMintTest())
+    }
 }
