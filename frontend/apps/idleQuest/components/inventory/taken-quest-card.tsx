@@ -1,8 +1,8 @@
 import { useState } from "react"
 import styled from "styled-components"
-import { PixelArtImage } from "../../../utils"
 import { ConditionalRender, TextOswald } from "../../../utils/components/basic_components"
 import { mapQuestScroll, TakenQuest, takenQuestStatus } from "../../dsl"
+import { PixelArtImage } from "../../utils"
 import InventoryBox from "./inventory-box"
 import Timer from "./timer"
 

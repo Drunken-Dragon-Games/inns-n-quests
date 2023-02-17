@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { PixelArtImage } from "../../../utils"
+import { PixelArtImage } from "../../utils"
 
 const LabelComponent = styled.div`
     position: absolute;
