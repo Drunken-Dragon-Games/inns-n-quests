@@ -243,7 +243,6 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             quest: { ...this.makeTakenQuestFromDB(quest), claimedAt: now, outcome },
             adventurers, 
         })
-        console.log(outcome)
         return { status: "ok", outcome }
     }
 

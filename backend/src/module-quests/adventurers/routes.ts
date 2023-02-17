@@ -13,6 +13,6 @@ import { WellKnownPolicies } from "../../registry-policies";
 export const loadAdventurerRoutes = async (database: Sequelize, assetManagementService: AssetManagementService, idleQuestsService: IdleQuestsService, wellKnownPolicies: WellKnownPolicies) => {
     const router = Router();
     const thioldenMetadata = await getAdvofThioldenMetadata()
-    router.get('/adventurers', [syncCardanoWallet(database, assetManagementService, wellKnownPolicies, thioldenMetadata), getAllAdventurers(thioldenMetadata, idleQuestsService)])
+    router.get('/adventurers', /*[syncCardanoWallet(database, assetManagementService, wellKnownPolicies, thioldenMetadata),*/ getAllAdventurers(thioldenMetadata, idleQuestsService))
     return router
 }
