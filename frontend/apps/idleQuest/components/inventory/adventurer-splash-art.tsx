@@ -1,10 +1,11 @@
 import styled from "styled-components"
-import { NoDragImage, PixelArtImage } from "../../../utils"
 import { Adventurer } from "../../dsl"
-import { useComputeHeightFromOriginalImage } from "../../utils"
+import { NoDragImage, PixelArtImage, Units, useComputeHeightFromOriginalImage, vh1 } from "../../utils"
 
-const AdventurerSplashArtContainer = styled.div`
-    filter: drop-shadow(0px 0px 1vmax rgba(0, 0, 0, 0.8));
+const AdventurerSplashArtContainer = styled.div<{ units: Units }>`
+    overflow: hidden;
+    border-radius: ${({units}) => units.u(1)};
+    filter: drop-shadow(0px 0px ${({units}) => units.u(1)} rgba(0, 0, 0, 0.8));
 `
 
 const mapImageSrc = (adventurer: Adventurer) => {
@@ -25,22 +26,24 @@ const mapImageSrc = (adventurer: Adventurer) => {
         return "https://cdn.ddu.gg/adv-of-thiolden/web/abbelka_10_0.webp"
 }
 
-const AdventurerSplashArt = ({ adventurer, scale = 1 }: { adventurer: Adventurer, scale?: number }) => {
-    const baseWidth = 30
+const AdventurerSplashArt = ({ adventurer, units = vh1 }: { adventurer: Adventurer, units?: Units }) => {
+    const baseWidth = 50
     const src = mapImageSrc(adventurer)
     const height = useComputeHeightFromOriginalImage(src, baseWidth)
     return (
-        <AdventurerSplashArtContainer>
+        <AdventurerSplashArtContainer units={units}>
             { adventurer.collection === "adventurers-of-thiolden" ?
             <NoDragImage
                 src={src}
                 alt={ adventurer.name + " splashart" }
-                width={baseWidth * scale} height={height * scale}
+                width={baseWidth} height={height}
+                units={units}
             /> :
             <PixelArtImage
                 src={src}
                 alt={ adventurer.name + " splashart" }
-                width={baseWidth * scale} height={height * scale}
+                width={baseWidth} height={height}
+                units={units}
             /> }
         </AdventurerSplashArtContainer>
     )

@@ -14,7 +14,7 @@ const leaveAnimation = keyframes`
 `
 
 const SnackBar = styled.div`
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 45vw;
     width: 20vw;

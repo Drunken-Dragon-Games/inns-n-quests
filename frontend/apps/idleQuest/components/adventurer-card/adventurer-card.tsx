@@ -1,7 +1,8 @@
 import styled, { keyframes } from "styled-components"
-import { PixelArtImage, notEmpty } from "../../../utils"
+import { notEmpty } from "../../../utils"
 import { TextOswald } from "../../../utils/components/basic_components"
 import { Adventurer } from "../../dsl"
+import { PixelArtImage, Units, vmax1 } from "../../utils"
 import AdventurerSprite, { SpriteRenderOptions } from "./adventurer-sprite"
 
 type ExperienceBarColor = "r" | "g" | "b"
@@ -25,8 +26,8 @@ const AdventurerContainer = styled.div`
     justify-content: center;
 `
 
-const InfoWrapper = styled.div`
-    margin-top: 0.5vmax;
+const InfoWrapper = styled.div<{ units: Units }>`
+    margin-top: ${props => props.units.u(0.5)};
     width: inherit;
 `
 
@@ -41,9 +42,11 @@ const AdventurerSpriteWrapper = styled.div`
     height: 100%;
 `
 
-const APSWrapper = styled.div`
+const APSWrapper = styled.div<{ units: Units }>`
+    width: 100%;
     display: flex;
-    flex-direction: row;
+    gap: ${({units}) => units.u(1)};
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 `
@@ -53,52 +56,35 @@ const ExperienceAnimation = (experience: number) => keyframes`
     100% {width: ${experience}%;}
 `
 
-const ExperienceBar = styled.div<{ $display: boolean, color: ExperienceBarColor }>`
+const ExperienceBar = styled.div<{ $display: boolean, color: ExperienceBarColor, units: Units }>`
+    width: 100%;
     overflow: visible;
     flex: 1;
-    height: 0.3vmax;
+    height: ${props => props.units.u(0.3)};
     background-color: ${props => rgbMapping(props.color, true)}};
     display: ${props => props.$display ? "block" : "none"};
 `
 
-const Experience = styled.div<{ experience: number, animate: boolean, color: ExperienceBarColor }>`
+const Experience = styled.div<{ experience: number, animate: boolean, color: ExperienceBarColor, units: Units }>`
     height: inherit;
     overflow: visible;
     background-color: ${props => rgbMapping(props.color, false)};
     width: ${props => props.experience}%;
     animation: ${props => props.animate ? ExperienceAnimation(props.experience) : "none"} 2s;
     position: relative;
-    filter: drop-shadow(0px 0px 0.2vmax rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0px 0px ${({units}) => units.u(0.2)} rgba(0, 0, 0, 0.5));
     span {
-        filter: drop-shadow(0px 0px 0.2vmax ${props => rgbMapping(props.color, false)});
+        filter: drop-shadow(0px 0px ${({units}) => units.u(0.2)} ${props => rgbMapping(props.color, false)});
         font-family: Oswald;
         position: absolute;
         display: block;
         overflow: visible;
         padding: 0;
-        margin: -1vmax 0 0 0.5vmax;
-        font-size: 1vmax;
+        margin: ${({units}) => units.u(-1)} 0 0 ${({units}) => units.u(0.5)};
+        font-size: ${({units}) => units.u(1)};
         font-weight: bold;
         color: ${props => rgbMapping(props.color, true)};
     }
-`
-
-const MedalWrapper = styled.div<{ $display: boolean }>`
-    position: absolute;
-    background-color: #ca9a3a;
-    width: 2vmax;
-    height: 2vmax;
-    border-radius: 50%;
-    z-index: 3;
-    display: ${props => props.$display ? "flex" : "none"};
-    justify-content: center;
-    align-items: center;
-`
-
-const Medal = styled.span`
-    color: white;
-    font-family: arial;
-    font-size: 0.9vmax;
 `
 
 const DeadMarkAnimation = keyframes`
@@ -109,12 +95,12 @@ const DeadMarkAnimation = keyframes`
     50% {opacity: 1;}
 `
 
-const DeadMark = styled.div <{ $display: boolean }>`
+const DeadMark = styled.div <{ $display: boolean, units: Units }>`
     position: absolute;
-    top: 3vmax;
-    left: 0.5vmax;
-    width: 5vmax;
-    height: 4vmax;
+    top: ${({units}) => units.u(3)};
+    left: ${({units}) => units.u(0.5)};
+    width: ${({units}) => units.u(5)};
+    height: ${({units}) => units.u(4)};
     z-index: 2;
     animation: ${DeadMarkAnimation} 1.2s;
     ${props => props.$display ? "" : "display: none;"}
@@ -127,32 +113,28 @@ interface AdventurerProps {
     displayDeadMark?: boolean,
     displayAPS?: boolean,
     animateAPS?: boolean,
-    medalNumber?: number,
     displayNameColor?: string,
+    units?: Units,
 }
 
-const AdventurerCard = ({ 
+const AdventurerMiniWithInfo = ({ 
     adventurer, 
     emoji, 
     render = "normal", 
     displayDeadMark = false, 
     displayAPS = false, 
     animateAPS = true, 
-    medalNumber,
-    displayNameColor// = "rgb(121, 51, 18)",
+    displayNameColor,// = "rgb(121, 51, 18)",
+    units = vmax1,
 }: AdventurerProps) =>
     <AdventurerContainer>
 
-        <DeadMark $display={displayDeadMark} >
+        <DeadMark $display={displayDeadMark} units={units}>
             <PixelArtImage 
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/chest_mark_fail.png" 
                 alt="fail mark image" 
             />
         </DeadMark>
-
-        <MedalWrapper $display={notEmpty(medalNumber)}>
-            <Medal>{medalNumber}</Medal>
-        </MedalWrapper>
 
         <AdventurerSpriteWrapper>
             <AdventurerSprite
@@ -162,31 +144,28 @@ const AdventurerCard = ({
             />
         </AdventurerSpriteWrapper>
 
-        {/*
-        <InfoWrapper>
+        <InfoWrapper units={units}>
             <NameTitle $display={notEmpty(displayNameColor)}>
                 <TextOswald fontsize={0.8} color={displayNameColor ?? "white"}>{adventurer.name}</TextOswald>
             </NameTitle>
-            <APSWrapper>
-                <ExperienceBar $display={displayAPS} color="r" key="ath">
-                    <Experience experience={adventurer.athleticism * 100 / 10} animate={animateAPS} color="r">
+            <APSWrapper units={units}>
+                <ExperienceBar $display={displayAPS} color="r" key="ath" units={units}>
+                    <Experience experience={adventurer.athleticism * 100 / 10} animate={animateAPS} color="r" units={units}>
                         <span>{adventurer.athleticism}</span>
                     </Experience>
                 </ExperienceBar>
-                <ExperienceBar $display={displayAPS} color="b" key="int">
-                    <Experience experience={adventurer.intellect * 100 / 10} animate={animateAPS} color="b">
+                <ExperienceBar $display={displayAPS} color="b" key="int" units={units}>
+                    <Experience experience={adventurer.intellect * 100 / 10} animate={animateAPS} color="b" units={units}>
                         <span>{adventurer.intellect}</span>
                     </Experience>
                 </ExperienceBar>
-                <ExperienceBar $display={displayAPS} color="g" key="cha">
-                    <Experience experience={adventurer.charisma * 100 / 10} animate={animateAPS} color="g">
+                <ExperienceBar $display={displayAPS} color="g" key="cha" units={units}>
+                    <Experience experience={adventurer.charisma * 100 / 10} animate={animateAPS} color="g" units={units}>
                         <span>{adventurer.charisma}</span>
                     </Experience>
                 </ExperienceBar>
             </APSWrapper>
         </InfoWrapper>
-        */}
-
     </AdventurerContainer>
 
-export default AdventurerCard
+export default AdventurerMiniWithInfo

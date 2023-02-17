@@ -1,23 +1,25 @@
 import styled, { keyframes } from "styled-components"
 import { useEffect, useMemo, useRef } from "react"
 import Signature from "./signature"
-import { notEmpty, PixelArtCss, PixelArtImage } from "../../../utils"
+import { notEmpty } from "../../../utils"
 import AdventurerSlot from "./adventurer-slot"
 import { APS, zeroAPS, sameOrBetterAPS, SelectedQuest, questSeal, Adventurer, 
          takenQuestSecondsLeft, getQuestAPSRequirement, mergeAPSSum, questName, 
          questDescription, 
          mapSealImage} from "../../dsl"
+import { PixelArtCss, PixelArtImage, Push, vh1 } from "../../utils"
 
 const QuestCardContainer = styled.div`
+    box-sizing: border-box;
     position: relative;
+    width: 75vh;
+    height: 85vh;
     display: flex;
-    height: 90vh;
     flex-direction: column;
-    gap: 1.8vmax;
-    padding: 3vmax;
-    width: 44vmax;
+    gap: 1.8vh;
+    padding: 3vh;
     z-index: 20;
-    filter: drop-shadow(0px 0px 1vmax rgba(0, 0, 0, 0.8));
+    filter: drop-shadow(0px 0px 1vh rgba(0, 0, 0, 0.8));
     background: url(https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png);
     background-size: cover;
     ${PixelArtCss}
@@ -26,7 +28,7 @@ const QuestCardContainer = styled.div`
 const QuestInfo = styled.div`
     display: flex;
     flex-direction: row;
-    gap: 2vmax;
+    gap: 2vh;
     width: 100%;
     flex: 1;
 `
@@ -36,7 +38,7 @@ const QuestInfoLeft = styled.div`
     flex: 3;
     display: flex;
     flex-direction: column;
-    gap: 2vmax;
+    gap: 2vh;
 `
 
 const QuestInfoRight = styled.div`
@@ -47,10 +49,10 @@ const QuestInfoRight = styled.div`
 `
 
 const Title = styled.h2`
-    padding-left: 3vmax;
+    padding-left: 4vh;
     text-align: left;
     font-family: VT323;
-    font-size: 1.7vmax;
+    font-size: 3.5vh;
     font-weight: 900;
     color: #793312;
     text-transform: uppercase; 
@@ -61,10 +63,10 @@ const Title = styled.h2`
 const Details = styled.p`
     width: 100%;
     font-family: VT323;
-    font-size: 1.5vmax;
+    font-size: 2vh;
     text-align: justify;
     color: #793312;
-    line-height: 1.5vmax;
+    line-height: 2vh;
     font-weight: 100;
 `
 
@@ -99,11 +101,11 @@ const ExperienceAnimation = (start: number, experience: number) => keyframes`
 `
 
 const ExperienceBar = styled.div<{ $display: boolean, color: ExperienceBarColor, $glow: boolean }>`
-    margin-top: 0.1vmax;
+    margin-top: 0.1vh;
     flex: 1;
-    height: 1.2vmax;
+    height: 1.2vh;
     overflow: hidden;
-    border-radius: 0vmax 1vmax 0vmax 1vmax;
+    border-radius: 0vh 1vh 0vh 1vh;
     background-color: ${props => rgbMapping(props.color, true)}};
     display: ${props => props.$display ? "block" : "none"};
     animation: ${props => props.$glow ? glow : "none"} 1s infinite;
@@ -111,20 +113,20 @@ const ExperienceBar = styled.div<{ $display: boolean, color: ExperienceBarColor,
 
 const Experience = styled.div<{ start: number, experience: number, animate: boolean, color: ExperienceBarColor, $glow: boolean }>`
     height: inherit;
-    border-radius: 0vmax 1vmax 0vmax 1vmax;
+    border-radius: 0vh 1vh 0vh 1vh;
     background-color: ${props => rgbMapping(props.color, false)};
     width: ${props => props.experience}%;
     animation: ${props => props.animate ? ExperienceAnimation(props.start, props.experience) : "none"} 2s;
     position: relative;
-    filter: drop-shadow(0px 0px 0.2vmax rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0px 0px 0.2vh rgba(0, 0, 0, 0.5));
     span {
-        filter: drop-shadow(0px 0px 0.2vmax ${props => rgbMapping(props.$glow ? "y" : props.color, false)});
+        filter: drop-shadow(0px 0px 0.2vh ${props => rgbMapping(props.$glow ? "y" : props.color, false)});
         font-family: Oswald;
         position: absolute;
         display: block;
         padding: 0;
-        margin: -0.4vmax 0 0 0.4vmax;
-        font-size: 1.3vmax;
+        margin: -0.4vh 0 0 0.4vh;
+        font-size: 1.3vh;
         font-weight: bold;
         color: ${props => rgbMapping(props.$glow ? "y" : props.color, true)};
     }
@@ -163,28 +165,26 @@ const APSReq = ({ apsRequired, apsAccumulated }: { apsRequired: APS, apsAccumula
 const AdventurersWrapper = styled.div`
     width: 100%;
     display: flex;
-    gap: 1vmax;
+    gap: 1vh;
     flex-direction: row;
 `
 
-const SealImage = styled(PixelArtImage)`
-    right: 3vmax;
-    bottom: 3vmax;
-    z-index: -1;
+const SealImage = styled.div<{ offset: number }>`
+    margin-top: ${props => props.offset}vh;
 `
 
 const Footer = styled.div`
     width: 100%;
     display: flex;
     flex-direction: row;
-    height: 4.5vmax;
+    height: 10vh;
 `
 
 interface QuestPaperTakenState {
     signatureType: "in-progress" | "finished" | "available-no-adventurers" | "available"
     apsRequired: APS
     apsAccumulated: APS
-    sealImage: { src: string, width: number, height: number }
+    sealImage: { src: string, width: number, height: number, offset: number }
 }
 
 const useQuestCardState = (quest: SelectedQuest, adventurerSlots: (Adventurer | null)[]): QuestPaperTakenState => 
@@ -224,41 +224,44 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onUnselectAdvent
                 <QuestInfoLeft>
                     <Title>{questName(quest)}</Title>
                     <Details dangerouslySetInnerHTML={{ __html: questDescription(quest) }} />
+                    <Push />
+                    <AdventurersWrapper>
+                        {adventurerSlots.map((adventurer, index) =>
+                            <AdventurerSlot
+                                key={"adventurer-slot-" + index}
+                                adventurer={adventurer}
+                                onUnselectAdventurer={quest?.ctype === "available-quest" ? onUnselectAdventurer : undefined}
+                            />
+                        )}
+                    </AdventurersWrapper>
                 </QuestInfoLeft>
 
                 <QuestInfoRight>
                     <PixelArtImage
                         src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg"
                         alt="quest monster"
-                        width={15} height={15}
+                        width={20} height={20}
+                        units={vh1}
                     />
                     <APSReq apsAccumulated={state.apsAccumulated} apsRequired={state.apsRequired} />
                 </QuestInfoRight>
             </QuestInfo>
-
-            <AdventurersWrapper>
-                {adventurerSlots.map((adventurer, index) =>
-                    <AdventurerSlot
-                        key={"adventurer-slot-" + index}
-                        adventurer={adventurer}
-                        onUnselectAdventurer={quest?.ctype === "available-quest" ? onUnselectAdventurer : undefined}
-                    />
-                )}
-            </AdventurersWrapper>
 
             <Footer>
                 <Signature
                     signatureType={state.signatureType}
                     onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest, adventurerSlots.filter(notEmpty))}
                 />
-
-                <SealImage
-                    src={state.sealImage.src}
-                    alt="quest seal"
-                    width={state.sealImage.width}
-                    height={state.sealImage.height}
-                    absolute
-                />
+                <Push/>
+                <SealImage offset={state.sealImage.offset}>
+                    <PixelArtImage
+                        src={state.sealImage.src}
+                        alt="quest seal"
+                        width={state.sealImage.width}
+                        height={state.sealImage.height}
+                        units={vh1}
+                    />
+                </SealImage>
             </Footer>
         </QuestCardContainer>
     )

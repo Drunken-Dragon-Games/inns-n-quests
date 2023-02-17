@@ -17,31 +17,34 @@ const closeAnimation = keyframes`
 `
 
 const InventoryContainer =styled.div<{ open: boolean }>`
-    width: 100vw;
-    height: 100vh;
     position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
     background-color: rgba(20,20,20,0.5);
     backdrop-filter: blur(5px);
-    z-index: 10;
-    ${props => props.open ? "top: 0;" : "top: -100vh;"}
+    ${props => props.open ? "top: 0;" : "top: -100vh;"}i
     opacity: ${props => props.open ? "1" : "0"};
     animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 `
 
+const Header = styled(DragonSilverDisplay)`
+    height: 5%;
+`
+
 const InventoryBody = styled.div<{ open: boolean }>`
+    height: 95%;
     width: 100%;
-    height: 100%;
     display: flex;
     opacity: ${props => props.open ? "1" : "0"};
 `
 
 const ActivityContainer = styled.div`
+    box-sizing: border-box;
+    padding: 2vw;
+    height: 100%;
     flex: 1;
-    display: inline-flex;
-    padding: 2vh 0;
+    display: flex;
     align-items: center;
     justify-content: center;
 `
@@ -65,7 +68,7 @@ const Inventory = (props: InventoryProps) => {
     const [page, setPage] = useState<TabNames>("inventory")
     return(
         <InventoryContainer open={props.open}>
-            <DragonSilverDisplay 
+            <Header
                 dragonSilver={props.dragonSilver}
                 dragonSilverToClaim={props.dragonSilverToClaim}
                 onClickClose={props.onClickClose}

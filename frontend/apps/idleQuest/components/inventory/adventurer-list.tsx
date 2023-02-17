@@ -1,7 +1,7 @@
 import styled from "styled-components"
 import { useState } from "react"
 import { Adventurer, SelectedQuest } from "../../dsl"
-import AdventurerCard from "../adventurer-card/adventurer-card"
+import AdventurerMiniWithInfo from "../adventurer-card/adventurer-card"
 import { notEmpty } from "../../../utils"
 import InventoryBox from "./inventory-box"
 
@@ -82,10 +82,9 @@ const AdventurerCardWrapper = ({ adventurer, adventurerSlots, selectedQuest, onA
             onMouseLeave={() => setHovering(false)}
             interactuable={interactuable}
         >
-            <AdventurerCard
+            <AdventurerMiniWithInfo
                 key={adventurer.adventurerId}
                 adventurer={adventurer}
-                medalNumber={slotIndex === 0 ? undefined : slotIndex}
                 displayAPS={true}
                 render={render}
                 emoji={emoji}

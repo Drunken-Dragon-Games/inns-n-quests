@@ -1,13 +1,17 @@
 import { useMemo, useState } from "react"
 import styled from "styled-components"
-import { PixelArtImage } from "../../../utils"
-import { Adventurer, mapQuestScroll, SelectedQuest, TakenQuest, takenQuestTimeLeft } from "../../dsl"
+import { Adventurer, AdventurerCollection, mapQuestScroll, SelectedQuest, TakenQuest, takenQuestTimeLeft } from "../../dsl"
 import { InventoryItem } from "../../dsl/inventory"
+import { PixelArtImage, vmax } from "../../utils"
 import AdventurerSprite from "../adventurer-card/adventurer-sprite"
 import InventoryBox from "./inventory-box"
 
 const InventoryBrowserContainer = styled.div`
-    padding: 0.5vmax;
+    box-sizing: border-box;
+    margin: 0.5vmax;
+    padding-left: 0.5vmax;
+    height: calc(100% - 1vmax);
+    width: 36vw;
     
     direction: rtl;
     overflow-x: hidden;
@@ -56,12 +60,14 @@ const ItemBox = styled(InventoryBox)`
     height: 8vmax;
 `
 
+const ItemBoxWrapper = styled.div<{ collection: AdventurerCollection }>`
+`
+
 type InventoryItemViewState = [string | undefined, boolean | undefined, boolean | undefined]
 
 const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItemViewState => {
     const [info, selected, disabled] = useMemo(() => {
         const item = props.item
-        const selectedQuest = props.selectedQuest?.ctype
         if (item && item.ctype === "adventurer") {
             return [
                 // info
@@ -70,7 +76,9 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
                 props.adventurerSlots?.some((a) => a && a.adventurerId === item.adventurerId) ||
                 props.selectedAdventurer?.adventurerId === item.adventurerId,
                 // disabled
-                props.selectedQuest && props.selectedQuest.ctype === "available-quest" && item.inChallenge
+                props.selectedQuest && 
+                props.selectedQuest.ctype === "available-quest" && 
+                item.inChallenge
             ]
         } else if (item && item.ctype === "taken-quest") {
             return [
@@ -105,7 +113,7 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
     const [info, selected, disabled] = useInventoryItemViewState(props)
     return (
         <ItemBox
-            onClick={() => props.onItemClick && props.item && props.onItemClick(props.item)}
+            onClick={() => !disabled && props.onItemClick && props.item && props.onItemClick(props.item)}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
             selected={selected}
@@ -118,7 +126,7 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
             <AdventurerSprite
                 adventurer={props.item}
                 emoji={hover ? props.item.adventurerId : undefined}
-                scale={0.7}
+                units={vmax(0.7)}
             /> :
         props.item?.ctype === "taken-quest" ? 
             <PixelArtImage

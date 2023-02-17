@@ -40,23 +40,24 @@ export type Reward = {
     apsExperience?: APS 
 }
 
-export const mapSealImage = (quest: SelectedQuest): { src: string, width: number, height: number } => {
+export const mapSealImage = (quest: SelectedQuest): { src: string, width: number, height: number, offset: number } => {
+    const scale = 1.8
     switch (questSeal(quest)) {
         case "heroic-quest": return { 
             src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/heroic_quest_big.png",
-            width: 6, height: 9
+            width: 6 * scale, height: 9 * scale, offset: 0
         }
         case "kings-plea": return {
             src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/kings_plea_big.png",
-            width: 9, height: 9.5
+            width: 9 * scale, height: 9.5 * scale, offset: 0
         }
         case "valiant-adventure": return {
             src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/valiant_adventure_big.png",
-            width: 6, height: 6
+            width: 6 * scale, height: 6 * scale, offset: 0
         }
         default: return {
             src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/townsfolk_big.png",
-            width: 8, height: 3
+            width: 8 * scale, height: 3 * scale, offset: 4.5
         }
     }
 }
