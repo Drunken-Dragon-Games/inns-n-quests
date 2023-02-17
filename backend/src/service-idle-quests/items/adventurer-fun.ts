@@ -1,10 +1,11 @@
-import Random from "../../tools-utils/random"
+import { Op, Sequelize, Transaction } from "sequelize"
 import { MetadataRegistry } from "../../registry-metadata"
-import { Adventurer, AdventurerClass, AdventurerCollection, APS, Race } from "../models"
-import { AdventurerDB } from "./adventurer-db"
 import { WellKnownPolicies } from "../../registry-policies"
 import { Inventory } from "../../service-asset-management"
-import { Op, Transaction } from "sequelize"
+import Random from "../../tools-utils/random"
+import { Adventurer, AdventurerClass, AdventurerCollection, APS, Race, Reward } from "../models"
+import { AdventurerDB } from "./adventurer-db"
+import { individualXPReward } from "./adventurer-equations"
 
 export const apsSum = (aps: APS): number =>
     aps.athleticism + aps.intellect + aps.charisma
@@ -134,6 +135,16 @@ export default class AdventurerFun {
             }
         }
 
+        const adventurerName = (adventurer: AdventurerCreationData): string => {
+            if (adventurer.collection == "adventurers-of-thiolden") {
+                const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
+                const name = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
+                return name.charAt(0).toUpperCase() + name.slice(1)
+            } else {
+                return adventurer.assetRef
+            }
+        }
+
         const createdAdventurers: AdventurerDB[] = await AdventurerDB.bulkCreate(adventurersToCreate.flatMap(adventurer =>
             [...Array(adventurer.quantity)].map(() => {
                 const aps = adventurerAPS(adventurer)
@@ -141,7 +152,7 @@ export default class AdventurerFun {
                     userId,
                     assetRef: adventurer.assetRef,
                     collection: adventurer.collection,
-                    name: adventurer.assetRef,
+                    name: adventurerName(adventurer),
                     class: adventurerClass(adventurer),
                     race: adventurerRace(adventurer),
                     hp: 1,
@@ -286,5 +297,20 @@ export default class AdventurerFun {
         })
 
         return withSprites
+    }
+
+    async levelUpAdventurers(adventurers: Adventurer[], reward: Reward, transaction?: Transaction): Promise<void> {
+        if (!reward.apsExperience) return
+        const updateData = individualXPReward(adventurers, reward.apsExperience).map(([adventurer, xp]) => ({
+            ...adventurer,
+            athXP: xp.athleticism + adventurer.athXP, 
+            intXP: xp.intellect + adventurer.intXP,
+            chaXP: xp.charisma + adventurer.chaXP
+        }))
+        try {
+        await AdventurerDB.bulkCreate(updateData, { updateOnDuplicate: ["athXP", "intXP", "chaXP"], transaction })
+        } catch (e) {
+            console.log(e)
+            throw e }
     }
 }

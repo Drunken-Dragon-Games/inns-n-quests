@@ -14,6 +14,9 @@ export class AdventurerDB extends Model implements Adventurer {
     declare athleticism: number
     declare intellect: number
     declare charisma: number
+    declare athXP: number
+    declare intXP: number
+    declare chaXP: number
 }
 
 export const AdventurerDBTableName = "idle_quests_adventurers"
@@ -77,6 +80,21 @@ export const AdventurerDBTableAttributes = {
     charisma: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    athXP: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
+    intXP: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
+    chaXP: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
     },
 }
 

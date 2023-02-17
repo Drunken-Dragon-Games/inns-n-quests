@@ -1,7 +1,7 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from '@reduxjs/toolkit'
 import { combineReducers } from "redux"
 import { v4 as uuidv4 } from 'uuid'
-import { Adventurer, AppNotification, AvailableQuest, SelectedQuest, TakenQuest } from './dsl'
+import { Adventurer, AppNotification, AvailableQuest, individualXPReward, Outcome, SelectedQuest, tagRealAPS, TakenQuest } from './dsl'
 
 const sortAdventurers = (adventurers: Adventurer[]) => {
     return adventurers.sort((a, b) => {
@@ -135,6 +135,35 @@ const questBoardState = createSlice({
             state.adventurers = sortAdventurers(state.adventurers)
         },
 
+        claimQuestOutcome: (state, action: PayloadAction<{ adventurers: Adventurer[], outcome: Outcome, takenQuest: TakenQuest }>) => {
+            const outcome = action.payload.outcome
+            const adventurers = action.payload.adventurers
+            if (state.selectedQuest && state.selectedQuest.ctype === "taken-quest" && state.selectedQuest.takenQuestId === action.payload.takenQuest.takenQuestId)
+                state.selectedQuest.claimedAt = new Date().toISOString()
+            if (outcome.ctype === "success-outcome" && outcome.reward.apsExperience) {
+                const individualXP = individualXPReward(adventurers, outcome.reward.apsExperience)
+                state.adventurers = state.adventurers.map(adventurer => {
+                    const inParty = action.payload.adventurers.find((actionAdventurer) => 
+                        actionAdventurer.adventurerId == adventurer.adventurerId)
+                    if (inParty) {
+                        return tagRealAPS({
+                            ...inParty, 
+                            inChallenge: false,
+                            athXP: inParty.athXP + individualXP[inParty.adventurerId].athleticism,
+                            intXP: inParty.intXP + individualXP[inParty.adventurerId].intellect,
+                            chaXP: inParty.chaXP + individualXP[inParty.adventurerId].charisma,
+                        }) as Adventurer
+                    } else {
+                        return adventurer
+                    }
+                })
+                state.adventurerSlots = state.adventurerSlots.map(adventurer => {
+                    if (!adventurer) return adventurer
+                    return state.adventurers.find(a => a.adventurerId === adventurer.adventurerId)!
+                })
+            }
+        },
+
         selectAdventurer: (state, action: PayloadAction<Adventurer | undefined>) => {
             state.selectedAdventurer = action.payload
         },
@@ -157,6 +186,7 @@ export const {
     unPickAdventurerForQuest,
     clearSelectedAdventurers,
     changeAdventurersInChallenge,
+    claimQuestOutcome,
     selectAdventurer,
 } = questBoardState.actions
 
