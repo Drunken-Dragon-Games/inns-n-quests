@@ -56,18 +56,11 @@ beforeAll(async () => {
         wellKnownPolicies: wellKnownPoliciesMainnet
     }
     service = await IdleQuestsServiceDsl.loadFromConfig(idleQuestsServiceConfig, idleQuestServiceDependencies)
+    await service.loadDatabaseModels()
 })
 
 afterAll(async () => {
     await database.close()
-})
-
-beforeEach(async () => {
-    await service.loadDatabaseModels()
-})
-
-afterEach(async () => {
-    await service.unloadDatabaseModels()
 })
 
 test("health endpoint", async () => {

@@ -1,5 +1,5 @@
 import { Adventurer } from "./adventurer"
-import { TakenQuest, AvailableQuest, Reward } from "./quest"
+import { TakenQuest, AvailableQuest, Outcome } from "./quest"
 
 export type GetAllAdventurersResult 
     = { status: "ok", adventurers: Adventurer[] }
@@ -16,12 +16,8 @@ export type GetAvailableQuestsResult
 export type GetTakenQuestsResult
     = { status: "ok", quests: TakenQuest[] }
 
-export type ClaimQuestOutcome
-    = { status: "success", reward: Reward }
-    | { status: "failure", deadAdventurers: Adventurer[] }
-
 export type ClaimQuestResult
-    = { status: "ok", outcome: ClaimQuestOutcome }
+    = { status: "ok", outcome: Outcome }
     | { status: "unknown-quest" }
     | { status: "quest-already-claimed" }
     | { status: "quest-not-finished" }

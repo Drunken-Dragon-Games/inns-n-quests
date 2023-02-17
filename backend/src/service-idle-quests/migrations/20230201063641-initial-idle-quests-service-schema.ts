@@ -24,6 +24,7 @@ export const up: MigrationFun = async ({ context: query }) => {
 }
 
 export const down: MigrationFun = async ({ context: query }) => {
-  await query.dropTable(AdventurerDBTableName)
-  await query.dropTable(TakenQuestDBTableName)
+  const options = { cascade: true, force: true }
+  await query.dropTable(AdventurerDBTableName, options)
+  await query.dropTable(TakenQuestDBTableName, options)
 }

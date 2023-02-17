@@ -1,3 +1,4 @@
+import { realAPS } from "../items/adventurer-equations"
 import { apsSum } from "../items/adventurer-fun"
 import { Adventurer, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, SuccessBonusRequirement, OrRequirement, QuestRequirement, Reward, EmptyRequirement, NotRequirement, AdventurerClass } from "../models"
 import { apsReward, AssetRewards, bestReward, mergeRewards } from "./quest-reward"
@@ -207,10 +208,11 @@ export function baseSuccessRate(requirement: QuestRequirement, inventory: Advent
 
         const adventurersAPSSum = (inventory: Adventurer[]): { athleticism: number, intellect: number, charisma: number } => {
             return inventory.reduce((acc, item) => {
+                const { athleticism, intellect, charisma } = realAPS(item)
                 return {
-                    athleticism: acc.athleticism + item.athleticism,
-                    intellect: acc.intellect + item.intellect,
-                    charisma: acc.charisma + item.charisma,
+                    athleticism: acc.athleticism + athleticism,
+                    intellect: acc.intellect + intellect,
+                    charisma: acc.charisma + charisma,
                 }
             }, { athleticism: 0, intellect: 0, charisma: 0 })
         }
@@ -278,9 +280,9 @@ export class RewardCalculator {
                     charisma: requirement.charisma,
                 }) * this.rewardFactor).toString())
             const experienceReward = apsReward({
-                athleticism: requirement.athleticism * 0.1 * this.rewardFactor,
-                intellect: requirement.intellect * 0.1 * this.rewardFactor,
-                charisma: requirement.charisma * 0.1 * this.rewardFactor,
+                athleticism: requirement.athleticism * 100 * this.rewardFactor,
+                intellect: requirement.intellect * 100 * this.rewardFactor,
+                charisma: requirement.charisma * 100 * this.rewardFactor,
             })
             return mergeRewards(dragonSilverReward, experienceReward)
         }

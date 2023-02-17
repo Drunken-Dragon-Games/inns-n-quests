@@ -2,6 +2,22 @@ import { useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { PixelFontFamily } from "./components/common-css"
 
+const date = "17 Feb 2023"
+
+const notes = [
+    "* Press 'B' to toggle the inventory. (Icons and buttons pending).",
+    "* Now you can click on the adventurers to see their splash art, soon we will display stats there as well.",
+    "* A first IV/EV system is implemented.",
+    "APS xp is split between the party evenly, but the individual xp is affected by the APS Initial Value (IV).",
+    "A 10/10/10 will get full XP benefit, a 1/1/1 only 10% of his share of XP.",
+    "The displayed APS is the Effort Value (EV).",
+    "Right now quests XP reward is its APS x 100.",
+    "The XP needed to level up a Stat follows a logarithmic curve. (The higher the level the harder is to level up).",
+    "Death mechanics are still to be implemented.",
+    "Thank you for testing Idle Quests!",
+    "- Vledic"
+]
+
 const openAnimation = keyframes`
     0% { opacity: 0; }
     100% { opacity: 1; }
@@ -68,14 +84,6 @@ const AlphaNote = styled.div`
     font-size: 1.2vmax;
 `
 
-const notes = [
-    "* Press 'B' to open the inventory. (Icons and buttons pending).",
-    "* Now you can click on the adventurers to see their splash art, soon we will display stats there as well.",
-    "* An IV/EV system is still on the works.",
-    "Thank you for testing Idle Quests!",
-    "- Vledic"
-]
-
 const AlphaNotes = () => {
     const [open, setOpen] = useState(true)
     return (
@@ -85,7 +93,7 @@ const AlphaNotes = () => {
                 <Push/>
                 <Close onClick={() => setOpen(false)}>X</Close>
             </AlphaNotesHeader>
-            <AlphaNotesDate>16 Feb 2023</AlphaNotesDate>
+            <AlphaNotesDate>{date}</AlphaNotesDate>
             <AlphaNotesContent>
             {notes.map((note, index) => 
                 <AlphaNote key={index}>{note}</AlphaNote>

@@ -10,7 +10,7 @@ const durationCalculator = new DurationCalculator()
 
 const adventurer = (advClass: AdventurerClass, athleticism: number, intellect: number, charisma: number): Adventurer => ({
     adventurerId: "", userId: "", name: "", class: advClass, race: "human", collection: "pixel-tiles", assetRef: "",
-    hp: 1, athleticism, intellect, charisma,
+    hp: 1, athleticism, intellect, charisma, athXP: 0, intXP: 0, chaXP: 0
 })
 
 test("Basic requirement calculations 1", () => {
@@ -30,9 +30,9 @@ test("Basic requirement calculations 1", () => {
             }
         ],
         "apsExperience": {
-            "athleticism": 1,
-            "intellect": 1,
-            "charisma": 1
+            "athleticism": 1000,
+            "intellect": 1000,
+            "charisma": 1000
         }
     }
     expect(reward).toStrictEqual(expectedReward)

@@ -71,7 +71,7 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
         if (item && item.ctype === "adventurer") {
             return [
                 // info
-                `${item.athleticism}/${item.intellect}/${item.charisma}`,
+                `${item.realATH}/${item.realINT}/${item.realCHA}`,
                 // selected
                 props.adventurerSlots?.some((a) => a && a.adventurerId === item.adventurerId) ||
                 props.selectedAdventurer?.adventurerId === item.adventurerId,

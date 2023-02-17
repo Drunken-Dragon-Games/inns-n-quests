@@ -203,39 +203,48 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      */
     async claimQuestResult(userId: string, takenQuestId: string): Promise<ClaimQuestResult> {
         const quest = await runningQuestsDB.TakenQuestDB.findOne({ where: { userId, takenQuestId } })
+        // Check quest exists
         if (!quest) 
             return { status: "unknown-quest" }
+        // Check quest is not already claimed
         if (quest.claimedAt !== null)
             return { status: "quest-already-claimed" }
         const requirements = this.questsRegistry[quest.questId].requirements
         const duration = this.durationCalculator.baseDuration(requirements)
         const now = this.calendar.now()
+        // Check quest is finished
         if (quest.createdAt.getTime() + duration > now.getTime()) 
             return { status: "quest-not-finished" }
         const transaction = await this.database.transaction()
         const adventurers = await this.adventurerFun.unsetInChallenge(userId, quest.adventurerIds, transaction)
         const missing = adventurers.map(a => a.adventurerId!).filter(item => quest.adventurerIds.indexOf(item) < 0)
+        // Check all adventurers are still in the inventory
         if (missing.length !== 0) {
             await transaction.rollback()
             return { status: "missing-adventurers", missing }
         }
         const successRate = baseSuccessRate(requirements, adventurers)
         const success = this.random.randomNumberBetween(1, 100) <= Math.floor(successRate * 100)
+        // Outcome data
         const outcome: Outcome = success 
             ? { ctype: "success-outcome", reward: this.rewardCalculator.baseReward(requirements) } 
             : { ctype: "failure-outcome", hpLoss: [] }
+        // If success, level up adventurers
+        if (outcome.ctype == "success-outcome") 
+            await this.adventurerFun.levelUpAdventurers(adventurers, outcome.reward, transaction)
+        // Check if any adventurer died
+        // TODO
+        // Claim quest
         await quest.update({ claimedAt: now, outcome }, { transaction })
         await transaction.commit()
+        // Publish event to eventstats
         this.evenstatsService.publish({
             ctype: "claimed-quest-event",
             quest: { ...this.makeTakenQuestFromDB(quest), claimedAt: now, outcome },
             adventurers, 
         })
-        if (success) {
-            return { status: "ok", outcome }
-        } else {
-            return { status: "ok", outcome }
-        }
+        console.log(outcome)
+        return { status: "ok", outcome }
     }
 
     async module_getAllAdventurers(userId: string): Promise<object[]> {
@@ -258,7 +267,6 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     async module_claimQuestResult(userId: string, questId: string): Promise<object> {
         const result = await this.claimQuestResult(userId, questId)
-        if (result.status != "unknown-quest") return { "status": "error", "error": result.status } 
         return { ...result }
     }
 

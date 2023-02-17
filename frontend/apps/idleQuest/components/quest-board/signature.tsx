@@ -29,7 +29,7 @@ const SignatureImage = style(PixelArtImage)`
 `
 
 interface Signature {
-    signatureType: "in-progress" | "finished" | "available-no-adventurers" | "available"
+    signatureType: "in-progress" | "finished" | "claimed" | "available-no-adventurers" | "available"
     onClick?: React.MouseEventHandler<HTMLDivElement> & React.MouseEventHandler<HTMLButtonElement>,
 }
 
@@ -59,7 +59,7 @@ const Signature = ({ signatureType, onClick }: Signature) => {
                 <p>Complete quest</p>
             </SignatureContainer>
         )
-    else //signatureType == "in-progress"
+    else if (signatureType == "in-progress")
         return (
             <SignatureContainer>
                 <Background />
@@ -69,6 +69,13 @@ const Signature = ({ signatureType, onClick }: Signature) => {
                     width={12} height={3} 
                     absolute
                 />
+            </SignatureContainer>
+        )
+    else 
+        return (
+            <SignatureContainer onClick={onClick} onMouseLeave={() => setOnHover(false)} onMouseOver={() => setOnHover(true)} hover={hover} interactuable glow>
+                <Background />
+                <p>Close quest</p>
             </SignatureContainer>
         )
 }

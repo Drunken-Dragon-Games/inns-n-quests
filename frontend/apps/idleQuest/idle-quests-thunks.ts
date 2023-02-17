@@ -3,11 +3,13 @@ import { AxiosError } from "axios"
 import { axiosCustomInstance } from "../../axios/axiosApi"
 import { simpleHash } from "../utils"
 import {
-    Adventurer, AvailableQuest, ClaimQuestOutcome, sealTypes, tagAdventurer, tagAvailableQuest,
+    Adventurer, AvailableQuest, Outcome, sealTypes, tagAdventurer, tagAvailableQuest,
+    tagRealAPS,
     tagTakenQuest, TakenQuest
 } from "./dsl"
 import {
     addAvailableQuests, addTakenQuest, changeAdventurersInChallenge,
+    claimQuestOutcome,
     idleQuestsStore,
     IdleQuestsThunk, notify, removeTakenQuest, setInitLoading, setInventory, setTakenQuests,
     unselectQuest
@@ -27,7 +29,7 @@ const addVisualDataToTakenQuests = (quest: any) =>
 export const getAdventurers = (firstLoad: boolean): IdleQuestsThunk => async (dispatch) =>
     await withTokenRefresh(async () => {
         const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
-        dispatch(setInventory(response.data.map(tagAdventurer)))
+        dispatch(setInventory(response.data.map(compose(tagRealAPS, tagAdventurer))))
         if (firstLoad) 
             setTimeout(() => dispatch(setInitLoading(false)), 1000)
     }, 
@@ -63,16 +65,15 @@ export const getInProgressQuests = (): IdleQuestsThunk => async (dispatch) =>
     () => dispatch(getInProgressQuests()))
 
 
-export const claimTakenQuest = (quest: TakenQuest, adventurers: Adventurer[]): IdleQuestsThunk => async (dispatch) =>
+export const claimTakenQuest = (takenQuest: TakenQuest, adventurers: Adventurer[]): IdleQuestsThunk => async (dispatch) =>
    await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: quest.takenQuestId })
-        const outcome = response.data.outcome as ClaimQuestOutcome
-        dispatch(removeTakenQuest(quest))
-        dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: false }))
-        dispatch(unselectQuest())
+        const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: takenQuest.takenQuestId })
+        const outcome = response.data.outcome as Outcome
+        dispatch(removeTakenQuest(takenQuest))
+        dispatch(claimQuestOutcome({ adventurers, outcome, takenQuest }))
         dispatch(notify({ message: "Quest finished", ctype: "info" }))
     }, 
-    () => dispatch(claimTakenQuest(quest, adventurers)))
+    () => dispatch(claimTakenQuest(takenQuest, adventurers)))
 
 export const fetchMintTest = (): IdleQuestsThunk => async (dispatch) => 
     await withTokenRefresh(async () => {

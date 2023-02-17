@@ -59,6 +59,8 @@ export default class IdleQuestsTransitions {
             dispatch(takeAvailableQuest(quest, adventurers))
             dispatch(removeAvailableQuest(quest))
             dispatch(toggleInventory())
+        } else if (quest.ctype == "taken-quest" && quest.claimedAt) {
+            dispatch(unselectQuest())
         } else if (quest.ctype == "taken-quest" && takenQuestSecondsLeft(quest) <= 0) {
             dispatch(claimTakenQuest(quest, adventurers))
         }

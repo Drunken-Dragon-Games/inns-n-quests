@@ -21,6 +21,9 @@ export interface Adventurer {
     athleticism: number,
     intellect: number,
     charisma: number,
+    athXP: number,
+    intXP: number,
+    chaXP: number,
 }
 
 export type APS = {

@@ -181,7 +181,7 @@ const Footer = styled.div`
 `
 
 interface QuestPaperTakenState {
-    signatureType: "in-progress" | "finished" | "available-no-adventurers" | "available"
+    signatureType: "in-progress" | "finished" | "claimed" | "available-no-adventurers" | "available"
     apsRequired: APS
     apsAccumulated: APS
     sealImage: { src: string, width: number, height: number, offset: number }
@@ -192,6 +192,7 @@ const useQuestCardState = (quest: SelectedQuest, adventurerSlots: (Adventurer | 
         signatureType: 
             quest.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
             quest.ctype == "available-quest" ? "available-no-adventurers" : 
+            quest.ctype == "taken-quest" && quest.claimedAt ? "claimed" :
             quest.ctype == "taken-quest" && takenQuestSecondsLeft(quest) <= 0 ? "finished" : 
             "in-progress",
         apsRequired: 
