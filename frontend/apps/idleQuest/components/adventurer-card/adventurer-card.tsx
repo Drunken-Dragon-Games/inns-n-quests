@@ -141,6 +141,7 @@ const AdventurerMiniWithInfo = ({
                 adventurer={adventurer}
                 render={render}
                 emoji={emoji}
+                units={units.scaleBy(1.5)}
             />
         </AdventurerSpriteWrapper>
 

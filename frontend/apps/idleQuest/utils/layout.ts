@@ -14,6 +14,10 @@ export class Units {
         if (amount) return `${amount * this.scale}${this.units}`
         else return ""
     }
+
+    public scaleBy(scale: number): Units {
+        return new Units(this.units, this.scale * scale)
+    }
 }
 
 export const vmax = (scale: number) => new Units("vmax", scale)
