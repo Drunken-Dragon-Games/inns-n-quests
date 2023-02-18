@@ -23,6 +23,12 @@ export interface Adventurer {
     realCHA: number,
 }
 
+export type AdventurerParty = {
+    partyId: string,
+    adventurers: Adventurer[],
+    location: [number, number],
+}
+
 export type Race = "human" | "elf" | "tiefling" | "dragonkin" | "worgenkin" | "undead" | "viera" | "troll" | "vulkin" | "orc" | "tauren"
 
 export const races = ["human", "elf", "tiefling", "dragonkin", "worgenkin", "undead", "viera", "troll", "vulkin", "orc", "tauren"]

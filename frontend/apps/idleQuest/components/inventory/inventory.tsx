@@ -2,7 +2,6 @@ import { useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { Adventurer, SelectedQuest, TakenQuest } from "../../dsl"
 import { InventoryItem } from "../../dsl/inventory"
-import { TabNames } from "./console-tabs"
 import DragonSilverDisplay from "./dragon-silver-display"
 import InventoryBrowser from "./inventory-browser"
 
@@ -65,7 +64,7 @@ interface InventoryProps {
 }
 
 const Inventory = (props: InventoryProps) => {
-    const [page, setPage] = useState<TabNames>("inventory")
+    //const [page, setPage] = useState<TabNames>("inventory")
     return(
         <InventoryContainer className={props.className} open={props.open}>
             <Header

@@ -1,5 +1,5 @@
 import { MouseEventHandler, useEffect, useState } from "react"
-import { px1, Units } from "../utils"
+import { px1, Units } from "../../utils"
 
 export type WorldMap = {
     name: string

@@ -1,5 +1,5 @@
 import { Provider } from "react-redux"
-import { idleQuestsStore } from "./state/idle-quests-state"
+import { idleQuestsStore } from "./idle-quests-state"
 import IdleQuestsView from "./idle-quests-view"
 
 const IdleQuestsApp = () =>

@@ -3,17 +3,17 @@ import { AxiosError } from "axios"
 import {
     addAvailableQuests, addTakenQuest, changeAdventurersInChallenge,
     claimQuestOutcome,
-    idleQuestsStore,
-    IdleQuestsThunk, notify, removeTakenQuest, setInitLoading, setInventory, setTakenQuests,
+    notify, removeTakenQuest, setInitLoading, setInventory, setTakenQuests,
     unselectQuest
-} from "."
-import { axiosCustomInstance } from "../../../axios/axiosApi"
-import { simpleHash } from "../../utils"
+} from "./state"
+import { axiosCustomInstance } from "../../axios/axiosApi"
+import { simpleHash } from "../utils"
 import {
     Adventurer, AvailableQuest, Outcome, sealTypes, tagAdventurer, tagAvailableQuest,
     tagRealAPS,
     tagTakenQuest, TakenQuest
-} from "../dsl"
+} from "./dsl"
+import { idleQuestsStore, IdleQuestsThunk } from "./idle-quests-state"
 
 const addVisualQuestData = (quest: any) => {
     return ({

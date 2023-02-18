@@ -7,9 +7,9 @@ import Inventory from "./components/inventory/inventory"
 import { Notifications } from "./components/notifications"
 import QuestBoard from "./components/quest-board"
 import QuestCard from "./components/quest-board/quest-card"
-import { IdleQuestsState, idleQuestsStore } from "./state/idle-quests-state"
-import { IdleQuestsTransitions } from "./state"
-import { WorldMapView } from "./components/world-map"
+import { IdleQuestsState, idleQuestsStore } from "./idle-quests-state"
+import { idleQuestsTransitions, IdleQuestsTransitions, useInitEffects } from "./idle-quests-transitions"
+import { WorldTransitions, WorldView } from "./modules/world"
 
 const IdleQuestsContainer = styled.section`
     position: relative;
@@ -29,8 +29,7 @@ const LoadingBackground = styled.section`
 const InventoryModule = styled(Inventory)`
     z-index: 20;
 `
-
-const WorldMapModule = styled(WorldMapView)`
+const WorldViewModule = styled(WorldView)`
     z-index: 10;
 `
 
@@ -43,7 +42,8 @@ const IdleQuestsView = () => {
         state: useSelector((state: IdleQuestsState) => state), 
         dispatch: idleQuestsStore.dispatch 
     }
-    IdleQuestsTransitions.useInitEffects(snd)
+    const transitions = idleQuestsTransitions(snd)
+    useInitEffects(transitions, snd)
     const dragonSilver = 0
     const dragonSilverToClaim = 0
     
@@ -66,16 +66,16 @@ const IdleQuestsView = () => {
                 selectedAdventurer={snd.state.questBoard.selectedAdventurer}
                 dragonSilver={dragonSilver}
                 dragonSilverToClaim={dragonSilverToClaim}
-                onAdventurerRecruit={IdleQuestsTransitions.onRecruitAdventurer(snd)}
-                onItemClick={IdleQuestsTransitions.onItemClick(snd)}
-                onClickClose={IdleQuestsTransitions.onToggleInventory(snd)}
+                onAdventurerRecruit={transitions.onRecruitAdventurer}
+                onItemClick={transitions.onItemClick}
+                onClickClose={transitions.onToggleInventory}
             > 
             { snd.state.questBoard.selectedQuest ?
                 <QuestCard
                     quest={snd.state.questBoard.selectedQuest}
                     adventurerSlots={snd.state.questBoard.adventurerSlots}
-                    onSign={IdleQuestsTransitions.onSignQuest(snd)}
-                    onUnselectAdventurer={IdleQuestsTransitions.onUnselectAdventurer(snd)}
+                    onSign={transitions.onSignQuest}
+                    onUnselectAdventurer={transitions.onUnselectAdventurer}
                 />
             : snd.state.questBoard.selectedAdventurer ?
                 <AdventurerSplashArt
@@ -84,18 +84,17 @@ const IdleQuestsView = () => {
             : <></> } 
             </InventoryModule>
 
-            { snd.state.worldMap.open ?
-                <WorldMapModule
-                    wm={snd.state.worldMap.worldMap}
-                    currentLocation={snd.state.worldMap.currentLocation}
-                    onLocationChange={IdleQuestsTransitions.onWorldMapLocationChange(snd)}
+            { snd.state.world.open ?
+                <WorldViewModule
+                    worldState={snd.state.world}
+                    onViewLocationChange={transitions.world.onWorldMapLocationChange}
                 />
             : <></> }
 
             <QuestBoardModule
                 availableQuests={snd.state.questBoard.availableQuests}
-                onSelectQuest={IdleQuestsTransitions.onSelectQuest(snd)}
-                onFetchMoreQuests={IdleQuestsTransitions.onFetchMoreQuests(snd)}
+                onSelectQuest={transitions.onSelectQuest}
+                onFetchMoreQuests={transitions.onFetchMoreQuests}
             />
 
             <AlphaNotes />

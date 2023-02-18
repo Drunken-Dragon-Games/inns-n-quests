@@ -2,7 +2,7 @@ import styled, { css } from "styled-components"
 import { useState } from "react"
 import { PixelArtCss, PixelArtImage } from "../../utils"
 import { AvailableQuest } from "../../dsl"
-import PropStamp from "./prop-stamp"
+import PropStamp from "./miniature-seal"
 
 const QuestBoardAreaContainer = styled.div`
     display: flex;
@@ -86,15 +86,6 @@ const PaperBackgroundHover4 = styled(PixelArtImage)<{hovering: boolean}>`
     width: 15.4vmax;
     height: 15.6vmax;
     ${PaperBackgroundHoverCommon}
-`
-
-const MonsterWrapper = styled(PixelArtImage)`
-    position: absolute;
-    top: 5vmax;
-    left: 6vmax;
-    height: 8vmax;
-    width: 4vmax;
-    ${PixelArtCss}
 `
 
 const QuestPreviewCard = ({ quest, onQuestClick }: { quest: AvailableQuest, onQuestClick: (quest: AvailableQuest) => void }) => {

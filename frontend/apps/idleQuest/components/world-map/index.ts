@@ -1,1 +1,0 @@
-export { default as WorldMapView } from "./world-map-view"

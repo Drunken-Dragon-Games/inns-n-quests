@@ -1,33 +1,35 @@
 import { useEffect } from "react"
 import { notEmpty } from "../utils"
-import { IdleQuestsStateAndDispatch, IdleQuestsTransitions } from "./state"
+import { IdleQuestsSnD } from "./idle-quests-state"
+import { IdleQuestsTransitions } from "./idle-quests-transitions"
 
 /**
  * Global key map for the Idle Quests app.
  * 
  * @param key 
+ * @param transitions
  * @param state 
  * @param dispatch 
  */
-const GlobalKeyMap = (key: string, snd: IdleQuestsStateAndDispatch) => { 
+const GlobalKeyMap = (key: string, transitions: IdleQuestsTransitions, snd: IdleQuestsSnD) => { 
     const q = snd.state.questBoard
 
     if (key == "b" || key == "B" || key == "i" || key == "I") {
-        IdleQuestsTransitions.onToggleInventory(snd)()
+        transitions.onToggleInventory()
 
     } else if (key == "m" || key == "M") {
-        IdleQuestsTransitions.onToggleWorldMap(snd)()
+        transitions.world.onToggleWorldView()
 
     } else if (key == "Escape" && q.selectedQuest) {
-        IdleQuestsTransitions.onCloseSelectedQuestAndInventory(snd)()
+        transitions.onCloseSelectedQuestAndInventory()
 
     } else if (key == "Escape" && q.inventoryOpen) {
-        IdleQuestsTransitions.onToggleInventory(snd)()
+        transitions.onToggleInventory()
 
     } else if (key == "Enter" && q.selectedQuest) {
         const quest = q.selectedQuest
         const adventurers = q.adventurerSlots.filter(notEmpty)
-        IdleQuestsTransitions.onSignQuest(snd)(quest, adventurers)
+        transitions.onSignQuest(quest, adventurers)
     }
 }
 
@@ -35,10 +37,10 @@ const GlobalKeyMap = (key: string, snd: IdleQuestsStateAndDispatch) => {
  * This hook is used to map keyboard keys to actions.
  * Uses the keyMap function to map keys to actions.
  */
-export const useIdleQuestsKeyMap = (snd: IdleQuestsStateAndDispatch) => {
+export const useIdleQuestsKeyMap = (transitions: IdleQuestsTransitions, snd: IdleQuestsSnD) => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => 
-            GlobalKeyMap(e.key, snd)
+            GlobalKeyMap(e.key, transitions, snd)
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
     }, [snd.state])
