@@ -1,2 +1,5 @@
-export { default as InventoryView } from "./inventory-view"
 export * from "./inventory-dsl"
+export * from "./inventory-state"
+export * from "./inventory-transitions"
+export { default as InventoryView } from "./inventory-view"
+export { default as InventoryActivityView } from "./inventory-activity-view"

@@ -2,6 +2,8 @@ import styled from "styled-components"
 import { AvailableQuest } from "../../dsl"
 import QuestBoardArea from "./components/quest-board-area"
 import RefreshButton from "./components/refresh-button"
+import { QuestBoardState } from "./quest-board-state"
+import { QuestBoardTransitions } from "./quest-board-transitions"
 
 const QuestBoardContainer = styled.div`
     height: 100%;
@@ -24,16 +26,16 @@ const AvailableQuestsWrapper = styled.div`
 
 interface QuestBoardViewProps {
     className?: string,
-    availableQuests: AvailableQuest[],
-    onSelectQuest: (quest: AvailableQuest) => void,
-    onFetchMoreQuests: () => void
+    questBoardState: QuestBoardState,
+    questBoardTransitions: QuestBoardTransitions,
+    onQuestClick: (quest: AvailableQuest) => void,
 }
 
-const QuestBoardView = ({ className, availableQuests, onSelectQuest, onFetchMoreQuests }: QuestBoardViewProps) =>
+const QuestBoardView = ({ className, questBoardState, questBoardTransitions, onQuestClick }: QuestBoardViewProps) =>
     <QuestBoardContainer className={className}>
         <AvailableQuestsWrapper>
-            <QuestBoardArea availableQuests={availableQuests} onQuestClick={onSelectQuest} />
-            <RefreshButton onClick={onFetchMoreQuests} />
+            <QuestBoardArea availableQuests={questBoardState.availableQuests} onQuestClick={onQuestClick} />
+            <RefreshButton onClick={questBoardTransitions.onClearAvailableQuests} />
         </AvailableQuestsWrapper>
     </QuestBoardContainer>
 

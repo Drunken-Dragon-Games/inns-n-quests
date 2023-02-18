@@ -1,3 +1,4 @@
+import { simpleHash } from "../utils"
 import { APS } from "./aptitude-points-system"
 import { QuestRequirement, APSRequirement, mergeAPSRequirementMax } from "./quest-requirements"
 
@@ -125,6 +126,15 @@ export const tagTakenQuest = (takenQuest: object): object =>
 
 export const tagAvailableQuest = (availableQuest: object): object =>
     ({...availableQuest, ctype: "available-quest"})
+
+export const addVisualQuestData = (quest: any) => ({
+    ...quest,
+    seal: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
+    paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
+})
+
+export const addVisualDataToTakenQuests = (quest: any) =>
+    ({ ...quest, quest: addVisualQuestData(quest.quest) })
 
 export const takenQuestId = (quest?: SelectedQuest): string =>
     quest?.ctype === "taken-quest" ? quest.takenQuestId : ""

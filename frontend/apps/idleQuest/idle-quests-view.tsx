@@ -2,13 +2,12 @@ import { useSelector } from "react-redux"
 import styled from "styled-components"
 import { ConditionalRender, Loading } from "../utils/components/basic_components"
 import AlphaNotes from "./alpha-notes"
-import QuestSheet from "./common-components/quest-sheet/quest-sheet"
+import { If } from "./common-components"
 import { IdleQuestsState, idleQuestsStore } from "./idle-quests-state"
 import { idleQuestsTransitions, useInitEffects } from "./idle-quests-transitions"
-import { InventoryView } from "./modules/inventory"
-import AdventurerSplashArt from "./modules/inventory/components/adventurer-splash-art"
+import { InventoryActivityView, InventoryView } from "./modules/inventory"
 import { NotificationsView } from "./modules/notifications"
-import QuestBoardView from "./modules/quest-board"
+import { QuestBoardView } from "./modules/quest-board"
 import { WorldView } from "./modules/world"
 
 const IdleQuestsContainer = styled.section`
@@ -42,63 +41,44 @@ const QuestBoardModule = styled(QuestBoardView)`
 `
 
 const IdleQuestsView = () => {
-    const snd = { 
-        state: useSelector((state: IdleQuestsState) => state), 
-        dispatch: idleQuestsStore.dispatch 
-    }
-    const transitions = idleQuestsTransitions(snd)
-    useInitEffects(transitions, snd)
+    const state = useSelector((state: IdleQuestsState) => state)
+    const dispatch = idleQuestsStore.dispatch 
+    const transitions = idleQuestsTransitions({ state, dispatch })
+    useInitEffects(transitions, state)
     const dragonSilver = 0
     const dragonSilverToClaim = 0
     
     return(
         <IdleQuestsContainer>
-            <ConditionalRender condition={snd.state.questBoard.initLoading}>
+            <ConditionalRender condition={state.inventory.initLoading}>
                 <LoadingBackground>
                     <Loading size={8} />
                 </LoadingBackground>
             </ConditionalRender>
 
-            <NotificationsModule notifications={snd.state.notifications.notifications} />
+            <NotificationsModule notifications={state.notifications.notifications} />
 
             <InventoryModule
-                open={snd.state.questBoard.inventoryOpen}
-                adventurers={snd.state.questBoard.adventurers}
-                adventurerSlots={snd.state.questBoard.adventurerSlots}
-                selectedQuest={snd.state.questBoard.selectedQuest}
-                takenQuests={snd.state.questBoard.takenQuests}
-                selectedAdventurer={snd.state.questBoard.selectedAdventurer}
                 dragonSilver={dragonSilver}
                 dragonSilverToClaim={dragonSilverToClaim}
-                onAdventurerRecruit={transitions.onRecruitAdventurer}
-                onItemClick={transitions.onItemClick}
-                onClickClose={transitions.onToggleInventory}
+                inventoryState={state.inventory}
+                inventoryTransitions={transitions.inventory}
+                onCloseAvailableQuest={transitions.questBoard.onRemoveAvailableQuest}
             > 
-            { snd.state.questBoard.selectedQuest ?
-                <QuestSheet
-                    quest={snd.state.questBoard.selectedQuest}
-                    adventurerSlots={snd.state.questBoard.adventurerSlots}
-                    onSign={transitions.onSignQuest}
-                    onUnselectAdventurer={transitions.onUnselectAdventurer}
-                />
-            : snd.state.questBoard.selectedAdventurer ?
-                <AdventurerSplashArt
-                    adventurer={snd.state.questBoard.selectedAdventurer}
-                />
-            : <></> } 
+                <InventoryActivityView state={state.inventory} transitions={transitions.inventory} />
             </InventoryModule>
 
-            { snd.state.world.open ?
+            <If $if={state.world.open}>
                 <WorldViewModule
-                    worldState={snd.state.world}
+                    worldState={state.world}
                     onViewLocationChange={transitions.world.onWorldMapLocationChange}
                 />
-            : <></> }
+            </If>
 
             <QuestBoardModule
-                availableQuests={snd.state.questBoard.availableQuests}
-                onSelectQuest={transitions.onSelectQuest}
-                onFetchMoreQuests={transitions.onFetchMoreQuests}
+                questBoardState={state.questBoard}
+                questBoardTransitions={transitions.questBoard}
+                onQuestClick={transitions.inventory.onSelectQuest}
             />
 
             <AlphaNotes />

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Adventurer, TakenQuest, AvailableQuest, SelectedQuest, Outcome, individualXPReward, tagRealAPS } from "../dsl"
+import { Adventurer, TakenQuest, SelectedQuest, Outcome, individualXPReward, tagRealAPS } from "../../dsl"
 
 const sortAdventurers = (adventurers: Adventurer[]) => {
     return adventurers.sort((a, b) => {
@@ -13,33 +13,32 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
     })
 }
 
-export interface QuestBoardState {
+export type InventorySelection = SelectedQuest | Adventurer
+
+export interface InventoryState {
     initLoading: boolean
 
-    inventoryOpen: boolean
+    open: boolean
     adventurers: Adventurer[]
     takenQuests: TakenQuest[]
 
-    availableQuests: AvailableQuest[]
-    selectedQuest?: SelectedQuest
-    selectedAdventurer?: Adventurer
-    adventurerSlots: (Adventurer | null)[]
+    selection?: InventorySelection
+    selectedParty: (Adventurer | null)[]
 }
 
-const questBoardInitialState: QuestBoardState = { 
+const inventoryInitialState: InventoryState = { 
     initLoading: true,
 
-    inventoryOpen: false,
+    open: false,
     adventurers: [],
     takenQuests: [],
 
-    availableQuests: [],
-    adventurerSlots: [],
+    selectedParty: [],
 }
 
-export const questBoardState = createSlice({
-    name: "quest-board-state",
-    initialState: questBoardInitialState,
+export const inventoryState = createSlice({
+    name: "inventory-state",
+    initialState: inventoryInitialState,
     reducers: {
 
         setInitLoading: (state, action: PayloadAction<boolean>) => {
@@ -47,7 +46,7 @@ export const questBoardState = createSlice({
         },
 
         toggleInventory: (state) => {
-            state.inventoryOpen = !state.inventoryOpen
+            state.open = !state.open
         },
 
         setInventory: (state, action: PayloadAction<Adventurer[]>) => {
@@ -66,59 +65,47 @@ export const questBoardState = createSlice({
             state.takenQuests = state.takenQuests.filter(quest => quest.takenQuestId !== action.payload.takenQuestId)
         },
 
-        addAvailableQuests: (state, action: PayloadAction<AvailableQuest[]>) => {
-            state.availableQuests = [...state.availableQuests, ...action.payload]
-        },
-
-        removeAvailableQuest: (state, action: PayloadAction<AvailableQuest>) => {
-            state.availableQuests = state.availableQuests.filter(quest => quest.questId !== action.payload.questId)
-        },
-
-        clearAvailableQuests: (state) => {
-            state.availableQuests = []
-        },
-
         selectQuest: (state, action: PayloadAction<SelectedQuest>) => {
             const quest = action.payload
-            state.selectedQuest = quest
+            state.selection = quest
             if (quest.ctype === "available-quest")
-                state.adventurerSlots = Array(quest.slots).fill(null)
+                state.selectedParty = Array(quest.slots).fill(null)
             else
-                state.adventurerSlots = Array(quest.quest.slots).fill(null).map((_, index) => 
+                state.selectedParty = Array(quest.quest.slots).fill(null).map((_, index) => 
                     state.adventurers.find(adventurer => adventurer.adventurerId === quest.adventurerIds[index]) ?? null)
         },
 
         unselectQuest: (state) => {
-            state.selectedQuest = undefined
-            state.adventurerSlots = []
+            state.selection = undefined
+            state.selectedParty = []
         },
 
         pickAdventurerForQuest: (state, action: PayloadAction<Adventurer>) => {
-            if (!state.selectedQuest) return
-            const indexNull = state.adventurerSlots.indexOf(null)
-            const indexAdventurer = state.adventurerSlots
+            if (!state.selection) return
+            const indexNull = state.selectedParty.indexOf(null)
+            const indexAdventurer = state.selectedParty
                 .map(a => a ? a.adventurerId : a)
                 .indexOf(action.payload.adventurerId)
             const alreadySelected = indexAdventurer !== -1
             const partyFull = indexNull === -1
             if (alreadySelected)
-                state.adventurerSlots[indexAdventurer] = null
+                state.selectedParty[indexAdventurer] = null
             else if (partyFull) 
-                state.adventurerSlots[0] = action.payload
+                state.selectedParty[0] = action.payload
             else 
-                state.adventurerSlots[indexNull] = action.payload
+                state.selectedParty[indexNull] = action.payload
         },
 
         unPickAdventurerForQuest: (state, action: PayloadAction<Adventurer>) => {
-            state.adventurerSlots = state.adventurerSlots.map(adventurer => 
+            state.selectedParty = state.selectedParty.map(adventurer => 
                 adventurer?.adventurerId === action.payload.adventurerId ? null : adventurer)
         },
 
-        clearSelectedAdventurers: (state) => {
-            if (state.selectedQuest && state.selectedQuest.ctype === "available-quest")
-                state.adventurerSlots = Array(state.selectedQuest.slots).fill(null)
+        clearSelectedParty: (state) => {
+            if (state.selection && state.selection.ctype === "available-quest")
+                state.selectedParty = Array(state.selection.slots).fill(null)
             else 
-                state.adventurerSlots = []
+                state.selectedParty = []
         },
         
         changeAdventurersInChallenge: (state, action: PayloadAction<{ adventurers: Adventurer[], inChallenge: boolean }>) => {
@@ -136,8 +123,8 @@ export const questBoardState = createSlice({
         claimQuestOutcome: (state, action: PayloadAction<{ adventurers: Adventurer[], outcome: Outcome, takenQuest: TakenQuest }>) => {
             const outcome = action.payload.outcome
             const adventurers = action.payload.adventurers
-            if (state.selectedQuest && state.selectedQuest.ctype === "taken-quest" && state.selectedQuest.takenQuestId === action.payload.takenQuest.takenQuestId)
-                state.selectedQuest.claimedAt = new Date().toISOString()
+            if (state.selection && state.selection.ctype === "taken-quest" && state.selection.takenQuestId === action.payload.takenQuest.takenQuestId)
+                state.selection.claimedAt = new Date().toISOString()
             if (outcome.ctype === "success-outcome" && outcome.reward.apsExperience) {
                 const individualXP = individualXPReward(adventurers, outcome.reward.apsExperience)
                 state.adventurers = state.adventurers.map(adventurer => {
@@ -155,7 +142,7 @@ export const questBoardState = createSlice({
                         return adventurer
                     }
                 })
-                state.adventurerSlots = state.adventurerSlots.map(adventurer => {
+                state.selectedParty = state.selectedParty.map(adventurer => {
                     if (!adventurer) return adventurer
                     return state.adventurers.find(a => a.adventurerId === adventurer.adventurerId)!
                 })
@@ -163,7 +150,7 @@ export const questBoardState = createSlice({
         },
 
         selectAdventurer: (state, action: PayloadAction<Adventurer | undefined>) => {
-            state.selectedAdventurer = action.payload
+            state.selection = action.payload
         },
     },
 });
@@ -175,16 +162,13 @@ export const {
     setTakenQuests,
     addTakenQuest,
     removeTakenQuest,
-    addAvailableQuests,
-    removeAvailableQuest,
-    clearAvailableQuests,
     selectQuest,
     unselectQuest,
     pickAdventurerForQuest,
     unPickAdventurerForQuest,
-    clearSelectedAdventurers,
+    clearSelectedParty: clearSelectedAdventurers,
     changeAdventurersInChallenge,
     claimQuestOutcome,
     selectAdventurer,
-} = questBoardState.actions
+} = inventoryState.actions
 

@@ -2,11 +2,11 @@ import { useMemo, useState } from "react"
 import styled from "styled-components"
 import { AdventurerSprite } from "../../../common-components"
 import {
-    Adventurer, AdventurerCollection, mapQuestScroll, SelectedQuest,
-    TakenQuest, takenQuestTimeLeft
+    Adventurer, AdventurerCollection, mapQuestScroll, SelectedQuest, takenQuestTimeLeft
 } from "../../../dsl"
 import { PixelArtImage, vmax } from "../../../utils"
 import { InventoryItem } from "../inventory-dsl"
+import { InventorySelection, InventoryState } from "../inventory-state"
 import InventoryBox from "./inventory-box"
 
 const InventoryBrowserContainer = styled.div`
@@ -76,11 +76,12 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
                 // info
                 `${item.realATH}/${item.realINT}/${item.realCHA}`,
                 // selected
-                props.adventurerSlots?.some((a) => a && a.adventurerId === item.adventurerId) ||
-                props.selectedAdventurer?.adventurerId === item.adventurerId,
+                props.selectedParty?.some((a) => a && a.adventurerId === item.adventurerId) ||
+                props.selection?.ctype === "adventurer" &&
+                props.selection?.adventurerId === item.adventurerId,
                 // disabled
-                props.selectedQuest && 
-                props.selectedQuest.ctype === "available-quest" && 
+                props.selection && 
+                props.selection.ctype === "available-quest" && 
                 item.inChallenge
             ]
         } else if (item && item.ctype === "taken-quest") {
@@ -88,16 +89,16 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
                 // info
                 "", //takenQuestTimeLeft(item), We actially dont want to memo this one
                 // selected
-                props.selectedQuest &&
-                props.selectedQuest.ctype === "taken-quest" &&
-                props.selectedQuest.takenQuestId === item.takenQuestId,
+                props.selection &&
+                props.selection.ctype === "taken-quest" &&
+                props.selection.takenQuestId === item.takenQuestId,
                 // disabled
                 false
             ]
         } else {
             return [undefined, undefined, undefined]
         }
-    }, [props.item, props.selectedQuest, props.adventurerSlots, props.selectedAdventurer])
+    }, [props.item, props.selection, props.selectedParty])
     // Calculate the time left for the quest every time we render
     const timerInfo = props.item && props.item.ctype === "taken-quest" ? takenQuestTimeLeft(props.item) : info
     return [timerInfo, selected, disabled]
@@ -105,9 +106,8 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
 
 interface InventoryItemViewProps {
     item?: InventoryItem,
-    adventurerSlots?: (Adventurer | null)[],
-    selectedQuest?: SelectedQuest,
-    selectedAdventurer?: Adventurer,
+    selectedParty?: (Adventurer | null)[],
+    selection?: InventorySelection,
     onItemClick?: (item: InventoryItem) => void
 }
 
@@ -141,9 +141,9 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
     )
 }
 
-const useInventoryBrowserState = (props: InventoryBrowserProps) => 
+const useInventoryBrowserState = (state: InventoryState) => 
     useMemo(() => {
-        const itemsSum = props.adventurers.length + props.takenQuests.length
+        const itemsSum = state.adventurers.length + state.takenQuests.length
         const slotsTail = itemsSum % 4
         const extraSlots = slotsTail === 0 ? 4 : 4 - slotsTail
         const amountIfWithExtraSlots = itemsSum + extraSlots
@@ -151,40 +151,34 @@ const useInventoryBrowserState = (props: InventoryBrowserProps) =>
         const totalExtraSlots = amountIfWithExtraSlots >= 4 * 8 ? extraSlots : amountIfWithoutExtraSlots
         const extraSlotsArray = Array(totalExtraSlots).fill(0)
         return extraSlotsArray
-    }, [props.adventurers, props.takenQuests])
+    }, [state.adventurers, state.takenQuests])
 
 interface InventoryBrowserProps {
-    adventurers: Adventurer[],
-    takenQuests: TakenQuest[],
-    adventurerSlots: (Adventurer | null)[],
-    selectedQuest?: SelectedQuest,
-    selectedAdventurer?: Adventurer,
+    inventoryState: InventoryState,
     onItemClick?: (item: InventoryItem) => void
 }
 
-const InventoryBrowser = (props: InventoryBrowserProps) => {
-    const extraSlotsArray = useInventoryBrowserState(props)
+const InventoryBrowser = ({ inventoryState, onItemClick }: InventoryBrowserProps) => {
+    const extraSlotsArray = useInventoryBrowserState(inventoryState)
     return (
         <InventoryBrowserContainer>
             <DirectionFix>
-                {props.adventurers.map((item) => 
+                {inventoryState.adventurers.map((item) => 
                     <InventoryItemView 
                         key={item.adventurerId} 
                         item={item} 
-                        adventurerSlots={props.adventurerSlots}
-                        selectedAdventurer={props.selectedAdventurer}
-                        selectedQuest={props.selectedQuest}
-                        onItemClick={props.onItemClick} 
+                        selectedParty={inventoryState.selectedParty}
+                        selection={inventoryState.selection}
+                        onItemClick={onItemClick} 
                     />
                 )}
-                {props.takenQuests.map((item) => 
+                {inventoryState.takenQuests.map((item) => 
                     <InventoryItemView 
                         key={item.takenQuestId} 
                         item={item} 
-                        adventurerSlots={props.adventurerSlots}
-                        selectedAdventurer={props.selectedAdventurer}
-                        selectedQuest={props.selectedQuest}
-                        onItemClick={props.onItemClick} 
+                        selectedParty={inventoryState.selectedParty}
+                        selection={inventoryState.selection}
+                        onItemClick={onItemClick} 
                     />
                 )}
                 {extraSlotsArray.map((_, i) => 

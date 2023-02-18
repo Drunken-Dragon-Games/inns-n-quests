@@ -1,6 +1,6 @@
 import styled from "styled-components"
-import { Adventurer } from "../../../dsl"
-import { NoDragImage, PixelArtImage, Units, useComputeHeightFromOriginalImage, vh1 } from "../../../utils"
+import { Adventurer } from "../dsl"
+import { NoDragImage, PixelArtImage, Units, useComputeHeightFromOriginalImage, vh1 } from "../utils"
 
 const AdventurerSplashArtContainer = styled.div<{ units: Units }>`
     overflow: hidden;

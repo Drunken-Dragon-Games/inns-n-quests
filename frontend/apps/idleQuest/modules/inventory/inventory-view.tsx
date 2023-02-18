@@ -1,8 +1,9 @@
 import styled, { keyframes } from "styled-components"
-import { Adventurer, TakenQuest, SelectedQuest } from "../../dsl"
-import { InventoryItem } from "./inventory-dsl"
+import { AvailableQuest } from "../../dsl"
 import DragonSilverDisplay from "./components/dragon-silver-display"
 import InventoryBrowser from "./components/inventory-browser"
+import { InventoryState } from "./inventory-state"
+import { InventoryTransitions } from "./inventory-transitions"
 
 const openAnimation = keyframes`
     0% { opacity: 0; }
@@ -49,37 +50,27 @@ const ActivityContainer = styled.div`
 interface InventoryProps {
     className?: string,
     children?: React.ReactNode,
-    open: boolean,
-    adventurers: Adventurer[],
-    takenQuests: TakenQuest[],
-    adventurerSlots: (Adventurer | null)[],
-    selectedQuest?: SelectedQuest,
-    selectedAdventurer?: Adventurer,
     dragonSilver: number,
     dragonSilverToClaim: number,
-    onAdventurerRecruit: () => void
-    onItemClick: (item: InventoryItem) => void
-    onClickClose: () => void
+    inventoryState: InventoryState,
+    inventoryTransitions: InventoryTransitions,
+    onCloseAvailableQuest: (availableQuest: AvailableQuest) => void
 }
 
 const InventoryView = (props: InventoryProps) => {
     //const [page, setPage] = useState<TabNames>("inventory")
     return(
-        <InventoryContainer className={props.className} open={props.open}>
+        <InventoryContainer className={props.className} open={props.inventoryState.open}>
             <Header
                 dragonSilver={props.dragonSilver}
                 dragonSilverToClaim={props.dragonSilverToClaim}
-                onClickClose={props.onClickClose}
-                onAdventurerRecruit={props.onAdventurerRecruit}
+                onClickClose={props.inventoryTransitions.onToggleInventory}
+                onAdventurerRecruit={props.inventoryTransitions.onRecruitAdventurer}
             />
-            <InventoryBody open={props.open}>
+            <InventoryBody open={props.inventoryState.open}>
                 <InventoryBrowser 
-                    adventurers={props.adventurers}
-                    takenQuests={props.takenQuests}
-                    adventurerSlots={props.adventurerSlots}
-                    selectedQuest={props.selectedQuest}
-                    selectedAdventurer={props.selectedAdventurer}
-                    onItemClick={props.onItemClick}
+                    inventoryState={props.inventoryState}
+                    onItemClick={props.inventoryTransitions.onItemClick}
                 />
                 <ActivityContainer>
                     {props.children}

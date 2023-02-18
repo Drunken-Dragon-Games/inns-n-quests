@@ -1,2 +1,1 @@
-export * from "./quest-board-state"
-export * from "./notifications-state"
+export * from "../modules/inventory/inventory-state"
