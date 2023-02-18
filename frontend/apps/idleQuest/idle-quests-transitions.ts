@@ -1,12 +1,12 @@
 import { useEffect } from "react"
 import { Adventurer, SelectedQuest, takenQuestSecondsLeft } from "./dsl"
-import { InventoryItem } from "./dsl/inventory"
 import { useIdleQuestsKeyMap } from "./idle-quests-key-map"
 import { IdleQuestsSnD } from "./idle-quests-state"
 import {
     claimTakenQuest, fetchMintTest, getAdventurers, getAvailableQuests, getInProgressQuests,
     takeAvailableQuest
 } from "./idle-quests-thunks"
+import { InventoryItem } from "./modules/inventory"
 import { worldTransitions, WorldTransitions } from "./modules/world"
 import {
     clearAvailableQuests, pickAdventurerForQuest, removeAvailableQuest,

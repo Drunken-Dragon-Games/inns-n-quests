@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components"
 import { useState } from "react"
-import { PixelArtCss, PixelArtImage } from "../../utils"
-import { AvailableQuest } from "../../dsl"
+import { PixelArtCss, PixelArtImage } from "../../../utils"
+import { AvailableQuest } from "../../../dsl"
 import PropStamp from "./miniature-seal"
 
 const QuestBoardAreaContainer = styled.div`

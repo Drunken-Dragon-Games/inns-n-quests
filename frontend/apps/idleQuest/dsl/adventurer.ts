@@ -29,13 +29,21 @@ export type AdventurerParty = {
     location: [number, number],
 }
 
-export type Race = "human" | "elf" | "tiefling" | "dragonkin" | "worgenkin" | "undead" | "viera" | "troll" | "vulkin" | "orc" | "tauren"
+export type Race 
+    = "human" | "elf" | "tiefling" | "dragonkin" | "worgenkin" 
+    | "undead" | "viera" | "troll" | "vulkin" | "orc" | "tauren"
 
-export const races = ["human", "elf", "tiefling", "dragonkin", "worgenkin", "undead", "viera", "troll", "vulkin", "orc", "tauren"]
+export const Races: Race[] = 
+    [ "human", "elf", "tiefling", "dragonkin", "worgenkin", 
+    "undead", "viera", "troll", "vulkin", "orc", "tauren"]
 
-export type AdventurerClass = "fighter" | "paladin" | "ranger" | "rogue" | "bard" | "mage" | "warlock" | "cleric" | "druid" | "knight"
+export type AdventurerClass 
+    = "fighter" | "paladin" | "ranger" | "rogue" | "bard" 
+    | "mage" | "warlock" | "cleric" | "druid" | "knight"
 
-export const adventurerClasses = ["fighter", "paladin", "ranger", "rogue", "bard", "mage", "warlock", "cleric", "druid", "knight"]
+export const AdventurerClasses: AdventurerClass[] = 
+    [ "fighter", "paladin", "ranger", "rogue", "bard", 
+    "mage", "warlock", "cleric", "druid", "knight" ]
 
 export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-thiolden" | "pixel-tiles"
 

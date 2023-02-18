@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { useState } from "react"
 import styled from "styled-components"
-import { ConditionalRender, TextElMessiri } from '../../../utils/components/basic_components'
+import { If } from "../../../common-components"
 
 const DragonSilverIconContainer = styled.div`
     display: flex;
@@ -54,12 +54,12 @@ const DragonSilverIcon = ({ src, dragonSilver, tooltip, toClaim }: DragonSilverI
                     onMouseOver={() => setOnHoverDragonSilverToClaim(true)}
                     onMouseLeave={() => setOnHoverDragonSilverToClaim(false)}
                 />
-                <ToolTipDragonSilverToClaim $hover={onHoverDragonSilverToClaim}><TextElMessiri fontsize={0.9} color="#23303B">{tooltip}</TextElMessiri></ToolTipDragonSilverToClaim>
+                <ToolTipDragonSilverToClaim $hover={onHoverDragonSilverToClaim}><p>{tooltip}</p></ToolTipDragonSilverToClaim>
             </ImageWrapper>
 
-            <ConditionalRender condition={toClaim == false}>
-                <TextElMessiri fontsize={0.9} color="white">{dragonSilver}</TextElMessiri>
-            </ConditionalRender>
+            <If $if={!toClaim}>
+                <p>{dragonSilver}</p>
+            </If>
 
         </DragonSilverIconContainer>
     )

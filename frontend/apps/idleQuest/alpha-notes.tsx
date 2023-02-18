@@ -1,6 +1,6 @@
 import { useState } from "react"
 import styled, { keyframes } from "styled-components"
-import { PixelFontFamily } from "./components/common-css"
+import { PixelFontFamily } from "./common-components"
 
 const date = "17 Feb 2023"
 

@@ -1,7 +1,9 @@
 import styled, { keyframes } from "styled-components"
-import { notEmpty, simpleHash } from "../../../utils"
-import { Adventurer } from "../../dsl/adventurer"
-import { Units, useComputeHeightFromOriginalImage, useRememberLastValue, vmax1, PixelArtImage } from "../../utils"
+import { Adventurer } from "../dsl/adventurer"
+import {
+    notEmpty, PixelArtImage, simpleHash, Units,
+    useComputeHeightFromOriginalImage, useRememberLastValue, vmax1
+} from "../utils"
 
 const emojiMapping = (emoji?: string) => {
     switch (emoji) {

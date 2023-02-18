@@ -1,6 +1,5 @@
 export * from "./adventurer"
 export * from "./aptitude-points-system"
 export * from "./backend-api"
-export * from "./notification"
 export * from "./quest-requirements"
 export * from "./quest"

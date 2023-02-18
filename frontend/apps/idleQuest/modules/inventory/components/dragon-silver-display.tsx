@@ -1,7 +1,6 @@
 import React from "react"
 import styled from "styled-components"
-import { Push } from "../../utils"
-import { SansSerifFontFamily } from "../common-css"
+import { Push, SansSerifFontFamily } from "../../../common-components"
 import BigHopsButton from "./big-hops-button"
 import DragonSilverIcon from "./dragon-silver-icon"
 

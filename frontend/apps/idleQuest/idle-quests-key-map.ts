@@ -1,7 +1,7 @@
 import { useEffect } from "react"
-import { notEmpty } from "../utils"
 import { IdleQuestsSnD } from "./idle-quests-state"
 import { IdleQuestsTransitions } from "./idle-quests-transitions"
+import { notEmpty } from "./utils"
 
 /**
  * Global key map for the Idle Quests app.

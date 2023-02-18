@@ -1,7 +1,7 @@
 import styled, { keyframes } from "styled-components"
-import { AppNotification } from "../../dsl"
+import { SansSerifFontFamily, InfoScheme, AlertScheme, SuccessScheme } from "../../common-components"
 import { useTagRemovals } from "../../utils"
-import { AlertScheme, InfoScheme, SansSerifFontFamily, SuccessScheme } from "../common-css"
+import { AppNotification } from "./notifications-dsl"
 
 const enterAnimation = keyframes`
     0% { opacity: 0; }
@@ -41,11 +41,11 @@ const Snack = styled.div<{ ctype: AppNotification["ctype"], $display: boolean }>
     position: ${props => props.$display ? "relative" : "absolute"};
 `
 
-interface NotificationsProps {
+interface NotificationsViewProps {
     notifications: AppNotification[]
 }
 
-const Notifications = ({ notifications }: NotificationsProps) => {
+const NotificationsView = ({ notifications }: NotificationsViewProps) => {
     const render = useTagRemovals(notifications, [], false)
     return (
         <SnackBar>
@@ -56,4 +56,4 @@ const Notifications = ({ notifications }: NotificationsProps) => {
     )
 }
 
-export default Notifications
+export default NotificationsView

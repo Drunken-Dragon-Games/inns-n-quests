@@ -1,8 +1,7 @@
 import styled, { keyframes } from "styled-components"
-import { notEmpty } from "../../../utils"
-import { TextOswald } from "../../../utils/components/basic_components"
-import { Adventurer, totalXPRequiredForNextLevel } from "../../dsl"
-import { PixelArtImage, Units, useRememberLastValue, vmax1 } from "../../utils"
+import { TextOswald } from "../../utils/components/basic_components"
+import { Adventurer, totalXPRequiredForNextLevel } from "../dsl"
+import { Units, vmax1, useRememberLastValue, PixelArtImage, notEmpty } from "../utils"
 import AdventurerSprite, { SpriteRenderOptions } from "./adventurer-sprite"
 
 type ExperienceBarColor = "r" | "g" | "b"
@@ -117,7 +116,7 @@ interface AdventurerProps {
     units?: Units,
 }
 
-const AdventurerMiniWithInfo = ({ 
+const AdventurerMini = ({ 
     adventurer, 
     emoji, 
     render = "normal", 
@@ -178,4 +177,4 @@ const AdventurerMiniWithInfo = ({
     )
 }
 
-export default AdventurerMiniWithInfo
+export default AdventurerMini

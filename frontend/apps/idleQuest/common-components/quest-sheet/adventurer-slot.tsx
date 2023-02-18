@@ -1,9 +1,8 @@
 import styled from "styled-components"
 import { useState } from "react"
-import { notEmpty } from "../../../utils"
 import { Adventurer } from "../../dsl"
-import AdventurerMiniWithInfo from "../adventurer-card/adventurer-card"
-import { PixelArtImage, vh1 } from "../../utils"
+import { notEmpty, PixelArtImage, vh1 } from "../../utils"
+import AdventurerMini from "../adventurer-mini"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
     width: 100%;
@@ -47,7 +46,7 @@ const AdventurerSlot = ({ className, adventurer, emoji, onUnselectAdventurer }: 
         >
             <EmptySlot />
             {notEmpty(adventurer) ?
-                <AdventurerMiniWithInfo
+                <AdventurerMini
                     adventurer={adventurer}
                     emoji={displayedEmoji}
                     render={render}

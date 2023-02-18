@@ -1,13 +1,12 @@
-import styled, { keyframes } from "styled-components"
 import { useEffect, useMemo, useRef } from "react"
-import Signature from "./signature"
-import { notEmpty } from "../../../utils"
+import styled, { keyframes } from "styled-components"
+import { Push } from ".."
+import { Adventurer, APS, AvailableQuest, getQuestAPSRequirement, mapSealImage, mergeAPSSum, questDescription, questName, sameOrBetterAPS, TakenQuest, takenQuestSecondsLeft, zeroAPS } from "../../dsl"
+import { notEmpty, PixelArtCss, PixelArtImage, vh1 } from "../../utils"
 import AdventurerSlot from "./adventurer-slot"
-import { APS, zeroAPS, sameOrBetterAPS, SelectedQuest, questSeal, Adventurer, 
-         takenQuestSecondsLeft, getQuestAPSRequirement, mergeAPSSum, questName, 
-         questDescription, 
-         mapSealImage} from "../../dsl"
-import { PixelArtCss, PixelArtImage, Push, vh1 } from "../../utils"
+import Signature from "./signature"
+
+type RenderQuest = AvailableQuest | TakenQuest
 
 const QuestCardContainer = styled.div`
     box-sizing: border-box;
@@ -187,7 +186,7 @@ interface QuestPaperTakenState {
     sealImage: { src: string, width: number, height: number, offset: number }
 }
 
-const useQuestCardState = (quest: SelectedQuest, adventurerSlots: (Adventurer | null)[]): QuestPaperTakenState => 
+const useQuestCardState = (quest: RenderQuest, adventurerSlots: (Adventurer | null)[]): QuestPaperTakenState => 
     useMemo(() => ({
         signatureType: 
             quest.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
@@ -208,15 +207,15 @@ const useQuestCardState = (quest: SelectedQuest, adventurerSlots: (Adventurer | 
             mapSealImage(quest)
     }), [quest, adventurerSlots])
 
-interface QuestPaperAvailableProps {
+interface QuestSheetProps {
     className?: string,
-    quest?: SelectedQuest, 
+    quest?: RenderQuest, 
     adventurerSlots: (Adventurer | null)[],
-    onSign?: (selectedQuest: SelectedQuest, adventurers: Adventurer[]) => void,
+    onSign?: (selectedQuest: RenderQuest, adventurers: Adventurer[]) => void,
     onUnselectAdventurer?: (adventurer: Adventurer) => void,
 }
 
-const QuestCard = ({ className, quest, adventurerSlots, onSign, onUnselectAdventurer }: QuestPaperAvailableProps) => {
+const QuestSheet = ({ className, quest, adventurerSlots, onSign, onUnselectAdventurer }: QuestSheetProps) => {
     if (!quest) return <></>
     const state = useQuestCardState(quest, adventurerSlots)
     return (
@@ -268,4 +267,4 @@ const QuestCard = ({ className, quest, adventurerSlots, onSign, onUnselectAdvent
     )
 }
 
-export default QuestCard
+export default QuestSheet

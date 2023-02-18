@@ -1,5 +1,4 @@
-import { Adventurer } from "./adventurer";
-import { TakenQuest } from "./quest";
+import { Adventurer, TakenQuest } from "../../dsl"
 
 export type InventoryItem = Adventurer | TakenQuest
 

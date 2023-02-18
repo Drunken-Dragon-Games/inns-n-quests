@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react"
 import styled from "styled-components"
-import { Adventurer, AdventurerCollection, mapQuestScroll, SelectedQuest, TakenQuest, takenQuestTimeLeft } from "../../dsl"
-import { InventoryItem } from "../../dsl/inventory"
-import { PixelArtImage, vmax } from "../../utils"
-import AdventurerSprite from "../adventurer-card/adventurer-sprite"
+import { AdventurerSprite } from "../../../common-components"
+import {
+    Adventurer, AdventurerCollection, mapQuestScroll, SelectedQuest,
+    TakenQuest, takenQuestTimeLeft
+} from "../../../dsl"
+import { PixelArtImage, vmax } from "../../../utils"
+import { InventoryItem } from "../inventory-dsl"
 import InventoryBox from "./inventory-box"
 
 const InventoryBrowserContainer = styled.div`

@@ -1,9 +1,8 @@
-import { useState } from "react"
 import styled, { keyframes } from "styled-components"
-import { Adventurer, SelectedQuest, TakenQuest } from "../../dsl"
-import { InventoryItem } from "../../dsl/inventory"
-import DragonSilverDisplay from "./dragon-silver-display"
-import InventoryBrowser from "./inventory-browser"
+import { Adventurer, TakenQuest, SelectedQuest } from "../../dsl"
+import { InventoryItem } from "./inventory-dsl"
+import DragonSilverDisplay from "./components/dragon-silver-display"
+import InventoryBrowser from "./components/inventory-browser"
 
 const openAnimation = keyframes`
     0% { opacity: 0; }
@@ -63,7 +62,7 @@ interface InventoryProps {
     onClickClose: () => void
 }
 
-const Inventory = (props: InventoryProps) => {
+const InventoryView = (props: InventoryProps) => {
     //const [page, setPage] = useState<TabNames>("inventory")
     return(
         <InventoryContainer className={props.className} open={props.open}>
@@ -90,4 +89,4 @@ const Inventory = (props: InventoryProps) => {
     )
 }
 
-export default Inventory
+export default InventoryView

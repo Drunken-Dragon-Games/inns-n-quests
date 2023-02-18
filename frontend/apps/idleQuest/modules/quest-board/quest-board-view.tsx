@@ -1,7 +1,7 @@
 import styled from "styled-components"
 import { AvailableQuest } from "../../dsl"
-import QuestBoardArea from "./quest-board-area"
-import RefreshButton from "./refresh-button"
+import QuestBoardArea from "./components/quest-board-area"
+import RefreshButton from "./components/refresh-button"
 
 const QuestBoardContainer = styled.div`
     height: 100%;
@@ -22,14 +22,14 @@ const AvailableQuestsWrapper = styled.div`
     margin: auto;
 `
 
-interface QuestBoardProps {
+interface QuestBoardViewProps {
     className?: string,
     availableQuests: AvailableQuest[],
     onSelectQuest: (quest: AvailableQuest) => void,
     onFetchMoreQuests: () => void
 }
 
-const QuestBoard = ({ className, availableQuests, onSelectQuest, onFetchMoreQuests }: QuestBoardProps) =>
+const QuestBoardView = ({ className, availableQuests, onSelectQuest, onFetchMoreQuests }: QuestBoardViewProps) =>
     <QuestBoardContainer className={className}>
         <AvailableQuestsWrapper>
             <QuestBoardArea availableQuests={availableQuests} onQuestClick={onSelectQuest} />
@@ -37,4 +37,4 @@ const QuestBoard = ({ className, availableQuests, onSelectQuest, onFetchMoreQues
         </AvailableQuestsWrapper>
     </QuestBoardContainer>
 
-export default QuestBoard 
+export default QuestBoardView 

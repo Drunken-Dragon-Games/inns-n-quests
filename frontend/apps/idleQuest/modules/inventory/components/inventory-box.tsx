@@ -1,6 +1,6 @@
 import { ReactNode } from "react"
 import styled, { css, keyframes } from "styled-components"
-import { OswaldFontFamily } from "../common-css"
+import { OswaldFontFamily } from "../../../common-components"
 
 const BoxCss = css`
     position: relative;

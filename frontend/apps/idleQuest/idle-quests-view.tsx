@@ -2,14 +2,14 @@ import { useSelector } from "react-redux"
 import styled from "styled-components"
 import { ConditionalRender, Loading } from "../utils/components/basic_components"
 import AlphaNotes from "./alpha-notes"
-import AdventurerSplashArt from "./components/inventory/adventurer-splash-art"
-import Inventory from "./components/inventory/inventory"
-import { Notifications } from "./components/notifications"
-import QuestBoard from "./components/quest-board"
-import QuestCard from "./components/quest-board/quest-card"
+import QuestSheet from "./common-components/quest-sheet/quest-sheet"
 import { IdleQuestsState, idleQuestsStore } from "./idle-quests-state"
-import { idleQuestsTransitions, IdleQuestsTransitions, useInitEffects } from "./idle-quests-transitions"
-import { WorldTransitions, WorldView } from "./modules/world"
+import { idleQuestsTransitions, useInitEffects } from "./idle-quests-transitions"
+import { InventoryView } from "./modules/inventory"
+import AdventurerSplashArt from "./modules/inventory/components/adventurer-splash-art"
+import { NotificationsView } from "./modules/notifications"
+import QuestBoardView from "./modules/quest-board"
+import { WorldView } from "./modules/world"
 
 const IdleQuestsContainer = styled.section`
     position: relative;
@@ -19,21 +19,25 @@ const IdleQuestsContainer = styled.section`
 
 const LoadingBackground = styled.section`
     position: absolute;
-    z-index: 10;
+    z-index: 29;
     display: flex;
     width: 100%;
     height: 100%;
     background-color: #0B1015;
 `
 
-const InventoryModule = styled(Inventory)`
+const NotificationsModule = styled(NotificationsView)`
+    z-index: 30;
+`
+
+const InventoryModule = styled(InventoryView)`
     z-index: 20;
 `
 const WorldViewModule = styled(WorldView)`
     z-index: 10;
 `
 
-const QuestBoardModule = styled(QuestBoard)`
+const QuestBoardModule = styled(QuestBoardView)`
     z-index: 1;
 `
 
@@ -55,7 +59,7 @@ const IdleQuestsView = () => {
                 </LoadingBackground>
             </ConditionalRender>
 
-            <Notifications notifications={snd.state.notifications.notifications} />
+            <NotificationsModule notifications={snd.state.notifications.notifications} />
 
             <InventoryModule
                 open={snd.state.questBoard.inventoryOpen}
@@ -71,7 +75,7 @@ const IdleQuestsView = () => {
                 onClickClose={transitions.onToggleInventory}
             > 
             { snd.state.questBoard.selectedQuest ?
-                <QuestCard
+                <QuestSheet
                     quest={snd.state.questBoard.selectedQuest}
                     adventurerSlots={snd.state.questBoard.adventurerSlots}
                     onSign={transitions.onSignQuest}

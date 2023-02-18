@@ -7,13 +7,13 @@ import {
     unselectQuest
 } from "./state"
 import { axiosCustomInstance } from "../../axios/axiosApi"
-import { simpleHash } from "../utils"
 import {
     Adventurer, AvailableQuest, Outcome, sealTypes, tagAdventurer, tagAvailableQuest,
     tagRealAPS,
     tagTakenQuest, TakenQuest
 } from "./dsl"
 import { idleQuestsStore, IdleQuestsThunk } from "./idle-quests-state"
+import { simpleHash } from "./utils"
 
 const addVisualQuestData = (quest: any) => {
     return ({
