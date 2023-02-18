@@ -72,8 +72,7 @@ export const inventoryTransitions = ({ state, dispatch }: IdleQuestsSnD): Invent
         state.inventory.selection.adventurerId === item.adventurerId ?
             dispatch(selectAdventurer(undefined)) :
 
-        item.ctype == "adventurer" && 
-        !state.inventory.selection ?
+        item.ctype == "adventurer" ?
             dispatch(selectAdventurer(item)) :
 
         item.ctype == "taken-quest" && 
@@ -83,9 +82,7 @@ export const inventoryTransitions = ({ state, dispatch }: IdleQuestsSnD): Invent
             dispatch(unselectQuest()) :
 
         item.ctype == "taken-quest" ? 
-            (() => { 
-                dispatch(selectQuest(item))
-            })() :
+            dispatch(selectQuest(item)) :
 
         null
     },

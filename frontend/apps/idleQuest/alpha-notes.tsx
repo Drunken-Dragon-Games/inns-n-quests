@@ -2,9 +2,10 @@ import { useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { PixelFontFamily } from "./common-components"
 
-const date = "17 Feb 2023"
+const date = "18 Feb 2023"
 
 const notes = [
+    "* Press 'M' to toggle a draggable world map.",
     "* Press 'B' to toggle the inventory. (Icons and buttons pending).",
     "* Now you can click on the adventurers to see their splash art, soon we will display stats there as well.",
     "* A first IV/EV system is implemented.",
