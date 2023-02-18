@@ -15,6 +15,9 @@ const GlobalKeyMap = (key: string, snd: IdleQuestsStateAndDispatch) => {
     if (key == "b" || key == "B" || key == "i" || key == "I") {
         IdleQuestsTransitions.onToggleInventory(snd)()
 
+    } else if (key == "m" || key == "M") {
+        IdleQuestsTransitions.onToggleWorldMap(snd)()
+
     } else if (key == "Escape" && q.selectedQuest) {
         IdleQuestsTransitions.onCloseSelectedQuestAndInventory(snd)()
 

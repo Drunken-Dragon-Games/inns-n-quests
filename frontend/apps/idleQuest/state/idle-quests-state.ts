@@ -2,9 +2,11 @@ import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { combineReducers } from "redux"
 import { notificationsState } from './notifications-state'
 import { questBoardState } from './quest-board-state'
+import { worldMapState } from './world-map-state'
 
 export const idleQuestsReducer = combineReducers({
     questBoard: questBoardState.reducer,
+    worldMap: worldMapState.reducer,
     notifications: notificationsState.reducer,
 })
 

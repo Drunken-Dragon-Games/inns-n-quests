@@ -4,9 +4,9 @@ import { InventoryItem } from "../dsl/inventory"
 import { useIdleQuestsKeyMap } from "../idle-quests-key-map"
 import {
     clearAvailableQuests, IdleQuestsDispatch, IdleQuestsState, pickAdventurerForQuest, removeAvailableQuest,
-    removeTimedOutNotifications, selectAdventurer, selectQuest, toggleInventory, unPickAdventurerForQuest,
+    removeTimedOutNotifications, selectAdventurer, selectQuest, setCurrentWorldMapLocation, toggleInventory, toggleWorldMap, unPickAdventurerForQuest,
     unselectQuest
-} from "../state"
+} from "."
 import {
     claimTakenQuest, fetchMintTest, getAdventurers, getAvailableQuests, getInProgressQuests,
     takeAvailableQuest
@@ -114,5 +114,14 @@ export class IdleQuestsTransitions {
 
     static onRecruitAdventurer = ({ state, dispatch }: IdleQuestsStateAndDispatch) => () => {
         dispatch(fetchMintTest())
+    }
+
+    static onWorldMapLocationChange = ({ state, dispatch }: IdleQuestsStateAndDispatch) => (newLocation: [number, number]) => {
+        dispatch(setCurrentWorldMapLocation(newLocation))
+    }
+
+    static onToggleWorldMap = ({ state, dispatch }: IdleQuestsStateAndDispatch) => () => {
+        console.log("LOL")
+        dispatch(toggleWorldMap())
     }
 }

@@ -23,13 +23,14 @@ const AvailableQuestsWrapper = styled.div`
 `
 
 interface QuestBoardProps {
+    className?: string,
     availableQuests: AvailableQuest[],
     onSelectQuest: (quest: AvailableQuest) => void,
     onFetchMoreQuests: () => void
 }
 
-const QuestBoard = ({ availableQuests, onSelectQuest, onFetchMoreQuests }: QuestBoardProps) =>
-    <QuestBoardContainer>
+const QuestBoard = ({ className, availableQuests, onSelectQuest, onFetchMoreQuests }: QuestBoardProps) =>
+    <QuestBoardContainer className={className}>
         <AvailableQuestsWrapper>
             <QuestBoardArea availableQuests={availableQuests} onQuestClick={onSelectQuest} />
             <RefreshButton onClick={onFetchMoreQuests} />

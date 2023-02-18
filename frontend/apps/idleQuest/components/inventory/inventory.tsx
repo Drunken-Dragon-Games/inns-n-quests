@@ -18,7 +18,6 @@ const closeAnimation = keyframes`
 
 const InventoryContainer =styled.div<{ open: boolean }>`
     position: absolute;
-    z-index: 10;
     width: 100%;
     height: 100%;
     background-color: rgba(20,20,20,0.5);
@@ -50,6 +49,7 @@ const ActivityContainer = styled.div`
 `
 
 interface InventoryProps {
+    className?: string,
     children?: React.ReactNode,
     open: boolean,
     adventurers: Adventurer[],
@@ -67,7 +67,7 @@ interface InventoryProps {
 const Inventory = (props: InventoryProps) => {
     const [page, setPage] = useState<TabNames>("inventory")
     return(
-        <InventoryContainer open={props.open}>
+        <InventoryContainer className={props.className} open={props.open}>
             <Header
                 dragonSilver={props.dragonSilver}
                 dragonSilverToClaim={props.dragonSilverToClaim}

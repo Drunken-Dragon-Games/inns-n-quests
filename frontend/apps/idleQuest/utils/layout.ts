@@ -6,8 +6,8 @@
 export class Units {
 
     constructor(
-        private readonly units: string, 
-        private readonly scale: number
+        public readonly units: string, 
+        public readonly scale: number
     ) {}
 
     public u(amount?: number): string {

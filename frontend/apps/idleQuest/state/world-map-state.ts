@@ -1,10 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { nwThiolden, WorldMap } from "../dsl"
 
 export type WorldMapState = {
+    worldMap: WorldMap
+    open: boolean
     currentLocation: [number, number]
 }
 
 const worldMapInitialState: WorldMapState = { 
+    worldMap: nwThiolden,
+    open: false,
     currentLocation: [0, 0]
 }
 
@@ -13,12 +18,17 @@ export const worldMapState = createSlice({
     initialState: worldMapInitialState,
     reducers: {
 
-        setCurrentLocation: (state, action: PayloadAction<[number, number]>) => {
+        setCurrentWorldMapLocation: (state, action: PayloadAction<[number, number]>) => {
             state.currentLocation = action.payload
         },
+
+        toggleWorldMap: (state) => {
+            state.open = !state.open
+        }
     }
 })
 
 export const {
-    setCurrentLocation,
+    setCurrentWorldMapLocation,
+    toggleWorldMap,
 } = worldMapState.actions

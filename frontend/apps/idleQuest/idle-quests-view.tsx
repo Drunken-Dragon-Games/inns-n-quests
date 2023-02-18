@@ -9,6 +9,7 @@ import QuestBoard from "./components/quest-board"
 import QuestCard from "./components/quest-board/quest-card"
 import { IdleQuestsState, idleQuestsStore } from "./state/idle-quests-state"
 import { IdleQuestsTransitions } from "./state"
+import { WorldMapView } from "./components/world-map"
 
 const IdleQuestsContainer = styled.section`
     position: relative;
@@ -16,13 +17,25 @@ const IdleQuestsContainer = styled.section`
     height: 100vh;
 `
 
-const BackGroundPositionAbsolute = styled.section`
+const LoadingBackground = styled.section`
     position: absolute;
     z-index: 10;
     display: flex;
     width: 100%;
     height: 100%;
     background-color: #0B1015;
+`
+
+const InventoryModule = styled(Inventory)`
+    z-index: 20;
+`
+
+const WorldMapModule = styled(WorldMapView)`
+    z-index: 10;
+`
+
+const QuestBoardModule = styled(QuestBoard)`
+    z-index: 1;
 `
 
 const IdleQuestsView = () => {
@@ -37,13 +50,14 @@ const IdleQuestsView = () => {
     return(
         <IdleQuestsContainer>
             <ConditionalRender condition={snd.state.questBoard.initLoading}>
-                <BackGroundPositionAbsolute>
+                <LoadingBackground>
                     <Loading size={8} />
-                </BackGroundPositionAbsolute>
+                </LoadingBackground>
             </ConditionalRender>
 
             <Notifications notifications={snd.state.notifications.notifications} />
-            <Inventory
+
+            <InventoryModule
                 open={snd.state.questBoard.inventoryOpen}
                 adventurers={snd.state.questBoard.adventurers}
                 adventurerSlots={snd.state.questBoard.adventurerSlots}
@@ -68,13 +82,22 @@ const IdleQuestsView = () => {
                     adventurer={snd.state.questBoard.selectedAdventurer}
                 />
             : <></> } 
-            </Inventory>
+            </InventoryModule>
 
-            <QuestBoard
+            { snd.state.worldMap.open ?
+                <WorldMapModule
+                    wm={snd.state.worldMap.worldMap}
+                    currentLocation={snd.state.worldMap.currentLocation}
+                    onLocationChange={IdleQuestsTransitions.onWorldMapLocationChange(snd)}
+                />
+            : <></> }
+
+            <QuestBoardModule
                 availableQuests={snd.state.questBoard.availableQuests}
                 onSelectQuest={IdleQuestsTransitions.onSelectQuest(snd)}
                 onFetchMoreQuests={IdleQuestsTransitions.onFetchMoreQuests(snd)}
             />
+
             <AlphaNotes />
         </IdleQuestsContainer>
     )
