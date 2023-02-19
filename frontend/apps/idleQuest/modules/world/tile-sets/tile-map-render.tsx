@@ -42,14 +42,16 @@ const Tile = <Tid extends string>({ tileSet, render }: TileProps<Tid>) => {
     const state = useTileState({ tileSet, render })
     return (
         <TileContainer width={state.containerWidth} height={state.containerHeight}>
-            <PixelArtImage
-                src={state.imageSrc}
-                alt={state.imageAlt}
-                width={state.imageWidth}
-                height={state.imageHeight}
-                units={tileSet.metadata.proportions.units}
-                absolute
-            />
+            { render !== "" ?
+                <PixelArtImage
+                    src={state.imageSrc}
+                    alt={state.imageAlt}
+                    width={state.imageWidth}
+                    height={state.imageHeight}
+                    units={tileSet.metadata.proportions.units}
+                    absolute
+                />
+            : <></>}
         </TileContainer>
     )
 }

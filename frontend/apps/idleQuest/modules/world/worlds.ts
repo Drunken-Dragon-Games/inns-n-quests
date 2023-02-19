@@ -20,7 +20,7 @@ export const BaseInn: WorldMap<TavernBuildingTileSet> =
         name: "Base Inn",
         tileSet: TavernBuildingTileSet,
         renderMatrix: [
-            ["wooden-floor-1", "wooden-floor-1", "wooden-floor-1"],
+            ["wooden-floor-1", "window-south-1", "wooden-floor-1"],
             ["wooden-floor-1", "wooden-floor-1", "wooden-floor-1"],
             ["wooden-floor-1", "wooden-floor-1", "wooden-floor-1"],
             ["wooden-floor-1", "wooden-floor-1", "wooden-floor-1"],

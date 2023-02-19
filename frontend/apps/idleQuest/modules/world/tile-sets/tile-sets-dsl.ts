@@ -17,7 +17,7 @@ export class TileSet<TileId extends string> {
     }
 
     renderMatrixWidthUnits(renderMatrix: TilesRenderMatrix<TileId>): string {
-        return this.metadata.proportions.width(renderMatrix[0].length)
+        return this.metadata.proportions.width(renderMatrix[0].reduce((acc, tileId) => acc + this.metadata.set[tileId].collision[0], 0))
     }
 
     renderMatrixHeightUnits(renderMatrix: TilesRenderMatrix<TileId>): string {
@@ -48,6 +48,14 @@ export class TileSet<TileId extends string> {
         return this.metadata.proportions.unitHeight * this.metadata.set[tileId].size[1] 
     }
 
+    collisionWidthUnits(tileId: TileId): string { 
+        return this.metadata.proportions.width(this.metadata.set[tileId].collision[0])
+    }
+
+    collisionHeightUnits(tileId: TileId): string {
+        return this.metadata.proportions.height(this.metadata.set[tileId].collision[1])
+    }
+
     tileSrc(tileId: TileId): string {
         return `${this.metadata.uri}/x4_${tileId}.png`
     }
@@ -65,3 +73,8 @@ export class Proportions {
 }
 
 export type TilesRenderMatrix<TileId extends string> = TileId[][]
+
+export type TileRender<TileId extends string> = {
+    renders?: TileId,
+    collides: boolean
+}
