@@ -13,12 +13,23 @@ import { notEmpty } from "./utils"
  */
 const GlobalKeyMap = (key: string, transitions: IdleQuestsTransitions, state: IdleQuestsState) => { 
 
-    if (key == "b" || key == "B" || key == "i" || key == "I") {
+    if (key == "b" || key == "B") {
         transitions.inventory.onToggleInventory()
 
     } else if (key == "m" || key == "M") {
-        transitions.world.onToggleWorldView()
+        if (state.world.activeMap.metadata.name === "Northwest Thiolden" && state.world.open) {
+            transitions.world.onSetWorldMap({ open: false })
+        } else {
+            transitions.world.onSetWorldMap({ open: true, worldName: "Northwest Thiolden" })
+        }
 
+    } else if (key == "i" || key == "I") {
+        if (state.world.activeMap.metadata.name === "Base Inn" && state.world.open) {
+            transitions.world.onSetWorldMap({ open: false })
+        } else {
+            transitions.world.onSetWorldMap({ open: true, worldName: "Base Inn" })
+        }
+    
     } else if (key == "Escape" && state.inventory.selection) {
         transitions.inventory.onCloseSelectedQuestAndInventory()
 

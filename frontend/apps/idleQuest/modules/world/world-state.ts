@@ -2,20 +2,22 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { AdventurerParty } from "../../dsl"
 import { IdSet } from "../../utils"
 import { WorldActivity } from "./activity-dsl"
-import { nwThiolden, WorldMap } from "./world-map-dsl"
+import { WorldMap } from "./world-dsl"
+import { BaseInn, NorthWestThioldenPaperMap, WorldMapName } from "./worlds"
 
 export type WorldState = {
-    worldMap: WorldMap
+    activeMap: WorldMap
     open: boolean
-    viewLocation: [number, number]
+    viewLocation: { [worldName in WorldMapName]: [number, number] }
+
     parties: IdSet<AdventurerParty>
     activities: IdSet<WorldActivity>
 }
 
 const worldInitialState: WorldState = { 
-    worldMap: nwThiolden,
+    activeMap: NorthWestThioldenPaperMap,
     open: false,
-    viewLocation: [0, 0],
+    viewLocation: { "Northwest Thiolden": [0, 0], "Base Inn": [0, 0] },
     parties: {},
     activities: {},
 }
@@ -25,12 +27,19 @@ export const worldState = createSlice({
     initialState: worldInitialState,
     reducers: {
 
-        setCurrentWorldMapLocation: (state, action: PayloadAction<[number, number]>) => {
-            state.viewLocation = action.payload
+        setWorldViewLocation: (state, action: PayloadAction<[number, number]>) => {
+            const scale = state.activeMap.metadata.units.scale
+            const [ changeX, changeY ] = action.payload
+            const [ currentX, currentY ] = state.viewLocation[state.activeMap.metadata.name]
+            state.viewLocation[state.activeMap.metadata.name] = [ changeX, changeY ]
         },
 
-        toggleWorldMap: (state) => {
-            state.open = !state.open
+        setWorldMap: (state, action: PayloadAction<{ open?: boolean, worldName?: WorldMapName }>) => {
+            state.open = action.payload.open ?? state.open
+            state.activeMap = 
+                action.payload.worldName == "Northwest Thiolden" ? NorthWestThioldenPaperMap : 
+                action.payload.worldName == "Base Inn" ? BaseInn :
+                state.activeMap
         },
 
         setParties: (state, action: PayloadAction<AdventurerParty[]>) => {
@@ -48,8 +57,8 @@ export const worldState = createSlice({
 })
 
 export const {
-    setCurrentWorldMapLocation,
-    toggleWorldMap,
+    setWorldViewLocation,
+    setWorldMap,
     setParties,
     setActivities,
 } = worldState.actions

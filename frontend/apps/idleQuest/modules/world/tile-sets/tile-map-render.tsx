@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import styled from "styled-components"
 import { PixelArtImage } from "../../../utils"
-import { TileSet, RenderMatrix } from "../tile-sets-dsl"
+import { TileSet, TilesRenderMatrix } from "./tile-sets-dsl"
 
 const TileContainer = styled.div<{ width: string, height: string }>`
     width: ${props => props.width};
@@ -26,7 +26,7 @@ const useTileState = <Tid extends string>({ tileSet, render }: TileProps<Tid>): 
     return useMemo(() => ({
         imageWidth: tileSet.sizeWidth(render),
         imageHeight: tileSet.sizeHeight(render),
-        imageAlt: `${tileSet.name} ${render} tile`,
+        imageAlt: `${tileSet.metadata.name} ${render} tile`,
         imageSrc: tileSet.tileSrc(render),
         containerWidth: tileSet.sizeWidthUnits(render),
         containerHeight: tileSet.sizeHeightUnits(render),
@@ -47,7 +47,7 @@ const Tile = <Tid extends string>({ tileSet, render }: TileProps<Tid>) => {
                 alt={state.imageAlt}
                 width={state.imageWidth}
                 height={state.imageHeight}
-                units={tileSet.proportions.units}
+                units={tileSet.metadata.proportions.units}
                 absolute
             />
         </TileContainer>
@@ -64,12 +64,12 @@ const TileMapContainer = styled.div<{ width: string, height: string }>`
     background-color: red;
 ` 
 
-type TileMapProps<Tid extends string> = {
+type TileMapRenderProps<Tid extends string> = {
     tileSet: TileSet<Tid>
-    renderMatrix: RenderMatrix<Tid>
+    renderMatrix: TilesRenderMatrix<Tid>
 }
 
-const TileMap = <Tid extends string>({ tileSet, renderMatrix }: TileMapProps<Tid>) => {
+const TileMapRender = <Tid extends string>({ tileSet, renderMatrix }: TileMapRenderProps<Tid>) => {
     const [width, height] = useMemo(() => [ 
         tileSet.renderMatrixWidthUnits(renderMatrix),
         tileSet.renderMatrixHeightUnits(renderMatrix)
@@ -77,10 +77,10 @@ const TileMap = <Tid extends string>({ tileSet, renderMatrix }: TileMapProps<Tid
     return (
         <TileMapContainer width={width} height={height}>
             {renderMatrix.map((row, y) => row.flatMap((render, x) => 
-                <Tile tileSet={tileSet} render={render} />
+                <Tile key={`${x}-${y}`} tileSet={tileSet} render={render} />
             ))}
         </TileMapContainer>
     )
 }
 
-export default TileMap
+export default TileMapRender

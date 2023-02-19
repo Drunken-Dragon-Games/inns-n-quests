@@ -5,7 +5,6 @@ import AlphaNotes from "./alpha-notes"
 import { If } from "./common-components"
 import { IdleQuestsState, idleQuestsStore } from "./idle-quests-state"
 import { idleQuestsTransitions, useInitEffects } from "./idle-quests-transitions"
-import { InnView } from "./modules/inn"
 import { InventoryActivityView, InventoryView } from "./modules/inventory"
 import { NotificationsView } from "./modules/notifications"
 import { QuestBoardView } from "./modules/quest-board"
@@ -32,10 +31,6 @@ const NotificationsModule = styled(NotificationsView)`
 
 const InventoryModule = styled(InventoryView)`
     z-index: 20;
-`
-
-const InnViewModule = styled(InnView)`
-    z-index: 50;
 `
 
 const WorldViewModule = styled(WorldView)`
@@ -80,12 +75,8 @@ const IdleQuestsView = () => {
             <If $if={state.world.open}>
                 <WorldViewModule
                     worldState={state.world}
-                    onViewLocationChange={transitions.world.onWorldMapLocationChange}
+                    worldTransitions={transitions.world}
                 />
-            </If>
-
-            <If $if={true}>
-                <InnViewModule />
             </If>
 
             <QuestBoardModule
