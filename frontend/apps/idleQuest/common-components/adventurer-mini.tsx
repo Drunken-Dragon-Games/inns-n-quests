@@ -17,9 +17,8 @@ const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
 
 const AdventurerContainer = styled.div`
     position: relative;
-    display: flex;
-    height: 100%;
     width: 100%;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -34,11 +33,6 @@ const NameTitle = styled.div<{ $display: boolean }>`
     font-weight: bold;
     text-transform: uppercase;
     display: ${props => props.$display ? "block" : "none"};
-`
-
-const AdventurerSpriteWrapper = styled.div`
-    display: flex;
-    height: 100%;
 `
 
 const APSWrapper = styled.div<{ units: Units }>`
@@ -142,14 +136,12 @@ const AdventurerMini = ({
                 />
             </DeadMark>
 
-            <AdventurerSpriteWrapper>
-                <AdventurerSprite
-                    adventurer={adventurer}
-                    render={render}
-                    emoji={emoji}
-                    units={units.scaleBy(1.5)}
-                />
-            </AdventurerSpriteWrapper>
+            <AdventurerSprite
+                adventurer={adventurer}
+                render={render}
+                emoji={emoji}
+                units={units}
+            />
 
             <InfoWrapper units={units}>
                 <NameTitle $display={notEmpty(displayNameColor)}>

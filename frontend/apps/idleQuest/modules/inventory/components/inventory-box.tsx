@@ -26,19 +26,26 @@ const InnerBorderBox = styled.div<{ $hover?: boolean }>`
     background-color: ${props => props.$hover ? "rgba(20,20,20,0.5)" : "rgba(0,0,0,0)"};
 `
 
-const InnerBackgroundBox = styled.div<{ $selected?: boolean }>`
+const InnerBackgroundBox = styled.div<{ $selected?: boolean, $center?: boolean }>`
     ${BoxCss}
     width: 100%;
     height: 100%;
 
-    #box-shadow: 0 4px -8px 0 rgba(0, 0, 0, 0.5);
     background-color: ${props => props.$selected ? "#1976d2" : "rgba(0,0,0,0)"};
     box-shadow: inset 0 0 0.5vmax ${props => props.$selected ? "#90caf9" : "rgba(0,0,0,0)"};
+    overflow: visible;
 
     display: flex;
-    justify-content: center;
+    flex-direction: column-reverse;
     align-items: center;
-    & > * { position: absolute; };
+
+    ${props => props.$center && css`
+        justify-content: center;
+    `}
+`
+
+const ChildrenWrapper = styled.div`
+    position: absolute;
 `
 
 const InfoBox = styled.div`
@@ -46,6 +53,7 @@ const InfoBox = styled.div`
     right: -0.5vmax;
     bottom: -0.5vmax;
     padding: 0.15vmax;
+    z-index: 2;
     background-color: rgba(20,20,20,0.9);
     border-radius: 0.15vmax;
 `
@@ -122,6 +130,7 @@ interface InventoryBoxProps {
     children?: ReactNode,
     selected?: boolean,
     disabled?: boolean,
+    center?: boolean,
     hover?: boolean,
     empty?: boolean,
     info?: string,
@@ -130,7 +139,7 @@ interface InventoryBoxProps {
     onMouseLeave?: () => void
 }
 
-const InventoryBox = ({ className, children, selected, disabled, hover, empty, info, onClick, onMouseEnter, onMouseLeave }: InventoryBoxProps) => {
+const InventoryBox = ({ className, children, selected, disabled, center, hover, empty, info, onClick, onMouseEnter, onMouseLeave }: InventoryBoxProps) => {
     return (
         <InventoryBoxContainer 
             className={className} 
@@ -141,8 +150,10 @@ const InventoryBox = ({ className, children, selected, disabled, hover, empty, i
             $empty={empty}
         >
             <InnerBorderBox $hover={hover && !empty && !disabled}>
-                <InnerBackgroundBox $selected={selected && !empty && !disabled}>
-                    {children}
+                <InnerBackgroundBox $selected={selected && !empty && !disabled} $center={center}>
+                    <ChildrenWrapper>
+                        {children}
+                    </ChildrenWrapper>
                 </InnerBackgroundBox>
                 {info ? <InfoBox><InfoInnerBox><span>{info}</span></InfoInnerBox></InfoBox> : <></>}
             </InnerBorderBox>

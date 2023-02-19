@@ -1,0 +1,1 @@
+export { default as InnView } from "./inn-view"
