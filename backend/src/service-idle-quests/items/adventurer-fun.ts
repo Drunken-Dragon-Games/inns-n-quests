@@ -285,7 +285,8 @@ export default class AdventurerFun {
             const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
             const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
             const chromaOrPlain = this.metadataRegistry.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
-            return `https://cdn.ddu.gg/adv-of-thiolden/x6/${adventurerName}-front-${chromaOrPlain}.png`
+            const finalName = adventurerName == "avva" ?  (Math.floor(Math.random() * 2) == 0 ? "avva_fire" : "avva_ice") : adventurerName
+            return `https://cdn.ddu.gg/adv-of-thiolden/x6/${finalName}-front-${chromaOrPlain}.png`
         }
 
         const withSprites: Adventurer[] = adventurers.map(adventurer => {

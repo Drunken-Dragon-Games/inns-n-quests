@@ -1,17 +1,24 @@
 import styled from "styled-components"
 import { useState } from "react"
 import { Adventurer } from "../../dsl"
-import { notEmpty, PixelArtImage, vh1 } from "../../utils"
+import { notEmpty, PixelArtImage, vh, vh1 } from "../../utils"
 import AdventurerMini from "../adventurer-mini"
+import { If } from "../helper-components"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
-    width: 100%;
-    height: 22vh;
-    width: 8vh;
+    position: relative;
+    height: 10vh;
+    width: 10vh;
     display: flex;
-    align-items: center;
+    flex-direction: column-reverse;
     justify-content: center;
+    align-items: center;
     ${props => props.interactuable ? `cursor: pointer;` : ``}
+`
+
+const AdventurerMiniWrapper = styled.div`
+    position: absolute;
+    top: 0;
 `
 
 const EmptySlot = () =>
@@ -45,15 +52,17 @@ const AdventurerSlot = ({ className, adventurer, emoji, onUnselectAdventurer }: 
             interactuable={interactuable}
         >
             <EmptySlot />
-            {notEmpty(adventurer) ?
-                <AdventurerMini
-                    adventurer={adventurer}
-                    emoji={displayedEmoji}
-                    render={render}
-                    displayAPS={true}
-                    units={vh1}
-                />
-            : <></> }
+            <If $if={notEmpty(adventurer)}>
+                <AdventurerMiniWrapper>
+                    <AdventurerMini
+                        adventurer={adventurer!}
+                        emoji={displayedEmoji}
+                        render={render}
+                        displayAPS={true}
+                        units={vh(1.7)}
+                    />
+                </AdventurerMiniWrapper>
+            </If>
         </AdventurerSlotContainer>
     )
 }

@@ -63,13 +63,10 @@ const ItemBox = styled(InventoryBox)`
     height: 8vmax;
 `
 
-const ItemBoxWrapper = styled.div<{ collection: AdventurerCollection }>`
-`
-
-type InventoryItemViewState = [string | undefined, boolean | undefined, boolean | undefined]
+type InventoryItemViewState = [string | undefined, boolean | undefined, boolean | undefined, boolean | undefined]
 
 const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItemViewState => {
-    const [info, selected, disabled] = useMemo(() => {
+    const [info, selected, disabled, center] = useMemo(() => {
         const item = props.item
         if (item && item.ctype === "adventurer") {
             return [
@@ -82,7 +79,9 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
                 // disabled
                 props.selection && 
                 props.selection.ctype === "available-quest" && 
-                item.inChallenge
+                item.inChallenge,
+                // center
+                false
             ]
         } else if (item && item.ctype === "taken-quest") {
             return [
@@ -93,15 +92,15 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
                 props.selection.ctype === "taken-quest" &&
                 props.selection.takenQuestId === item.takenQuestId,
                 // disabled
-                false
+                false,
+                // center
+                true
             ]
-        } else {
-            return [undefined, undefined, undefined]
-        }
+        } else return [undefined, undefined, undefined, undefined]
     }, [props.item, props.selection, props.selectedParty])
     // Calculate the time left for the quest every time we render
     const timerInfo = props.item && props.item.ctype === "taken-quest" ? takenQuestTimeLeft(props.item) : info
-    return [timerInfo, selected, disabled]
+    return [timerInfo, selected, disabled, center]
 }
 
 interface InventoryItemViewProps {
@@ -113,7 +112,7 @@ interface InventoryItemViewProps {
 
 const InventoryItemView = (props: InventoryItemViewProps) => {
     const [hover, setHover] = useState(false)
-    const [info, selected, disabled] = useInventoryItemViewState(props)
+    const [info, selected, disabled, center] = useInventoryItemViewState(props)
     return (
         <ItemBox
             onClick={() => !disabled && props.onItemClick && props.item && props.onItemClick(props.item)}
@@ -121,6 +120,7 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
             onMouseLeave={() => setHover(false)}
             selected={selected}
             disabled={disabled}
+            center={center}
             hover={hover}
             empty={!props.item}
             info={info}
@@ -129,7 +129,7 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
             <AdventurerSprite
                 adventurer={props.item}
                 emoji={hover ? props.item.adventurerId : undefined}
-                units={vmax(0.7)}
+                units={vmax(0.8)}
             /> :
         props.item?.ctype === "taken-quest" ? 
             <PixelArtImage

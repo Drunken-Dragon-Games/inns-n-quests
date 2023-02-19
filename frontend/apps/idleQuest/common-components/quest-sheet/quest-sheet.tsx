@@ -224,16 +224,6 @@ const QuestSheet = ({ className, quest, adventurerSlots, onSign, onUnselectAdven
                 <QuestInfoLeft>
                     <Title>{questName(quest)}</Title>
                     <Details dangerouslySetInnerHTML={{ __html: questDescription(quest) }} />
-                    <Push />
-                    <AdventurersWrapper>
-                        {adventurerSlots.map((adventurer, index) =>
-                            <AdventurerSlot
-                                key={"adventurer-slot-" + index}
-                                adventurer={adventurer}
-                                onUnselectAdventurer={quest?.ctype === "available-quest" ? onUnselectAdventurer : undefined}
-                            />
-                        )}
-                    </AdventurersWrapper>
                 </QuestInfoLeft>
 
                 <QuestInfoRight>
@@ -246,6 +236,17 @@ const QuestSheet = ({ className, quest, adventurerSlots, onSign, onUnselectAdven
                     <APSReq apsAccumulated={state.apsAccumulated} apsRequired={state.apsRequired} />
                 </QuestInfoRight>
             </QuestInfo>
+
+            <Push />
+            <AdventurersWrapper>
+                {adventurerSlots.map((adventurer, index) =>
+                    <AdventurerSlot
+                        key={"adventurer-slot-" + index}
+                        adventurer={adventurer}
+                        onUnselectAdventurer={quest?.ctype === "available-quest" ? onUnselectAdventurer : undefined}
+                    />
+                )}
+            </AdventurersWrapper>
 
             <Footer>
                 <Signature
