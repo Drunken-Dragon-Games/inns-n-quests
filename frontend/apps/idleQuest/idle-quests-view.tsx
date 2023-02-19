@@ -84,7 +84,7 @@ const IdleQuestsView = () => {
                 />
             </If>
 
-            <If $if={false}>
+            <If $if={true}>
                 <InnViewModule />
             </If>
 

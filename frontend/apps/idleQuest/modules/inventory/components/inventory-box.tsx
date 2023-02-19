@@ -46,6 +46,7 @@ const InnerBackgroundBox = styled.div<{ $selected?: boolean, $center?: boolean }
 
 const ChildrenWrapper = styled.div`
     position: absolute;
+    z-index: 2;
 `
 
 const InfoBox = styled.div`
@@ -53,7 +54,7 @@ const InfoBox = styled.div`
     right: -0.5vmax;
     bottom: -0.5vmax;
     padding: 0.15vmax;
-    z-index: 2;
+    z-index: 3;
     background-color: rgba(20,20,20,0.9);
     border-radius: 0.15vmax;
 `

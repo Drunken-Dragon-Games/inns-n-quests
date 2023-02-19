@@ -224,7 +224,7 @@ const EmojiContainer = styled.div<{ $display: boolean, dimensions: Dimensions }>
     position: absolute;
     width: ${props => props.dimensions.units.u(3.4)};
     height: ${props => props.dimensions.units.u(3.4)};
-    z-index: 100;
+    z-index: 10;
     overflow: visible;
     display: flex;
     justify-content: center;
