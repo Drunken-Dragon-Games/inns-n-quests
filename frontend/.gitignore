@@ -34,6 +34,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+public/textures/
+public/maps/
 
 backend/.npmrc
 frontend/.npmrc

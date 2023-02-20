@@ -12,6 +12,18 @@ export class TileSet<TileId extends string> {
         set: { [tid in TileId]: TileData<TileId> } 
     }){}
 
+    get srcSet(): { tileId: TileId, uri: string }[] {
+        return this.tileNames.map(tileId => ({ tileId, uri: this.tileSrc(tileId)}))
+    }
+
+    get tileNames(): TileId[] {
+        return Object.keys(this.metadata.set) as TileId[]
+    }
+
+    get tiles(): TileData<TileId>[] {
+        return Object.values(this.metadata.set)
+    }
+
     scaleBy(scale: number): TileSet<TileId> { 
         return new TileSet<TileId>({...this.metadata, proportions: this.metadata.proportions.scaleBy(scale)})
     }

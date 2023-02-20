@@ -11,8 +11,9 @@ const openAnimation = keyframes`
 `
 
 const closeAnimation = keyframes`
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+    0% { opacity: 1; top: 0; }
+    99% { top: 0; }
+    100% { opacity: 0; top: -100vh; }
 `
 
 const InventoryContainer =styled.div<{ open: boolean }>`
@@ -21,7 +22,7 @@ const InventoryContainer =styled.div<{ open: boolean }>`
     height: 100%;
     background-color: rgba(20,20,20,0.5);
     backdrop-filter: blur(5px);
-    ${props => props.open ? "top: 0;" : "top: -100vh;"}i
+    ${props => props.open ? "top: 0;" : "top: -100vh;"};
     opacity: ${props => props.open ? "1" : "0"};
     animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 `
@@ -35,6 +36,7 @@ const InventoryBody = styled.div<{ open: boolean }>`
     width: 100%;
     display: flex;
     opacity: ${props => props.open ? "1" : "0"};
+    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 `
 
 const ActivityContainer = styled.div`

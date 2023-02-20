@@ -7,6 +7,7 @@ import { IdleQuestsState, idleQuestsStore } from "./idle-quests-state"
 import { idleQuestsTransitions, useInitEffects } from "./idle-quests-transitions"
 import { InventoryActivityView, InventoryView } from "./modules/inventory"
 import { NotificationsView } from "./modules/notifications"
+import { usePhaserRender } from "./modules/overworld/phaser-render"
 import { QuestBoardView } from "./modules/quest-board"
 import { WorldView } from "./modules/world"
 
@@ -38,6 +39,11 @@ const WorldViewModule = styled(WorldView)`
 `
 
 const QuestBoardModule = styled(QuestBoardView)`
+    z-index: 0;
+`
+
+const PhaserModule = styled.div`
+    position: absolute;
     z-index: 1;
 `
 
@@ -46,6 +52,7 @@ const IdleQuestsView = () => {
     const dispatch = idleQuestsStore.dispatch 
     const transitions = idleQuestsTransitions({ state, dispatch })
     useInitEffects(transitions, state)
+    usePhaserRender()
     const dragonSilver = 0
     const dragonSilverToClaim = 0
     
@@ -56,6 +63,8 @@ const IdleQuestsView = () => {
                     <Loading size={8} />
                 </LoadingBackground>
             </ConditionalRender>
+
+            <PhaserModule id="overworld-phaser-container" key="overworld-phaser-container" />
 
             <NotificationsModule notifications={state.notifications.notifications} />
 
