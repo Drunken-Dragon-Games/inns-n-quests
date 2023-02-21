@@ -1,4 +1,5 @@
 import Phaser from "phaser"
+import { innBuildingTileSet } from "../assets"
 
 export class Preloader extends Phaser.Scene {
 
@@ -7,9 +8,10 @@ export class Preloader extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image("tiles", "maps/inn-building.png")
+        //this.load.image("tiles", "maps/inn-building.png")
         //this.load.image("gmas1", "https://cdn.ddu.gg/gmas/sprite-sheets-front/spritesheet-gmas-front_1.png")
-        this.load.tilemapTiledJSON("base-inn", "maps/base-inn.json")
+        //this.load.tilemapTiledJSON("base-inn", "maps/base-inn.json")
+        innBuildingTileSet.loadImage(this.load)
         this.load.spritesheet("gmas1", "maps/spritesheet-gmas-front_1.png", {
             frameWidth: 52,
             frameHeight: 75,
