@@ -1,7 +1,7 @@
 import { TileSet } from "./tile-set-dsl"
 import Phaser from "phaser"
 
-export type RMTile<TileId extends string> = TileId | "" | string[];
+export type RMTile<TileId extends string> = TileId | "" | string[] | RMTile<TileId>[]
 
 export class TileRenderMatrix<TileId extends string> {
 
@@ -11,9 +11,10 @@ export class TileRenderMatrix<TileId extends string> {
         coordSize: [number, number]
     }) {}
 
-    render(scene: Phaser.Scene): Phaser.GameObjects.Sprite[] {
+    render(scene: Phaser.Scene, origin: [number, number]): Phaser.GameObjects.Sprite[] {
         const [ xCoordSize, yCoordSize ] = this.metadata.coordSize
         const [ xTileSize, yTileSize ] = this.metadata.tileSet.metadata.tileSize
+        const [ xOrigin, yOrigin ] = origin
         const group = [] as Phaser.GameObjects.Sprite[]
         const tilesetName = this.metadata.tileSet.metadata.name
         this.metadata.matrix.forEach((row, y) => {
@@ -22,16 +23,16 @@ export class TileRenderMatrix<TileId extends string> {
                 const t = this.metadata.tileSet.getTile(tile as TileId)
                 if (tile !== "" && t.collision[0] === 0) {
                     const sprite = scene.add.sprite(
-                        x * xCoordSize, 
-                        y * yCoordSize, 
+                        x * xCoordSize + xOrigin, 
+                        y * yCoordSize + yOrigin, 
                         tilesetName, 
                         this.metadata.tileSet.tileSpriteSheetLocation(tile as TileId)
                     )
                     group.push(sprite)
                 } else if (tile !== "") {
                     const sprite = scene.physics.add.staticSprite(
-                        x * xCoordSize, 
-                        y * yCoordSize, 
+                        x * xCoordSize + xOrigin, 
+                        y * yCoordSize + yOrigin, 
                         tilesetName, 
                         this.metadata.tileSet.tileSpriteSheetLocation(tile as TileId)
                     )

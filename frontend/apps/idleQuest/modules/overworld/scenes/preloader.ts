@@ -16,6 +16,7 @@ export class Preloader extends Phaser.Scene {
             frameWidth: 52,
             frameHeight: 75,
         })
+        this.load.image("inn-bg", "maps/inn-bg-2.png")
     }
 
     create() {

@@ -13,6 +13,7 @@ import { WorldView } from "./modules/world"
 
 const IdleQuestsContainer = styled.section`
     position: relative;
+    overflow: hidden;
     width: 100vw;
     height: 100vh;
 `

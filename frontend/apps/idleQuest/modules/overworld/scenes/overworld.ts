@@ -38,7 +38,7 @@ export class Overworld extends Phaser.Scene {
             D: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
             Space: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
         }
-        this.cameraControls = new Phaser.Cameras.Controls.SmoothedKeyControl({
+        const cameraControl = this.cameraControls = new Phaser.Cameras.Controls.SmoothedKeyControl({
             camera: this.cameras.main,
             left: this.inputs.A,
             right: this.inputs.D,
@@ -53,13 +53,18 @@ export class Overworld extends Phaser.Scene {
             minZoom: 1,
             maxZoom: 2.0
         })
+        this.cameras.main.setBounds(0, 0, 1577, 1300, true)
+        this.cameras.main.scrollX = this.cameras.main.scrollX - 190
         //this.game.events.emit("progress", 1)
     }
 
     create() {
 
-        innBuildingRenderMatrix[0].render(this)
-        this.walls = innBuildingRenderMatrix[1].render(this)
+        this.add.image(0, 0, "inn-bg").setOrigin(0, 0)
+
+        const innOrigin: [number, number] = [350, 485]
+        innBuildingRenderMatrix[0].render(this, innOrigin)
+        this.walls = innBuildingRenderMatrix[1].render(this, innOrigin)
 
         const adventurersGroup = this.physics.add.group()
 
