@@ -1,5 +1,4 @@
 import Phaser from "phaser"
-import { idleQuestsStore } from "../../../idle-quests-state"
 import { innBuildingRenderMatrix } from "../assets"
 
 type KInputs = {
@@ -99,7 +98,6 @@ export class Overworld extends Phaser.Scene {
 
         // @ts-ignore
         this.input.on("drag", (pointer, gameObject, dragX, dragY) => {
-            console.log(gameObject.body.embedded)
             this.draggingDirection = {
                 obj: gameObject,
                 dragPosition: [dragX, dragY],

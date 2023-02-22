@@ -13,7 +13,8 @@ const mapImageSrc = (adventurer: Adventurer) => {
     if (adventurer.collection === "adventurers-of-thiolden") {
         // extract with regex any string between "x6/" and ".png"
         const advId = adventurer.sprite.match(/x6\/(.*)\.png/)?.[1]
-        const [ advName, isChromaText ] = advId?.split("-front-") ?? ["abbelka", "plain"]
+        const [ advName1, isChromaText ] = advId?.split("-front-") ?? ["abbelka", "plain"]
+        const advName = advName1.includes("avva") ? "avva" : advName1
         const isChroma = isChromaText === "plain" ? "0" : "1"
         const fileFormat = isChromaText === "plain" ? "webp" : "mp4"
         const apsSum = adventurer.athleticism + adventurer.intellect + adventurer.charisma

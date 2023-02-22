@@ -1,7 +1,10 @@
+import { useState } from "react"
 import styled, { keyframes } from "styled-components"
+import { OswaldFontFamily } from "../../common-components"
 import { AvailableQuest } from "../../dsl"
 import DragonSilverDisplay from "./components/dragon-silver-display"
-import InventoryBrowser from "./components/inventory-browser"
+import InventoryPage, { PageName } from "./components/inventory-page"
+import { InventoryItem } from "./inventory-dsl"
 import { InventoryState } from "./inventory-state"
 import { InventoryTransitions } from "./inventory-transitions"
 
@@ -49,6 +52,57 @@ const ActivityContainer = styled.div`
     justify-content: center;
 `
 
+const InventoryBrowserContainer = styled.div`
+    height: 100%;
+    width: 36vmax;
+    display: flex;
+    flex-direction: column;
+`
+
+const InventoryTabsContainer = styled.div`
+    height: 5%;
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+`
+
+const InventoryTab = styled.div<{ selected: boolean }>`
+    height: 100%;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    font-size: 1vmax;
+    justify-content: center;
+    cursor: pointer;
+    color: ${props => props.selected ? "white" : "rgba(20,20,20,1)"};
+    filter: ${props => props.selected ? "drop-shadow(0px 0px 5px white)" : "none"};
+    border-bottom: ${props => props.selected ? "2px solid white" : "2px solid rgba(20,20,20,0.9)"};
+    ${OswaldFontFamily}
+`
+
+const InventoryPagesContainer = styled.div`
+    height: 95%;
+    width: 100%;
+`
+
+const InventoryBrowser = ({ inventoryState, onItemClick }: { inventoryState: InventoryState, onItemClick: (item: InventoryItem) => void }) => {
+    const [page, setPage] = useState<PageName>("adventurers")
+    return (
+        <InventoryBrowserContainer>
+            <InventoryTabsContainer>
+                <InventoryTab onClick={() => setPage("adventurers")} selected={page === "adventurers"}><span>Adventurers</span></InventoryTab>
+                <InventoryTab onClick={() => setPage("taken-quests")} selected={page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
+            </InventoryTabsContainer>
+            <InventoryPagesContainer>
+                <InventoryPage inventoryState={inventoryState} page={page} onItemClick={onItemClick} />
+            </InventoryPagesContainer>
+        </InventoryBrowserContainer>
+    )
+}
+
 interface InventoryProps {
     className?: string,
     children?: React.ReactNode,
@@ -71,8 +125,8 @@ const InventoryView = (props: InventoryProps) => {
             />
             <InventoryBody open={props.inventoryState.open}>
                 <InventoryBrowser 
-                    inventoryState={props.inventoryState}
-                    onItemClick={props.inventoryTransitions.onItemClick}
+                    inventoryState={props.inventoryState} 
+                    onItemClick={props.inventoryTransitions.onItemClick} 
                 />
                 <ActivityContainer>
                     {props.children}

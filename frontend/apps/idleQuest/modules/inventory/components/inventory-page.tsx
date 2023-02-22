@@ -2,43 +2,43 @@ import { useMemo, useState } from "react"
 import styled from "styled-components"
 import { AdventurerSprite } from "../../../common-components"
 import {
-    Adventurer, AdventurerCollection, mapQuestScroll, SelectedQuest, takenQuestTimeLeft
+    Adventurer, mapQuestScroll, takenQuestTimeLeft
 } from "../../../dsl"
 import { PixelArtImage, vmax } from "../../../utils"
 import { InventoryItem } from "../inventory-dsl"
 import { InventorySelection, InventoryState } from "../inventory-state"
 import InventoryBox from "./inventory-box"
 
-const InventoryBrowserContainer = styled.div`
+const InventoryPageContainer = styled.div`
     box-sizing: border-box;
     margin: 0.5vmax;
     padding-left: 0.5vmax;
     height: calc(100% - 1vmax);
-    width: 36vw;
+    width: 100%;
     
     direction: rtl;
     overflow-x: hidden;
     overflow-y: scroll;
 
     ::-webkit-scrollbar {
-        width: 0.4vmax; 
+        width: 0.4vw; 
       }
       
     /* Track */
     ::-webkit-scrollbar-track {
         background: #495362;
         background-clip: padding-box;
-        border-left: 0.1vmax solid transparent;
-        border-right: 0.1vmax solid transparent;
+        border-left: 0.1vw solid transparent;
+        border-right: 0.1vw solid transparent;
     }
        
     /* Handle */
     ::-webkit-scrollbar-thumb {
         background: rgba(0, 0, 0, 0);
-        border-top: 0.3vmax solid rgba(0, 0, 0, 0);
-        border-right: 0.5vmax  solid #8A8780;
-        border-bottom: 0.3vmax  solid rgba(0, 0, 0, 0);;
-        border-left: 0.5vmax  solid #8A8780;
+        border-top: 0.3vw solid rgba(0, 0, 0, 0);
+        border-right: 0.5vw  solid #8A8780;
+        border-bottom: 0.3vw  solid rgba(0, 0, 0, 0);;
+        border-left: 0.5vw  solid #8A8780;
     }
       
     /* Handle on hover */
@@ -53,7 +53,7 @@ const DirectionFix = styled.div`
     display: inline-flex;
     flex-wrap: wrap;
 
-    width: 35vmax;
+    width: 100%;
     gap: 0.5vmax;
 
 `
@@ -141,52 +141,47 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
     )
 }
 
-const useInventoryBrowserState = (state: InventoryState) => 
+const useInventoryPageState = (state: InventoryState, page: PageName) => 
     useMemo(() => {
-        const itemsSum = state.adventurers.length + state.takenQuests.length
-        const slotsTail = itemsSum % 4
+        const items = page == "adventurers" ? state.adventurers : state.takenQuests
+        const slotsTail = items.length % 4
         const extraSlots = slotsTail === 0 ? 4 : 4 - slotsTail
-        const amountIfWithExtraSlots = itemsSum + extraSlots
-        const amountIfWithoutExtraSlots = (4 * 8) - itemsSum
+        const amountIfWithExtraSlots = items.length + extraSlots
+        const amountIfWithoutExtraSlots = (4 * 8) -items.length 
         const totalExtraSlots = amountIfWithExtraSlots >= 4 * 8 ? extraSlots : amountIfWithoutExtraSlots
         const extraSlotsArray = Array(totalExtraSlots).fill(0)
-        return extraSlotsArray
-    }, [state.adventurers, state.takenQuests])
+        return [items, extraSlotsArray]
+    }, [state.adventurers, state.takenQuests, page])
 
-interface InventoryBrowserProps {
+export type PageName = "adventurers" | "taken-quests"
+
+interface InventoryPageProps {
+    className?: string,
     inventoryState: InventoryState,
+    page?: PageName
     onItemClick?: (item: InventoryItem) => void
 }
 
-const InventoryBrowser = ({ inventoryState, onItemClick }: InventoryBrowserProps) => {
-    const extraSlotsArray = useInventoryBrowserState(inventoryState)
+const InventoryPage = ({ className, inventoryState, onItemClick, page = "adventurers" }: InventoryPageProps) => {
+    const [items, extraSlotsArray] = useInventoryPageState(inventoryState, page)
     return (
-        <InventoryBrowserContainer>
+        <InventoryPageContainer className={className}>
             <DirectionFix>
-                {inventoryState.adventurers.map((item) => 
-                    <InventoryItemView 
-                        key={item.adventurerId} 
-                        item={item} 
+                {items.map((item, index) =>
+                    <InventoryItemView
+                        key={index}
+                        item={item}
                         selectedParty={inventoryState.selectedParty}
                         selection={inventoryState.selection}
-                        onItemClick={onItemClick} 
-                    />
-                )}
-                {inventoryState.takenQuests.map((item) => 
-                    <InventoryItemView 
-                        key={item.takenQuestId} 
-                        item={item} 
-                        selectedParty={inventoryState.selectedParty}
-                        selection={inventoryState.selection}
-                        onItemClick={onItemClick} 
+                        onItemClick={onItemClick}
                     />
                 )}
                 {extraSlotsArray.map((_, i) => 
                     <InventoryItemView key={i} />
                 )}
             </DirectionFix>
-        </InventoryBrowserContainer>
+        </InventoryPageContainer>
     )
 }
 
-export default InventoryBrowser
+export default InventoryPage
