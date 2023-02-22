@@ -1,18 +1,23 @@
 import { IdleQuestsSnD } from "../../idle-quests-state"
-import { setCurrentWorldMapLocation, toggleWorldMap } from "./world-state"
+import { setWorldViewLocation, setWorldMap } from "./world-state"
+import { WorldMapName } from "./worlds"
 
 export type WorldTransitions = {
-    onWorldMapLocationChange: (newLocation: [number, number]) => void
-    onToggleWorldView: () => void
+    onWorldViewLocationChange: (locationDirection: [number, number]) => void
+    onSetWorldMap: (worldMap: { open?: boolean, worldName?: WorldMapName }) => void
+    onToggleWorldMap: (open?: boolean) => void
 }
 
 export const worldTransitions = ({ state, dispatch }: IdleQuestsSnD): WorldTransitions => ({
 
-    onWorldMapLocationChange: (newLocation: [number, number]) => {
-        dispatch(setCurrentWorldMapLocation(newLocation))
+    onWorldViewLocationChange: (locationDirection: [number, number]) => {
+        dispatch(setWorldViewLocation(locationDirection))
     },
 
-    onToggleWorldView: () => {
-        dispatch(toggleWorldMap())
-    }
+    onSetWorldMap: (worldMap: { open?: boolean, worldName?: WorldMapName }) => {
+        dispatch(setWorldMap(worldMap))
+    }, 
+
+    onToggleWorldMap: (open?: boolean) => 
+        dispatch(setWorldMap({ open, worldName: "Northwest Thiolden" }))
 })

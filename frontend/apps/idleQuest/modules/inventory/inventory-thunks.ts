@@ -8,7 +8,7 @@ import { IdleQuestsThunk } from "../../idle-quests-state"
 import {
     addTakenQuest, changeAdventurersInChallenge,
     claimQuestOutcome,
-    removeTakenQuest, setInitLoading, setInventory, setTakenQuests,
+    removeTakenQuest, finishLoadingModule, setInventory, setTakenQuests,
     unselectQuest
 } from "../../state"
 
@@ -17,7 +17,7 @@ export const getAdventurers = (firstLoad: boolean): IdleQuestsThunk => async (di
         const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
         dispatch(setInventory(response.data.map(compose(tagRealAPS, tagAdventurer))))
         if (firstLoad) 
-            setTimeout(() => dispatch(setInitLoading(false)), 1000)
+            setTimeout(() => dispatch(finishLoadingModule({ module: 0 })), 1000)
     })
 
 export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventurer[]): IdleQuestsThunk  => async (dispatch) =>

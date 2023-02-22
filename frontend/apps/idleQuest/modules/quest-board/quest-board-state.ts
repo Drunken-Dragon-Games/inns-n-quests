@@ -7,7 +7,7 @@ export interface QuestBoardState {
 }
 
 const questBoardInitialState: QuestBoardState = { 
-    open: true,
+    open: false,
     availableQuests: [],
 }
 
@@ -27,6 +27,10 @@ export const questBoardState = createSlice({
         clearAvailableQuests: (state) => {
             state.availableQuests = []
         },
+
+        toggleQuestBoard: (state, action: PayloadAction<{ open?: boolean }>) => {
+            state.open = action.payload.open ?? !state.open
+        }
     }
 })
 
@@ -34,4 +38,5 @@ export const {
     addAvailableQuests,
     removeAvailableQuest,
     clearAvailableQuests,
+    toggleQuestBoard,
 } = questBoardState.actions

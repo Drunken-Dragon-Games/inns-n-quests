@@ -3,7 +3,7 @@
 const hostname = process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "https://acceptance.ddu.gg"
 
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   swcMinify: true,
   output: 'standalone',
   compiler: {

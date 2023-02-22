@@ -1,6 +1,6 @@
 import { default as NImage } from "next/image"
+import { MouseEventHandler, useEffect, useState } from "react"
 import styled, { css } from "styled-components"
-import { useState, useEffect } from "react"
 import { Units, vmax1 } from "./layout"
 
 /**
@@ -73,11 +73,12 @@ export const NoDragImage = (props: {
     width?: number,
     units?: Units,
     zIndex?: number,
+    onClick?: MouseEventHandler<HTMLDivElement>
 }) => {
     const units = props.units ?? vmax1
     if (props.absolute) {
         return (
-            <NoDragWrapper position="absolute" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units}>
+            <NoDragWrapper position="absolute" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} onClick={props.onClick}>
                 <NoDragWrapper position="relative" $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units}>
                     <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
                 </NoDragWrapper>
@@ -85,7 +86,7 @@ export const NoDragImage = (props: {
         )
     } else {
         return (
-            <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units}>
+            <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} onClick={props.onClick}>
                 <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
             </NoDragWrapper>
         )

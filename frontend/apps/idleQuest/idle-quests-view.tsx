@@ -5,14 +5,16 @@ import AlphaNotes from "./alpha-notes"
 import { If } from "./common-components"
 import { IdleQuestsState, idleQuestsStore } from "./idle-quests-state"
 import { idleQuestsTransitions, useInitEffects } from "./idle-quests-transitions"
-import { InnView } from "./modules/inn"
+import { HudView } from "./modules/hud"
 import { InventoryActivityView, InventoryView } from "./modules/inventory"
 import { NotificationsView } from "./modules/notifications"
+import { usePhaserRender } from "./modules/overworld/phaser-render"
 import { QuestBoardView } from "./modules/quest-board"
 import { WorldView } from "./modules/world"
 
 const IdleQuestsContainer = styled.section`
     position: relative;
+    overflow: hidden;
     width: 100vw;
     height: 100vh;
 `
@@ -27,22 +29,27 @@ const LoadingBackground = styled.section`
 `
 
 const NotificationsModule = styled(NotificationsView)`
-    z-index: 30;
+    z-index: 40;
+`
+
+const HudModule = styled(HudView)`
+    z-index: 15;
 `
 
 const InventoryModule = styled(InventoryView)`
     z-index: 20;
 `
 
-const InnViewModule = styled(InnView)`
-    z-index: 50;
-`
-
 const WorldViewModule = styled(WorldView)`
-    z-index: 10;
+    z-index: 13;
 `
 
 const QuestBoardModule = styled(QuestBoardView)`
+    z-index: 10;
+`
+
+const PhaserModule = styled.div`
+    position: absolute;
     z-index: 1;
 `
 
@@ -51,18 +58,35 @@ const IdleQuestsView = () => {
     const dispatch = idleQuestsStore.dispatch 
     const transitions = idleQuestsTransitions({ state, dispatch })
     useInitEffects(transitions, state)
+    usePhaserRender(transitions)
     const dragonSilver = 0
     const dragonSilverToClaim = 0
+    const ready = state.inventory.appReady.reduce((acc, curr) => acc && curr, true)
     
     return(
         <IdleQuestsContainer>
-            <ConditionalRender condition={state.inventory.initLoading}>
+            <ConditionalRender condition={!ready}>
                 <LoadingBackground>
                     <Loading size={8} />
                 </LoadingBackground>
             </ConditionalRender>
 
+            <HudModule transitions={transitions} />
+
             <NotificationsModule notifications={state.notifications.notifications} />
+
+            <PhaserModule id="overworld-phaser-container" key="overworld-phaser-container" />
+
+            <QuestBoardModule
+                questBoardState={state.questBoard}
+                questBoardTransitions={transitions.questBoard}
+                onQuestClick={transitions.inventory.onSelectQuest}
+            />
+
+            <WorldViewModule
+                worldState={state.world}
+                worldTransitions={transitions.world}
+            />
 
             <InventoryModule
                 dragonSilver={dragonSilver}
@@ -76,23 +100,6 @@ const IdleQuestsView = () => {
                     transitions={transitions.inventory} 
                 />
             </InventoryModule>
-
-            <If $if={state.world.open}>
-                <WorldViewModule
-                    worldState={state.world}
-                    onViewLocationChange={transitions.world.onWorldMapLocationChange}
-                />
-            </If>
-
-            <If $if={false}>
-                <InnViewModule />
-            </If>
-
-            <QuestBoardModule
-                questBoardState={state.questBoard}
-                questBoardTransitions={transitions.questBoard}
-                onQuestClick={transitions.inventory.onSelectQuest}
-            />
 
             <AlphaNotes />
         </IdleQuestsContainer>

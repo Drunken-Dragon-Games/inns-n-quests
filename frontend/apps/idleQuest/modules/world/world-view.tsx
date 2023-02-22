@@ -1,19 +1,33 @@
-import { ReactNode, useMemo } from "react"
-import styled from "styled-components"
-import { NoDragImage } from "../../utils"
-import {
-    useDragMapLocation, WorldMap, worldMapHeightUnits,
-    worldMapLocationOffsetUnits, worldMapUriMatrix, worldMapWidthUnits
-} from "./world-map-dsl"
+import { useMemo } from "react"
+import styled, { keyframes } from "styled-components"
+import { useDrag } from "../../utils"
+import PaperMapRender from "./paper-map/paper-map-render"
+import TileMapRender from "./tile-sets/tile-map-render"
 import { WorldState } from "./world-state"
+import { WorldTransitions } from "./world-transitions"
 
-const WorldViewContainer = styled.div<{ dragging: boolean }>`
+const openAnimation = keyframes`
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+`
+
+const closeAnimation = keyframes`
+    0% { opacity: 1; top: 0; }
+    99% { top: 0; }
+    100% { opacity: 0; top: -100vh; }
+`
+
+const WorldViewContainer = styled.div<{ dragging: boolean, open: boolean }>`
     position: absolute;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    background-color: rgba(20,20,20,0.7);
+    top: 0;
+    background-color: rgba(20,20,20,1);
     cursor: ${props => props.dragging ? "grabbing" : "grab"};
+    ${props => props.open ? "top: 0;" : "top: -100vh;"};
+    opacity: ${props => props.open ? "1" : "0"};
+    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 `
 
 interface WorldAreaProps {
@@ -27,45 +41,15 @@ const WorldArea = styled.div.attrs<WorldAreaProps>(props => ({ style: {
     left: `calc(${props.locationOffset[0]} + 50vw)`,
 }}))<WorldAreaProps>`
     position: relative;
-    width: calc(${props => props.width} + 20px);
-    heigth: calc(${props => props.height} + 20px);
-    border: 10px solid #3f1904;
-    filter: drop-shadow(0 0 15px rgba(0,0,0,0.9));
+    width: calc(${props => props.width});
+    heigth: calc(${props => props.height});
 `
-
-const LayerContainer = styled.div<{ height: string, width: string }>`
-    position: absolute;
-    width: ${props => props.width};
-    heigth: ${props => props.height};
-    display: inline-flex;
-    flex-wrap: wrap;
-`
-
-interface MapLayerProps {
-    className?: string
-    children?: ReactNode
-    width: string
-    height: string
-}
-
-const WorldLayer = ({ className, children, width, height }: MapLayerProps ) => 
-    <LayerContainer className={className} width={width} height={height}>
-        {children}
-    </LayerContainer>
-
-
-const Layer0 = (props: { wm: WorldMap, state: WorldMapViewState } ) => 
-    <WorldLayer width={props.state.mapWidth} height={props.state.mapHeight}>
-        {props.state.layer0RenderMatrix.map((sector, index) => 
-            <NoDragImage key={index} src={sector} width={props.wm.baseSectorWidth} height={props.wm.baseSectorHeight} units={props.wm.units} />
-        )}
-    </WorldLayer>
 
 
 type WorldMapViewState = WorldMapViewStaticState & WorldMapViewDynamicState
 
 interface WorldMapViewStaticState {
-    layer0RenderMatrix: string[]
+    renderMatrix: string[][]
     mapWidth: string
     mapHeight: string
 }
@@ -76,12 +60,12 @@ interface WorldMapViewDynamicState {
 
 const useWorldViewState = (worldState: WorldState): WorldMapViewState => {
     const staticState = useMemo<WorldMapViewStaticState>(() => ({
-        layer0RenderMatrix: worldMapUriMatrix(worldState.worldMap),
-        mapWidth: worldMapWidthUnits(worldState.worldMap),
-        mapHeight: worldMapHeightUnits(worldState.worldMap),
-    }), [worldState.worldMap, worldState.worldMap.units])
+        renderMatrix: worldState.activeMap.contentMatrix(),
+        mapWidth: worldState.activeMap.uwidth,
+        mapHeight: worldState.activeMap.uheight,
+    }), [worldState.activeMap, worldState.activeMap.metadata.units])
     const dynamicState = useMemo(() => ({
-        locationOffset: worldMapLocationOffsetUnits(worldState.worldMap, worldState.viewLocation)
+        locationOffset: worldState.activeMap.ulocationOffset(worldState.viewLocation[worldState.activeMap.metadata.name])
     }), [worldState.viewLocation])
     return { ...staticState, ...dynamicState }
 }
@@ -89,16 +73,35 @@ const useWorldViewState = (worldState: WorldState): WorldMapViewState => {
 interface WorldViewProps {
     className?: string
     worldState: WorldState
-    onViewLocationChange: (newLocation: [number, number]) => void
+    worldTransitions: WorldTransitions
 }
 
-const WorldView = ({ className, worldState, onViewLocationChange }: WorldViewProps) => {
+const WorldView = ({ className, worldState, worldTransitions }: WorldViewProps) => {
     const viewState = useWorldViewState(worldState)
-    const { dragging, onStartDrag } = useDragMapLocation(worldState.viewLocation, onViewLocationChange)
+    const { dragging, onStartDrag } = useDrag(
+        worldState.viewLocation[worldState.activeMap.metadata.name], 
+        worldState.activeMap.metadata.units.scale,
+        worldTransitions.onWorldViewLocationChange)
     return (
-        <WorldViewContainer className={className} onMouseDown={onStartDrag} dragging={dragging}>
+        <WorldViewContainer className={className} onMouseDown={onStartDrag} dragging={dragging} open={worldState.open}>
             <WorldArea width={viewState.mapWidth} height={viewState.mapHeight} locationOffset={viewState.locationOffset}>
-                <Layer0 wm={worldState.worldMap} state={viewState} />
+
+                { worldState.activeMap.metadata.contents.ctype === "paper-map-contents" ?
+                    <PaperMapRender 
+                        width={viewState.mapWidth} 
+                        height={viewState.mapHeight} 
+                        sectorWidth={worldState.activeMap.metadata.sectorSize[0]} 
+                        sectorHeight={worldState.activeMap.metadata.sectorSize[1]} 
+                        units={worldState.activeMap.metadata.units} 
+                        renderMatrix={viewState.renderMatrix.flat()} 
+                    />
+                :  worldState.activeMap.metadata.contents.ctype === "tile-map-contents" ?
+                    <TileMapRender 
+                        tileSet={worldState.activeMap.metadata.contents.tileSet} 
+                        renderMatrix={viewState.renderMatrix} 
+                    />
+                :<></>}
+
             </WorldArea>
         </WorldViewContainer>
     )
