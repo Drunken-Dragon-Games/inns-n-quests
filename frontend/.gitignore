@@ -35,7 +35,7 @@ yarn-error.log*
 *.tsbuildinfo
 
 public/textures/
-public/maps/
+public/maps/aseprite/
 
 backend/.npmrc
 frontend/.npmrc
