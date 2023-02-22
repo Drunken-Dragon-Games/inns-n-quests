@@ -20,6 +20,7 @@ export class Preloader extends Phaser.Scene {
     }
 
     create() {
+        this.game.events.emit("loading-complete")
         this.scene.start("Overworld")
     }
 }

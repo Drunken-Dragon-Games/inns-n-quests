@@ -1,18 +1,33 @@
 import { useMemo } from "react"
-import styled from "styled-components"
+import styled, { keyframes } from "styled-components"
 import { useDrag } from "../../utils"
 import PaperMapRender from "./paper-map/paper-map-render"
 import TileMapRender from "./tile-sets/tile-map-render"
 import { WorldState } from "./world-state"
 import { WorldTransitions } from "./world-transitions"
 
-const WorldViewContainer = styled.div<{ dragging: boolean }>`
+const openAnimation = keyframes`
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+`
+
+const closeAnimation = keyframes`
+    0% { opacity: 1; top: 0; }
+    99% { top: 0; }
+    100% { opacity: 0; top: -100vh; }
+`
+
+const WorldViewContainer = styled.div<{ dragging: boolean, open: boolean }>`
     position: absolute;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
+    top: 0;
     background-color: rgba(20,20,20,1);
     cursor: ${props => props.dragging ? "grabbing" : "grab"};
+    ${props => props.open ? "top: 0;" : "top: -100vh;"};
+    opacity: ${props => props.open ? "1" : "0"};
+    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 `
 
 interface WorldAreaProps {
@@ -68,7 +83,7 @@ const WorldView = ({ className, worldState, worldTransitions }: WorldViewProps) 
         worldState.activeMap.metadata.units.scale,
         worldTransitions.onWorldViewLocationChange)
     return (
-        <WorldViewContainer className={className} onMouseDown={onStartDrag} dragging={dragging}>
+        <WorldViewContainer className={className} onMouseDown={onStartDrag} dragging={dragging} open={worldState.open}>
             <WorldArea width={viewState.mapWidth} height={viewState.mapHeight} locationOffset={viewState.locationOffset}>
 
                 { worldState.activeMap.metadata.contents.ctype === "paper-map-contents" ?

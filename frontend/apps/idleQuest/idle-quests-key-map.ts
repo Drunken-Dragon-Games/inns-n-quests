@@ -14,7 +14,12 @@ import { notEmpty } from "./utils"
 const GlobalKeyMap = (key: string, transitions: IdleQuestsTransitions, state: IdleQuestsState) => { 
 
     if (key == "b" || key == "B") {
+        transitions.world.onToggleWorldMap(false)
         transitions.inventory.onToggleInventory()
+
+    } else if (key == "q" || key == "Q") {
+        transitions.world.onToggleWorldMap(false)
+        transitions.questBoard.onToggleQuestBoard()
 
     } else if (key == "m" || key == "M") {
         if (state.world.activeMap.metadata.name === "Northwest Thiolden" && state.world.open) {
@@ -22,19 +27,18 @@ const GlobalKeyMap = (key: string, transitions: IdleQuestsTransitions, state: Id
         } else {
             transitions.world.onSetWorldMap({ open: true, worldName: "Northwest Thiolden" })
         }
-
-    } else if (key == "i" || key == "I") {
-        if (state.world.activeMap.metadata.name === "Base Inn" && state.world.open) {
-            transitions.world.onSetWorldMap({ open: false })
-        } else {
-            transitions.world.onSetWorldMap({ open: true, worldName: "Base Inn" })
-        }
     
     } else if (key == "Escape" && state.inventory.selection) {
         transitions.inventory.onCloseSelectedQuestAndInventory()
 
     } else if (key == "Escape" && state.inventory.open) {
         transitions.inventory.onToggleInventory()
+
+    } else if (key == "Escape" && state.world.open) {
+        transitions.world.onToggleWorldMap()
+
+    } else if (key == "Escape" && state.questBoard.open) {
+        transitions.questBoard.onToggleQuestBoard()
 
     } else if (key == "Enter" && state.inventory.selection && state.inventory.selection.ctype !== "adventurer") {
         const quest = state.inventory.selection

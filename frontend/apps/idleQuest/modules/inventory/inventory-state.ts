@@ -16,7 +16,7 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
 export type InventorySelection = SelectedQuest | Adventurer
 
 export interface InventoryState {
-    initLoading: boolean
+    appReady: boolean[]
 
     open: boolean
     adventurers: Adventurer[]
@@ -27,7 +27,7 @@ export interface InventoryState {
 }
 
 const inventoryInitialState: InventoryState = { 
-    initLoading: true,
+    appReady: [false, false],
 
     open: false,
     adventurers: [],
@@ -41,8 +41,9 @@ export const inventoryState = createSlice({
     initialState: inventoryInitialState,
     reducers: {
 
-        setInitLoading: (state, action: PayloadAction<boolean>) => {
-            state.initLoading = action.payload
+        finishLoadingModule: (state, action: PayloadAction<{ module: number }>) => {
+            state.appReady = state.appReady
+                .map((loading, index) => index === action.payload.module ? true : loading)
         },
 
         toggleInventory: (state) => {
@@ -156,7 +157,7 @@ export const inventoryState = createSlice({
 });
 
 export const {
-    setInitLoading,
+    finishLoadingModule,
     toggleInventory,
     setInventory,
     setTakenQuests,
@@ -166,7 +167,7 @@ export const {
     unselectQuest,
     pickAdventurerForQuest,
     unPickAdventurerForQuest,
-    clearSelectedParty: clearSelectedAdventurers,
+    clearSelectedParty,
     changeAdventurersInChallenge,
     claimQuestOutcome,
     selectAdventurer,

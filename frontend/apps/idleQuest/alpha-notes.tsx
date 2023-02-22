@@ -2,20 +2,18 @@ import { useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { PixelFontFamily } from "./common-components"
 
-const date = "18 Feb 2023"
+const date = "22 Feb 2023"
 
 const notes = [
-    "* Press 'M' to toggle a draggable world map.",
-    "* Press 'B' to toggle the inventory. (Icons and buttons pending).",
-    "* Now you can click on the adventurers to see their splash art, soon we will display stats there as well.",
-    "* A first IV/EV system is implemented.",
-    "APS xp is split between the party evenly, but the individual xp is affected by the APS Initial Value (IV).",
-    "A 10/10/10 will get full XP benefit, a 1/1/1 only 10% of his share of XP.",
-    "The displayed APS is the Effort Value (EV).",
-    "Right now quests XP reward is its APS x 100.",
-    "The XP needed to level up a Stat follows a logarithmic curve. (The higher the level the harder is to level up).",
-    "Death mechanics are still to be implemented.",
-    "Thank you for testing Idle Quests!",
+    "'Q' to toggle the quest board.",
+    "'M' to toggle Thiolden's map.",
+    "'B' to toggle the inventory.",
+    "* A first implementation of the Inn is working.",
+    "* Use A W S D keys to move around.",
+    "* Click + Space + Drag Mouse to move around.",
+    "* Try dragging an adventurer, he will follow you around and collide with walls.", 
+    "* This is just a proof of concept.",
+    "Thank you for testing Idle Adventures!",
     "- Vledic"
 ]
 

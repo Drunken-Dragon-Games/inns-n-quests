@@ -1,10 +1,11 @@
 import { SelectedQuest, Adventurer, takenQuestSecondsLeft } from "../../dsl"
 import { IdleQuestsSnD } from "../../idle-quests-state"
 import { InventoryItem } from "./inventory-dsl"
-import { toggleInventory, selectQuest, unselectQuest, unPickAdventurerForQuest, pickAdventurerForQuest, selectAdventurer } from "./inventory-state"
+import { toggleInventory, selectQuest, unselectQuest, unPickAdventurerForQuest, pickAdventurerForQuest, selectAdventurer, finishLoadingModule } from "./inventory-state"
 import { takeAvailableQuest, claimTakenQuest, fetchMintTest, getAdventurers, getInProgressQuests } from "./inventory-thunks"
 
 export type InventoryTransitions = {
+    onFinishLoadingModule: (module: number) => void
     onRefreshInventory: (firstTime: boolean) => void
     onToggleInventory: () => void
     onSelectQuest: (quest: SelectedQuest) => void
@@ -17,6 +18,9 @@ export type InventoryTransitions = {
 
 export const inventoryTransitions = ({ state, dispatch }: IdleQuestsSnD): InventoryTransitions => ({
     
+    onFinishLoadingModule: (module: number) => 
+        dispatch(finishLoadingModule({ module })),
+
     onRefreshInventory: (firstTime: boolean) => {
         dispatch(getAdventurers(firstTime))
         dispatch(getInProgressQuests())

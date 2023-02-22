@@ -35,7 +35,7 @@ export const worldState = createSlice({
         },
 
         setWorldMap: (state, action: PayloadAction<{ open?: boolean, worldName?: WorldMapName }>) => {
-            state.open = action.payload.open ?? state.open
+            state.open = action.payload.open ?? !state.open
             state.activeMap = 
                 action.payload.worldName == "Northwest Thiolden" ? NorthWestThioldenPaperMap : 
                 action.payload.worldName == "Base Inn" ? BaseInn :

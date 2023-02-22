@@ -1,0 +1,1 @@
+export { default as HudView } from "./hud-view"

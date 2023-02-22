@@ -1,7 +1,8 @@
 import { Game } from "phaser"
 import { useEffect } from "react"
+import { IdleQuestsTransitions } from "../../idle-quests-transitions"
 
-async function loadPhaser(): Promise<Game> {
+async function loadPhaser(transitions: IdleQuestsTransitions): Promise<Game> {
     const Phaser = await import("phaser")
     const { Preloader } = await import("./scenes/preloader")
     const { Overworld } = await import("./scenes/overworld")
@@ -20,22 +21,21 @@ async function loadPhaser(): Promise<Game> {
         physics: {
             default: "arcade",
             arcade: {
-                debug: true
+                debug: false
             }
         },
         scene: [Preloader, Overworld]
     })
 
-    game.events.on("progress", (progress: number) => {
-        console.log(progress)
+    game.events.on("loading-complete", () => {
+        transitions.inventory.onFinishLoadingModule(1)
     })
 
     return game
 }
 
-export const usePhaserRender = () => 
+export const usePhaserRender = (transitions: IdleQuestsTransitions) => 
     useEffect(() => {
-        console.log("Loding Phaser")
-        const game = loadPhaser()
+        const game = loadPhaser(transitions)
         return () => { game.then(g => g.destroy(true)) }
     }, [])

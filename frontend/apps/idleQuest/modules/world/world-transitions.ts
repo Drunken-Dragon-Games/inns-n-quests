@@ -5,6 +5,7 @@ import { WorldMapName } from "./worlds"
 export type WorldTransitions = {
     onWorldViewLocationChange: (locationDirection: [number, number]) => void
     onSetWorldMap: (worldMap: { open?: boolean, worldName?: WorldMapName }) => void
+    onToggleWorldMap: (open?: boolean) => void
 }
 
 export const worldTransitions = ({ state, dispatch }: IdleQuestsSnD): WorldTransitions => ({
@@ -15,5 +16,8 @@ export const worldTransitions = ({ state, dispatch }: IdleQuestsSnD): WorldTrans
 
     onSetWorldMap: (worldMap: { open?: boolean, worldName?: WorldMapName }) => {
         dispatch(setWorldMap(worldMap))
-    }
+    }, 
+
+    onToggleWorldMap: (open?: boolean) => 
+        dispatch(setWorldMap({ open, worldName: "Northwest Thiolden" }))
 })

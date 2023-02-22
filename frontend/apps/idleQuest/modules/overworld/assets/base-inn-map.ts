@@ -100,7 +100,7 @@ const wallsMatrix: RMTile<InnBuildingTileSet>[][] = [
     ["","","","w-wall" ,"" ,"" , "" , "" , "" ,  "w-wall" , "", "", "", "", "", "", "e-wall"],
     ["","","","w-wall" ,"" ,"" , "" , "" , "" ,  "w-wall" , "", "", "", "", "", "", "e-wall"],
     ["","","","w-wall" ,"" ,"" , "" , "" , "" ,  "w-wall" , "", "", "", "", "", "", "e-wall"],
-    ["nw-corner", "n-window", "n-wall", "nw-l-intersection","" ,"" , "" , "" , "" , "w-wall", "", "", "", "", "", "", "e-wall"],
+    ["nw-corner", "n-wall", "n-wall", "nw-l-intersection","" ,"" , "" , "" , "" , "w-wall", "", "", "", "", "", "", "e-wall"],
     ["w-wall", "", "", "","" ,"" , "" , "" , "" , "sw-corner", "s-door-1", "s-door-2", "", "", "", "", "e-wall"],
     ["w-wall", "", "", "","" ,"" , "" , "" , "" , "", "", "", "nw-corner", "n-wall", "nw-l-intersection", "", "ne-l-intersection", "n-wall", "ne-corner"],
     ["w-wall", "", "", "","" ,"" , "" , "" , "" , "", "", "", "w-wall", "", "", "", "", "", "e-wall"],
