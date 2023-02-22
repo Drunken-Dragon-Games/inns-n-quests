@@ -92,10 +92,12 @@ export class Overworld extends Phaser.Scene {
             console.log("space")
         })
 
+        // @ts-ignore
         this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
             this.cameras.main.setZoom(deltaY > 0 ? 1 : 2)
         })
 
+        // @ts-ignore
         this.input.on("drag", (pointer, gameObject, dragX, dragY) => {
             console.log(gameObject.body.embedded)
             this.draggingDirection = {
