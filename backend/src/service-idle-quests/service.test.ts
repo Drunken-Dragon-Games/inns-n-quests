@@ -1,5 +1,6 @@
 import path from "path"
 import { Sequelize } from "sequelize"
+import { v4 } from "uuid"
 import { wellKnownPoliciesMainnet } from "../registry-policies"
 import { loadQuestRegistryFromFs } from "../registry-quests"
 import { connectToDB } from "../tools-database"
@@ -10,9 +11,13 @@ import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-se
 import EvenstatsServiceMock from "../tools-utils/mocks/evenstats-service-mock"
 import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registry"
 import Random from "../tools-utils/random"
+import { aps } from "./challenges/quest-requirement"
 import { Adventurer, AvailableQuest, Outcome, TakenQuest } from "./models"
 import { IdleQuestsServiceDsl } from "./service"
 import { IdleQuestsService } from "./service-spec"
+import * as adventurersDB from "./items/adventurer-db"
+import * as furnitureDB from "./items/furniture-db"
+import { Inventory } from "../service-asset-management"
 
 let service: IdleQuestsService
 let database: Sequelize
@@ -60,6 +65,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
+    await service.unloadDatabaseModels()
     await database.close()
 })
 
@@ -67,8 +73,70 @@ test("health endpoint", async () => {
     expect(await service.health()).toBeTruthy()
 })
 
-test("Normal user flow 1", async () => {
-    const userId = "ae991e8c-361f-44e9-afbc-461fb94be2fa"
+test("Sync Adventurers", async () => {
+    const userId = v4()
+    const assetInventory1: Inventory = {
+        [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ 
+            { unit: "PixelTile1", quantity: "2", chain: false },
+            { unit: "PixelTile2", quantity: "10", chain: false } 
+        ]
+    }
+    const assetInventory2: Inventory = {
+        [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile1", quantity: "1", chain: false } ]
+    }
+    await service.adventurerFun.syncAdventurers(userId, assetInventory1)
+    const assets1 = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
+    await service.adventurerFun.syncAdventurers(userId, assetInventory2)
+    const assets2 = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
+
+    expect(assets1.length).toBe(2)
+    expect(assets1[0].assetRef).toBe("PixelTile1")
+    expect(assets1[1].assetRef).toBe("PixelTile1")
+    expect(assets2.length).toBe(1)
+    expect(assets2[0].assetRef).toBe("PixelTile1")
+    expect(assets1.some(adv => adv.adventurerId == assets2[0].adventurerId)).toBeTruthy()
+})
+
+test("Sync Furniture", async () => {
+    const userId = v4()
+    const assetInventory1: Inventory = {
+        [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ 
+            { unit: "PixelTile1", quantity: "10", chain: false },
+            { unit: "PixelTile2", quantity: "2", chain: false } 
+        ]
+    }
+    const assetInventory2: Inventory = {
+        [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile2", quantity: "1", chain: false } ]
+    }
+    await service.furnitureFun.syncFurniture(userId, assetInventory1)
+    const assets1 = await furnitureDB.FurnitureDB.findAll({ where: { userId }})
+    await service.furnitureFun.syncFurniture(userId, assetInventory2)
+    const assets2 = await furnitureDB.FurnitureDB.findAll({ where: { userId }})
+
+    expect(assets1.length).toBe(2)
+    expect(assets1[0].assetRef).toBe("PixelTile2")
+    expect(assets1[1].assetRef).toBe("PixelTile2")
+    expect(assets2.length).toBe(1)
+    expect(assets2[0].assetRef).toBe("PixelTile2")
+    expect(assets1.some(adv => adv.furnitureId == assets2[0].furnitureId)).toBeTruthy()
+})
+
+test("Level up adventurers", async () => {
+    const userId = v4()
+    const adventurers = await service.adventurerFun.syncAdventurers(userId, {
+        [wellKnownPoliciesMainnet.grandMasterAdventurers.policyId]: [ 
+            { unit: "GrandmasterAdventurer1", quantity: "1", chain: false },
+            { unit: "GrandmasterAdventurer2", quantity: "1", chain: false },
+        ]
+    })
+    await service.adventurerFun.levelUpAdventurers(adventurers, { apsExperience: aps(50,50,50) })
+    const adventurersAfter = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
+    expect(adventurersAfter.map(a => [a.athXP, a.intXP, a.chaXP]))
+        .toStrictEqual([[20,23,10], [3,15,5]])
+})
+
+test("Normal quest flow 1", async () => {
+    const userId = v4()
     const adventurers = await getAllAdventurers(userId)
     const availableQuests = await getAvailableQuests("Auristar")
     const adventurersToGoOnQuest = adventurers.map(a => a.adventurerId!)
@@ -91,10 +159,10 @@ test("Normal user flow 1", async () => {
 
 async function getAllAdventurers(userId: string): Promise<Adventurer[]> {
     return await expectResponse(
-        service.getAllAdventurers(userId),
+        service.getInventory(userId),
         response =>
             response.status === "ok" ?
-            success(response.adventurers) :
+            success(response.inventory) :
             failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )

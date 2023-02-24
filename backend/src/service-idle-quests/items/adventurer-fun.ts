@@ -1,4 +1,4 @@
-import { Op, Sequelize, Transaction } from "sequelize"
+import { Op, Transaction } from "sequelize"
 import { MetadataRegistry } from "../../registry-metadata"
 import { WellKnownPolicies } from "../../registry-policies"
 import { Inventory } from "../../service-asset-management"
@@ -6,6 +6,7 @@ import Random from "../../tools-utils/random"
 import { Adventurer, AdventurerClass, AdventurerCollection, APS, Race, Reward } from "../models"
 import { AdventurerDB } from "./adventurer-db"
 import { individualXPReward } from "./adventurer-equations"
+import { InventoryAsset, syncData } from "./sync-fun"
 
 export const apsSum = (aps: APS): number =>
     aps.athleticism + aps.intellect + aps.charisma
@@ -136,7 +137,14 @@ export default class AdventurerFun {
         }
 
         const adventurerName = (adventurer: AdventurerCreationData): string => {
-            if (adventurer.collection == "adventurers-of-thiolden") {
+            if (adventurer.collection == "pixel-tiles") {
+                const name = this.metadataRegistry.pixelTilesMetadata[adventurer.assetRef].name
+                const realName = (name.match(/(PixelTile #\d\d?)\s(.+)/) ?? ["", "Metadata Error"])[2] 
+                return realName
+            } else if (adventurer.collection == "grandmaster-adventurers") {
+                const aclass = this.metadataRegistry.gmasMetadata[adventurer.assetRef].class
+                return `Grand Master ${aclass}`
+            } else if (adventurer.collection == "adventurers-of-thiolden") {
                 const idx = parseInt(adventurer.assetRef.replace("AdventurerOfThiolden", "")) - 1
                 const name = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
                 return name.charAt(0).toUpperCase() + name.slice(1)
@@ -188,17 +196,18 @@ export default class AdventurerFun {
      */
     async syncAdventurers(userId: string, assetInventory: Inventory): Promise<Adventurer[]> {
         
-        const pickInventoryAdventurers = (assetInventory: Inventory): AssetInventoryAdventurer[] => {
-            const pxs: AssetInventoryAdventurer[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
+        const pickInventoryAdventurers = (assetInventory: Inventory): InventoryAsset<AdventurerCollection>[] => {
+            const pxs: InventoryAsset<AdventurerCollection>[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
                 .filter(pxt => this.metadataRegistry.pixelTilesMetadata[pxt.unit].type == "Adventurer")
                 .map(pxt => ({ assetRef: pxt.unit, collection: "pixel-tiles", quantity: parseInt(pxt.quantity) }))
-            const gmas: AssetInventoryAdventurer[] = (assetInventory[this.wellKnownPolicies.grandMasterAdventurers.policyId] ?? [])
+            const gmas: InventoryAsset<AdventurerCollection>[] = (assetInventory[this.wellKnownPolicies.grandMasterAdventurers.policyId] ?? [])
                 .map(gma => ({ assetRef: gma.unit, collection: "grandmaster-adventurers", quantity: parseInt(gma.quantity) }))
-            const aots: AssetInventoryAdventurer[] = (assetInventory[this.wellKnownPolicies.adventurersOfThiolden.policyId] ?? [])
+            const aots: InventoryAsset<AdventurerCollection>[] = (assetInventory[this.wellKnownPolicies.adventurersOfThiolden.policyId] ?? [])
                 .map(aot => ({ assetRef: aot.unit, collection: "adventurers-of-thiolden", quantity: parseInt(aot.quantity) }))
             return [...pxs, ...gmas, ...aots]
         }
 
+        /*
         const adventurersToSync = (preSyncedAdventurers: Adventurer[], assetInventoryAdventurers: AssetInventoryAdventurer[]): { adventurersToCreate: AssetInventoryAdventurer[], adventurersToDelete: Adventurer[], survivingAdventurers: Adventurer[] } => {
             const assetDifference = assetInventoryAdventurers
                 .map(asset => {
@@ -220,14 +229,14 @@ export default class AdventurerFun {
                 !adventurersToDelete.map(adventurer => adventurer.adventurerId).includes(preSynced.adventurerId))
             return { adventurersToCreate, adventurersToDelete, survivingAdventurers }
         }
+        */
 
-        const preSyncedDBAdventurers: AdventurerDB[] = await AdventurerDB.findAll({ where: { userId } })
-        const preSyncedAdventurers: Adventurer[] = preSyncedDBAdventurers.map(adventurer => adventurer.dataValues)
+        const preSyncedAdventurers: Adventurer[] = (await AdventurerDB.findAll({ where: { userId } })).map(adventurer => adventurer.dataValues)
         const assetInventoryAdventurers = pickInventoryAdventurers(assetInventory)
-        const { adventurersToCreate, adventurersToDelete, survivingAdventurers } = adventurersToSync(preSyncedAdventurers, assetInventoryAdventurers)
-        const createdAdventurers = await this.createAdventurers(userId, adventurersToCreate)
-        await this.deleteAdventurers(adventurersToDelete.map(adventurer => adventurer.adventurerId!))
-        return this.addSpritesToAdventurers(createdAdventurers.concat(survivingAdventurers))
+        const { toCreate, toDelete, surviving } = syncData(preSyncedAdventurers, assetInventoryAdventurers, adventurer => adventurer.adventurerId)
+        const createdAdventurers = await this.createAdventurers(userId, toCreate)
+        await this.deleteAdventurers(toDelete.map(adventurer => adventurer.adventurerId))
+        return this.addSpritesToAdventurers(createdAdventurers.concat(surviving))
     }
 
     /**

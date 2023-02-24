@@ -21,109 +21,11 @@ import { IdleQuestsService } from "../../service-idle-quests";
 
 const { Op } = require("sequelize");
 
-////////////////// GETS RANDOM QUESTS  ////////////////////
-/* 
-GETS PLAYER ADVENTURERS
-QUERIES RANDOM QUESTS FROM THE DB BASED ON ADVENTURER LEVEL BUCKETS
-RETURN QUESTS TO THE CLIENT
-*/
 const getRandomQuestsV2 = (sequelize: Sequelize, idleQuestsService: IdleQuestsService) => async (request: Request, response: Response, next: NextFunction) => {
     const userId = request.auth!.userId
     const numberOfQuests = 20;
 
-    /*
-    try {
-        // GETS THE MAX AND MIN LEVEL OF THE PLAYER ADVENTURERS
-        let xpMin: number = await Adventurer.min('experience', { where: { 
-            user_id: userId, 
-            in_quest: false,
-            [Op.or]: [{ type: "pixeltile" }, {type: "gma", metadata: { is_alive: true }}]
-        }});
-        let xpMax: number = await Adventurer.max('experience', { where: { 
-            user_id: userId, 
-            in_quest: false,
-            [Op.or]: [{ type: "pixeltile" }, {type: "gma", metadata: { is_alive: true }}]
-        }});
-        
-        // CREATES THE NUMBER OF ADVENTURER BUCKETS TO FILTER QUESTS
-        let adventurerFilters: IFilteredAdventurers[] = handleQuestsByAdventurerLevel(xpMin, xpMax);
-        
-        let adventurers: Adventurer[] = await Adventurer.findAll({
-            where: {
-                user_id: userId,
-                in_quest: false,
-                [Op.or]: [{ type: "pixeltile" }, {type: "gma", metadata: { is_alive: true }}]
-            }
-        });
-        
-        // FILLS UP THE BUCKET WITH ADVENTURER DATA
-        adventurers.forEach((adventurer: Adventurer) => {
-            
-            adventurerFilters.forEach(group => {
-                const filter = group;
-                if (filter.min_level <= adventurer.getLevel() &&
-                filter.max_level >= adventurer.getLevel()
-                ) {
-                    filter.adventurer_count++;
-                    const currentNumberOfAdventurers = filter.adventurer_count;
-                    const averageLevel = filter.average_level;
-                    filter.average_level = ((averageLevel * (currentNumberOfAdventurers - 1)) + adventurer.getLevel())/ currentNumberOfAdventurers;
-                }
-            })
-        });
-        
-        let totalNumberOfAdventurers: number = adventurers.length;
-        let queryArray: Promise<Model<IQuest, IQuestCreation>[]>[] = [];
-        // GETS QUESTS BASED ON BUCKET DATA
-        if (totalNumberOfAdventurers <= 0) {
-            queryArray.push(
-                Quest.findAll({ 
-                    order: [ sequelize.fn('RANDOM') ], 
-                    limit: 20, 
-                    where: { difficulty: { [Op.between]: [1, 4] }, is_war_effort: false } 
-                })
-            )
-        }
-        else if(totalNumberOfAdventurers > 0){
-            let count: number = 5;
-            adventurerFilters.forEach(group => {
-                count--;
-                const filter = group;
-                if (filter.adventurer_count > 0) {
-                    let questAmount: number = Math.round((filter.adventurer_count / totalNumberOfAdventurers)*numberOfQuests)
-                    let lowDifficulty: number = filter.average_level - count;
-                    let highDifficulty: number = filter.average_level + filter.difficulty_offset
-                    
-                    queryArray.push(Quest.findAll({ 
-                        order: [ sequelize.fn('RANDOM') ], 
-                        limit: questAmount, 
-                        where: { difficulty: { [Op.between]: [lowDifficulty, highDifficulty] }, is_war_effort: false } 
-                    }))
-                }
-            }) 
-        }
-
-        let warEffortQuests = Quest.getWarEffortQuests(userId, sequelize);
-
-        queryArray = queryArray.concat(warEffortQuests);
-
-        let quests = await Promise.all(queryArray).then(data => {
-            return [].concat.apply([], data as any)
-        }) as Quest[];
-
-        const parsedQuests = quests.map(quest => {
-            const newQuest = quest.toJSON()
-            newQuest.duration = config.floatOrElse("QUEST_TIME", 1) * quest.duration
-            return newQuest
-        })
-        console.log(parsedQuests)
-        return response.status(200).send(shuffle(parsedQuests));
-        
-    } catch (error: any) { 
-        next(error);
-    }
-    */
-    return response.status(200).send(await idleQuestsService.module_getAvailableQuests(userId));
+    return response.status(200).send(await idleQuestsService.getAvailableQuests(userId));
 }
 
 
@@ -186,7 +88,6 @@ const acceptQuest = (database: Sequelize, idleQuestsService: IdleQuestsService) 
         next(error)
     }
     */
-    return response.status(201).send(await idleQuestsService.module_acceptQuest(userId, questId, adventurerIds));
 }
 
 ////////////////// GETS TAKEN QUESTS  ////////////////////
@@ -243,7 +144,6 @@ const getTakenQuest = (idleQuestsService: IdleQuestsService) => async (request: 
         next(error);
     }
     */
-    return response.status(200).json(await idleQuestsService.module_getTakenQuests(userId));
 }
 
 ////////////////// CLAIMS QUEST REWARDS  ////////////////////
@@ -311,7 +211,6 @@ const claimQuestReward = (sequelize: Sequelize, assetManagementService: AssetMan
         next(error);
     }
     */
-    return response.status(200).json(await idleQuestsService.module_claimQuestResult(userId, takenQuestId));
 }
 
 export {

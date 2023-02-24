@@ -77,9 +77,10 @@ const InventoryTab = styled.div<{ selected: boolean }>`
     font-size: 1vmax;
     justify-content: center;
     cursor: pointer;
-    color: ${props => props.selected ? "white" : "rgba(20,20,20,1)"};
+    background-color: ${props => props.selected ? "rgba(20,20,20,0.1)" : "rgba(20,20,20,0.5)"};
+    color: ${props => props.selected ? "white" : "rgba(200,200,200,0.5)"};
     filter: ${props => props.selected ? "drop-shadow(0px 0px 5px white)" : "none"};
-    border-bottom: ${props => props.selected ? "2px solid white" : "2px solid rgba(20,20,20,0.9)"};
+    border-bottom: ${props => props.selected ? "2px solid white" : "2px solid rgba(200,200,200,0.5)"};
     ${OswaldFontFamily}
 `
 

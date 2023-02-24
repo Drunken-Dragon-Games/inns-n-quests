@@ -1,8 +1,27 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
-import { Adventurer, AdventurerClass, adventurerClasses, AdventurerCollection, adventurerCollections, Race, races } from "../models"
+import { AdventurerClass, adventurerClasses, AdventurerCollection, adventurerCollections, Race, races } from "../models"
 
-export class AdventurerDB extends Model implements Adventurer {
-    declare adventurerId?: string
+export interface IAdventurerDB {
+    adventurerId: string,
+    userId: string,
+    name: string,
+    class: AdventurerClass,
+    race: Race,
+    collection: AdventurerCollection,
+    assetRef: string,
+    sprite?: string,
+    hp: number,
+    inChallenge?: boolean,
+    athleticism: number,
+    intellect: number,
+    charisma: number,
+    athXP: number,
+    intXP: number,
+    chaXP: number,
+}
+
+export class AdventurerDB extends Model implements IAdventurerDB {
+    declare adventurerId: string
     declare userId: string
     declare name: string
     declare class: AdventurerClass

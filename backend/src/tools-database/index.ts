@@ -1,6 +1,6 @@
 import fs from "fs"
 import { Umzug, SequelizeStorage } from "umzug"
-import { QueryInterface, Sequelize } from "sequelize";
+import { DataTypes, ModelAttributes, QueryInterface, Sequelize } from "sequelize";
 
 export type DBConfig =
     { host: string
@@ -30,6 +30,8 @@ export const connectToDB = (config: DBConfig): Sequelize =>
         }
     })
 
+export type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
+
 /**
  * Umzug object builder to execute Sequelize migrations programmatically
  */
@@ -40,3 +42,17 @@ export const buildMigrator = (sequelize: Sequelize, pathName: string): Umzug<Que
         storage: new SequelizeStorage({ sequelize }),
         logger: undefined
     })
+
+export const addDateReferenceColumns = (tableAttributes: ModelAttributes<any, any>): ModelAttributes<any, any> => {
+  return { 
+    ...tableAttributes, 
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
+  }
+}

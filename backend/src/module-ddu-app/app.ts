@@ -13,12 +13,12 @@ import { getStakeAddressMiddleware } from "../module-quests/app/middleware/get-s
 import { validateAddressMiddleware } from "../module-quests/app/middleware/validate_address";
 import { registerAddressMidleware } from "../module-quests/app/middleware/register-address-middleware";
 import { loadPlayerRoutes } from "../module-quests/players/routes";
-import { loadAdventurerRoutes } from "../module-quests/adventurers/routes";
-import { loadQuestRoutes } from "../module-quests/quests/routes";
 import { Sequelize } from "sequelize";
 import compression from "compression"
 import { IdleQuestsService } from "../service-idle-quests";
 import { WellKnownPolicies } from "../registry-policies";
+import { checkAddressAvailability, checkTransactionLimit } from "../module-quests/players/vending_machine";
+import { idleQuestRoutes } from "./routes-idle-quests";
 
 dotenv.config()
 const questRootPath = "/quests/api"
@@ -52,8 +52,7 @@ const buildApp = async (identityService: IdentityService, assetManagementService
     
     // QUEST MODULE ROUTES
     app.use(questRootPath, loadPlayerRoutes(identityService, assetManagementService, wellKnownPolicies))
-    app.use(questRootPath, (await loadAdventurerRoutes(database, assetManagementService, idleQuestsService, wellKnownPolicies)))
-    app.use(questRootPath, loadQuestRoutes(database, assetManagementService, idleQuestsService))
+    app.use(questRootPath, [checkAddressAvailability, checkTransactionLimit, idleQuestRoutes(idleQuestsService)])
     
     // Error handler middleware
     app.use(apiErrorHandler)

@@ -8,7 +8,7 @@ export type HealthStatus =
     }
 
 export interface Adventurer {
-    adventurerId?: string,
+    adventurerId: string,
     userId: string,
     name: string,
     class: AdventurerClass,
@@ -24,6 +24,15 @@ export interface Adventurer {
     athXP: number,
     intXP: number,
     chaXP: number,
+}
+
+export type Furniture = {
+    furnitureId: string
+    userId: string
+    name: string
+    collection: FurnitureCollection 
+    assetRef: string
+    sprite?: string
 }
 
 export type APS = {
@@ -50,6 +59,12 @@ export const adventurerClasses = ["fighter", "paladin", "ranger", "rogue", "bard
 export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-thiolden" | "pixel-tiles"
 
 export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
+
+export type FurnitureCollection = "pixel-tiles"
+
+export const furnitureCollections = ["pixel-tiles"]
+
+export type IdleQuestsInventory = (Adventurer | Furniture)[]
 
 export type Quest = {
     questId: string,
@@ -150,8 +165,8 @@ export type BattleReport = {
     latestFinishedQuest?: TakenQuest & { adventurers: Adventurer[] },
 }
 
-export type GetAllAdventurersResult 
-    = { status: "ok", adventurers: Adventurer[] }
+export type GetInventoryResult 
+    = { status: "ok", inventory: IdleQuestsInventory }
     | { status: "unknown-user" }
 
 export type AcceptQuestResult

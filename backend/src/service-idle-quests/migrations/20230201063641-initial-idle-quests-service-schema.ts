@@ -1,26 +1,10 @@
-import { DataTypes, ModelAttributes, QueryInterface } from 'sequelize'
-import { TakenQuestDBTableName, TakenQuestDBTableAttributes } from '../challenges/taken-quest-db'
+import { addDateReferenceColumns, MigrationFun } from '../../tools-database'
+import { TakenQuestDBTableAttributes, TakenQuestDBTableName } from '../challenges/taken-quest-db'
 import { AdventurerDBTableAttributes, AdventurerDBTableName } from '../items/adventurer-db'
 
-type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
-
-const addSequelizeColumns = (tableAttributes: ModelAttributes<any, any>): ModelAttributes<any, any> => {
-  return { 
-    ...tableAttributes, 
-    createdAt: {
-      allowNull: false,
-      type: DataTypes.DATE
-    },
-    updatedAt: {
-      allowNull: false,
-      type: DataTypes.DATE
-    }
-  }
-}
-
 export const up: MigrationFun = async ({ context: query }) => {
-  await query.createTable(AdventurerDBTableName, addSequelizeColumns(AdventurerDBTableAttributes))
-  await query.createTable(TakenQuestDBTableName, addSequelizeColumns(TakenQuestDBTableAttributes))
+  await query.createTable(AdventurerDBTableName, addDateReferenceColumns(AdventurerDBTableAttributes))
+  await query.createTable(TakenQuestDBTableName, addDateReferenceColumns(TakenQuestDBTableAttributes))
 }
 
 export const down: MigrationFun = async ({ context: query }) => {
