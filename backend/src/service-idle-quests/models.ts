@@ -50,19 +50,23 @@ export type Reward = {
 
 export type Race = "human" | "elf" | "tiefling" | "dragonkin" | "worgenkin" | "undead" | "viera" | "troll" | "vulkin" | "orc" | "tauren"
 
-export const races = ["human", "elf", "tiefling", "dragonkin", "worgenkin", "undead", "viera", "troll", "vulkin", "orc", "tauren"]
+export const races: Race[] = 
+    ["human", "elf", "tiefling", "dragonkin", "worgenkin", "undead", "viera", "troll", "vulkin", "orc", "tauren"]
 
 export type AdventurerClass = "fighter" | "paladin" | "ranger" | "rogue" | "bard" | "mage" | "warlock" | "cleric" | "druid" | "knight"
 
-export const adventurerClasses = ["fighter", "paladin", "ranger", "rogue", "bard", "mage", "warlock", "cleric", "druid", "knight"]
+export const adventurerClasses: AdventurerClass[] = 
+    ["fighter", "paladin", "ranger", "rogue", "bard", "mage", "warlock", "cleric", "druid", "knight"]
 
 export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-thiolden" | "pixel-tiles"
 
-export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
+export const adventurerCollections: AdventurerCollection[] = 
+    ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
 
 export type FurnitureCollection = "pixel-tiles"
 
-export const furnitureCollections = ["pixel-tiles"]
+export const furnitureCollections: FurnitureCollection[] = 
+    ["pixel-tiles"]
 
 export type IdleQuestsInventory = (Adventurer | Furniture)[]
 

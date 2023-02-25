@@ -44,6 +44,17 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return response
     }
 
+    async grantMany(userId: string, asset: { unit: string, policyId: string, quantity: string }[], logger?: LoggingContext): Promise<models.GrantResponse> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.log.info(`granting assets to user ${userId}`, { asset })
+        const response = await this.base.grantMany(userId, asset, serviceLogger)
+        if (response.status == "invalid")
+            serviceLogger?.log.info(`invalid asset grant to user ${userId} reason:${response.reason}`)
+        else 
+            serviceLogger?.log.info(`grant successful`)
+        return response
+    }
+
     async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<models.ClaimResponse> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`claiming assets for user ${userId}`, { stakeAddress, asset })

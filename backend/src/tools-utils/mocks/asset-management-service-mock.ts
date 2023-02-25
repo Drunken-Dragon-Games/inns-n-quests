@@ -11,6 +11,7 @@ export default class AssetManagementServiceMock {
             health: jest.fn(),
             list: jest.fn(),
             grant: jest.fn(),
+            grantMany: jest.fn(),
             claim: jest.fn(),
             submitClaimSignature: jest.fn(),
             claimStatus: jest.fn(),

@@ -58,5 +58,5 @@ export function isQuest(obj: any): obj is Quest {
 }
 
 export function isClass(obj: any): obj is AdventurerClass {
-    return typeof obj === "string" && adventurerClasses.includes(obj)
+    return typeof obj === "string" && adventurerClasses.includes(obj as AdventurerClass)
 }

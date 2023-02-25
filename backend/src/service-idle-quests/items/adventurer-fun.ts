@@ -119,7 +119,7 @@ export default class AdventurerFun {
                     case "Uncommon": return { athleticism: 4, intellect: 4, charisma: 4 }
                     case "Rare": return { athleticism: 6, intellect: 6, charisma: 6 }
                     case "Epic": return { athleticism: 8, intellect: 8, charisma: 8 }
-                    case "Legendary": return { athleticism: 10, intellect: 10, charisma: 10 }
+                    default: return { athleticism: 10, intellect: 10, charisma: 10 }
                 }
                 case "grandmaster-adventurers":
                     const armor = parseInt(this.metadataRegistry.gmasMetadata[adventurer.assetRef].armor)
@@ -198,7 +198,13 @@ export default class AdventurerFun {
         
         const pickInventoryAdventurers = (assetInventory: Inventory): InventoryAsset<AdventurerCollection>[] => {
             const pxs: InventoryAsset<AdventurerCollection>[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
-                .filter(pxt => this.metadataRegistry.pixelTilesMetadata[pxt.unit].type == "Adventurer")
+                .filter(pxt => 
+                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type == "Adventurer" ||
+                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type == "Monster" ||
+                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type == "Townsfolk" || // Remove this one when implementing Hosts and Crafters
+                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].name == "PixelTile #24 Guard" ||
+                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].name == "PixelTile #45 Recruit"
+                )
                 .map(pxt => ({ assetRef: pxt.unit, collection: "pixel-tiles", quantity: parseInt(pxt.quantity) }))
             const gmas: InventoryAsset<AdventurerCollection>[] = (assetInventory[this.wellKnownPolicies.grandMasterAdventurers.policyId] ?? [])
                 .map(gma => ({ assetRef: gma.unit, collection: "grandmaster-adventurers", quantity: parseInt(gma.quantity) }))
@@ -206,30 +212,6 @@ export default class AdventurerFun {
                 .map(aot => ({ assetRef: aot.unit, collection: "adventurers-of-thiolden", quantity: parseInt(aot.quantity) }))
             return [...pxs, ...gmas, ...aots]
         }
-
-        /*
-        const adventurersToSync = (preSyncedAdventurers: Adventurer[], assetInventoryAdventurers: AssetInventoryAdventurer[]): { adventurersToCreate: AssetInventoryAdventurer[], adventurersToDelete: Adventurer[], survivingAdventurers: Adventurer[] } => {
-            const assetDifference = assetInventoryAdventurers
-                .map(asset => {
-                    const allSyncedAdventurersQuantity =
-                        preSyncedAdventurers.filter(preSynced => preSynced.assetRef == asset.assetRef).length
-                    return { ...asset, quantity: asset.quantity - allSyncedAdventurersQuantity }
-                })
-            const adventurersToCreate = assetDifference.filter(asset => asset.quantity > 0)
-            const assetAdventurersToDelete = assetDifference.filter(asset => asset.quantity < 0)
-            // Pick the pre-synced adventurers to delete based on the asset difference
-            const adventurersToDelete = assetAdventurersToDelete.flatMap(asset => {
-                const preSyncedAdventurersToDelete = preSyncedAdventurers
-                    .filter(preSynced => preSynced.assetRef == asset.assetRef)
-                    .slice(0, Math.abs(asset.quantity))
-                return preSyncedAdventurersToDelete
-            })
-            // Pick the pre-synced adventurers that are not going to be deleted
-            const survivingAdventurers = preSyncedAdventurers.filter(preSynced => 
-                !adventurersToDelete.map(adventurer => adventurer.adventurerId).includes(preSynced.adventurerId))
-            return { adventurersToCreate, adventurersToDelete, survivingAdventurers }
-        }
-        */
 
         const preSyncedAdventurers: Adventurer[] = (await AdventurerDB.findAll({ where: { userId } })).map(adventurer => adventurer.dataValues)
         const assetInventoryAdventurers = pickInventoryAdventurers(assetInventory)

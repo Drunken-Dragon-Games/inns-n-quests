@@ -108,6 +108,11 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         return { status: "ok" }
     }
 
+    async grantMany(userId: string, assets: { unit: string, policyId: string, quantity: string }[], logger: LoggingContext): Promise<GrantResponse> {
+        await Promise.all(assets.map(a => this.assets.grant(userId, a.unit, a.policyId, a.quantity)))
+        return { status: "ok" }
+    }
+
     async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<ClaimResponse> {
         const result = await this.claims.claim(userId, stakeAddress, assets, logger)
         if (result.ctype == "success") 

@@ -10,6 +10,12 @@ export type HealthStatus =
 export type Inventory = 
     { [policyId: string]: { unit: string, quantity: string, chain: boolean }[] }
 
+export type AssetUnit = {
+    unit: string,
+    policyId: string,
+    quantity: string,
+}
+
 export type DDUAsset =
     { unit: string
     , policyId: string

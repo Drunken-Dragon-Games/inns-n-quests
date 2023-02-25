@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Adventurer, TakenQuest, SelectedQuest, Outcome, individualXPReward, tagRealAPS } from "../../dsl"
+import { Furniture } from "../../dsl/furniture"
 
 const sortAdventurers = (adventurers: Adventurer[]) => {
     return adventurers.sort((a, b) => {
@@ -15,11 +16,14 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
 
 export type InventorySelection = SelectedQuest | Adventurer
 
+export type InventoryAsset = Adventurer | Furniture
+
 export interface InventoryState {
     appReady: boolean[]
 
     open: boolean
     adventurers: Adventurer[]
+    furniture: Furniture[]
     takenQuests: TakenQuest[]
 
     selection?: InventorySelection
@@ -31,6 +35,7 @@ const inventoryInitialState: InventoryState = {
 
     open: false,
     adventurers: [],
+    furniture: [],
     takenQuests: [],
 
     selectedParty: [],
@@ -50,8 +55,11 @@ export const inventoryState = createSlice({
             state.open = !state.open
         },
 
-        setInventory: (state, action: PayloadAction<Adventurer[]>) => {
-            state.adventurers = sortAdventurers(action.payload)
+        setInventory: (state, action: PayloadAction<InventoryAsset[]>) => {
+            const adventurers = action.payload.filter(asset => asset.ctype === "adventurer") as Adventurer[]
+            const furniture = action.payload.filter(asset => asset.ctype === "furniture") as Furniture[]
+            state.adventurers = sortAdventurers(adventurers)
+            state.furniture = furniture
         },
 
         setTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {

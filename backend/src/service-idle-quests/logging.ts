@@ -51,4 +51,8 @@ export class IdleQuestsServiceLogging implements IdleQuestsService {
     async claimQuestResult(userId: string, takenQuestId: string): Promise<models.ClaimQuestResult> {
         return await this.base.claimQuestResult(userId, takenQuestId)
     }
+
+    async grantTestInventory(userId: string): Promise<models.GetInventoryResult> {
+        return await this.base.grantTestInventory(userId)
+    }
 }

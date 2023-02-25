@@ -15,7 +15,10 @@ export type GmasMetadata =
     { [assetName: string]: { name: string, image: string, race: string, subrace: string, genre: string, class: string, armor: string, weapon: string } }
 
 export type PixelTilesMetadata = 
-    { [assetName: string]: { name: string, image: string, alt: string, rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary", type: string } }
+    { [assetName: string]: { name: string, image: string, alt: string, 
+        rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Unique", 
+        type: "Adventurer" | "Table" | "Hearth" | "Bar Barrels" | "Simple Prop" | "Townsfolk" | "Wall Banner" | "Artifact" | "Monster" | "Rug"
+    } }
 
 export type PixelTilesGameMetadata = 
     { [assetName: string]: { class: string, race: string } }

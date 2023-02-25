@@ -10,14 +10,14 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
         const userId: string = request.auth!.userId
         const result = await idleQuestsService.getInventory(userId)
         if (result.status == "ok")
-            response.status(200).json(result)
+            response.status(200).json(result.inventory)
         else 
             response.status(400).send(result.status)
     })
 
     router.get('/quests', async (request: Request, response: Response) => {
         const userId = request.auth!.userId
-        const result = await idleQuestsService.getAvailableQuests(userId)
+        const result = await idleQuestsService.getAvailableQuests("Auristar")
         if (result.status == "ok")
             response.status(200).send(result.quests)
     })
@@ -46,6 +46,15 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
         const result = await idleQuestsService.claimQuestResult(userId, takenQuestId)
         if (result.status == "ok")
             response.status(200).json(result.outcome)
+        else
+            response.status(400).send(result.status)
+    })
+
+    router.get('/grant-test-inventory', async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await idleQuestsService.grantTestInventory(userId)
+        if (result.status == "ok")
+            response.status(200).json(result.inventory)
         else
             response.status(400).send(result.status)
     })

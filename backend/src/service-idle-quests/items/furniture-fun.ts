@@ -24,7 +24,11 @@ export default class FurnitureFun {
         
         const pickInventoryFurniture = (assetInventory: Inventory): InventoryAsset<FurnitureCollection>[] => {
             const pxs: InventoryAsset<FurnitureCollection>[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
-                .filter(pxt => this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Adventurer")
+                .filter( pxt => 
+                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Adventurer" &&
+                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Monster" &&
+                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Townsfolk" 
+                )
                 .map(pxt => ({ assetRef: pxt.unit, collection: "pixel-tiles", quantity: parseInt(pxt.quantity) }))
             // This is coded like this for when extended for other furniture. See the adventurers sync for reference.
             return [...pxs]

@@ -9,7 +9,7 @@ import { IdleQuestsServiceLogging } from "./logging"
 import { IdleQuestsService } from "./service-spec"
 
 import { 
-    AcceptQuestResult, AvailableQuest, ClaimQuestResult, GetAvailableQuestsResult, 
+    AcceptQuestResult, AdventurerCollection, adventurerCollections, AvailableQuest, ClaimQuestResult, FurnitureCollection, GetAvailableQuestsResult, 
     GetInventoryResult, GetTakenQuestsResult, HealthStatus, Outcome, Quest, TakenQuest 
 } from "./models"
 
@@ -20,7 +20,7 @@ import * as furnitureDB from "./items/furniture-db"
 import { MetadataRegistry } from "../registry-metadata"
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { pickRandomQuestsByLocation, QuestRegistry } from "../registry-quests"
-import { AssetManagementService } from "../service-asset-management"
+import { AssetManagementService, AssetUnit } from "../service-asset-management"
 import { EvenstatsService } from "../service-evenstats"
 import { Calendar } from "../tools-utils/calendar"
 import Random from "../tools-utils/random"
@@ -254,5 +254,71 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             adventurers, 
         })
         return { status: "ok", outcome }
+    }
+
+    async grantTestInventory(userId: string): Promise<GetInventoryResult> {
+        if (process.env.NODE_ENV === "production") return { status: "ok", inventory: [] }
+
+        const pickAdventurer = (collection: AdventurerCollection, amount: number): AssetUnit[] => {
+            if (collection == "pixel-tiles") {
+                const meta = this.metadataRegistry.pixelTilesMetadata
+                const adventurers = Object.keys(meta).filter(a => 
+                    meta[a].rarity != "Unique" && (
+                    meta[a].type == "Adventurer" || 
+                    meta[a].type == "Monster" || 
+                    meta[a].type == "Townsfolk" || // Remove this one when implementing Hosts and Crafters
+                    meta[a].name == "PixelTile #24 Guard" || 
+                    meta[a].name == "PixelTile #45 Recruit"))
+                return [...Array(amount)].map(() => ({
+                    unit: this.random.pickRandom(adventurers),
+                    policyId: this.wellKnownPolicies.pixelTiles.policyId,
+                    quantity: "1",
+                }))
+
+            } else if (collection == "grandmaster-adventurers") {
+                const meta = this.metadataRegistry.gmasMetadata
+                const adventurers = Object.keys(meta)
+                return [...Array(amount)].map(() => ({
+                    unit: this.random.pickRandom(adventurers),
+                    policyId: this.wellKnownPolicies.grandMasterAdventurers.policyId,
+                    quantity: "1",
+                }))
+
+            } else { //if (collection == "adventurers-of-thiolden") {
+                const meta = this.metadataRegistry.advOfThioldenAppMetadata
+                const adventurers = Object.keys(meta)
+                return [...Array(amount)].map(() => ({
+                    unit: "AdventurerOfThiolden"+this.random.pickRandom(adventurers),
+                    policyId: this.wellKnownPolicies.adventurersOfThiolden.policyId,
+                    quantity: "1",
+                }))
+            }
+        }
+
+        const pickFurniture = (collection: FurnitureCollection, amount: number): AssetUnit[] => {
+            const meta = this.metadataRegistry.pixelTilesMetadata
+            const furniture = Object.keys(meta).filter(a =>
+                meta[a].type != "Adventurer" && 
+                meta[a].type != "Monster" && 
+                meta[a].type != "Townsfolk" && 
+                meta[a].rarity != "Unique"
+            )
+            return [...Array(amount)].map(() => ({
+                unit: this.random.pickRandom(furniture),
+                policyId: this.wellKnownPolicies.pixelTiles.policyId,
+                quantity: "10",
+            }))
+            
+        }
+
+        const options: AssetUnit[] = [
+            ...pickAdventurer("pixel-tiles", 10), 
+            ...pickAdventurer("grandmaster-adventurers", 10), 
+            ...pickAdventurer("adventurers-of-thiolden", 10), 
+            ...pickFurniture("pixel-tiles", 10)
+        ]
+
+        await this.assetManagementService.grantMany(userId, options)
+        return await this.getInventory(userId)
     }
 }

@@ -1,24 +1,24 @@
+import compression from "compression";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import dotenv from "dotenv";
 import express, { Request, Response, Router } from "express";
-import cookieParser from "cookie-parser"
-import { corsOptions } from "./settings"
-import cors from "cors"
-import { loadAccountManagementRoutes, loadUserRoutes, loadAccountRegisterRoutes } from "./routes"
-import apiErrorHandler from "./error/api_error_handler"
-import dotenv from "dotenv"
-import { IdentityService } from "../service-identity";
-import { AssetManagementService } from "../service-asset-management";
-import helmet from "helmet"
-import { jwtMiddleware } from "../module-quests/app/middleware/jwt_middleware";
-import { getStakeAddressMiddleware } from "../module-quests/app/middleware/get-stakeaddress-middleware";
-import { validateAddressMiddleware } from "../module-quests/app/middleware/validate_address";
-import { registerAddressMidleware } from "../module-quests/app/middleware/register-address-middleware";
-import { loadPlayerRoutes } from "../module-quests/players/routes";
+import helmet from "helmet";
 import { Sequelize } from "sequelize";
-import compression from "compression"
-import { IdleQuestsService } from "../service-idle-quests";
+import { loadPlayerRoutes } from "../module-quests/players/routes";
 import { WellKnownPolicies } from "../registry-policies";
-import { checkAddressAvailability, checkTransactionLimit } from "../module-quests/players/vending_machine";
+import { AssetManagementService } from "../service-asset-management";
+import { IdentityService } from "../service-identity";
+import { IdleQuestsService } from "../service-idle-quests";
+import apiErrorHandler from "./error/api_error_handler";
+import { getStakeAddressMiddleware } from "./middleware/get-stakeaddress-middleware";
+import { jwtMiddleware } from "./middleware/jwt_middleware";
+import { registerAddressMidleware } from "./middleware/register-address-middleware";
+import { validateAddressMiddleware } from "./middleware/validate_address";
+import { limitRequestsPerSecondByUserId } from "./requests-limiter";
+import { loadAccountManagementRoutes, loadAccountRegisterRoutes, loadUserRoutes } from "./routes";
 import { idleQuestRoutes } from "./routes-idle-quests";
+import { corsOptions } from "./settings";
 
 dotenv.config()
 const questRootPath = "/quests/api"
@@ -52,7 +52,7 @@ const buildApp = async (identityService: IdentityService, assetManagementService
     
     // QUEST MODULE ROUTES
     app.use(questRootPath, loadPlayerRoutes(identityService, assetManagementService, wellKnownPolicies))
-    app.use(questRootPath, [checkAddressAvailability, checkTransactionLimit, idleQuestRoutes(idleQuestsService)])
+    app.use(questRootPath, [limitRequestsPerSecondByUserId, idleQuestRoutes(idleQuestsService)])
     
     // Error handler middleware
     app.use(apiErrorHandler)

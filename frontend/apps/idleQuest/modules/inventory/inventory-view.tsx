@@ -71,7 +71,7 @@ const InventoryTabsContainer = styled.div`
 
 const InventoryTab = styled.div<{ selected: boolean }>`
     height: 100%;
-    width: 50%;
+    width: 33%;
     display: flex;
     align-items: center;
     font-size: 1vmax;
@@ -96,6 +96,7 @@ const InventoryBrowser = ({ inventoryState, onItemClick }: { inventoryState: Inv
             <InventoryTabsContainer>
                 <InventoryTab onClick={() => setPage("adventurers")} selected={page === "adventurers"}><span>Adventurers</span></InventoryTab>
                 <InventoryTab onClick={() => setPage("taken-quests")} selected={page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
+                <InventoryTab onClick={() => setPage("furniture")} selected={page === "furniture"}><span>Furniture</span></InventoryTab>
             </InventoryTabsContainer>
             <InventoryPagesContainer>
                 <InventoryPage inventoryState={inventoryState} page={page} onItemClick={onItemClick} />

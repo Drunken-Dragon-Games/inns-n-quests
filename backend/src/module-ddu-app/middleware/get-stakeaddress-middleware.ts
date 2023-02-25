@@ -1,8 +1,8 @@
 import { Request } from "express-jwt";
 import { Response, NextFunction } from "express";
-import ApiError from "../error/api_error";
-import { withTracing } from "../../base-logger";
-import { IdentityService } from "../../../service-identity";
+import ApiError from "../../module-quests/app/error/api_error";
+import { withTracing } from "../../module-quests/base-logger";
+import { IdentityService } from "../../service-identity";
 
 export const getStakeAddressMiddleware = (identityService: IdentityService) => async (request: Request, response: Response, next: NextFunction) => {
     if (request.auth == undefined) return next()

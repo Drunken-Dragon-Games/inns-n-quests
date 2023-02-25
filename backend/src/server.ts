@@ -56,7 +56,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService })
     
     // Soon to be deprecated
-    await loadQuestModuleModels(database)
+    //await loadQuestModuleModels(database)
     const app = await buildApp(identityService, assetManagementService, idleQuestsService, wellKnownPolicies, database)
 
     app.listen(PORT, () => console.log(`Server running on port ${PORT}...`));

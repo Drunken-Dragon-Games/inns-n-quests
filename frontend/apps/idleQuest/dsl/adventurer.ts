@@ -49,8 +49,8 @@ export type AdventurerCollection = "grandmaster-adventurers" | "adventurers-of-t
 
 export const adventurerCollections = ["grandmaster-adventurers", "adventurers-of-thiolden", "pixel-tiles"]
 
-export const tagAdventurer = (adventurer: any): any => 
-    ({...adventurer, ctype: "adventurer" })
+export const tagAdventurer = (adventurer: any): any =>
+    adventurer.adventurerId ? ({...adventurer, ctype: "adventurer" }) : adventurer
 
 export const adventurerAPS = (adventurer: Adventurer): APS => ({
     athleticism: adventurer.athleticism,
@@ -58,7 +58,8 @@ export const adventurerAPS = (adventurer: Adventurer): APS => ({
     charisma: adventurer.charisma,
 })
 
-export const tagRealAPS = (adventurer: object): object => {
+export const tagRealAPS = (adventurer: any): any => {
+    if (!adventurer.adventurerId) return adventurer
     const { athleticism, intellect, charisma } = realAPS(adventurer as Adventurer)
     return ({...adventurer, realATH: athleticism, realINT: intellect, realCHA: charisma })
 }

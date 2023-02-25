@@ -2,7 +2,7 @@ import { DataTypes, Model, Sequelize } from "sequelize"
 import { FurnitureCollection, furnitureCollections } from "../models"
 
 export interface IFurnitureDB {
-    furnitureId?: string
+    furnitureId: string
     userId: string
     name: string
     collection: FurnitureCollection 
@@ -10,7 +10,7 @@ export interface IFurnitureDB {
 }
 
 export class FurnitureDB extends Model implements IFurnitureDB {
-    declare furnitureId?: string
+    declare furnitureId: string
     declare userId: string
     declare name: string
     declare collection: FurnitureCollection 

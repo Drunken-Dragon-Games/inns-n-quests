@@ -137,13 +137,22 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
                 alt="quest scroll"
                 width={7.3} height={6}
             /> :
+        props.item?.ctype === "furniture" ? 
+            <PixelArtImage
+                src={props.item.sprite}
+                alt="furniture"
+                width={7.3} height={6}
+            /> :
         <></> } </ItemBox>
     )
 }
 
 const useInventoryPageState = (state: InventoryState, page: PageName) => 
     useMemo(() => {
-        const items = page == "adventurers" ? state.adventurers : state.takenQuests
+        const items = 
+            page == "adventurers" ? state.adventurers :
+            page == "furniture" ? state.furniture
+            : state.takenQuests
         const slotsTail = items.length % 4
         const extraSlots = slotsTail === 0 ? 4 : 4 - slotsTail
         const amountIfWithExtraSlots = items.length + extraSlots
@@ -153,7 +162,7 @@ const useInventoryPageState = (state: InventoryState, page: PageName) =>
         return [items, extraSlotsArray]
     }, [state.adventurers, state.takenQuests, page])
 
-export type PageName = "adventurers" | "taken-quests"
+export type PageName = "adventurers" | "taken-quests" | "furniture"
 
 interface InventoryPageProps {
     className?: string,
