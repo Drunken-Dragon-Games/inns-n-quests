@@ -14,7 +14,7 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
     })
 }
 
-export type InventorySelection = SelectedQuest | Adventurer
+export type InventorySelection = SelectedQuest | Adventurer | Furniture
 
 export type InventoryAsset = Adventurer | Furniture
 

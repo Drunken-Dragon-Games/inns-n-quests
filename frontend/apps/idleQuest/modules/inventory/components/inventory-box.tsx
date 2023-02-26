@@ -26,14 +26,14 @@ const InnerBorderBox = styled.div<{ $hover?: boolean }>`
     background-color: ${props => props.$hover ? "rgba(20,20,20,0.5)" : "rgba(0,0,0,0)"};
 `
 
-const InnerBackgroundBox = styled.div<{ $selected?: boolean, $center?: boolean }>`
+const InnerBackgroundBox = styled.div<{ $selected?: boolean, $center?: boolean, $overflowHidden?: boolean }>`
     ${BoxCss}
     width: 100%;
     height: 100%;
 
     background-color: ${props => props.$selected ? "#1976d2" : "rgba(0,0,0,0)"};
     box-shadow: inset 0 0 0.5vmax ${props => props.$selected ? "#90caf9" : "rgba(0,0,0,0)"};
-    overflow: visible;
+    overflow: ${props => props.$overflowHidden ? "hidden" : "visible"};
 
     display: flex;
     flex-direction: column-reverse;
@@ -135,12 +135,13 @@ interface InventoryBoxProps {
     hover?: boolean,
     empty?: boolean,
     info?: string,
+    overflowHidden?: boolean,
     onClick?: () => void 
     onMouseEnter?: () => void
     onMouseLeave?: () => void
 }
 
-const InventoryBox = ({ className, children, selected, disabled, center, hover, empty, info, onClick, onMouseEnter, onMouseLeave }: InventoryBoxProps) => {
+const InventoryBox = ({ className, children, selected, disabled, center, hover, empty, info, overflowHidden, onClick, onMouseEnter, onMouseLeave }: InventoryBoxProps) => {
     return (
         <InventoryBoxContainer 
             className={className} 
@@ -151,7 +152,7 @@ const InventoryBox = ({ className, children, selected, disabled, center, hover, 
             $empty={empty}
         >
             <InnerBorderBox $hover={hover && !empty && !disabled}>
-                <InnerBackgroundBox $selected={selected && !empty && !disabled} $center={center}>
+                <InnerBackgroundBox $selected={selected && !empty && !disabled} $center={center} $overflowHidden={overflowHidden}>
                     <ChildrenWrapper>
                         {children}
                     </ChildrenWrapper>

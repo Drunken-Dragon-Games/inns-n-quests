@@ -89,7 +89,8 @@ export default class FurnitureFun {
     private addSpritesToFurniture(furniture: Furniture[]): Furniture[] {
 
         const pixeltileSprite = (furniture: Furniture): string => {
-            return `https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_${furniture.assetRef.replace("PixelTile", "")}.png`
+            const name = furniture.assetRef === "PixelTile8" ? "PixelTile4" : furniture.assetRef
+            return `https://cdn.ddu.gg/pixeltiles/x4/${name}.png`
         }
 
         const withSprites: Furniture[] = furniture.map(furniture => {

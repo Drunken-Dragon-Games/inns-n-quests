@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import styled from "styled-components"
-import { AdventurerSprite } from "../../../common-components"
+import { AdventurerSprite, FurnitureSprite } from "../../../common-components"
 import {
     Adventurer, mapQuestScroll, takenQuestTimeLeft
 } from "../../../dsl"
@@ -63,10 +63,10 @@ const ItemBox = styled(InventoryBox)`
     height: 8vmax;
 `
 
-type InventoryItemViewState = [string | undefined, boolean | undefined, boolean | undefined, boolean | undefined]
+type InventoryItemViewState = [string | undefined, boolean | undefined, boolean | undefined, boolean | undefined, boolean | undefined]
 
 const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItemViewState => {
-    const [info, selected, disabled, center] = useMemo(() => {
+    const [info, selected, disabled, center, overflowHidden] = useMemo(() => {
         const item = props.item
         if (item && item.ctype === "adventurer") {
             return [
@@ -81,7 +81,9 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
                 props.selection.ctype === "available-quest" && 
                 item.inChallenge,
                 // center
-                false
+                false,
+                // overflowHidden
+                false,
             ]
         } else if (item && item.ctype === "taken-quest") {
             return [
@@ -94,13 +96,30 @@ const useInventoryItemViewState = (props: InventoryItemViewProps): InventoryItem
                 // disabled
                 false,
                 // center
-                true
+                true,
+                // overflowHidden
+                false,
             ]
-        } else return [undefined, undefined, undefined, undefined]
+        } else if (item && item.ctype === "furniture") {
+            return [
+                // info
+                "",
+                // selected
+                props.selection &&
+                props.selection.ctype === "furniture" &&
+                props.selection.furnitureId === item.furnitureId,
+                // disabled
+                false,
+                // center
+                false,
+                // overflowHidden
+                true,
+            ]
+        } else return [undefined, undefined, undefined, undefined, undefined]
     }, [props.item, props.selection, props.selectedParty])
     // Calculate the time left for the quest every time we render
     const timerInfo = props.item && props.item.ctype === "taken-quest" ? takenQuestTimeLeft(props.item) : info
-    return [timerInfo, selected, disabled, center]
+    return [timerInfo, selected, disabled, center, overflowHidden]
 }
 
 interface InventoryItemViewProps {
@@ -112,7 +131,7 @@ interface InventoryItemViewProps {
 
 const InventoryItemView = (props: InventoryItemViewProps) => {
     const [hover, setHover] = useState(false)
-    const [info, selected, disabled, center] = useInventoryItemViewState(props)
+    const [info, selected, disabled, center, overflowHidden] = useInventoryItemViewState(props)
     return (
         <ItemBox
             onClick={() => !disabled && props.onItemClick && props.item && props.onItemClick(props.item)}
@@ -124,6 +143,7 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
             hover={hover}
             empty={!props.item}
             info={info}
+            overflowHidden={overflowHidden}
         > { 
         props.item?.ctype === "adventurer" ? 
             <AdventurerSprite
@@ -138,10 +158,9 @@ const InventoryItemView = (props: InventoryItemViewProps) => {
                 width={7.3} height={6}
             /> :
         props.item?.ctype === "furniture" ? 
-            <PixelArtImage
-                src={props.item.sprite}
-                alt="furniture"
-                width={7.3} height={6}
+            <FurnitureSprite
+                furniture={props.item}
+                units={vmax(0.8)}
             /> :
         <></> } </ItemBox>
     )
