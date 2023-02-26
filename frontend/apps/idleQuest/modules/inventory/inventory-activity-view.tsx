@@ -5,7 +5,7 @@ import { InventoryTransitions } from "./inventory-transitions";
 
 const InventoryActivityView = ({ state, transitions }: { state: InventoryState, transitions: InventoryTransitions }) => {
 
-    if (state.selection && state.selection.ctype !== "adventurer")
+    if (state.selection && state.selection.ctype === "taken-quest")
         return <QuestSheet
             quest={state.selection}
             adventurerSlots={state.selectedParty}

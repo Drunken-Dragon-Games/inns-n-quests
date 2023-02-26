@@ -40,7 +40,7 @@ const GlobalKeyMap = (key: string, transitions: IdleQuestsTransitions, state: Id
     } else if (key == "Escape" && state.questBoard.open) {
         transitions.questBoard.onToggleQuestBoard()
 
-    } else if (key == "Enter" && state.inventory.selection && state.inventory.selection.ctype !== "adventurer") {
+    } else if (key == "Enter" && state.inventory.selection && state.inventory.selection.ctype === "taken-quest") {
         const quest = state.inventory.selection
         const adventurers = state.inventory.selectedParty.filter(notEmpty)
         transitions.inventory.onSignQuest(quest, adventurers)
