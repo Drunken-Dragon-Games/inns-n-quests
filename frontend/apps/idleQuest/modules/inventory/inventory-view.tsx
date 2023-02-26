@@ -19,9 +19,9 @@ const closeAnimation = keyframes`
     100% { opacity: 0; top: -100vh; }
 `
 
-const InventoryContainer =styled.div<{ open: boolean }>`
+const InventoryContainer = styled.div<{ open: boolean }>`
     position: absolute;
-    width: 100%;
+    width: 36vmax;
     height: 100%;
     background-color: rgba(20,20,20,0.5);
     backdrop-filter: blur(5px);
@@ -34,34 +34,18 @@ const Header = styled(DragonSilverDisplay)`
     height: 5%;
 `
 
-const InventoryBody = styled.div<{ open: boolean }>`
+const InventoryBrowserContainer = styled.div<{ open: boolean }>`
     height: 95%;
     width: 100%;
     display: flex;
+    flex-direction: column;
     opacity: ${props => props.open ? "1" : "0"};
     animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 `
 
-const ActivityContainer = styled.div`
-    box-sizing: border-box;
-    padding: 2vw;
-    height: 100%;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`
-
-const InventoryBrowserContainer = styled.div`
-    height: 100%;
-    width: 36vmax;
-    display: flex;
-    flex-direction: column;
-`
-
 const InventoryTabsContainer = styled.div`
     height: 5%;
-    width: 90%;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: row;
@@ -71,7 +55,7 @@ const InventoryTabsContainer = styled.div`
 
 const InventoryTab = styled.div<{ selected: boolean }>`
     height: 100%;
-    width: 33%;
+    flex: 1;
     display: flex;
     align-items: center;
     font-size: 1vmax;
@@ -89,10 +73,10 @@ const InventoryPagesContainer = styled.div`
     width: 100%;
 `
 
-const InventoryBrowser = ({ inventoryState, onItemClick }: { inventoryState: InventoryState, onItemClick: (item: InventoryItem) => void }) => {
+const InventoryBrowser = ({ inventoryState, open, onItemClick }: { inventoryState: InventoryState, open: boolean, onItemClick: (item: InventoryItem) => void }) => {
     const [page, setPage] = useState<PageName>("adventurers")
     return (
-        <InventoryBrowserContainer>
+        <InventoryBrowserContainer open={open}>
             <InventoryTabsContainer>
                 <InventoryTab onClick={() => setPage("adventurers")} selected={page === "adventurers"}><span>Adventurers</span></InventoryTab>
                 <InventoryTab onClick={() => setPage("taken-quests")} selected={page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
@@ -107,7 +91,6 @@ const InventoryBrowser = ({ inventoryState, onItemClick }: { inventoryState: Inv
 
 interface InventoryProps {
     className?: string,
-    children?: React.ReactNode,
     dragonSilver: number,
     dragonSilverToClaim: number,
     inventoryState: InventoryState,
@@ -117,7 +100,7 @@ interface InventoryProps {
 
 const InventoryView = (props: InventoryProps) => {
     //const [page, setPage] = useState<TabNames>("inventory")
-    return(
+    return (
         <InventoryContainer className={props.className} open={props.inventoryState.open}>
             <Header
                 dragonSilver={props.dragonSilver}
@@ -125,15 +108,11 @@ const InventoryView = (props: InventoryProps) => {
                 onClickClose={props.inventoryTransitions.onToggleInventory}
                 onAdventurerRecruit={props.inventoryTransitions.onRecruitAdventurer}
             />
-            <InventoryBody open={props.inventoryState.open}>
-                <InventoryBrowser 
-                    inventoryState={props.inventoryState} 
-                    onItemClick={props.inventoryTransitions.onItemClick} 
-                />
-                <ActivityContainer>
-                    {props.children}
-                </ActivityContainer>
-            </InventoryBody>
+            <InventoryBrowser
+                inventoryState={props.inventoryState}
+                open={props.inventoryState.open}
+                onItemClick={props.inventoryTransitions.onItemClick}
+            />
         </InventoryContainer>
     )
 }

@@ -5,8 +5,9 @@ import AlphaNotes from "./alpha-notes"
 import { If } from "./common-components"
 import { IdleQuestsState, idleQuestsStore } from "./idle-quests-state"
 import { idleQuestsTransitions, useInitEffects } from "./idle-quests-transitions"
+import { ActivityView } from "./modules/activity"
 import { HudView } from "./modules/hud"
-import { InventoryActivityView, InventoryView } from "./modules/inventory"
+import { InventoryView } from "./modules/inventory"
 import { NotificationsView } from "./modules/notifications"
 import { usePhaserRender } from "./modules/overworld/phaser-render"
 import { QuestBoardView } from "./modules/quest-board"
@@ -37,6 +38,10 @@ const HudModule = styled(HudView)`
 `
 
 const InventoryModule = styled(InventoryView)`
+    z-index: 20;
+`
+
+const ActivityModule = styled(ActivityView)`
     z-index: 20;
 `
 
@@ -94,12 +99,12 @@ const IdleQuestsView = () => {
                 inventoryState={state.inventory}
                 inventoryTransitions={transitions.inventory}
                 onCloseAvailableQuest={transitions.questBoard.onRemoveAvailableQuest}
-            > 
-                <InventoryActivityView 
-                    state={state.inventory} 
-                    transitions={transitions.inventory} 
-                />
-            </InventoryModule>
+            /> 
+
+            <ActivityModule
+                state={state.inventory} 
+                transitions={transitions.inventory} 
+            />
 
             <AlphaNotes />
         </IdleQuestsContainer>
