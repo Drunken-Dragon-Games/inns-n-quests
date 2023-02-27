@@ -17,14 +17,13 @@ const closeAnimation = keyframes`
     100% { opacity: 0; top: -100vh; }
 `
 
-const WorldViewContainer = styled.div<{ dragging: boolean, open: boolean }>`
+const WorldViewContainer = styled.div<{ open: boolean }>`
     position: absolute;
     width: 100%;
     height: 100%;
     overflow: hidden;
     top: 0;
     background-color: rgba(20,20,20,1);
-    cursor: ${props => props.dragging ? "grabbing" : "grab"};
     ${props => props.open ? "top: 0;" : "top: -100vh;"};
     opacity: ${props => props.open ? "1" : "0"};
     animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
@@ -78,12 +77,14 @@ interface WorldViewProps {
 
 const WorldView = ({ className, worldState, worldTransitions }: WorldViewProps) => {
     const viewState = useWorldViewState(worldState)
+    /*
     const { dragging, onStartDrag } = useDrag(
         worldState.viewLocation[worldState.activeMap.metadata.name], 
         worldState.activeMap.metadata.units.scale,
         worldTransitions.onWorldViewLocationChange)
+    */
     return (
-        <WorldViewContainer className={className} onMouseDown={onStartDrag} dragging={dragging} open={worldState.open}>
+        <WorldViewContainer className={className} open={worldState.open}>
             <WorldArea width={viewState.mapWidth} height={viewState.mapHeight} locationOffset={viewState.locationOffset}>
 
                 { worldState.activeMap.metadata.contents.ctype === "paper-map-contents" ?

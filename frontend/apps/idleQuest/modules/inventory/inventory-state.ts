@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Adventurer, TakenQuest, SelectedQuest, Outcome, individualXPReward, tagRealAPS } from "../../dsl"
+import { Adventurer, TakenQuest, Outcome, individualXPReward, tagRealAPS } from "../../dsl"
 import { Furniture } from "../../dsl/furniture"
+import { DraggableItem, InventoryAsset, InventorySelection, SelectedQuest } from "./inventory-dsl"
 
 const sortAdventurers = (adventurers: Adventurer[]) => {
     return adventurers.sort((a, b) => {
@@ -14,10 +15,6 @@ const sortAdventurers = (adventurers: Adventurer[]) => {
     })
 }
 
-export type InventorySelection = SelectedQuest | Adventurer | Furniture
-
-export type InventoryAsset = Adventurer | Furniture
-
 export interface InventoryState {
     appReady: boolean[]
 
@@ -27,6 +24,7 @@ export interface InventoryState {
     takenQuests: TakenQuest[]
 
     selection?: InventorySelection
+    dragging?: [DraggableItem, boolean]
     selectedParty: (Adventurer | null)[]
 }
 
@@ -110,6 +108,14 @@ export const inventoryState = createSlice({
                 adventurer?.adventurerId === action.payload.adventurerId ? null : adventurer)
         },
 
+        dragItemStarted: (state, action: PayloadAction<DraggableItem>) => {
+            state.dragging = [action.payload, true]
+        },
+
+        dragItemEnded: (state, action: PayloadAction<DraggableItem>) => {
+            state.dragging = [action.payload, false]
+        },
+
         clearSelectedParty: (state) => {
             if (state.selection && state.selection.ctype === "available-quest")
                 state.selectedParty = Array(state.selection.slots).fill(null)
@@ -173,6 +179,8 @@ export const {
     removeTakenQuest,
     selectQuest,
     unselectQuest,
+    dragItemStarted,
+    dragItemEnded,
     pickAdventurerForQuest,
     unPickAdventurerForQuest,
     clearSelectedParty,

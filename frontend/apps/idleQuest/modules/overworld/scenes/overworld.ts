@@ -117,11 +117,12 @@ export class Overworld extends Phaser.Scene {
         })
         this.cameraControls.update(delta)
 
+        /*
         if (this.draggingDirection) {
 
             if (!this.draggingDirection.dragging) {
                 this.draggingDirection.obj.setVelocity(0, 0)
-                this.draggingDirection == undefined
+                this.draggingDirection = undefined
             }
             else {
                 const speed = 500
@@ -139,8 +140,9 @@ export class Overworld extends Phaser.Scene {
             //this.draggingDirection.obj.y = this.draggingDirection.dragPosition[1]
             //this.draggingDirection == undefined
         }
-
-        if (this.game.input.activePointer.isDown && this.inputs.Space.isDown) {
+        else 
+        */
+        if (this.game.input.activePointer.isDown) {
             if (this.origDragPoint) {
                 // move the camera by the amount the mouse has moved since last update		
                 this.cameras.main.scrollX += this.origDragPoint.x - this.game.input.activePointer.position.x

@@ -1,7 +1,7 @@
 import { compose } from "@reduxjs/toolkit"
 import { axiosCustomInstance } from "../../../../axios/axiosApi"
 import {
-    addVisualDataToTakenQuests, Adventurer, AvailableQuest, Outcome, tagAdventurer, tagRealAPS,
+    Adventurer, AvailableQuest, Outcome, tagAdventurer, tagRealAPS,
     tagTakenQuest, TakenQuest, withTokenRefresh
 } from "../../dsl"
 import { tagFurniture } from "../../dsl/furniture"
@@ -12,6 +12,7 @@ import {
     removeTakenQuest, finishLoadingModule, setInventory, setTakenQuests,
     unselectQuest
 } from "../../state"
+import { addVisualDataToTakenQuests } from "./inventory-dsl"
 
 export const getInventory = (firstLoad: boolean): IdleQuestsThunk => async (dispatch) =>
     await withTokenRefresh(async () => {

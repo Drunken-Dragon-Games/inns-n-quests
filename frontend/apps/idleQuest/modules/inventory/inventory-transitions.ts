@@ -1,8 +1,11 @@
-import { SelectedQuest, Adventurer, takenQuestSecondsLeft } from "../../dsl"
+import { Adventurer, takenQuestSecondsLeft } from "../../dsl"
 import { IdleQuestsSnD } from "../../idle-quests-state"
-import { InventoryItem } from "./inventory-dsl"
-import { toggleInventory, selectQuest, unselectQuest, unPickAdventurerForQuest, pickAdventurerForQuest, selectAdventurer, finishLoadingModule } from "./inventory-state"
-import { takeAvailableQuest, claimTakenQuest, fetchMintTest, getInventory, getInProgressQuests } from "./inventory-thunks"
+import { DraggableItem, InventoryItem, SelectedQuest } from "./inventory-dsl"
+import {
+    dragItemEnded, dragItemStarted, finishLoadingModule, pickAdventurerForQuest,
+    selectAdventurer, selectQuest, toggleInventory, unPickAdventurerForQuest, unselectQuest
+} from "./inventory-state"
+import { claimTakenQuest, fetchMintTest, getInProgressQuests, getInventory, takeAvailableQuest } from "./inventory-thunks"
 
 export type InventoryTransitions = {
     onFinishLoadingModule: (module: number) => void
@@ -13,6 +16,8 @@ export type InventoryTransitions = {
     onSignQuest: (quest: SelectedQuest, adventurers: Adventurer[]) => void
     onUnselectAdventurer: (adventurer: Adventurer) => void
     onItemClick: (item: InventoryItem) => void
+    onItemDragStarted: (item: DraggableItem) => void
+    onItemDragEnded: (item: DraggableItem) => void
     onRecruitAdventurer: () => void
 }
 
@@ -89,6 +94,14 @@ export const inventoryTransitions = ({ state, dispatch }: IdleQuestsSnD): Invent
             dispatch(selectQuest(item)) :
 
         null
+    },
+
+    onItemDragStarted: (item: DraggableItem) => {
+        dispatch(dragItemStarted(item))
+    },
+
+    onItemDragEnded: (item: DraggableItem) => {
+        dispatch(dragItemEnded(item))
     },
 
     onRecruitAdventurer: () => {

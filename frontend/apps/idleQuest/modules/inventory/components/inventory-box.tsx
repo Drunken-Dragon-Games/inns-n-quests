@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { MouseEventHandler, ReactNode } from "react"
 import styled, { css, keyframes } from "styled-components"
 import { OswaldFontFamily } from "../../../common-components"
 
@@ -136,30 +136,34 @@ interface InventoryBoxProps {
     empty?: boolean,
     info?: string,
     overflowHidden?: boolean,
-    onClick?: () => void 
-    onMouseEnter?: () => void
-    onMouseLeave?: () => void
+    onClick?:  MouseEventHandler
+    onMouseDown?: MouseEventHandler
+    onMouseUp?: MouseEventHandler
+    onMouseEnter?: MouseEventHandler
+    onMouseLeave?: MouseEventHandler
 }
 
-const InventoryBox = ({ className, children, selected, disabled, center, hover, empty, info, overflowHidden, onClick, onMouseEnter, onMouseLeave }: InventoryBoxProps) => {
+const InventoryBox = (props: InventoryBoxProps) => {
     return (
         <InventoryBoxContainer 
-            className={className} 
-            onClick={onClick} 
-            onMouseEnter={onMouseEnter} 
-            onMouseLeave={onMouseLeave}
-            $disabled={disabled}
-            $empty={empty}
+            className={props.className} 
+            onClick={props.onClick} 
+            onMouseDown={props.onMouseDown}
+            onMouseUp={props.onMouseUp}
+            onMouseEnter={props.onMouseEnter} 
+            onMouseLeave={props.onMouseLeave}
+            $disabled={props.disabled}
+            $empty={props.empty}
         >
-            <InnerBorderBox $hover={hover && !empty && !disabled}>
-                <InnerBackgroundBox $selected={selected && !empty && !disabled} $center={center} $overflowHidden={overflowHidden}>
+            <InnerBorderBox $hover={props.hover && !props.empty && !props.disabled}>
+                <InnerBackgroundBox $selected={props.selected && !props.empty && !props.disabled} $center={props.center} $overflowHidden={props.overflowHidden}>
                     <ChildrenWrapper>
-                        {children}
+                        {props.children}
                     </ChildrenWrapper>
                 </InnerBackgroundBox>
-                {info ? <InfoBox><InfoInnerBox><span>{info}</span></InfoInnerBox></InfoBox> : <></>}
+                {props.info ? <InfoBox><InfoInnerBox><span>{props.info}</span></InfoInnerBox></InfoBox> : <></>}
             </InnerBorderBox>
-            {hover && !empty && !disabled ?
+            {props.hover && !props.empty && !props.disabled ?
                 <>
                     <CornerImage side="top-left" />
                     <CornerImage side="top-right" />

@@ -1,10 +1,11 @@
 import { useState } from "react"
 import styled, { keyframes } from "styled-components"
-import { OswaldFontFamily } from "../../common-components"
+import { AdventurerSprite, FurnitureSprite } from "../../common-components"
 import { AvailableQuest } from "../../dsl"
+import { vmax } from "../../utils"
 import DragonSilverDisplay from "./components/dragon-silver-display"
-import InventoryPage, { PageName } from "./components/inventory-page"
-import { InventoryItem } from "./inventory-dsl"
+import InventoryBrowser from "./components/inventory-browser"
+import { DraggableItem } from "./inventory-dsl"
 import { InventoryState } from "./inventory-state"
 import { InventoryTransitions } from "./inventory-transitions"
 
@@ -34,59 +35,19 @@ const Header = styled(DragonSilverDisplay)`
     height: 5%;
 `
 
-const InventoryBrowserContainer = styled.div<{ open: boolean }>`
-    height: 95%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    opacity: ${props => props.open ? "1" : "0"};
-    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
+const DraggingContainer = styled.div.attrs<{ position?: [number, number] }>( props => ({ 
+    style: { 
+        top: props.position ? props.position[1] : 0, 
+        left: props.position ? props.position[0] : 0 
+    }
+}))<{ position?: [number, number] }>`
+    position: absolute;
+    display: ${props => props.position ? "block" : "none"};
 `
 
-const InventoryTabsContainer = styled.div`
-    height: 5%;
-    width: 100%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-`
-
-const InventoryTab = styled.div<{ selected: boolean }>`
-    height: 100%;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    font-size: 1vmax;
-    justify-content: center;
-    cursor: pointer;
-    background-color: ${props => props.selected ? "rgba(20,20,20,0.1)" : "rgba(20,20,20,0.5)"};
-    color: ${props => props.selected ? "white" : "rgba(200,200,200,0.5)"};
-    filter: ${props => props.selected ? "drop-shadow(0px 0px 5px white)" : "none"};
-    border-bottom: ${props => props.selected ? "2px solid white" : "2px solid rgba(200,200,200,0.5)"};
-    ${OswaldFontFamily}
-`
-
-const InventoryPagesContainer = styled.div`
-    height: 95%;
-    width: 100%;
-`
-
-const InventoryBrowser = ({ inventoryState, open, onItemClick }: { inventoryState: InventoryState, open: boolean, onItemClick: (item: InventoryItem) => void }) => {
-    const [page, setPage] = useState<PageName>("adventurers")
-    return (
-        <InventoryBrowserContainer open={open}>
-            <InventoryTabsContainer>
-                <InventoryTab onClick={() => setPage("adventurers")} selected={page === "adventurers"}><span>Adventurers</span></InventoryTab>
-                <InventoryTab onClick={() => setPage("taken-quests")} selected={page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
-                <InventoryTab onClick={() => setPage("furniture")} selected={page === "furniture"}><span>Furniture</span></InventoryTab>
-            </InventoryTabsContainer>
-            <InventoryPagesContainer>
-                <InventoryPage inventoryState={inventoryState} page={page} onItemClick={onItemClick} />
-            </InventoryPagesContainer>
-        </InventoryBrowserContainer>
-    )
+interface DraggingState {
+    item: DraggableItem
+    position: [number, number]
 }
 
 interface InventoryProps {
@@ -99,7 +60,7 @@ interface InventoryProps {
 }
 
 const InventoryView = (props: InventoryProps) => {
-    //const [page, setPage] = useState<TabNames>("inventory")
+    const [draggingState, setDraggingState] = useState<DraggingState | undefined>()
     return (
         <InventoryContainer className={props.className} open={props.inventoryState.open}>
             <Header
@@ -108,11 +69,34 @@ const InventoryView = (props: InventoryProps) => {
                 onClickClose={props.inventoryTransitions.onToggleInventory}
                 onAdventurerRecruit={props.inventoryTransitions.onRecruitAdventurer}
             />
+
             <InventoryBrowser
                 inventoryState={props.inventoryState}
                 open={props.inventoryState.open}
                 onItemClick={props.inventoryTransitions.onItemClick}
+                onItemDrag={(item, position) => {
+                    setDraggingState({ item, position })
+                    props.inventoryTransitions.onItemDragStarted(item)
+                }}
+                onItemDragEnd={(item) => {
+                    setDraggingState(undefined)
+                    props.inventoryTransitions.onItemDragEnded(item)
+                }}
             />
+
+            <DraggingContainer position={draggingState?.position}>
+                { draggingState && draggingState.item.ctype === "adventurer" ?
+                    <AdventurerSprite
+                        adventurer={draggingState.item}
+                        units={vmax(0.8)}
+                    />
+                : draggingState && draggingState.item.ctype === "furniture" ?
+                    <FurnitureSprite
+                        furniture={draggingState.item}
+                        units={vmax(0.8)}
+                    /> 
+                : <></> } 
+            </DraggingContainer>
         </InventoryContainer>
     )
 }

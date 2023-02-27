@@ -13,11 +13,13 @@ async function loadPhaser(transitions: IdleQuestsTransitions): Promise<Game> {
     const game = new Phaser.Game({
         type: Phaser.AUTO,
         title: "Inns & Quests Overworld",
-        parent: "overworld-phaser-container",
-        width: window.innerWidth * window.devicePixelRatio / zoom,
-        height: window.innerHeight * window.devicePixelRatio / zoom,
+        //width: window.innerWidth * window.devicePixelRatio / zoom,
+        //height: window.innerHeight * window.devicePixelRatio / zoom,
         pixelArt: true,
-        scale: { zoom },
+        scale: { 
+            mode: Phaser.Scale.ENVELOP,
+            parent: "overworld-phaser-container",
+        },
         physics: {
             default: "arcade",
             arcade: {

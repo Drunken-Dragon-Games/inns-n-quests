@@ -1,4 +1,18 @@
 import { MouseEventHandler, useEffect, useState } from "react"
+import { notEmpty } from "."
+
+export type DragProps = {
+    onDrag?: (position: [number, number], vector: [number, number]) => void
+    onDrop?: () => void
+}
+
+export type DragEffect = {
+    dragging: boolean
+    initialPosition?: [number, number]
+    currentPosition?: [number, number]
+    vector?: [number, number]
+    onStartDrag: MouseEventHandler
+}
 
 /**
  * Handles the dragging of any element by keeping track of a location pair. 
@@ -9,29 +23,40 @@ import { MouseEventHandler, useEffect, useState } from "react"
  * @param onDrag 
  * @returns 
  */
-export const useDrag = (currentLocation: [number, number], scale: number, onDrag: (newLocation: [number, number]) => void): { dragging: boolean, onStartDrag: MouseEventHandler } => {
-    const [dragging, setDragging] = useState<[number, number] | undefined>(undefined)
+export const useDrag = ({ onDrag, onDrop }: DragProps): DragEffect => {
+    const [initialPosition, setInitialPosition] = useState<[number, number] | undefined>(undefined)
+    const [currentPosition, setCurrentPosition] = useState<{ position: [number, number], vector: [number, number] } | undefined>(undefined)
     useEffect(() => {
-        if (dragging) {
-            let limiter = 0
-            const handleMouseMove = (event: MouseEvent) => {
-                if (limiter++ % 5 !== 0) return
-                const moveX = event.clientX - dragging[0] 
-                const moveY = event.clientY - dragging[1] 
-                onDrag([ currentLocation[0] + moveX / scale, currentLocation[1] + moveY / scale])
-            }
-            const handleMouseUp = () => {
-                setDragging(undefined)
-                window.removeEventListener('mousemove', handleMouseMove)
-                window.removeEventListener('mouseup', handleMouseUp)
-            }
-            window.addEventListener('mousemove', handleMouseMove)
-            window.addEventListener('mouseup', handleMouseUp)
-            return () => {
-                window.removeEventListener('mousemove', handleMouseMove)
-                window.removeEventListener('mouseup', handleMouseUp)
-            }
+        if (initialPosition === undefined) return
+        setCurrentPosition({ position: initialPosition, vector: [0, 0] })
+        let limiter = 0
+        const handleMouseMove = (event: MouseEvent) => {
+            if (limiter++ % 5 !== 0) return
+            const position: [number, number] = [event.clientX, event.clientY]
+            const vector: [number, number] = [position[0] - initialPosition[0], position[1] - initialPosition[1]]
+            setCurrentPosition({ position, vector })
+            onDrag && onDrag(position, vector)
         }
-    }, [dragging])
-    return { dragging: dragging !== undefined, onStartDrag: (event) => setDragging([event.clientX, event.clientY]) }
+        const handleMouseUp = () => {
+            onDrop && onDrop()
+            setCurrentPosition(undefined)
+            setInitialPosition(undefined)
+            window.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('mouseup', handleMouseUp)
+        }
+        const unregisterListeners = () => {
+            window.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('mouseup', handleMouseUp)
+        }
+        window.addEventListener('mousemove', handleMouseMove)
+        window.addEventListener('mouseup', handleMouseUp)
+        return unregisterListeners
+    }, [initialPosition])
+    return { 
+        dragging: notEmpty(initialPosition),
+        initialPosition,
+        currentPosition: currentPosition?.position,
+        vector: currentPosition?.vector,
+        onStartDrag: (event) => setInitialPosition([event.clientX, event.clientY]) 
+    }
 }

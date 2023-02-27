@@ -1,7 +1,8 @@
 import { compose } from "@reduxjs/toolkit"
 import { axiosCustomInstance } from "../../../../axios/axiosApi"
-import { addVisualQuestData, tagAvailableQuest, withTokenRefresh } from "../../dsl"
+import { tagAvailableQuest, withTokenRefresh } from "../../dsl"
 import { IdleQuestsThunk } from "../../idle-quests-state"
+import { addVisualQuestData } from "../inventory"
 import { addAvailableQuests } from "./quest-board-state"
 
 export const getAvailableQuests = (): IdleQuestsThunk => async (dispatch) => 
