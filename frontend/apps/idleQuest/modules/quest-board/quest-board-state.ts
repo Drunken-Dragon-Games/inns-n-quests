@@ -1,10 +1,17 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { AvailableQuest } from "../../dsl"
+import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
+import { useSelector } from "react-redux"
+import { AvailableQuest } from "../../common"
 
 export interface QuestBoardState {
     open: boolean
     availableQuests: AvailableQuest[]
 }
+
+export type QuestBoardStoreState = 
+    ReturnType<typeof questBoardStore.getState> // Includes Thunks Middleware
+
+export type QuestBoardThunk<ReturnType = void> = 
+    ThunkAction<ReturnType, QuestBoardStoreState, unknown, Action<string>>
 
 const questBoardInitialState: QuestBoardState = { 
     open: false,
@@ -40,3 +47,10 @@ export const {
     clearAvailableQuests,
     toggleQuestBoard,
 } = questBoardState.actions
+
+export const questBoardStore = configureStore({
+    reducer: questBoardState.reducer,
+})
+
+export const useQuestBoardSelector = <Selection = unknown>(selector: (state: QuestBoardState) => Selection) => 
+    useSelector<QuestBoardStoreState, Selection>(selector)

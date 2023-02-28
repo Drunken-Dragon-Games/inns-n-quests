@@ -1,6 +1,6 @@
 import { MouseEventHandler, ReactNode } from "react"
 import styled, { css, keyframes } from "styled-components"
-import { OswaldFontFamily } from "../../../common-components"
+import { OswaldFontFamily } from "../../../../common"
 
 const BoxCss = css`
     position: relative;
@@ -143,35 +143,33 @@ interface InventoryBoxProps {
     onMouseLeave?: MouseEventHandler
 }
 
-const InventoryBox = (props: InventoryBoxProps) => {
-    return (
-        <InventoryBoxContainer 
-            className={props.className} 
-            onClick={props.onClick} 
-            onMouseDown={props.onMouseDown}
-            onMouseUp={props.onMouseUp}
-            onMouseEnter={props.onMouseEnter} 
-            onMouseLeave={props.onMouseLeave}
-            $disabled={props.disabled}
-            $empty={props.empty}
-        >
-            <InnerBorderBox $hover={props.hover && !props.empty && !props.disabled}>
-                <InnerBackgroundBox $selected={props.selected && !props.empty && !props.disabled} $center={props.center} $overflowHidden={props.overflowHidden}>
-                    <ChildrenWrapper>
-                        {props.children}
-                    </ChildrenWrapper>
-                </InnerBackgroundBox>
-                {props.info ? <InfoBox><InfoInnerBox><span>{props.info}</span></InfoInnerBox></InfoBox> : <></>}
-            </InnerBorderBox>
-            {props.hover && !props.empty && !props.disabled ?
-                <>
-                    <CornerImage side="top-left" />
-                    <CornerImage side="top-right" />
-                    <CornerImage side="bottom-right" />
-                    <CornerImage side="bottom-left" />
-                </>
-                : <></>}
-        </InventoryBoxContainer>
-    )
-}
+const InventoryBox = (props: InventoryBoxProps) =>
+    <InventoryBoxContainer
+        className={props.className}
+        onClick={props.onClick}
+        onMouseDown={props.onMouseDown}
+        onMouseUp={props.onMouseUp}
+        onMouseEnter={props.onMouseEnter}
+        onMouseLeave={props.onMouseLeave}
+        $disabled={props.disabled}
+        $empty={props.empty}
+    >
+        <InnerBorderBox $hover={props.hover && !props.empty && !props.disabled}>
+            <InnerBackgroundBox $selected={props.selected && !props.empty && !props.disabled} $center={props.center} $overflowHidden={props.overflowHidden}>
+                <ChildrenWrapper>
+                    {props.children}
+                </ChildrenWrapper>
+            </InnerBackgroundBox>
+            {props.info ? <InfoBox><InfoInnerBox><span>{props.info}</span></InfoInnerBox></InfoBox> : <></>}
+        </InnerBorderBox>
+        {props.hover && !props.empty && !props.disabled ?
+            <>
+                <CornerImage side="top-left" />
+                <CornerImage side="top-right" />
+                <CornerImage side="bottom-right" />
+                <CornerImage side="bottom-left" />
+            </>
+            : <></>}
+    </InventoryBoxContainer>
+
 export default InventoryBox

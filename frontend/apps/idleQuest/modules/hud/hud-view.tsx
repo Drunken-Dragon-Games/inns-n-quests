@@ -1,6 +1,7 @@
 import styled from "styled-components"
-import { IdleQuestsTransitions } from "../../idle-quests-transitions"
 import { PixelArtImage, vh } from "../../utils"
+import InventoryApi from "../inventory/inventory-api"
+import { QuestBoardApi } from "../quest-board"
 
 const HudContainer = styled.div`
     position: absolute;
@@ -28,37 +29,19 @@ const HudButton = styled(PixelArtImage)`
     }
 `
 
-interface HudViewProps {
-    className?: string,
-    transitions: IdleQuestsTransitions
-}
-
-const HudView = ({ className, transitions }: HudViewProps) =>
+const HudView = ({ className }: { className?: string }) =>
     <HudContainer>
         <HudButtons className={className}>
             <HudButton
-                onClick={() => {
-                    transitions.world.onToggleWorldMap(false)
-                    transitions.questBoard.onToggleQuestBoard()
-                }}
+                onClick={QuestBoardApi.toggleQuestBoard}
                 src="https://cdn.ddu.gg/modules/quests/icons/quests-icon.png"
                 width={80}
                 height={68}
                 units={vh(0.15)}
             />
             <HudButton
-                onClick={() => {
-                    transitions.world.onToggleWorldMap(false)
-                    transitions.inventory.onToggleInventory()
-                }}
+                onClick={InventoryApi.toggleInventory}
                 src="https://cdn.ddu.gg/modules/quests/icons/inventory-icon.png"
-                width={80}
-                height={68}
-                units={vh(0.15)}
-            />
-            <HudButton
-                onClick={() => transitions.world.onToggleWorldMap()}
-                src="https://cdn.ddu.gg/modules/quests/icons/map-icon.png"
                 width={80}
                 height={68}
                 units={vh(0.15)}

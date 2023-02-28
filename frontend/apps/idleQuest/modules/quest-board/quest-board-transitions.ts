@@ -1,27 +1,24 @@
-import { AvailableQuest } from "../../dsl"
-import { IdleQuestsSnD } from "../../idle-quests-state"
-import { clearAvailableQuests, removeAvailableQuest, toggleQuestBoard } from "./quest-board-state"
+import { AvailableQuest } from "../../common"
+import InventoryApi from "../inventory/inventory-api"
+import { clearAvailableQuests, questBoardStore, removeAvailableQuest, toggleQuestBoard } from "./quest-board-state"
 import { getAvailableQuests } from "./quest-board-thunks"
 
-export type QuestBoardTransitions = {
-    onFetchAvailableQuests: () => void
-    onClearAvailableQuests: () => void
-    onRemoveAvailableQuest: (availableQuest: AvailableQuest) => void
-    onToggleQuestBoard: (open?: boolean) => void
-}
-
-export const questBoardTransitions = ({ state, dispatch }: IdleQuestsSnD): QuestBoardTransitions => ({
+const QuestBoardTransitions = {
 
     onFetchAvailableQuests: () =>
-        dispatch(getAvailableQuests()),
+        questBoardStore.dispatch(getAvailableQuests()),
 
     onClearAvailableQuests: () => 
-        dispatch(clearAvailableQuests()),
+        questBoardStore.dispatch(clearAvailableQuests()),
+    
+    onClickAvailableQuest: (availableQuest: AvailableQuest) =>
+        InventoryApi.selectQuest(availableQuest),
 
     onRemoveAvailableQuest: (availableQuest: AvailableQuest) => 
-        dispatch(removeAvailableQuest(availableQuest)),
+        questBoardStore.dispatch(removeAvailableQuest(availableQuest)),
 
     onToggleQuestBoard: (open?: boolean) => 
-        dispatch(toggleQuestBoard({ open })),
-})
+        questBoardStore.dispatch(toggleQuestBoard({ open })),
+}
 
+export default QuestBoardTransitions

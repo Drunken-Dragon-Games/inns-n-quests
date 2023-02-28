@@ -1,4 +1,4 @@
-import { MouseEventHandler, useEffect, useState } from "react"
+import { MouseEventHandler, useCallback, useEffect, useState, MouseEvent as ReactMouseEvent } from "react"
 import { notEmpty } from "."
 
 export type DragProps = {
@@ -11,7 +11,7 @@ export type DragEffect = {
     initialPosition?: [number, number]
     currentPosition?: [number, number]
     vector?: [number, number]
-    onStartDrag: MouseEventHandler
+    startDrag: MouseEventHandler
 }
 
 /**
@@ -26,10 +26,12 @@ export type DragEffect = {
 export const useDrag = ({ onDrag, onDrop }: DragProps): DragEffect => {
     const [initialPosition, setInitialPosition] = useState<[number, number] | undefined>(undefined)
     const [currentPosition, setCurrentPosition] = useState<{ position: [number, number], vector: [number, number] } | undefined>(undefined)
+
     useEffect(() => {
         if (initialPosition === undefined) return
         setCurrentPosition({ position: initialPosition, vector: [0, 0] })
         let limiter = 0
+
         const handleMouseMove = (event: MouseEvent) => {
             if (limiter++ % 5 !== 0) return
             const position: [number, number] = [event.clientX, event.clientY]
@@ -37,6 +39,7 @@ export const useDrag = ({ onDrag, onDrop }: DragProps): DragEffect => {
             setCurrentPosition({ position, vector })
             onDrag && onDrag(position, vector)
         }
+
         const handleMouseUp = () => {
             onDrop && onDrop()
             setCurrentPosition(undefined)
@@ -44,6 +47,7 @@ export const useDrag = ({ onDrag, onDrop }: DragProps): DragEffect => {
             window.removeEventListener('mousemove', handleMouseMove)
             window.removeEventListener('mouseup', handleMouseUp)
         }
+
         const unregisterListeners = () => {
             window.removeEventListener('mousemove', handleMouseMove)
             window.removeEventListener('mouseup', handleMouseUp)
@@ -52,11 +56,13 @@ export const useDrag = ({ onDrag, onDrop }: DragProps): DragEffect => {
         window.addEventListener('mouseup', handleMouseUp)
         return unregisterListeners
     }, [initialPosition])
+    
     return { 
         dragging: notEmpty(initialPosition),
         initialPosition,
         currentPosition: currentPosition?.position,
         vector: currentPosition?.vector,
-        onStartDrag: (event) => setInitialPosition([event.clientX, event.clientY]) 
+        startDrag: useCallback((event: ReactMouseEvent) => 
+            setInitialPosition([event.clientX, event.clientY]), [])
     }
 }

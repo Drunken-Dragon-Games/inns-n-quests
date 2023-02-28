@@ -1,6 +1,7 @@
 import React from "react"
 import styled from "styled-components"
-import { Push, SansSerifFontFamily } from "../../../common-components"
+import { Push, SansSerifFontFamily } from "../../../../common"
+import Transitions from "../../inventory-transitions"
 import BigHopsButton from "./big-hops-button"
 import DragonSilverIcon from "./dragon-silver-icon"
 
@@ -32,22 +33,18 @@ const ClaimDragonSilverButtonWrapper = styled.div`
     margin-top: 0.3vh;
 `
 
-interface DragonSilverDisplayProps {
+interface InventoryHeaderProps {
     className?: string,
-    dragonSilver: number,
-    dragonSilverToClaim: number,
-    onClickClose: () => void,
-    onAdventurerRecruit: () => void
 }
 
-const DragonSilverDisplay = ({ className, dragonSilver, dragonSilverToClaim, onClickClose, onAdventurerRecruit }: DragonSilverDisplayProps) =>
+const InventoryHeader = ({ className }: InventoryHeaderProps) =>
     <DragonSilverDisplayContainer className={className}>
-        <BigHopsButton onClick={onAdventurerRecruit} text="Recruit" />
+        <BigHopsButton onClick={Transitions.onRecruitAdventurer} text="Recruit" />
         <Push />
         <DragonSilverWrapper>
             <DragonSilverIcon
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/dragon_silver.png"
-                dragonSilver={dragonSilver}
+                dragonSilver={0}
                 tooltip="Dragon Silver"
                 toClaim={false}
             />
@@ -56,15 +53,15 @@ const DragonSilverDisplay = ({ className, dragonSilver, dragonSilverToClaim, onC
         <ClaimDragonSilverButtonWrapper>
             <DragonSilverIcon
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/dragon_silver_to_claim.png"
-                dragonSilver={dragonSilverToClaim}
+                dragonSilver={0}
                 tooltip="Dragon Silver to Claim"
                 toClaim={false}
             />
         </ClaimDragonSilverButtonWrapper>
 
-        <CloseButton onClick={onClickClose}>
+        <CloseButton onClick={Transitions.onToggleInventory}>
             <span>X</span>
         </CloseButton>
     </DragonSilverDisplayContainer>
 
-export default DragonSilverDisplay
+export default InventoryHeader

@@ -1,7 +1,6 @@
 import { useEffect } from "react"
-import { IdleQuestsState } from "./idle-quests-state"
-import { IdleQuestsTransitions } from "./idle-quests-transitions"
-import { notEmpty } from "./utils"
+import InventoryApi from "./modules/inventory/inventory-api"
+import { QuestBoardApi } from "./modules/quest-board"
 
 /**
  * Global key map for the Idle Quests app.
@@ -11,39 +10,26 @@ import { notEmpty } from "./utils"
  * @param state 
  * @param dispatch 
  */
-const GlobalKeyMap = (key: string, transitions: IdleQuestsTransitions, state: IdleQuestsState) => { 
+const GlobalKeyMap = (key: string) => { 
 
     if (key == "b" || key == "B") {
-        transitions.world.onToggleWorldMap(false)
-        transitions.inventory.onToggleInventory()
+        InventoryApi.toggleInventory()
 
     } else if (key == "q" || key == "Q") {
-        transitions.world.onToggleWorldMap(false)
-        transitions.questBoard.onToggleQuestBoard()
+        QuestBoardApi.toggleQuestBoard()
 
-    } else if (key == "m" || key == "M") {
-        if (state.world.activeMap.metadata.name === "Northwest Thiolden" && state.world.open) {
-            transitions.world.onSetWorldMap({ open: false })
-        } else {
-            transitions.world.onSetWorldMap({ open: true, worldName: "Northwest Thiolden" })
-        }
-    
-    } else if (key == "Escape" && state.inventory.selection) {
-        transitions.inventory.onCloseSelectedQuestAndInventory()
+    } else if (key == "Escape" && InventoryApi.activeActivity()) {
+        InventoryApi.toggleInventory()
+        InventoryApi.closeActivity()
 
-    } else if (key == "Escape" && state.inventory.open) {
-        transitions.inventory.onToggleInventory()
+    } else if (key == "Escape" && InventoryApi.isOpen()) {
+        InventoryApi.toggleInventory()
 
-    } else if (key == "Escape" && state.world.open) {
-        transitions.world.onToggleWorldMap()
+    } else if (key == "Escape" && QuestBoardApi.isOpen()) {
+        QuestBoardApi.toggleQuestBoard()
 
-    } else if (key == "Escape" && state.questBoard.open) {
-        transitions.questBoard.onToggleQuestBoard()
-
-    } else if (key == "Enter" && state.inventory.selection && state.inventory.selection.ctype === "taken-quest") {
-        const quest = state.inventory.selection
-        const adventurers = state.inventory.selectedParty.filter(notEmpty)
-        transitions.inventory.onSignQuest(quest, adventurers)
+    } else if (key == "Enter" && InventoryApi.activeActivity() === "taken-quest") {
+        InventoryApi.signQuest()
     }
 }
 
@@ -51,11 +37,11 @@ const GlobalKeyMap = (key: string, transitions: IdleQuestsTransitions, state: Id
  * This hook is used to map keyboard keys to actions.
  * Uses the keyMap function to map keys to actions.
  */
-export const useIdleQuestsKeyMap = (transitions: IdleQuestsTransitions, state: IdleQuestsState) => {
+export const useIdleQuestsKeyMap = () => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => 
-            GlobalKeyMap(e.key, transitions, state)
+            GlobalKeyMap(e.key)
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [state])
+    }, [])
 }

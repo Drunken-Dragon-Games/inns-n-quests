@@ -1,9 +1,8 @@
 import styled from "styled-components"
 import { useState } from "react"
-import { Adventurer } from "../../dsl"
-import { notEmpty, PixelArtImage, vh, vh1 } from "../../utils"
-import AdventurerMini from "../adventurer-mini"
-import { If } from "../helper-components"
+import { Adventurer, If } from "../../../../../common"
+import { PixelArtImage, vh1, notEmpty, vh } from "../../../../../utils"
+import AdventurerMini from "./adventurer-mini"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
     position: relative;

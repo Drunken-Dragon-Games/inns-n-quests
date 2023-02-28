@@ -1,3 +1,2 @@
-import IdleQuestsApp from "./idle-quests-app"
-export * from "./dsl/adventurer"
-export default IdleQuestsApp
+import IdleQuestsView from "./idle-quests-view"
+export default IdleQuestsView

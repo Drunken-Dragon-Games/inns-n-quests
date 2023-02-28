@@ -1,14 +1,10 @@
 import { Game } from "phaser"
 import { useEffect } from "react"
-import { IdleQuestsTransitions } from "../../idle-quests-transitions"
 
-async function loadPhaser(transitions: IdleQuestsTransitions): Promise<Game> {
+async function loadPhaser(containerId: string, onReady: () => void): Promise<Game> {
     const Phaser = await import("phaser")
     const { Preloader } = await import("./scenes/preloader")
     const { Overworld } = await import("./scenes/overworld")
-
-    const scaleRatio = window.devicePixelRatio / 3;
-    const zoom = 3
 
     const game = new Phaser.Game({
         type: Phaser.AUTO,
@@ -18,7 +14,7 @@ async function loadPhaser(transitions: IdleQuestsTransitions): Promise<Game> {
         pixelArt: true,
         scale: { 
             mode: Phaser.Scale.ENVELOP,
-            parent: "overworld-phaser-container",
+            parent: containerId,
         },
         physics: {
             default: "arcade",
@@ -29,15 +25,13 @@ async function loadPhaser(transitions: IdleQuestsTransitions): Promise<Game> {
         scene: [Preloader, Overworld]
     })
 
-    game.events.on("loading-complete", () => {
-        transitions.inventory.onFinishLoadingModule(1)
-    })
+    game.events.on("loading-complete", onReady)
 
     return game
 }
 
-export const usePhaserRender = (transitions: IdleQuestsTransitions) => 
+export const usePhaserRender = (containerId: string, onReady: () => void) => 
     useEffect(() => {
-        const game = loadPhaser(transitions)
+        const game = loadPhaser(containerId, onReady)
         return () => { game.then(g => g.destroy(true)) }
     }, [])

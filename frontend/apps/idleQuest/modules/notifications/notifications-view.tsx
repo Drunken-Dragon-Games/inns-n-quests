@@ -1,7 +1,10 @@
+import { Provider, useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
-import { SansSerifFontFamily, InfoScheme, AlertScheme, SuccessScheme } from "../../common-components"
-import { useTagRemovals } from "../../utils"
+import { SansSerifFontFamily, InfoScheme, AlertScheme, SuccessScheme } from "../../common"
+import { useClockSeconds, useTagRemovals } from "../../utils"
 import { AppNotification } from "./notifications-dsl"
+import { NotificationsState, notificationsStore } from "./notifications-state"
+import Transitions from "./notifications-transitions"
 
 const enterAnimation = keyframes`
     0% { opacity: 0; }
@@ -41,19 +44,24 @@ const Snack = styled.div<{ ctype: AppNotification["ctype"], $display: boolean }>
     position: ${props => props.$display ? "relative" : "absolute"};
 `
 
-interface NotificationsViewProps {
-    notifications: AppNotification[]
+const SnackList = () => {
+    const notifications = useSelector((state: NotificationsState) => state.notifications)
+    const render = useTagRemovals(notifications, [], false)
+    useClockSeconds(Transitions.removeTimedOutNotifications)
+    return <>
+        {render.map(({ value, display }) =>
+            <Snack key={value.notificationId} ctype={value.ctype} $display={display}>{value.message}</Snack>
+        )}
+    </>
 }
 
-const NotificationsView = ({ notifications }: NotificationsViewProps) => {
-    const render = useTagRemovals(notifications, [], false)
-    return (
+const NotificationsView = () => {
+    // Continuous clock (seconds)
+    return <Provider store={notificationsStore}>
         <SnackBar>
-            {render.map(({ value, display }) => 
-                <Snack key={value.notificationId} ctype={value.ctype} $display={display}>{value.message}</Snack>
-            )}
+            <SnackList />
         </SnackBar>
-    )
+    </Provider>
 }
 
 export default NotificationsView

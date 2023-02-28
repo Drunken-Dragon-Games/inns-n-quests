@@ -1,4 +1,4 @@
-import { SealType } from "../modules/inventory"
+import { simpleHash } from "../utils"
 import { APS } from "./aptitude-points-system"
 import { QuestRequirement } from "./quest-requirements"
 
@@ -25,6 +25,10 @@ export type TakenQuest = {
     claimedAt?: string,
     createdAt: string,
 }
+
+export type SealType = "kings-plea" | "heroic-quest" | "valiant-adventure" | "townsfolk"
+
+export const sealTypes = ["kings-plea", "heroic-quest", "valiant-adventure", "townsfolk"] 
 
 export const tagTakenQuest = (takenQuest: object): object => 
     ({...takenQuest, ctype: "taken-quest"})
@@ -74,3 +78,12 @@ export function takenQuestTimeLeft(takenQuest: TakenQuest): string {
     else if (secondsLeft > 0) return `${secondsLeft}s`
     else return "finished"
 }
+
+export const addVisualQuestData = (quest: any) => ({
+    ...quest,
+    seal: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
+    paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
+})
+
+export const addVisualDataToTakenQuests = (quest: any) =>
+    ({ ...quest, quest: addVisualQuestData(quest.quest) })

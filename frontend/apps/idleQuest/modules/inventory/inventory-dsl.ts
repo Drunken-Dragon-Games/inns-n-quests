@@ -1,20 +1,22 @@
-import { Adventurer, APS, APSRequirement, AvailableQuest, mergeAPSRequirementMax, QuestRequirement, TakenQuest } from "../../dsl"
-import { Furniture } from "../../dsl/furniture"
-import { simpleHash } from "../../utils"
+import { Adventurer, APS, APSRequirement, AvailableQuest, mergeAPSRequirementMax, QuestRequirement, SealType, TakenQuest } from "../../common"
+import { Furniture } from "../../common/furniture"
 
 export type SelectedQuest = AvailableQuest | TakenQuest
+
+export type InventoryPageName = "adventurers" | "taken-quests" | "furniture"
 
 export type InventoryAsset = Adventurer | Furniture
 
 export type InventoryItem = Adventurer | TakenQuest | Furniture
 
-export type InventorySelection = SelectedQuest | Adventurer | Furniture
+export type ActivitySelection = SelectedQuest | Adventurer | Furniture
 
 export type DraggableItem = Adventurer | Furniture
 
-export type SealType = "kings-plea" | "heroic-quest" | "valiant-adventure" | "townsfolk"
-
-export const sealTypes = ["kings-plea", "heroic-quest", "valiant-adventure", "townsfolk"] 
+export type DraggingState = {
+    item: DraggableItem
+    position: [number, number]
+}
 
 export const mapSealImage = (quest: SelectedQuest): { src: string, width: number, height: number, offset: number } => {
     const scale = 1.8
@@ -38,6 +40,12 @@ export const mapSealImage = (quest: SelectedQuest): { src: string, width: number
     }
 }
 
+export const activityId = (activity?: ActivitySelection): string =>
+    activity?.ctype === "adventurer" ? activity.adventurerId :
+    activity?.ctype === "taken-quest" ? activity.takenQuestId :
+    activity?.ctype === "furniture" ? activity.furnitureId :
+    "no-activity"
+
 export const takenQuestId = (quest?: SelectedQuest): string =>
     quest?.ctype === "taken-quest" ? quest.takenQuestId : ""
 
@@ -55,15 +63,6 @@ export const questPaper = (quest: SelectedQuest): number =>
 
 export const questSeal = (quest: SelectedQuest): SealType =>
     quest.ctype === "taken-quest" ? quest.quest.seal : quest.seal
-
-export const addVisualQuestData = (quest: any) => ({
-    ...quest,
-    seal: sealTypes[Math.abs(simpleHash(quest.name ?? "") % 4)],
-    paper: Math.abs(simpleHash(quest.description ?? "") % 4) + 1
-})
-
-export const addVisualDataToTakenQuests = (quest: any) =>
-    ({ ...quest, quest: addVisualQuestData(quest.quest) })
 
 export function inventoryItemId(item: InventoryItem): string {
     if (item.ctype === "adventurer")
@@ -91,6 +90,7 @@ export const mapQuestScroll = (takenQuest: TakenQuest) => {
         case "heroic-quest": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/heroic_quest.png"
         case "valiant-adventure": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/valiant_adventure.png"
         case "townsfolk": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/townsfolk.png"
+        default: return ""
     }
 }
 
@@ -107,4 +107,16 @@ export function getQuestAPSRequirement(selectedQuest: SelectedQuest): APS {
     const quest = selectedQuest.ctype === "available-quest" ? selectedQuest : selectedQuest.quest
     const requirement = search(quest.requirements)
     return { athleticism: requirement.athleticism, intellect: requirement.intellect, charisma: requirement.charisma }
+}
+
+export const sortAdventurers = (adventurers: Adventurer[]) => {
+    return adventurers.sort((a, b) => {
+        if(a.inChallenge && !b.inChallenge){
+            return 1
+        }
+        if(!a.inChallenge && b.inChallenge){
+            return -1
+        }
+        return 0
+    })
 }

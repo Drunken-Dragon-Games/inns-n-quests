@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { AdventurerParty } from "../../dsl"
+import { AdventurerParty } from "../../common"
 import { IdSet } from "../../utils"
 import { WorldActivity } from "./activity-dsl"
 import { WorldMap } from "./world-dsl"

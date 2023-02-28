@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react"
 import styled, { css } from "styled-components"
-import { useState } from "react"
-import { PixelArtCss, PixelArtImage } from "../../../utils"
-import { AvailableQuest } from "../../../dsl"
+import { AvailableQuest } from "../../../common"
+import { PixelArtImage } from "../../../utils"
+import { useQuestBoardSelector } from "../quest-board-state"
+import QuestBoardTransitions from "../quest-board-transitions"
 import PropStamp from "./miniature-seal"
 
 const QuestBoardAreaContainer = styled.div`
@@ -39,13 +41,6 @@ const Title = styled.h2`
     text-transform: uppercase; 
     font-smooth: never;
     -webkit-font-smoothing : none;
-`
-
-const PaperBackground = styled.div`
-    position: absolute;
-    width: 16vmax;
-    height: 16vmax;
-    ${PixelArtCss}
 `
 
 const PaperBackgroundHoverCommon = css<{hovering: boolean}>`
@@ -88,12 +83,16 @@ const PaperBackgroundHover4 = styled(PixelArtImage)<{hovering: boolean}>`
     ${PaperBackgroundHoverCommon}
 `
 
-const QuestPreviewCard = ({ quest, onQuestClick }: { quest: AvailableQuest, onQuestClick: (quest: AvailableQuest) => void }) => {
+const QuestPreviewCard = ({ quest }: { quest: AvailableQuest }) => {
     const questStyle = quest.paper
     const [hovering, setHovering] = useState(false)
     const PaperBackgroundHover = [PaperBackgroundHover1, PaperBackgroundHover2, PaperBackgroundHover3, PaperBackgroundHover4][questStyle - 1]!
     return (
-        <QuestPreviewCardContainer onClick={() => onQuestClick(quest)} onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)}>
+        <QuestPreviewCardContainer 
+            onClick={() => QuestBoardTransitions.onClickAvailableQuest(quest)} 
+            onMouseEnter={() => setHovering(true)} 
+            onMouseLeave={() => setHovering(false)}
+        >
             <PaperBackgroundHover
                 hovering={hovering}
                 src={`https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/paper/paper_prop_${questStyle}_onhover.webp`}
@@ -118,17 +117,20 @@ const QuestPreviewCard = ({ quest, onQuestClick }: { quest: AvailableQuest, onQu
     )
 }
 
-interface QuestBoardAreaProps {
-    className?: string
-    availableQuests: AvailableQuest[]
-    onQuestClick: (quest: AvailableQuest) => void
+const QuestBoardArea = () => {
+    const availableQuests = useQuestBoardSelector(state => state.availableQuests)
+    // Makes sure there are always at least 5 quests in the board
+    useEffect(() => {
+        if (availableQuests.length < 5) 
+            QuestBoardTransitions.onFetchAvailableQuests()
+    }, [availableQuests.length])
+    return (
+        <QuestBoardAreaContainer>
+            {availableQuests.slice(0, 5).map((quest: AvailableQuest, index: number) =>
+                <QuestPreviewCard quest={quest} key={"quest-" + index} />
+            )}
+        </QuestBoardAreaContainer>
+    )
 }
-
-const QuestBoardArea = ({ className, availableQuests, onQuestClick }: QuestBoardAreaProps) =>
-    <QuestBoardAreaContainer className={className}>
-        {availableQuests.slice(0, 5).map((quest: AvailableQuest, index: number) => 
-            <QuestPreviewCard quest={quest} key={"quest-" + index} onQuestClick={onQuestClick} />
-        )}
-    </QuestBoardAreaContainer>
 
 export default QuestBoardArea

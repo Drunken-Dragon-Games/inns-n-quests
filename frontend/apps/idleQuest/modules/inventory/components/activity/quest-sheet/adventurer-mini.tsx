@@ -1,8 +1,8 @@
 import styled, { keyframes } from "styled-components"
-import { TextOswald } from "../../utils/components/basic_components"
-import { Adventurer, totalXPRequiredForNextLevel } from "../dsl"
-import { Units, vmax1, useRememberLastValue, PixelArtImage, notEmpty } from "../utils"
-import AdventurerSprite, { SpriteRenderOptions } from "./adventurer-sprite"
+import { TextOswald } from "../../../../../../utils/components/basic_components"
+import { Adventurer, totalXPRequiredForNextLevel } from "../../../../../common"
+import { Units, vmax1, useRememberLastValue, PixelArtImage, notEmpty } from "../../../../../utils"
+import AdventurerSprite, { SpriteRenderOptions } from "../../sprites/adventurer-sprite"
 
 type ExperienceBarColor = "r" | "g" | "b"
 

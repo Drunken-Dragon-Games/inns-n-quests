@@ -1,4 +1,2 @@
-export * from "./inventory-dsl"
-export * from "./inventory-state"
-export * from "./inventory-transitions"
+export { default as QuestBoardApi } from "./inventory-api"
 export { default as InventoryView } from "./inventory-view"

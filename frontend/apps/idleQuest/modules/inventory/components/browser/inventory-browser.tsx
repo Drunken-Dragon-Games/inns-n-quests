@@ -1,9 +1,9 @@
 import { useState } from "react"
 import styled, { keyframes } from "styled-components"
-import { OswaldFontFamily } from "../../../common-components"
-import { InventoryItem, DraggableItem } from "../inventory-dsl"
-import { InventoryState } from "../inventory-state"
-import InventoryPage, { PageName } from "./inventory-page"
+import { OswaldFontFamily } from "../../../../common"
+import { InventoryPageName } from "../../inventory-dsl"
+import { useInventorySelector } from "../../inventory-state"
+import InventoryPage from "./inventory-page"
 
 const openAnimation = keyframes`
     0% { opacity: 0; }
@@ -55,16 +55,9 @@ const InventoryPagesContainer = styled.div`
     width: 100%;
 `
 
-interface InventoryBrowserProps {
-    inventoryState: InventoryState,
-    open: boolean,
-    onItemClick: (item: InventoryItem) => void
-    onItemDrag: (item: DraggableItem, position: [number, number]) => void
-    onItemDragEnd: (item: DraggableItem) => void
-}
-
-const InventoryBrowser = ({ inventoryState, open, onItemClick, onItemDrag, onItemDragEnd }: InventoryBrowserProps) => {
-    const [page, setPage] = useState<PageName>("adventurers")
+const InventoryBrowser = () => {
+    const [page, setPage] = useState<InventoryPageName>("adventurers")
+    const open = useInventorySelector(state => state.open)
     return (
         <InventoryBrowserContainer open={open}>
             <InventoryTabsContainer>
@@ -73,13 +66,7 @@ const InventoryBrowser = ({ inventoryState, open, onItemClick, onItemDrag, onIte
                 <InventoryTab onClick={() => setPage("furniture")} selected={page === "furniture"}><span>Furniture</span></InventoryTab>
             </InventoryTabsContainer>
             <InventoryPagesContainer>
-                <InventoryPage 
-                    inventoryState={inventoryState} 
-                    page={page} 
-                    onItemClick={onItemClick} 
-                    onItemDrag={onItemDrag}
-                    onItemDragEnd={onItemDragEnd}
-                />
+                <InventoryPage page={page} />
             </InventoryPagesContainer>
         </InventoryBrowserContainer>
     )

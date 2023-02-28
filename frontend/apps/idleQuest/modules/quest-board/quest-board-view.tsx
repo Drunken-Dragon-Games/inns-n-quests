@@ -1,10 +1,10 @@
+import { Provider } from "react-redux"
 import styled, { keyframes } from "styled-components"
-import { AvailableQuest } from "../../dsl"
 import { PixelArtImage, vh1 } from "../../utils"
 import QuestBoardArea from "./components/quest-board-area"
 import RefreshButton from "./components/refresh-button"
-import { QuestBoardState } from "./quest-board-state"
-import { QuestBoardTransitions } from "./quest-board-transitions"
+import { questBoardStore, useQuestBoardSelector } from "./quest-board-state"
+import QuestBoardTransitions from "./quest-board-transitions"
 
 const openAnimation = keyframes`
     0% { opacity: 0; }
@@ -52,27 +52,29 @@ const QuestBoardBackground = styled(PixelArtImage)`
     filter: drop-shadow(0px 0px 10px black);
 `
 
-interface QuestBoardViewProps {
-    className?: string,
-    questBoardState: QuestBoardState,
-    questBoardTransitions: QuestBoardTransitions,
-    onQuestClick: (quest: AvailableQuest) => void,
+const QuestBoard = ({ className }: { className?: string }) => {
+    const open = useQuestBoardSelector(state => state.open)
+    return (
+        <QuestBoardContainer className={className} open={open}>
+            <AvailableQuestsWrapper>
+                <QuestBoardBackground
+                    src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp"
+                    alt="Quest Board Background"
+                    width={100}
+                    height={60}
+                    units={vh1}
+                    absolute
+                />
+                <QuestBoardArea />
+                <RefreshButton onClick={QuestBoardTransitions.onClearAvailableQuests} />
+            </AvailableQuestsWrapper>
+        </QuestBoardContainer>
+    )
 }
 
-const QuestBoardView = ({ className, questBoardState, questBoardTransitions, onQuestClick }: QuestBoardViewProps) =>
-    <QuestBoardContainer className={className} open={questBoardState.open}>
-        <AvailableQuestsWrapper>
-            <QuestBoardBackground
-                src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp"
-                alt="Quest Board Background"
-                width={100}
-                height={60}
-                units={vh1}
-                absolute
-            />
-            <QuestBoardArea availableQuests={questBoardState.availableQuests} onQuestClick={onQuestClick} />
-            <RefreshButton onClick={questBoardTransitions.onClearAvailableQuests} />
-        </AvailableQuestsWrapper>
-    </QuestBoardContainer>
+const QuestBoardView = ({ className }: { className?: string }) =>
+    <Provider store={questBoardStore}>
+        <QuestBoard className={className} />
+    </Provider>
 
 export default QuestBoardView 

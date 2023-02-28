@@ -5,19 +5,19 @@ export type InfoNotification = {
     ctype: "info"
     notificationId: string
     message: string
-    createdAt: Date
+    createdAt: number
 }
 
 export type AlertNotification = {
     ctype: "alert"
     notificationId: string
     message: string
-    createdAt: Date
+    createdAt: number
 }
 
 export type SuccessNotification = {
     ctype: "success"
     notificationId: string
     message: string
-    createdAt: Date
+    createdAt: number
 }

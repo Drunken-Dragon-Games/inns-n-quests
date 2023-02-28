@@ -1,6 +1,6 @@
 import style, { keyframes } from "styled-components"
 import { useState } from "react"
-import { PixelArtImage } from "../../utils"
+import { PixelArtImage } from "../../../../../utils"
 
 const glow = keyframes`
     100% {text-shadow: 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2); }

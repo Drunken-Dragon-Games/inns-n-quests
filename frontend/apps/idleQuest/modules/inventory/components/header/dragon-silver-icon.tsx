@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { useState } from "react"
 import styled from "styled-components"
-import { If } from "../../../common-components"
+import { If } from "../../../../common"
 
 const DragonSilverIconContainer = styled.div`
     display: flex;

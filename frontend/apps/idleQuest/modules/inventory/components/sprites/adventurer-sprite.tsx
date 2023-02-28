@@ -1,11 +1,11 @@
 import { useMemo } from "react"
 import styled, { keyframes } from "styled-components"
-import { Adventurer } from "../dsl/adventurer"
+import { If } from "../../../../common"
+import { Adventurer } from "../../../../common/adventurer"
 import {
     notEmpty, PixelArtImage, simpleHash, Units,
     useComputeHeightFromOriginalImage, useRememberLastValue, vmax1
-} from "../utils"
-import { If } from "./helper-components"
+} from "../../../../utils"
 
 const ptMeasures = (adventurer: Adventurer): [number, [number,number], number] => {
     if (adventurer.assetRef === "PixelTile42")
@@ -164,7 +164,7 @@ const emojiMapping = (emoji?: string) => {
     }
 }
 
-export type SpriteRenderOptions = "normal" | "in-challenge" | "selected" | "dead" | "hovered"
+export type SpriteRenderOptions = "normal" | "disabled" | "hovered"
 
 const AdventurerSpriteContainer = styled.div<{ dimensions: Dimensions, render: SpriteRenderOptions }>`
     position: relative;
@@ -176,11 +176,7 @@ const AdventurerSpriteContainer = styled.div<{ dimensions: Dimensions, render: S
     align-items: center;
 
     ${({ render }) => { switch (render) {
-        case "in-challenge":
-            return "filter: gray; /* IE6-9 */ -webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */ filter: grayscale(1);"
-        case "selected":
-            return "filter: sepia; /* IE6-9 */ -webkit-filter: sepia(1); /* Google Chrome, Safari 6+ & Opera 15+ */ filter: sepia(1);"
-        case "dead":
+        case "disabled":
             return "filter: gray; /* IE6-9 */ -webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */ filter: grayscale(1);"
         case "hovered":
             return `
@@ -203,7 +199,6 @@ const AdventurerSpriteContainer = styled.div<{ dimensions: Dimensions, render: S
                 overflow: visible; 
                 filter: drop-shadow(0px 10px 5px rgba(0,0,0,0.5)); /* IE6-9 */ 
                 -webkit-filter: drop-shadow(0px 10px 5px rgba(0,0,0,0.5)); /* Google Chrome, Safari 6+ & Opera 15+ */ 
-                filter: drop-shadow(0px 10px 5px rgba(0,0,0,0.5));
             `
         default:
             return ""
@@ -266,23 +261,12 @@ const EmojiImage = ({ emoji, dimensions }: { emoji?: string, dimensions: Dimensi
 
 const AdventurerImageContainer = styled.div<{ dimensions: Dimensions }>`
     position: absolute;
+    overflow: visible;
     width: ${props => props.dimensions.units.u(props.dimensions.width)};
     height: ${props => props.dimensions.units.u(props.dimensions.height)};
-    overflow: visible;
     margin-top: ${props => props.dimensions.units.u(props.dimensions.offset[0])};
     margin-left: ${props => props.dimensions.units.u(props.dimensions.offset[1])};
 `
-
-const AdventurerImage = (props: { adventurer: Adventurer, dimensions: Dimensions }) =>
-    <AdventurerImageContainer dimensions={props.dimensions}>
-        <PixelArtImage
-            src={props.adventurer.sprite}
-            alt={props.adventurer.assetRef}
-            width={props.dimensions.width}
-            height={props.dimensions.height}
-            units={props.dimensions.units}
-        />
-    </AdventurerImageContainer>
 
 interface Dimensions {
     width: number
@@ -322,7 +306,15 @@ const AdventurerSprite = ({className, adventurer, render = "normal", emoji, unit
             dimensions={dimensions}
             render={render} >
             <EmojiImage emoji={emoji} dimensions={dimensions} />
-            <AdventurerImage adventurer={adventurer} dimensions={dimensions} />
+            <AdventurerImageContainer dimensions={dimensions}>
+                <PixelArtImage
+                    src={adventurer.sprite}
+                    alt={adventurer.assetRef}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    units={dimensions.units}
+                />
+            </AdventurerImageContainer>
         </AdventurerSpriteContainer>
     )
 }

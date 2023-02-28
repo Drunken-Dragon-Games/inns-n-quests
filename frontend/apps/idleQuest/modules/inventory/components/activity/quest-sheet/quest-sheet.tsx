@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef } from "react"
 import styled, { keyframes } from "styled-components"
-import { Push } from ".."
-import { Adventurer, APS, AvailableQuest, getQuestAPSRequirement, mapSealImage, mergeAPSSum, questDescription, questName, sameOrBetterAPS, TakenQuest, takenQuestSecondsLeft, zeroAPS } from "../../dsl"
-import { notEmpty, PixelArtCss, PixelArtImage, vh1 } from "../../utils"
+import { AvailableQuest, TakenQuest, APS, zeroAPS, sameOrBetterAPS, Adventurer, takenQuestSecondsLeft, mergeAPSSum, Push } from "../../../../../common"
+import { PixelArtCss, notEmpty, PixelArtImage, vh1 } from "../../../../../utils"
+import { getQuestAPSRequirement, mapSealImage, questName, questDescription } from "../../../inventory-dsl"
+import InventoryTransitions from "../../../inventory-transitions"
 import AdventurerSlot from "./adventurer-slot"
 import Signature from "./signature"
 
@@ -209,13 +210,11 @@ const useQuestCardState = (quest: RenderQuest, adventurerSlots: (Adventurer | nu
 
 interface QuestSheetProps {
     className?: string,
-    quest?: RenderQuest, 
+    quest: RenderQuest, 
     adventurerSlots: (Adventurer | null)[],
-    onSign?: (selectedQuest: RenderQuest, adventurers: Adventurer[]) => void,
-    onUnselectAdventurer?: (adventurer: Adventurer) => void,
 }
 
-const QuestSheet = ({ className, quest, adventurerSlots, onSign, onUnselectAdventurer }: QuestSheetProps) => {
+const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
     if (!quest) return <></>
     const state = useQuestCardState(quest, adventurerSlots)
     return (
@@ -243,7 +242,9 @@ const QuestSheet = ({ className, quest, adventurerSlots, onSign, onUnselectAdven
                     <AdventurerSlot
                         key={"adventurer-slot-" + index}
                         adventurer={adventurer}
-                        onUnselectAdventurer={quest?.ctype === "available-quest" ? onUnselectAdventurer : undefined}
+                        onUnselectAdventurer={ () => 
+                            InventoryTransitions.removeAdventurerFromParty(adventurer)
+                        }
                     />
                 )}
             </AdventurersWrapper>
@@ -251,7 +252,7 @@ const QuestSheet = ({ className, quest, adventurerSlots, onSign, onUnselectAdven
             <Footer>
                 <Signature
                     signatureType={state.signatureType}
-                    onClick={() => notEmpty(quest) && notEmpty(onSign) && onSign(quest, adventurerSlots.filter(notEmpty))}
+                    onClick={InventoryTransitions.onSignQuest}
                 />
                 <Push/>
                 <SealImage offset={state.sealImage.offset}>

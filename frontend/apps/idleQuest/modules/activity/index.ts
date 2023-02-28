@@ -1,1 +1,0 @@
-export { default as ActivityView } from "../activity/activity-view"

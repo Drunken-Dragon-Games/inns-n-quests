@@ -1,7 +1,7 @@
 import { default as NImage } from "next/image"
 import { MouseEventHandler, useEffect, useState } from "react"
 import styled, { css } from "styled-components"
-import { Units, vmax1 } from "./layout"
+import { Units, vmax1 } from "../utils/units"
 
 /**
  * Computes the height of an image based on its width and the original image's width and height
