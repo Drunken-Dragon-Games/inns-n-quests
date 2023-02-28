@@ -1,5 +1,6 @@
-import { Adventurer, takenQuestSecondsLeft } from "../../common"
+import { Adventurer, takenQuestSecondsLeft, takenQuestStatus } from "../../common"
 import { notEmpty } from "../../utils"
+import { NotificationsApi } from "../notifications"
 import { QuestBoardApi } from "../quest-board"
 import { activityId, DraggableItem, DraggingState, InventoryItem, inventoryItemId, SelectedQuest } from "./inventory-dsl"
 import {
@@ -9,6 +10,15 @@ import {
 import { claimTakenQuest, fetchMintTest, getInProgressQuests, getInventory, takeAvailableQuest } from "./inventory-thunks"
 
 const InventoryTransitions = {
+
+    trackInventoryState: () => {
+        const interval = setInterval(() => {
+            const state = inventoryStore.getState()
+            const finishedQuests = state.takenQuests.filter(quest => takenQuestSecondsLeft(quest) == -1)
+            finishedQuests.forEach(quest => NotificationsApi.notify(`Quest ${quest.quest.name} finished!`, "info"))
+        }, 1000)
+        return interval 
+    },
 
     onRefreshInventory: () => {
         inventoryStore.dispatch(getInventory())
@@ -37,9 +47,9 @@ const InventoryTransitions = {
             inventoryStore.dispatch(toggleInventory())
             QuestBoardApi.removeAvailableQuest(quest)
         } 
-        else if (quest?.ctype == "taken-quest" && quest.claimedAt) 
+        else if (quest?.ctype == "taken-quest" && takenQuestStatus(quest) === "claimed")
             inventoryStore.dispatch(closeActivity())
-        else if (quest?.ctype == "taken-quest" && takenQuestSecondsLeft(quest) <= 0) 
+        else if (quest?.ctype == "taken-quest" && takenQuestStatus(quest) === "finished") 
             inventoryStore.dispatch(claimTakenQuest(quest, adventurers))
     },
 

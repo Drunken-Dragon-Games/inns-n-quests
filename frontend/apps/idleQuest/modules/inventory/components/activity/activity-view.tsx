@@ -7,7 +7,7 @@ const ActivityView = () => {
         selection: state.activitySelection,
         selectedParty: state.selectedParty,
     })) 
-    return <>
+    return <div onClick={(e) => e.stopPropagation()}>
         { state.selection?.ctype === "taken-quest" || state.selection?.ctype === "available-quest" ?
             <QuestSheet
                 quest={state.selection}
@@ -18,7 +18,7 @@ const ActivityView = () => {
             <AdventurerSplashArt adventurer={state.selection} />
 
         : <></> }
-    </>
+    </div>
 }
 
 export default ActivityView

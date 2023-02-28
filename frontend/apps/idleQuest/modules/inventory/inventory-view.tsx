@@ -97,14 +97,18 @@ const Inventory = ({ className }: { className?: string }) => {
         open: state.open,
         selection: state.activitySelection
     }))
-    // Initial load of adventurers and quests in progress
-    useEffect(() => InventoryTransitions.onRefreshInventory(), [])
+    // Initial load of adventurers, quests in progress, and tracking init.
+    useEffect(() => {
+        InventoryTransitions.onRefreshInventory()
+        const interval = InventoryTransitions.trackInventoryState()
+        return () => clearInterval(interval)
+    }, [])
     return <WithDraggingItem>
         <InventoryContainer className={className} open={open}>
             <Header />
             <InventoryBrowser />
         </InventoryContainer>
-        <ActivityContainer className={className} open={open && notEmpty(selection)}>
+        <ActivityContainer className={className} open={open && notEmpty(selection)} onClick={InventoryTransitions.closeActivity}>
             <ActivityView />
         </ActivityContainer>
     </WithDraggingItem>

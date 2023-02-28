@@ -8,13 +8,15 @@ import {
 import { tagFurniture } from "../../common/furniture"
 import {
     addTakenQuest, changeAdventurersInChallenge, claimQuestOutcome, 
-    InventoryThunk, removeTakenQuest, setInventory, setTakenQuests, closeActivity
+    InventoryThunk, removeTakenQuest, setInventory, setTakenQuests, closeActivity, inventoryStore
 } from "../../state"
 import { NotificationsApi } from "../notifications"
+import { activityId } from "./inventory-dsl"
 
 export const getInventory = (): InventoryThunk => async (dispatch) =>
     await withTokenRefresh(async () => {
         const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
+        console.log(response.data.length)
         dispatch(setInventory(response.data.map(compose(tagRealAPS, tagAdventurer, tagFurniture))))
     })
 
@@ -33,16 +35,21 @@ export const getInProgressQuests = (): InventoryThunk => async (dispatch) =>
     await withTokenRefresh(async () => {
         const response = await axiosCustomInstance('/quests/api/taken-quests').get('/quests/api/taken-quests')  
         const takenQuests = response.data.map(compose(addVisualDataToTakenQuests, tagTakenQuest))
-        dispatch(setTakenQuests(takenQuests))
+        dispatch(setTakenQuests(takenQuests));
     })
 
 export const claimTakenQuest = (takenQuest: TakenQuest, adventurers: Adventurer[]): InventoryThunk => async (dispatch) =>
    await withTokenRefresh(async () => {
+        console.log("lol")
         const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: takenQuest.takenQuestId })
         const outcome = response.data as Outcome
         NotificationsApi.notify(`Quest ${outcome.ctype == "success-outcome" ? "succeeded" : "failed"}: ${takenQuest.quest.name}`, "info")
         dispatch(removeTakenQuest(takenQuest))
         dispatch(claimQuestOutcome({ adventurers, outcome, takenQuest }))
+        setTimeout(() => {
+            if (activityId(inventoryStore.getState().activitySelection) === takenQuest.takenQuestId)
+                dispatch(closeActivity())
+        }, 3000)
     })
 
 export const fetchMintTest = (): InventoryThunk => async (dispatch) => 

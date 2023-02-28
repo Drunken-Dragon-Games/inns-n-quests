@@ -18,23 +18,40 @@ export const syncData = <Collection extends string, DbAsset extends PreSynced<Co
     assetInventory: InventoryAsset<Collection>[],
     assetId: (asset: DbAsset) => string,
 ): SyncData<Collection, DbAsset> => {
-    const assetDifference = assetInventory
-        .map(asset => {
-            const allSyncedFurnitureQuantity =
-                preSynced.filter(preSynced => preSynced.assetRef == asset.assetRef).length
-            return { ...asset, quantity: asset.quantity - allSyncedFurnitureQuantity }
-        })
-        const toCreate = assetDifference.filter(asset => asset.quantity > 0)
-        const assetFurnitureToDelete = assetDifference.filter(asset => asset.quantity < 0)
-        // Pick the pre-synced assets to delete based on the asset difference
-        const toDelete = assetFurnitureToDelete.flatMap(asset => {
-            const preSyncedFurnitureToDelete = preSynced
-                .filter(preSynced => preSynced.assetRef == asset.assetRef)
-                .slice(0, Math.abs(asset.quantity))
-            return preSyncedFurnitureToDelete
-        })
-        // Pick the pre-synced assets that are not going to be deleted
-        const surviving = preSynced.filter(preSynced =>
-            !toDelete.map(asset => assetId(asset)).includes(assetId(preSynced)))
-        return { toCreate, toDelete, surviving }
+
+    const inventoryRecord: { [assetRef: string]: { assetRef: string, collection: Collection, quantity: number } } = {}
+    assetInventory.forEach(asset => {
+        if (inventoryRecord[asset.assetRef])
+            inventoryRecord[asset.assetRef].quantity += asset.quantity
+        else
+            inventoryRecord[asset.assetRef] = asset
+    })
+
+    const preSyncedRecord: { [assetRef: string]: DbAsset[] } = {}
+    preSynced.forEach(asset => {
+        if (preSyncedRecord[asset.assetRef])
+            preSyncedRecord[asset.assetRef].push(asset)
+        else
+            preSyncedRecord[asset.assetRef] = [asset]
+    })
+
+    const empty: { toCreate: InventoryAsset<Collection>[], toDelete: DbAsset[], surviving: DbAsset[] } = 
+        { toCreate: [], toDelete: [], surviving: [] }
+
+    const result = Object.values(inventoryRecord)
+        .reduce(({ toCreate, toDelete, surviving }, inventoryAsset) => {
+            const preSyncedQuantity = preSyncedRecord[inventoryAsset.assetRef]?.length || 0
+            // If possitive, create new assets. If negative, delete assets. If zero, add to surviving.
+            const diff = inventoryAsset.quantity - preSyncedQuantity
+            if (diff > 0) 
+                toCreate.push({ ...inventoryAsset, quantity: diff })
+            else if (diff < 0) 
+                toDelete.push(...preSyncedRecord[inventoryAsset.assetRef].slice(0, Math.abs(diff)))
+            else 
+                surviving.push(...preSyncedRecord[inventoryAsset.assetRef])
+            return (
+                { toCreate, toDelete, surviving })
+        }, empty)
+
+    return result
 }

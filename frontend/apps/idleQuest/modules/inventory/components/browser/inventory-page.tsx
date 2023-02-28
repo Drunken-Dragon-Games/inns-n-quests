@@ -1,4 +1,4 @@
-import { MouseEventHandler, useMemo, useState } from "react"
+import { MouseEventHandler, useEffect, useMemo, useState } from "react"
 import { useDrag } from "../../../../utils"
 import styled from "styled-components"
 import { notEmpty, vmax, PixelArtImage } from "../../../../utils"
@@ -7,6 +7,8 @@ import { useInventorySelector } from "../../inventory-state"
 import InventoryTransitions from "../../inventory-transitions"
 import { AdventurerSprite, FurnitureSprite } from "../sprites"
 import InventoryBox from "./inventory-box"
+import { takenQuestStatus, takenQuestTimeLeft } from "../../../../common"
+import { NotificationsApi } from "../../../notifications"
 
 const InventoryPageContainer = styled.div`
     box-sizing: border-box;
@@ -92,15 +94,14 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
                     subState.selection?.ctype === "adventurer" &&
                     subState.selection?.adventurerId === item.adventurerId,
                 disabled:
-                    subState.selection && 
-                    subState.selection.ctype === "available-quest" && 
+                    subState.selection?.ctype === "available-quest" && 
                     item.inChallenge,
                 center: false,
                 overflowHidden: false,
             }
         } else if (item && item.ctype === "taken-quest") {
             return {
-                info: "", //takenQuestTimeLeft(item), We actially dont want to memo this one
+                info: takenQuestTimeLeft(item),
                 selected:
                     subState.selection &&
                     subState.selection.ctype === "taken-quest" &&
@@ -146,13 +147,21 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
 
     const [hover, setHover] = useState(false)
 
-    /*
-    return item && item.ctype === "taken-quest" 
-        ? {...boxState, info: takenQuestTimeLeft(item) } 
-        : boxState
-    */
+    const [ timedInfo, setTimedInfo ] = useState<{ info?: string } | undefined>(undefined)
 
-    return { ...boxState, ...draggingState, ...callbacks, hover, startDrag }
+    useEffect(() => {
+        if (item?.ctype === "taken-quest" && takenQuestStatus(item) === "in-progress") {
+            const interval = setInterval(() => { 
+                setTimedInfo({ info: takenQuestTimeLeft(item) }) 
+                if (takenQuestStatus(item) !== "in-progress") clearInterval(interval) 
+            }, 1000)
+            return () => clearInterval(interval)
+        } else {
+            setTimedInfo({ info: boxState.info })
+        }
+    }, [item])
+
+    return { ...boxState, ...draggingState, ...callbacks, hover, startDrag, ...timedInfo }
 }
 
 const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
@@ -165,7 +174,7 @@ const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
             onMouseEnter={state.hoverOn}
             onMouseLeave={state.hoverOff}
             selected={state.selected}
-            disabled={state.dragging}
+            disabled={state.disabled}
             center={state.center}
             hover={state.hover}
             empty={!item}
