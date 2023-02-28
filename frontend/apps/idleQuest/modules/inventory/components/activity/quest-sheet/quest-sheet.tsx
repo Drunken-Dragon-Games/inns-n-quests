@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef } from "react"
 import styled, { keyframes } from "styled-components"
-import { AvailableQuest, TakenQuest, APS, zeroAPS, sameOrBetterAPS, Adventurer, takenQuestSecondsLeft, mergeAPSSum, Push } from "../../../../../common"
-import { PixelArtCss, notEmpty, PixelArtImage, vh1 } from "../../../../../utils"
-import { getQuestAPSRequirement, mapSealImage, questName, questDescription } from "../../../inventory-dsl"
+import { Adventurer, APS, AvailableQuest, mergeAPSSum, Push, sameOrBetterAPS, TakenQuest, takenQuestSecondsLeft, zeroAPS } from "../../../../../common"
+import { notEmpty, PixelArtCss, PixelArtImage, vh1 } from "../../../../../utils"
+import { getQuestAPSRequirement, mapSealImage, questDescription, questName } from "../../../inventory-dsl"
 import InventoryTransitions from "../../../inventory-transitions"
 import AdventurerSlot from "./adventurer-slot"
 import Signature from "./signature"
@@ -242,9 +242,7 @@ const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
                     <AdventurerSlot
                         key={"adventurer-slot-" + index}
                         adventurer={adventurer}
-                        onUnselectAdventurer={ () => 
-                            InventoryTransitions.removeAdventurerFromParty(adventurer)
-                        }
+                        slotNumber={index}
                     />
                 )}
             </AdventurersWrapper>

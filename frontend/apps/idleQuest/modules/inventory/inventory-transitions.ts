@@ -31,7 +31,7 @@ const InventoryTransitions = {
 
     onSelectQuest: (quest: SelectedQuest) => {
         inventoryStore.dispatch(openActivity(quest))
-        inventoryStore.dispatch(toggleInventory())
+        inventoryStore.dispatch(toggleInventory(true))
     },
 
     closeActivity: () => {
@@ -55,8 +55,14 @@ const InventoryTransitions = {
 
     removeAdventurerFromParty: (adventurer: Adventurer | null) => {
         const activity = inventoryStore.getState().activitySelection
-        if (adventurer && activity?.ctype === "taken-quest")
+        if (adventurer && activity?.ctype === "available-quest")
             inventoryStore.dispatch(removeAdventurerFromParty(adventurer))
+    },
+
+    addAdventurerToParty: (adventurer: Adventurer, slot?: number) => {
+        const activity = inventoryStore.getState().activitySelection
+        if (activity?.ctype === "available-quest")
+            inventoryStore.dispatch(addAdventurerToParty({ adventurer, slot }))
     },
 
     onItemClick: (item: InventoryItem) => {
@@ -64,7 +70,7 @@ const InventoryTransitions = {
         if (activityId(activeActivity) === inventoryItemId(item))
             inventoryStore.dispatch(closeActivity()) 
         else if(item.ctype == "adventurer" && activeActivity?.ctype === "available-quest")
-            inventoryStore.dispatch(addAdventurerToParty(item)) 
+            inventoryStore.dispatch(addAdventurerToParty({ adventurer: item })) 
         else 
             inventoryStore.dispatch(openActivity(item))
     },

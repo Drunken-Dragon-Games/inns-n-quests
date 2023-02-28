@@ -11,16 +11,14 @@ const QuestBoardTransitions = {
     onClearAvailableQuests: () => 
         questBoardStore.dispatch(clearAvailableQuests()),
     
-    onClickAvailableQuest: (availableQuest: AvailableQuest) =>
+    onClickAvailableQuest: (availableQuest: AvailableQuest) => 
         InventoryApi.selectQuest(availableQuest),
 
     onRemoveAvailableQuest: (availableQuest: AvailableQuest) => 
         questBoardStore.dispatch(removeAvailableQuest(availableQuest)),
 
-    onToggleQuestBoard: (open?: boolean) => {
-        if (!questBoardStore.getState().open) InventoryApi.toggleInventory()
-        questBoardStore.dispatch(toggleQuestBoard({ open }))
-    },
+    onToggleQuestBoard: (open?: boolean) => 
+        questBoardStore.dispatch(toggleQuestBoard({ open })),
 }
 
 export default QuestBoardTransitions

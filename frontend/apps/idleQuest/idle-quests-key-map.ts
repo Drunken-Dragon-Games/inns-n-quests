@@ -11,6 +11,7 @@ import { QuestBoardApi } from "./modules/quest-board"
  * @param dispatch 
  */
 const GlobalKeyMap = (key: string) => { 
+    const activeActivity = InventoryApi.activeActivity()
 
     if (key == "b" || key == "B") {
         InventoryApi.toggleInventory()
@@ -18,7 +19,7 @@ const GlobalKeyMap = (key: string) => {
     } else if (key == "q" || key == "Q") {
         QuestBoardApi.toggleQuestBoard()
 
-    } else if (key == "Escape" && InventoryApi.activeActivity()) {
+    } else if (key == "Escape" && activeActivity) {
         InventoryApi.toggleInventory()
         InventoryApi.closeActivity()
 
@@ -28,7 +29,7 @@ const GlobalKeyMap = (key: string) => {
     } else if (key == "Escape" && QuestBoardApi.isOpen()) {
         QuestBoardApi.toggleQuestBoard()
 
-    } else if (key == "Enter" && InventoryApi.activeActivity() === "taken-quest") {
+    } else if (key == "Enter" && (activeActivity === "available-quest" || activeActivity === "taken-quest")) {
         InventoryApi.signQuest()
     }
 }

@@ -35,8 +35,8 @@ export const inventoryState = createSlice({
     initialState: inventoryInitialState,
     reducers: {
 
-        toggleInventory: (state) => {
-            state.open = !state.open
+        toggleInventory: (state, action: PayloadAction<boolean | undefined>) => {
+            state.open = action.payload ?? !state.open
         },
 
         setInventory: (state, action: PayloadAction<InventoryAsset[]>) => {
@@ -75,20 +75,27 @@ export const inventoryState = createSlice({
             state.selectedParty = []
         },
 
-        addAdventurerToParty: (state, action: PayloadAction<Adventurer>) => {
-            if (!state.activitySelection) return
-            const indexNull = state.selectedParty.indexOf(null)
-            const indexAdventurer = state.selectedParty
-                .map(a => a ? a.adventurerId : a)
-                .indexOf(action.payload.adventurerId)
-            const alreadySelected = indexAdventurer !== -1
-            const partyFull = indexNull === -1
-            if (alreadySelected)
-                state.selectedParty[indexAdventurer] = null
-            else if (partyFull) 
-                state.selectedParty[0] = action.payload
-            else 
-                state.selectedParty[indexNull] = action.payload
+        addAdventurerToParty: (state, action: PayloadAction<{ adventurer: Adventurer, slot?: number }>) => {
+            const adventurer = action.payload.adventurer
+            const slotNumber = action.payload.slot
+
+            if (slotNumber) {
+                state.selectedParty[slotNumber] = adventurer
+            } else {
+                const indexNull = state.selectedParty.indexOf(null)
+                const indexAdventurer = state.selectedParty
+                    .map(a => a ? a.adventurerId : a)
+                    .indexOf(adventurer.adventurerId)
+                const alreadySelected = indexAdventurer !== -1
+                const partyFull = indexNull === -1
+                if (alreadySelected)
+                    state.selectedParty[indexAdventurer] = null
+                else if (partyFull)
+                    state.selectedParty[0] = adventurer
+                else
+                    state.selectedParty[indexNull] = adventurer
+            }
+
         },
 
         removeAdventurerFromParty: (state, action: PayloadAction<Adventurer>) => {

@@ -1,10 +1,8 @@
 import { useMemo } from "react"
 import styled, { keyframes } from "styled-components"
-import { useDrag } from "../../utils"
 import PaperMapRender from "./paper-map/paper-map-render"
 import TileMapRender from "./tile-sets/tile-map-render"
 import { WorldState } from "./world-state"
-import { WorldTransitions } from "./world-transitions"
 
 const openAnimation = keyframes`
     0% { opacity: 0; }
@@ -72,10 +70,9 @@ const useWorldViewState = (worldState: WorldState): WorldMapViewState => {
 interface WorldViewProps {
     className?: string
     worldState: WorldState
-    worldTransitions: WorldTransitions
 }
 
-const WorldView = ({ className, worldState, worldTransitions }: WorldViewProps) => {
+const WorldView = ({ className, worldState }: WorldViewProps) => {
     const viewState = useWorldViewState(worldState)
     /*
     const { dragging, onStartDrag } = useDrag(

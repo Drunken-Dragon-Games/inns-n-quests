@@ -2,17 +2,21 @@ import { useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { PixelFontFamily } from "./common"
 
-const date = "22 Feb 2023"
+const date = "28 Feb 2023"
 
 const notes = [
     "'Q' to toggle the quest board.",
-    "'M' to toggle Thiolden's map.",
     "'B' to toggle the inventory.",
-    "* A first implementation of the Inn is working.",
-    "* Use A W S D keys to move around.",
-    "* Click + Space + Drag Mouse to move around.",
-    "* Try dragging an adventurer, he will follow you around and collide with walls.", 
-    "* This is just a proof of concept.",
+    "________",
+    "* Drag and drop of adventurers for quests working.",
+    "* Map has been disabled for now. It will be reimplemented within the game engine instead of using HTML.",
+    "* Hit enter to take or complete quests.",
+    "* Notifications now tell you when a quest is done.",
+    "* Notifications now tell you the outcome of a quest.",
+    "* Now the quests close after 3 seconds of hitting complete.",
+    "* Performance improvements.",
+    "* Furniture added to inventory.",
+    "________",
     "Thank you for testing Idle Adventures!",
     "- Vledic"
 ]
