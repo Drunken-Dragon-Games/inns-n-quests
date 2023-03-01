@@ -4,7 +4,7 @@ import styled, { keyframes } from "styled-components"
 import _ from "underscore"
 import { Adventurer, APS, AvailableQuest, mergeAPSSum, Push, sameOrBetterAPS, TakenQuest, takenQuestSecondsLeft, zeroAPS } from "../../../../../common"
 import { notEmpty, PixelArtCss, PixelArtImage, vh1 } from "../../../../../utils"
-import { DraggableItem, getQuestAPSRequirement, mapSealImage, questDescription, questName } from "../../../inventory-dsl"
+import { DraggableItem, getQuestAPSRequirement, makeDropBox, mapSealImage, questDescription, questName } from "../../../inventory-dsl"
 import { InventoryState } from "../../../inventory-state"
 import InventoryTransitions from "../../../inventory-transitions"
 import AdventurerSlot from "./adventurer-slot"
@@ -196,12 +196,15 @@ const usePartyViewState = (quest: RenderQuest, adventurerSlots: (Adventurer | nu
     const boxRef4 = useRef<HTMLDivElement>(null)
     const boxRef5 = useRef<HTMLDivElement>(null)
     const dropBoxesRefs = [boxRef1, boxRef2, boxRef3, boxRef4, boxRef5]
+    const box1Bound = boxRef1.current?.getBoundingClientRect()
 
     useEffect(() => {
         if (quest.ctype !== "available-quest" || dropBoxesRefs.every(ref => ref.current == null)) return
-        InventoryTransitions.registerDropBoxes("party-pick", dropBoxesRefs)
+        InventoryTransitions.registerDropBoxes("party-pick", dropBoxesRefs.map(makeDropBox))
         return InventoryTransitions.deregisterDropBoxes
-    }, [boxRef1.current, boxRef2.current, boxRef3.current, boxRef4.current, boxRef5.current])
+    }, [boxRef1.current, boxRef2.current, boxRef3.current, boxRef4.current, boxRef5.current, quest,
+        box1Bound?.left, box1Bound?.top, box1Bound?.bottom, box1Bound?.right, 
+    ])
 
     const dropBoxesState = useSelector((state: InventoryState) => state.dropBoxesState, _.isEqual)
 

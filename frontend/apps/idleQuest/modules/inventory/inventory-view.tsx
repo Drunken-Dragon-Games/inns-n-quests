@@ -7,6 +7,7 @@ import ActivityView from "./components/activity"
 import InventoryBrowser from "./components/browser"
 import InventoryHeader from "./components/header"
 import { AdventurerSprite, FurnitureSprite } from "./components/sprites"
+import { ActivitySelection, DropBoxesState, makeDropBox } from "./inventory-dsl"
 import { InventoryState, inventoryStore } from "./inventory-state"
 import InventoryTransitions from "./inventory-transitions"
 
@@ -93,24 +94,52 @@ const WithDraggingItem = ({ children }: { children?: ReactNode }) => {
     </>
 }
 
-const Inventory = ({ className }: { className?: string }) => {
+type InventoryComponentState = {
+    open: boolean
+    selection?: ActivitySelection
+    dropBoxesState?: DropBoxesState
+    inventoryContainerRef: React.RefObject<HTMLDivElement>
+}
+
+const useInventoryState = (): InventoryComponentState => {
+
+    /** InventoryContainer ref to figure out the dropbox for the overworld drag and drop. */
+    const inventoryContainerRef = useRef<HTMLDivElement>(null)
+    const containerBound = inventoryContainerRef.current?.getBoundingClientRect()
+
     const { open, selection } = useSelector((state: InventoryState) => ({
         open: state.open,
-        selection: state.activitySelection
+        selection: state.activitySelection,
+        //dropBoxesState: !state.activitySelection && state.open ? state.dropBoxesState : undefined,
     }), _.isEqual)
-    const inventoryContainerRef = useRef<HTMLDivElement>(null)
-    // Initial load of adventurers, quests in progress, and tracking init.
+
+    /** Register overworld drag and drop dropbox when the inventory is open and there is no active activity. */
+    useEffect(() => {
+        if (!containerBound || !open || selection) return
+        const dropBox = makeDropBox(inventoryContainerRef)
+        InventoryTransitions.registerDropBoxes("overworld-drop", [{ ...dropBox, left: dropBox.right, right: Number.MAX_SAFE_INTEGER }])
+        return InventoryTransitions.deregisterDropBoxes
+    }, [inventoryContainerRef.current, containerBound?.top, containerBound?.left, containerBound?.bottom, containerBound?.right, open, selection])
+
+    /** Initial load of adventurers, quests in progress, and tracking init. */ 
     useEffect(() => {
         InventoryTransitions.onRefreshInventory()
         const interval = InventoryTransitions.trackInventoryState()
         return () => clearInterval(interval)
     }, [])
+
+    return { open, selection, inventoryContainerRef }
+}
+
+const Inventory = ({ className }: { className?: string }) => {
+    const state = useInventoryState()
+    console.log("render inventory")
     return <WithDraggingItem>
-        <InventoryContainer className={className} open={open} ref={inventoryContainerRef}>
+        <InventoryContainer className={className} open={state.open} ref={state.inventoryContainerRef}>
             <Header />
             <InventoryBrowser />
         </InventoryContainer>
-        <ActivityContainer className={className} open={open && notEmpty(selection)} onClick={InventoryTransitions.closeActivity}>
+        <ActivityContainer className={className} open={state.open && notEmpty(state.selection)} onClick={InventoryTransitions.closeActivity}>
             <ActivityView />
         </ActivityContainer>
     </WithDraggingItem>

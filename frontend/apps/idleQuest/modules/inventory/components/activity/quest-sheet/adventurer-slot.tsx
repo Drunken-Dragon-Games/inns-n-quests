@@ -43,7 +43,7 @@ type AdventurerSlotState = {
 type AdventurerSlotCallbacks = {
     onMouseOver: MouseEventHandler
     onMouseLeave: MouseEventHandler
-    //onMouseUp: MouseEventHandler
+    onMouseUp: MouseEventHandler
     onMouseDown: MouseEventHandler
 }
 
@@ -56,13 +56,14 @@ const useAdventurerSlotState = (props: AdventurerSlotProps): AdventurerSlotState
         displayedEmoji: props.preview ? undefined : notEmpty(props.adventurer) && hovering ? "cross" : props.emoji,
         render: props.preview || notEmpty(props.adventurer) && hovering ? "hovered" : "normal",
         hovering
-    }), [props, hovering])
+    }), [props.adventurer, props.preview, hovering])
 
     const { dragging, startDrag } = useDrag({
         onDrag: (position) =>
             renderState.interactuable && InventoryTransitions.setDraggingState({ item: props.adventurer!, position }),
         onDrop: () =>
             InventoryTransitions.onItemDragEnded(),
+        effectiveDraggingVectorMagnitude: 30,
     })
 
     const callbacks = useMemo<AdventurerSlotCallbacks>(() => ({
@@ -89,7 +90,7 @@ const AdventurerSlot = ({ adventurer, emoji, preview }: AdventurerSlotProps) => 
         <AdventurerSlotContainer
             onMouseOver={state.onMouseOver}
             onMouseLeave={state.onMouseLeave}
-            //onMouseUp={state.onMouseUp}
+            onMouseUp={state.onMouseUp}
             onMouseDown={state.onMouseDown}
             interactuable={state.interactuable}
         >

@@ -4,6 +4,7 @@ import { notEmpty } from "."
 export type DragProps = {
     onDrag?: (position: [number, number], vector: [number, number]) => void
     onDrop?: () => void
+    effectiveDraggingVectorMagnitude?: number
 }
 
 export type DragEffect = {
@@ -23,7 +24,7 @@ export type DragEffect = {
  * @param onDrag 
  * @returns 
  */
-export const useDrag = ({ onDrag, onDrop }: DragProps): DragEffect => {
+export const useDrag = ({ onDrag, onDrop, effectiveDraggingVectorMagnitude = 1 }: DragProps): DragEffect => {
     const [initialPosition, setInitialPosition] = useState<[number, number] | undefined>(undefined)
     const [currentPosition, setCurrentPosition] = useState<{ position: [number, number], vector: [number, number] } | undefined>(undefined)
 
@@ -36,7 +37,9 @@ export const useDrag = ({ onDrag, onDrop }: DragProps): DragEffect => {
             if (limiter++ % 5 !== 0) return
             const position: [number, number] = [event.clientX, event.clientY]
             const vector: [number, number] = [position[0] - initialPosition[0], position[1] - initialPosition[1]]
+            const magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2)
             setCurrentPosition({ position, vector })
+            if (magnitude < effectiveDraggingVectorMagnitude) return
             onDrag && onDrag(position, vector)
         }
 

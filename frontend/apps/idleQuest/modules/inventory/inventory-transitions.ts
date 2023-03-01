@@ -4,7 +4,7 @@ import { notEmpty } from "../../utils"
 import { NotificationsApi } from "../notifications"
 import { OverworldApi } from "../overworld"
 import { QuestBoardApi } from "../quest-board"
-import { activityId, DraggableItem, DraggingState, InventoryItem, inventoryItemId, SelectedQuest } from "./inventory-dsl"
+import { activityId, DraggableItem, DraggingState, DropBox, DropBoxUtility, InventoryItem, inventoryItemId, SelectedQuest } from "./inventory-dsl"
 import {
     dragItemEnded, inventoryStore, addAdventurerToParty,
     openActivity, setDraggingState, toggleInventory, removeAdventurerFromParty, closeActivity, registerDropBoxes
@@ -19,6 +19,23 @@ const InventoryTransitions = {
             const finishedQuests = state.takenQuests.filter(quest => takenQuestSecondsLeft(quest) == -1)
             finishedQuests.forEach(quest => NotificationsApi.notify(`Quest ${quest.quest.name} finished!`, "info"))
         }, 1000)
+
+        inventoryStore.subscribe(() => {
+            const state = inventoryStore.getState()
+            const dropBoxesState = state.dropBoxesState
+            const draggingState = state.draggingState
+            if (dropBoxesState?.utility == "overworld-drop") {
+                const hovering = dropBoxesState?.dropBoxes[0]?.hovering
+                const droped = dropBoxesState?.dropBoxes[0]?.dropped
+                if (droped?.ctype === "adventurer" && !draggingState)
+                    OverworldApi.draggingItemIntoOverworld(droped)
+                else if (hovering?.ctype === "adventurer" && draggingState?.position)
+                    OverworldApi.draggingItemIntoOverworld(hovering, draggingState.position)
+                else if (!hovering && !droped)
+                    OverworldApi.cancelDraggingItemIntoOverworld()
+            }
+        })
+
         return interval 
     },
 
@@ -83,15 +100,8 @@ const InventoryTransitions = {
         inventoryStore.dispatch(setDraggingState(state))
     },
 
-    registerDropBoxes: (utility: "party-pick" | "other", refs: RefObject<HTMLDivElement>[]) => {
-        inventoryStore.dispatch(registerDropBoxes({ 
-            utility, 
-            dropBoxes: refs.map(ref => {
-                if (!ref.current) throw new Error("Ref for dropbox not set")
-                const { top, left, bottom, right } = ref.current.getBoundingClientRect()
-                return { top, left, bottom, right }
-            })
-        }))
+    registerDropBoxes: (utility: DropBoxUtility, dropBoxes: DropBox[]) => {
+        inventoryStore.dispatch(registerDropBoxes({ utility, dropBoxes, }))
     },
 
     deregisterDropBoxes: () => {

@@ -1,9 +1,8 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { EqualityFn, useSelector } from "react-redux"
 import { Adventurer, individualXPReward, Outcome, tagRealAPS, TakenQuest } from "../../common"
 import { Furniture } from "../../common/furniture"
 import { notEmpty } from "../../utils"
-import { DraggableItem, DraggingState, InventoryAsset, ActivitySelection, SelectedQuest, sortAdventurers, DropBox, DropBoxesState, draggingIntersects } from "./inventory-dsl"
+import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility, InventoryAsset, sortAdventurers } from "./inventory-dsl"
 
 export interface InventoryState {
     open: boolean
@@ -79,27 +78,27 @@ export const inventoryState = createSlice({
         },
 
         /** Drag & Drop */
-        registerDropBoxes: (state, action: PayloadAction<{utility: "party-pick" | "other", dropBoxes: DropBox[]}>) => {
+        registerDropBoxes: (state, action: PayloadAction<{utility: DropBoxUtility, dropBoxes: DropBox[]}>) => {
             const { utility, dropBoxes } = action.payload
             if (dropBoxes.length === 0) state.dropBoxesState = undefined
             else state.dropBoxesState = { utility, dragging: notEmpty(state.draggingState), dropBoxes, }
         },
 
         setDraggingState: (state, action: PayloadAction<DraggingState | undefined>) => {
-            const [ newDropBoxesState, newDraggingState ]= draggingIntersects(state.dropBoxesState, action.payload)
+            const [ newDropBoxesState, newDraggingState ] = draggingIntersects(state.dropBoxesState, action.payload)
             state.draggingState = newDraggingState
             state.dropBoxesState = newDropBoxesState
         },
 
         dragItemEnded: (state) => {
             if (state.dropBoxesState?.utility === "party-pick")
-                state.dropBoxesState?.dropBoxes.forEach((dropBox, index) => {
+                state.dropBoxesState.dropBoxes.forEach((dropBox, index) => {
                     if (dropBox.hovering?.ctype === "adventurer") state.selectedParty[index] = dropBox.hovering
                     dropBox.hovering = undefined
                 })
 
-            else if (state.dropBoxesState?.utility === "other") 
-                state.dropBoxesState?.dropBoxes.forEach(dropBox => {
+            else if (state.dropBoxesState) 
+                state.dropBoxesState.dropBoxes.forEach(dropBox => {
                     if (dropBox.hovering) dropBox.dropped = dropBox.hovering
                     dropBox.hovering = undefined
                 })

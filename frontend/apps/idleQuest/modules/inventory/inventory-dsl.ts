@@ -1,3 +1,4 @@
+import { RefObject } from "react"
 import { Adventurer, APS, APSRequirement, AvailableQuest, mergeAPSRequirementMax, QuestRequirement, SealType, TakenQuest } from "../../common"
 import { Furniture } from "../../common/furniture"
 import { notEmpty } from "../../utils"
@@ -30,10 +31,12 @@ export type DropBox = {
 }
 
 export type DropBoxesState = {
-    utility: "party-pick" | "other"
+    utility: DropBoxUtility
     dragging: boolean
     dropBoxes: DropBox[]
 }
+
+export type DropBoxUtility = "party-pick" | "overworld-drop" | "other"
 
 export const mapSealImage = (quest: SelectedQuest): { src: string, width: number, height: number, offset: number } => {
     const scale = 1.8
@@ -138,8 +141,14 @@ export const sortAdventurers = (adventurers: Adventurer[]) => {
     })
 }
 
+export const makeDropBox = (ref: RefObject<HTMLDivElement>): DropBox => {
+    if (!ref.current) throw new Error("Ref for dropbox not set")
+    const { top, left, bottom, right } = ref.current.getBoundingClientRect()
+    return { top, left, bottom, right }
+}
+
 export function draggingIntersects(dropBoxesState?: DropBoxesState, draggingState?: DraggingState): [DropBoxesState | undefined, DraggingState | undefined] {
-    if (!dropBoxesState) return [undefined, draggingState]
+    if (!dropBoxesState) return [undefined, undefined]
     else {
         const dropBoxes: DropBox[] = dropBoxesState.dropBoxes.map(dropBox => {
             const hovering =

@@ -6,10 +6,13 @@ const OverworldApi = {
 
     setEventEmitter: (eventEmitter: Phaser.Events.EventEmitter) => events = eventEmitter,
 
-    draggingItemIntoOverworld: (item: Adventurer, position: [number, number]) => {
-        events.emit("dragging-item", item, position)
+    draggingItemIntoOverworld: (item: Adventurer, position?: [number, number]) => {
+        events.emit("dragging-item-from-inventory", item, position)
     },
 
+    cancelDraggingItemIntoOverworld: () => {
+        events.emit("cancel-dragging-item-from-inventory")
+    },
 }
 
 export default OverworldApi
