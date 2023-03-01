@@ -1,6 +1,46 @@
 import { Adventurer } from "../../../common";
 import { Overworld } from "../scenes/overworld";
 
+const pixelTilesMap = (pxNum: number) => {
+    switch (pxNum) {
+        case 1: return 0
+        case 2: return 1
+        case 3: return 2
+        case 11: return 3
+        case 12: return 4
+        case 13: return 5
+        case 21: return 6
+        case 22: return 7
+        case 23: return 8
+        case 24: return 9
+        case 31: return 10
+        case 32: return 11
+        case 33: return 12
+        case 41: return 13
+        case 42: return 14
+        case 43: return 15
+        case 44: return 16
+        case 45: return 17
+        case 46: return 18
+        case 47: return 19
+        case 48: return 20
+        case 49: return 21
+        case 50: return 22
+        case 51: return 23
+        case 52: return 24
+        case 53: return 25
+        case 54: return 26
+        case 55: return 27
+        case 56: return 28
+        case 57: return 29
+        case 58: return 30
+        case 59: return 31
+        case 60: return 32
+        case 61: return 33
+        default: return 0
+    }
+}
+
 export default class OverworldAdventurer {
 
     public lastClickTime: number = 0
@@ -25,7 +65,9 @@ export default class OverworldAdventurer {
     static createSprite (adventurer: Adventurer, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite {
         const i = parseInt(adventurer.assetRef.match(/(\d+)/)![0])
         // Later check adventurer collection and load from right sprite sheet
-        const sprite = overworld.physics.add.sprite(position.x, position.y, "gmas1", i-1)
+        const sheet = adventurer.collection === "grandmaster-adventurers" ? "grandmaster-adventurers-front" : "pixel-tiles-adventurers-front"
+        const index = adventurer.collection === "grandmaster-adventurers" ? i-1 : pixelTilesMap(i)
+        const sprite = overworld.physics.add.sprite(position.x, position.y, sheet, index)
         sprite.setSize(32, 16) /** Collision box size */
         sprite.setOffset(10, 59) /** Collision box offset */
         sprite.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
@@ -41,11 +83,11 @@ export default class OverworldAdventurer {
 
     static onPointerUp = (overworld: Overworld, adventurer: OverworldAdventurer) => (pointer: Phaser.Input.Pointer) => {
         const now = Date.now()
-        const isDoubleClick = now - adventurer.lastClickTime < 500
+        const isDoubleClick = now - adventurer.lastClickTime < 300
         adventurer.lastClickTime = now
 
         if (isDoubleClick) return adventurer.destroy()
-        if (pointer.getDuration() < 200) return adventurer.sprite.flipX = !adventurer.sprite.flipX
+        if (pointer.getDuration() < 300) return adventurer.sprite.flipX = !adventurer.sprite.flipX
     }
 
     static onDragStart = (overworld: Overworld, adventurer: OverworldAdventurer) => () => {

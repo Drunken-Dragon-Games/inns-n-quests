@@ -36,6 +36,7 @@ yarn-error.log*
 
 public/textures/
 public/maps/aseprite/
+public/maps
 
 backend/.npmrc
 frontend/.npmrc
