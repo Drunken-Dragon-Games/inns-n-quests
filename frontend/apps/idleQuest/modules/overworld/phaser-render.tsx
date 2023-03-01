@@ -1,5 +1,6 @@
 import { Game } from "phaser"
 import { useEffect } from "react"
+import OverworldApi from "./overworld-api"
 
 async function loadPhaser(containerId: string, onReady: () => void): Promise<Game> {
     const Phaser = await import("phaser")
@@ -25,6 +26,7 @@ async function loadPhaser(containerId: string, onReady: () => void): Promise<Gam
         scene: [Preloader, Overworld]
     })
 
+    OverworldApi.setEventEmitter(game.events)
     game.events.on("loading-complete", onReady)
 
     return game

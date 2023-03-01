@@ -1,12 +1,14 @@
-import { useInventorySelector } from "../../inventory-state"
+import { useSelector } from "react-redux"
+import _ from "underscore"
+import { InventoryState } from "../../inventory-state"
 import AdventurerSplashArt from "./adventurer-splash-art"
 import QuestSheet from "./quest-sheet"
 
 const ActivityView = () => {
-    const state = useInventorySelector(state => ({
+    const state = useSelector((state: InventoryState) => ({
         selection: state.activitySelection,
         selectedParty: state.selectedParty,
-    })) 
+    }), _.isEqual) 
     return <div onClick={(e) => e.stopPropagation()}>
         { state.selection?.ctype === "taken-quest" || state.selection?.ctype === "available-quest" ?
             <QuestSheet

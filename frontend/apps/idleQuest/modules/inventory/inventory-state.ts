@@ -1,8 +1,9 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { useSelector } from "react-redux"
+import { EqualityFn, useSelector } from "react-redux"
 import { Adventurer, individualXPReward, Outcome, tagRealAPS, TakenQuest } from "../../common"
 import { Furniture } from "../../common/furniture"
-import { DraggableItem, DraggingState, InventoryAsset, ActivitySelection, SelectedQuest, sortAdventurers } from "./inventory-dsl"
+import { notEmpty } from "../../utils"
+import { DraggableItem, DraggingState, InventoryAsset, ActivitySelection, SelectedQuest, sortAdventurers, DropBox, DropBoxesState, draggingIntersects } from "./inventory-dsl"
 
 export interface InventoryState {
     open: boolean
@@ -11,8 +12,8 @@ export interface InventoryState {
     takenQuests: TakenQuest[]
 
     activitySelection?: ActivitySelection
-    droppedItem?: DraggableItem
     draggingState?: DraggingState
+    dropBoxesState?: DropBoxesState
     selectedParty: (Adventurer | null)[]
 }
 
@@ -35,6 +36,7 @@ export const inventoryState = createSlice({
     initialState: inventoryInitialState,
     reducers: {
 
+        /** Inventory */
         toggleInventory: (state, action: PayloadAction<boolean | undefined>) => {
             state.open = action.payload ?? !state.open
         },
@@ -58,6 +60,7 @@ export const inventoryState = createSlice({
             state.takenQuests = state.takenQuests.filter(quest => quest.takenQuestId !== action.payload.takenQuestId)
         },
 
+        /** Activities State */
         openActivity: (state, action: PayloadAction<ActivitySelection | undefined>) => {
             const activity = action.payload
             state.activitySelection = activity
@@ -75,6 +78,36 @@ export const inventoryState = createSlice({
             state.selectedParty = []
         },
 
+        /** Drag & Drop */
+        registerDropBoxes: (state, action: PayloadAction<{utility: "party-pick" | "other", dropBoxes: DropBox[]}>) => {
+            const { utility, dropBoxes } = action.payload
+            if (dropBoxes.length === 0) state.dropBoxesState = undefined
+            else state.dropBoxesState = { utility, dragging: notEmpty(state.draggingState), dropBoxes, }
+        },
+
+        setDraggingState: (state, action: PayloadAction<DraggingState | undefined>) => {
+            const [ newDropBoxesState, newDraggingState ]= draggingIntersects(state.dropBoxesState, action.payload)
+            state.draggingState = newDraggingState
+            state.dropBoxesState = newDropBoxesState
+        },
+
+        dragItemEnded: (state) => {
+            if (state.dropBoxesState?.utility === "party-pick")
+                state.dropBoxesState?.dropBoxes.forEach((dropBox, index) => {
+                    if (dropBox.hovering?.ctype === "adventurer") state.selectedParty[index] = dropBox.hovering
+                    dropBox.hovering = undefined
+                })
+
+            else if (state.dropBoxesState?.utility === "other") 
+                state.dropBoxesState?.dropBoxes.forEach(dropBox => {
+                    if (dropBox.hovering) dropBox.dropped = dropBox.hovering
+                    dropBox.hovering = undefined
+                })
+
+            state.draggingState = undefined
+        },
+
+        /** Party Pick */
         addAdventurerToParty: (state, action: PayloadAction<{ adventurer: Adventurer, slot?: number }>) => {
             const adventurer = action.payload.adventurer
             const slotNumber = action.payload.slot
@@ -103,15 +136,6 @@ export const inventoryState = createSlice({
                 adventurer?.adventurerId === action.payload.adventurerId ? null : adventurer)
         },
 
-        setDraggingState: (state, action: PayloadAction<DraggingState>) => {
-            state.draggingState = action.payload
-        },
-
-        dragItemEnded: (state, action: PayloadAction<DraggableItem>) => {
-            state.draggingState = undefined
-            state.droppedItem = action.payload
-        },
-
         clearSelectedParty: (state) => {
             if (state.activitySelection && state.activitySelection.ctype === "available-quest")
                 state.selectedParty = Array(state.activitySelection.slots).fill(null)
@@ -119,6 +143,7 @@ export const inventoryState = createSlice({
                 state.selectedParty = []
         },
         
+        /** Adventurer List State */
         changeAdventurersInChallenge: (state, action: PayloadAction<{ adventurers: Adventurer[], inChallenge: boolean }>) => {
             state.adventurers.forEach(adventurer => {
                 action.payload.adventurers.forEach((actionAdventurer) => {
@@ -131,6 +156,7 @@ export const inventoryState = createSlice({
             state.adventurers = sortAdventurers(state.adventurers)
         },
 
+        /** Quest State */
         claimQuestOutcome: (state, action: PayloadAction<{ adventurers: Adventurer[], outcome: Outcome, takenQuest: TakenQuest }>) => {
             const outcome = action.payload.outcome
             const adventurers = action.payload.adventurers
@@ -163,25 +189,29 @@ export const inventoryState = createSlice({
 });
 
 export const {
+    /** Inventory */
     toggleInventory,
     setInventory,
     setTakenQuests,
     addTakenQuest,
     removeTakenQuest,
+    /** Activities State */
     openActivity,
     closeActivity,
+    /** Drag & Drop */
+    registerDropBoxes,
     setDraggingState,
     dragItemEnded,
+    /** Party Pick */
     addAdventurerToParty,
     removeAdventurerFromParty,
     clearSelectedParty,
+    /** Adventurer List State */
     changeAdventurersInChallenge,
+    /** Quest State */
     claimQuestOutcome,
 } = inventoryState.actions
 
 export const inventoryStore = configureStore({
     reducer: inventoryState.reducer,
 })
-
-export const useInventorySelector = <Selection = unknown>(selector: (state: InventoryState) => Selection) => 
-    useSelector<InventoryStoreState, Selection>(selector)

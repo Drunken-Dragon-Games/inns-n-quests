@@ -16,7 +16,6 @@ import { activityId } from "./inventory-dsl"
 export const getInventory = (): InventoryThunk => async (dispatch) =>
     await withTokenRefresh(async () => {
         const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
-        console.log(response.data.length)
         dispatch(setInventory(response.data.map(compose(tagRealAPS, tagAdventurer, tagFurniture))))
     })
 

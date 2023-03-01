@@ -1,10 +1,9 @@
+import { MouseEventHandler, useMemo, useState } from "react"
 import styled from "styled-components"
-import { useMemo, useRef, useState } from "react"
-import { Adventurer, If } from "../../../../../common"
-import { PixelArtImage, vh1, notEmpty, vh } from "../../../../../utils"
-import AdventurerMini from "./adventurer-mini"
-import { useInventorySelector } from "../../../inventory-state"
+import { Adventurer } from "../../../../../common"
+import { notEmpty, PixelArtImage, useDrag, vh, vh1 } from "../../../../../utils"
 import InventoryTransitions from "../../../inventory-transitions"
+import AdventurerMini from "./adventurer-mini"
 
 const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
     position: relative;
@@ -14,6 +13,8 @@ const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
     flex-direction: column-reverse;
     justify-content: center;
     align-items: center;
+    background-color: rgba(20,20,20,0.1);
+    border-radius: 1vh;
     ${props => props.interactuable ? `cursor: pointer;` : ``}
 `
 
@@ -32,69 +33,73 @@ const EmptySlot = () =>
         absolute
     />
 
-interface AdventurerSlotProps {
-    className?: string,
-    adventurer: Adventurer | null,
-    emoji?: string,
-    slotNumber: number,
+type AdventurerSlotState = {
+    hovering: boolean
+    interactuable: boolean
+    displayedEmoji: string | undefined
+    render: "normal" | "hovered"
 }
 
-const AdventurerSlot = ({ className, adventurer, emoji, slotNumber }: AdventurerSlotProps) => {
+type AdventurerSlotCallbacks = {
+    onMouseOver: MouseEventHandler
+    onMouseLeave: MouseEventHandler
+    //onMouseUp: MouseEventHandler
+    onMouseDown: MouseEventHandler
+}
+
+const useAdventurerSlotState = (props: AdventurerSlotProps): AdventurerSlotState & AdventurerSlotCallbacks => {
+
     const [hovering, setHovering] = useState<boolean>(false)
 
-    const containerRef = useRef<HTMLDivElement>(null)
-    const draggingRef = useRef<{ adventurer: Adventurer, intersects: boolean} | null>(null)
-    const draggingState = useInventorySelector(state => state.draggingState)
-    useMemo(() => {
-        if (draggingRef.current && !draggingState) {
-            if (draggingRef.current.intersects) 
-                InventoryTransitions.addAdventurerToParty(draggingRef.current.adventurer, slotNumber)
-            draggingRef.current = null
-        } else if (containerRef.current && draggingState?.item.ctype === "adventurer") {
-            const rect = containerRef.current.getBoundingClientRect()
-            const intersects = (
-                rect.top < draggingState.position[1] && 
-                rect.bottom > draggingState.position[1] &&
-                rect.left < draggingState.position[0] &&
-                rect.right > draggingState.position[0]
-            )
-            draggingRef.current = { adventurer: draggingState.item, intersects }
-        }
-    }, [draggingState])
+    const renderState = useMemo<AdventurerSlotState>(() => ({
+        interactuable: !props.preview && notEmpty(props.adventurer),
+        displayedEmoji: props.preview ? undefined : notEmpty(props.adventurer) && hovering ? "cross" : props.emoji,
+        render: props.preview || notEmpty(props.adventurer) && hovering ? "hovered" : "normal",
+        hovering
+    }), [props, hovering])
 
-    const interactuable = notEmpty(adventurer)
-    const displayedEmoji = interactuable && hovering ? "cross" : emoji
-    const render = interactuable && hovering ? "hovered" : "normal"
+    const { dragging, startDrag } = useDrag({
+        onDrag: (position) =>
+            renderState.interactuable && InventoryTransitions.setDraggingState({ item: props.adventurer!, position }),
+        onDrop: () =>
+            InventoryTransitions.onItemDragEnded(),
+    })
+
+    const callbacks = useMemo<AdventurerSlotCallbacks>(() => ({
+        onMouseOver: () => { setHovering(true) },
+        onMouseLeave: () => { setHovering(false); dragging && InventoryTransitions.removeAdventurerFromParty(props.adventurer) },
+        onMouseUp: () => renderState.interactuable && InventoryTransitions.removeAdventurerFromParty(props.adventurer),
+        onMouseDown: (event) => {
+            if (renderState.interactuable) { startDrag(event) }
+        },
+    }), [props.adventurer, renderState.interactuable, dragging])
+
+    return { ...renderState, ...callbacks }
+}
+
+interface AdventurerSlotProps {
+    adventurer: Adventurer | null
+    emoji?: string
+    preview?: boolean
+}
+
+const AdventurerSlot = ({ adventurer, emoji, preview }: AdventurerSlotProps) => {
+    const state = useAdventurerSlotState({ adventurer, emoji, preview })
     return (
         <AdventurerSlotContainer
-            className={className}
-            ref={containerRef}
-            onMouseOver={() => { 
-                setHovering(true) 
-            }}
-            onMouseLeave={() => {
-                setHovering(false)
-            }}
-            onClick={() => notEmpty(adventurer) && InventoryTransitions.removeAdventurerFromParty(adventurer)}
-            interactuable={interactuable}
+            onMouseOver={state.onMouseOver}
+            onMouseLeave={state.onMouseLeave}
+            //onMouseUp={state.onMouseUp}
+            onMouseDown={state.onMouseDown}
+            interactuable={state.interactuable}
         >
             <EmptySlot />
-            { notEmpty(adventurer) && !draggingRef.current?.intersects ? 
+            { notEmpty(adventurer) ? 
                 <AdventurerMiniWrapper>
                     <AdventurerMini
                         adventurer={adventurer}
-                        emoji={displayedEmoji}
-                        render={render}
-                        displayAPS={true}
-                        units={vh(1.7)}
-                    />
-                </AdventurerMiniWrapper>
-            : <></> }
-            { notEmpty(draggingRef.current) && draggingRef.current.intersects ?
-                <AdventurerMiniWrapper>
-                    <AdventurerMini
-                        adventurer={draggingRef.current.adventurer}
-                        render={"disabled"}
+                        emoji={state.displayedEmoji}
+                        render={state.render}
                         displayAPS={true}
                         units={vh(1.7)}
                     />

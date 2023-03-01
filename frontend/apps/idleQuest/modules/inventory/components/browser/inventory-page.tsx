@@ -1,14 +1,14 @@
 import { MouseEventHandler, useEffect, useMemo, useState } from "react"
-import { useDrag } from "../../../../utils"
+import { shallowEqual, useSelector } from "react-redux"
 import styled from "styled-components"
-import { notEmpty, vmax, PixelArtImage } from "../../../../utils"
-import { InventoryItem, isDraggableItem, mapQuestScroll, InventoryPageName } from "../../inventory-dsl"
-import { useInventorySelector } from "../../inventory-state"
+import _ from "underscore"
+import { takenQuestStatus, takenQuestTimeLeft } from "../../../../common"
+import { notEmpty, PixelArtImage, useDrag, vmax } from "../../../../utils"
+import { InventoryItem, InventoryPageName, isDraggableItem, mapQuestScroll } from "../../inventory-dsl"
+import { InventoryState } from "../../inventory-state"
 import InventoryTransitions from "../../inventory-transitions"
 import { AdventurerSprite, FurnitureSprite } from "../sprites"
 import InventoryBox from "./inventory-box"
-import { takenQuestStatus, takenQuestTimeLeft } from "../../../../common"
-import { NotificationsApi } from "../../../notifications"
 
 const InventoryPageContainer = styled.div`
     box-sizing: border-box;
@@ -72,7 +72,6 @@ type InventoryItemViewState = {
     center?: boolean
     overflowHidden?: boolean
     hover: boolean,
-    dragging: boolean,
     itemClick: MouseEventHandler,
     hoverOn: MouseEventHandler,
     hoverOff: MouseEventHandler,
@@ -80,11 +79,11 @@ type InventoryItemViewState = {
 }
 
 const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState => {
-    const subState = useInventorySelector(state => ({ 
+    const subState = useSelector((state: InventoryState) => ({ 
         selection: state.activitySelection,
         selectedParty: state.selectedParty,
         otherDraggingHappening: notEmpty(state.draggingState)
-    }))
+    }), _.isEqual)
     const boxState = useMemo(() => {
         if (item && item.ctype === "adventurer") {
             return {
@@ -124,13 +123,14 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
         } else return {}
     }, [item, subState.selection, subState.selectedParty])
 
-    const { vector, startDrag } = useDrag({
+    const {startDrag } = useDrag({
         onDrag: (position) =>
             isDraggableItem(item) && InventoryTransitions.setDraggingState({ item: item, position }),
         onDrop: () =>
-            isDraggableItem(item) && InventoryTransitions.onItemDragEnded(item),
+            isDraggableItem(item) && InventoryTransitions.onItemDragEnded(),
     })
 
+    /*
     const draggingState = useMemo(() => ({
         dragging:
             !boxState.disabled &&
@@ -138,12 +138,13 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
             notEmpty(vector) && 
             (Math.abs(vector[0]) > 20 || Math.abs(vector[1]) > 20),
     }), [item, boxState.disabled, vector])
+    */
 
     const callbacks = useMemo(() => ({
-        itemClick: () => !boxState.disabled && !draggingState.dragging && item && InventoryTransitions.onItemClick(item),
+        itemClick: () => !boxState.disabled && /*!draggingState.dragging &&*/ item && InventoryTransitions.onItemClick(item),
         hoverOn: () => setHover(!boxState.disabled && !subState.otherDraggingHappening),
         hoverOff: () => setHover(false),
-    }), [item, boxState.disabled, draggingState.dragging, subState.otherDraggingHappening])
+    }), [item, boxState.disabled, /*draggingState.dragging,*/ subState.otherDraggingHappening])
 
     const [hover, setHover] = useState(false)
 
@@ -161,7 +162,8 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
         }
     }, [item])
 
-    return { ...boxState, ...draggingState, ...callbacks, hover, startDrag, ...timedInfo }
+    return { ...boxState, /*...draggingState,*/ ...callbacks, hover, startDrag, ...timedInfo }
+
 }
 
 const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
@@ -211,12 +213,12 @@ type InventoryPageState = {
 }
 
 const useInventoryPageState = (page: InventoryPageName): InventoryPageState => {
-    const subState = useInventorySelector(state => ({ 
+    const subState = useSelector((state: InventoryState) => ({ 
         adventurers: state.adventurers, 
         furniture: state.furniture, 
         takenQuests: state.takenQuests,
         selection: state.activitySelection
-    }))
+    }), shallowEqual)
     const itemSlots = useMemo(() => {
         const items = 
             page == "adventurers" ? subState.adventurers :

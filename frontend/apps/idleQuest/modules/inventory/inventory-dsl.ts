@@ -1,5 +1,6 @@
 import { Adventurer, APS, APSRequirement, AvailableQuest, mergeAPSRequirementMax, QuestRequirement, SealType, TakenQuest } from "../../common"
 import { Furniture } from "../../common/furniture"
+import { notEmpty } from "../../utils"
 
 export type SelectedQuest = AvailableQuest | TakenQuest
 
@@ -15,7 +16,23 @@ export type DraggableItem = Adventurer | Furniture
 
 export type DraggingState = {
     item: DraggableItem
+    hide?: boolean
     position: [number, number]
+}
+
+export type DropBox = {
+    top: number
+    bottom: number
+    left: number
+    right: number
+    dropped?: DraggableItem
+    hovering?: DraggableItem
+}
+
+export type DropBoxesState = {
+    utility: "party-pick" | "other"
+    dragging: boolean
+    dropBoxes: DropBox[]
 }
 
 export const mapSealImage = (quest: SelectedQuest): { src: string, width: number, height: number, offset: number } => {
@@ -119,4 +136,32 @@ export const sortAdventurers = (adventurers: Adventurer[]) => {
         }
         return 0
     })
+}
+
+export function draggingIntersects(dropBoxesState?: DropBoxesState, draggingState?: DraggingState): [DropBoxesState | undefined, DraggingState | undefined] {
+    if (!dropBoxesState) return [undefined, draggingState]
+    else {
+        const dropBoxes: DropBox[] = dropBoxesState.dropBoxes.map(dropBox => {
+            const hovering =
+                draggingState &&
+                    dropBox.top < draggingState.position[1] &&
+                    dropBox.bottom > draggingState.position[1] &&
+                    dropBox.left < draggingState.position[0] &&
+                    dropBox.right > draggingState.position[0] ?
+                    draggingState.item : undefined
+            return { ...dropBox, hovering }
+        })
+        const dragging = notEmpty(draggingState)
+        const hide = dropBoxes.some(dropBox => dropBox.hovering)
+        return [{
+            ...dropBoxesState,
+            dropBoxes,
+            dragging
+        },
+            draggingState ? {
+                ...draggingState,
+                hide
+            } : undefined
+        ]
+    }
 }

@@ -1,8 +1,9 @@
 import { useState } from "react"
+import { shallowEqual, useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
 import { OswaldFontFamily } from "../../../../common"
 import { InventoryPageName } from "../../inventory-dsl"
-import { useInventorySelector } from "../../inventory-state"
+import { InventoryState } from "../../inventory-state"
 import InventoryPage from "./inventory-page"
 
 const openAnimation = keyframes`
@@ -57,7 +58,7 @@ const InventoryPagesContainer = styled.div`
 
 const InventoryBrowser = () => {
     const [page, setPage] = useState<InventoryPageName>("adventurers")
-    const open = useInventorySelector(state => state.open)
+    const open = useSelector((state: InventoryState) => state.open, shallowEqual)
     return (
         <InventoryBrowserContainer open={open}>
             <InventoryTabsContainer>

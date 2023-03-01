@@ -1,11 +1,13 @@
+import { RefObject, useEffect } from "react"
 import { Adventurer, takenQuestSecondsLeft, takenQuestStatus } from "../../common"
 import { notEmpty } from "../../utils"
 import { NotificationsApi } from "../notifications"
+import { OverworldApi } from "../overworld"
 import { QuestBoardApi } from "../quest-board"
 import { activityId, DraggableItem, DraggingState, InventoryItem, inventoryItemId, SelectedQuest } from "./inventory-dsl"
 import {
     dragItemEnded, inventoryStore, addAdventurerToParty,
-    openActivity, setDraggingState, toggleInventory, removeAdventurerFromParty, closeActivity
+    openActivity, setDraggingState, toggleInventory, removeAdventurerFromParty, closeActivity, registerDropBoxes
 } from "./inventory-state"
 import { claimTakenQuest, fetchMintTest, getInProgressQuests, getInventory, takeAvailableQuest } from "./inventory-thunks"
 
@@ -76,11 +78,28 @@ const InventoryTransitions = {
     },
 
     setDraggingState: (state: DraggingState) => {
+        //if (state.item.ctype == "adventurer")
+        //    OverworldApi.draggingItemIntoOverworld(state.item, state.position)
         inventoryStore.dispatch(setDraggingState(state))
     },
 
-    onItemDragEnded: (item: DraggableItem) => {
-        inventoryStore.dispatch(dragItemEnded(item))
+    registerDropBoxes: (utility: "party-pick" | "other", refs: RefObject<HTMLDivElement>[]) => {
+        inventoryStore.dispatch(registerDropBoxes({ 
+            utility, 
+            dropBoxes: refs.map(ref => {
+                if (!ref.current) throw new Error("Ref for dropbox not set")
+                const { top, left, bottom, right } = ref.current.getBoundingClientRect()
+                return { top, left, bottom, right }
+            })
+        }))
+    },
+
+    deregisterDropBoxes: () => {
+        inventoryStore.dispatch(registerDropBoxes({utility: "other", dropBoxes: []}))
+    },
+
+    onItemDragEnded: () => {
+        inventoryStore.dispatch(dragItemEnded())
     },
 
     onRecruitAdventurer: () => {

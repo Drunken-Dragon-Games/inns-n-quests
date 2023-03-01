@@ -1,12 +1,13 @@
-import { ReactNode, useEffect } from "react"
-import { Provider } from "react-redux"
+import { ReactNode, useEffect, useRef } from "react"
+import { Provider, useSelector } from "react-redux"
 import styled, { css, keyframes } from "styled-components"
+import _ from "underscore"
 import { notEmpty, vmax } from "../../utils"
 import ActivityView from "./components/activity"
 import InventoryBrowser from "./components/browser"
 import InventoryHeader from "./components/header"
 import { AdventurerSprite, FurnitureSprite } from "./components/sprites"
-import { inventoryStore, useInventorySelector } from "./inventory-state"
+import { InventoryState, inventoryStore } from "./inventory-state"
 import InventoryTransitions from "./inventory-transitions"
 
 const openAnimation = keyframes`
@@ -71,16 +72,16 @@ const DraggingItem = styled.div.attrs<{ position?: [number, number] }>( props =>
  * them from being re-rendered when the dragging state changes.
  */
 const WithDraggingItem = ({ children }: { children?: ReactNode }) => {
-    const draggingState = useInventorySelector(state => state.draggingState)
+    const draggingState = useSelector((state: InventoryState) => state.draggingState)
     return <>
         <DraggingItem position={draggingState?.position}>
-            {draggingState && draggingState.item.ctype === "adventurer" ?
+            {draggingState?.item.ctype === "adventurer" && !draggingState.hide ?
                 <AdventurerSprite
                     adventurer={draggingState.item}
                     units={vmax(0.8)}
                     render={"hovered"}
                 />
-            : draggingState && draggingState.item.ctype === "furniture" ?
+            : draggingState?.item.ctype === "furniture" && !draggingState.hide ?
                 <FurnitureSprite
                     furniture={draggingState.item}
                     units={vmax(0.8)}
@@ -93,10 +94,11 @@ const WithDraggingItem = ({ children }: { children?: ReactNode }) => {
 }
 
 const Inventory = ({ className }: { className?: string }) => {
-    const { open, selection } = useInventorySelector(state => ({
+    const { open, selection } = useSelector((state: InventoryState) => ({
         open: state.open,
         selection: state.activitySelection
-    }))
+    }), _.isEqual)
+    const inventoryContainerRef = useRef<HTMLDivElement>(null)
     // Initial load of adventurers, quests in progress, and tracking init.
     useEffect(() => {
         InventoryTransitions.onRefreshInventory()
@@ -104,7 +106,7 @@ const Inventory = ({ className }: { className?: string }) => {
         return () => clearInterval(interval)
     }, [])
     return <WithDraggingItem>
-        <InventoryContainer className={className} open={open}>
+        <InventoryContainer className={className} open={open} ref={inventoryContainerRef}>
             <Header />
             <InventoryBrowser />
         </InventoryContainer>

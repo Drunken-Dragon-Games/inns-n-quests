@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useRef } from "react"
+import { RefObject, useEffect, useMemo, useRef } from "react"
+import { useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
+import _ from "underscore"
 import { Adventurer, APS, AvailableQuest, mergeAPSSum, Push, sameOrBetterAPS, TakenQuest, takenQuestSecondsLeft, zeroAPS } from "../../../../../common"
 import { notEmpty, PixelArtCss, PixelArtImage, vh1 } from "../../../../../utils"
-import { getQuestAPSRequirement, mapSealImage, questDescription, questName } from "../../../inventory-dsl"
+import { DraggableItem, getQuestAPSRequirement, mapSealImage, questDescription, questName } from "../../../inventory-dsl"
+import { InventoryState } from "../../../inventory-state"
 import InventoryTransitions from "../../../inventory-transitions"
 import AdventurerSlot from "./adventurer-slot"
 import Signature from "./signature"
@@ -162,7 +165,7 @@ const APSReq = ({ apsRequired, apsAccumulated }: { apsRequired: APS, apsAccumula
     )
 }
 
-const AdventurersWrapper = styled.div`
+const PartyContainer = styled.div`
     width: 100%;
     display: flex;
     gap: 1vh;
@@ -180,15 +183,75 @@ const Footer = styled.div`
     height: 10vh;
 `
 
-interface QuestPaperTakenState {
+type PartyViewState = {
+    dropBoxRef: RefObject<HTMLDivElement>
+    hovering?: Adventurer
+    picked: Adventurer | null
+}[]
+
+const usePartyViewState = (quest: RenderQuest, adventurerSlots: (Adventurer | null)[]): PartyViewState => {
+    const boxRef1 = useRef<HTMLDivElement>(null)
+    const boxRef2 = useRef<HTMLDivElement>(null)
+    const boxRef3 = useRef<HTMLDivElement>(null)
+    const boxRef4 = useRef<HTMLDivElement>(null)
+    const boxRef5 = useRef<HTMLDivElement>(null)
+    const dropBoxesRefs = [boxRef1, boxRef2, boxRef3, boxRef4, boxRef5]
+
+    useEffect(() => {
+        if (quest.ctype !== "available-quest" || dropBoxesRefs.every(ref => ref.current == null)) return
+        InventoryTransitions.registerDropBoxes("party-pick", dropBoxesRefs)
+        return InventoryTransitions.deregisterDropBoxes
+    }, [boxRef1.current, boxRef2.current, boxRef3.current, boxRef4.current, boxRef5.current])
+
+    const dropBoxesState = useSelector((state: InventoryState) => state.dropBoxesState, _.isEqual)
+
+    const slotsState = useMemo<PartyViewState>(() => 
+        dropBoxesRefs.map((dropBoxRef, index) => {
+            const hovering: DraggableItem | undefined = dropBoxesState?.dropBoxes[index]?.hovering
+            return {
+                dropBoxRef,
+                hovering: hovering?.ctype == "adventurer" ? hovering : undefined,
+                picked: adventurerSlots[index]
+            }
+        })
+    , [dropBoxesState, adventurerSlots, quest])
+
+    return slotsState
+    /*
+    return dropBoxesRefs.map((dropBoxRef, index) => {
+        return {
+            dropBoxRef,
+            picked: adventurerSlots[index]
+        }
+    })
+    */
+}
+
+const PartyView = ({ quest, adventurerSlots }: { quest: RenderQuest, adventurerSlots: (Adventurer | null)[] }) => {
+    const state = usePartyViewState(quest, adventurerSlots)
+    return (
+        <PartyContainer>
+            {state.map(({ dropBoxRef, picked, hovering }, index) =>
+                <div key={"adventurer-slot-" + index} ref={dropBoxRef}>
+                    <AdventurerSlot
+                        adventurer={hovering ? hovering : picked}
+                        preview={notEmpty(hovering) || quest.ctype !== "available-quest"}
+                    />
+                </div>
+            )}
+        </PartyContainer>
+    )
+}
+
+type QuestSheetState = {
     signatureType: "in-progress" | "finished" | "claimed" | "available-no-adventurers" | "available"
     apsRequired: APS
     apsAccumulated: APS
     sealImage: { src: string, width: number, height: number, offset: number }
 }
 
-const useQuestCardState = (quest: RenderQuest, adventurerSlots: (Adventurer | null)[]): QuestPaperTakenState => 
-    useMemo(() => ({
+const useQuestCardState = (quest: RenderQuest, adventurerSlots: (Adventurer | null)[]): QuestSheetState => 
+    useMemo<QuestSheetState>(() => ({
         signatureType: 
             quest.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
             quest.ctype == "available-quest" ? "available-no-adventurers" : 
@@ -237,15 +300,7 @@ const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
             </QuestInfo>
 
             <Push />
-            <AdventurersWrapper>
-                {adventurerSlots.map((adventurer, index) =>
-                    <AdventurerSlot
-                        key={"adventurer-slot-" + index}
-                        adventurer={adventurer}
-                        slotNumber={index}
-                    />
-                )}
-            </AdventurersWrapper>
+            <PartyView quest={quest} adventurerSlots={adventurerSlots} />
 
             <Footer>
                 <Signature

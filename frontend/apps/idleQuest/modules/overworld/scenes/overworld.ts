@@ -1,4 +1,5 @@
 import Phaser from "phaser"
+import { Adventurer } from "../../../common"
 import { innBuildingRenderMatrix } from "../assets"
 
 type KInputs = {
@@ -31,7 +32,53 @@ export class Overworld extends Phaser.Scene {
         super("Overworld")
     }
 
+    draggingItem?: Phaser.Physics.Arcade.Sprite
+
+    subscribeDraggingItem() {
+        this.game.events.on("dragging-item", (item: Adventurer, position: [number, number]) => {
+            const camera = this.cameras.main
+            const overworldPosition = new Phaser.Math.Vector2(
+                (position[0] * camera.scaleManager.displayScale.x / camera.zoom + camera.worldView.left), 
+                (position[1] * camera.scaleManager.displayScale.y / camera.zoom + camera.worldView.top)
+            )
+            if (this.draggingItem) {
+                const sprite = this.draggingItem
+                sprite.x = overworldPosition.x
+                sprite.y = overworldPosition.y
+            }
+            else {
+                const sprite = this.createAdventurer(item.assetRef, overworldPosition.x, overworldPosition.y)
+                this.draggingItem = sprite
+            }
+        })
+    }
+
+    // 370 + i * 50, 600
+    createAdventurer(assetRef: string, x: number, y: number): Phaser.Physics.Arcade.Sprite {
+        // match regexp "(GrandmasterAdventurer|AdventurerOfThiolden|PixelTile)(\d+)" and extract the digits.
+        const i = parseInt(assetRef.match(/\d+/)![0])
+        const adventurer = this.physics.add.sprite(x, y, "gmas1", i-1)
+        adventurer.setSize(32, 16)
+        adventurer.setOffset(10, 59)
+        adventurer.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
+        this.input.setDraggable(adventurer)
+        this.physics.add.collider(adventurer, this.walls)
+        this.adventurers.push(adventurer)
+        adventurer.on("dragstart", () => {
+            this.draggingItem = adventurer
+        })
+        adventurer.on("drag", (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+            adventurer.x = dragX
+            adventurer.y = dragY
+        })
+        adventurer.on("dragend", (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+            this.draggingItem = undefined
+        })
+        return adventurer
+    }
+
     preload() {
+        this.subscribeDraggingItem()
         this.inputs = {
             W: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
             A: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
@@ -67,19 +114,12 @@ export class Overworld extends Phaser.Scene {
 
         const adventurersGroup = this.physics.add.group()
 
-        for (let i = 0; i < 5; i++) {
-            const adventurer = this.physics.add.sprite(370 + i * 50, 600, "gmas1", i)
-            adventurer.setSize(32,16)
-            adventurer.setOffset(10, 59)
-            adventurer.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
-            //this.input.setDraggable(adventurer)
-            this.physics.add.collider(adventurer, this.walls)
-            this.adventurers.push(adventurer)
-
+        for (let i = 0; i < 1; i++) {
+            this.createAdventurer("GrandmasterAdventurer36", 370 + i * 50, 600)
+            /*
             adventurer.on("pointerin", () => {
                 console.log("pointerin")
             })
-            /*
             adventurer.on("pointerdown", () => {
                 this.activeCollides = { obj: adventurer, collides: false }})
             adventurer.on("pointerup", () => {
@@ -142,7 +182,7 @@ export class Overworld extends Phaser.Scene {
         }
         else 
         */
-        if (this.game.input.activePointer.isDown) {
+        if (this.game.input.activePointer.isDown && !this.draggingItem) {
             if (this.origDragPoint) {
                 // move the camera by the amount the mouse has moved since last update		
                 this.cameras.main.scrollX += this.origDragPoint.x - this.game.input.activePointer.position.x
