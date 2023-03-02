@@ -1,25 +1,23 @@
 
-export type PreSynced<Collection extends string> = {
+export type PreSynced = {
     assetRef: string
-    collection: Collection
 }
 
-export type InventoryAsset<Collection extends string> = 
-    PreSynced<Collection> & { quantity: number }
+export type InventoryAsset = 
+    PreSynced & { quantity: number }
 
-export type SyncData<Collection extends string, DbAsset extends PreSynced<Collection>> = {
-    toCreate: InventoryAsset<Collection>[]
+export type SyncData<DbAsset extends PreSynced, InvAsset extends InventoryAsset> = {
+    toCreate: InvAsset[]
     toDelete: DbAsset[]
     surviving: DbAsset[]
 }
 
-export const syncData = <Collection extends string, DbAsset extends PreSynced<Collection>>(
+export const syncData = <DbAsset extends PreSynced, InvAsset extends InventoryAsset>(
     preSynced: DbAsset[],
-    assetInventory: InventoryAsset<Collection>[],
-    assetId: (asset: DbAsset) => string,
-): SyncData<Collection, DbAsset> => {
+    assetInventory: InvAsset[],
+): SyncData<DbAsset, InvAsset> => {
 
-    const inventoryRecord: { [assetRef: string]: { assetRef: string, collection: Collection, quantity: number } } = {}
+    const inventoryRecord: { [assetRef: string]: InvAsset } = {}
     assetInventory.forEach(asset => {
         if (inventoryRecord[asset.assetRef])
             inventoryRecord[asset.assetRef].quantity += asset.quantity
@@ -35,7 +33,7 @@ export const syncData = <Collection extends string, DbAsset extends PreSynced<Co
             preSyncedRecord[asset.assetRef] = [asset]
     })
 
-    const empty: { toCreate: InventoryAsset<Collection>[], toDelete: DbAsset[], surviving: DbAsset[] } = 
+    const empty: { toCreate: InvAsset[], toDelete: DbAsset[], surviving: DbAsset[] } = 
         { toCreate: [], toDelete: [], surviving: [] }
 
     const result = Object.values(inventoryRecord)

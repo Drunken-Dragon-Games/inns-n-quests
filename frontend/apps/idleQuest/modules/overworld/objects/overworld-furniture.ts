@@ -1,4 +1,5 @@
 import { Furniture } from "../../../common";
+import OverworldTransitions from "../overworld-transitions";
 import { Overworld } from "../scenes/overworld";
 
 export default class OverworldFurniture {
@@ -60,7 +61,10 @@ export default class OverworldFurniture {
 
     static onDragEnd = (overworld: Overworld, furniture: OverworldFurniture) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
         overworld.draggingItem = undefined
+        furniture.updateLocationState()
     }
+
+    get objectId() { return this.furniture.furnitureId }
 
     get depth() { return this.sprite.depth }
 
@@ -78,6 +82,8 @@ export default class OverworldFurniture {
     get y() { return this.sprite.y }
 
     set y(y: number) { this.sprite.y = y }
+
+    updateLocationState() { OverworldTransitions.setObjectLocation(this.furniture, [this.x, this.y]) }
 }
 
 const pixelTilesSpritesheetMap = (pxNum: number): [string, number] => {

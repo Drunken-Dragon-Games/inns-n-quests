@@ -3,7 +3,13 @@ import { WellKnownPolicies } from "../../registry-policies"
 import { Inventory } from "../../service-asset-management"
 import { Furniture, FurnitureCollection } from "../models"
 import { FurnitureDB } from "./furniture-db"
-import { InventoryAsset, syncData } from "./sync-fun"
+import { syncData } from "./sync-fun"
+
+interface InventoryFurniture {
+    assetRef: string
+    collection: FurnitureCollection
+    quantity: number
+}
 
 export default class FurnitureFun {
 
@@ -22,8 +28,8 @@ export default class FurnitureFun {
      */
     async syncFurniture(userId: string, assetInventory: Inventory): Promise<Furniture[]> {
         
-        const pickInventoryFurniture = (assetInventory: Inventory): InventoryAsset<FurnitureCollection>[] => {
-            const pxs: InventoryAsset<FurnitureCollection>[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
+        const pickInventoryFurniture = (assetInventory: Inventory): InventoryFurniture[] => {
+            const pxs: InventoryFurniture[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
                 .filter( pxt => 
                     this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Adventurer" &&
                     this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Monster" &&
@@ -37,7 +43,7 @@ export default class FurnitureFun {
         const preSyncedFurniture: Furniture[] = (await FurnitureDB.findAll({ where: { userId } })).map(data => data.dataValues)
         //const preSyncedFurniture: Furniture[] = preSyncedDBFurniture.map(adventurer => adventurer.dataValues)
         const assetInventoryFurniture = pickInventoryFurniture(assetInventory)
-        const { toCreate, toDelete, surviving } = syncData(preSyncedFurniture, assetInventoryFurniture, furniture => furniture.assetRef)
+        const { toCreate, toDelete, surviving } = syncData(preSyncedFurniture, assetInventoryFurniture)
         const createdFurniture = await this.createFurniture(userId, toCreate)
         await this.deleteFurniture(toDelete.map(furniture => furniture.furnitureId))
         return this.addSpritesToFurniture(createdFurniture.concat(surviving))
@@ -49,10 +55,10 @@ export default class FurnitureFun {
      * @param userId 
      * @param furnitureToCreate 
      */
-    async createFurniture(userId: string, furnitureToCreate: InventoryAsset<FurnitureCollection>[]): Promise<Furniture[]> {
+    async createFurniture(userId: string, furnitureToCreate: InventoryFurniture[]): Promise<Furniture[]> {
         if (furnitureToCreate.length == 0) return []
 
-        const furnitureName = (furniture: InventoryAsset<FurnitureCollection>): string => {
+        const furnitureName = (furniture: InventoryFurniture): string => {
             if (furniture.collection == "pixel-tiles") {
                 const name = this.metadataRegistry.pixelTilesMetadata[furniture.assetRef].name
                 const realName = (name.match(/(PixelTile #\d\d?)\s(.+)/) ?? ["", "Metadata Error"])[2] 

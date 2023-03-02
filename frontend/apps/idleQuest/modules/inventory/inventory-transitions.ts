@@ -1,14 +1,10 @@
-import { RefObject, useEffect } from "react"
 import { Adventurer, takenQuestSecondsLeft, takenQuestStatus } from "../../common"
 import { notEmpty } from "../../utils"
 import { NotificationsApi } from "../notifications"
 import { OverworldApi } from "../overworld"
 import { QuestBoardApi } from "../quest-board"
-import { activityId, DraggableItem, DraggingState, DropBox, DropBoxUtility, InventoryItem, inventoryItemId, SelectedQuest } from "./inventory-dsl"
-import {
-    dragItemEnded, inventoryStore, addAdventurerToParty,
-    openActivity, setDraggingState, toggleInventory, removeAdventurerFromParty, closeActivity, registerDropBoxes
-} from "./inventory-state"
+import { activityId, DraggingState, DropBox, DropBoxUtility, InventoryItem, inventoryItemId, SelectedQuest } from "./inventory-dsl"
+import { addAdventurerToParty, closeActivity, dragItemEnded, inventoryStore, openActivity, registerDropBoxes, removeAdventurerFromParty, setDraggingState, toggleInventory } from "./inventory-state"
 import { claimTakenQuest, fetchMintTest, getInProgressQuests, getInventory, takeAvailableQuest } from "./inventory-thunks"
 
 const InventoryTransitions = {

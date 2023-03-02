@@ -68,8 +68,6 @@ export type FurnitureCollection = "pixel-tiles"
 export const furnitureCollections: FurnitureCollection[] = 
     ["pixel-tiles"]
 
-export type IdleQuestsInventory = (Adventurer | Furniture)[]
-
 export type Quest = {
     questId: string,
     name: string,
@@ -163,6 +161,28 @@ export type NotRequirement = {
 
 export type EmptyRequirement = {
     ctype: "empty-requirement",
+}
+
+export type SectorState = {
+    sectorId: string
+    name: string
+    objectLocations: ObjectsLocations
+}
+
+export type ObjectsLocations = Record<string, [number, number]>
+
+export type InventoryRecord<T> = Record<string, T>
+
+export function makeRecord<T>(objects: T[], id: (o: T) => string): InventoryRecord<T> {
+    const record: InventoryRecord<T> = {}
+    objects.forEach(o => record[id(o)] = o)
+    return record
+}
+
+export type IdleQuestsInventory = {
+    adventurers: InventoryRecord<Adventurer> 
+    furniture: InventoryRecord<Furniture>
+    innState?: SectorState
 }
 
 export type BattleReport = {

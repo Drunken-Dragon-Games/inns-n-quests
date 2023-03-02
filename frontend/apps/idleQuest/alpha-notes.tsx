@@ -2,12 +2,15 @@ import { useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { PixelFontFamily } from "./common"
 
-const date = "28 Feb 2023"
+const date = "02 March 2023"
 
 const notes = [
     "'Q' to toggle the quest board.",
     "'B' to toggle the inventory.",
-    "________",
+    "29 Feb________",
+    "* Adventurers and Furniture can now be placed in the Inn.",
+    "* Inn persists.",
+    "28 Feb________",
     "* Drag and drop of adventurers for quests working.",
     "* Map has been disabled for now. It will be reimplemented within the game engine instead of using HTML.",
     "* Hit enter to take or complete quests.",

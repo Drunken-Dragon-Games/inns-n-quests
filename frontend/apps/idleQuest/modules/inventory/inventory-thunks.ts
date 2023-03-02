@@ -1,58 +1,68 @@
-import { compose } from "@reduxjs/toolkit"
-import { axiosCustomInstance } from "../../../../axios/axiosApi"
 import {
-    addVisualDataToTakenQuests,
-    Adventurer, AvailableQuest, Outcome, tagAdventurer, tagRealAPS,
-    tagTakenQuest, TakenQuest, withTokenRefresh
+    Adventurer, AvailableQuest, TakenQuest
 } from "../../common"
-import { tagFurniture } from "../../common/furniture"
+import IdleQuestsApi from "../../idle-quests-api"
 import {
-    addTakenQuest, changeAdventurersInChallenge, claimQuestOutcome, 
-    InventoryThunk, removeTakenQuest, setInventory, setTakenQuests, closeActivity, inventoryStore
+    addTakenQuest, changeAdventurersInChallenge, claimQuestOutcome, closeActivity, inventoryStore, InventoryThunk, removeFromInventory, removeTakenQuest, setInventory, setTakenQuests
 } from "../../state"
 import { NotificationsApi } from "../notifications"
+import { OverworldApi } from "../overworld"
 import { activityId } from "./inventory-dsl"
 
-export const getInventory = (): InventoryThunk => async (dispatch) =>
-    await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/adventurers').get('/quests/api/adventurers')   
-        dispatch(setInventory(response.data.map(compose(tagRealAPS, tagAdventurer, tagFurniture))))
-    })
+export const getInventory = (): InventoryThunk => async (dispatch) => {
+    const response = await IdleQuestsApi.getInventory()
+    if (response.status == "ok") {
+        dispatch(setInventory(response.inventory))
+        OverworldApi.setInitialInnState(response.inventory)
+    }
+    else
+        NotificationsApi.notify(`Error getting inventory: ${response.status}`, "alert")
+}
 
-export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventurer[]): InventoryThunk  => async (dispatch) =>
-    await withTokenRefresh(async () => {
-        const adventurer_ids = adventurers.map(adventurer => adventurer.adventurerId)
-        const response = await axiosCustomInstance('/quests/api/accept').post('/quests/api/accept', {quest_id: quest.questId, adventurer_ids})
-        const takenQuest = tagTakenQuest(addVisualDataToTakenQuests(response.data)) as TakenQuest
+export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventurer[]): InventoryThunk  => async (dispatch) => {
+    const response = await IdleQuestsApi.takeAvailableQuest(quest, adventurers)
+    if (response.status == "ok") {
         NotificationsApi.notify(`Quest taken: ${quest.name}`, "info")
-        dispatch(addTakenQuest(takenQuest))
+        dispatch(addTakenQuest(response.takenQuest))
         dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: true }))
         dispatch(closeActivity())
-    })
+    } else {
+        NotificationsApi.notify(`Error taking quest: ${response.status}`, "alert")
+    }
+}
 
-export const getInProgressQuests = (): InventoryThunk => async (dispatch) =>
-    await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/taken-quests').get('/quests/api/taken-quests')  
-        const takenQuests = response.data.map(compose(addVisualDataToTakenQuests, tagTakenQuest))
-        dispatch(setTakenQuests(takenQuests));
-    })
+export const getInProgressQuests = (): InventoryThunk => async (dispatch) => {
+    const response = await IdleQuestsApi.getInProgressQuests()
+    if (response.status == "ok") {
+        dispatch(setTakenQuests(response.quests))
+    } else {
+        NotificationsApi.notify(`Error getting in progress quests: ${response.status}`, "alert")
+    }
+}
 
-export const claimTakenQuest = (takenQuest: TakenQuest, adventurers: Adventurer[]): InventoryThunk => async (dispatch) =>
-   await withTokenRefresh(async () => {
-        console.log("lol")
-        const response = await axiosCustomInstance('/quests/api/claim').post('/quests/api/claim', {taken_quest_id: takenQuest.takenQuestId })
-        const outcome = response.data as Outcome
-        NotificationsApi.notify(`Quest ${outcome.ctype == "success-outcome" ? "succeeded" : "failed"}: ${takenQuest.quest.name}`, "info")
+export const claimTakenQuest = (takenQuest: TakenQuest, adventurers: Adventurer[]): InventoryThunk => async (dispatch) => {
+    const response = await IdleQuestsApi.claimTakenQuest(takenQuest)
+    if (response.status == "ok") {
+        NotificationsApi.notify(`Quest ${response.outcome.ctype == "success-outcome" ? "succeeded" : "failed"}: ${takenQuest.quest.name}`, "info")
         dispatch(removeTakenQuest(takenQuest))
-        dispatch(claimQuestOutcome({ adventurers, outcome, takenQuest }))
+        dispatch(claimQuestOutcome({ adventurers, outcome: response.outcome, takenQuest }))
         setTimeout(() => {
             if (activityId(inventoryStore.getState().activitySelection) === takenQuest.takenQuestId)
                 dispatch(closeActivity())
         }, 3000)
-    })
+    } else if (response.status == "missing-adventurers") {
+        NotificationsApi.notify(`Missing adventurers on wallet: ${response.missing.length} adventurers.`, "alert")
+        dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: false }))
+        dispatch(removeFromInventory(response.missing))
+        dispatch(removeTakenQuest(takenQuest))
+        dispatch(closeActivity())
+    } else {
+        NotificationsApi.notify(`Error claiming quest: ${response.status}`, "alert")
+    }
+}
 
-export const fetchMintTest = (): InventoryThunk => async (dispatch) => 
-    await withTokenRefresh(async () => {
-        const response = await axiosCustomInstance('/quests/api/grant-test-inventory').get('/quests/api/grant-test-inventory')
-        dispatch(setInventory(response.data.map(compose(tagRealAPS, tagAdventurer, tagFurniture))))
-    })
+export const fetchMintTest = (): InventoryThunk => async (dispatch) => {
+    const response = await IdleQuestsApi.grantTestInventory()
+    if (response.status == "ok") 
+        dispatch(setInventory(response.inventory))
+}

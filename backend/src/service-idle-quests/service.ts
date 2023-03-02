@@ -10,12 +10,13 @@ import { IdleQuestsService } from "./service-spec"
 
 import { 
     AcceptQuestResult, AdventurerCollection, adventurerCollections, AvailableQuest, ClaimQuestResult, FurnitureCollection, GetAvailableQuestsResult, 
-    GetInventoryResult, GetTakenQuestsResult, HealthStatus, Outcome, Quest, TakenQuest 
+    GetInventoryResult, GetTakenQuestsResult, HealthStatus, makeRecord, ObjectsLocations, Outcome, Quest, TakenQuest 
 } from "./models"
 
 import * as runningQuestsDB from "./challenges/taken-quest-db"
 import * as adventurersDB from "./items/adventurer-db"
 import * as furnitureDB from "./items/furniture-db"
+import * as sectorDB from "./overworld/sector-db"
 
 import { MetadataRegistry } from "../registry-metadata"
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
@@ -27,6 +28,7 @@ import Random from "../tools-utils/random"
 import { baseSuccessRate, DurationCalculator, RewardCalculator } from "./challenges/quest-requirement"
 import AdventurerFun from "./items/adventurer-fun"
 import FurnitureFun from "./items/furniture-fun"
+import InnsFun from "./overworld/inns-fun"
 
 export interface IdleQuestsServiceConfig 
     { rewardFactor: number
@@ -97,6 +99,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         adventurersDB.configureSequelizeModel(this.database)
         runningQuestsDB.configureSequelizeModel(this.database)
         furnitureDB.configureSequelizeModel(this.database)
+        sectorDB.configureSequelizeModel(this.database)
         await this.migrator.up()
     }
 
@@ -148,11 +151,14 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         const inventoryResult = await this.assetManagementService.list(userId, { policies: onlyPolicies(this.wellKnownPolicies) })
         if (inventoryResult.status == "unknown-user") 
             return { status: "unknown-user" }
-        const inventory = (await Promise.all([
+        const [ adventurers, furniture ] = (await Promise.all([
             this.adventurerFun.syncAdventurers(userId, inventoryResult.inventory),
             this.furnitureFun.syncFurniture(userId, inventoryResult.inventory),
-        ])).flat()
-        return { status: "ok", inventory }
+        ]))
+        return { status: "ok", inventory: await InnsFun.syncPlayerInn(userId, { 
+            adventurers: makeRecord(adventurers, (a) => a.adventurerId), 
+            furniture: makeRecord(furniture, (f) => f.furnitureId)
+        }) }
     }
 
     /**
@@ -257,7 +263,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async grantTestInventory(userId: string): Promise<GetInventoryResult> {
-        if (process.env.NODE_ENV === "production") return { status: "ok", inventory: [] }
+        if (process.env.NODE_ENV === "production") return { status: "ok", inventory: { adventurers: {}, furniture: {} } }
 
         const pickAdventurer = (collection: AdventurerCollection, amount: number): AssetUnit[] => {
             if (collection == "pixel-tiles") {
@@ -320,5 +326,10 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
         await this.assetManagementService.grantMany(userId, options)
         return await this.getInventory(userId)
+    }
+
+    async setInnState(userId: string, name?: string, objectLocations?: ObjectsLocations): Promise<void> {
+        if (!name && !objectLocations) return
+        await InnsFun.setPlayerInnState(userId, name, objectLocations)
     }
 }

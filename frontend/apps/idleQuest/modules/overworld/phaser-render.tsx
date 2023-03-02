@@ -1,6 +1,7 @@
 import { Game } from "phaser"
 import { useEffect } from "react"
 import OverworldApi from "./overworld-api"
+import OverworldTransitions from "./overworld-transitions"
 
 async function loadPhaser(containerId: string, onReady: () => void): Promise<Game> {
     const Phaser = await import("phaser")

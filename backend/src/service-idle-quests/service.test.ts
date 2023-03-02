@@ -162,7 +162,7 @@ async function getAllAdventurers(userId: string): Promise<Adventurer[]> {
         service.getInventory(userId),
         response =>
             response.status === "ok" ?
-            success(response.inventory) :
+            success(Object.values(response.inventory.adventurers)) :
             failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )

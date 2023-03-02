@@ -1,13 +1,13 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { Adventurer, individualXPReward, Outcome, tagRealAPS, TakenQuest } from "../../common"
+import { Adventurer, IdleQuestsInventory, individualXPReward, InventoryRecord, Outcome, setRealAPS, tagRealAPS, TakenQuest } from "../../common"
 import { Furniture } from "../../common/furniture"
 import { notEmpty } from "../../utils"
 import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility, InventoryAsset, sortAdventurers } from "./inventory-dsl"
 
 export interface InventoryState {
     open: boolean
-    adventurers: Adventurer[]
-    furniture: Furniture[]
+    adventurers: InventoryRecord<Adventurer>
+    furniture: InventoryRecord<Furniture>
     takenQuests: TakenQuest[]
 
     activitySelection?: ActivitySelection
@@ -24,8 +24,8 @@ export type InventoryThunk<ReturnType = void> =
 
 const inventoryInitialState: InventoryState = { 
     open: false,
-    adventurers: [],
-    furniture: [],
+    adventurers: {},
+    furniture: {},
     takenQuests: [],
     selectedParty: [],
 }
@@ -40,11 +40,17 @@ export const inventoryState = createSlice({
             state.open = action.payload ?? !state.open
         },
 
-        setInventory: (state, action: PayloadAction<InventoryAsset[]>) => {
-            const adventurers = action.payload.filter(asset => asset.ctype === "adventurer") as Adventurer[]
-            const furniture = action.payload.filter(asset => asset.ctype === "furniture") as Furniture[]
-            state.adventurers = sortAdventurers(adventurers)
-            state.furniture = furniture
+        setInventory: (state, action: PayloadAction<IdleQuestsInventory>) => {
+            state.adventurers = action.payload.adventurers
+            state.furniture = action.payload.furniture
+        },
+
+        removeFromInventory: (state, action: PayloadAction<string[]>) => {
+            const ids = action.payload
+            ids.forEach(id => {
+                delete state.adventurers[id]
+                delete state.furniture[id]
+            })
         },
 
         setTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
@@ -67,7 +73,8 @@ export const inventoryState = createSlice({
                 state.selectedParty = Array(activity.slots).fill(null)
             else if (activity?.ctype === "taken-quest")
                 state.selectedParty = Array(activity.quest.slots).fill(null).map((_, index) => 
-                    state.adventurers.find(adventurer => adventurer.adventurerId === activity.adventurerIds[index]) ?? null)
+                    state.adventurers[activity.adventurerIds[index]] ?? null)
+                    //state.adventurers.find(adventurer => adventurer.adventurerId === activity.adventurerIds[index]) ?? null)
             else 
                 state.selectedParty = []
         },
@@ -144,6 +151,10 @@ export const inventoryState = createSlice({
         
         /** Adventurer List State */
         changeAdventurersInChallenge: (state, action: PayloadAction<{ adventurers: Adventurer[], inChallenge: boolean }>) => {
+            action.payload.adventurers.forEach(adventurer => {
+                state.adventurers[adventurer.adventurerId].inChallenge = action.payload.inChallenge
+            })
+            /*
             state.adventurers.forEach(adventurer => {
                 action.payload.adventurers.forEach((actionAdventurer) => {
                     if(actionAdventurer.adventurerId == adventurer.adventurerId){
@@ -153,6 +164,7 @@ export const inventoryState = createSlice({
                 })
             })
             state.adventurers = sortAdventurers(state.adventurers)
+            */
         },
 
         /** Quest State */
@@ -163,24 +175,16 @@ export const inventoryState = createSlice({
                 state.activitySelection.claimedAt = new Date().toISOString()
             if (outcome.ctype === "success-outcome" && outcome.reward.apsExperience) {
                 const individualXP = individualXPReward(adventurers, outcome.reward.apsExperience)
-                state.adventurers = state.adventurers.map(adventurer => {
-                    const inParty = action.payload.adventurers.find((actionAdventurer) => 
-                        actionAdventurer.adventurerId == adventurer.adventurerId)
-                    if (inParty) {
-                        return tagRealAPS({
-                            ...inParty, 
-                            inChallenge: false,
-                            athXP: inParty.athXP + individualXP[inParty.adventurerId].athleticism,
-                            intXP: inParty.intXP + individualXP[inParty.adventurerId].intellect,
-                            chaXP: inParty.chaXP + individualXP[inParty.adventurerId].charisma,
-                        }) as Adventurer
-                    } else {
-                        return adventurer
-                    }
+                adventurers.forEach(adventurer => {
+                    adventurer.athXP += individualXP[adventurer.adventurerId].athleticism
+                    adventurer.intXP += individualXP[adventurer.adventurerId].intellect
+                    adventurer.chaXP += individualXP[adventurer.adventurerId].charisma
+                    setRealAPS(adventurer)
+                    adventurer.inChallenge = false
                 })
-                state.selectedParty = state.selectedParty.map(adventurer => {
-                    if (!adventurer) return adventurer
-                    return state.adventurers.find(a => a.adventurerId === adventurer.adventurerId)!
+            } else if (outcome.ctype === "failure-outcome") {
+                adventurers.forEach(adventurer => {
+                    adventurer.inChallenge = false
                 })
             }
         },
@@ -191,6 +195,7 @@ export const {
     /** Inventory */
     toggleInventory,
     setInventory,
+    removeFromInventory,
     setTakenQuests,
     addTakenQuest,
     removeTakenQuest,

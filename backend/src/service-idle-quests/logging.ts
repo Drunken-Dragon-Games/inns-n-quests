@@ -55,4 +55,8 @@ export class IdleQuestsServiceLogging implements IdleQuestsService {
     async grantTestInventory(userId: string): Promise<models.GetInventoryResult> {
         return await this.base.grantTestInventory(userId)
     }
+
+    async setInnState(userId: string, name?: string, objectLocations?: models.ObjectsLocations): Promise<void> {
+        return await this.base.setInnState(userId, name, objectLocations)
+    }
 }

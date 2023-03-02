@@ -1,4 +1,5 @@
 import { Adventurer } from "../../../common";
+import OverworldTransitions from "../overworld-transitions";
 import { Overworld } from "../scenes/overworld";
 
 export default class OverworldAdventurer {
@@ -71,7 +72,10 @@ export default class OverworldAdventurer {
 
     static onDragEnd = (overworld: Overworld, adventurer: OverworldAdventurer) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
         overworld.draggingItem = undefined
+        adventurer.updateLocationState()
     }
+
+    get objectId() { return this.adventurer.adventurerId }
 
     get depth() { return this.sprite.depth }
 
@@ -84,6 +88,8 @@ export default class OverworldAdventurer {
     get y() { return this.sprite.y }
 
     set y(y: number) { this.sprite.y = y }
+
+    updateLocationState() { OverworldTransitions.setObjectLocation(this.adventurer, [this.x, this.y]) }
 }
 
 const pixelTilesSpritesheetMap = (pxNum: number) => {

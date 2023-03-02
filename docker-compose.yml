@@ -6,28 +6,32 @@ services:
     ports:
       - 5000:5000
     env_file:
-      - ./backend/.env-preprod
+      - /home/app/secrets/.env-preprod
     restart: always
-    depends_on:
-      - db
-  db:
-    image: postgres:11
-    container_name: ddu_db
-    restart: always
-    ports:
-      - 5432:5432
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
+    volumes:
+      - /home/app/secrets/ca-certificate.crt:/var/ca-certificate.crt
+      - /home/app/quest-registry.yaml:/var/quest-registry.yaml
+        #depends_on:
+        #- db
+
+        #  db:
+        #    image: postgres:11
+        #    container_name: ddu_db
+        #    restart: always
+        #    ports:
+        #      - 5432:5432
+        #environment:
+        #POSTGRES_DB: postgres
+        #POSTGRES_PASSWORD: postgres
+        #POSTGRES_USER: postgres
 
   frontend:
     image: registry.digitalocean.com/ddu-cr/ddu-frontend:preprod
     container_name: ddu_frontend
-    env_file:
-      - ./frontend/.env
     ports:
       - 3000:3000
+    volumes:
+      - /home/app/public:/app/public
 
   nginx:
     image: nginx:1.13
@@ -35,14 +39,14 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./nginx/conf.d/production.conf:/etc/nginx/conf.d/local.conf
-      - ./certbot/www:/var/www/certbot/:ro
-      - ./certbot/conf/:/etc/nginx/ssl/:ro
+      - /home/app/nginx/conf.d/production.conf:/etc/nginx/conf.d/local.conf  
+      - /home/app/secrets/certbot/www:/var/www/certbot/:ro
+      - /home/app/secrets/certbot/conf/:/etc/nginx/ssl/:ro
     depends_on:
       - backend
 
   certbot:
     image: certbot/certbot:latest
     volumes:
-      - ./certbot/www/:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/letsencrypt/:rw
+      - /home/app/secrets/certbot/www/:/var/www/certbot/:rw
+      - /home/app/secrets/certbot/conf/:/etc/letsencrypt/:rw

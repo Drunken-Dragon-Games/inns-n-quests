@@ -6,7 +6,7 @@ import Random from "../../tools-utils/random"
 import { Adventurer, AdventurerClass, AdventurerCollection, APS, Race, Reward } from "../models"
 import { AdventurerDB } from "./adventurer-db"
 import { individualXPReward } from "./adventurer-equations"
-import { InventoryAsset, syncData } from "./sync-fun"
+import { syncData } from "./sync-fun"
 
 export const apsSum = (aps: APS): number =>
     aps.athleticism + aps.intellect + aps.charisma
@@ -48,15 +48,9 @@ export const generateRandomAPS = (targetAPS: number, rand: Random): APS => {
     else return stats
 }
 
-export type AdventurerCreationData = {
-    assetRef: string,
-    collection: AdventurerCollection,
-    quantity: number
-}
-
-type AssetInventoryAdventurer = {
-    assetRef: string,
-    collection: AdventurerCollection,
+interface InventoryAdventurer {
+    assetRef: string
+    collection: AdventurerCollection
     quantity: number
 }
 
@@ -88,9 +82,9 @@ export default class AdventurerFun {
      * @param adventurersToCreate 
      * @returns 
      */
-    async createAdventurers(userId: string, adventurersToCreate: AdventurerCreationData[]): Promise<Adventurer[]> {
+    async createAdventurers(userId: string, adventurersToCreate: InventoryAdventurer[]): Promise<Adventurer[]> {
 
-        const adventurerClass = (adventurer: AdventurerCreationData): AdventurerClass => {
+        const adventurerClass = (adventurer: InventoryAdventurer): AdventurerClass => {
             switch (adventurer.collection) {
                 case "pixel-tiles": return this.metadataRegistry.pixelTilesGameMetadata[adventurer.assetRef].class.toLowerCase() as AdventurerClass
                 case "grandmaster-adventurers": return this.metadataRegistry.gmasMetadata[adventurer.assetRef].class.toLowerCase() as AdventurerClass
@@ -101,7 +95,7 @@ export default class AdventurerFun {
             }
         }
 
-        const adventurerRace = (adventurer: AdventurerCreationData): Race => {
+        const adventurerRace = (adventurer: InventoryAdventurer): Race => {
             switch (adventurer.collection) {
                 case "pixel-tiles": return this.metadataRegistry.pixelTilesGameMetadata[adventurer.assetRef].race as Race
                 case "grandmaster-adventurers": return this.metadataRegistry.gmasMetadata[adventurer.assetRef].race as Race
@@ -112,7 +106,7 @@ export default class AdventurerFun {
             }
         }
 
-        const adventurerAPS = (adventurer: AdventurerCreationData): APS => {
+        const adventurerAPS = (adventurer: InventoryAdventurer): APS => {
             switch (adventurer.collection) {
                 case "pixel-tiles": switch (this.metadataRegistry.pixelTilesMetadata[adventurer.assetRef].rarity) {
                     case "Common": return { athleticism: 2, intellect: 2, charisma: 2 }
@@ -136,7 +130,7 @@ export default class AdventurerFun {
             }
         }
 
-        const adventurerName = (adventurer: AdventurerCreationData): string => {
+        const adventurerName = (adventurer: InventoryAdventurer): string => {
             if (adventurer.collection == "pixel-tiles") {
                 const name = this.metadataRegistry.pixelTilesMetadata[adventurer.assetRef].name
                 const realName = (name.match(/(PixelTile #\d\d?)\s(.+)/) ?? ["", "Metadata Error"])[2] 
@@ -196,8 +190,8 @@ export default class AdventurerFun {
      */
     async syncAdventurers(userId: string, assetInventory: Inventory): Promise<Adventurer[]> {
         
-        const pickInventoryAdventurers = (assetInventory: Inventory): InventoryAsset<AdventurerCollection>[] => {
-            const pxs: InventoryAsset<AdventurerCollection>[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
+        const pickInventoryAdventurers = (assetInventory: Inventory): InventoryAdventurer[] => {
+            const pxs: InventoryAdventurer[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
                 .filter(pxt => 
                     this.metadataRegistry.pixelTilesMetadata[pxt.unit].type == "Adventurer" ||
                     this.metadataRegistry.pixelTilesMetadata[pxt.unit].type == "Monster" ||
@@ -206,16 +200,16 @@ export default class AdventurerFun {
                     this.metadataRegistry.pixelTilesMetadata[pxt.unit].name == "PixelTile #45 Recruit"
                 )
                 .map(pxt => ({ assetRef: pxt.unit, collection: "pixel-tiles", quantity: parseInt(pxt.quantity) }))
-            const gmas: InventoryAsset<AdventurerCollection>[] = (assetInventory[this.wellKnownPolicies.grandMasterAdventurers.policyId] ?? [])
+            const gmas: InventoryAdventurer[] = (assetInventory[this.wellKnownPolicies.grandMasterAdventurers.policyId] ?? [])
                 .map(gma => ({ assetRef: gma.unit, collection: "grandmaster-adventurers", quantity: parseInt(gma.quantity) }))
-            const aots: InventoryAsset<AdventurerCollection>[] = (assetInventory[this.wellKnownPolicies.adventurersOfThiolden.policyId] ?? [])
+            const aots: InventoryAdventurer[] = (assetInventory[this.wellKnownPolicies.adventurersOfThiolden.policyId] ?? [])
                 .map(aot => ({ assetRef: aot.unit, collection: "adventurers-of-thiolden", quantity: parseInt(aot.quantity) }))
             return [...pxs, ...gmas, ...aots]
         }
 
         const preSyncedAdventurers: Adventurer[] = (await AdventurerDB.findAll({ where: { userId } })).map(adventurer => adventurer.dataValues)
         const assetInventoryAdventurers = pickInventoryAdventurers(assetInventory)
-        const { toCreate, toDelete, surviving } = syncData(preSyncedAdventurers, assetInventoryAdventurers, adventurer => adventurer.adventurerId)
+        const { toCreate, toDelete, surviving } = syncData(preSyncedAdventurers, assetInventoryAdventurers)
         const createdAdventurers = await this.createAdventurers(userId, toCreate)
         await this.deleteAdventurers(toDelete.map(adventurer => adventurer.adventurerId))
         return this.addSpritesToAdventurers(createdAdventurers.concat(surviving))

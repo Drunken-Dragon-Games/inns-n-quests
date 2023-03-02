@@ -4,7 +4,7 @@ import styled from "styled-components"
 import _ from "underscore"
 import { takenQuestStatus, takenQuestTimeLeft } from "../../../../common"
 import { notEmpty, PixelArtImage, useDrag, vmax } from "../../../../utils"
-import { InventoryItem, InventoryPageName, isDraggableItem, mapQuestScroll } from "../../inventory-dsl"
+import { InventoryItem, InventoryPageName, isDraggableItem, mapQuestScroll, sortAdventurers } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
 import InventoryTransitions from "../../inventory-transitions"
 import { AdventurerSprite, FurnitureSprite } from "../sprites"
@@ -214,14 +214,14 @@ type InventoryPageState = {
 
 const useInventoryPageState = (page: InventoryPageName): InventoryPageState => {
     const subState = useSelector((state: InventoryState) => ({ 
-        adventurers: state.adventurers, 
-        furniture: state.furniture, 
+        adventurers: Object.values(state.adventurers), 
+        furniture: Object.values(state.furniture), 
         takenQuests: state.takenQuests,
         selection: state.activitySelection
     }), shallowEqual)
     const itemSlots = useMemo(() => {
         const items = 
-            page == "adventurers" ? subState.adventurers :
+            page == "adventurers" ? sortAdventurers(subState.adventurers) :
             page == "furniture" ? subState.furniture
             : subState.takenQuests
         const slotsTail = items.length % 4

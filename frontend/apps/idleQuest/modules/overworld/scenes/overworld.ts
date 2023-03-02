@@ -3,6 +3,8 @@ import { Adventurer, Furniture } from "../../../common"
 import { innBuildingRenderMatrix } from "../assets"
 import OverworldAdventurer from "../objects/overworld-adventurer"
 import OverworldFurniture from "../objects/overworld-furniture"
+import { overworldState, overworldStore } from "../overworld-state"
+import OverworldTransitions from "../overworld-transitions"
 
 type KInputs = {
     W: Phaser.Input.Keyboard.Key,
@@ -31,6 +33,7 @@ export class Overworld extends Phaser.Scene {
         this.game.events.on("dragging-item-from-inventory", (item: Adventurer | Furniture, position?: [number, number]) => {
             const camera = this.cameras.main
             if (!position) {
+                this.draggingItem?.updateLocationState()
                 this.draggingItem = undefined
                 return 
             }
@@ -62,6 +65,22 @@ export class Overworld extends Phaser.Scene {
                 this.draggingItem = undefined
             }
         })
+    }
+
+    setInitialInnState() {
+        const state = overworldStore.getState()
+        const innConfiguration = state.innConfiguration
+        if (innConfiguration) {
+            this.adventurers.forEach(adventurer => adventurer.destroy())
+            this.furniture.forEach(furniture => furniture.destroy())
+            Object.values(innConfiguration).forEach(({ obj, location }) => {
+                if (obj.ctype === "adventurer")
+                    this.adventurers.push(OverworldAdventurer.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))
+                else if (obj.ctype === "furniture")
+                    this.furniture.push(OverworldFurniture.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))
+            })
+        }
+        OverworldTransitions.trackOverworldState()
     }
 
     preload() {
@@ -101,6 +120,8 @@ export class Overworld extends Phaser.Scene {
         this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
             this.cameras.main.setZoom(deltaY > 0 ? 1 : 2)
         })
+
+        this.setInitialInnState()
     }
 
     update(time: number, delta: number): void {

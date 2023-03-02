@@ -26,4 +26,6 @@ export interface IdleQuestsService {
     claimQuestResult(userId: string, takenQuestId: string): Promise<models.ClaimQuestResult>
 
     grantTestInventory(userId: string): Promise<models.GetInventoryResult>
+
+    setInnState(userId: string, name?: string, objectLocations?: models.ObjectsLocations): Promise<void>
 }
