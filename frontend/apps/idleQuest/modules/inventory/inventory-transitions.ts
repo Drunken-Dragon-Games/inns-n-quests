@@ -27,9 +27,9 @@ const InventoryTransitions = {
             if (dropBoxesState?.utility == "overworld-drop") {
                 const hovering = dropBoxesState?.dropBoxes[0]?.hovering
                 const droped = dropBoxesState?.dropBoxes[0]?.dropped
-                if (droped?.ctype === "adventurer" && !draggingState)
+                if ((droped?.ctype === "adventurer" || droped?.ctype == "furniture") && !draggingState)
                     OverworldApi.draggingItemIntoOverworld(droped)
-                else if (hovering?.ctype === "adventurer" && draggingState?.position)
+                else if ((hovering?.ctype === "adventurer" || hovering?.ctype == "furniture") && draggingState?.position)
                     OverworldApi.draggingItemIntoOverworld(hovering, draggingState.position)
                 else if (!hovering && !droped)
                     OverworldApi.cancelDraggingItemIntoOverworld()

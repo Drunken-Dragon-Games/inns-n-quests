@@ -28,6 +28,37 @@ export class Preloader extends Phaser.Scene {
             frameWidth: 96,
             frameHeight: 96,
         })
+
+        this.load.spritesheet("pixel-tiles-bar-barrels", "maps/furniture/pixel-tiles/bar-barrels.png", {
+            frameWidth: 96,
+            frameHeight: 64,
+        }) 
+
+        this.load.spritesheet("pixel-tiles-bars", "maps/furniture/pixel-tiles/bars.png", {
+            frameWidth: 96,
+            frameHeight: 48,
+        }) 
+
+        this.load.spritesheet("pixel-tiles-hearths", "maps/furniture/pixel-tiles/hearths.png", {
+            frameWidth: 96,
+            frameHeight: 128,
+        }) 
+
+        this.load.spritesheet("pixel-tiles-rug", "maps/furniture/pixel-tiles/rug.png", {
+            frameWidth: 96,
+            frameHeight: 48,
+        }) 
+
+        this.load.spritesheet("pixel-tiles-simple-furniture", "maps/furniture/pixel-tiles/simple-furniture.png", {
+            frameWidth: 32,
+            frameHeight: 64,
+        }) 
+
+        this.load.spritesheet("pixel-tiles-tables", "maps/furniture/pixel-tiles/tables.png", {
+            frameWidth: 64,
+            frameHeight: 48,
+        }) 
+
         this.load.image("inn-bg", "maps/inn-bg-2.png")
     }
 
