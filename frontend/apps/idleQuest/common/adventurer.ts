@@ -64,11 +64,9 @@ export const tagRealAPS = (adventurer: any): any => {
     return ({...adventurer, realATH: athleticism, realINT: intellect, realCHA: charisma })
 }
 
-export const setRealAPS = (adventurer: Adventurer): void => {
+export const setRealAPS = (adventurer: Adventurer): Adventurer => {
     const { athleticism, intellect, charisma } = realAPS(adventurer as Adventurer)
-    adventurer.realATH = athleticism
-    adventurer.realINT = intellect
-    adventurer.realCHA = charisma
+    return {...adventurer, realATH: athleticism, realINT: intellect, realCHA: charisma }
 }
 
 export const realAPS = (adventurer: Adventurer): APS => ({

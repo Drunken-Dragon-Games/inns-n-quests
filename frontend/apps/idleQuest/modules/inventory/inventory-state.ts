@@ -176,15 +176,19 @@ export const inventoryState = createSlice({
             if (outcome.ctype === "success-outcome" && outcome.reward.apsExperience) {
                 const individualXP = individualXPReward(adventurers, outcome.reward.apsExperience)
                 adventurers.forEach(adventurer => {
-                    adventurer.athXP += individualXP[adventurer.adventurerId].athleticism
-                    adventurer.intXP += individualXP[adventurer.adventurerId].intellect
-                    adventurer.chaXP += individualXP[adventurer.adventurerId].charisma
-                    setRealAPS(adventurer)
-                    adventurer.inChallenge = false
+                    const newAdventurer = 
+                        setRealAPS({
+                            ...adventurer,
+                            inChallenge: false,
+                            athXP: adventurer.athXP + individualXP[adventurer.adventurerId].athleticism,
+                            intXP: adventurer.intXP + individualXP[adventurer.adventurerId].intellect,
+                            chaXP: adventurer.chaXP + individualXP[adventurer.adventurerId].charisma,
+                        })
+                    state.adventurers[adventurer.adventurerId] = newAdventurer
                 })
             } else if (outcome.ctype === "failure-outcome") {
                 adventurers.forEach(adventurer => {
-                    adventurer.inChallenge = false
+                    state.adventurers[adventurer.adventurerId].inChallenge = false
                 })
             }
         },

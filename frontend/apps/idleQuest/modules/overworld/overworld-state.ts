@@ -27,8 +27,11 @@ export const overworldState = createSlice({
             const obj = action.payload.obj
             const location = action.payload.location
             const innConfiguration = state.innConfiguration
-            if (!innConfiguration) return
-            if (obj.ctype == "adventurer") {
+            if (!innConfiguration) {
+                if (obj.ctype == "adventurer") state.innConfiguration = { [obj.adventurerId]: { obj, location } }
+                else if (obj.ctype == "furniture") state.innConfiguration = { [obj.furnitureId]: { obj, location } }
+            }
+            else if (obj.ctype == "adventurer") {
                 if (!innConfiguration[obj.adventurerId]) innConfiguration[obj.adventurerId] = { obj, location }
                 else innConfiguration[obj.adventurerId].location = location
             } else if (obj.ctype == "furniture") {
