@@ -20,6 +20,14 @@ export class Preloader extends Phaser.Scene {
             frameWidth: 32,
             frameHeight: 64,
         })
+        this.load.spritesheet("adventurers-of-thiolden-front", "maps/adventurers/adventurers-of-thiolden-front.png", {
+            frameWidth: 64,
+            frameHeight: 80,
+        })
+        this.load.spritesheet("adventurers-of-thiolden-big-front", "maps/adventurers/adventurers-of-thiolden-big-front.png", {
+            frameWidth: 96,
+            frameHeight: 96,
+        })
         this.load.image("inn-bg", "maps/inn-bg-2.png")
     }
 

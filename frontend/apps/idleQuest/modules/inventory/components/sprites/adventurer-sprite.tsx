@@ -71,7 +71,7 @@ const aotMeasures = (adventurer: Adventurer): [number, [number,number], number] 
         return [6.8, [0,-1.7], -7.5] 
     else if (advName == 'mey')
         return [6.2, [0,-0.5], -7] 
-    else if (advName == "arun'na" )
+    else if (advName == "arunna" )
         return [6.3, [0,-0.4], -7] 
     else if (advName == 'ferra')
         return [5.8, [0,-0.8], -7] 
@@ -125,7 +125,7 @@ const aotMeasures = (adventurer: Adventurer): [number, [number,number], number] 
     // Nurmyr & Jagermyr
     else if (advName == 'bodica')
         return [6.2, [0,1.2], -7.2] 
-    else if (advName == "ude'namvar")
+    else if (advName == "udenamvar")
         return [6.2, [0,0.2], -7.5] 
     else if (advName == 'rando')
         return [6.3, [0,-0.6], -7] 

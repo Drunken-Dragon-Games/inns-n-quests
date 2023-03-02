@@ -43,3 +43,5 @@ yarn-error.log*
 
 */access.log
 */error.log
+
+playground.js
