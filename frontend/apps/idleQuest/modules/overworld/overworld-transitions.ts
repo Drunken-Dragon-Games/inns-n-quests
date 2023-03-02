@@ -10,7 +10,7 @@ const trackInnSaves = () => {
     setInterval(() => {
         const state = overworldStore.getState()
         const innState = { name: state.name, innConfiguration: state.innConfiguration }
-        if (_.isEqual(innState, lastInnState)) return
+        if (!innState.innConfiguration || _.isEqual(innState, lastInnState)) return
         lastInnState = innState
         const innStateToSave = { name: innState.name, objectLocations: ({} as Record<string, [number, number]>) }
         Object.keys(innState.innConfiguration!).forEach(objectId => {

@@ -1,7 +1,7 @@
 import axios, { Method, AxiosResponse, AxiosError } from "axios"
 import { compose } from "underscore"
 import { v4 } from "uuid"
-import { addVisualQuestData, Adventurer, AvailableQuest, Furniture, IdleQuestsInventory, Outcome, tagAdventurer, tagAvailableQuest, tagFurniture, tagRealAPS, tagTakenQuest, TakenQuest } from "./common"
+import { addVisualDataToTakenQuests, addVisualQuestData, Adventurer, AvailableQuest, Furniture, IdleQuestsInventory, Outcome, tagAdventurer, tagAvailableQuest, tagFurniture, tagRealAPS, tagTakenQuest, TakenQuest } from "./common"
 import { InventoryAsset } from "./modules/inventory/inventory-dsl"
 import urljoin from "url-join"
 
@@ -27,7 +27,7 @@ const IdleQuestsApi = {
         const adventurer_ids = adventurers.map(adventurer => adventurer.adventurerId)
         const response = await IdleQuestsRequest("post", "/accept", {quest_id: quest.questId, adventurer_ids})
         if (response.data.status == "ok") 
-            return { status: "ok", takenQuest: tagTakenQuest(response.data.takenQuest) as TakenQuest }
+            return { status: "ok", takenQuest: compose(addVisualDataToTakenQuests, tagTakenQuest)(response.data.takenQuest) as TakenQuest }
         else
             return response.data
     },
@@ -35,7 +35,7 @@ const IdleQuestsApi = {
     getInProgressQuests: async (): Promise<GetTakenQuestsResult> => {
         const response = await IdleQuestsRequest("get", "/taken-quests")
         if (response.data.status == "ok") 
-            return { status: "ok", quests: response.data.quests.map(tagTakenQuest) as TakenQuest[] }
+            return { status: "ok", quests: response.data.quests.map(compose(addVisualDataToTakenQuests, tagTakenQuest)) as TakenQuest[] }
         else
             return response.data
     },
@@ -82,7 +82,7 @@ export default IdleQuestsApi
 async function IdleQuestsRequest<ReqData = any, ResData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
     const traceId = v4()
     const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "quests/api")
-    if (baseURL.includes("acceptance.") || baseURL.includes("testnet.") || baseURL.includes("localhost")) 
+    //if (baseURL.includes("acceptance.") || baseURL.includes("testnet.") || baseURL.includes("localhost")) 
         console.log(`${method}: ${endpoint}\ntrace-id: ${traceId}`)
     return await withTokenRefresh(() => axios.request<ResData, AxiosResponse<ResData>, ReqData>({
         method,
