@@ -1,5 +1,5 @@
 import { QuestRegistry } from "../../registry-quests";
-import { empty } from "../../service-idle-quests/challenges/quest-requirement";
+import { empty } from "../../service-idle-quests/game-vm";
 
 export const testQuestRegistry: QuestRegistry = {
     "quest-1": {

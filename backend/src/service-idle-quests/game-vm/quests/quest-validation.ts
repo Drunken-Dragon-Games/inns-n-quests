@@ -1,5 +1,6 @@
-import { QuestRequirement, AndRequirement, OrRequirement, BonusRequirement, APSRequirement, ClassRequirement, 
-         adventurerClasses, SuccessBonusRequirement, Reward, AssetReward, APS, Quest, AdventurerClass, EmptyRequirement } from "../models"
+import { AdventurerClasses } from "../character-entity"
+import { Reward, AssetReward, Quest } from "./quest"
+import { QuestRequirement, AndRequirement, OrRequirement, BonusRequirement, APSRequirement, ClassRequirement, SuccessBonusRequirement, EmptyRequirement } from "./quests-requirements"
 
 export function isQuestRequirement(obj: any): obj is QuestRequirement {
 
@@ -20,7 +21,7 @@ export function isQuestRequirement(obj: any): obj is QuestRequirement {
     }
 
     function isClassRequirement(obj: any): obj is ClassRequirement {
-        return obj.ctype === "class-requirement" && typeof obj.class === "string" && adventurerClasses.includes(obj.class)
+        return obj.ctype === "class-requirement" && typeof obj.class === "string" && AdventurerClasses.includes(obj.class)
     }
 
     function isSuccessBonus(obj: any): obj is SuccessBonusRequirement {
@@ -49,14 +50,6 @@ export function isAssetReward(obj: any): obj is AssetReward {
     return typeof obj.policyId === "string" && typeof obj.unit === "string" && typeof obj.quantity === "string"  
 }
 
-export function isAPS(obj: any): obj is APS {
-    return typeof obj.athleticism === "number" && typeof obj.intellect === "number" && typeof obj.charisma === "number"
-}
-
 export function isQuest(obj: any): obj is Quest {
     return typeof obj.questId === "string" && typeof obj.name === "string" && typeof obj.location === "string" && typeof obj.description === "string" && isQuestRequirement(obj.requirements)
-}
-
-export function isClass(obj: any): obj is AdventurerClass {
-    return typeof obj === "string" && adventurerClasses.includes(obj as AdventurerClass)
 }

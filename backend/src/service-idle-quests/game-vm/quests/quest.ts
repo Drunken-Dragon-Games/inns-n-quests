@@ -1,21 +1,41 @@
-import { apsSum } from "../items/adventurer-fun";
-import { APS, Reward } from "../models";
+import { WellKnownPolicies } from "../../../registry-policies";
+import { APS, apsSum } from "../character-entity";
+import { QuestRequirement } from "./quests-requirements";
+
+export type Quest = {
+    questId: string,
+    name: string,
+    location: string,
+    description: string,
+    requirements: QuestRequirement,
+    timeModifier?: { operator: "multiply" | "add" | "replace", modifier: number },
+    rewardModifier?: { operator: "multiply" | "add" | "replace", modifier: Reward },
+    slots?: number,
+}
+
+export type Reward = { 
+    currencies?: AssetReward[], 
+    apsExperience?: APS 
+}
+
+export type AssetReward = { policyId: string, assetRef: string, quantity: string }
 
 export class AssetRewards {
 
-    constructor(private readonly policies: { dragonSilver: string }) {}
+    constructor(private readonly wellKnownPolicies: WellKnownPolicies) {}
 
     dragonSilver (quantity: string): Reward {
-        return { currencies: [{ policyId: this.policies.dragonSilver, unit: "DragonSilver", quantity }] }
+        return { currencies: [{ policyId: this.wellKnownPolicies.dragonSilver.policyId, assetRef: "DragonSilver", quantity }] }
     }
 }
 
-export const apsReward = (aps: APS): Reward => ({ apsExperience: aps, })
+export const apsReward = (aps: APS): Reward => 
+    ({ apsExperience: aps, })
 
 export const mergeRewards = (a: Reward, b: Reward): Reward => {
     const preCurrencies = [...(a.currencies ?? [])]
     const currencies = [...(b.currencies ?? [])].reduce((acc, curr) => {
-        const existing = acc.find(c => c.policyId === curr.policyId && c.unit === curr.unit)
+        const existing = acc.find(c => c.policyId === curr.policyId && c.assetRef === curr.assetRef)
         if (existing) {
             existing.quantity = (BigInt(existing.quantity) + BigInt(curr.quantity)).toString()
         } else {

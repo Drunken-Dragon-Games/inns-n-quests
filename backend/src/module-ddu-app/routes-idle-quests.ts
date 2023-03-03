@@ -2,7 +2,7 @@
 import { Response, Router } from "express"
 import { Request } from "express-jwt"
 import { IdleQuestsService } from "../service-idle-quests"
-import { isObjectLocations } from "../service-idle-quests/overworld/sector-validation";
+import { isObjectLocations } from "../service-idle-quests/game-vm/sectors/sector-validation";
 
 export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
     const router = Router();    

@@ -1,11 +1,9 @@
-import { Quest } from "./service-idle-quests/models";
-import { isQuest } from "./service-idle-quests/challenges/quest-validation";
 import Random from "./tools-utils/random";
 import axios from "axios"
 import YAML from "yaml"
 import { readFile } from "fs/promises";
 import { URL } from "url";
-import { parseEasyJsonSyntax } from "./service-idle-quests/challenges/quest-requirement";
+import { isQuest, parseEasyJsonSyntax, Quest } from "./service-idle-quests/game-vm";
 
 export type QuestRegistry = { [questId: string]: Quest }
 

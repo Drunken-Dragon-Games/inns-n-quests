@@ -1,7 +1,7 @@
 import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
 import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
-import { Adventurer, TakenQuest } from "../service-idle-quests"
+import { Character, TakenQuest } from "../service-idle-quests"
 import { config } from "../tools-utils"
 import { QueryInterface, Sequelize } from "sequelize"
 
@@ -121,7 +121,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         }
     }
 
-    async notifyQuestClaimed(quest: TakenQuest, adventurers: Adventurer[]): Promise<void> {
+    async notifyQuestClaimed(quest: TakenQuest, adventurers: Character[]): Promise<void> {
         const servers = Object.values(this.configCache)
         const player = await this.identityService.resolveUser({ ctype: "user-id", userId: quest.userId })
         if (player.status !== "ok" || !quest.outcome) return
@@ -130,10 +130,10 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         //const outcome = quest.outcome.ctype === "success-outcome" ? quest.outcome.reward.currencies[0]!.unit : quest.outcome!.reason
         const embed = new EmbedBuilder()
             .setColor(0xF5CD1B)
-            .setTitle(`${player.info.nickname} just ${success} ${quest.quest.name}!`)
-            .setDescription(quest.quest.description)
+            .setTitle(`${player.info.nickname} just ${success} ${quest.availableQuest.name}!`)
+            .setDescription(quest.availableQuest.description)
             .addFields(
-                { name: "Adventurers", value: adventurers.map(a => `${a.name}(${a.athleticism}/${a.intellect}/${a.charisma})`).join(", ") },
+                { name: "Adventurers", value: adventurers.map(a => `${a.name}`).join(", ") },
             )
 
         for (const server of servers) {
@@ -157,7 +157,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         const embed = new EmbedBuilder()
             .setColor(0xFF0000)
             .setTitle(`Leaderboard changed!`)
-            .setDescription("The most successful Adventurer Inn Keepers of Thiolden. \n (These are notifications from the Idle Quests @Council of Elronidas alpha tests, if you want to join please ask an @Inkeepers on how to join the council!)")
+            .setDescription("The most successful Character Inn Keepers of Thiolden. \n (These are notifications from the Idle Quests @Council of Elronidas alpha tests, if you want to join please ask an @Inkeepers on how to join the council!)")
             .addFields(embedFields)
 
         for (const server of servers) {

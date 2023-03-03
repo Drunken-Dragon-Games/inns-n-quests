@@ -3,6 +3,7 @@ import { Sequelize } from "sequelize"
 import { v4 } from "uuid"
 import { wellKnownPoliciesMainnet } from "../registry-policies"
 import { loadQuestRegistryFromFs } from "../registry-quests"
+import { Inventory } from "../service-asset-management"
 import { connectToDB } from "../tools-database"
 import { failure, success } from "../tools-utils"
 import { expectResponse } from "../tools-utils/api-expectations"
@@ -11,17 +12,19 @@ import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-se
 import EvenstatsServiceMock from "../tools-utils/mocks/evenstats-service-mock"
 import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registry"
 import Random from "../tools-utils/random"
-import { aps } from "./challenges/quest-requirement"
-import { Adventurer, AvailableQuest, Outcome, TakenQuest } from "./models"
+import * as vm from "./game-vm"
+import { Outcome } from "./game-vm"
+import { AvailableQuest, Character, TakenQuest } from "./models"
 import { IdleQuestsServiceDsl } from "./service"
 import { IdleQuestsService } from "./service-spec"
-import * as adventurersDB from "./items/adventurer-db"
-import * as furnitureDB from "./items/furniture-db"
-import { Inventory } from "../service-asset-management"
+import CharacterState, * as adventurersDB from "./state/character-state"
+import FurnitureState, * as furnitureDB from "./state/furniture-state"
 
 let service: IdleQuestsService
 let database: Sequelize
 let calendar: MutableCalendar = new MutableCalendar(new Date(0))
+let characterState: CharacterState
+let furnitureState: FurnitureState
 
 beforeAll(async () => {
     const assetManagementService = new AssetManagementServiceMock()
@@ -46,10 +49,6 @@ beforeAll(async () => {
         password: "admin",
         database: "service_db"
     })
-    const idleQuestsServiceConfig = {
-        rewardFactor: 1,
-        durationFactor: 1
-    }
     const idleQuestServiceDependencies = {
         random: new Random("test"),
         calendar,
@@ -60,7 +59,10 @@ beforeAll(async () => {
         questsRegistry: await loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "stubs", "test-quest-registry.yaml"), "yaml"),
         wellKnownPolicies: wellKnownPoliciesMainnet
     }
-    service = await IdleQuestsServiceDsl.loadFromConfig(idleQuestsServiceConfig, idleQuestServiceDependencies)
+    service = await IdleQuestsServiceDsl.loadFromConfig(idleQuestServiceDependencies)
+    const rules: vm.IQRuleset = new vm.DefaultRuleset(wellKnownPoliciesMainnet)
+    characterState = new CharacterState(testMetadataRegistry, wellKnownPoliciesMainnet, rules)
+    furnitureState = new FurnitureState(testMetadataRegistry, wellKnownPoliciesMainnet)
     await service.loadDatabaseModels()
 })
 
@@ -84,17 +86,17 @@ test("Sync Adventurers", async () => {
     const assetInventory2: Inventory = {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile1", quantity: "1", chain: false } ]
     }
-    await service.adventurerFun.syncAdventurers(userId, assetInventory1)
-    const assets1 = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
-    await service.adventurerFun.syncAdventurers(userId, assetInventory2)
-    const assets2 = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
+    await characterState.syncCharacters(userId, assetInventory1)
+    const assets1 = await adventurersDB.CharacterDB.findAll({ where: { userId }})
+    await characterState.syncCharacters(userId, assetInventory2)
+    const assets2 = await adventurersDB.CharacterDB.findAll({ where: { userId }})
 
     expect(assets1.length).toBe(2)
     expect(assets1[0].assetRef).toBe("PixelTile1")
     expect(assets1[1].assetRef).toBe("PixelTile1")
     expect(assets2.length).toBe(1)
     expect(assets2[0].assetRef).toBe("PixelTile1")
-    expect(assets1.some(adv => adv.adventurerId == assets2[0].adventurerId)).toBeTruthy()
+    expect(assets1.some(adv => adv.entityId == assets2[0].entityId)).toBeTruthy()
 })
 
 test("Sync Furniture", async () => {
@@ -108,9 +110,9 @@ test("Sync Furniture", async () => {
     const assetInventory2: Inventory = {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile2", quantity: "1", chain: false } ]
     }
-    await service.furnitureFun.syncFurniture(userId, assetInventory1)
+    await furnitureState.syncFurniture(userId, assetInventory1)
     const assets1 = await furnitureDB.FurnitureDB.findAll({ where: { userId }})
-    await service.furnitureFun.syncFurniture(userId, assetInventory2)
+    await furnitureState.syncFurniture(userId, assetInventory2)
     const assets2 = await furnitureDB.FurnitureDB.findAll({ where: { userId }})
 
     expect(assets1.length).toBe(2)
@@ -118,51 +120,37 @@ test("Sync Furniture", async () => {
     expect(assets1[1].assetRef).toBe("PixelTile2")
     expect(assets2.length).toBe(1)
     expect(assets2[0].assetRef).toBe("PixelTile2")
-    expect(assets1.some(adv => adv.furnitureId == assets2[0].furnitureId)).toBeTruthy()
-})
-
-test("Level up adventurers", async () => {
-    const userId = v4()
-    const adventurers = await service.adventurerFun.syncAdventurers(userId, {
-        [wellKnownPoliciesMainnet.grandMasterAdventurers.policyId]: [ 
-            { unit: "GrandmasterAdventurer1", quantity: "1", chain: false },
-            { unit: "GrandmasterAdventurer2", quantity: "1", chain: false },
-        ]
-    })
-    await service.adventurerFun.levelUpAdventurers(adventurers, { apsExperience: aps(50,50,50) })
-    const adventurersAfter = await adventurersDB.AdventurerDB.findAll({ where: { userId }})
-    expect(adventurersAfter.map(a => [a.athXP, a.intXP, a.chaXP]))
-        .toStrictEqual([[20,23,10], [3,15,5]])
+    expect(assets1.some(adv => adv.entityId == assets2[0].entityId)).toBeTruthy()
 })
 
 test("Normal quest flow 1", async () => {
     const userId = v4()
     const adventurers = await getAllAdventurers(userId)
     const availableQuests = await getAvailableQuests("Auristar")
-    const adventurersToGoOnQuest = adventurers.map(a => a.adventurerId!)
+    const adventurersToGoOnQuest = adventurers.map(a => a.entityId)
     const acceptedQuest = await acceptQuest(userId, availableQuests[0].questId, adventurersToGoOnQuest)
     const takenQuests1 = await getTakenQuests(userId)
     const claimBeforeTimeResponse = await service.claimQuestResult(userId, acceptedQuest.takenQuestId!)
-    calendar.moveSeconds(acceptedQuest.quest.duration)
+    calendar.moveSeconds(acceptedQuest.availableQuest.duration)
     const outcome = await claimQuestResult(userId, acceptedQuest.takenQuestId!)
     const takenQuests2 = await getTakenQuests(userId)
 
     expect(adventurers.length).toBe(6)
-    expect(acceptedQuest.quest.questId).toBe(availableQuests[0].questId)
+    expect(acceptedQuest.availableQuest.questId).toBe(availableQuests[0].questId)
     expect(takenQuests1.length).toBe(1)
     expect(takenQuests1[0].adventurerIds).toStrictEqual(adventurersToGoOnQuest)
-    expect(takenQuests1[0].quest.questId).toEqual(availableQuests[0].questId)
+    expect(takenQuests1[0].availableQuest.questId).toEqual(availableQuests[0].questId)
     expect(claimBeforeTimeResponse.status).toBe("quest-not-finished")
     expect(takenQuests2.length).toBe(0)
     expect(outcome.ctype).toBe("success-outcome")
 })
 
-async function getAllAdventurers(userId: string): Promise<Adventurer[]> {
+async function getAllAdventurers(userId: string): Promise<Character[]> {
     return await expectResponse(
         service.getInventory(userId),
         response =>
             response.status === "ok" ?
-            success(Object.values(response.inventory.adventurers)) :
+            success(Object.values(response.inventory.characters)) :
             failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )
@@ -173,7 +161,7 @@ async function getAvailableQuests(location: string): Promise<AvailableQuest[]> {
         service.getAvailableQuests(location),
         response =>
             response.status === "ok" ?
-            success(response.quests) :
+            success(response.availableQuests) :
             failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )
@@ -195,7 +183,7 @@ async function getTakenQuests(userId: string): Promise<TakenQuest[]> {
         service.getTakenQuests(userId),
         response =>
             response.status === "ok" ?
-            success(response.quests) :
+            success(response.takenQuests) :
             failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )

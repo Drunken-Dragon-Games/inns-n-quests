@@ -1,35 +1,8 @@
-import { Adventurer, APS } from "../models";
 
-export const individualXPReward = (adventurers: Adventurer[], reward: APS): [Adventurer, APS][] => {
-    const amount = adventurers.length
-    const baseAthXP = Math.ceil(reward.athleticism / amount) 
-    const baseIntXP = Math.ceil(reward.intellect / amount)
-    const baseChaXP = Math.ceil(reward.charisma / amount)
-    return adventurers.map(adventurer => {
-        const athXP = Math.ceil(adventurer.athleticism * baseAthXP / 10)
-        const intXP = Math.ceil(adventurer.intellect * baseIntXP / 10)
-        const chaXP = Math.ceil(adventurer.charisma * baseChaXP / 10)
-        return [adventurer, {athleticism: athXP, intellect: intXP, charisma: chaXP}]
-    })
-}
-
-export const realAPS = (adventurer: Adventurer): APS => ({
-    athleticism: levelByXP(adventurer.athXP) - 1 + adventurer.athleticism,
-    intellect: levelByXP(adventurer.intXP) - 1 + adventurer.intellect,
-    charisma: levelByXP(adventurer.chaXP) - 1 + adventurer.charisma,
-})
-
-export const totalXPRequiredForNextLevel = (level: number) =>
-    10 * ((level * (level + 1) * (2 * level + 1) / 6) + (10 * (level * (level + 1) / 2)))
-
-export function levelByXP(xp: number): number {
-    if (xp === 0) return 1
-    const roots = cubicSolver(10/3, 55, 155/3, -xp);
-    const realRoots = roots.map(root => {
-        return root.real;
-    })
-    const root = realRoots.find(root => root >= 0)
-    return Math.floor(Math.round(root! * 10) / 10 + 1);
+export function makeRecord<T>(items: T[], key: (item: T) => string): Record<string, T> {
+    const record: Record<string, T> = {}
+    items.forEach(item => record[key(item)] = item)
+    return record
 }
 
 export function cubicSolver(a: number, b: number, c: number, d: number) {

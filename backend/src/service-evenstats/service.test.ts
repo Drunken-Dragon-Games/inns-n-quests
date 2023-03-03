@@ -42,7 +42,7 @@ afterEach(async () => {
 const mockTakenQuest = (userId: string): TakenQuest => ({
     takenQuestId: "taken-quest1",
     userId,
-    quest: {
+    availableQuest: {
         questId: "quest1",
         name: "Quest",
         location: "Auristar",
