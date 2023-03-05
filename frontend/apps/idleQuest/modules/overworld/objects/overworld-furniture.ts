@@ -38,7 +38,7 @@ export default class OverworldFurniture {
 
     destroy() {
         this.sprite.destroy()
-        this.overworld.furniture = this.overworld.furniture.filter(a => a.furniture.furnitureId !== this.furniture.furnitureId)
+        this.overworld.furniture = this.overworld.furniture.filter(a => a.furniture.entityId !== this.furniture.entityId)
     }
 
     static onPointerUp = (overworld: Overworld, furniture: OverworldFurniture) => (pointer: Phaser.Input.Pointer) => {
@@ -64,7 +64,7 @@ export default class OverworldFurniture {
         furniture.updateLocationState()
     }
 
-    get objectId() { return this.furniture.furnitureId }
+    get objectId() { return this.furniture.entityId }
 
     get depth() { return this.sprite.depth }
 

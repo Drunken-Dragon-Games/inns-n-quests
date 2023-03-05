@@ -1,7 +1,7 @@
 import Phaser from "phaser"
-import { Adventurer, Furniture } from "../../../common"
+import { Character, Furniture } from "../../../common"
 import { innBuildingRenderMatrix } from "../assets"
-import OverworldAdventurer from "../objects/overworld-adventurer"
+import OverworldCharacter from "../objects/overworld-character"
 import OverworldFurniture from "../objects/overworld-furniture"
 import { overworldState, overworldStore } from "../overworld-state"
 import OverworldTransitions from "../overworld-transitions"
@@ -18,9 +18,9 @@ export class Overworld extends Phaser.Scene {
     
     /** Objects */
     walls!: Phaser.GameObjects.Sprite[]
-    adventurers: OverworldAdventurer[] = []
+    adventurers: OverworldCharacter[] = []
     furniture: OverworldFurniture[]= []
-    draggingItem?: OverworldAdventurer | OverworldFurniture
+    draggingItem?: OverworldCharacter | OverworldFurniture
     
     /** Controls */
     inputs!: KInputs
@@ -30,7 +30,7 @@ export class Overworld extends Phaser.Scene {
     constructor() { super("Overworld") }
 
     subscribeDraggingItemFromInventory() {
-        this.game.events.on("dragging-item-from-inventory", (item: Adventurer | Furniture, position?: [number, number]) => {
+        this.game.events.on("dragging-item-from-inventory", (item: Character | Furniture, position?: [number, number]) => {
             const camera = this.cameras.main
             if (!position) {
                 this.draggingItem?.updateLocationState()
@@ -46,13 +46,13 @@ export class Overworld extends Phaser.Scene {
                 this.draggingItem.y = overworldPosition.y
             }
             else {
-                if (item.ctype === "adventurer")
+                if (item.ctype === "character")
                     this.draggingItem = 
-                        this.adventurers.filter(adventurer => adventurer.adventurer.adventurerId === item.adventurerId)[0] ||
-                        OverworldAdventurer.init(item, this, overworldPosition)
+                        this.adventurers.filter(adventurer => adventurer.adventurer.entityId === item.entityId)[0] ||
+                        OverworldCharacter.init(item, this, overworldPosition)
                 else if (item.ctype === "furniture")
                     this.draggingItem = 
-                        this.furniture.filter(furniture => furniture.furniture.furnitureId === item.furnitureId)[0] ||
+                        this.furniture.filter(furniture => furniture.furniture.entityId === item.entityId)[0] ||
                         OverworldFurniture.init(item, this, overworldPosition)
             }
         })
@@ -75,7 +75,7 @@ export class Overworld extends Phaser.Scene {
             this.furniture.forEach(furniture => furniture.destroy())
             Object.values(innConfiguration).forEach(({ obj, location }) => {
                 if (obj.ctype === "adventurer")
-                    this.adventurers.push(OverworldAdventurer.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))
+                    this.adventurers.push(OverworldCharacter.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))
                 else if (obj.ctype === "furniture")
                     this.furniture.push(OverworldFurniture.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))
             })

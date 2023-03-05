@@ -50,10 +50,10 @@ export default class SectorState {
             throw new Error("Invalid inn state, object locations are not valid")
         const toDelete = Object.keys(parsedLocations).filter(objectId => !inventory.characters[objectId] && !inventory.furniture[objectId])
         if (toDelete.length == 0) 
-            return { ...inventory, innState: { ...innState, objectLocations: parsedLocations } }
+            return { ...inventory, innState: { ...innState, objectLocations: parsedLocations, ctype: "sector" } }
         const newLocations = toDelete.reduce((acc, objectId) => { delete acc[objectId]; return acc }, parsedLocations)
         await SectorDB.update({ objectLocations: JSON.stringify(newLocations) }, { where: { sectorId: userId }, transaction })
-        return { ...inventory, innState: { ...innState, objectLocations: newLocations } }
+        return { ...inventory, innState: { ...innState, objectLocations: newLocations, ctype: "sector" } }
     }
 
     static async setPlayerInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, transaction?: Transaction): Promise<void> {

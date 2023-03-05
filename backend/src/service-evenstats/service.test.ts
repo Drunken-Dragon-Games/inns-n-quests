@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize"
 import { TakenQuest } from "../service-idle-quests"
+import { noReward } from "../service-idle-quests/game-vm"
 import { connectToDB } from "../tools-database"
 import { EvenstatsEvent, EvenstatsSubscriber, QuestSucceededEntry } from "./models"
 import { EvenstatsServiceDsl } from "./service"
@@ -40,6 +41,7 @@ afterEach(async () => {
 })
 
 const mockTakenQuest = (userId: string): TakenQuest => ({
+    ctype: "taken-quest",
     takenQuestId: "taken-quest1",
     userId,
     availableQuest: {
@@ -48,14 +50,14 @@ const mockTakenQuest = (userId: string): TakenQuest => ({
         location: "Auristar",
         description: "Description",
         requirements: { ctype: "empty-requirement" },
-        reward: {},
+        reward: noReward,
         duration: 1,
         slots: 1,
     },
     adventurerIds: [],
     claimedAt: new Date(),
     createdAt: new Date(),
-    outcome: { ctype: "success-outcome", reward: {}  },
+    outcome: { ctype: "success-outcome", party: [], reward: noReward  },
 })
 
 const mockClaimedQuestEvent = (userId: string): EvenstatsEvent => ({

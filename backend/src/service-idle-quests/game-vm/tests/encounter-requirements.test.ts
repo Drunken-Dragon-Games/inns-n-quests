@@ -1,6 +1,6 @@
 import path from "path"
 import { loadQuestRegistryFromFs } from "../../../registry-quests"
-import { all, and, apsRequirement, bonus, fighter, oneOf, or, paladin, parseEasyJsonSyntax, successBonus, warlock } from "./quests-requirements"
+import { all, and, apsRequirement, bonus, fighter, oneOf, or, paladin, parseEasyJsonSyntax, successBonus, warlock } from "../encounter/encounter-requirements"
 
 test("Quest registry loading yaml", async () => {
     expect(async () => loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "..", "stubs", "test-quest-registry.yaml"), "yaml")).toBeTruthy()

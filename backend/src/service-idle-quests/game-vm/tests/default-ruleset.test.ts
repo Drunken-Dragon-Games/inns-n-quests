@@ -1,9 +1,8 @@
-import { wellKnownPoliciesMainnet } from '../../../registry-policies'
 import Random from '../../../tools-utils/random'
-import { CharacterEntityRuleSetProperties } from '../character-entity'
-import DefaultRuleset from './default-ruleset'
+import { CharacterEntityRuleSetProperties } from '../iq-ruleset'
+import DefaultRuleset from '../default-ruleset/default-ruleset'
 
-const rules = new DefaultRuleset(wellKnownPoliciesMainnet)
+const rules = new DefaultRuleset()//wellKnownPoliciesMainnet)
 const rand = new Random("test")
 const characterProperties = new CharacterEntityRuleSetProperties(rules.character, rand)
 

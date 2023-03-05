@@ -5,10 +5,10 @@ import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
 import { HealthStatus } from "../tools-utils"
-import { IdleQuestsServiceLogging } from "./logging"
-import { AcceptQuestResult, ClaimQuestResult, GetAvailableQuestsResult, GetInventoryResult, GetTakenQuestsResult, IdleQuestsService } from "./service-spec"
+import { AcceptEncounterResult, AcceptQuestResult, ClaimEncounterResult, ClaimQuestResult, GetActiveEncountersResult, GetAvailableEncountersResult, GetAvailableQuestsResult, GetInventoryResult, GetTakenQuestsResult, IdleQuestsService } from "./service-spec"
 
 import * as charactersStateModule from "./state/character-state"
+import { ActiveEncounterDBInfo, ActiveEncounterState } from './state/encounter-state'
 import * as furnitureStateModule from "./state/furniture-state"
 import * as sectorStateModule from "./state/sector-state"
 import * as takenQuestsStateModule from "./state/taken-quest-state"
@@ -25,7 +25,9 @@ import { AssetManagementService, AssetUnit } from "../service-asset-management"
 import { EvenstatsService } from "../service-evenstats"
 import { Calendar } from "../tools-utils/calendar"
 import Random from "../tools-utils/random"
+
 import * as vm from "./game-vm"
+import { testCharacters, testEncounter } from "./game-vm"
 
 export interface IdleQuestServiceDependencies 
     { random: Random
@@ -46,6 +48,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     private readonly furnitureState: FurnitureState
     private readonly takenQuestState: TakenQuestState
 
+    private readonly activeEncounterState: ActiveEncounterState
+
     constructor (
         private readonly random: Random,
         private readonly calendar: Calendar,
@@ -58,10 +62,12 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
-        this.rules = new vm.DefaultRuleset(wellKnownPolicies)
+        this.rules = new vm.DefaultRuleset()//wellKnownPolicies)
         this.characterState = new CharacterState(metadataRegistry, wellKnownPolicies, this.rules)
         this.furnitureState = new FurnitureState(metadataRegistry, wellKnownPolicies)
         this.takenQuestState = new TakenQuestState(questsRegistry, this.rules)
+
+        this.activeEncounterState = new ActiveEncounterState()
     }
 
     static async loadFromEnv(dependencies: IdleQuestServiceDependencies): Promise<IdleQuestsService> {
@@ -70,7 +76,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     static async loadFromConfig(dependencies: IdleQuestServiceDependencies): Promise<IdleQuestsService> {
-        const service = new IdleQuestsServiceLogging(new IdleQuestsServiceDsl(
+        const service = new IdleQuestsServiceDsl(
             dependencies.random,
             dependencies.calendar,
             dependencies.database,
@@ -79,7 +85,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             dependencies.questsRegistry,
             dependencies.metadataRegistry,
             dependencies.wellKnownPolicies,
-        ))
+        )
         await service.loadDatabaseModels()
         return service
     }
@@ -89,6 +95,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         takenQuestsStateModule.configureSequelizeModel(this.database)
         furnitureStateModule.configureSequelizeModel(this.database)
         sectorStateModule.configureSequelizeModel(this.database)
+        ActiveEncounterDBInfo.configureSequelizeModel(this.database)
         await this.migrator.up()
     }
 
@@ -122,11 +129,95 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             this.characterState.syncCharacters(userId, inventoryResult.inventory),
             this.furnitureState.syncFurniture(userId, inventoryResult.inventory),
         ]))
-        return { status: "ok", inventory: await SectorState.syncPlayerInn(userId, { 
-            characters: vm.makeRecord(characters, c => c.entityId), 
-            furniture: vm.makeRecord(furniture, f => f.entityId)
-        }) }
+        return { 
+            status: "ok", 
+            inventory: await SectorState.syncPlayerInn(userId, {
+                characters: vm.makeRecord(testCharacters(userId), c => c.entityId),
+                furniture: vm.makeRecord(furniture, f => f.entityId)
+            }) 
+        }
     }
+
+
+
+    async getAvailableEncounters(location: string): Promise<GetAvailableEncountersResult> {
+        return { status: "ok", availableEncounters: [testEncounter] }
+    }
+
+    async acceptEncounter(userId: string, encounterId: string, adventurerIds: string[]): Promise<AcceptEncounterResult> {
+        /*
+        if (this.questsRegistry[questId] === undefined) 
+            return { status: "unknown-quest" }
+        */
+        const transaction = await this.database.transaction()
+        const adventurers = await this.characterState.setInActivity(userId, adventurerIds, transaction)
+        if (adventurers.length != adventurerIds.length) {
+            await transaction.rollback()
+            return { status: "invalid-adventurers" }
+        }
+        const activeEncounter = await this.activeEncounterState.create(userId, encounterId, adventurers.map(a => a.entityId), this.calendar.now(), transaction)
+        await transaction.commit()
+        return { status: "ok", activeEncounter }
+    }
+
+    async getActiveEncounters(userId: string): Promise<GetActiveEncountersResult> {
+        const activeEncounters = await this.activeEncounterState.unclaimedActiveEncounters(userId)
+        return { status: "ok", activeEncounters }
+    }
+
+    async claimEncounter(userId: string, activeEncounterId: string): Promise<ClaimEncounterResult> {
+        const activeEncounter = await this.activeEncounterState.userActiveEncounter(userId, activeEncounterId)
+        // Check encounter exists
+        if (!activeEncounter) 
+            return { status: "unknown-encounter" }
+        // Check encounter is not already claimed
+        if (activeEncounter.claimedAt)
+            return { status: "already-claimed" }
+        const duration = activeEncounter.encounter.duration
+        const now = this.calendar.now()
+        // Check encounter is finished
+        if (activeEncounter.createdAt.getTime() + duration > now.getTime()) 
+            return { status: "not-finished" }
+        const transaction = await this.database.transaction()
+        const adventurers = await this.characterState.unsetInChallenge(userId, activeEncounter.party, transaction)
+        const missing = adventurers.map(a => a.entityId).filter(item => activeEncounter.party.indexOf(item) < 0)
+        // Check all adventurers are still in the inventory
+        if (missing.length > 0) {
+            await transaction.rollback()
+            return { status: "missing-adventurers", missing }
+        }
+       const strategy = activeEncounter.encounter.strategies[activeEncounter.chosenStrategyIndex]
+       const outcome = this.rules.quest.encounterOutcome(strategy, adventurers, this.random)
+        // If success, level up adventurers
+        if (outcome.ctype == "success-outcome") 
+            await this.characterState.setXP(this.rules.character.levelUp(adventurers, outcome.reward, vm.newAPS([1,1,1])), transaction)
+        // Check if any adventurer died
+        // TODO
+        // Claimencounter 
+        await this.activeEncounterState.claim(activeEncounter.activeEncounterId, now, outcome, transaction)
+        await transaction.commit()
+        // Publish event to eventstats
+        /*
+        this.evenstatsService.publish({
+            ctype: "claimed-encounter-event",
+            quest: { ...takenQuest, claimedAt: now, outcome },
+            adventurers, 
+        })
+        */
+        return { status: "ok", outcome }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Returns a list of quests that are available for the given location.
@@ -136,8 +227,12 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @returns 
      */
     async getAvailableQuests(location: string, quantity: number = 20): Promise<GetAvailableQuestsResult> {
-        return { status: "ok", availableQuests: pickRandomQuestsByLocation(location, quantity, this.questsRegistry, this.random)
-            .map(vm.newAvailableQuest(this.rules)) }
+        return { 
+            status: "ok", 
+            availableQuests: pickRandomQuestsByLocation(location, quantity, this.questsRegistry, this.random)
+                .map(vm.newAvailableQuest(this.rules)) 
+                .map(q => ({ ...q, ctype: "available-quest" }))
+        }
     }
 
     /**
@@ -203,12 +298,15 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             await transaction.rollback()
             return { status: "missing-adventurers", missing }
         }
-        const successRate = this.rules.quest.successRate(takenQuest.availableQuest.requirements, adventurers)
+        /*
+        const successRate = this.rules.quest.satisfied(takenQuest.availableQuest.requirements, adventurers)
         const success = this.random.randomNumberBetween(1, 100) <= Math.floor(successRate * 100)
         // Outcome data
-        const outcome: vm.Outcome = success 
+        const outcome: vm.QuestOutcome = success 
             ? { ctype: "success-outcome", reward: this.rules.quest.reward(takenQuest.availableQuest.requirements) } 
             : { ctype: "failure-outcome", hpLoss: [] }
+        */
+       const outcome = this.rules.quest.outcome(takenQuest, adventurers, this.random)
         // If success, level up adventurers
         if (outcome.ctype == "success-outcome") 
             await this.characterState.setXP(this.rules.character.levelUp(adventurers, outcome.reward, vm.newAPS([1,1,1])), transaction)

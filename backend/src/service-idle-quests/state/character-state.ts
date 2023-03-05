@@ -101,7 +101,7 @@ export default class CharacterState {
      */
     async find(entityIds: string[], userId?: string, transaction?: Transaction): Promise<Character[]> {
         const characters = await CharacterDB.findAll({ where: { entityId: entityIds, userId }, transaction })
-        return characters.map(makeCharacter(this.metadataRegistry))
+        return characters.map(makeCharacter(this.metadataRegistry, this.rules))
     }
 
     /**
@@ -117,7 +117,7 @@ export default class CharacterState {
         const created: CharacterDB[] = await CharacterDB.bulkCreate(toCreate.flatMap(character =>
             [...Array(character.quantity)].map(() => makeCharacterDB(this.metadataRegistry, this.rules)(userId, character))
         ), { transaction })
-        return created.map(makeCharacter(this.metadataRegistry))
+        return created.map(makeCharacter(this.metadataRegistry, this.rules))
     }
 
     /**
@@ -158,12 +158,12 @@ export default class CharacterState {
             return [...pxs, ...gmas, ...aots]
         }
 
-        const preSyncedAdventurers: ICharacterDB[] = (await CharacterDB.findAll({ where: { userId } })).map(makeCharacter(this.metadataRegistry))
+        const preSyncedAdventurers: ICharacterDB[] = (await CharacterDB.findAll({ where: { userId } })).map(makeCharacter(this.metadataRegistry, this.rules))
         const assetInventoryAdventurers = pickInventoryCharacters()
         const { toCreate, toDelete, surviving } = syncData(preSyncedAdventurers, assetInventoryAdventurers)
         const createdAdventurers = await this.bulkCreate(userId, toCreate, transaction)
         await this.bulkDelete(toDelete.map(c => c.entityId), transaction)
-        return createdAdventurers.concat(surviving.map(makeCharacter(this.metadataRegistry)))
+        return createdAdventurers.concat(surviving.map(makeCharacter(this.metadataRegistry, this.rules)))
     }
 
     /**
@@ -181,7 +181,7 @@ export default class CharacterState {
         if (entityIds.length == 0) return []
         const [_, adventurers] = await CharacterDB.update({ inActivity: true }, 
             { where: { userId, entityId: entityIds, inActivity: false, hp: { [Op.not]: 0 } }, returning: true, transaction })
-        return adventurers.map(makeCharacter(this.metadataRegistry))
+        return adventurers.map(makeCharacter(this.metadataRegistry, this.rules))
     }
 
     /**
@@ -198,7 +198,7 @@ export default class CharacterState {
         if (entityIds.length == 0) return []
         const [_, adventurers] = await CharacterDB.update({ inActivity: false }, 
             { where: { userId, entityId: entityIds }, returning: true, transaction })
-        return adventurers.map(makeCharacter(this.metadataRegistry))
+        return adventurers.map(makeCharacter(this.metadataRegistry, this.rules))
     }
 
     async setXP(characters: { entityId: string, xpAPS: vm.APS }[], transaction?: Transaction): Promise<void> {
@@ -212,9 +212,10 @@ export default class CharacterState {
  * @param characterDB 
  * @returns 
  */
-const makeCharacter = (metadataRegistry: MetadataRegistry) => (characterDB: ICharacterDB): Character => {
+const makeCharacter = (metadataRegistry: MetadataRegistry, rules: IQRuleset) => (characterDB: ICharacterDB): Character => {
     const collection = vm.characterCollection(characterDB.assetRef)
     return {
+        ctype: "character",
         entityId: characterDB.entityId,
         entityType: "character-entity",
         userId: characterDB.userId,
@@ -224,6 +225,7 @@ const makeCharacter = (metadataRegistry: MetadataRegistry) => (characterDB: ICha
         hp: characterDB.hp,
         ivAPS: characterDB.ivAPS,
         xpAPS: characterDB.xpAPS,
+        evAPS: rules.character.evAPS(characterDB.ivAPS, characterDB.xpAPS),
         sprite: vm.characterSprite(metadataRegistry)(characterDB.assetRef, collection),
         race: vm.characterRace(metadataRegistry)(characterDB.assetRef, collection),
         characterType: vm.characterType(metadataRegistry)(characterDB.assetRef, collection),

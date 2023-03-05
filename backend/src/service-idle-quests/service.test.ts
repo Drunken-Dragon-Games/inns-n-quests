@@ -13,7 +13,7 @@ import EvenstatsServiceMock from "../tools-utils/mocks/evenstats-service-mock"
 import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registry"
 import Random from "../tools-utils/random"
 import * as vm from "./game-vm"
-import { Outcome } from "./game-vm"
+import { QuestOutcome } from "./game-vm"
 import { AvailableQuest, Character, TakenQuest } from "./models"
 import { IdleQuestsServiceDsl } from "./service"
 import { IdleQuestsService } from "./service-spec"
@@ -60,7 +60,7 @@ beforeAll(async () => {
         wellKnownPolicies: wellKnownPoliciesMainnet
     }
     service = await IdleQuestsServiceDsl.loadFromConfig(idleQuestServiceDependencies)
-    const rules: vm.IQRuleset = new vm.DefaultRuleset(wellKnownPoliciesMainnet)
+    const rules: vm.IQRuleset = new vm.DefaultRuleset()//wellKnownPoliciesMainnet)
     characterState = new CharacterState(testMetadataRegistry, wellKnownPoliciesMainnet, rules)
     furnitureState = new FurnitureState(testMetadataRegistry, wellKnownPoliciesMainnet)
     await service.loadDatabaseModels()
@@ -189,7 +189,7 @@ async function getTakenQuests(userId: string): Promise<TakenQuest[]> {
     )
 }
 
-async function claimQuestResult(userId: string, takenQuestId: string): Promise<Outcome> {
+async function claimQuestResult(userId: string, takenQuestId: string): Promise<QuestOutcome> {
     return await expectResponse(
         service.claimQuestResult(userId, takenQuestId),
         response =>

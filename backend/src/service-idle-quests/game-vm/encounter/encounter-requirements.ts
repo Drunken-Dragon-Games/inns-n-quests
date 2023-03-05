@@ -1,9 +1,25 @@
-import { AdventurerClass, isAdventurerClass } from "../character-entity"
-import { isQuestRequirement } from "./quest-validation"
+import { AdventurerClass, APS, isAdventurerClass } from "../character-entity"
+import { isQuestRequirement } from "./encounter-validation"
 
 export type QuestRequirement 
     = APSRequirement | ClassRequirement | OrRequirement | AndRequirement 
-    | BonusRequirement | SuccessBonusRequirement | NotRequirement | EmptyRequirement
+    | BonusRequirement | SuccessBonusRequirement | EmptyRequirement
+
+/**
+ * Percentages at which a party satisfies a requirement.
+ */
+export type SatisfiedRequirements = {
+    aps: APS
+    class: number
+}
+
+/**
+ * Picked requirements for a party.
+ */
+export type TargetRequirements = {
+    aps: APS
+    class: string[]
+}
 
 export type OrRequirement = {
     ctype: "or-requirement",
@@ -43,6 +59,7 @@ export type ClassRequirement = {
     class: string,
 }
 
+/** Removed for now */
 export type NotRequirement = {
     ctype: "not-requirement",
     continuation: QuestRequirement,
@@ -71,8 +88,10 @@ export const all = (requirements: QuestRequirement[]): QuestRequirement =>
 export const oneOf = (requirements: QuestRequirement[]): QuestRequirement =>
     requirements.reduce((left, right) => or(left, right), empty)
 
+/*
 export const none = (requirements: QuestRequirement[]): QuestRequirement =>
     not(all(requirements))
+*/
 
 export const successBonus = (bonus: number, left: QuestRequirement, right: QuestRequirement): SuccessBonusRequirement => ({
     ctype: "success-bonus-requirement",
@@ -223,8 +242,10 @@ export function parseEasyJsonSyntax(json: any): QuestRequirement {
             else if (key == "oneOf")
                 throw new Error("Invalid oneOf requirement: " + JSON.stringify(json))
 
+            /*
             else if (key == "not")
                 return not(parseEasyJsonSyntax(value))
+            */
             else if (key == "classes" && Array.isArray(value) && value.every(isAdventurerClass))
                 return all(value.map(classReq))
             else 

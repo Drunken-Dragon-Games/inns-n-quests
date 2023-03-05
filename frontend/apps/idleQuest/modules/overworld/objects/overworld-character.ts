@@ -1,29 +1,29 @@
-import { Adventurer } from "../../../common";
+import { Character } from "../../../common";
 import OverworldTransitions from "../overworld-transitions";
 import { Overworld } from "../scenes/overworld";
 
-export default class OverworldAdventurer {
+export default class OverworldCharacter {
 
     public lastClickTime: number = 0
 
     constructor(
-        public readonly adventurer: Adventurer,
+        public readonly adventurer: Character,
         public readonly sprite: Phaser.Physics.Arcade.Sprite,
         private readonly overworld: Overworld
     ){}
 
-    static init (adventurer: Adventurer, overworld: Overworld, position: Phaser.Math.Vector2): OverworldAdventurer {
-        const sprite = OverworldAdventurer.createSprite(adventurer, overworld, position)
-        const owAdventurer = new OverworldAdventurer(adventurer, sprite, overworld)
+    static init (adventurer: Character, overworld: Overworld, position: Phaser.Math.Vector2): OverworldCharacter {
+        const sprite = OverworldCharacter.createSprite(adventurer, overworld, position)
+        const owAdventurer = new OverworldCharacter(adventurer, sprite, overworld)
         overworld.adventurers.push(owAdventurer)
-        sprite.on("pointerup", OverworldAdventurer.onPointerUp(overworld, owAdventurer))
-        sprite.on("dragstart", OverworldAdventurer.onDragStart(overworld, owAdventurer))
-        sprite.on("drag", OverworldAdventurer.onDrag(overworld, owAdventurer))
-        sprite.on("dragend", OverworldAdventurer.onDragEnd(overworld, owAdventurer))
+        sprite.on("pointerup", OverworldCharacter.onPointerUp(overworld, owAdventurer))
+        sprite.on("dragstart", OverworldCharacter.onDragStart(overworld, owAdventurer))
+        sprite.on("drag", OverworldCharacter.onDrag(overworld, owAdventurer))
+        sprite.on("dragend", OverworldCharacter.onDragEnd(overworld, owAdventurer))
         return owAdventurer
     }
 
-    static createSprite (adventurer: Adventurer, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite {
+    static createSprite (adventurer: Character, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite {
         const i = parseInt(adventurer.assetRef.match(/(\d+)/)![0])
         // Later check adventurer collection and load from right sprite sheet
         const sheet = 
@@ -49,10 +49,10 @@ export default class OverworldAdventurer {
 
     destroy() {
         this.sprite.destroy()
-        this.overworld.adventurers = this.overworld.adventurers.filter(a => a.adventurer.adventurerId !== this.adventurer.adventurerId)
+        this.overworld.adventurers = this.overworld.adventurers.filter(a => a.adventurer.entityId !== this.adventurer.entityId)
     }
 
-    static onPointerUp = (overworld: Overworld, adventurer: OverworldAdventurer) => (pointer: Phaser.Input.Pointer) => {
+    static onPointerUp = (overworld: Overworld, adventurer: OverworldCharacter) => (pointer: Phaser.Input.Pointer) => {
         const now = Date.now()
         const isDoubleClick = now - adventurer.lastClickTime < 300
         adventurer.lastClickTime = now
@@ -61,21 +61,21 @@ export default class OverworldAdventurer {
         if (pointer.getDuration() < 300) return adventurer.sprite.flipX = !adventurer.sprite.flipX
     }
 
-    static onDragStart = (overworld: Overworld, adventurer: OverworldAdventurer) => () => {
+    static onDragStart = (overworld: Overworld, adventurer: OverworldCharacter) => () => {
         overworld.draggingItem = adventurer
     }
 
-    static onDrag = (overworld: Overworld, adventurer: OverworldAdventurer) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+    static onDrag = (overworld: Overworld, adventurer: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
         adventurer.sprite.x = dragX
         adventurer.sprite.y = dragY
     }
 
-    static onDragEnd = (overworld: Overworld, adventurer: OverworldAdventurer) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+    static onDragEnd = (overworld: Overworld, adventurer: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
         overworld.draggingItem = undefined
         adventurer.updateLocationState()
     }
 
-    get objectId() { return this.adventurer.adventurerId }
+    get objectId() { return this.adventurer.entityId }
 
     get depth() { return this.sprite.depth }
 

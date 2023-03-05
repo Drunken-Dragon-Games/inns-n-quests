@@ -1,4 +1,4 @@
-import { APS } from "./character-entity"
+import { APS } from "../common"
 import { SkillName } from "./encounter"
 
 export type IQEntity<EType extends IQEntityType> = {

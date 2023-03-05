@@ -1,4 +1,4 @@
-import { Adventurer, Furniture, IdleQuestsInventory } from "../../common"
+import { Character, Furniture, IdleQuestsInventory } from "../../common"
 import { SectorConfiguration } from "./overworld-dsl"
 import OverworldTransitions from "./overworld-transitions"
 
@@ -8,7 +8,7 @@ const OverworldApi = {
 
     setEventEmitter: (eventEmitter: Phaser.Events.EventEmitter) => events = eventEmitter,
 
-    draggingItemIntoOverworld: (item: Adventurer | Furniture, position?: [number, number]) => {
+    draggingItemIntoOverworld: (item: Character | Furniture, position?: [number, number]) => {
         events.emit("dragging-item-from-inventory", item, position)
     },
 
@@ -21,7 +21,7 @@ const OverworldApi = {
         if (innState) {
             const innConfiguration: SectorConfiguration = {}
             Object.keys(innState.objectLocations).forEach(objectId => {
-                const obj: Adventurer | Furniture = inventory.adventurers[objectId] || inventory.furniture[objectId]
+                const obj: Character | Furniture = inventory.adventurers[objectId] || inventory.furniture[objectId]
                 innConfiguration[objectId] = { obj, location: innState.objectLocations[objectId] }
             })
             OverworldTransitions.setInitialInnState(innState.name, innConfiguration)

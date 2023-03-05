@@ -1,6 +1,7 @@
 import { AdventurerClasses } from "../character-entity"
-import { Reward, AssetReward, Quest } from "./quest"
-import { QuestRequirement, AndRequirement, OrRequirement, BonusRequirement, APSRequirement, ClassRequirement, SuccessBonusRequirement, EmptyRequirement } from "./quests-requirements"
+import { Quest } from "./encounter"
+import { QuestRequirement, AndRequirement, OrRequirement, BonusRequirement, APSRequirement, ClassRequirement, SuccessBonusRequirement, EmptyRequirement } from "./encounter-requirements"
+import { Reward } from "./reward"
 
 export function isQuestRequirement(obj: any): obj is QuestRequirement {
 
@@ -46,9 +47,11 @@ export function isReward(obj: any): obj is Reward {
     return true
 }
 
+/*
 export function isAssetReward(obj: any): obj is AssetReward {
     return typeof obj.policyId === "string" && typeof obj.unit === "string" && typeof obj.quantity === "string"  
 }
+*/
 
 export function isQuest(obj: any): obj is Quest {
     return typeof obj.questId === "string" && typeof obj.name === "string" && typeof obj.location === "string" && typeof obj.description === "string" && isQuestRequirement(obj.requirements)

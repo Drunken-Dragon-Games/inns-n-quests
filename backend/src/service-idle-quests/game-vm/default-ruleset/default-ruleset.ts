@@ -1,9 +1,8 @@
 import { WellKnownPolicies } from "../../../registry-policies"
-import { CharacterEntityRuleset } from "../character-entity"
-import { IQRuleset } from "../iq-ruleset"
-import { AssetRewards, QuestRuleset } from "../quests"
-import DefaultCharacterRuleset from "./character-entity"
-import DefaultQuestRuleset from "./quest"
+import { CharacterEntityRuleset, IQRuleset, QuestRuleset } from "../iq-ruleset"
+//import { ItemRewards } from "../encounter"
+import DefaultCharacterRuleset from "./default-ruleset-character-entity"
+import DefaultQuestRuleset from "./default-ruleset-quest"
 
 export default class DefaultRuleset implements IQRuleset {
 
@@ -12,10 +11,9 @@ export default class DefaultRuleset implements IQRuleset {
     readonly quest: QuestRuleset
 
     constructor(
-        wellKnownPolicies: WellKnownPolicies,
+        //assetRewards: ItemRewards,
     ){
-        const assetRewards = new AssetRewards(wellKnownPolicies)
-        this.character = DefaultCharacterRuleset
-        this.quest = new DefaultQuestRuleset(DefaultCharacterRuleset, assetRewards)
+        this.character = new DefaultCharacterRuleset()
+        this.quest = new DefaultQuestRuleset(this.character)//, assetRewards)
     }
 }

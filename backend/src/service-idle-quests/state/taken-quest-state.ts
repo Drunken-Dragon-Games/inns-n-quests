@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
 import { QuestRegistry } from "../../registry-quests"
-import { IQRuleset, newAvailableQuest, Outcome } from "../game-vm"
+import { IQRuleset, newAvailableQuest, QuestOutcome } from "../game-vm"
 import { TakenQuest } from "../models"
 
 export interface ITakenQuestDB {
@@ -10,7 +10,7 @@ export interface ITakenQuestDB {
     adventurerIds: string[]
     claimedAt?: Date
     createdAt: Date
-    outcome? : Outcome
+    outcome? : QuestOutcome
 }
 
 export class TakenQuestDB extends Model implements ITakenQuestDB {
@@ -20,7 +20,7 @@ export class TakenQuestDB extends Model implements ITakenQuestDB {
     declare adventurerIds: string[]
     declare claimedAt?: Date
     declare createdAt: Date
-    declare outcome? : Outcome
+    declare outcome? : QuestOutcome
 }
 
 export const TakenQuestDBTableName = "idle_quests_taken_quests"
@@ -89,7 +89,7 @@ export default class TakenQuestState {
         return makeTakenQuest(this.questRegistry, this.rules)(result)
     }
 
-    async claimQuest(takenQuestId: string, claimedAt: Date, outcome: Outcome, transaction?: Transaction): Promise<void> {
+    async claimQuest(takenQuestId: string, claimedAt: Date, outcome: QuestOutcome, transaction?: Transaction): Promise<void> {
         await TakenQuestDB.update({ claimedAt, outcome }, { where: { takenQuestId }, transaction })
     }
 
@@ -98,6 +98,7 @@ export default class TakenQuestState {
 const makeTakenQuest = (questRegistry: QuestRegistry, rules: IQRuleset) => (takenQuestDB: ITakenQuestDB): TakenQuest => {
     const quest = questRegistry[takenQuestDB.questId]
     return {
+        ctype: "taken-quest",
         takenQuestId: takenQuestDB.takenQuestId,
         userId: takenQuestDB.userId,
         availableQuest: newAvailableQuest(rules)(quest),

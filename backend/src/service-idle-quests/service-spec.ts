@@ -12,6 +12,17 @@ export interface IdleQuestsService {
 
     getInventory(userId: string): Promise<GetInventoryResult>
 
+
+
+    getAvailableEncounters(location: string): Promise<GetAvailableEncountersResult>
+
+    acceptEncounter(userId: string, encounterId: string, adventurerIds: string[]): Promise<AcceptEncounterResult>
+
+    getActiveEncounters(userId: string): Promise<GetActiveEncountersResult>
+
+    claimEncounter(userId: string, activeEncounterId: string): Promise<ClaimEncounterResult>
+
+
     getAvailableQuests(location: string): Promise<GetAvailableQuestsResult>
 
     acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptQuestResult>
@@ -19,6 +30,8 @@ export interface IdleQuestsService {
     getTakenQuests(userId: string): Promise<GetTakenQuestsResult>
 
     claimQuestResult(userId: string, takenQuestId: string): Promise<ClaimQuestResult>
+
+
 
     grantTestInventory(userId: string): Promise<GetInventoryResult>
 
@@ -37,6 +50,28 @@ export type GetInventoryResult
     = { status: "ok", inventory: models.IdleQuestsInventory }
     | { status: "unknown-user" }
 
+
+
+export type GetAvailableEncountersResult
+    = { status: "ok", availableEncounters: models.AvailableEncounter[] }
+
+export type AcceptEncounterResult
+    = { status: "ok", activeEncounter: models.ActiveEncounter }
+    | { status: "unknown-encounter" }
+    | { status: "invalid-adventurers" }
+
+export type GetActiveEncountersResult
+    = { status: "ok", activeEncounters: models.ActiveEncounter[] }
+
+export type ClaimEncounterResult
+    = { status: "ok", outcome: vm.QuestOutcome }
+    | { status: "unknown-encounter" }
+    | { status: "already-claimed" }
+    | { status: "not-finished" }
+    | { status: "missing-adventurers", missing: string[] }
+
+
+
 export type AcceptQuestResult
     = { status: "ok", takenQuest: models.TakenQuest }
     | { status: "unknown-quest" }
@@ -49,7 +84,7 @@ export type GetTakenQuestsResult
     = { status: "ok", takenQuests: models.TakenQuest[] }
 
 export type ClaimQuestResult
-    = { status: "ok", outcome: vm.Outcome }
+    = { status: "ok", outcome: vm.QuestOutcome }
     | { status: "unknown-quest" }
     | { status: "quest-already-claimed" }
     | { status: "quest-not-finished" }

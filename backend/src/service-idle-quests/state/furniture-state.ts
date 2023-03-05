@@ -122,6 +122,7 @@ export default class FurnitureState {
     private makeFurniture(furniture: IFurnitureDB): Furniture {
         const collection = "pixel-tiles"
         return {
+            ctype: "furniture",
             entityType: "furniture-entity",
             entityId: furniture.entityId,
             userId: furniture.userId,
