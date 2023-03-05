@@ -1,19 +1,19 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { Adventurer, IdleQuestsInventory, individualXPReward, InventoryRecord, Outcome, setRealAPS, tagRealAPS, TakenQuest } from "../../common"
-import { Furniture } from "../../common/furniture"
+import { Character, Furniture, IdleQuestsInventory, TakenQuest } from "../../common"
 import { notEmpty } from "../../utils"
-import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility, InventoryAsset, sortAdventurers } from "./inventory-dsl"
+import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility, InventoryAsset, sortCharacters } from "./inventory-dsl"
+import * as vm from "../../game-vm"
 
 export interface InventoryState {
     open: boolean
-    adventurers: InventoryRecord<Adventurer>
-    furniture: InventoryRecord<Furniture>
+    characters: Record<string, Character>
+    furniture: Record<string, Furniture>
     takenQuests: TakenQuest[]
 
     activitySelection?: ActivitySelection
     draggingState?: DraggingState
     dropBoxesState?: DropBoxesState
-    selectedParty: (Adventurer | null)[]
+    selectedParty: (Character | null)[]
 }
 
 export type InventoryStoreState = 
@@ -24,7 +24,7 @@ export type InventoryThunk<ReturnType = void> =
 
 const inventoryInitialState: InventoryState = { 
     open: false,
-    adventurers: {},
+    characters: {},
     furniture: {},
     takenQuests: [],
     selectedParty: [],
@@ -41,14 +41,14 @@ export const inventoryState = createSlice({
         },
 
         setInventory: (state, action: PayloadAction<IdleQuestsInventory>) => {
-            state.adventurers = action.payload.adventurers
+            state.characters = action.payload.characters
             state.furniture = action.payload.furniture
         },
 
         removeFromInventory: (state, action: PayloadAction<string[]>) => {
             const ids = action.payload
             ids.forEach(id => {
-                delete state.adventurers[id]
+                delete state.characters[id]
                 delete state.furniture[id]
             })
         },
@@ -72,9 +72,9 @@ export const inventoryState = createSlice({
             if (activity?.ctype === "available-quest")
                 state.selectedParty = Array(activity.slots).fill(null)
             else if (activity?.ctype === "taken-quest")
-                state.selectedParty = Array(activity.quest.slots).fill(null).map((_, index) => 
-                    state.adventurers[activity.adventurerIds[index]] ?? null)
-                    //state.adventurers.find(adventurer => adventurer.adventurerId === activity.adventurerIds[index]) ?? null)
+                state.selectedParty = Array(activity.availableQuest.slots).fill(null).map((_, index) => 
+                    state.characters[activity.adventurerIds[index]] ?? null)
+                    //state.characters.find(character => character.entityId === activity.adventurerIds[index]) ?? null)
             else 
                 state.selectedParty = []
         },
@@ -100,7 +100,7 @@ export const inventoryState = createSlice({
         dragItemEnded: (state) => {
             if (state.dropBoxesState?.utility === "party-pick")
                 state.dropBoxesState.dropBoxes.forEach((dropBox, index) => {
-                    if (dropBox.hovering?.ctype === "adventurer") state.selectedParty[index] = dropBox.hovering
+                    if (dropBox.hovering?.ctype === "character") state.selectedParty[index] = dropBox.hovering
                     dropBox.hovering = undefined
                 })
 
@@ -114,32 +114,32 @@ export const inventoryState = createSlice({
         },
 
         /** Party Pick */
-        addAdventurerToParty: (state, action: PayloadAction<{ adventurer: Adventurer, slot?: number }>) => {
-            const adventurer = action.payload.adventurer
+        addCharacterToParty: (state, action: PayloadAction<{ character: Character, slot?: number }>) => {
+            const character = action.payload.character
             const slotNumber = action.payload.slot
 
             if (slotNumber) {
-                state.selectedParty[slotNumber] = adventurer
+                state.selectedParty[slotNumber] =character 
             } else {
                 const indexNull = state.selectedParty.indexOf(null)
-                const indexAdventurer = state.selectedParty
-                    .map(a => a ? a.adventurerId : a)
-                    .indexOf(adventurer.adventurerId)
-                const alreadySelected = indexAdventurer !== -1
+                const indexCharacter = state.selectedParty
+                    .map(a => a ? a.entityId : a)
+                    .indexOf(character.entityId)
+                const alreadySelected = indexCharacter !== -1
                 const partyFull = indexNull === -1
                 if (alreadySelected)
-                    state.selectedParty[indexAdventurer] = null
+                    state.selectedParty[indexCharacter] = null
                 else if (partyFull)
-                    state.selectedParty[0] = adventurer
+                    state.selectedParty[0] =character 
                 else
-                    state.selectedParty[indexNull] = adventurer
+                    state.selectedParty[indexNull] =character 
             }
 
         },
 
-        removeAdventurerFromParty: (state, action: PayloadAction<Adventurer>) => {
-            state.selectedParty = state.selectedParty.map(adventurer => 
-                adventurer?.adventurerId === action.payload.adventurerId ? null : adventurer)
+        removeCharacterFromParty: (state, action: PayloadAction<Character>) => {
+            state.selectedParty = state.selectedParty.map(character => 
+                character?.entityId === action.payload.entityId ? null : character)
         },
 
         clearSelectedParty: (state) => {
@@ -149,48 +149,51 @@ export const inventoryState = createSlice({
                 state.selectedParty = []
         },
         
-        /** Adventurer List State */
-        changeAdventurersInChallenge: (state, action: PayloadAction<{ adventurers: Adventurer[], inChallenge: boolean }>) => {
-            action.payload.adventurers.forEach(adventurer => {
-                state.adventurers[adventurer.adventurerId].inChallenge = action.payload.inChallenge
+        /** Character List State */
+        changeCharactersInChallenge: (state, action: PayloadAction<{ characters: Character[], inActivity: boolean }>) => {
+            action.payload.characters.forEach(character => {
+                state.characters[character.entityId].inActivity = action.payload.inActivity
             })
             /*
-            state.adventurers.forEach(adventurer => {
-                action.payload.adventurers.forEach((actionAdventurer) => {
-                    if(actionAdventurer.adventurerId == adventurer.adventurerId){
-                        adventurer.inChallenge = action.payload.inChallenge
+            state.characters.forEach(character => {
+                action.payload.characters.forEach((actionCharacter) => {
+                    if(actionCharacter.entityId == character.entityId){
+                        character.inActivity = action.payload.inActivity
                         return 
                     }
                 })
             })
-            state.adventurers = sortAdventurers(state.adventurers)
+            state.characters = sortCharacters(state.characters)
             */
         },
 
         /** Quest State */
-        claimQuestOutcome: (state, action: PayloadAction<{ adventurers: Adventurer[], outcome: Outcome, takenQuest: TakenQuest }>) => {
+        claimQuestOutcome: (state, action: PayloadAction<{ characters: Character[], outcome: vm.QuestOutcome, takenQuest: TakenQuest }>) => {
             const outcome = action.payload.outcome
-            const adventurers = action.payload.adventurers
-            if (state.activitySelection && state.activitySelection.ctype === "taken-quest" && state.activitySelection.takenQuestId === action.payload.takenQuest.takenQuestId)
-                state.activitySelection.claimedAt = new Date().toISOString()
+            const characters = action.payload.characters
+            characters.forEach(character => state.characters[character.entityId].inActivity = false)
+            if (state.activitySelection?.ctype === "taken-quest" && state.activitySelection.takenQuestId === action.payload.takenQuest.takenQuestId)
+                state.activitySelection.claimedAt = new Date()
+            /*
             if (outcome.ctype === "success-outcome" && outcome.reward.apsExperience) {
-                const individualXP = individualXPReward(adventurers, outcome.reward.apsExperience)
-                adventurers.forEach(adventurer => {
-                    const newAdventurer = 
+                const individualXP = individualXPReward(characters, outcome.reward.apsExperience)
+                characters.forEach(character => {
+                    const newCharacter = 
                         setRealAPS({
-                            ...adventurer,
-                            inChallenge: false,
-                            athXP: adventurer.athXP + individualXP[adventurer.adventurerId].athleticism,
-                            intXP: adventurer.intXP + individualXP[adventurer.adventurerId].intellect,
-                            chaXP: adventurer.chaXP + individualXP[adventurer.adventurerId].charisma,
+                            ...character,
+                            inActivity: false,
+                            athXP: character.athXP + individualXP[character.entityId].athleticism,
+                            intXP: character.intXP + individualXP[character.entityId].intellect,
+                            chaXP: character.chaXP + individualXP[character.entityId].charisma,
                         })
-                    state.adventurers[adventurer.adventurerId] = newAdventurer
+                    state.characters[character.entityId] = neCharacterw
                 })
             } else if (outcome.ctype === "failure-outcome") {
-                adventurers.forEach(adventurer => {
-                    state.adventurers[adventurer.adventurerId].inChallenge = false
+                characters.forEach(character => {
+                    state.characters[character.entityId].inActivity = false
                 })
             }
+            */
         },
     },
 });
@@ -211,11 +214,11 @@ export const {
     setDraggingState,
     dragItemEnded,
     /** Party Pick */
-    addAdventurerToParty,
-    removeAdventurerFromParty,
+    addCharacterToParty,
+    removeCharacterFromParty,
     clearSelectedParty,
-    /** Adventurer List State */
-    changeAdventurersInChallenge,
+    /** Character List State */
+    changeCharactersInChallenge,
     /** Quest State */
     claimQuestOutcome,
 } = inventoryState.actions

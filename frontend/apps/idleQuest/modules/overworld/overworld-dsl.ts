@@ -1,4 +1,4 @@
-import { Adventurer, Furniture } from "../../common"
+import { Character, Furniture } from "../../common"
 
 export type SectorConfiguration = 
-    Record<string, { obj: Adventurer | Furniture, location: [number, number] }>
+    Record<string, { obj: Character | Furniture, location: [number, number] }>

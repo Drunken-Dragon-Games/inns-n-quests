@@ -1,38 +1,38 @@
 import { useMemo } from "react"
 import styled, { keyframes } from "styled-components"
 import { If } from "../../../../common"
-import { Adventurer } from "../../../../common/adventurer"
+import { Character } from "../../../../common"
 import {
     notEmpty, PixelArtImage, simpleHash, Units,
     useComputeHeightFromOriginalImage, useRememberLastValue, vmax1
 } from "../../../../utils"
 
-const ptMeasures = (adventurer: Adventurer): [number, [number,number], number] => {
-    if (adventurer.assetRef === "PixelTile42")
+const ptMeasures = (character: Character): [number, [number,number], number] => {
+    if (character.assetRef === "PixelTile42")
         return [5, [0,0], -4]
     else 
         return [5, [0,0], -7]
 }
 
-const gmasMeasures = (adventurer: Adventurer): [number, [number,number], number] => {
-    if (adventurer.class == "bard")
+const gmasMeasures = (character: Character): [number, [number,number], number] => {
+    if (character.characterType.class == "Bard")
         return [8.5, [0,0.3], -6]
-    else if (adventurer.class == "rogue")
+    else if (character.characterType.class == "Rogue")
         return [8.5, [0,0.3], -6.5]
-    else if (adventurer.class == "warlock")
+    else if (character.characterType.class == "Warlock")
         return [8.5, [0,0.3], -6.8]
-    else if (adventurer.class == "fighter")
+    else if (character.characterType.class == "Fighter")
         return [8.5, [0,0.3], -6.5]
-    else if (adventurer.class == "knight")
+    else if (character.characterType.class == "Knight")
         return [8.5, [0,0.3], -7]
-    else if (adventurer.class == "cleric")
+    else if (character.characterType.class == "Cleric")
         return [8.5, [0,0.3], -9]
     else
         return [8.5, [0,0.3], -7.5]
 }
 
-const aotMeasures = (adventurer: Adventurer): [number, [number,number], number] => {
-    const advName = adventurer.sprite.split('/')[5].split('-')[0]
+const aotMeasures = (character: Character): [number, [number,number], number] => {
+    const advName = character.sprite.split('/')[5].split('-')[0]
     
     // Vilnay
     if (advName == 'astrid')
@@ -166,7 +166,7 @@ const emojiMapping = (emoji?: string) => {
 
 export type SpriteRenderOptions = "normal" | "disabled" | "hovered"
 
-const AdventurerSpriteContainer = styled.div<{ dimensions: Dimensions, render: SpriteRenderOptions }>`
+const CharacterSpriteContainer = styled.div<{ dimensions: Dimensions, render: SpriteRenderOptions }>`
     position: relative;
     width: ${props => props.dimensions.units.u(5)};
     height: ${props => props.dimensions.units.u(5)};
@@ -249,7 +249,7 @@ const EmojiImage = ({ emoji, dimensions }: { emoji?: string, dimensions: Dimensi
                 />
                 <PixelArtImage
                     src={emojiMapping(renderEmoji)}
-                    alt="adventurer emoji"
+                    alt="character emoji"
                     width={2.8}
                     height={2.5}
                     units={dimensions.units}
@@ -259,7 +259,7 @@ const EmojiImage = ({ emoji, dimensions }: { emoji?: string, dimensions: Dimensi
     )
 }
 
-const AdventurerImageContainer = styled.div<{ dimensions: Dimensions }>`
+const CharacterImageContainer = styled.div<{ dimensions: Dimensions }>`
     position: absolute;
     overflow: visible;
     width: ${props => props.dimensions.units.u(props.dimensions.width)};
@@ -276,47 +276,47 @@ interface Dimensions {
     offsetEmoji: number
 }
 
-const useAdventurerSpriteState = (adventurer: Adventurer, units: Units): Dimensions => {
+const useCharacterSpriteState = (character: Character, units: Units): Dimensions => {
     const dimensions = useMemo(() => {
         const [width, offset, offsetEmoji] =
-            adventurer.collection == "pixel-tiles" ?
-                ptMeasures(adventurer) :
-            adventurer.collection == "grandmaster-adventurers" ?
-                gmasMeasures(adventurer) :
-            // adventurer.collection == "adventurers-of-thiolden" ?
-                aotMeasures(adventurer)
+            character.collection == "pixel-tiles" ?
+                ptMeasures(character) :
+            character.collection == "grandmaster-adventurers" ?
+                gmasMeasures(character) :
+            // character.collection == "adventurers-of-thiolden" ?
+                aotMeasures(character)
         return { width, height: 0, units, offset: offset as [number,number], offsetEmoji }
-    }, [adventurer, units])
-    return {...dimensions, height: useComputeHeightFromOriginalImage(adventurer.sprite, dimensions.width) }
+    }, [character, units])
+    return {...dimensions, height: useComputeHeightFromOriginalImage(character.sprite, dimensions.width) }
 }
 
-interface AdventurerSpriteProps {
+interface CharacterSpriteProps {
     className?: string
-    adventurer: Adventurer
+    character:Character 
     render?: SpriteRenderOptions
     emoji?: string
     units?: Units
 }
 
-const AdventurerSprite = ({className, adventurer, render = "normal", emoji, units = vmax1 } : AdventurerSpriteProps) => {
-    const dimensions = useAdventurerSpriteState(adventurer, units)
+const CharacterSprite = ({className, character, render = "normal", emoji, units = vmax1 } : CharacterSpriteProps) => {
+    const dimensions = useCharacterSpriteState(character, units)
     return (
-        <AdventurerSpriteContainer 
+        <CharacterSpriteContainer 
             className={className} 
             dimensions={dimensions}
             render={render} >
             <EmojiImage emoji={emoji} dimensions={dimensions} />
-            <AdventurerImageContainer dimensions={dimensions}>
+            <CharacterImageContainer dimensions={dimensions}>
                 <PixelArtImage
-                    src={adventurer.sprite}
-                    alt={adventurer.assetRef}
+                    src={character.sprite}
+                    alt={character.assetRef}
                     width={dimensions.width}
                     height={dimensions.height}
                     units={dimensions.units}
                 />
-            </AdventurerImageContainer>
-        </AdventurerSpriteContainer>
+            </CharacterImageContainer>
+        </CharacterSpriteContainer>
     )
 }
 
-export default AdventurerSprite
+export default CharacterSprite

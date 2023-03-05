@@ -4,10 +4,10 @@ import styled from "styled-components"
 import _ from "underscore"
 import { takenQuestStatus, takenQuestTimeLeft } from "../../../../common"
 import { notEmpty, PixelArtImage, useDrag, vmax } from "../../../../utils"
-import { InventoryItem, InventoryPageName, isDraggableItem, mapQuestScroll, sortAdventurers } from "../../inventory-dsl"
+import { InventoryItem, InventoryPageName, isDraggableItem, mapQuestScroll, sortCharacters } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
 import InventoryTransitions from "../../inventory-transitions"
-import { AdventurerSprite, FurnitureSprite } from "../sprites"
+import { CharacterSprite, FurnitureSprite } from "../sprites"
 import InventoryBox from "./inventory-box"
 
 const InventoryPageContainer = styled.div`
@@ -85,16 +85,16 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
         otherDraggingHappening: notEmpty(state.draggingState)
     }), _.isEqual)
     const boxState = useMemo(() => {
-        if (item && item.ctype === "adventurer") {
+        if (item && item.ctype === "character") {
             return {
-                info: `${item.realATH}/${item.realINT}/${item.realCHA}`,
+                info: `${item.evAPS.athleticism}/${item.evAPS.intellect}/${item.evAPS.charisma}`,
                 selected:
-                    subState.selectedParty?.some((a) => a && a.adventurerId === item.adventurerId) ||
-                    subState.selection?.ctype === "adventurer" &&
-                    subState.selection?.adventurerId === item.adventurerId,
+                    subState.selectedParty?.some((a) => a && a.entityId === item.entityId) ||
+                    subState.selection?.ctype === "character" &&
+                    subState.selection?.entityId === item.entityId,
                 disabled:
                     subState.selection?.ctype === "available-quest" && 
-                    item.inChallenge,
+                    item.inActivity,
                 center: false,
                 overflowHidden: false,
             }
@@ -115,7 +115,7 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
                 selected:
                     subState.selection &&
                     subState.selection.ctype === "furniture" &&
-                    subState.selection.furnitureId === item.furnitureId,
+                    subState.selection.entityId === item.entityId,
                 disabled: false,
                 center: false,
                 overflowHidden: true,
@@ -183,10 +183,10 @@ const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
             info={state.info}
             overflowHidden={state.overflowHidden}
         > 
-        { item?.ctype === "adventurer" ? 
-            <AdventurerSprite
-                adventurer={item}
-                emoji={state.hover ? item.adventurerId : undefined}
+        { item?.ctype === "character" ? 
+            <CharacterSprite
+                character={item}
+                emoji={state.hover ? item.entityId : undefined}
                 units={vmax(0.8)}
                 render={state.hover ? "hovered" : "normal"}
             /> 
@@ -214,14 +214,14 @@ type InventoryPageState = {
 
 const useInventoryPageState = (page: InventoryPageName): InventoryPageState => {
     const subState = useSelector((state: InventoryState) => ({ 
-        adventurers: Object.values(state.adventurers), 
+        characters: Object.values(state.characters), 
         furniture: Object.values(state.furniture), 
         takenQuests: state.takenQuests,
         selection: state.activitySelection
     }), shallowEqual)
     const itemSlots = useMemo(() => {
         const items = 
-            page == "adventurers" ? sortAdventurers(subState.adventurers) :
+            page == "characters" ? sortCharacters(subState.characters) :
             page == "furniture" ? subState.furniture
             : subState.takenQuests
         const slotsTail = items.length % 4
@@ -231,7 +231,7 @@ const useInventoryPageState = (page: InventoryPageName): InventoryPageState => {
         const totalExtraSlots = amountIfWithExtraSlots >= 4 * 8 ? extraSlots : amountIfWithoutExtraSlots
         const emptySlots = Array(totalExtraSlots).fill(null).map((_, i) => i + items.length)
         return { items, emptySlots }
-    }, [subState.adventurers, subState.furniture, subState.takenQuests, page])
+    }, [subState.characters, subState.furniture, subState.takenQuests, page])
     return itemSlots
 }
 

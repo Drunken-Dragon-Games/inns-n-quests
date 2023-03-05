@@ -3,7 +3,7 @@ import { Character, Furniture } from "../../../common"
 import { innBuildingRenderMatrix } from "../assets"
 import OverworldCharacter from "../objects/overworld-character"
 import OverworldFurniture from "../objects/overworld-furniture"
-import { overworldState, overworldStore } from "../overworld-state"
+import { overworldStore } from "../overworld-state"
 import OverworldTransitions from "../overworld-transitions"
 
 type KInputs = {
@@ -74,7 +74,7 @@ export class Overworld extends Phaser.Scene {
             this.adventurers.forEach(adventurer => adventurer.destroy())
             this.furniture.forEach(furniture => furniture.destroy())
             Object.values(innConfiguration).forEach(({ obj, location }) => {
-                if (obj.ctype === "adventurer")
+                if (obj.ctype === "character")
                     this.adventurers.push(OverworldCharacter.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))
                 else if (obj.ctype === "furniture")
                     this.furniture.push(OverworldFurniture.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))

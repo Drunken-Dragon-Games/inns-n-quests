@@ -3,7 +3,7 @@ import { MetadataRegistry } from "../../registry-metadata"
 import { WellKnownPolicies } from "../../registry-policies"
 import * as am from "../../service-asset-management"
 import * as vm from "../game-vm"
-import { IQRuleset } from "../game-vm"
+import { IQRuleset, newAPS } from "../game-vm"
 import { Character } from "../models"
 import { syncData } from "./sync-util"
 
@@ -214,6 +214,7 @@ export default class CharacterState {
  */
 const makeCharacter = (metadataRegistry: MetadataRegistry, rules: IQRuleset) => (characterDB: ICharacterDB): Character => {
     const collection = vm.characterCollection(characterDB.assetRef)
+    const evAPS = rules.character.evAPS(characterDB.ivAPS, characterDB.xpAPS)
     return {
         ctype: "character",
         entityId: characterDB.entityId,
@@ -225,7 +226,12 @@ const makeCharacter = (metadataRegistry: MetadataRegistry, rules: IQRuleset) => 
         hp: characterDB.hp,
         ivAPS: characterDB.ivAPS,
         xpAPS: characterDB.xpAPS,
-        evAPS: rules.character.evAPS(characterDB.ivAPS, characterDB.xpAPS),
+        evAPS,
+        nextLevelXP: newAPS([
+            rules.character.totalXPRequiredForNextAPSLevel(evAPS.athleticism),
+            rules.character.totalXPRequiredForNextAPSLevel(evAPS.intellect),
+            rules.character.totalXPRequiredForNextAPSLevel(evAPS.charisma),
+        ]),
         sprite: vm.characterSprite(metadataRegistry)(characterDB.assetRef, collection),
         race: vm.characterRace(metadataRegistry)(characterDB.assetRef, collection),
         characterType: vm.characterType(metadataRegistry)(characterDB.assetRef, collection),

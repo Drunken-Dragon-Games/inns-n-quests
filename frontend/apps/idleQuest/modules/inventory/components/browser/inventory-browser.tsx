@@ -57,12 +57,12 @@ const InventoryPagesContainer = styled.div`
 `
 
 const InventoryBrowser = () => {
-    const [page, setPage] = useState<InventoryPageName>("adventurers")
+    const [page, setPage] = useState<InventoryPageName>("characters")
     const open = useSelector((state: InventoryState) => state.open, shallowEqual)
     return (
         <InventoryBrowserContainer open={open}>
             <InventoryTabsContainer>
-                <InventoryTab onClick={() => setPage("adventurers")} selected={page === "adventurers"}><span>Adventurers</span></InventoryTab>
+                <InventoryTab onClick={() => setPage("characters")} selected={page === "characters"}><span>Adventurers</span></InventoryTab>
                 <InventoryTab onClick={() => setPage("taken-quests")} selected={page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
                 <InventoryTab onClick={() => setPage("furniture")} selected={page === "furniture"}><span>Furniture</span></InventoryTab>
             </InventoryTabsContainer>

@@ -6,7 +6,7 @@ import { notEmpty, vmax } from "../../utils"
 import ActivityView from "./components/activity"
 import InventoryBrowser from "./components/browser"
 import InventoryHeader from "./components/header"
-import { AdventurerSprite, FurnitureSprite } from "./components/sprites"
+import { CharacterSprite, FurnitureSprite } from "./components/sprites"
 import { ActivitySelection, DropBoxesState, makeDropBox } from "./inventory-dsl"
 import { InventoryState, inventoryStore } from "./inventory-state"
 import InventoryTransitions from "./inventory-transitions"
@@ -76,9 +76,9 @@ const WithDraggingItem = ({ children }: { children?: ReactNode }) => {
     const draggingState = useSelector((state: InventoryState) => state.draggingState)
     return <>
         <DraggingItem position={draggingState?.position}>
-            {draggingState?.item.ctype === "adventurer" && !draggingState.hide ?
-                <AdventurerSprite
-                    adventurer={draggingState.item}
+            {draggingState?.item.ctype === "character" && !draggingState.hide ?
+                <CharacterSprite
+                    character={draggingState.item}
                     units={vmax(0.8)}
                     render={"hovered"}
                 />
@@ -121,7 +121,7 @@ const useInventoryState = (): InventoryComponentState => {
         return InventoryTransitions.deregisterDropBoxes
     }, [inventoryContainerRef.current, containerBound?.top, containerBound?.left, containerBound?.bottom, containerBound?.right, open, selection])
 
-    /** Initial load of adventurers, quests in progress, and tracking init. */ 
+    /** Initial load of characters, quests in progress, and tracking init. */ 
     useEffect(() => {
         InventoryTransitions.onRefreshInventory()
         const interval = InventoryTransitions.trackInventoryState()

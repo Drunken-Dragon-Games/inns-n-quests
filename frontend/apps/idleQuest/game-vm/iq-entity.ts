@@ -1,4 +1,4 @@
-import { APS } from "../common"
+import { APS } from "./character-entity"
 import { SkillName } from "./encounter"
 
 export type IQEntity<EType extends IQEntityType> = {
@@ -32,6 +32,10 @@ export type WithSkills = {
 
 export type WithEV = {
     evAPS: APS
+}
+
+export type WithNextLevelXP = {
+    nextLevelXP: APS
 }
 
 export type WithTag<Tag extends string> = {

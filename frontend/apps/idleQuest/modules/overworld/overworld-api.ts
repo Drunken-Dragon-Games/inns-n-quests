@@ -21,7 +21,7 @@ const OverworldApi = {
         if (innState) {
             const innConfiguration: SectorConfiguration = {}
             Object.keys(innState.objectLocations).forEach(objectId => {
-                const obj: Character | Furniture = inventory.adventurers[objectId] || inventory.furniture[objectId]
+                const obj: Character | Furniture = inventory.characters[objectId] || inventory.furniture[objectId]
                 innConfiguration[objectId] = { obj, location: innState.objectLocations[objectId] }
             })
             OverworldTransitions.setInitialInnState(innState.name, innConfiguration)

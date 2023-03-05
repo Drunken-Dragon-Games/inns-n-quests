@@ -8,6 +8,7 @@ export type Character
     & vm.WithActivityState
     & vm.WithSkills
     & vm.WithEV
+    & vm.WithNextLevelXP
 
 export type Furniture
     = vm.FurnitureEntity

@@ -2,13 +2,14 @@ import { RefObject, useEffect, useMemo, useRef } from "react"
 import { useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
 import _ from "underscore"
-import { Adventurer, APS, AvailableQuest, mergeAPSSum, Push, sameOrBetterAPS, TakenQuest, takenQuestSecondsLeft, zeroAPS } from "../../../../../common"
+import { Character, AvailableQuest, Push, TakenQuest, takenQuestSecondsLeft } from "../../../../../common"
 import { notEmpty, PixelArtCss, PixelArtImage, vh1 } from "../../../../../utils"
 import { DraggableItem, getQuestAPSRequirement, makeDropBox, mapSealImage, questDescription, questName } from "../../../inventory-dsl"
 import { InventoryState } from "../../../inventory-state"
 import InventoryTransitions from "../../../inventory-transitions"
-import AdventurerSlot from "./adventurer-slot"
+import PartySlot from "./party-slot"
 import Signature from "./signature"
+import * as vm from "../../../../../game-vm"
 
 type RenderQuest = AvailableQuest | TakenQuest
 
@@ -135,14 +136,17 @@ const Experience = styled.div<{ start: number, experience: number, animate: bool
     }
 `
 
-const APSReq = ({ apsRequired, apsAccumulated }: { apsRequired: APS, apsAccumulated: APS }) => {
-    const lastAccumulated = useRef(zeroAPS)
+const APSReq = ({ apsRequired, apsAccumulated }: { apsRequired: vm.APS, apsAccumulated: vm.APS }) => {
+    const lastAccumulated = useRef(vm.zeroAPS)
     const start = {
         athleticism: lastAccumulated.current.athleticism * 100 / apsRequired.athleticism,
         intellect: lastAccumulated.current.intellect * 100 / apsRequired.intellect,
         charisma: lastAccumulated.current.charisma * 100 / apsRequired.charisma
     }
-    const glow = sameOrBetterAPS(apsAccumulated, apsRequired)
+    const glow = 
+        apsAccumulated.athleticism >= apsRequired.athleticism &&
+        apsAccumulated.intellect >= apsRequired.intellect &&
+        apsAccumulated.charisma >= apsRequired.charisma
     useEffect(() => { lastAccumulated.current = apsAccumulated }, [apsAccumulated])
     return (
         <APSWrapper>
@@ -185,11 +189,11 @@ const Footer = styled.div`
 
 type PartyViewState = {
     dropBoxRef: RefObject<HTMLDivElement>
-    hovering?: Adventurer
-    picked: Adventurer | null
+    hovering?:Character 
+    picked: Character | null
 }[]
 
-const usePartyViewState = (quest: RenderQuest, adventurerSlots: (Adventurer | null)[]): PartyViewState => {
+const usePartyViewState = (quest: RenderQuest, adventurerSlots: (Character | null)[]): PartyViewState => {
     const boxRef1 = useRef<HTMLDivElement>(null)
     const boxRef2 = useRef<HTMLDivElement>(null)
     const boxRef3 = useRef<HTMLDivElement>(null)
@@ -213,7 +217,7 @@ const usePartyViewState = (quest: RenderQuest, adventurerSlots: (Adventurer | nu
             const hovering: DraggableItem | undefined = dropBoxesState?.dropBoxes[index]?.hovering
             return {
                 dropBoxRef,
-                hovering: hovering?.ctype == "adventurer" ? hovering : undefined,
+                hovering: hovering?.ctype == "character" ? hovering : undefined,
                 picked: adventurerSlots[index]
             }
         })
@@ -230,14 +234,14 @@ const usePartyViewState = (quest: RenderQuest, adventurerSlots: (Adventurer | nu
     */
 }
 
-const PartyView = ({ quest, adventurerSlots }: { quest: RenderQuest, adventurerSlots: (Adventurer | null)[] }) => {
+const PartyView = ({ quest, adventurerSlots }: { quest: RenderQuest, adventurerSlots: (Character | null)[] }) => {
     const state = usePartyViewState(quest, adventurerSlots)
     return (
         <PartyContainer>
             {state.map(({ dropBoxRef, picked, hovering }, index) =>
-                <div key={"adventurer-slot-" + index} ref={dropBoxRef}>
-                    <AdventurerSlot
-                        adventurer={hovering ? hovering : picked}
+                <div key={"character-slot-" + index} ref={dropBoxRef}>
+                    <PartySlot
+                        character={hovering ? hovering : picked}
                         preview={notEmpty(hovering) || quest.ctype !== "available-quest"}
                     />
                 </div>
@@ -248,12 +252,12 @@ const PartyView = ({ quest, adventurerSlots }: { quest: RenderQuest, adventurerS
 
 type QuestSheetState = {
     signatureType: "in-progress" | "finished" | "claimed" | "available-no-adventurers" | "available"
-    apsRequired: APS
-    apsAccumulated: APS
+    apsRequired: vm.APS
+    apsAccumulated: vm.APS
     sealImage: { src: string, width: number, height: number, offset: number }
 }
 
-const useQuestCardState = (quest: RenderQuest, adventurerSlots: (Adventurer | null)[]): QuestSheetState => 
+const useQuestCardState = (quest: RenderQuest, adventurerSlots: (Character | null)[]): QuestSheetState => 
     useMemo<QuestSheetState>(() => ({
         signatureType: 
             quest.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
@@ -264,12 +268,8 @@ const useQuestCardState = (quest: RenderQuest, adventurerSlots: (Adventurer | nu
         apsRequired: 
             getQuestAPSRequirement(quest),
         apsAccumulated: 
-            adventurerSlots.filter(notEmpty).reduce((acc, adventurer) =>
-                mergeAPSSum(acc, { 
-                    athleticism: adventurer.athleticism, 
-                    intellect: adventurer.intellect, 
-                    charisma: adventurer.charisma 
-                }), zeroAPS),
+            adventurerSlots.filter(notEmpty).reduce((acc, character) =>
+                vm.apsAdd(acc, character.evAPS), vm.zeroAPS),
         sealImage: 
             mapSealImage(quest)
     }), [quest, adventurerSlots])
@@ -277,7 +277,7 @@ const useQuestCardState = (quest: RenderQuest, adventurerSlots: (Adventurer | nu
 interface QuestSheetProps {
     className?: string,
     quest: RenderQuest, 
-    adventurerSlots: (Adventurer | null)[],
+    adventurerSlots: (Character | null)[],
 }
 
 const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {

@@ -1,8 +1,8 @@
 import styled, { keyframes } from "styled-components"
 import { TextOswald } from "../../../../../../utils/components/basic_components"
-import { Adventurer, totalXPRequiredForNextLevel } from "../../../../../common"
+import { Character } from "../../../../../common"
 import { Units, vmax1, useRememberLastValue, PixelArtImage, notEmpty } from "../../../../../utils"
-import AdventurerSprite, { SpriteRenderOptions } from "../../sprites/adventurer-sprite"
+import AdventurerSprite, { SpriteRenderOptions } from "../../sprites/character-sprite"
 
 type ExperienceBarColor = "r" | "g" | "b"
 
@@ -15,7 +15,7 @@ const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
     if (color == "b" && !background) return "rgb(80, 80, 255)"
 }
 
-const AdventurerContainer = styled.div`
+const CharacterContainer = styled.div`
     position: relative;
     width: 100%;
     display: flex;
@@ -100,7 +100,7 @@ const DeadMark = styled.div <{ $display: boolean, units: Units }>`
 `
 
 interface AdventurerProps {
-    adventurer: Adventurer,
+    character: Character,
     emoji?: string,
     render?: SpriteRenderOptions,
     displayDeadMark?: boolean,
@@ -110,8 +110,8 @@ interface AdventurerProps {
     units?: Units,
 }
 
-const AdventurerMini = ({ 
-    adventurer, 
+const CharacterMini = ({ 
+    character, 
     emoji, 
     render = "normal", 
     displayDeadMark = false, 
@@ -121,13 +121,13 @@ const AdventurerMini = ({
     units = vmax1,
 }: AdventurerProps) => {
     const experience: [number,number,number] = [
-        adventurer.athXP * 100 / totalXPRequiredForNextLevel(adventurer.realATH),
-        adventurer.intXP * 100 / totalXPRequiredForNextLevel(adventurer.realINT),
-        adventurer.chaXP * 100 / totalXPRequiredForNextLevel(adventurer.realCHA)
+        character.xpAPS.athleticism * 100 / character.nextLevelXP.athleticism,
+        character.xpAPS.intellect * 100 / character.nextLevelXP.intellect,
+        character.xpAPS.charisma * 100 /character.nextLevelXP.charisma
     ]
     const lastExperience = useRememberLastValue<[number, number, number]>(experience, [0,0,0])
     return (
-        <AdventurerContainer>
+        <CharacterContainer>
 
             <DeadMark $display={displayDeadMark} units={units}>
                 <PixelArtImage
@@ -137,7 +137,7 @@ const AdventurerMini = ({
             </DeadMark>
 
             <AdventurerSprite
-                adventurer={adventurer}
+                character={character}
                 render={render}
                 emoji={emoji}
                 units={units}
@@ -145,28 +145,28 @@ const AdventurerMini = ({
 
             <InfoWrapper units={units}>
                 <NameTitle $display={notEmpty(displayNameColor)}>
-                    <TextOswald fontsize={0.8} color={displayNameColor ?? "white"}>{adventurer.name}</TextOswald>
+                    <TextOswald fontsize={0.8} color={displayNameColor ?? "white"}>{character.name}</TextOswald>
                 </NameTitle>
                 <APSWrapper units={units}>
                     <ExperienceBar $display={displayAPS} color="r" key="ath" units={units}>
                         <Experience start={lastExperience[0]} experience={experience[0]} animate={animateAPS} color="r" units={units}>
-                            <span>{adventurer.realATH}</span>
+                            <span>{character.evAPS.athleticism}</span>
                         </Experience>
                     </ExperienceBar>
                     <ExperienceBar $display={displayAPS} color="b" key="int" units={units}>
                         <Experience start={lastExperience[1]} experience={experience[1]} animate={animateAPS} color="b" units={units}>
-                            <span>{adventurer.realINT}</span>
+                            <span>{character.evAPS.intellect}</span>
                         </Experience>
                     </ExperienceBar>
                     <ExperienceBar $display={displayAPS} color="g" key="cha" units={units}>
                         <Experience start={lastExperience[2]} experience={experience[2]} animate={animateAPS} color="g" units={units}>
-                            <span>{adventurer.realCHA}</span>
+                            <span>{character.evAPS.charisma}</span>
                         </Experience>
                     </ExperienceBar>
                 </APSWrapper>
             </InfoWrapper>
-        </AdventurerContainer>
+        </CharacterContainer>
     )
 }
 
-export default AdventurerMini
+export default CharacterMini

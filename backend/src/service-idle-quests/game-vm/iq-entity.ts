@@ -30,6 +30,10 @@ export type WithSkills = {
     skills?: SkillName[]
 }
 
+export type WithNextLevelXP = {
+    nextLevelXP: APS
+}
+
 export type WithEV = {
     evAPS: APS
 }

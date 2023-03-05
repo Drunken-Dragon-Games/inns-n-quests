@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux"
 import _ from "underscore"
 import { InventoryState } from "../../inventory-state"
-import AdventurerSplashArt from "./adventurer-splash-art"
+import CharacterSplashArt from "./character-splash-art"
 import QuestSheet from "./quest-sheet"
 
 const ActivityView = () => {
@@ -16,8 +16,8 @@ const ActivityView = () => {
                 adventurerSlots={state.selectedParty}
             />
 
-        : state.selection?.ctype === "adventurer" ?
-            <AdventurerSplashArt adventurer={state.selection} />
+        : state.selection?.ctype === "character" ?
+            <CharacterSplashArt character={state.selection} />
 
         : <></> }
     </div>

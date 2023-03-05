@@ -84,7 +84,7 @@ const PaperBackgroundHover4 = styled(PixelArtImage)<{hovering: boolean}>`
 `
 
 const QuestPreviewCard = ({ quest }: { quest: AvailableQuest }) => {
-    const questStyle = quest.paper
+    const questStyle = 0
     const [hovering, setHovering] = useState(false)
     const PaperBackgroundHover = [PaperBackgroundHover1, PaperBackgroundHover2, PaperBackgroundHover3, PaperBackgroundHover4][questStyle - 1]!
     return (
@@ -112,7 +112,7 @@ const QuestPreviewCard = ({ quest }: { quest: AvailableQuest }) => {
                 alt="quest monster preview"
                 width={8.5} height={8.5}
             />
-            <PropStamp rarity={quest.seal} />
+            <PropStamp rarity={"townsfolk"} />
         </QuestPreviewCardContainer>
     )
 }

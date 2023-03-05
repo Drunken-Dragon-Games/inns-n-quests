@@ -314,6 +314,7 @@ export const testCharacters = (userId: string): Character[] => [{
     ivAPS: zeroAPS,
     xpAPS: zeroAPS,
     evAPS: newAPS([5, 14, 20]),
+    nextLevelXP: newAPS([100,100,100]),
     skills: [
         "Slash Weapons I",
         "Nature Knowledge I",
@@ -338,6 +339,7 @@ export const testCharacters = (userId: string): Character[] => [{
     ivAPS: zeroAPS,
     xpAPS: zeroAPS,
     evAPS: newAPS([5, 10, 20]),
+    nextLevelXP: newAPS([100,100,100]),
     skills: [
         "Slash Weapons I",
         "Mystic Communion I",
@@ -362,6 +364,7 @@ export const testCharacters = (userId: string): Character[] => [{
     ivAPS: zeroAPS,
     xpAPS: zeroAPS,
     evAPS: newAPS([5, 10, 20]),
+    nextLevelXP: newAPS([100,100,100]),
     skills: [
         "Slash Weapons I",
         "Communication I",
@@ -386,6 +389,7 @@ export const testCharacters = (userId: string): Character[] => [{
     ivAPS: zeroAPS,
     xpAPS: zeroAPS,
     evAPS: newAPS([5, 10, 20]),
+    nextLevelXP: newAPS([100,100,100]),
     skills: [
         "Slash Weapons I",
         "Nature Knowledge I",

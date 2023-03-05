@@ -1,19 +1,19 @@
 import { RefObject } from "react"
-import { Adventurer, APS, APSRequirement, AvailableQuest, mergeAPSRequirementMax, QuestRequirement, SealType, TakenQuest } from "../../common"
-import { Furniture } from "../../common/furniture"
+import { Character, Furniture, AvailableQuest, SealType, TakenQuest } from "../../common"
 import { notEmpty } from "../../utils"
+import * as vm from "../../game-vm"
 
 export type SelectedQuest = AvailableQuest | TakenQuest
 
-export type InventoryPageName = "adventurers" | "taken-quests" | "furniture"
+export type InventoryPageName = "characters" | "taken-quests" | "furniture"
 
-export type InventoryAsset = Adventurer | Furniture
+export type InventoryAsset = Character | Furniture
 
-export type InventoryItem = Adventurer | TakenQuest | Furniture
+export type InventoryItem = Character | TakenQuest | Furniture
 
-export type ActivitySelection = SelectedQuest | Adventurer | Furniture
+export type ActivitySelection = SelectedQuest | Character | Furniture
 
-export type DraggableItem = Adventurer | Furniture
+export type DraggableItem = Character | Furniture
 
 export type DraggingState = {
     item: DraggableItem
@@ -61,60 +61,66 @@ export const mapSealImage = (quest: SelectedQuest): { src: string, width: number
 }
 
 export const activityId = (activity?: ActivitySelection): string =>
-    activity?.ctype === "adventurer" ? activity.adventurerId :
+    activity?.ctype === "character" ? activity.entityId :
     activity?.ctype === "taken-quest" ? activity.takenQuestId :
-    activity?.ctype === "furniture" ? activity.furnitureId :
+    activity?.ctype === "furniture" ? activity.entityId :
     "no-activity"
 
 export const takenQuestId = (quest?: SelectedQuest): string =>
     quest?.ctype === "taken-quest" ? quest.takenQuestId : ""
 
 export const questId = (quest: SelectedQuest): string =>
-    quest.ctype === "taken-quest" ? quest.quest.questId : quest.questId
+    quest.ctype === "taken-quest" ? quest.availableQuest.questId : quest.questId
 
 export const questName = (quest: SelectedQuest): string =>
-    quest.ctype === "taken-quest" ? quest.quest.name : quest.name
+    quest.ctype === "taken-quest" ? quest.availableQuest.name : quest.name
 
 export const questDescription = (quest: SelectedQuest): string =>
-    quest.ctype === "taken-quest" ? quest.quest.description : quest.description
+    quest.ctype === "taken-quest" ? quest.availableQuest.description : quest.description
 
-export const questPaper = (quest: SelectedQuest): number =>
-    quest.ctype === "taken-quest" ? quest.quest.paper : quest.paper
+//export const questPaper = (quest: SelectedQuest): number =>
+    //0
+    //quest.ctype === "taken-quest" ? quest.availableQuest.paper : quest.paper
 
 export const questSeal = (quest: SelectedQuest): SealType =>
-    quest.ctype === "taken-quest" ? quest.quest.seal : quest.seal
+    "townsfolk"
+    //quest.ctype === "taken-quest" ? quest.availableQuest.seal : quest.seal
 
 export function inventoryItemId(item: InventoryItem): string {
-    if (item.ctype === "adventurer")
-        return item.adventurerId
+    if (item.ctype === "character")
+        return item.entityId
     else if (item.ctype === "furniture")
-        return item.furnitureId
+        return item.entityId
     else //if (item.ctype === "taken-quest")
         return item.takenQuestId
 }
 
 export function isDraggableItem(item?: any): item is DraggableItem {
-    return item && (item.ctype === "adventurer" || item.ctype === "furniture")
+    return item && (item.ctype === "character" || item.ctype === "furniture")
 }
 
 export function draggableItemId(item: DraggableItem): string {
-    if (item.ctype === "adventurer")
-        return item.adventurerId
+    if (item.ctype === "character")
+        return item.entityId
     else //if (item.ctype === "furniture")
-        return item.furnitureId
+        return item.entityId
 }
 
 export const mapQuestScroll = (takenQuest: TakenQuest) => {
-    switch (takenQuest.quest.seal) {
+    return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/townsfolk.png"
+    /*
+    switch (takenQuest.availableQuest.seal) {
         case "kings-plea": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/kings_plea.png"
         case "heroic-quest": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/heroic_quest.png"
         case "valiant-adventure": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/valiant_adventure.png"
         case "townsfolk": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/townsfolk.png"
         default: return ""
     }
+    */
 }
 
-export function getQuestAPSRequirement(selectedQuest: SelectedQuest): APS {
+export function getQuestAPSRequirement(selectedQuest: SelectedQuest): vm.APS {
+    /*
     const search = (requirement: QuestRequirement): APSRequirement => {
         if (requirement.ctype === "aps-requirement") return requirement
         else if (requirement.ctype === "or-requirement") return mergeAPSRequirementMax(search(requirement.left), search(requirement.right))
@@ -127,14 +133,16 @@ export function getQuestAPSRequirement(selectedQuest: SelectedQuest): APS {
     const quest = selectedQuest.ctype === "available-quest" ? selectedQuest : selectedQuest.quest
     const requirement = search(quest.requirements)
     return { athleticism: requirement.athleticism, intellect: requirement.intellect, charisma: requirement.charisma }
+    */
+    return { athleticism: 10, intellect: 10, charisma: 10 }
 }
 
-export const sortAdventurers = (adventurers: Adventurer[]) => {
+export const sortCharacters = (adventurers: Character[]) => {
     return adventurers.sort((a, b) => {
-        if(a.inChallenge && !b.inChallenge){
+        if(a.inActivity && !b.inActivity){
             return 1
         }
-        if(!a.inChallenge && b.inChallenge){
+        if(!a.inActivity && b.inActivity){
             return -1
         }
         return 0

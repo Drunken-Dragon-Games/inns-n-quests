@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { AdventurerParty } from "../../common"
 import { IdSet } from "../../utils"
 import { WorldActivity } from "./activity-dsl"
 import { WorldMap } from "./world-dsl"
@@ -10,7 +9,7 @@ export type WorldState = {
     open: boolean
     viewLocation: { [worldName in WorldMapName]: [number, number] }
 
-    parties: IdSet<AdventurerParty>
+    //parties: IdSet<AdventurerParty>
     activities: IdSet<WorldActivity>
 }
 
@@ -18,7 +17,7 @@ const worldInitialState: WorldState = {
     activeMap: NorthWestThioldenPaperMap,
     open: false,
     viewLocation: { "Northwest Thiolden": [0, 0], "Base Inn": [0, 0] },
-    parties: {},
+    //parties: {},
     activities: {},
 }
 
@@ -42,11 +41,13 @@ export const worldState = createSlice({
                 state.activeMap
         },
 
+        /*
         setParties: (state, action: PayloadAction<AdventurerParty[]>) => {
             action.payload.forEach(party => {
                 state.parties[party.partyId] = party
             })
         },
+        */
 
         setActivities: (state, action: PayloadAction<WorldActivity[]>) => {
             action.payload.forEach(activity => {
@@ -59,6 +60,6 @@ export const worldState = createSlice({
 export const {
     setWorldViewLocation,
     setWorldMap,
-    setParties,
+    //setParties,
     setActivities,
 } = worldState.actions

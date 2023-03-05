@@ -1,11 +1,11 @@
 import { MouseEventHandler, useMemo, useState } from "react"
 import styled from "styled-components"
-import { Adventurer } from "../../../../../common"
+import { Character } from "../../../../../common"
 import { notEmpty, PixelArtImage, useDrag, vh, vh1 } from "../../../../../utils"
 import InventoryTransitions from "../../../inventory-transitions"
-import AdventurerMini from "./adventurer-mini"
+import CharacterMini from "./character-mini"
 
-const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
+const CharacterSlotContainer = styled.div<{ interactuable: boolean }>`
     position: relative;
     height: 10vh;
     width: 10vh;
@@ -18,7 +18,7 @@ const AdventurerSlotContainer = styled.div<{ interactuable: boolean }>`
     ${props => props.interactuable ? `cursor: pointer;` : ``}
 `
 
-const AdventurerMiniWrapper = styled.div`
+const CharacterMiniWrapper = styled.div`
     position: absolute;
     top: 0;
 `
@@ -26,68 +26,68 @@ const AdventurerMiniWrapper = styled.div`
 const EmptySlot = () =>
     <PixelArtImage
         src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/dropbox.png"
-        alt="adventurer slot in quest"
+        alt="character slot in quest"
         width={3}
         height={3}
         units={vh1}
         absolute
     />
 
-type AdventurerSlotState = {
+type CharacterSlotState = {
     hovering: boolean
     interactuable: boolean
     displayedEmoji: string | undefined
     render: "normal" | "hovered"
 }
 
-type AdventurerSlotCallbacks = {
+type CharacterSlotCallbacks = {
     onMouseOver: MouseEventHandler
     onMouseLeave: MouseEventHandler
     onMouseUp: MouseEventHandler
     onMouseDown: MouseEventHandler
 }
 
-const useAdventurerSlotState = (props: AdventurerSlotProps): AdventurerSlotState & AdventurerSlotCallbacks => {
+const useCharacterSlotState = (props: CharacterSlotProps): CharacterSlotState & CharacterSlotCallbacks => {
 
     const [hovering, setHovering] = useState<boolean>(false)
 
-    const renderState = useMemo<AdventurerSlotState>(() => ({
-        interactuable: !props.preview && notEmpty(props.adventurer),
-        displayedEmoji: props.preview ? undefined : notEmpty(props.adventurer) && hovering ? "cross" : props.emoji,
-        render: props.preview || notEmpty(props.adventurer) && hovering ? "hovered" : "normal",
+    const renderState = useMemo<CharacterSlotState>(() => ({
+        interactuable: !props.preview && notEmpty(props.character),
+        displayedEmoji: props.preview ? undefined : notEmpty(props.character) && hovering ? "cross" : props.emoji,
+        render: props.preview || notEmpty(props.character) && hovering ? "hovered" : "normal",
         hovering
-    }), [props.adventurer, props.preview, hovering])
+    }), [props.character, props.preview, hovering])
 
     const { dragging, startDrag } = useDrag({
         onDrag: (position) =>
-            renderState.interactuable && InventoryTransitions.setDraggingState({ item: props.adventurer!, position }),
+            renderState.interactuable && InventoryTransitions.setDraggingState({ item: props.character!, position }),
         onDrop: () =>
             InventoryTransitions.onItemDragEnded(),
         effectiveDraggingVectorMagnitude: 30,
     })
 
-    const callbacks = useMemo<AdventurerSlotCallbacks>(() => ({
+    const callbacks = useMemo<CharacterSlotCallbacks>(() => ({
         onMouseOver: () => { setHovering(true) },
-        onMouseLeave: () => { setHovering(false); dragging && InventoryTransitions.removeAdventurerFromParty(props.adventurer) },
-        onMouseUp: () => renderState.interactuable && InventoryTransitions.removeAdventurerFromParty(props.adventurer),
+        onMouseLeave: () => { setHovering(false); dragging && InventoryTransitions.removeCharacterFromParty(props.character) },
+        onMouseUp: () => renderState.interactuable && InventoryTransitions.removeCharacterFromParty(props.character),
         onMouseDown: (event) => {
             if (renderState.interactuable) { startDrag(event) }
         },
-    }), [props.adventurer, renderState.interactuable, dragging])
+    }), [props.character, renderState.interactuable, dragging])
 
     return { ...renderState, ...callbacks }
 }
 
-interface AdventurerSlotProps {
-    adventurer: Adventurer | null
+interface CharacterSlotProps {
+    character: Character | null
     emoji?: string
     preview?: boolean
 }
 
-const AdventurerSlot = ({ adventurer, emoji, preview }: AdventurerSlotProps) => {
-    const state = useAdventurerSlotState({ adventurer, emoji, preview })
+const PartySlot = ({ character, emoji, preview }: CharacterSlotProps) => {
+    const state = useCharacterSlotState({ character, emoji, preview })
     return (
-        <AdventurerSlotContainer
+        <CharacterSlotContainer
             onMouseOver={state.onMouseOver}
             onMouseLeave={state.onMouseLeave}
             onMouseUp={state.onMouseUp}
@@ -95,19 +95,19 @@ const AdventurerSlot = ({ adventurer, emoji, preview }: AdventurerSlotProps) => 
             interactuable={state.interactuable}
         >
             <EmptySlot />
-            { notEmpty(adventurer) ? 
-                <AdventurerMiniWrapper>
-                    <AdventurerMini
-                        adventurer={adventurer}
+            { notEmpty(character) ? 
+                <CharacterMiniWrapper>
+                    <CharacterMini
+                        character={character}
                         emoji={state.displayedEmoji}
                         render={state.render}
                         displayAPS={true}
                         units={vh(1.7)}
                     />
-                </AdventurerMiniWrapper>
+                </CharacterMiniWrapper>
             : <></> }
-        </AdventurerSlotContainer>
+        </CharacterSlotContainer>
     )
 }
 
-export default AdventurerSlot
+export default PartySlot

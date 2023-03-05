@@ -1,9 +1,9 @@
 import {
-    Adventurer, AvailableQuest, TakenQuest
+    Character, AvailableQuest, TakenQuest
 } from "../../common"
 import IdleQuestsApi from "../../idle-quests-api"
 import {
-    addTakenQuest, changeAdventurersInChallenge, claimQuestOutcome, closeActivity, inventoryStore, InventoryThunk, removeFromInventory, removeTakenQuest, setInventory, setTakenQuests
+    addTakenQuest, changeCharactersInChallenge, claimQuestOutcome, closeActivity, inventoryStore, InventoryThunk, removeFromInventory, removeTakenQuest, setInventory, setTakenQuests
 } from "../../state"
 import { NotificationsApi } from "../notifications"
 import { OverworldApi } from "../overworld"
@@ -19,12 +19,12 @@ export const getInventory = (): InventoryThunk => async (dispatch) => {
         NotificationsApi.notify(`Error getting inventory: ${response.status}`, "alert")
 }
 
-export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventurer[]): InventoryThunk  => async (dispatch) => {
-    const response = await IdleQuestsApi.takeAvailableQuest(quest, adventurers)
+export const takeAvailableQuest = (quest: AvailableQuest, characters: Character[]): InventoryThunk  => async (dispatch) => {
+    const response = await IdleQuestsApi.takeAvailableQuest(quest, characters)
     if (response.status == "ok") {
         NotificationsApi.notify(`Quest taken: ${quest.name}`, "info")
         dispatch(addTakenQuest(response.takenQuest))
-        dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: true }))
+        dispatch(changeCharactersInChallenge({ characters, inActivity: true }))
         dispatch(closeActivity())
     } else {
         NotificationsApi.notify(`Error taking quest: ${response.status}`, "alert")
@@ -34,25 +34,25 @@ export const takeAvailableQuest = (quest: AvailableQuest, adventurers: Adventure
 export const getInProgressQuests = (): InventoryThunk => async (dispatch) => {
     const response = await IdleQuestsApi.getInProgressQuests()
     if (response.status == "ok") {
-        dispatch(setTakenQuests(response.quests))
+        dispatch(setTakenQuests(response.takenQuests))
     } else {
         NotificationsApi.notify(`Error getting in progress quests: ${response.status}`, "alert")
     }
 }
 
-export const claimTakenQuest = (takenQuest: TakenQuest, adventurers: Adventurer[]): InventoryThunk => async (dispatch) => {
+export const claimTakenQuest = (takenQuest: TakenQuest, characters: Character[]): InventoryThunk => async (dispatch) => {
     const response = await IdleQuestsApi.claimTakenQuest(takenQuest)
     if (response.status == "ok") {
-        NotificationsApi.notify(`Quest ${response.outcome.ctype == "success-outcome" ? "succeeded" : "failed"}: ${takenQuest.quest.name}`, "info")
+        NotificationsApi.notify(`Quest ${response.outcome.ctype == "success-outcome" ? "succeeded" : "failed"}: ${takenQuest.availableQuest.name}`, "info")
         dispatch(removeTakenQuest(takenQuest))
-        dispatch(claimQuestOutcome({ adventurers, outcome: response.outcome, takenQuest }))
+        dispatch(claimQuestOutcome({ characters, outcome: response.outcome, takenQuest }))
         setTimeout(() => {
             if (activityId(inventoryStore.getState().activitySelection) === takenQuest.takenQuestId)
                 dispatch(closeActivity())
         }, 3000)
     } else if (response.status == "missing-adventurers") {
-        NotificationsApi.notify(`Missing adventurers on wallet: ${response.missing.length} adventurers.`, "alert")
-        dispatch(changeAdventurersInChallenge({ adventurers, inChallenge: false }))
+        NotificationsApi.notify(`Missing characters on wallet: ${response.missing.length} characters.`, "alert")
+        dispatch(changeCharactersInChallenge({ characters, inActivity: false }))
         dispatch(removeFromInventory(response.missing))
         dispatch(removeTakenQuest(takenQuest))
         dispatch(closeActivity())

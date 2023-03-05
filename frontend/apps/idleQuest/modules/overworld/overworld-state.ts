@@ -1,5 +1,5 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Adventurer, Furniture } from "../../common"
+import { Character, Furniture } from "../../common"
 import { SectorConfiguration } from "./overworld-dsl"
 
 interface OverworldState {
@@ -23,20 +23,20 @@ export const overworldState = createSlice({
             state.innConfiguration = action.payload.innConfiguration
         },
 
-        setObjectLocation: (state, action: PayloadAction<{ obj: Adventurer | Furniture, location: [number, number] }>) => { 
+        setObjectLocation: (state, action: PayloadAction<{ obj: Character | Furniture, location: [number, number] }>) => { 
             const obj = action.payload.obj
             const location = action.payload.location
             const innConfiguration = state.innConfiguration
             if (!innConfiguration) {
-                if (obj.ctype == "adventurer") state.innConfiguration = { [obj.adventurerId]: { obj, location } }
-                else if (obj.ctype == "furniture") state.innConfiguration = { [obj.furnitureId]: { obj, location } }
+                if (obj.ctype == "character") state.innConfiguration = { [obj.entityId]: { obj, location } }
+                else if (obj.ctype == "furniture") state.innConfiguration = { [obj.entityId]: { obj, location } }
             }
-            else if (obj.ctype == "adventurer") {
-                if (!innConfiguration[obj.adventurerId]) innConfiguration[obj.adventurerId] = { obj, location }
-                else innConfiguration[obj.adventurerId].location = location
+            else if (obj.ctype == "character") {
+                if (!innConfiguration[obj.entityId]) innConfiguration[obj.entityId] = { obj, location }
+                else innConfiguration[obj.entityId].location = location
             } else if (obj.ctype == "furniture") {
-                if (!innConfiguration[obj.furnitureId]) innConfiguration[obj.furnitureId] = { obj, location }
-                else innConfiguration[obj.furnitureId].location = location
+                if (!innConfiguration[obj.entityId]) innConfiguration[obj.entityId] = { obj, location }
+                else innConfiguration[obj.entityId].location = location
             }
         },
     }

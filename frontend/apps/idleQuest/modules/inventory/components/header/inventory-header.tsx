@@ -39,7 +39,7 @@ interface InventoryHeaderProps {
 
 const InventoryHeader = ({ className }: InventoryHeaderProps) =>
     <DragonSilverDisplayContainer className={className}>
-        <BigHopsButton onClick={Transitions.onRecruitAdventurer} text="Recruit" />
+        <BigHopsButton onClick={Transitions.onRecruitCharacter} text="Recruit" />
         <Push />
         <DragonSilverWrapper>
             <DragonSilverIcon
