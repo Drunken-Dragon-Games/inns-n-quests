@@ -54,6 +54,8 @@ export type WillDamageType
     | "Seduction"
     | "Sadness"
 
+export const willDamageTypes = ["Fear", "Seduction", "Sadness"]
+
 export type MagicDamageType
     = "Fire"
     | "Frost"
@@ -61,10 +63,14 @@ export type MagicDamageType
     | "Nature"
     | "Arcane"
 
+export const magicDamageTypes = ["Fire", "Frost", "Shadow", "Nature", "Arcane"]
+
 export type PhysicalDamageType
     = "Blunt"
     | "Pierce"
     | "Slash"
+
+export const physicalDamageTypes = ["Blunt", "Pierce", "Slash"]
 
 export type Condition
     = "Poisoned"
@@ -181,7 +187,7 @@ export const Tier2Skills = {
     /** Charisma */
     "Negotion I": {
         description: "Can talk to people, even if they don't want to talk back.",
-        benefits: newAPS([0,0.5,0]),
+        benefits: newAPS([0,0.5,0.7]),
         requires: {
             aps: newAPS([0,5,0]),
             classes: classTag(),

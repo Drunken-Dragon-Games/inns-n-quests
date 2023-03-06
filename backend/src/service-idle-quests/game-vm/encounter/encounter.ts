@@ -289,7 +289,7 @@ export const testEncounter: Encounter & WithTag<"available-encounter"> = {
         }, {
             name: "Negotiation.",
             description: "We need someone to convince them to leave.",
-            difficulty: 12,
+            difficulty: 25,
             solvedBy: ["Negotion I"],
         }]
     }]
@@ -394,5 +394,7 @@ export const testCharacters = (userId: string): Character[] => [{
         "Slash Weapons I",
         "Nature Knowledge I",
         "Invoke Flower Bouquet I",
+        "Bark Weapons I",
+        "Negotion I"
     ],
 }]

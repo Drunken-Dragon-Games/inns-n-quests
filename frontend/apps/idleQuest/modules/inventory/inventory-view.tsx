@@ -21,33 +21,34 @@ const closeAnimation = keyframes`
     100% { opacity: 0; top: -100vh; }
 `
 
-const ContainerCss = css<{ open: boolean }>`
+const InventoryContainer = styled.div<{ open: boolean, activityOpen: boolean }>`
     position: absolute;
-    top: 0;
     height: 100%;
-    background-color: rgba(20,20,20,0.5);
     ${props => props.open ? "top: 0;" : "top: -100vh;"};
     opacity: ${props => props.open ? "1" : "0"};
     animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
+
+    display: flex;
+    width: ${props => props.activityOpen ? "100%" : "500px"};
 `
 
-const InventoryContainer = styled.div<{ open: boolean }>`
-    ${ContainerCss}
-    left: 0;
+const BrowserContainer = styled.div<{ open: boolean }>`
     width: 500px;
     backdrop-filter: blur(5px);
+    background-color: rgba(20,20,20,0.5);
 `
 
 const ActivityContainer = styled.div<{ open: boolean }>`
-    ${ContainerCss}
-    right: 0;
-    padding: 2vw;
-    width: 64vw;
+    backdrop-filter: blur(3px);
     flex: 1;
-    display: flex;
+    ${props => props.open ? "top: 0;" : "top: -100vh;"};
+    opacity: ${props => props.open ? "1" : "0"};
+    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
+    display: ${props => props.open ? "flex" : "none"};
+
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(3px);
+    background-color: rgba(20,20,20,0.5);
 `
 
 const DraggingItem = styled.div.attrs<{ position?: [number, number] }>( props => ({ 
@@ -129,12 +130,14 @@ const useInventoryState = (): InventoryComponentState => {
 const Inventory = ({ className }: { className?: string }) => {
     const state = useInventoryState()
     return <WithDraggingItem>
-        <InventoryContainer className={className} open={state.open} ref={state.inventoryContainerRef}>
-            <InventoryBrowser />
+        <InventoryContainer className={className} open={state.open} activityOpen={state.open && notEmpty(state.selection)}>
+            <BrowserContainer className={className} open={state.open} ref={state.inventoryContainerRef}>
+                <InventoryBrowser />
+            </BrowserContainer>
+            <ActivityContainer className={className} open={state.open && notEmpty(state.selection)} onClick={InventoryTransitions.closeActivity}>
+                <ActivityView />
+            </ActivityContainer>
         </InventoryContainer>
-        <ActivityContainer className={className} open={state.open && notEmpty(state.selection)} onClick={InventoryTransitions.closeActivity}>
-            <ActivityView />
-        </ActivityContainer>
     </WithDraggingItem>
 }
 

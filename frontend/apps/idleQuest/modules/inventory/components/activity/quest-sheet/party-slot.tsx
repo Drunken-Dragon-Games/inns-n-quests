@@ -101,7 +101,7 @@ const PartySlot = ({ character, emoji, preview }: CharacterSlotProps) => {
                         character={character}
                         emoji={state.displayedEmoji}
                         render={state.render}
-                        displayAPS={true}
+                        displayAPS={false}
                         units={vh(1.7)}
                     />
                 </CharacterMiniWrapper>

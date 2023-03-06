@@ -8,24 +8,11 @@ import { CharacterInfoCard } from "../character-info"
 import InventoryPage from "./inventory-page"
 import InventoryHeader from "./inventory-header"
 
-const openAnimation = keyframes`
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-`
-
-const closeAnimation = keyframes`
-    0% { opacity: 1; top: 0; }
-    99% { top: 0; }
-    100% { opacity: 0; top: -100vh; }
-`
-
-const InventoryBrowserContainer = styled.div<{ open: boolean }>`
+const InventoryBrowserContainer = styled.div`
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
-    opacity: ${props => props.open ? "1" : "0"};
-    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 `
 
 const InventoryTabsContainer = styled.div`
@@ -76,7 +63,7 @@ const useInventoryBrowserState = (): InventoryBrowserState => {
 const InventoryBrowser = () => {
     const state = useInventoryBrowserState()
     return (
-        <InventoryBrowserContainer open={state.open}>
+        <InventoryBrowserContainer>
             <InventoryHeader />
             <InventoryTabsContainer>
                 <InventoryTab onClick={() => state.setPage("characters")} selected={state.page === "characters"}><span>Adventurers</span></InventoryTab>
