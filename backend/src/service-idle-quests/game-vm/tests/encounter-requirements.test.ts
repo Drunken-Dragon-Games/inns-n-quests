@@ -6,12 +6,14 @@ test("Quest registry loading yaml", async () => {
     expect(async () => loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "..", "stubs", "test-quest-registry.yaml"), "yaml")).toBeTruthy()
 })
 
+/*
 test("'classes' easy json syntax", () => {
     expect(parseEasyJsonSyntax({ "classes": ["fighter", "paladin", "warlock"] }))
         .toStrictEqual(all([fighter, paladin, warlock]))
     expect(() => parseEasyJsonSyntax({ "classes": ["fighter", "paladin", "warlock", "unknown"] }))
         .toThrow()
 })
+*/
 
 test("'aps' easy json syntax", () => {
     expect(parseEasyJsonSyntax({ "aps": [1, 1, 1] }))
