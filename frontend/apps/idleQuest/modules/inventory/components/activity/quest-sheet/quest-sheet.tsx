@@ -2,7 +2,7 @@ import { RefObject, useEffect, useMemo, useRef } from "react"
 import { useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
 import _ from "underscore"
-import { Character, AvailableQuest, Push, TakenQuest, takenQuestSecondsLeft } from "../../../../../common"
+import { Character, AvailableQuest, Push, TakenQuest, takenQuestSecondsLeft, AvailableEncounter } from "../../../../../common"
 import { notEmpty, PixelArtCss, PixelArtImage, vh1 } from "../../../../../utils"
 import { DraggableItem, getQuestAPSRequirement, makeDropBox, mapSealImage, questDescription, questName } from "../../../inventory-dsl"
 import { InventoryState } from "../../../inventory-state"
@@ -11,7 +11,7 @@ import PartySlot from "./party-slot"
 import Signature from "./signature"
 import * as vm from "../../../../../game-vm"
 
-type RenderQuest = AvailableQuest | TakenQuest
+type RenderQuest = AvailableQuest | TakenQuest | AvailableEncounter
 
 const QuestCardContainer = styled.div`
     box-sizing: border-box;
@@ -203,7 +203,7 @@ const usePartyViewState = (quest: RenderQuest, adventurerSlots: (Character | nul
     const box1Bound = boxRef1.current?.getBoundingClientRect()
 
     useEffect(() => {
-        if (quest.ctype !== "available-quest" || dropBoxesRefs.every(ref => ref.current == null)) return
+        if (quest.ctype === "taken-quest" || dropBoxesRefs.every(ref => ref.current == null)) return
         InventoryTransitions.registerDropBoxes("party-pick", dropBoxesRefs.map(makeDropBox))
         return InventoryTransitions.deregisterDropBoxes
     }, [boxRef1.current, boxRef2.current, boxRef3.current, boxRef4.current, boxRef5.current, quest,
@@ -242,7 +242,7 @@ const PartyView = ({ quest, adventurerSlots }: { quest: RenderQuest, adventurerS
                 <div key={"character-slot-" + index} ref={dropBoxRef}>
                     <PartySlot
                         character={hovering ? hovering : picked}
-                        preview={notEmpty(hovering) || quest.ctype !== "available-quest"}
+                        preview={notEmpty(hovering) || quest.ctype === "taken-quest"}
                     />
                 </div>
             )}

@@ -1,9 +1,9 @@
 import { RefObject } from "react"
-import { Character, Furniture, AvailableQuest, SealType, TakenQuest } from "../../common"
+import { Character, Furniture, AvailableQuest, SealType, TakenQuest, AvailableEncounter } from "../../common"
 import { notEmpty } from "../../utils"
 import * as vm from "../../game-vm"
 
-export type SelectedQuest = AvailableQuest | TakenQuest
+export type SelectedQuest = AvailableQuest | TakenQuest | AvailableEncounter
 
 export type InventoryPageName = "characters" | "taken-quests" | "furniture"
 
@@ -70,7 +70,9 @@ export const takenQuestId = (quest?: SelectedQuest): string =>
     quest?.ctype === "taken-quest" ? quest.takenQuestId : ""
 
 export const questId = (quest: SelectedQuest): string =>
-    quest.ctype === "taken-quest" ? quest.availableQuest.questId : quest.questId
+    quest.ctype === "taken-quest" ? quest.availableQuest.questId : 
+    quest.ctype === "available-quest" ? quest.questId :
+    quest.encounterId
 
 export const questName = (quest: SelectedQuest): string =>
     quest.ctype === "taken-quest" ? quest.availableQuest.name : quest.name

@@ -94,8 +94,6 @@ const classTag = (types?: AdventurerClass[] | CrafterClass[]): AdventurerClass[]
 
 const skillsTagT1 = (types?: Tier1SkillName[]): Tier1SkillName[] | undefined => types
 
-export type SkillName = Tier1SkillName | Tier2SkillName
-
 export type Tier1SkillName = keyof typeof Tier1Skills
 
 export const Tier1Skills = {
@@ -153,7 +151,7 @@ export const Tier1Skills = {
         provokes: conditionTag(),
     },
     "Mystic Communion I": {
-        descriptions: "Can talk with minor spirits, demons and deities, but they don't always listen.",
+        description: "Can talk with minor spirits, demons and deities, but they don't always listen.",
         benefits: newAPS([0,0,1]),
         requires: {
             aps: newAPS([0,0,1]),
@@ -170,19 +168,9 @@ export const Tier1Skills = {
             aps: newAPS([1,0,0]),
             class: classTag(),
         },
-        damge: damageTag(["Slash"]),
+        damage: damageTag(["Slash"]),
         provokes: conditionTag(),
     },
-}
-
-export type SkillInfo<SkillDependency> = {
-    description: string,
-    benefits: APS,
-    requires: {
-        aps: APS,
-        classes: (AdventurerClass | CrafterClass)[],
-        skills: SkillDependency[],
-    }
 }
 
 export type Tier2SkillName = keyof typeof Tier2Skills
@@ -222,7 +210,7 @@ export const Tier2Skills = {
             classes: classTag(["Druid"]),
             skills: skillsTagT1(["Slash Weapons I"]),
         },
-        damge: damageTag(["Slash", "Nature"]),
+        damage: damageTag(["Slash", "Nature"]),
         provokes: conditionTag(["Poisoned"]),
     },
     "Entangling Roots I": {
@@ -233,7 +221,7 @@ export const Tier2Skills = {
             classes: ["Druid"],
             skills: skillsTagT1(["Nature Knowledge I"]),
         },
-        damge: damageTag(["Nature"]),
+        damage: damageTag(["Nature"]),
         provokes: conditionTag(["Rooted", "Grounded"]),
     },
     "Minor Shapeshift": {
@@ -244,9 +232,33 @@ export const Tier2Skills = {
             classes: ["Druid"],
             skills: skillsTagT1(["Mystic Communion I"]),
         },
-        damge: damageTag(["Pierce"]),
+        damage: damageTag(["Pierce"]),
         provokes: conditionTag(),
     },
+}
+
+export type SkillName = Tier1SkillName | Tier2SkillName
+
+export type SkillInfo = {
+    description: string,
+    benefits: APS,
+    requires: {
+        aps: APS,
+        classes?: (AdventurerClass | CrafterClass)[],
+        skills: SkillName[],
+    },
+    damage?: DamageType[],
+    provokes?: Condition[],
+}
+
+const AccSkills = { ...Tier1Skills, ...Tier2Skills }
+
+export const Skills = {
+
+    get(name: SkillName): SkillInfo {
+        const res = AccSkills[name] as SkillInfo
+        return res
+    }
 }
 
 export const testEncounter: Encounter & WithTag<"available-encounter"> = {

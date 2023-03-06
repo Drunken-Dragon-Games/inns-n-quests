@@ -1,10 +1,11 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
 import { useSelector } from "react-redux"
-import { AvailableQuest } from "../../common"
+import { AvailableEncounter, AvailableQuest } from "../../common"
 
 export interface QuestBoardState {
     open: boolean
     availableQuests: AvailableQuest[]
+    availableEncounters: AvailableEncounter[]
 }
 
 export type QuestBoardStoreState = 
@@ -16,6 +17,7 @@ export type QuestBoardThunk<ReturnType = void> =
 const questBoardInitialState: QuestBoardState = { 
     open: false,
     availableQuests: [],
+    availableEncounters: [],
 }
 
 export const questBoardState = createSlice({
@@ -35,6 +37,18 @@ export const questBoardState = createSlice({
             state.availableQuests = []
         },
 
+        addAvailableEncounters: (state, action: PayloadAction<AvailableEncounter[]>) => {
+            state.availableEncounters = [...state.availableEncounters, ...action.payload]
+        },
+
+        removeAvailableEncounter: (state, action: PayloadAction<AvailableEncounter>) => {
+            state.availableEncounters = state.availableEncounters.filter(encounter => encounter.encounterId !== action.payload.encounterId)
+        },
+
+        clearAvailableEncounters: (state) => {
+            state.availableEncounters = []
+        },
+
         toggleQuestBoard: (state, action: PayloadAction<{ open?: boolean }>) => {
             state.open = action.payload.open ?? !state.open
         }
@@ -46,6 +60,9 @@ export const {
     removeAvailableQuest,
     clearAvailableQuests,
     toggleQuestBoard,
+    addAvailableEncounters,
+    removeAvailableEncounter,
+    clearAvailableEncounters,
 } = questBoardState.actions
 
 export const questBoardStore = configureStore({

@@ -1,3 +1,4 @@
+import { MouseEventHandler } from "react"
 import styled from "styled-components"
 
 const Container = styled.div`
@@ -27,7 +28,7 @@ const Text = styled.p`
 
 interface BigHopsButtonProps {
     className?: string
-    onClick?: () => void
+    onClick?: MouseEventHandler 
     text?: string
 }
 

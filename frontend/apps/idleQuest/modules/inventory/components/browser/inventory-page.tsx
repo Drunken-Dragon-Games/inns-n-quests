@@ -3,7 +3,7 @@ import { shallowEqual, useSelector } from "react-redux"
 import styled from "styled-components"
 import _ from "underscore"
 import { takenQuestStatus, takenQuestTimeLeft } from "../../../../common"
-import { notEmpty, PixelArtImage, useDrag, vmax } from "../../../../utils"
+import { notEmpty, PixelArtImage, px, useDrag, vmax } from "../../../../utils"
 import { InventoryItem, InventoryPageName, isDraggableItem, mapQuestScroll, sortCharacters } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
 import InventoryTransitions from "../../inventory-transitions"
@@ -12,13 +12,15 @@ import InventoryBox from "./inventory-box"
 
 const InventoryPageContainer = styled.div`
     box-sizing: border-box;
-    margin: 0.5vmax;
-    padding-left: 0.5vmax;
-    height: calc(100% - 1vmax);
-    width: 100%;
+    margin: 10px 0px 0px 5px;
+    padding: 0 10px;
+    width: calc(100% - 5px);
     
+    #background-color: blue;
+
     direction: rtl;
-    overflow-x: hidden;
+    overflow: auto;
+    overflow-x: visible;
     overflow-y: scroll;
 
     ::-webkit-scrollbar {
@@ -50,19 +52,19 @@ const InventoryPageContainer = styled.div`
 
 const DirectionFix = styled.div`
     direction: ltr;
+    overflow: visible;
 
-    display: inline-flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(108.5px, 1fr);
+    grid-gap: 10px;
 
     width: 100%;
-    gap: 0.5vmax;
-
 `
 
-const ItemBox = styled(InventoryBox)`
-    position: relative;
-    width: 8vmax;
-    height: 8vmax;
+const InventoryBoxContainer = styled.div`
+    display: inline-block;
+    height: 100%;
 `
 
 type InventoryItemViewState = {
@@ -142,7 +144,12 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
 
     const callbacks = useMemo(() => ({
         itemClick: () => !boxState.disabled && /*!draggingState.dragging &&*/ item && InventoryTransitions.onItemClick(item),
-        hoverOn: () => setHover(!boxState.disabled && !subState.otherDraggingHappening),
+        hoverOn: () => {
+            const allowedHover = !boxState.disabled && !subState.otherDraggingHappening
+            setHover(allowedHover)
+            if (allowedHover && item?.ctype === "character")
+                InventoryTransitions.setCharacterInfo(item)
+        },
         hoverOff: () => setHover(false),
     }), [item, boxState.disabled, /*draggingState.dragging,*/ subState.otherDraggingHappening])
 
@@ -169,41 +176,43 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
 const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
     const state = useInventoryItemViewState(item)
     return (
-        <ItemBox
-            //onClick={() => !state.disabled && props.onItemClick && item && props.onItemClick(item)}
-            onMouseUp={state.itemClick}
-            onMouseDown={state.startDrag}
-            onMouseEnter={state.hoverOn}
-            onMouseLeave={state.hoverOff}
-            selected={state.selected}
-            disabled={state.disabled}
-            center={state.center}
-            hover={state.hover}
-            empty={!item}
-            info={state.info}
-            overflowHidden={state.overflowHidden}
-        > 
-        { item?.ctype === "character" ? 
-            <CharacterSprite
-                character={item}
-                emoji={state.hover ? item.entityId : undefined}
-                units={vmax(0.8)}
-                render={state.hover ? "hovered" : "normal"}
-            /> 
-        : item?.ctype === "taken-quest" ? 
-            <PixelArtImage
-                src={mapQuestScroll(item)}
-                alt="quest scroll"
-                width={7.3} height={6}
-            /> 
-        : item?.ctype === "furniture" ? 
-            <FurnitureSprite
-                furniture={item}
-                units={vmax(0.8)}
-                render={state.hover ? "hovered" : "normal"}
-            /> :
-        <></> } 
-        </ItemBox>
+        <InventoryBoxContainer>
+            <InventoryBox
+                //onClick={() => !state.disabled && props.onItemClick && item && props.onItemClick(item)}
+                onMouseUp={state.itemClick}
+                onMouseDown={state.startDrag}
+                onMouseEnter={state.hoverOn}
+                onMouseLeave={state.hoverOff}
+                selected={state.selected}
+                disabled={state.disabled}
+                center={state.center}
+                hover={state.hover}
+                empty={!item}
+                info={state.info}
+                overflowHidden={state.overflowHidden}
+            >
+                {item?.ctype === "character" ?
+                    <CharacterSprite
+                        character={item}
+                        emoji={state.hover ? item.entityId : undefined}
+                        units={px(15)}
+                        render={state.hover ? "hovered" : "normal"}
+                    />
+                    : item?.ctype === "taken-quest" ?
+                        <PixelArtImage
+                            src={mapQuestScroll(item)}
+                            alt="quest scroll"
+                            width={7.3} height={6}
+                        />
+                        : item?.ctype === "furniture" ?
+                            <FurnitureSprite
+                                furniture={item}
+                                units={px(15)}
+                                render={state.hover ? "hovered" : "normal"}
+                            /> :
+                            <></>}
+            </InventoryBox>
+        </InventoryBoxContainer>
     )
 }
 
@@ -235,10 +244,10 @@ const useInventoryPageState = (page: InventoryPageName): InventoryPageState => {
     return itemSlots
 }
 
-const InventoryPage = ({ page }: { page: InventoryPageName }) => {
+const InventoryPage = ({ className, page }: { className?: string, page: InventoryPageName }) => {
     const { items, emptySlots } = useInventoryPageState(page)
     return (
-        <InventoryPageContainer>
+        <InventoryPageContainer className={className}>
             <DirectionFix>
                 {items.map((item, index) =>
                     <InventoryItemView key={index} item={item} />

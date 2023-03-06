@@ -1,10 +1,12 @@
 import { useState } from "react"
 import { shallowEqual, useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
-import { OswaldFontFamily } from "../../../../common"
+import { Character, OswaldFontFamily } from "../../../../common"
 import { InventoryPageName } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
+import { CharacterInfoCard } from "../character-info"
 import InventoryPage from "./inventory-page"
+import InventoryHeader from "./inventory-header"
 
 const openAnimation = keyframes`
     0% { opacity: 0; }
@@ -18,7 +20,7 @@ const closeAnimation = keyframes`
 `
 
 const InventoryBrowserContainer = styled.div<{ open: boolean }>`
-    height: 95%;
+    height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -27,21 +29,16 @@ const InventoryBrowserContainer = styled.div<{ open: boolean }>`
 `
 
 const InventoryTabsContainer = styled.div`
-    height: 5%;
     width: 100%;
-    margin: 0 auto;
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
 `
 
 const InventoryTab = styled.div<{ selected: boolean }>`
-    height: 100%;
     flex: 1;
     display: flex;
     align-items: center;
-    font-size: 1vmax;
+    font-size: 14px;
+    padding: 10px 0;
     justify-content: center;
     cursor: pointer;
     background-color: ${props => props.selected ? "rgba(20,20,20,0.1)" : "rgba(20,20,20,0.5)"};
@@ -51,24 +48,45 @@ const InventoryTab = styled.div<{ selected: boolean }>`
     ${OswaldFontFamily}
 `
 
-const InventoryPagesContainer = styled.div`
-    height: 95%;
-    width: 100%;
+const InventoryPagesContainer = styled(InventoryPage)`
+    flex: 1;
 `
 
-const InventoryBrowser = () => {
+const CharacterInfoCardContainer = styled(CharacterInfoCard)`
+    box-sizing: border-box;
+    margin: 10px;
+`
+
+type InventoryBrowserState = {
+    infoCardCharacter?: Character
+    open: boolean
+    page: InventoryPageName 
+    setPage: (page: InventoryPageName) => void
+}
+
+const useInventoryBrowserState = (): InventoryBrowserState => {
     const [page, setPage] = useState<InventoryPageName>("characters")
-    const open = useSelector((state: InventoryState) => state.open, shallowEqual)
+    const state = useSelector((state: InventoryState) => ({
+        open: state.open,
+        infoCardCharacter: state.activeCharacterInfo
+    }), shallowEqual)
+    return {...state, page, setPage}
+}
+
+const InventoryBrowser = () => {
+    const state = useInventoryBrowserState()
     return (
-        <InventoryBrowserContainer open={open}>
+        <InventoryBrowserContainer open={state.open}>
+            <InventoryHeader />
             <InventoryTabsContainer>
-                <InventoryTab onClick={() => setPage("characters")} selected={page === "characters"}><span>Adventurers</span></InventoryTab>
-                <InventoryTab onClick={() => setPage("taken-quests")} selected={page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
-                <InventoryTab onClick={() => setPage("furniture")} selected={page === "furniture"}><span>Furniture</span></InventoryTab>
+                <InventoryTab onClick={() => state.setPage("characters")} selected={state.page === "characters"}><span>Adventurers</span></InventoryTab>
+                <InventoryTab onClick={() => state.setPage("taken-quests")} selected={state.page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
+                <InventoryTab onClick={() => state.setPage("furniture")} selected={state.page === "furniture"}><span>Furniture</span></InventoryTab>
             </InventoryTabsContainer>
-            <InventoryPagesContainer>
-                <InventoryPage page={page} />
-            </InventoryPagesContainer>
+            { state.infoCardCharacter ?
+                <CharacterInfoCardContainer character={state.infoCardCharacter} />
+            : <></>}
+            <InventoryPagesContainer page={state.page}/>
         </InventoryBrowserContainer>
     )
 }

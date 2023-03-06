@@ -5,7 +5,6 @@ import _ from "underscore"
 import { notEmpty, vmax } from "../../utils"
 import ActivityView from "./components/activity"
 import InventoryBrowser from "./components/browser"
-import InventoryHeader from "./components/header"
 import { CharacterSprite, FurnitureSprite } from "./components/sprites"
 import { ActivitySelection, DropBoxesState, makeDropBox } from "./inventory-dsl"
 import { InventoryState, inventoryStore } from "./inventory-state"
@@ -35,7 +34,7 @@ const ContainerCss = css<{ open: boolean }>`
 const InventoryContainer = styled.div<{ open: boolean }>`
     ${ContainerCss}
     left: 0;
-    width: 36vmax;
+    width: 500px;
     backdrop-filter: blur(5px);
 `
 
@@ -49,10 +48,6 @@ const ActivityContainer = styled.div<{ open: boolean }>`
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(3px);
-`
-
-const Header = styled(InventoryHeader)`
-    height: 5%;
 `
 
 const DraggingItem = styled.div.attrs<{ position?: [number, number] }>( props => ({ 
@@ -133,10 +128,8 @@ const useInventoryState = (): InventoryComponentState => {
 
 const Inventory = ({ className }: { className?: string }) => {
     const state = useInventoryState()
-    console.log("render inventory")
     return <WithDraggingItem>
         <InventoryContainer className={className} open={state.open} ref={state.inventoryContainerRef}>
-            <Header />
             <InventoryBrowser />
         </InventoryContainer>
         <ActivityContainer className={className} open={state.open && notEmpty(state.selection)} onClick={InventoryTransitions.closeActivity}>

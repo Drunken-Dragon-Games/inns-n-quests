@@ -1,4 +1,4 @@
-import { AvailableQuest } from "../../common";
+import { SelectedQuest } from "./inventory-dsl";
 import { inventoryStore } from "./inventory-state";
 import InventoryTransitions from "./inventory-transitions";
 
@@ -10,7 +10,7 @@ const InventoryApi = {
     activeActivity: () =>
         inventoryStore.getState().activitySelection?.ctype,
 
-    selectQuest: (quest: AvailableQuest) =>
+    selectQuest: (quest: SelectedQuest) =>
         InventoryTransitions.onSelectQuest(quest),
     
     signQuest: () =>

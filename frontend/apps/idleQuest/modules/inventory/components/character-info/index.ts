@@ -1,0 +1,1 @@
+export { default as CharacterInfoCard } from "./character-info-card"

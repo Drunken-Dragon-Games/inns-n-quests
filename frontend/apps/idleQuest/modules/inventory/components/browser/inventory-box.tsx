@@ -3,14 +3,17 @@ import styled, { css, keyframes } from "styled-components"
 import { OswaldFontFamily } from "../../../../common"
 
 const BoxCss = css`
-    position: relative;
+    box-sizing: border-box;
     overflow: visible;
-    border-radius: 0.15vmax;
+    border-radius: 2px;
+    padding: 3px;
+    width: 100%;
+    height: 100%;
 `
 
 const InventoryBoxContainer = styled.div<{ $empty?: boolean, $disabled?: boolean }>`
     ${BoxCss}
-    padding: 0.15vmax;
+    position: relative;
     cursor: ${props => props.$empty || props.$disabled ? "default" : "pointer"};
     filter: ${props => props.$disabled ? "grayscale(100%)" : "none"};
     background-color: ${props => props.$empty ? "rgba(30,30,30,0.8)" : "rgba(20,20,20,0.9)" };
@@ -18,21 +21,15 @@ const InventoryBoxContainer = styled.div<{ $empty?: boolean, $disabled?: boolean
 
 const InnerBorderBox = styled.div<{ $hover?: boolean }>`
     ${BoxCss}
-    padding: 0.2vmax;
-    width: 100%;
-    height: 100%;
-
-    border: 0.15vmax solid ${props => props.$hover ? "rgba(255,255,255,0.7)" : "rgba(50,50,50,0.8)"};
+    border: 2px solid ${props => props.$hover ? "rgba(255,255,255,0.7)" : "rgba(50,50,50,0.8)"};
     background-color: ${props => props.$hover ? "rgba(20,20,20,0.5)" : "rgba(0,0,0,0)"};
 `
 
 const InnerBackgroundBox = styled.div<{ $selected?: boolean, $center?: boolean, $overflowHidden?: boolean }>`
     ${BoxCss}
-    width: 100%;
-    height: 100%;
 
     background-color: ${props => props.$selected ? "#1976d2" : "rgba(0,0,0,0)"};
-    box-shadow: inset 0 0 0.5vmax ${props => props.$selected ? "#90caf9" : "rgba(0,0,0,0)"};
+    box-shadow: inset 0 0 10px ${props => props.$selected ? "#90caf9" : "rgba(0,0,0,0)"};
     overflow: ${props => props.$overflowHidden ? "hidden" : "visible"};
 
     display: flex;
@@ -51,21 +48,21 @@ const ChildrenWrapper = styled.div`
 
 const InfoBox = styled.div`
     position: absolute;
-    right: -0.5vmax;
-    bottom: -0.5vmax;
-    padding: 0.15vmax;
+    right: -3px;
+    bottom: -3px;
+    padding: 2px;
     z-index: 3;
     background-color: rgba(20,20,20,0.9);
-    border-radius: 0.15vmax;
+    border-radius: 2px;
 `
 
 const InfoInnerBox = styled.div`
-    padding: 0 0.3vmax;
-    border: 0.15vmax solid rgba(50,50,50,0.7);
-    border-radius: 0.15vmax;
+    padding: 0 3px;
+    border: 2px solid rgba(50,50,50,0.7);
+    border-radius: 2px;
     span {
         ${OswaldFontFamily}
-        font-size: 0.8vmax;
+        font-size: 12px;
         text-align: center;
         color: white !important;
     };
@@ -73,49 +70,48 @@ const InfoInnerBox = styled.div`
 
 const cornerTopLeftAnimation = keyframes`
     0% { transform: translate(0vmax, 0vmax) rotate(-45deg) }
-    100% { transform: translate(-0.30vmax, -0.30vmax) rotate(-45deg) }
+    100% { transform: translate(-4px, -4px) rotate(-45deg) }
 `
 
 const cornerTopRightAnimation = keyframes`
     0% { transform: translate(0vmax, 0vmax) rotate(45deg) }
-    100% { transform: translate(0.30vmax, -0.30vmax) rotate(45deg) }
+    100% { transform: translate(4px, -4px) rotate(45deg) }
 `
 
 const cornerBottomRightAnimation = keyframes`
     0% { transform: translate(0vmax, 0vmax) rotate(135deg) }
-    100% { transform: translate(0.30vmax, 0.30vmax) rotate(135deg) }
+    100% { transform: translate(4px, 4px) rotate(135deg) }
 `
 
 const cornerBottomLeftAnimation = keyframes`
     0% { transform: translate(0vmax, 0vmax) rotate(225deg) }
-    100% { transform: translate(-0.30vmax, 0.30vmax) rotate(225deg) }
+    100% { transform: translate(-4px, 4px) rotate(225deg) }
 `
 
 const CornerImage = styled.div<{ side: "top-left" | "top-right" | "bottom-right" | "bottom-left" }>`
     position: absolute;
     width: 0; 
     height: 0; 
-    border-left: 0.5vmax solid transparent;
-    border-right: 0.5vmax solid transparent;
-    border-bottom: 0.5vmax solid white;
-    box-shadow: 0 0.1vmax 0.3vmax 0 rgba(255, 255, 255, 0.5);
-    border-radius: 0.2vmax;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-bottom: 9px solid white;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
 
     ${props => props.side === "top-left" ? `
-        top: 0.15vmax;
-        left: -0.15vmax;
+        top: 2px;
+        left: -2px;
         transform: rotate(-45deg);
     ` : props.side === "top-right" ? `
-        top: 0.15vmax;
-        right: -0.15vmax;
+        top: 2px;
+        right: -2px;
         transform: rotate(45deg);
     ` : props.side === "bottom-right" ? `
-        bottom: 0.15vmax;
-        right: -0.15vmax;
+        bottom: 2px;
+        right: -2px;
         transform: rotate(135deg);
     ` : `
-        bottom: 0.15vmax;
-        left: -0.15vmax;
+        bottom: 2px;
+        left: -2px;
         transform: rotate(225deg);
     `}
 
@@ -169,7 +165,7 @@ const InventoryBox = (props: InventoryBoxProps) =>
                 <CornerImage side="bottom-right" />
                 <CornerImage side="bottom-left" />
             </>
-            : <></>}
+        : <></>}
     </InventoryBoxContainer>
 
 export default InventoryBox

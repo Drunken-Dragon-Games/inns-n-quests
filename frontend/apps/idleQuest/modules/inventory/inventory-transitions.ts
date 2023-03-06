@@ -4,8 +4,12 @@ import { NotificationsApi } from "../notifications"
 import { OverworldApi } from "../overworld"
 import { QuestBoardApi } from "../quest-board"
 import { activityId, DraggingState, DropBox, DropBoxUtility, InventoryItem, inventoryItemId, SelectedQuest } from "./inventory-dsl"
-import { addCharacterToParty, closeActivity, dragItemEnded, inventoryStore, openActivity, registerDropBoxes, removeCharacterFromParty, setDraggingState, toggleInventory } from "./inventory-state"
-import { claimTakenQuest, fetchMintTest, getInProgressQuests, getInventory, takeAvailableQuest } from "./inventory-thunks"
+import { inventoryStore, inventoryState } from "./inventory-state"
+import InventoryThunks from "./inventory-thunks"
+
+const actions = inventoryState.actions
+
+const dispatch = inventoryStore.dispatch
 
 const InventoryTransitions = {
 
@@ -36,21 +40,21 @@ const InventoryTransitions = {
     },
 
     onRefreshInventory: () => {
-        inventoryStore.dispatch(getInventory())
-        inventoryStore.dispatch(getInProgressQuests())
+        dispatch(InventoryThunks.getInventory())
+        dispatch(InventoryThunks.getInProgressQuests())
     },
 
     onToggleInventory: () => {
-        inventoryStore.dispatch(toggleInventory())
+        dispatch(actions.toggleInventory())
     },
 
     onSelectQuest: (quest: SelectedQuest) => {
-        inventoryStore.dispatch(openActivity(quest))
-        inventoryStore.dispatch(toggleInventory(true))
+        dispatch(actions.openActivity(quest))
+        dispatch(actions.toggleInventory(true))
     },
 
     closeActivity: () => {
-        inventoryStore.dispatch(closeActivity())
+        dispatch(actions.closeActivity())
     },
     
     onSignQuest: () => {
@@ -58,58 +62,62 @@ const InventoryTransitions = {
         const quest = state.activitySelection
         const adventurers = state.selectedParty.filter(notEmpty)
         if (quest?.ctype == "available-quest" && adventurers.length > 0) {
-            inventoryStore.dispatch(takeAvailableQuest(quest, adventurers))
-            inventoryStore.dispatch(toggleInventory())
+            dispatch(InventoryThunks.takeAvailableQuest(quest, adventurers))
+            dispatch(actions.toggleInventory())
             QuestBoardApi.removeAvailableQuest(quest)
         } 
         else if (quest?.ctype == "taken-quest" && takenQuestStatus(quest) === "claimed")
-            inventoryStore.dispatch(closeActivity())
+            dispatch(actions.closeActivity())
         else if (quest?.ctype == "taken-quest" && takenQuestStatus(quest) === "finished") 
-            inventoryStore.dispatch(claimTakenQuest(quest, adventurers))
+            dispatch(InventoryThunks.claimTakenQuest(quest, adventurers))
     },
 
     removeCharacterFromParty: (character: Character | null) => {
         const activity = inventoryStore.getState().activitySelection
-        if (character && activity?.ctype === "available-quest")
-            inventoryStore.dispatch(removeCharacterFromParty(character))
+        if (character && activity?.ctype !== "taken-quest")
+            dispatch(actions.removeCharacterFromParty(character))
     },
 
     addCharacterToParty: (character: Character, slot?: number) => {
         const activity = inventoryStore.getState().activitySelection
-        if (activity?.ctype === "available-quest")
-            inventoryStore.dispatch(addCharacterToParty({ character, slot }))
+        if (activity?.ctype !== "taken-quest")
+            dispatch(actions.addCharacterToParty({ character, slot }))
     },
 
     onItemClick: (item: InventoryItem) => {
         const activeActivity = inventoryStore.getState().activitySelection
         if (activityId(activeActivity) === inventoryItemId(item))
-            inventoryStore.dispatch(closeActivity()) 
-        else if(item.ctype == "character" && activeActivity?.ctype === "available-quest")
-            inventoryStore.dispatch(addCharacterToParty({ character: item })) 
+            dispatch(actions.closeActivity()) 
+        else if(item.ctype == "character" && activeActivity?.ctype !== "taken-quest")
+            dispatch(actions.addCharacterToParty({ character: item })) 
         else 
-            inventoryStore.dispatch(openActivity(item))
+            dispatch(actions.openActivity(item))
+    },
+
+    setCharacterInfo: (character: Character) => {
+        dispatch(actions.setCharacterInfo(character))
     },
 
     setDraggingState: (state: DraggingState) => {
         //if (state.item.ctype == "character")
         //    OverworldApi.draggingItemIntoOverworld(state.item, state.position)
-        inventoryStore.dispatch(setDraggingState(state))
+        dispatch(actions.setDraggingState(state))
     },
 
     registerDropBoxes: (utility: DropBoxUtility, dropBoxes: DropBox[]) => {
-        inventoryStore.dispatch(registerDropBoxes({ utility, dropBoxes, }))
+        dispatch(actions.registerDropBoxes({ utility, dropBoxes, }))
     },
 
     deregisterDropBoxes: () => {
-        inventoryStore.dispatch(registerDropBoxes({utility: "other", dropBoxes: []}))
+        dispatch(actions.registerDropBoxes({utility: "other", dropBoxes: []}))
     },
 
     onItemDragEnded: () => {
-        inventoryStore.dispatch(dragItemEnded())
+        dispatch(actions.dragItemEnded())
     },
 
     onRecruitCharacter: () => {
-        inventoryStore.dispatch(fetchMintTest())
+        dispatch(InventoryThunks.fetchMintTest())
     },
 }
 

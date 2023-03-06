@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { v4 } from "uuid"
-import { AcceptQuestResult, AvailableQuest, Character, ClaimQuestResult, GetAvailableQuestsResult, GetInventoryResult, GetTakenQuestsResult, IdleQuestsInventory, TakenQuest } from "./common"
+import { AcceptEncounterResult, AcceptQuestResult, AvailableQuest, Character, ClaimEncounterResult, ClaimQuestResult, GetActiveEncountersResult, GetAvailableEncountersResult, GetAvailableQuestsResult, GetInventoryResult, GetTakenQuestsResult, IdleQuestsInventory, TakenQuest } from "./common"
 
 const IdleQuestsApi = {
 
@@ -14,6 +14,59 @@ const IdleQuestsApi = {
         } else
             return response.data
     },
+
+    /*
+    router.get('/available-encounters', async (request: Request, response: Response) => {
+        const location: string = request.query.location as string
+        const result = await idleQuestsService.getAvailableEncounters(location)
+        response.status(200).json(result)
+    })
+
+    router.post('/accept-encounter', async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const encounterId: string = request.body.encounter_id
+        const adventurerIds: string[] = request.body.adventurer_ids
+        const result = await idleQuestsService.acceptEncounter(userId, encounterId, adventurerIds)
+        response.status(200).json(result)
+    })
+
+    router.get('/active-encounters', async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await idleQuestsService.getActiveEncounters(userId)
+        response.status(200).json(result)
+    })
+
+    router.post('/claim-encounter', async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const activeEncounterId: string = request.body.active_encounter_id
+        const result = await idleQuestsService.claimEncounter(userId, activeEncounterId)
+        response.status(200).json(result)
+    })
+    */
+
+
+    async getAvailableEncounters(location: string): Promise<GetAvailableEncountersResult> {
+        const response = await IdleQuestsRequest("get", "/encounter/available", {location})
+        return response.data
+    },
+
+    async acceptEncounter(userId: string, encounterId: string, adventurerIds: string[]): Promise<AcceptEncounterResult> {
+        const response = await IdleQuestsRequest("post", "/encounter/accept", {userId, encounterId, adventurerIds})
+        return response.data
+    },
+
+    async getActiveEncounters(userId: string): Promise<GetActiveEncountersResult> {
+        const response = await IdleQuestsRequest("get", "/encounter/active", {userId})
+        return response.data
+    },
+
+    async claimEncounter(userId: string, activeEncounterId: string): Promise<ClaimEncounterResult> {
+        const response = await IdleQuestsRequest("post", "/encounter/claim", {userId, activeEncounterId})
+        return response.data
+    },
+
+
+
 
     takeAvailableQuest: async (quest: AvailableQuest, party: Character[]): Promise<AcceptQuestResult> => {
         const adventurer_ids = party.map(adventurer => adventurer.entityId)

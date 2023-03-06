@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import styled, { css } from "styled-components"
-import { AvailableQuest } from "../../../common"
+import { AvailableEncounter } from "../../../common"
 import { PixelArtImage } from "../../../utils"
 import { useQuestBoardSelector } from "../quest-board-state"
 import QuestBoardTransitions from "../quest-board-transitions"
@@ -83,13 +83,13 @@ const PaperBackgroundHover4 = styled(PixelArtImage)<{hovering: boolean}>`
     ${PaperBackgroundHoverCommon}
 `
 
-const QuestPreviewCard = ({ quest }: { quest: AvailableQuest }) => {
-    const questStyle = 0
+const QuestPreviewCard = ({ quest }: { quest: AvailableEncounter }) => {
+    const questStyle = 1
     const [hovering, setHovering] = useState(false)
     const PaperBackgroundHover = [PaperBackgroundHover1, PaperBackgroundHover2, PaperBackgroundHover3, PaperBackgroundHover4][questStyle - 1]!
     return (
         <QuestPreviewCardContainer 
-            onClick={() => QuestBoardTransitions.onClickAvailableQuest(quest)} 
+            onClick={() => QuestBoardTransitions.onClickAvailableEncounter(quest)} 
             onMouseEnter={() => setHovering(true)} 
             onMouseLeave={() => setHovering(false)}
         >
@@ -118,15 +118,15 @@ const QuestPreviewCard = ({ quest }: { quest: AvailableQuest }) => {
 }
 
 const QuestBoardArea = () => {
-    const availableQuests = useQuestBoardSelector(state => state.availableQuests)
+    const availableQuests = useQuestBoardSelector(state => state.availableEncounters)
     // Makes sure there are always at least 5 quests in the board
     useEffect(() => {
-        if (availableQuests.length < 5) 
-            QuestBoardTransitions.onFetchAvailableQuests()
+        if (availableQuests.length < 1) 
+            QuestBoardTransitions.onFetchAvailableEncounters()
     }, [availableQuests.length])
     return (
         <QuestBoardAreaContainer>
-            {availableQuests.slice(0, 5).map((quest: AvailableQuest, index: number) =>
+            {availableQuests.slice(0, 5).map((quest: AvailableEncounter, index: number) =>
                 <QuestPreviewCard quest={quest} key={"quest-" + index} />
             )}
         </QuestBoardAreaContainer>

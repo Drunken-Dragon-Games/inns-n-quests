@@ -17,7 +17,6 @@ const rgbMapping = (color: ExperienceBarColor, background: boolean) => {
 
 const CharacterContainer = styled.div`
     position: relative;
-    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -100,17 +99,19 @@ const DeadMark = styled.div <{ $display: boolean, units: Units }>`
 `
 
 interface AdventurerProps {
-    character: Character,
-    emoji?: string,
-    render?: SpriteRenderOptions,
-    displayDeadMark?: boolean,
-    displayAPS?: boolean,
-    animateAPS?: boolean,
-    displayNameColor?: string,
-    units?: Units,
+    className?: string
+    character: Character
+    emoji?: string
+    render?: SpriteRenderOptions
+    displayDeadMark?: boolean
+    displayAPS?: boolean
+    animateAPS?: boolean
+    displayNameColor?: string
+    units?: Units
 }
 
 const CharacterMini = ({ 
+    className,
     character, 
     emoji, 
     render = "normal", 
@@ -127,7 +128,7 @@ const CharacterMini = ({
     ]
     const lastExperience = useRememberLastValue<[number, number, number]>(experience, [0,0,0])
     return (
-        <CharacterContainer>
+        <CharacterContainer className={className}>
 
             <DeadMark $display={displayDeadMark} units={units}>
                 <PixelArtImage

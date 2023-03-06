@@ -13,6 +13,37 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
         response.status(200).json(result)
     })
 
+
+
+    router.get('/encounter/available', async (request: Request, response: Response) => {
+        const location: string = request.query.location as string
+        const result = await idleQuestsService.getAvailableEncounters(location)
+        response.status(200).json(result)
+    })
+
+    router.post('/encounter/accept', async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const encounterId: string = request.body.encounterId
+        const adventurerIds: string[] = request.body.adventurerIds
+        const result = await idleQuestsService.acceptEncounter(userId, encounterId, adventurerIds)
+        response.status(200).json(result)
+    })
+
+    router.get('/encounter/active', async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await idleQuestsService.getActiveEncounters(userId)
+        response.status(200).json(result)
+    })
+
+    router.post('/encounter/claim', async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const activeEncounterId: string = request.body.activeEncounterId
+        const result = await idleQuestsService.claimEncounter(userId, activeEncounterId)
+        response.status(200).json(result)
+    })
+
+
+
     router.get('/quests', async (request: Request, response: Response) => {
         const userId = request.auth!.userId
         const result = await idleQuestsService.getAvailableQuests("Auristar")

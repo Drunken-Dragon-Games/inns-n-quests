@@ -1,7 +1,7 @@
-import { AvailableQuest } from "../../common"
+import { AvailableEncounter, AvailableQuest } from "../../common"
 import InventoryApi from "../inventory/inventory-api"
-import { clearAvailableQuests, questBoardStore, removeAvailableQuest, toggleQuestBoard } from "./quest-board-state"
-import { getAvailableQuests } from "./quest-board-thunks"
+import { clearAvailableEncounters, clearAvailableQuests, questBoardStore, removeAvailableEncounter, removeAvailableQuest, toggleQuestBoard } from "./quest-board-state"
+import { getAvailableEncounters, getAvailableQuests } from "./quest-board-thunks"
 
 const QuestBoardTransitions = {
 
@@ -16,6 +16,22 @@ const QuestBoardTransitions = {
 
     onRemoveAvailableQuest: (availableQuest: AvailableQuest) => 
         questBoardStore.dispatch(removeAvailableQuest(availableQuest)),
+    
+
+
+    onFetchAvailableEncounters: () =>
+        questBoardStore.dispatch(getAvailableEncounters("Auristar")),
+
+    onClearAvailableEncounters: () =>
+        questBoardStore.dispatch(clearAvailableEncounters()),
+
+    onClickAvailableEncounter: (availableEncounter: AvailableEncounter) =>
+        InventoryApi.selectQuest(availableEncounter),
+    
+    onRemoveAvailableEncounter: (availableEncounter: AvailableEncounter) =>
+        questBoardStore.dispatch(removeAvailableEncounter(availableEncounter)),
+
+    
 
     onToggleQuestBoard: (open?: boolean) => 
         questBoardStore.dispatch(toggleQuestBoard({ open })),

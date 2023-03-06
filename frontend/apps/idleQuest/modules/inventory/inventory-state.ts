@@ -11,6 +11,8 @@ export interface InventoryState {
     takenQuests: TakenQuest[]
 
     activitySelection?: ActivitySelection
+    activeCharacterInfo?: Character
+
     draggingState?: DraggingState
     dropBoxesState?: DropBoxesState
     selectedParty: (Character | null)[]
@@ -43,6 +45,7 @@ export const inventoryState = createSlice({
         setInventory: (state, action: PayloadAction<IdleQuestsInventory>) => {
             state.characters = action.payload.characters
             state.furniture = action.payload.furniture
+            state.activeCharacterInfo = Object.values(action.payload.characters)[0]
         },
 
         removeFromInventory: (state, action: PayloadAction<string[]>) => {
@@ -76,12 +79,17 @@ export const inventoryState = createSlice({
                     state.characters[activity.adventurerIds[index]] ?? null)
                     //state.characters.find(character => character.entityId === activity.adventurerIds[index]) ?? null)
             else 
-                state.selectedParty = []
+                state.selectedParty = Array(5).fill(null)
         },
 
         closeActivity: (state) => {
             state.activitySelection = undefined
             state.selectedParty = []
+        },
+
+        /** Character Info State */
+        setCharacterInfo: (state, action: PayloadAction<Character | undefined>) => {
+            state.activeCharacterInfo = action.payload
         },
 
         /** Drag & Drop */
@@ -130,7 +138,7 @@ export const inventoryState = createSlice({
                 if (alreadySelected)
                     state.selectedParty[indexCharacter] = null
                 else if (partyFull)
-                    state.selectedParty[0] =character 
+                    state.selectedParty[0] = character 
                 else
                     state.selectedParty[indexNull] =character 
             }
@@ -143,10 +151,7 @@ export const inventoryState = createSlice({
         },
 
         clearSelectedParty: (state) => {
-            if (state.activitySelection && state.activitySelection.ctype === "available-quest")
-                state.selectedParty = Array(state.activitySelection.slots).fill(null)
-            else 
-                state.selectedParty = []
+            state.selectedParty = Array(5).fill(null)
         },
         
         /** Character List State */
@@ -197,31 +202,6 @@ export const inventoryState = createSlice({
         },
     },
 });
-
-export const {
-    /** Inventory */
-    toggleInventory,
-    setInventory,
-    removeFromInventory,
-    setTakenQuests,
-    addTakenQuest,
-    removeTakenQuest,
-    /** Activities State */
-    openActivity,
-    closeActivity,
-    /** Drag & Drop */
-    registerDropBoxes,
-    setDraggingState,
-    dragItemEnded,
-    /** Party Pick */
-    addCharacterToParty,
-    removeCharacterFromParty,
-    clearSelectedParty,
-    /** Character List State */
-    changeCharactersInChallenge,
-    /** Quest State */
-    claimQuestOutcome,
-} = inventoryState.actions
 
 export const inventoryStore = configureStore({
     reducer: inventoryState.reducer,
