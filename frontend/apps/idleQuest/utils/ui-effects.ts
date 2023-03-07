@@ -1,4 +1,4 @@
-import { MouseEventHandler, useCallback, useEffect, useState, MouseEvent as ReactMouseEvent } from "react"
+import { MouseEventHandler, TouchEventHandler, useCallback, useEffect, useState } from "react"
 import { notEmpty } from "."
 
 export type DragProps = {
@@ -13,6 +13,7 @@ export type DragEffect = {
     currentPosition?: [number, number]
     vector?: [number, number]
     startDrag: MouseEventHandler
+    startDragTouch: TouchEventHandler
 }
 
 /**
@@ -43,6 +44,17 @@ export const useDrag = ({ onDrag, onDrop, effectiveDraggingVectorMagnitude = 1 }
             onDrag && onDrag(position, vector)
         }
 
+        const handleTouchMove = (event: TouchEvent) => {
+            event.preventDefault()
+            if (limiter++ % 2 !== 0) return
+            const position: [number, number] = [event.touches[0].clientX, event.touches[0].clientY]
+            const vector: [number, number] = [position[0] - initialPosition[0], position[1] - initialPosition[1]]
+            const magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2)
+            setCurrentPosition({ position, vector })
+            if (magnitude < effectiveDraggingVectorMagnitude) return
+            onDrag && onDrag(position, vector)
+        }
+
         const handleMouseUp = () => {
             onDrop && onDrop()
             setCurrentPosition(undefined)
@@ -51,12 +63,24 @@ export const useDrag = ({ onDrag, onDrop, effectiveDraggingVectorMagnitude = 1 }
             window.removeEventListener('mouseup', handleMouseUp)
         }
 
+        const handleTouchEnd = () => {
+            onDrop && onDrop()
+            setCurrentPosition(undefined)
+            setInitialPosition(undefined)
+            window.removeEventListener('touchmove', handleTouchMove)
+            window.removeEventListener('touchend', handleTouchEnd)
+        }
+
         const unregisterListeners = () => {
             window.removeEventListener('mousemove', handleMouseMove)
             window.removeEventListener('mouseup', handleMouseUp)
+            window.removeEventListener('touchmove', handleTouchMove)
+            window.removeEventListener('touchend', handleTouchEnd)
         }
         window.addEventListener('mousemove', handleMouseMove)
         window.addEventListener('mouseup', handleMouseUp)
+        window.addEventListener('touchmove', handleTouchMove, { passive: false })
+        window.addEventListener('touchend', handleTouchEnd)
         return unregisterListeners
     }, [initialPosition])
     
@@ -65,7 +89,9 @@ export const useDrag = ({ onDrag, onDrop, effectiveDraggingVectorMagnitude = 1 }
         initialPosition,
         currentPosition: currentPosition?.position,
         vector: currentPosition?.vector,
-        startDrag: useCallback((event: ReactMouseEvent) => 
-            setInitialPosition([event.clientX, event.clientY]), [])
+        startDrag: useCallback((event: React.MouseEvent) => 
+            setInitialPosition([event.clientX, event.clientY]), []),
+        startDragTouch: useCallback((event: React.TouchEvent) =>
+            setInitialPosition([event.touches[0].clientX, event.touches[0].clientY]), [])
     }
 }

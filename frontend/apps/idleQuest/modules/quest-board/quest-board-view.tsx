@@ -35,9 +35,10 @@ const QuestBoardContainer = styled.div<{ open: boolean }>`
 `
 
 const AvailableQuestsWrapper = styled.div`
-    width: 80vw;
-    height: 50vw;
+    width: 100vh;
+    height: 60vh;
     position: relative;
+    padding: 3vh;
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -55,8 +56,8 @@ const QuestBoardBackground = styled(PixelArtImage)`
 const QuestBoard = ({ className }: { className?: string }) => {
     const open = useQuestBoardSelector(state => state.open)
     return (
-        <QuestBoardContainer className={className} open={open}>
-            <AvailableQuestsWrapper>
+        <QuestBoardContainer className={className} open={open} onClick={() => QuestBoardTransitions.onToggleQuestBoard() }>
+            <AvailableQuestsWrapper onClick={(e) => e.stopPropagation()}>
                 <QuestBoardBackground
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp"
                     alt="Quest Board Background"

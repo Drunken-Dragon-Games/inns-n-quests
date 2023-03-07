@@ -1,4 +1,4 @@
-import { MouseEventHandler, useEffect, useMemo, useState } from "react"
+import { MouseEventHandler, TouchEventHandler, useEffect, useMemo, useState } from "react"
 import { shallowEqual, useSelector } from "react-redux"
 import styled from "styled-components"
 import _ from "underscore"
@@ -77,6 +77,7 @@ type InventoryItemViewState = {
     hoverOn: MouseEventHandler,
     hoverOff: MouseEventHandler,
     startDrag: MouseEventHandler,
+    startDragTouch: TouchEventHandler,
 }
 
 const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState => {
@@ -124,7 +125,7 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
         } else return {}
     }, [item, subState.selection, subState.selectedParty])
 
-    const {startDrag } = useDrag({
+    const { startDrag, startDragTouch } = useDrag({
         onDrag: (position) =>
             isDraggableItem(item) && InventoryTransitions.setDraggingState({ item: item, position }),
         onDrop: () =>
@@ -158,6 +159,7 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
 
     useEffect(() => {
         if (item?.ctype === "taken-staking-quest" && takenQuestStatus(item) === "in-progress") {
+            setTimedInfo({ info: takenQuestTimeLeft(item) }) 
             const interval = setInterval(() => { 
                 setTimedInfo({ info: takenQuestTimeLeft(item) }) 
                 if (takenQuestStatus(item) !== "in-progress") clearInterval(interval) 
@@ -168,7 +170,7 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
         }
     }, [item])
 
-    return { ...boxState, /*...draggingState,*/ ...callbacks, hover, startDrag, ...timedInfo }
+    return { ...boxState, /*...draggingState,*/ ...callbacks, hover, startDrag, startDragTouch, ...timedInfo }
 
 }
 
@@ -182,6 +184,7 @@ const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
                 onMouseDown={state.startDrag}
                 onMouseEnter={state.hoverOn}
                 onMouseLeave={state.hoverOff}
+                onTouchStart={state.startDragTouch}
                 selected={state.selected}
                 disabled={state.disabled}
                 center={state.center}
@@ -202,6 +205,7 @@ const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
                             src={mapQuestScroll(item)}
                             alt="quest scroll"
                             width={7.3} height={6}
+                            units={px(13)}
                         />
                         : item?.ctype === "furniture" ?
                             <FurnitureSprite

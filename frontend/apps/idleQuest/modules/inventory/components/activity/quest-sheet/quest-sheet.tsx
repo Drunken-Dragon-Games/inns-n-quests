@@ -9,15 +9,16 @@ import EncounterView from "./encounter-view"
 import PartyView from "./party-view"
 import Signature from "./signature"
 
-const QuestCardContainer = styled.div`
+const QuestSheetContainer = styled.div`
     box-sizing: border-box;
     position: relative;
-    width: 75vh;
-    height: 85vh;
+    width: 79vh;
+    max-width: calc(100vw - 500px);
+    height: 90vh;
     display: flex;
     flex-direction: column;
     gap: 1.8vh;
-    padding: 3vh;
+    padding: 8vh;
     z-index: 20;
     filter: drop-shadow(0px 0px 1vh rgba(0, 0, 0, 0.8));
     background: url(https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/pergamino_base.png);
@@ -52,13 +53,12 @@ const QuestInfoRight = styled.div`
 `
 
 const Title = styled.h2`
-    padding-left: 4vh;
-    text-align: left;
     font-size: 3.5vh;
     font-weight: 900;
     text-transform: uppercase; 
     font-smooth: never;
     -webkit-font-smoothing : none;
+    text-align: center;
 `
 
 const Details = styled.p`
@@ -115,7 +115,7 @@ const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
     if (!quest) return <></>
     const state = useQuestCardState(quest, adventurerSlots)
     return (
-        <QuestCardContainer className={className}>
+        <QuestSheetContainer className={className}>
             <QuestInfo>
                 <QuestInfoLeft>
                     <Title>{questName(quest)}</Title>
@@ -129,7 +129,7 @@ const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
                     <PixelArtImage
                         src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg"
                         alt="quest monster"
-                        width={20} height={20}
+                        width={25} height={25}
                         units={vh1}
                     />
                     {/*<APSReq apsAccumulated={state.apsAccumulated} apsRequired={state.apsRequired} /> */}
@@ -155,7 +155,7 @@ const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
                     />
                 </SealImage>
             </Footer>
-        </QuestCardContainer>
+        </QuestSheetContainer>
     )
 }
 

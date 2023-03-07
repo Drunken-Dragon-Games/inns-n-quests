@@ -36,7 +36,9 @@ const aotMeasures = (character: Character): [number, [number,number], number] =>
     const advName = split[0]
     const chroma = split[2]
     // Vilnay
-    if (advName == 'astrid')
+    if (advName == 'astrid' && chroma == 'chroma.png')
+        return [5.5, [0,0], -7] 
+    else if (advName == 'astrid')
         return [5, [0,0], -7] 
     else if (advName == 'vadanna')
         return [6.5, [0,1], -7] 
@@ -58,6 +60,8 @@ const aotMeasures = (character: Character): [number, [number,number], number] =>
         return [8, [0,-0.8], -7] 
     else if (advName == 'perneli')
         return [5.6, [0,0.1], -7] 
+    else if (advName == 'eify' && chroma == 'chroma.png')
+        return [6.3, [0,0.4], -7.5] 
     else if (advName == 'eify')
         return [5.5, [0,0.4], -7.5] 
     else if (advName == 'bo')
@@ -114,6 +118,8 @@ const aotMeasures = (character: Character): [number, [number,number], number] =>
         return [5.5, [0,0.5], -7] 
 
     // Kullmyr
+    else if (advName == 'rundir' && chroma == 'chroma.png')
+        return [7.5, [0, -0.7], -7.5] 
     else if (advName == 'rundir')
         return [6.7, [0,-1.6], -7.5] 
     else if (advName == 'dethiol')

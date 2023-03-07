@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled, { css, keyframes } from "styled-components"
 import _ from "underscore"
-import { notEmpty, vmax } from "../../utils"
+import { notEmpty, px, vmax } from "../../utils"
 import ActivityView from "./components/activity"
 import InventoryBrowser from "./components/browser"
 import { CharacterSprite, FurnitureSprite } from "./components/sprites"
@@ -75,13 +75,13 @@ const WithDraggingItem = ({ children }: { children?: ReactNode }) => {
             {draggingState?.item.ctype === "character" && !draggingState.hide ?
                 <CharacterSprite
                     character={draggingState.item}
-                    units={vmax(0.8)}
+                    units={px(17)}
                     render={"hovered"}
                 />
             : draggingState?.item.ctype === "furniture" && !draggingState.hide ?
                 <FurnitureSprite
                     furniture={draggingState.item}
-                    units={vmax(0.8)}
+                    units={px(15)}
                     render={"hovered"}
                 />
             : <></>}

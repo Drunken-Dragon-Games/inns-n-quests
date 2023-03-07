@@ -14,6 +14,7 @@ const PartyContainer = styled.div`
     display: flex;
     gap: 1vh;
     flex-direction: row;
+    justify-content: center;
 `
 
 const CharacterSlotContainer = styled.div<{ interactuable: boolean }>`

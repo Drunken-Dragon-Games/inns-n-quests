@@ -43,7 +43,7 @@ export const mapSealImage = (quest: SelectedQuest): { src: string, width: number
     switch (questSeal(quest)) {
         case "heroic-quest": return { 
             src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/heroic_quest_big.png",
-            width: 6 * scale, height: 9 * scale, offset: 0
+            width: 6 * scale, height: 9 * scale, offset: 4
         }
         case "kings-plea": return {
             src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/kings_plea_big.png",
@@ -85,7 +85,7 @@ export const questDescription = (quest: SelectedQuest): string =>
     //quest.ctype === "taken-staking-quest" ? quest.availableQuest.paper : quest.paper
 
 export const questSeal = (quest: SelectedQuest): SealType =>
-    "townsfolk"
+    "heroic-quest"
     //quest.ctype === "taken-staking-quest" ? quest.availableQuest.seal : quest.seal
 
 export function inventoryItemId(item: InventoryItem): string {

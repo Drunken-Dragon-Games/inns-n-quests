@@ -1,13 +1,14 @@
 import styled from "styled-components"
 import Image from "next/image"
 import { SealType } from "../../../common"
+import { PixelArtImage, vh } from "../../../utils"
 
 const SealWrapperKingsPlea = styled.div`
     position: absolute;
-    bottom: 0vw;
-    right: 1vw;
-    width: 4vw;
-    height: 4vw;
+    bottom: 0vh;
+    right: 1vh;
+    width: 4vh;
+    height: 4vh;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
@@ -16,10 +17,9 @@ const SealWrapperKingsPlea = styled.div`
 
 const SealWrapperHeroicQuest = styled.div`
     position: absolute;
-    bottom: 0vw;
-    right: 1.5vw;
-    width: 2.5vw;
-    height: 4vw;
+    bottom: 0vh;
+    right: 5vh;
+    width: 2.5vh;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
@@ -28,10 +28,10 @@ const SealWrapperHeroicQuest = styled.div`
 
 const SealWrapperValiantAdventure = styled.div`
     position: absolute;
-    bottom: 1.5vw;
-    right: 1.5vw;
-    width: 2.2vw;
-    height: 2.2vw;
+    bottom: 1.5vh;
+    right: 1.5vh;
+    width: 2.2vh;
+    height: 2.2vh;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
@@ -40,10 +40,10 @@ const SealWrapperValiantAdventure = styled.div`
 
 const SealWrapperTownsfolk = styled.div`
     position: absolute;
-    bottom: 1.5vw;
-    right: 1.5vw;
-    width: 4vw;
-    height: 1.5vw;
+    bottom: 1.5vh;
+    right: 1.5vh;
+    width: 4vh;
+    height: 1.5vh;
 
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
@@ -67,12 +67,13 @@ export default ({ rarity }: { rarity: SealType }) => {
     else if (rarity == "heroic-quest")
         return (
             <SealWrapperHeroicQuest>
-                <Image
+                <PixelArtImage
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/heroic_quest.png"
                     alt="paper prop"
                     width={50}
                     height={80}
-                    layout="responsive" />
+                    units={vh(0.1)}
+                />
             </SealWrapperHeroicQuest>
         )
     else if (rarity == "valiant-adventure")

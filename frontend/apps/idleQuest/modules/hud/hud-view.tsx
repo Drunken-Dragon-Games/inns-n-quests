@@ -1,12 +1,11 @@
 import styled from "styled-components"
-import { PixelArtImage, vh } from "../../utils"
+import { OswaldFontFamily } from "../../common"
+import { PixelArtImage, px, vh } from "../../utils"
 import InventoryApi from "../inventory/inventory-api"
 import { QuestBoardApi } from "../quest-board"
 
 const HudContainer = styled.div`
     position: absolute;
-    padding-bottom: 2vh;
-    bottom: 0;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -15,18 +14,24 @@ const HudContainer = styled.div`
 const HudButtons = styled.div`
     display: flex;
     gap: 2vh;
-    padding: 2vh;
-    background-color: rgba(20,20,20,0.5);
-    backdrop-filter: blur(5px);
-    border-radius: 1vh;
+    padding: 10px;
 `
 
 const HudButton = styled(PixelArtImage)`
-    filter: drop-shadow(0px 0px 15px black);
+    filter: drop-shadow(0px 0px 13px black);
     &:hover {
         filter: drop-shadow(0px 0px 15px yellow);
         cursor: pointer;
     }
+`
+
+const Letter = styled.div<{ letter: string }>`
+    color white;
+    ${OswaldFontFamily}
+    font-size: 26px;
+    position: absolute;
+    filter: drop-shadow(0px 0px 3px black);
+    ${props => props.letter === "q" ? "left: 45vw;" : "right: 45vw;"}
 `
 
 const HudView = ({ className }: { className?: string }) =>
@@ -37,15 +42,17 @@ const HudView = ({ className }: { className?: string }) =>
                 src="https://cdn.ddu.gg/modules/quests/icons/quests-icon.png"
                 width={80}
                 height={68}
-                units={vh(0.15)}
+                units={px(0.6)}
             />
+            <Letter letter="q"> Q </Letter>
             <HudButton
                 onClick={InventoryApi.toggleInventory}
                 src="https://cdn.ddu.gg/modules/quests/icons/inventory-icon.png"
                 width={80}
                 height={68}
-                units={vh(0.15)}
+                units={px(0.6)}
             />
+            <Letter letter="b"> B </Letter>
         </HudButtons>
     </HudContainer>
 

@@ -1,14 +1,14 @@
 import Image from "next/image"
 import React, { useState } from "react"
 import styled from "styled-components"
-import { If, Push, SansSerifFontFamily } from "../../../../common"
+import { If, OswaldFontFamily, Push, SansSerifFontFamily } from "../../../../common"
 import Transitions from "../../inventory-transitions"
 import { BigHopsButton } from "../../../../common"
 
 const DragonSilverDisplayContainer = styled.div`
     box-sizing: border-box;
     display: flex;
-    padding: 0.8vh 1vh;
+    padding: 15px;
     background-color: rgba(20,20,20,0.5);
     align-items: center;
 `
@@ -16,15 +16,15 @@ const DragonSilverDisplayContainer = styled.div`
 const CloseButton = styled.div`
     cursor: pointer;
     color: white;
-    font-size: 2.5vh;
+    font-size: 30px;
     font-weight: bold;
     ${SansSerifFontFamily}
     &:hover{ text-shadow: 0 0 0.5vh white; }
 `
 
 const DragonSilverWrapper = styled.div`
-    margin-left: 1vh;
-    margin-top: 0.3vh;
+    margin-left: 10px;
+    margin-top: 0;
     display: flex;
 `
 
@@ -35,32 +35,39 @@ const ClaimDragonSilverButtonWrapper = styled.div`
 
 const DragonSilverIconContainer = styled.div`
     display: flex;
-    width: 4vw;
-    p{
-        margin-left: 0.5vw;
-        margin-top: 0.12vw;
+    margin-right: 40px;
+    align-items: center;
+    & > * {
+        ${OswaldFontFamily}
+        color: white;
+        margin-left: 20px;
+        font-size: 20px;
+        border-weight: bold;
     }
 `
 
 const ImageWrapper = styled.div`
     display: block;
-    width: 1.5vw;
-    height: 1.5vw;
+    width: 25px;
+    height: 25px;
     position: relative;
 `
 
 const ToolTipDragonSilverToClaim = styled.span<{ $hover: boolean }>`
     position: absolute;
+    color: #1e1e1e;
+    font-size: 10px;
+    text-align: center;
     background-color: white;
-    padding: 0.2vw 0.5vw 0.1vw 0.5vw;
-    border-radius: 0.5vw;
-    top: 0vw;
-    left: 2vw;
-    width: 6vw;
+    padding: 3px;
+    border-radius: 2px;
+    bottom: -50px;
+    left: -70%;
+    width 60px;
     visibility: ${props => props.$hover ? "visible": "hidden"};
     opacity: ${props => props.$hover ? "1": "0"};
     transition: opacity 0.5s, visibility 0.5s;
-    z-index: 2;
+    z-index: 10;
 `
 
 interface DragonSilverIconProps{
@@ -74,6 +81,7 @@ const DragonSilverIcon = ({ src, dragonSilver, tooltip, toClaim }: DragonSilverI
     const [onHoverDragonSilverToClaim, setOnHoverDragonSilverToClaim] = useState<boolean>(false)
     return (
         <DragonSilverIconContainer>
+            <span>{dragonSilver}</span>
             <ImageWrapper>
                 <Image
                     src={src}
@@ -86,11 +94,6 @@ const DragonSilverIcon = ({ src, dragonSilver, tooltip, toClaim }: DragonSilverI
                 />
                 <ToolTipDragonSilverToClaim $hover={onHoverDragonSilverToClaim}><p>{tooltip}</p></ToolTipDragonSilverToClaim>
             </ImageWrapper>
-
-            <If $if={!toClaim}>
-                <p>{dragonSilver}</p>
-            </If>
-
         </DragonSilverIconContainer>
     )
 }
@@ -108,11 +111,12 @@ const InventoryHeader = ({ className }: InventoryHeaderProps) =>
             <DragonSilverIcon
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/dragon_silver.png"
                 dragonSilver={0}
-                tooltip="Dragon Silver"
+                    tooltip="Claimable Dragon Silver"
                 toClaim={false}
             />
         </DragonSilverWrapper>
 
+        {/*
         <ClaimDragonSilverButtonWrapper>
             <DragonSilverIcon
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/dragon_silver_to_claim.png"
@@ -121,6 +125,7 @@ const InventoryHeader = ({ className }: InventoryHeaderProps) =>
                 toClaim={false}
             />
         </ClaimDragonSilverButtonWrapper>
+        */}
 
         <CloseButton onClick={Transitions.onToggleInventory}>
             <span>X</span>

@@ -9,23 +9,23 @@ const glow = keyframes`
 const SignatureContainer = style.div<{ interactuable?: boolean, hover?: boolean, glow?: boolean }>`
     margin-top: auto;
     position: relative;
-    height: 1.8vmax;
-    width: 10vmax;
+    height: 4vh;
+    width: 20vh;
     cursor: ${props => props.interactuable ? "pointer" : "context-menu"};
     animation: ${props => props.glow ? glow : ""} 0.5s ease-in-out infinite alternate;
     p{
-        font-size: 1vmax;
+        font-size: 2vh;
         color: #D99F59;
         font-family: VT323;
-        margin-top: 0.6vmax;
-        margin-left:${props => props.interactuable ? "2.5" : "2.5"}vmax;
+        margin-top: 1.5vh;
+        margin-left:${props => props.interactuable ? "4" : "4"}vh;
         opacity: ${props => props.hover ? "0.5": "1"};
     }
 `
 
 const SignatureImage = style(PixelArtImage)`
-    bottom: -0.4vmax;
-    left: 2vmax;
+    bottom: -0.4vh;
+    left: 3vh;
 `
 
 interface Signature {

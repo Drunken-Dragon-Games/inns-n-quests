@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import styled, { css } from "styled-components"
 import { AvailableEncounter, AvailableStakingQuest } from "../../../common"
-import { PixelArtImage } from "../../../utils"
+import { PixelArtImage, vh } from "../../../utils"
 import { useQuestBoardSelector } from "../quest-board-state"
 import QuestBoardTransitions from "../quest-board-transitions"
 import PropStamp from "./miniature-seal"
@@ -14,14 +14,13 @@ const QuestBoardAreaContainer = styled.div`
     align-items: center;
     width: 100%;
     height: 100%;
-    padding: 10vmax;
 `
 
 const QuestPreviewCardContainer = styled.div`
     position: relative;
     cursor: pointer;
-    width: 16vmax;
-    height: 16vmax;
+    width: 30vh;
+    height: 30vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -36,7 +35,7 @@ const Title = styled.h2`
     text-align: center;
     padding: 0 1.5vmax 1vmax 1.5vmax;
     font-family: VT323;
-    font-size: 1.2vmax;
+    font-size: 2vh;
     color: #793312;
     text-transform: uppercase; 
     font-smooth: never;
@@ -52,10 +51,10 @@ const PaperBackgroundHoverCommon = css<{hovering: boolean}>`
 `
 
 const PaperBackgroundHover1 = styled(PixelArtImage)<{hovering: boolean}>`
-    top: 0.3vmax;
-    left: 0.5vmax;
-    width: 15.2vmax;
-    height: 15.4vmax;
+    top: 0.5vh;
+    left: 0.9vh;
+    width: 28.6vh;
+    height: 29vh;
     ${PaperBackgroundHoverCommon}
 `
 
@@ -115,9 +114,10 @@ const QuestPreviewCard = ({ quest }: { quest: AvailableEncounter | AvailableStak
             <PixelArtImage
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/monster.svg"
                 alt="quest monster preview"
-                width={8.5} height={8.5}
+                width={10} height={10}
+                units={vh(1.8)}
             />
-            <PropStamp rarity={"townsfolk"} />
+            <PropStamp rarity={"heroic-quest"} />
         </QuestPreviewCardContainer>
     )
 }
