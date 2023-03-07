@@ -39,7 +39,7 @@ const Header = styled.div`
 
 const MiniatureBox = styled(InventoryBox)`
     width: 120px;
-    height: 120px;
+    height: 180px;
 `
 
 const HeaderInfo = styled.div`
@@ -209,7 +209,7 @@ const CharacterInfoCard = ({ className, character }: CharacterInfoCardProps) => 
     return (
         <CharacterInfoCardContainer className={className}>
             <Header>
-                <MiniatureBox>
+                <MiniatureBox overflowHidden={true}>
                     <CharacterSprite
                         character={character}
                         units={px(17)}
@@ -228,7 +228,7 @@ const CharacterInfoCard = ({ className, character }: CharacterInfoCardProps) => 
             <InfoWrapper>
                 <Skills>
                 {character.skills?.map(skill => {
-                    const skillInfo = vm.Skills.get(skill)
+                    const skillInfo = vm.Skills[skill]
                     const value = (
                         skillInfo.benefits.athleticism * character.evAPS.athleticism + 
                         skillInfo.benefits.intellect * character.evAPS.intellect + 

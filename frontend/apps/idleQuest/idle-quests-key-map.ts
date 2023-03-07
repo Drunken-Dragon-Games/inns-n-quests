@@ -29,7 +29,7 @@ const GlobalKeyMap = (key: string) => {
     } else if (key == "Escape" && QuestBoardApi.isOpen()) {
         QuestBoardApi.toggleQuestBoard()
 
-    } else if (key == "Enter" && (activeActivity === "available-quest" || activeActivity === "taken-quest")) {
+    } else if (key == "Enter" && (activeActivity === "available-staking-quest" || activeActivity === "taken-staking-quest")) {
         InventoryApi.signQuest()
     }
 }

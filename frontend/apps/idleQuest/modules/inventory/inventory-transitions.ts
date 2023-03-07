@@ -49,6 +49,7 @@ const InventoryTransitions = {
     },
 
     onSelectQuest: (quest: SelectedQuest) => {
+        console.log(quest.ctype)
         dispatch(actions.openActivity(quest))
         dispatch(actions.toggleInventory(true))
     },
@@ -61,26 +62,26 @@ const InventoryTransitions = {
         const state = inventoryStore.getState()
         const quest = state.activitySelection
         const adventurers = state.selectedParty.filter(notEmpty)
-        if (quest?.ctype == "available-quest" && adventurers.length > 0) {
+        if (quest?.ctype == "available-staking-quest" && adventurers.length > 0) {
             dispatch(InventoryThunks.takeAvailableQuest(quest, adventurers))
             dispatch(actions.toggleInventory())
             QuestBoardApi.removeAvailableQuest(quest)
         } 
-        else if (quest?.ctype == "taken-quest" && takenQuestStatus(quest) === "claimed")
+        else if (quest?.ctype == "taken-staking-quest" && takenQuestStatus(quest) === "claimed")
             dispatch(actions.closeActivity())
-        else if (quest?.ctype == "taken-quest" && takenQuestStatus(quest) === "finished") 
+        else if (quest?.ctype == "taken-staking-quest" && takenQuestStatus(quest) === "finished") 
             dispatch(InventoryThunks.claimTakenQuest(quest, adventurers))
     },
 
     removeCharacterFromParty: (character: Character | null) => {
         const activity = inventoryStore.getState().activitySelection
-        if (character && activity?.ctype !== "taken-quest")
+        if (character && activity?.ctype !== "taken-staking-quest")
             dispatch(actions.removeCharacterFromParty(character))
     },
 
     addCharacterToParty: (character: Character, slot?: number) => {
         const activity = inventoryStore.getState().activitySelection
-        if (activity?.ctype !== "taken-quest")
+        if (activity?.ctype !== "taken-staking-quest")
             dispatch(actions.addCharacterToParty({ character, slot }))
     },
 
@@ -88,7 +89,7 @@ const InventoryTransitions = {
         const activeActivity = inventoryStore.getState().activitySelection
         if (activityId(activeActivity) === inventoryItemId(item))
             dispatch(actions.closeActivity()) 
-        else if(item.ctype == "character" && activeActivity?.ctype !== "taken-quest")
+        else if(item.ctype == "character" && activeActivity?.ctype !== "taken-staking-quest")
             dispatch(actions.addCharacterToParty({ character: item })) 
         else 
             dispatch(actions.openActivity(item))

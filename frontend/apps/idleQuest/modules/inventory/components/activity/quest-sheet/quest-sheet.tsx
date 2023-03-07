@@ -91,10 +91,10 @@ type QuestSheetState = {
 const useQuestCardState = (quest: SelectedQuest, adventurerSlots: (Character | null)[]): QuestSheetState => 
     useMemo<QuestSheetState>(() => ({
         signatureType: 
-            quest.ctype == "available-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
-            quest.ctype == "available-quest" ? "available-no-adventurers" : 
-            quest.ctype == "taken-quest" && quest.claimedAt ? "claimed" :
-            quest.ctype == "taken-quest" && takenQuestSecondsLeft(quest) <= 0 ? "finished" : 
+            quest.ctype == "available-staking-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
+            quest.ctype == "available-staking-quest" ? "available-no-adventurers" : 
+            quest.ctype == "taken-staking-quest" && quest.claimedAt ? "claimed" :
+            quest.ctype == "taken-staking-quest" && takenQuestSecondsLeft(quest) <= 0 ? "finished" : 
             "in-progress",
         apsRequired: 
             getQuestAPSRequirement(quest),

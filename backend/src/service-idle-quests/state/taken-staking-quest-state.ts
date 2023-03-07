@@ -25,7 +25,7 @@ export class TakenStakingQuestDB extends Model implements ITakenStakingQuestDB {
 
 export const TakenStakingQuestDBInfo = {
 
-    tableName: "idle_quests_taken_quests",
+    tableName: "idle_quests_staking_taken_quests",
 
     tableAttributes: {
         takenQuestId: {

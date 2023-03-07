@@ -1,5 +1,5 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { Character, Furniture, IdleQuestsInventory, TakenQuest } from "../../common"
+import { Character, Furniture, IdleQuestsInventory, TakenStakingQuest } from "../../common"
 import { notEmpty } from "../../utils"
 import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility, InventoryAsset, sortCharacters } from "./inventory-dsl"
 import * as vm from "../../game-vm"
@@ -8,7 +8,7 @@ export interface InventoryState {
     open: boolean
     characters: Record<string, Character>
     furniture: Record<string, Furniture>
-    takenQuests: TakenQuest[]
+    takenQuests: TakenStakingQuest[]
 
     activitySelection?: ActivitySelection
     activeCharacterInfo?: Character
@@ -56,15 +56,15 @@ export const inventoryState = createSlice({
             })
         },
 
-        setTakenQuests: (state, action: PayloadAction<TakenQuest[]>) => {
+        setTakenQuests: (state, action: PayloadAction<TakenStakingQuest[]>) => {
             state.takenQuests = action.payload
         },
 
-        addTakenQuest: (state, action: PayloadAction<TakenQuest>) => {
+        addTakenQuest: (state, action: PayloadAction<TakenStakingQuest>) => {
             state.takenQuests = [...state.takenQuests, action.payload]
         },
 
-        removeTakenQuest: (state, action: PayloadAction<TakenQuest>) => {
+        removeTakenQuest: (state, action: PayloadAction<TakenStakingQuest>) => {
             state.takenQuests = state.takenQuests.filter(quest => quest.takenQuestId !== action.payload.takenQuestId)
         },
 
@@ -72,9 +72,9 @@ export const inventoryState = createSlice({
         openActivity: (state, action: PayloadAction<ActivitySelection | undefined>) => {
             const activity = action.payload
             state.activitySelection = activity
-            if (activity?.ctype === "available-quest")
+            if (activity?.ctype === "available-staking-quest")
                 state.selectedParty = Array(activity.slots).fill(null)
-            else if (activity?.ctype === "taken-quest")
+            else if (activity?.ctype === "taken-staking-quest")
                 state.selectedParty = Array(activity.availableQuest.slots).fill(null).map((_, index) => 
                     state.characters[activity.adventurerIds[index]] ?? null)
                     //state.characters.find(character => character.entityId === activity.adventurerIds[index]) ?? null)
@@ -173,11 +173,11 @@ export const inventoryState = createSlice({
         },
 
         /** Quest State */
-        claimQuestOutcome: (state, action: PayloadAction<{ characters: Character[], outcome: vm.QuestOutcome, takenQuest: TakenQuest }>) => {
+        claimQuestOutcome: (state, action: PayloadAction<{ characters: Character[], outcome: vm.StakingQuestOutcome, takenQuest: TakenStakingQuest }>) => {
             const outcome = action.payload.outcome
             const characters = action.payload.characters
             characters.forEach(character => state.characters[character.entityId].inActivity = false)
-            if (state.activitySelection?.ctype === "taken-quest" && state.activitySelection.takenQuestId === action.payload.takenQuest.takenQuestId)
+            if (state.activitySelection?.ctype === "taken-staking-quest" && state.activitySelection.takenQuestId === action.payload.takenQuest.takenQuestId)
                 state.activitySelection.claimedAt = new Date()
             /*
             if (outcome.ctype === "success-outcome" && outcome.reward.apsExperience) {

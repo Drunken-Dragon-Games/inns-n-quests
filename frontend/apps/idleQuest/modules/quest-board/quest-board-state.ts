@@ -1,10 +1,10 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
 import { useSelector } from "react-redux"
-import { AvailableEncounter, AvailableQuest } from "../../common"
+import { AvailableEncounter, AvailableStakingQuest } from "../../common"
 
 export interface QuestBoardState {
     open: boolean
-    availableQuests: AvailableQuest[]
+    availableQuests: AvailableStakingQuest[]
     availableEncounters: AvailableEncounter[]
 }
 
@@ -25,11 +25,11 @@ export const questBoardState = createSlice({
     initialState: questBoardInitialState,
     reducers: {
 
-        addAvailableQuests: (state, action: PayloadAction<AvailableQuest[]>) => {
+        addAvailableQuests: (state, action: PayloadAction<AvailableStakingQuest[]>) => {
             state.availableQuests = [...state.availableQuests, ...action.payload]
         },
 
-        removeAvailableQuest: (state, action: PayloadAction<AvailableQuest>) => {
+        removeAvailableQuest: (state, action: PayloadAction<AvailableStakingQuest>) => {
             state.availableQuests = state.availableQuests.filter(quest => quest.questId !== action.payload.questId)
         },
 

@@ -28,6 +28,7 @@ const InnerBorderBox = styled.div<{ $hover?: boolean }>`
 const InnerBackgroundBox = styled.div<{ $selected?: boolean, $center?: boolean, $overflowHidden?: boolean }>`
     ${BoxCss}
 
+    position: relative;
     background-color: ${props => props.$selected ? "#1976d2" : "rgba(0,0,0,0)"};
     box-shadow: inset 0 0 10px ${props => props.$selected ? "#90caf9" : "rgba(0,0,0,0)"};
     overflow: ${props => props.$overflowHidden ? "hidden" : "visible"};

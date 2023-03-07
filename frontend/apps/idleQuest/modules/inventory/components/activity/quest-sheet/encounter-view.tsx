@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react"
 import styled from "styled-components"
-import { AvailableEncounter, Character, ProgressBar } from "../../../../../common"
+import { AvailableEncounter, Character, ProgressBar, rules } from "../../../../../common"
 import * as vm from "../../../../../game-vm"
-import { notEmpty } from "../../../../../utils"
 
 const EncounterStrategyContainer = styled.div`
     padding-top: 10px;
@@ -28,137 +27,46 @@ const Contribution = styled.p`
     font-weight: 600;
 `
 
-const skillPower = (skill: vm.SkillInfo, character: Character) => 
-    skill.benefits.athleticism * character.evAPS.athleticism +
-    skill.benefits.intellect * character.evAPS.intellect +
-    skill.benefits.charisma * character.evAPS.charisma
-
-const applyVulWeak = (power: number, damageTypes: vm.DamageType[], resistances: vm.DamageType[], weaknesses: vm.DamageType[]): number => {
-    const resistant = damageTypes.some(dType => resistances.includes(dType)) ?? false
-    const weak = damageTypes.some(dType => weaknesses.includes(dType)) ?? false
-    const finalPower = resistant && weak ? power : resistant ? power * 0.5 : weak ? power * 2 : power
-    return finalPower
-}
-
-const percentage = (value: number, total: number) => Math.min(Math.round(value * 100 / total), 100)
-
-type GeneralDmgType = "Will" | "Magic" | "Physical"
-
-const skillDamageType = (skill: vm.SkillInfo): GeneralDmgType[] => 
-    skill.damage?.map(dType => {
-        if (vm.willDamageTypes.includes(dType)) return "Will"
-        if (vm.magicDamageTypes.includes(dType)) return "Magic"
-        return "Physical"
-    }) ?? []
-
 type EncounterStrategyState = {
-    challenges: { challenge: vm.Challenge, power: number, contributors: { 
-        character: Character, skill: string, skillInfo: vm.SkillInfo }[] }[] 
-    combat?: { 
-        willDmg: number, 
-        magicDmg: number, 
-        physicalDmg: number, 
-        willHitPoints: number,
-        magicHitPoints: number,
-        physicalHitPoints: number,
-        willResistances?: string,
-        magicResistances?: string,
-        physicalResistances?: string,
-        willWeaknesses?: string,
-        magicWeaknesses?: string,
-        physicalWeaknesses?: string,
-        contributors: { 
-            power: number, 
-            skill: string, 
-            skillInfo: vm.SkillInfo, 
-            dmgTypes: GeneralDmgType[] 
-        }[] }
-    successChance: string
+    challenges: vm.ChallengeConfiguration[]
+    combat?: vm.CombatConfiguration & { 
+        weaknesses: { will?: string, magic?: string, physical?: string }, 
+        resistances: { will?: string, magic?: string, physical?: string } 
+    }
+    successChance: number
 }
 
-const useEncounterStrategyState = (strategy: vm.Strategy, party: Character[]): EncounterStrategyState => {
-    const challenges = useMemo(() =>
-        strategy.challenges.map(challenge => {
-            const contributors = party.map(character => {
-                const solvedBy = challenge.solvedBy
-                const skills = character.skills?.filter(skill => {
-                    const provokes = vm.Skills.get(skill).provokes
-                    return solvedBy.includes(skill) || provokes?.some(c => solvedBy.includes(c))
-                })
-                return skills && skills.length > 0 ? { character, skill: skills[0], skillInfo: vm.Skills.get(skills[0]) } : undefined
-            }).filter(notEmpty) as { character: Character, skill: string, skillInfo: vm.SkillInfo }[]
+const useEncounterStrategyState = (strategy: vm.Strategy, party: Character[]): EncounterStrategyState => 
+    useMemo(() => {
+        const configuration = rules.encounter.strategyConfiguration(strategy, party)
+        const combat = (() => {
+            const combat = configuration.combat
+            if (!combat) return 
+
+            const willResistances = combat.combat.resistances.filter((damageType) => vm.willDamageTypes.includes(damageType))
+            const magicResistances = combat.combat.resistances.filter((damageType) => vm.magicDamageTypes.includes(damageType))
+            const physicalResistances = combat.combat.resistances.filter((damageType) => vm.physicalDamageTypes.includes(damageType))
+
+            const willWeaknesses = combat.combat.weaknesses.filter((damageType) => vm.willDamageTypes.includes(damageType))
+            const magicWeaknesses = combat.combat.weaknesses.filter((damageType) => vm.magicDamageTypes.includes(damageType))
+            const physicalWeamagicWeaknesses = combat.combat.weaknesses.filter((damageType) => vm.physicalDamageTypes.includes(damageType))
+
             return {
-                challenge,
-                power: contributors.reduce((acc, character) => acc + skillPower(character.skillInfo, character.character), 0),
-                contributors,
+                ...combat,
+                resistances: {
+                    will: willResistances.length > 0 ? " | RESIST: " + willResistances.join(", ") : undefined,
+                    magic: magicResistances.length > 0 ? " | RESIST: " + magicResistances.join(", ") : undefined,
+                    physical: physicalResistances.length > 0 ? " | RESIST: " + physicalResistances.join(", ") : undefined,
+                },
+                weaknesses: {
+                    will: willWeaknesses.length > 0 ? " | WEAK: " + willWeaknesses.join(", ") : undefined,
+                    magic: magicWeaknesses.length > 0 ? " | WEAK: " + magicWeaknesses.join(", ") : undefined,
+                    physical: physicalWeamagicWeaknesses.length > 0 ? " | WEAK: " + physicalWeamagicWeaknesses.join(", ") : undefined,
+                },
             }
-    }), [strategy, party])
-
-    const combat = useMemo(() => {
-        const combat = strategy.combat
-        if (!combat) return
-
-        const willResistances = combat.resistances.filter((damageType) => vm.willDamageTypes.includes(damageType))
-        const magicResistances = combat.resistances.filter((damageType) => vm.magicDamageTypes.includes(damageType))
-        const physicalResistances = combat.resistances.filter((damageType) => vm.physicalDamageTypes.includes(damageType))
-
-        const willVulnerabilities = combat.weaknesses.filter((damageType) => vm.willDamageTypes.includes(damageType))
-        const magicVulnerabilities = combat.weaknesses.filter((damageType) => vm.magicDamageTypes.includes(damageType))
-        const physicalVulnerabilities = combat.weaknesses.filter((damageType) => vm.physicalDamageTypes.includes(damageType))
-
-        const contributors = party.flatMap(character => 
-            character.skills?.map(skill => {
-                const skillInfo = vm.Skills.get(skill)
-                const dmgTypes = skillDamageType(skillInfo)
-                const prePower = skillPower(skillInfo, character)
-                const power = 
-                    skillInfo.damage ? applyVulWeak(prePower, skillInfo.damage, combat.resistances, combat.weaknesses)
-                    : prePower
-                return skillInfo.damage ? { 
-                    skill, 
-                    skillInfo, 
-                    power, 
-                    dmgTypes,
-                } : undefined
-            }).filter(notEmpty)
-        ).filter(notEmpty) as { skill: string, skillInfo: vm.SkillInfo, power: number, dmgTypes: GeneralDmgType[]}[]
-
-        const willDmg = contributors.filter(({dmgTypes}) => dmgTypes.includes("Will")).reduce((acc, {power}) => acc + power, 0)
-        const magicDmg = contributors.filter(({dmgTypes}) => dmgTypes.includes("Magic")).reduce((acc, {power}) => acc + power, 0)
-        const physicalDmg = contributors.filter(({dmgTypes}) => dmgTypes.includes("Physical")).reduce((acc, {power}) => acc + power, 0)
-
-        return { ...combat, willDmg, magicDmg, physicalDmg, contributors,
-            willResistances: willResistances.length > 0 ? " | RESIST: " + willResistances.join(", ") : undefined,
-            magicResistances: magicResistances.length > 0 ? " | RESIST: " + magicResistances.join(", ") : undefined,
-            physicalResistances: physicalResistances.length > 0 ? " | RESIST: " + physicalResistances.join(", ") : undefined,
-            willWeaknesses: willVulnerabilities.length > 0 ? " | WEAK: " + willVulnerabilities.join(", ") : undefined,
-            magicWeaknesses: magicVulnerabilities.length > 0 ? " | WEAK: " + magicVulnerabilities.join(", ") : undefined,
-            physicalWeaknesses: physicalVulnerabilities.length > 0 ? " | WEAK: " + physicalVulnerabilities.join(", ") : undefined,
-        }
-        
+        })()
+        return {...configuration, combat}
     }, [strategy, party])
-
-    const chance = useMemo(() => {
-        const challengePercentage = challenges.reduce((acc, {power, challenge}) => acc + percentage(power, challenge.difficulty), 0) / challenges.length
-        const willPercentage = combat ? percentage(combat.willDmg, combat.willHitPoints) : 0
-        const magicPercentage = combat ? percentage(combat.magicDmg, combat.magicHitPoints) : 0
-        const physicalPercentage = combat ? percentage(combat.physicalDmg, combat.physicalHitPoints) : 0
-        const combatPercentage = combat ? 
-            willPercentage > magicPercentage && willPercentage > physicalPercentage ? willPercentage :
-            magicPercentage > physicalPercentage ? magicPercentage :
-            physicalPercentage 
-        : 0
-        const successChance = 
-            combat && challenges.length > 0 ?  
-                Math.round((challengePercentage * 2 + combatPercentage) / 3) + "%" :
-            combat ? 
-                Math.round(combatPercentage) + "%" :
-                Math.round(challengePercentage) + "%"
-        return { successChance }
-    }, [strategy, party])
-
-    return { challenges, combat, ...chance }
-}
 
 const EncounterStrategy = ({ strategy, party }: { strategy: vm.Strategy, party: Character[] }) => {
     const state = useEncounterStrategyState(strategy, party)
@@ -178,26 +86,26 @@ const EncounterStrategy = ({ strategy, party }: { strategy: vm.Strategy, party: 
                         <ProgressBar maxValue={challenge.difficulty} currentValue={power} />
                         <h5>(DIFF {challenge.difficulty}) Solved by: {challenge.solvedBy.join(", ")}</h5>
                     </ChallengeDifficultyWrapper>
-                    <h5>(PWR {power}) { contributors.length > 0 ? contributors.map(c => c.skill).join(", ") : null }</h5>
+                    <h5>(PWR {power}) { contributors.length > 0 ? contributors.flatMap(c => c.skills).map(s => s.name).join(", ") : null }</h5>
                 </EncounterChallengeContainer>
             )}
             {state.combat ? <>
                 <EncounterChallengeContainer key="combat">
                     <h4>COMBAT</h4>
                     <ChallengeDifficultyWrapper>
-                        <ProgressBar maxValue={state.combat.willHitPoints} currentValue={state.combat.willDmg} reverse />
-                        <h5>{state.combat.willHitPoints} HP WILL {state.combat.willResistances} {state.combat.willWeaknesses}</h5>
+                        <ProgressBar maxValue={state.combat.combat.willHitPoints} currentValue={state.combat.damage.will} reverse />
+                        <h5>{state.combat.combat.willHitPoints} HP WILL {state.combat.resistances.will} {state.combat.weaknesses.will}</h5>
                     </ChallengeDifficultyWrapper>
                     <ChallengeDifficultyWrapper>
-                        <ProgressBar maxValue={state.combat.magicHitPoints} currentValue={state.combat.magicDmg} reverse />
-                        <h5>{state.combat.magicHitPoints} HP MAGIC {state.combat.magicResistances} {state.combat.magicWeaknesses}</h5>
+                        <ProgressBar maxValue={state.combat.combat.magicHitPoints} currentValue={state.combat.damage.magic} reverse />
+                        <h5>{state.combat.combat.magicHitPoints} HP MAGIC {state.combat.resistances.magic} {state.combat.weaknesses.magic}</h5>
                     </ChallengeDifficultyWrapper>
                     <ChallengeDifficultyWrapper>
-                        <ProgressBar maxValue={state.combat.physicalHitPoints} currentValue={state.combat.physicalDmg} reverse />
-                        <h5>{state.combat.physicalHitPoints} HP PHYSICAL {state.combat.physicalResistances} {state.combat.physicalWeaknesses}</h5>
+                        <ProgressBar maxValue={state.combat.combat.physicalHitPoints} currentValue={state.combat.damage.physical} reverse />
+                        <h5>{state.combat.combat.physicalHitPoints} HP PHYSICAL {state.combat.resistances.physical} {state.combat.weaknesses.physical}</h5>
                     </ChallengeDifficultyWrapper>
-                    { state.combat.contributors.map(({power, skill, skillInfo, dmgTypes}, index) => 
-                        <Contribution key={"combat-contributor-" + index}>(PWR {power}) {skill} ({skillInfo.damage?.join(", ")} = {dmgTypes.join(", ")})</Contribution>
+                    { state.combat.contributors.map(({character, power, skills}, index) => 
+                        <Contribution key={"combat-contributor-" + index}>(PWR {power}) {character.name} ({skills.map(({name, damage}) => `${name}(${damage?.join(", ")})`).join("  ")})</Contribution>
                     )}
                 </EncounterChallengeContainer>
             </> : <></> }

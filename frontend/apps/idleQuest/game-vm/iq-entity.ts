@@ -1,5 +1,6 @@
+import { v4 } from "uuid"
 import { APS } from "./character-entity"
-import { SkillName } from "./encounter"
+import { SkillName } from "./skills"
 
 export type IQEntity<EType extends IQEntityType> = {
     entityId: string
@@ -30,14 +31,17 @@ export type WithSkills = {
     skills?: SkillName[]
 }
 
-export type WithEV = {
-    evAPS: APS
-}
-
 export type WithNextLevelXP = {
     nextLevelXP: APS
+}
+
+export type WithEV = {
+    evAPS: APS
 }
 
 export type WithTag<Tag extends string> = {
     ctype: Tag
 }
+
+export const newIQEntity = <EType extends IQEntityType>(entityType: EType, props: { assetRef: string, name: string }): IQEntity<EType> => 
+    ({ entityId: v4(), entityType, ...props })

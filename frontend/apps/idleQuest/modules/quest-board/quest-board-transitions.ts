@@ -1,4 +1,4 @@
-import { AvailableEncounter, AvailableQuest } from "../../common"
+import { AvailableEncounter, AvailableStakingQuest } from "../../common"
 import InventoryApi from "../inventory/inventory-api"
 import { clearAvailableEncounters, clearAvailableQuests, questBoardStore, removeAvailableEncounter, removeAvailableQuest, toggleQuestBoard } from "./quest-board-state"
 import { getAvailableEncounters, getAvailableQuests } from "./quest-board-thunks"
@@ -11,10 +11,10 @@ const QuestBoardTransitions = {
     onClearAvailableQuests: () => 
         questBoardStore.dispatch(clearAvailableQuests()),
     
-    onClickAvailableQuest: (availableQuest: AvailableQuest) => 
+    onClickAvailableQuest: (availableQuest: AvailableStakingQuest) => 
         InventoryApi.selectQuest(availableQuest),
 
-    onRemoveAvailableQuest: (availableQuest: AvailableQuest) => 
+    onRemoveAvailableQuest: (availableQuest: AvailableStakingQuest) => 
         questBoardStore.dispatch(removeAvailableQuest(availableQuest)),
     
 

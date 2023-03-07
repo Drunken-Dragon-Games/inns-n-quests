@@ -1,4 +1,4 @@
-import { AvailableQuest } from "../../common"
+import { AvailableStakingQuest } from "../../common"
 import { questBoardStore } from "./quest-board-state"
 import QuestBoardTransitions from "./quest-board-transitions"
 
@@ -10,7 +10,7 @@ const QuestBoardApi = {
     toggleQuestBoard: () =>
         QuestBoardTransitions.onToggleQuestBoard(),
 
-    removeAvailableQuest: (quest: AvailableQuest) => 
+    removeAvailableQuest: (quest: AvailableStakingQuest) => 
         QuestBoardTransitions.onRemoveAvailableQuest(quest)
 }
 

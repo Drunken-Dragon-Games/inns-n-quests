@@ -137,7 +137,7 @@ const usePartyViewState = (quest: SelectedQuest, adventurerSlots: (Character | n
     const box1Bound = boxRef1.current?.getBoundingClientRect()
 
     useEffect(() => {
-        if (quest.ctype === "taken-quest" || dropBoxesRefs.every(ref => ref.current == null)) return
+        if (quest.ctype === "taken-staking-quest" || dropBoxesRefs.every(ref => ref.current == null)) return
         InventoryTransitions.registerDropBoxes("party-pick", dropBoxesRefs.map(makeDropBox))
         return InventoryTransitions.deregisterDropBoxes
     }, [boxRef1.current, boxRef2.current, boxRef3.current, boxRef4.current, boxRef5.current, quest,
@@ -176,7 +176,7 @@ const PartyView = ({ quest, adventurerSlots }: { quest: SelectedQuest, adventure
                 <div key={"character-slot-" + index} ref={dropBoxRef}>
                     <PartySlot
                         character={hovering ? hovering : picked}
-                        preview={notEmpty(hovering) || quest.ctype === "taken-quest"}
+                        preview={notEmpty(hovering) || quest.ctype === "taken-staking-quest"}
                     />
                 </div>
             )}

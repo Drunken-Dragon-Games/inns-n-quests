@@ -12,15 +12,14 @@ import InventoryBox from "./inventory-box"
 
 const InventoryPageContainer = styled.div`
     box-sizing: border-box;
-    margin: 10px 0px 0px 5px;
-    padding: 0 10px;
-    width: calc(100% - 5px);
+    margin: 5px 0px 5px 5px;
+    padding: 0px 5px 0px 0px;
+    width: calc(100% - 15px);
     
     #background-color: blue;
 
     direction: rtl;
-    overflow: auto;
-    overflow-x: visible;
+    overflow-x: hidden;
     overflow-y: scroll;
 
     ::-webkit-scrollbar {
@@ -50,13 +49,13 @@ const InventoryPageContainer = styled.div`
     }
 `
 
-const DirectionFix = styled.div`
+const DirectionFix = styled.div<{ tall?: boolean }>`
     direction: ltr;
     overflow: visible;
 
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: minmax(108.5px, 1fr);
+    grid-auto-rows: minmax(${props => props.tall ? "180px" : "108.5px"}, 1fr);
     grid-gap: 10px;
 
     width: 100%;
@@ -95,21 +94,21 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
                     subState.selection?.ctype === "character" &&
                     subState.selection?.entityId === item.entityId,
                 disabled:
-                    subState.selection?.ctype === "available-quest" && 
+                    subState.selection?.ctype === "available-staking-quest" && 
                     item.inActivity,
                 center: false,
                 overflowHidden: false,
             }
-        } else if (item && item.ctype === "taken-quest") {
+        } else if (item && item.ctype === "taken-staking-quest") {
             return {
                 info: takenQuestTimeLeft(item),
                 selected:
                     subState.selection &&
-                    subState.selection.ctype === "taken-quest" &&
+                    subState.selection.ctype === "taken-staking-quest" &&
                     subState.selection.takenQuestId === item.takenQuestId,
                 disabled: false,
                 center: true,
-                overflowHidden: false,
+                overflowHidden: true,
             }
         } else if (item && item.ctype === "furniture") {
             return {
@@ -158,7 +157,7 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
     const [ timedInfo, setTimedInfo ] = useState<{ info?: string } | undefined>(undefined)
 
     useEffect(() => {
-        if (item?.ctype === "taken-quest" && takenQuestStatus(item) === "in-progress") {
+        if (item?.ctype === "taken-staking-quest" && takenQuestStatus(item) === "in-progress") {
             const interval = setInterval(() => { 
                 setTimedInfo({ info: takenQuestTimeLeft(item) }) 
                 if (takenQuestStatus(item) !== "in-progress") clearInterval(interval) 
@@ -195,10 +194,10 @@ const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
                     <CharacterSprite
                         character={item}
                         emoji={state.hover ? item.entityId : undefined}
-                        units={px(15)}
+                        units={px(17)}
                         render={state.hover ? "hovered" : "normal"}
                     />
-                    : item?.ctype === "taken-quest" ?
+                    : item?.ctype === "taken-staking-quest" ?
                         <PixelArtImage
                             src={mapQuestScroll(item)}
                             alt="quest scroll"
@@ -207,7 +206,7 @@ const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
                         : item?.ctype === "furniture" ?
                             <FurnitureSprite
                                 furniture={item}
-                                units={px(15)}
+                                units={px(12)}
                                 render={state.hover ? "hovered" : "normal"}
                             /> :
                             <></>}
@@ -248,7 +247,7 @@ const InventoryPage = ({ className, page }: { className?: string, page: Inventor
     const { items, emptySlots } = useInventoryPageState(page)
     return (
         <InventoryPageContainer className={className}>
-            <DirectionFix>
+            <DirectionFix tall={page == "characters"}>
                 {items.map((item, index) =>
                     <InventoryItemView key={index} item={item} />
                 )}

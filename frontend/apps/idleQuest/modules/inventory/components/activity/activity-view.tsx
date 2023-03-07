@@ -10,7 +10,7 @@ const ActivityView = () => {
         selectedParty: state.selectedParty,
     }), _.isEqual) 
     return <div onClick={(e) => e.stopPropagation()}>
-        { state.selection?.ctype === "taken-quest" || state.selection?.ctype === "available-quest" || state.selection?.ctype === "available-encounter" ?
+        { state.selection?.ctype === "taken-staking-quest" || state.selection?.ctype === "available-staking-quest" || state.selection?.ctype === "available-encounter" ?
             <QuestSheet
                 quest={state.selection}
                 adventurerSlots={state.selectedParty}

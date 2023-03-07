@@ -1,9 +1,8 @@
 import { AdventurerClasses } from "../character-entity"
-import { Quest } from "./encounter"
-import { QuestRequirement, AndRequirement, OrRequirement, BonusRequirement, APSRequirement, ClassRequirement, SuccessBonusRequirement, EmptyRequirement } from "./encounter-requirements"
-import { Reward } from "./reward"
+import { StakingQuest, StakingReward } from "./staking-quest"
+import { AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirement, SuccessBonusRequirement } from "./staking-quest-requirements"
 
-export function isQuestRequirement(obj: any): obj is QuestRequirement {
+export function isQuestRequirement(obj: any): obj is StakingQuestRequirement {
 
     function isAndRequirement(obj: any): obj is AndRequirement {
         return obj.ctype === "and-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
@@ -42,17 +41,10 @@ export function isQuestRequirement(obj: any): obj is QuestRequirement {
         || isEmptyRequirement(obj)
 }
 
-export function isReward(obj: any): obj is Reward {
-    // All rewards have all properties optional
-    return true
+export function isReward(obj: any): obj is StakingReward {
+    return typeof obj.currency === "number"
 }
 
-/*
-export function isAssetReward(obj: any): obj is AssetReward {
-    return typeof obj.policyId === "string" && typeof obj.unit === "string" && typeof obj.quantity === "string"  
-}
-*/
-
-export function isQuest(obj: any): obj is Quest {
+export function isQuest(obj: any): obj is StakingQuest {
     return typeof obj.questId === "string" && typeof obj.name === "string" && typeof obj.location === "string" && typeof obj.description === "string" && isQuestRequirement(obj.requirements)
 }

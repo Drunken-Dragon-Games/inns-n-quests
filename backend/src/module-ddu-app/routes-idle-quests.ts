@@ -2,18 +2,10 @@
 import { Response, Router } from "express"
 import { Request } from "express-jwt"
 import { IdleQuestsService } from "../service-idle-quests"
-import { isObjectLocations } from "../service-idle-quests/game-vm/sectors/sector-validation";
+import { isObjectLocations } from "../service-idle-quests/game-vm/sectors/sector-validation"
 
 export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
-    const router = Router();    
-
-    router.get('/inventory', async (request: Request, response: Response) => {
-        const userId: string = request.auth!.userId
-        const result = await idleQuestsService.getInventory(userId)
-        response.status(200).json(result)
-    })
-
-
+    const router = Router()    
 
     router.get('/encounter/available', async (request: Request, response: Response) => {
         const location: string = request.query.location as string
@@ -42,32 +34,36 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
         response.status(200).json(result)
     })
 
-
-
-    router.get('/quests', async (request: Request, response: Response) => {
+    router.get('/staking-quest/available', async (request: Request, response: Response) => {
         const userId = request.auth!.userId
         const result = await idleQuestsService.getAvailableStakingQuests("Auristar")
         response.status(200).send(result)
     })
 
-    router.post('/accept', async (request: Request, response: Response) => {
-        const questId: string = request.body.quest_id;
-        const adventurerIds: string[] = request.body.adventurer_ids;
+    router.post('/staking-quest/accept', async (request: Request, response: Response) => {
+        const questId: string = request.body.questId
+        const adventurerIds: string[] = request.body.adventurerIds
         const userId: string = request.auth!.userId
         const result = await idleQuestsService.acceptStakingQuest(userId, questId, adventurerIds)
         response.status(200).send(result)
     })
 
-    router.get('/taken-quests', async (request: Request, response: Response) => {
+    router.get('/staking-quest/taken', async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const result = await idleQuestsService.getTakenStakingQuests(userId)
         response.status(200).json(result)
     })
 
-    router.post('/claim', async (request: Request, response: Response) => {
+    router.post('/staking-quest/claim', async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
-        const takenQuestId: string = request.body.taken_quest_id;
+        const takenQuestId: string = request.body.takenQuestId
         const result = await idleQuestsService.claimStakingQuestResult(userId, takenQuestId)
+        response.status(200).json(result)
+    })
+
+    router.get('/inventory', async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await idleQuestsService.getInventory(userId)
         response.status(200).json(result)
     })
 

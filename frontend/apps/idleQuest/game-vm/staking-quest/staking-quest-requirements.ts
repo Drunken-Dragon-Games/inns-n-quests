@@ -1,7 +1,7 @@
 import { AdventurerClass, APS, isAdventurerClass } from "../character-entity"
-import { isQuestRequirement } from "./encounter-validation"
+import { isQuestRequirement } from "./staking-quest-validation"
 
-export type QuestRequirement 
+export type StakingQuestRequirement 
     = APSRequirement | ClassRequirement | OrRequirement | AndRequirement 
     | BonusRequirement | SuccessBonusRequirement | EmptyRequirement
 
@@ -23,28 +23,28 @@ export type TargetRequirements = {
 
 export type OrRequirement = {
     ctype: "or-requirement",
-    left: QuestRequirement,
-    right: QuestRequirement,
+    left: StakingQuestRequirement,
+    right: StakingQuestRequirement,
 }
 
 export type AndRequirement = {
     ctype: "and-requirement",
-    left: QuestRequirement,
-    right: QuestRequirement,
+    left: StakingQuestRequirement,
+    right: StakingQuestRequirement,
 }
 
 export type BonusRequirement = {
     ctype: "bonus-requirement",
     bonus: number,
-    left: QuestRequirement,
-    right: QuestRequirement,
+    left: StakingQuestRequirement,
+    right: StakingQuestRequirement,
 }
 
 export type SuccessBonusRequirement = {
     ctype: "success-bonus-requirement",
     bonus: number,
-    left: QuestRequirement,
-    right: QuestRequirement,
+    left: StakingQuestRequirement,
+    right: StakingQuestRequirement,
 }
 
 export type APSRequirement = {
@@ -62,7 +62,7 @@ export type ClassRequirement = {
 /** Removed for now */
 export type NotRequirement = {
     ctype: "not-requirement",
-    continuation: QuestRequirement,
+    continuation: StakingQuestRequirement,
 }
 
 export type EmptyRequirement = {
@@ -77,15 +77,15 @@ export const apsRequirement = (athleticism: number, intellect: number, charisma:
     charisma: charisma,
 })
 
-export const bonus = (bonus: number, left: QuestRequirement, right: QuestRequirement): BonusRequirement => ({
+export const bonus = (bonus: number, left: StakingQuestRequirement, right: StakingQuestRequirement): BonusRequirement => ({
     ctype: "bonus-requirement",
     bonus, left, right,
 })
 
-export const all = (requirements: QuestRequirement[]): QuestRequirement => 
+export const all = (requirements: StakingQuestRequirement[]): StakingQuestRequirement => 
     requirements.reduce((left, right) => and(left, right), empty)
 
-export const oneOf = (requirements: QuestRequirement[]): QuestRequirement =>
+export const oneOf = (requirements: StakingQuestRequirement[]): StakingQuestRequirement =>
     requirements.reduce((left, right) => or(left, right), empty)
 
 /*
@@ -93,22 +93,22 @@ export const none = (requirements: QuestRequirement[]): QuestRequirement =>
     not(all(requirements))
 */
 
-export const successBonus = (bonus: number, left: QuestRequirement, right: QuestRequirement): SuccessBonusRequirement => ({
+export const successBonus = (bonus: number, left: StakingQuestRequirement, right: StakingQuestRequirement): SuccessBonusRequirement => ({
     ctype: "success-bonus-requirement",
     bonus, left, right,
 })
 
-export const and = (left: QuestRequirement, right: QuestRequirement): AndRequirement => ({
+export const and = (left: StakingQuestRequirement, right: StakingQuestRequirement): AndRequirement => ({
     ctype: "and-requirement",
     left, right,
 })
 
-export const or = (left: QuestRequirement, right: QuestRequirement): OrRequirement => ({
+export const or = (left: StakingQuestRequirement, right: StakingQuestRequirement): OrRequirement => ({
     ctype: "or-requirement",
     left, right,
 })
 
-export const not = (continuation: QuestRequirement): NotRequirement => ({
+export const not = (continuation: StakingQuestRequirement): NotRequirement => ({
     ctype: "not-requirement",
     continuation,
 })
@@ -171,7 +171,7 @@ export const ranger: ClassRequirement = {
     class: "ranger",
 }
 
-export function parseEasyJsonSyntax(json: any): QuestRequirement {
+export function parseEasyJsonSyntax(json: any): StakingQuestRequirement {
     if (isQuestRequirement(json)) return json
     else if (typeof json == "string" && json == "empty") return empty
     else if (typeof json == "string" && json == "fighter") return fighter

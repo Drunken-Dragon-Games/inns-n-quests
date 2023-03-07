@@ -3,7 +3,7 @@ import { NotificationsApi } from "../notifications"
 import { addAvailableEncounters, addAvailableQuests, QuestBoardThunk } from "./quest-board-state"
 
 export const getAvailableQuests = (): QuestBoardThunk => async (dispatch) => {
-    const response = await IdleQuestsApi.getAvailableQuests()
+    const response = await IdleQuestsApi.getAvailableStakingQuests()
     if (response.status == "ok") {
         dispatch(addAvailableQuests(response.availableQuests))
     } else {

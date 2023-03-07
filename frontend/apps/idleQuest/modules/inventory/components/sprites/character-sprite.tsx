@@ -32,13 +32,16 @@ const gmasMeasures = (character: Character): [number, [number,number], number] =
 }
 
 const aotMeasures = (character: Character): [number, [number,number], number] => {
-    const advName = character.sprite.split('/')[5].split('-')[0]
-    
+    const split = character.sprite.split('/')[5].split('-')
+    const advName = split[0]
+    const chroma = split[2]
     // Vilnay
     if (advName == 'astrid')
         return [5, [0,0], -7] 
     else if (advName == 'vadanna')
         return [6.5, [0,1], -7] 
+    else if (advName == 'marlanye' && chroma == 'chroma.png')
+        return [7, [0,0], -7] 
     else if (advName == 'marlanye')
         return [5, [0,0], -7] 
     else if (advName == 'volggan')
@@ -236,27 +239,25 @@ const EmojiBubble = styled(PixelArtImage)`
 const EmojiImage = ({ emoji, dimensions }: { emoji?: string, dimensions: Dimensions }) => {
     const lastEmoji = useRememberLastValue(emoji, undefined)
     const renderEmoji = emoji ?? lastEmoji
-    return (
-        <If $if={notEmpty(renderEmoji)}>
-            <EmojiContainer $display={notEmpty(emoji)} dimensions={dimensions}>
-                <EmojiBubble
-                    src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"
-                    alt="emoji buble"
-                    width={3.4}
-                    height={3.4}
-                    units={dimensions.units}
-                    absolute
-                />
-                <PixelArtImage
-                    src={emojiMapping(renderEmoji)}
-                    alt="character emoji"
-                    width={2.8}
-                    height={2.5}
-                    units={dimensions.units}
-                />
-            </EmojiContainer>
-        </If>
-    )
+    return notEmpty(renderEmoji) ?
+        <EmojiContainer $display={notEmpty(emoji)} dimensions={dimensions}>
+            <EmojiBubble
+                src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/buble_emoji.webp"
+                alt="emoji buble"
+                width={3.4}
+                height={3.4}
+                units={dimensions.units}
+                absolute
+            />
+            <PixelArtImage
+                src={emojiMapping(renderEmoji)}
+                alt="character emoji"
+                width={2.8}
+                height={2.5}
+                units={dimensions.units}
+            />
+        </EmojiContainer>
+    : <></>
 }
 
 const CharacterImageContainer = styled.div<{ dimensions: Dimensions }>`

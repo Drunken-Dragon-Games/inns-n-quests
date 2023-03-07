@@ -1,15 +1,15 @@
 import { RefObject } from "react"
-import { Character, Furniture, AvailableQuest, SealType, TakenQuest, AvailableEncounter } from "../../common"
+import { Character, Furniture, AvailableStakingQuest, SealType, TakenStakingQuest, AvailableEncounter } from "../../common"
 import { notEmpty } from "../../utils"
 import * as vm from "../../game-vm"
 
-export type SelectedQuest = AvailableQuest | TakenQuest | AvailableEncounter
+export type SelectedQuest = AvailableStakingQuest | TakenStakingQuest | AvailableEncounter
 
 export type InventoryPageName = "characters" | "taken-quests" | "furniture"
 
 export type InventoryAsset = Character | Furniture
 
-export type InventoryItem = Character | TakenQuest | Furniture
+export type InventoryItem = Character | TakenStakingQuest | Furniture
 
 export type ActivitySelection = SelectedQuest | Character | Furniture
 
@@ -62,38 +62,38 @@ export const mapSealImage = (quest: SelectedQuest): { src: string, width: number
 
 export const activityId = (activity?: ActivitySelection): string =>
     activity?.ctype === "character" ? activity.entityId :
-    activity?.ctype === "taken-quest" ? activity.takenQuestId :
+    activity?.ctype === "taken-staking-quest" ? activity.takenQuestId :
     activity?.ctype === "furniture" ? activity.entityId :
     "no-activity"
 
 export const takenQuestId = (quest?: SelectedQuest): string =>
-    quest?.ctype === "taken-quest" ? quest.takenQuestId : ""
+    quest?.ctype === "taken-staking-quest" ? quest.takenQuestId : ""
 
 export const questId = (quest: SelectedQuest): string =>
-    quest.ctype === "taken-quest" ? quest.availableQuest.questId : 
-    quest.ctype === "available-quest" ? quest.questId :
+    quest.ctype === "taken-staking-quest" ? quest.availableQuest.questId : 
+    quest.ctype === "available-staking-quest" ? quest.questId :
     quest.encounterId
 
 export const questName = (quest: SelectedQuest): string =>
-    quest.ctype === "taken-quest" ? quest.availableQuest.name : quest.name
+    quest.ctype === "taken-staking-quest" ? quest.availableQuest.name : quest.name
 
 export const questDescription = (quest: SelectedQuest): string =>
-    quest.ctype === "taken-quest" ? quest.availableQuest.description : quest.description
+    quest.ctype === "taken-staking-quest" ? quest.availableQuest.description : quest.description
 
 //export const questPaper = (quest: SelectedQuest): number =>
     //0
-    //quest.ctype === "taken-quest" ? quest.availableQuest.paper : quest.paper
+    //quest.ctype === "taken-staking-quest" ? quest.availableQuest.paper : quest.paper
 
 export const questSeal = (quest: SelectedQuest): SealType =>
     "townsfolk"
-    //quest.ctype === "taken-quest" ? quest.availableQuest.seal : quest.seal
+    //quest.ctype === "taken-staking-quest" ? quest.availableQuest.seal : quest.seal
 
 export function inventoryItemId(item: InventoryItem): string {
     if (item.ctype === "character")
         return item.entityId
     else if (item.ctype === "furniture")
         return item.entityId
-    else //if (item.ctype === "taken-quest")
+    else //if (item.ctype === "taken-staking-quest")
         return item.takenQuestId
 }
 
@@ -108,7 +108,7 @@ export function draggableItemId(item: DraggableItem): string {
         return item.entityId
 }
 
-export const mapQuestScroll = (takenQuest: TakenQuest) => {
+export const mapQuestScroll = (takenQuest: TakenStakingQuest) => {
     return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/townsfolk.png"
     /*
     switch (takenQuest.availableQuest.seal) {
@@ -132,7 +132,7 @@ export function getQuestAPSRequirement(selectedQuest: SelectedQuest): vm.APS {
         else if (requirement.ctype === "not-requirement") return search(requirement.continuation)
         else return { ctype: "aps-requirement", athleticism: 0, intellect: 0, charisma: 0 }
     }
-    const quest = selectedQuest.ctype === "available-quest" ? selectedQuest : selectedQuest.quest
+    const quest = selectedQuest.ctype === "available-staking-quest" ? selectedQuest : selectedQuest.quest
     const requirement = search(quest.requirements)
     return { athleticism: requirement.athleticism, intellect: requirement.intellect, charisma: requirement.charisma }
     */

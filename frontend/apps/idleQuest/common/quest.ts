@@ -1,5 +1,5 @@
 import { simpleHash } from "../utils"
-import { TakenQuest } from "./backend-api"
+import { TakenStakingQuest } from "./backend-api"
 
 export type SealType = "kings-plea" | "heroic-quest" | "valiant-adventure" | "townsfolk"
 
@@ -7,19 +7,19 @@ export const sealTypes = ["kings-plea", "heroic-quest", "valiant-adventure", "to
 
 export type TakenQuestStatus = "in-progress" | "finished" | "claimed"
 
-export function takenQuestStatus(takenQuest: TakenQuest): TakenQuestStatus {
+export function takenQuestStatus(takenQuest: TakenStakingQuest): TakenQuestStatus {
     if (takenQuest.claimedAt) return "claimed"
     const isDone = takenQuestSecondsLeft(takenQuest) <= 0
     return isDone ? "finished" : "in-progress"
 }
 
-export function takenQuestSecondsLeft(takenQuest: TakenQuest): number {
+export function takenQuestSecondsLeft(takenQuest: TakenStakingQuest): number {
     const nowSeconds = Math.round(Date.now() / 1000)
     const createdOn = Math.round(new Date(takenQuest.createdAt).getTime() / 1000)
     return createdOn + takenQuest.availableQuest.duration - nowSeconds
 }
 
-export function takenQuestTimeLeft(takenQuest: TakenQuest): string {
+export function takenQuestTimeLeft(takenQuest: TakenStakingQuest): string {
     const secondsLeft = takenQuestSecondsLeft(takenQuest)
     const minutesLeft = Math.floor(secondsLeft / 60)
     const hoursLeft = Math.floor(minutesLeft / 60)

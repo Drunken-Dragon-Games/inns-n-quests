@@ -1,4 +1,9 @@
 
+export const notEmpty = <T>(value: T | null | undefined): value is T => 
+    value !== null && value !== undefined
+
+export const percentage = (value: number, total: number) => Math.min(Math.round(value * 100 / total), 100)
+
 export function makeRecord<T>(items: T[], key: (item: T) => string): Record<string, T> {
     const record: Record<string, T> = {}
     items.forEach(item => record[key(item)] = item)

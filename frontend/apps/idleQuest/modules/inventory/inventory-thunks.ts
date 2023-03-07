@@ -1,4 +1,4 @@
-import { AvailableQuest, Character, TakenQuest } from "../../common"
+import { AvailableStakingQuest, Character, TakenStakingQuest } from "../../common"
 import IdleQuestsApi from "../../idle-quests-api"
 import {
     inventoryState, inventoryStore, InventoryThunk
@@ -21,8 +21,8 @@ const InventoryThunks = {
             NotificationsApi.notify(`Error getting inventory: ${response.status}`, "alert")
     },
 
-    takeAvailableQuest: (quest: AvailableQuest, characters: Character[]): InventoryThunk  => async (dispatch) => {
-        const response = await IdleQuestsApi.takeAvailableQuest(quest, characters)
+    takeAvailableQuest: (quest: AvailableStakingQuest, characters: Character[]): InventoryThunk  => async (dispatch) => {
+        const response = await IdleQuestsApi.takeAvailableStakingQuest(quest, characters)
         if (response.status == "ok") {
             NotificationsApi.notify(`Quest taken: ${quest.name}`, "info")
             dispatch(actions.addTakenQuest(response.takenQuest))
@@ -34,7 +34,7 @@ const InventoryThunks = {
     },
 
     getInProgressQuests: (): InventoryThunk => async (dispatch) => {
-        const response = await IdleQuestsApi.getInProgressQuests()
+        const response = await IdleQuestsApi.getInProgressStakingQuests()
         if (response.status == "ok") {
             dispatch(actions.setTakenQuests(response.takenQuests))
         } else {
@@ -42,8 +42,8 @@ const InventoryThunks = {
         }
     },
 
-    claimTakenQuest: (takenQuest: TakenQuest, characters: Character[]): InventoryThunk => async (dispatch) => {
-        const response = await IdleQuestsApi.claimTakenQuest(takenQuest)
+    claimTakenQuest: (takenQuest: TakenStakingQuest, characters: Character[]): InventoryThunk => async (dispatch) => {
+        const response = await IdleQuestsApi.claimTakenStakingQuest(takenQuest)
         if (response.status == "ok") {
             NotificationsApi.notify(`Quest ${response.outcome.ctype == "success-outcome" ? "succeeded" : "failed"}: ${takenQuest.availableQuest.name}`, "info")
             dispatch(actions.removeTakenQuest(takenQuest))
