@@ -14,29 +14,32 @@ export class SectorDB extends Model implements ISectorDB {
     declare objectLocations: string
 }
 
-export const SectorDBTableName = "idle_quests_sector"
+export const SectorDBInfo = {
 
-export const SectorDBTableAttributes = {
-    sectorId: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        defaultValue: DataTypes.UUIDV4
+    tableName: "idle_quests_sector",
+
+    tableAttributes: {
+        sectorId: {
+            type: DataTypes.UUID,
+            primaryKey: true,
+            defaultValue: DataTypes.UUIDV4
+        },
+        objectLocations: {
+            type: DataTypes.TEXT,
+            allowNull: false
+        },
     },
-    objectLocations: {
-        type: DataTypes.TEXT,
-        allowNull: false
-    },
+
+    configureSequelizeModel(sequelize: Sequelize): void {
+        SectorDB.init(this.tableAttributes, {
+            sequelize,
+            modelName: 'SectorDB',
+            tableName: this.tableName
+        })
+    }
 }
 
-export const configureSequelizeModel = (sequelize: Sequelize): void => {
-    SectorDB.init(SectorDBTableAttributes, {
-        sequelize, 
-        modelName: 'SectorDB', 
-        tableName: SectorDBTableName
-    })
-}
-
-export default class SectorState {
+export class SectorState {
 
     constructor(
     ) { }

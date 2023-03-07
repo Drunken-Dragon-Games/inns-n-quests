@@ -1,50 +1,26 @@
-import Random from "../../../tools-utils/random"
 import { APS, apsAdd, apsAddBonus, apsMultScalar, apsSum, CharacterEntity, newAPS, oneAPS, zeroAPS } from "../character-entity"
-import {
-    addRewards, AndRequirement, APSRequirement, apsReward, BonusRequirement,
-    ClassRequirement, currencyReward, noReward, OrRequirement, QuestOutcome, QuestRequirement, Reward, SatisfiedRequirements, Strategy, SuccessBonusRequirement, TakenQuest
-} from "../encounter"
-import { CharacterEntityRuleset, QuestRuleset } from "../iq-ruleset"
+import { addEncounterRewards, encounterCurrencyReward, encounterAPSReward, noEncounterReward } from "../encounter"
+import IQRandom from "../iq-random"
+import { CharacterEntityRuleset, StakingQuestRuleset } from "../iq-ruleset"
+import { addStakingRewards, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, OrRequirement, SatisfiedRequirements, StakingQuestOutcome, StakingQuestRequirement, StakingReward, SuccessBonusRequirement, TakenStakingQuest } from "../staking-quest"
 
-class DefaultQuestRuleset implements QuestRuleset {
+export default class DefaultQuestRuleset implements StakingQuestRuleset {
 
     constructor (
         private characterRuleset: CharacterEntityRuleset, 
-        //private assetRewards: ItemRewards
+        private rand: IQRandom,
     ) {}
-
-    encounterOutcome(encounter: Strategy, party: CharacterEntity[], rand: Random): QuestOutcome {
-        return { ctype: "success-outcome", party, reward: noReward }
-    }
-
-    encounterXPReward(encounter: Strategy): Reward {
-        return noReward
-    }
-
-    
-    outcome(takenQuest: TakenQuest, party: CharacterEntity[], rand: Random): QuestOutcome {
-        
-        const successOutcome = (): { party: CharacterEntity[], reward: Reward } => {
-            const reward = this.reward(takenQuest.availableQuest.requirements)
-            const newParty = this.characterRuleset.levelUp(party, reward, newAPS([1,1,1]))
-            return { party: newParty, reward }
-        }
-
-        const failureOutcome = (): { party: CharacterEntity[] } => {
-            //const challengeAPS = this.challengeAPS(takenQuest.availableQuest.requirements)
-            //const newParty = party.map(p => this.characterRuleset.takeDamage(p, challengeAPS))
-            return { party }
-        }
-
+ 
+    outcome(takenQuest: TakenStakingQuest, party: CharacterEntity[]): StakingQuestOutcome {
         const successRate = this.satisfied(takenQuest.availableQuest.requirements, party)
-        const success = rand.randomNumberBetween(1, 100) <= Math.floor(1 * 100)
+        const success = this.rand.randomNumberBetween(1, 100) <= Math.floor(1 * 100)
         // Outcome data
         return success 
-            ? { ctype: "success-outcome", ...successOutcome() } 
-            : { ctype: "failure-outcome", ...failureOutcome() }
+            ? { ctype: "success-outcome", reward: this.reward(takenQuest.availableQuest.requirements) } 
+            : { ctype: "failure-outcome" }
     }
 
-    satisfied(requirements: QuestRequirement, party: CharacterEntity[]): SatisfiedRequirements {
+    satisfied(requirements: StakingQuestRequirement, party: CharacterEntity[]): SatisfiedRequirements {
 
         const and = (requirement: AndRequirement): SatisfiedRequirements => {
             const left = this.satisfied(requirement.left, party)
@@ -68,20 +44,6 @@ class DefaultQuestRuleset implements QuestRuleset {
             if (apsSum(right.aps) > apsSum(left.aps)) return right
             else return left
         }
-
-        /*
-        const not = (requirement: NotRequirement): SatisfiedRequirements => {
-            const continuation = this.satisfied(requirement.continuation, party)
-            return {
-                aps: newAPS([
-                    1 - continuation.aps.athleticism,
-                    1 - continuation.aps.intellect,
-                    1 - continuation.aps.charisma
-                ]),
-                class: 1 - continuation.class
-            }
-        }
-        */
 
         const bonus = (requirement: BonusRequirement | SuccessBonusRequirement): SatisfiedRequirements => {
             const left = this.satisfied(requirement.left, party)
@@ -133,31 +95,31 @@ class DefaultQuestRuleset implements QuestRuleset {
         }
     }
 
-    reward(requirements: QuestRequirement): Reward {
+    reward(requirements: StakingQuestRequirement): StakingReward {
 
-        const and = (requirement: AndRequirement | BonusRequirement): Reward => {
+        const and = (requirement: AndRequirement | BonusRequirement): StakingReward => {
             const leftReward = this.reward(requirement.left)
             const rightReward = this.reward(requirement.right)
-            return addRewards(leftReward, rightReward)
+            return addStakingRewards(leftReward, rightReward)
         }
 
-        const or = (requirement: OrRequirement): Reward => {
+        const or = (requirement: OrRequirement): StakingReward => {
             const leftReward = this.reward(requirement.left)
             const rightReward = this.reward(requirement.right)
             return leftReward
         }
 
-        const bonus = (requirement: SuccessBonusRequirement): Reward => 
+        const bonus = (requirement: SuccessBonusRequirement): StakingReward => 
             this.reward(requirement.right)
 
-        const apsR = (requirement: APSRequirement): Reward => {
-            const currency = currencyReward(apsSum(requirement))
-            const experienceReward = apsReward(apsMultScalar(requirement, 100))
-            return addRewards(currency, experienceReward)
+        const apsR = (requirement: APSRequirement): StakingReward => {
+            const currency = encounterCurrencyReward(apsSum(requirement))
+            const experienceReward = encounterAPSReward(apsMultScalar(requirement, 100))
+            return addEncounterRewards(currency, experienceReward)
         }
 
-        const classR = (requirement: ClassRequirement): Reward => {
-            return currencyReward(100)
+        const classR = (requirement: ClassRequirement): StakingReward => {
+            return encounterCurrencyReward(100)
         }
 
         switch (requirements.ctype) {
@@ -174,11 +136,11 @@ class DefaultQuestRuleset implements QuestRuleset {
             case "or-requirement":
                 return or(requirements)
             case "empty-requirement":
-                return noReward
+                return noEncounterReward
         }
     }
 
-    duration(requirements: QuestRequirement): number {
+    duration(requirements: StakingQuestRequirement): number {
         if (requirements.ctype === "aps-requirement")
             return 60//apsSum({ athleticism: requirements.athleticism, intellect: requirements.intellect, charisma: requirements.charisma }) * 10 * this.durationFactor
         else if (requirements.ctype === "bonus-requirement")
@@ -193,5 +155,3 @@ class DefaultQuestRuleset implements QuestRuleset {
             return 0
     }
 }
-
-export default DefaultQuestRuleset

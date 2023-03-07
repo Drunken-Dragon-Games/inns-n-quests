@@ -16,13 +16,13 @@ export type Furniture
     & vm.WithOwner
     & vm.WithSprite
 
-export type AvailableQuest
-    = vm.AvailableQuest
-    & vm.WithTag<"available-quest">
+export type AvailableStakingQuest
+    = vm.AvailableStakingQuest
+    & vm.WithTag<"available-staking-quest">
 
-export type TakenQuest 
-    = vm.TakenQuest
-    & vm.WithTag<"taken-quest">
+export type TakenStakingQuest 
+    = vm.TakenStakingQuest
+    & vm.WithTag<"taken-staking-quest">
     & vm.WithOwner
 
 export type AvailableEncounter

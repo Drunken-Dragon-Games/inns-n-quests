@@ -1,19 +1,21 @@
-import { WellKnownPolicies } from "../../../registry-policies"
-import { CharacterEntityRuleset, IQRuleset, QuestRuleset } from "../iq-ruleset"
-//import { ItemRewards } from "../encounter"
+import IQRandom from "../iq-random"
+import { CharacterEntityRuleset, EncounterRuleset, IQRuleset, StakingQuestRuleset } from "../iq-ruleset"
 import DefaultCharacterRuleset from "./default-ruleset-character-entity"
-import DefaultQuestRuleset from "./default-ruleset-quest"
+import DefaultEncounterRuleset from "./default-ruleset-encounter"
+import DefaultQuestRuleset from "./default-ruleset-staking-quest"
 
 export default class DefaultRuleset implements IQRuleset {
 
     readonly name: string = "Default"
     readonly character: CharacterEntityRuleset
-    readonly quest: QuestRuleset
+    readonly stakingQuest: StakingQuestRuleset
+    readonly encounter: EncounterRuleset
 
     constructor(
-        //assetRewards: ItemRewards,
+       public readonly rand: IQRandom 
     ){
         this.character = new DefaultCharacterRuleset()
-        this.quest = new DefaultQuestRuleset(this.character)//, assetRewards)
+        this.stakingQuest = new DefaultQuestRuleset(this.character, rand)
+        this.encounter = new DefaultEncounterRuleset()
     }
 }

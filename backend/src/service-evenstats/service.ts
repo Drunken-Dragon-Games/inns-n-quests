@@ -6,7 +6,7 @@ import * as leaderboardDB from "./leaderboard/leaderboard-db"
 import { Umzug } from "umzug"
 import path from "path"
 import { buildMigrator } from "../tools-database"
-import { TakenQuest } from "../service-idle-quests"
+import { TakenStakingQuest } from "../service-idle-quests"
 
 export type EvenstatsServiceDependencies = {
     database: Sequelize

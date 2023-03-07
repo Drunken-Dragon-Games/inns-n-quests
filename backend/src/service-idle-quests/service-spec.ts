@@ -10,9 +10,7 @@ export interface IdleQuestsService {
 
     health(logger?: LoggingContext): Promise<HealthStatus>
 
-    getInventory(userId: string): Promise<GetInventoryResult>
-
-
+    /** Encounters */
 
     getAvailableEncounters(location: string): Promise<GetAvailableEncountersResult>
 
@@ -22,16 +20,19 @@ export interface IdleQuestsService {
 
     claimEncounter(userId: string, activeEncounterId: string): Promise<ClaimEncounterResult>
 
+    /** Staking Quests */
 
-    getAvailableQuests(location: string): Promise<GetAvailableQuestsResult>
+    getAvailableStakingQuests(location: string): Promise<GetAvailableStakingQuestsResult>
 
-    acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptQuestResult>
+    acceptStakingQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptStakingQuestResult>
 
-    getTakenQuests(userId: string): Promise<GetTakenQuestsResult>
+    getTakenStakingQuests(userId: string): Promise<GetTakenStakingQuestsResult>
 
-    claimQuestResult(userId: string, takenQuestId: string): Promise<ClaimQuestResult>
+    claimStakingQuestResult(userId: string, takenQuestId: string): Promise<ClaimStakingQuestResult>
 
+    /** Player State */
 
+    getInventory(userId: string): Promise<GetInventoryResult>
 
     grantTestInventory(userId: string): Promise<GetInventoryResult>
 
@@ -50,7 +51,7 @@ export type GetInventoryResult
     = { status: "ok", inventory: models.IdleQuestsInventory }
     | { status: "unknown-user" }
 
-
+/** Encounters */
 
 export type GetAvailableEncountersResult
     = { status: "ok", availableEncounters: models.AvailableEncounter[] }
@@ -64,27 +65,27 @@ export type GetActiveEncountersResult
     = { status: "ok", activeEncounters: models.ActiveEncounter[] }
 
 export type ClaimEncounterResult
-    = { status: "ok", outcome: vm.QuestOutcome }
+    = { status: "ok", outcome: vm.EncounterOutcome }
     | { status: "unknown-encounter" }
     | { status: "already-claimed" }
     | { status: "not-finished" }
     | { status: "missing-adventurers", missing: string[] }
 
+/** Staking Quests */
 
+export type GetAvailableStakingQuestsResult
+    = { status: "ok", availableQuests: models.AvailableStakingQuest[] }
 
-export type AcceptQuestResult
-    = { status: "ok", takenQuest: models.TakenQuest }
+export type AcceptStakingQuestResult
+    = { status: "ok", takenQuest: models.TakenStakingQuest }
     | { status: "unknown-quest" }
     | { status: "invalid-adventurers" }
 
-export type GetAvailableQuestsResult
-    = { status: "ok", availableQuests: models.AvailableQuest[] }
+export type GetTakenStakingQuestsResult
+    = { status: "ok", takenQuests: models.TakenStakingQuest[] }
 
-export type GetTakenQuestsResult
-    = { status: "ok", takenQuests: models.TakenQuest[] }
-
-export type ClaimQuestResult
-    = { status: "ok", outcome: vm.QuestOutcome }
+export type ClaimStakingQuestResult
+    = { status: "ok", outcome: vm.StakingQuestOutcome }
     | { status: "unknown-quest" }
     | { status: "quest-already-claimed" }
     | { status: "quest-not-finished" }

@@ -1,4 +1,4 @@
-import { Character, TakenQuest } from "../service-idle-quests"
+import { Character, TakenStakingQuest } from "../service-idle-quests"
 
 export interface EvenstatsSubscriber {
     onEvenstatsEvent: (event: EvenstatsEvent) => Promise<void>
@@ -8,7 +8,7 @@ export type EvenstatsEvent = ClaimedQuestEvent | QuestsSucceededLeaderboardChang
 
 export type ClaimedQuestEvent = {
     ctype: "claimed-quest-event",
-    quest: TakenQuest,
+    quest: TakenStakingQuest,
     adventurers: Character[], 
 }
 

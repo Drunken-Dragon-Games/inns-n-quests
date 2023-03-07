@@ -1,6 +1,6 @@
 import { APS, CharacterEntity, newAPS } from "../character-entity";
 import { CharacterEntityRuleset } from "../iq-ruleset";
-import { Reward } from "../encounter";
+import { EncounterReward } from "../encounter";
 import { cubicSolver } from "../utils";
 
 class DefaultCharacterRuleset implements CharacterEntityRuleset {
@@ -20,7 +20,7 @@ class DefaultCharacterRuleset implements CharacterEntityRuleset {
         return 10 * ((currentLevel * (currentLevel + 1) * (2 * currentLevel + 1) / 6) + (10 * (currentLevel * (currentLevel + 1) / 2)))
     }
 
-    levelUp(party: CharacterEntity[], reward: Reward, bonus: APS = newAPS([1,1,1])): CharacterEntity[] {
+    levelUp(party: CharacterEntity[], reward: EncounterReward, bonus: APS = newAPS([1,1,1])): CharacterEntity[] {
         const xpReward = reward.experience
         if (!xpReward) return party
         

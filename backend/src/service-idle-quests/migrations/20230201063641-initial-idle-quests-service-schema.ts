@@ -1,26 +1,23 @@
 import { addDateReferenceColumns, MigrationFun } from '../../tools-database'
-import { TakenQuestDBTableAttributes, TakenQuestDBTableName } from '../state/taken-quest-state'
-import { CharacterDBTableAttributes, CharacterDBTableName } from '../state/character-state'
-import { SectorDBTableAttributes, SectorDBTableName } from '../state/sector-state'
-import { FurnitureDBTableName, FurnitureDBTableAttributes } from '../state/furniture-state'
+import { CharacterDBInfo } from '../state/character-state'
 import { ActiveEncounterDBInfo } from '../state/encounter-state'
+import { FurnitureDBInfo } from '../state/furniture-state'
+import { SectorDBInfo } from '../state/sector-state'
+import { TakenStakingQuestDBInfo } from '../state/taken-staking-quest-state'
 
 export const up: MigrationFun = async ({ context: query }) => {
-  await query.createTable(CharacterDBTableName, addDateReferenceColumns(CharacterDBTableAttributes))
-  await query.createTable(TakenQuestDBTableName, addDateReferenceColumns(TakenQuestDBTableAttributes))
-  await query.createTable(SectorDBTableName, addDateReferenceColumns(SectorDBTableAttributes))
-  await query.createTable(FurnitureDBTableName, addDateReferenceColumns(FurnitureDBTableAttributes))
-
+  await query.createTable(CharacterDBInfo.tableName, addDateReferenceColumns(CharacterDBInfo.tableAttributes))
+  await query.createTable(TakenStakingQuestDBInfo.tableName, addDateReferenceColumns(TakenStakingQuestDBInfo.tableAttributes))
+  await query.createTable(SectorDBInfo.tableName, addDateReferenceColumns(SectorDBInfo.tableAttributes))
+  await query.createTable(FurnitureDBInfo.tableName, addDateReferenceColumns(FurnitureDBInfo.tableAttributes))
   await query.createTable(ActiveEncounterDBInfo.tableName, addDateReferenceColumns(ActiveEncounterDBInfo.tableAttributes))
-
 }
 
 export const down: MigrationFun = async ({ context: query }) => {
   const options = { cascade: true, force: true }
-  await query.dropTable(CharacterDBTableName, options)
-  await query.dropTable(TakenQuestDBTableName, options)
-  await query.dropTable(SectorDBTableName, options)
-  await query.dropTable(FurnitureDBTableName, options)
-
+  await query.dropTable(CharacterDBInfo.tableName, options)
+  await query.dropTable(TakenStakingQuestDBInfo.tableName, options)
+  await query.dropTable(SectorDBInfo.tableName, options)
+  await query.dropTable(FurnitureDBInfo.tableName, options)
   await query.dropTable(ActiveEncounterDBInfo.tableName, options)
 }

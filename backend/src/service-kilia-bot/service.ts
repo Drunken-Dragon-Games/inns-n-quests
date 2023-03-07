@@ -1,7 +1,7 @@
 import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
 import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
-import { Character, TakenQuest } from "../service-idle-quests"
+import { Character, TakenStakingQuest } from "../service-idle-quests"
 import { config } from "../tools-utils"
 import { QueryInterface, Sequelize } from "sequelize"
 
@@ -121,7 +121,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         }
     }
 
-    async notifyQuestClaimed(quest: TakenQuest, adventurers: Character[]): Promise<void> {
+    async notifyQuestClaimed(quest: TakenStakingQuest, adventurers: Character[]): Promise<void> {
         const servers = Object.values(this.configCache)
         const player = await this.identityService.resolveUser({ ctype: "user-id", userId: quest.userId })
         if (player.status !== "ok" || !quest.outcome) return

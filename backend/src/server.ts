@@ -1,26 +1,24 @@
-import { buildApp } from "./module-ddu-app/app"
+import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
+import dotenv from 'dotenv';
+import { setTimeout } from "timers/promises";
+import { buildApp } from "./module-ddu-app/app";
 import { PORT } from "./module-ddu-app/settings";
-import { IdentityServiceDsl } from "./service-identity";
+import { AssetManagementService } from "./service-asset-management";
 import { AssetManagementServiceDsl } from "./service-asset-management/service";
+import { IdentityServiceDsl } from "./service-identity";
+import { IdleQuestsServiceDsl } from "./service-idle-quests/service";
 import { SecureSigningServiceDsl } from "./service-secure-signing";
 import { connectToDB } from "./tools-database";
-import { config } from "./tools-utils";
-import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
-import { loadQuestModuleModels } from "./module-quests/app/database/migration_scripts/migrate";
-import { setTimeout } from "timers/promises";
 import { LoggingContext } from "./tools-tracing";
-import { AssetManagementService } from "./service-asset-management";
-import { IdleQuestsServiceDsl } from "./service-idle-quests/service";
-import dotenv from 'dotenv'
+import { config } from "./tools-utils";
 
-import Random from "./tools-utils/random";
-import { loadQuestRegistry } from "./registry-quests";
-import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./registry-policies";
-import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata";
 import path from "path";
-import { commonCalendar } from "./tools-utils/calendar";
-import { KiliaBotServiceDsl } from "./service-kilia-bot";
+import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata";
+import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./registry-policies";
+import { loadQuestRegistry } from "./service-idle-quests/state/staking-quests-registry";
 import { EvenstatsServiceDsl } from "./service-evenstats/service";
+import { KiliaBotServiceDsl } from "./service-kilia-bot";
+import { commonCalendar } from "./tools-utils/calendar";
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -31,7 +29,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
 
 (async () => {
     dotenv.config()
-    const random = new Random(config.stringOrElse("RANDOM_SEED", Date.now().toString()))
+    const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
     const calendar = commonCalendar
     const metadataRegistry = await loadMetadataCache(loadMetadataLocationsFromEnv())
     const wellKnownPolicies = process.env.CARDANO_NETWORK === "mainnet" ? wellKnownPoliciesMainnet : loadWellKnownPoliciesFromEnv()
@@ -52,7 +50,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
-    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ random, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
+    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService })
     
     // Soon to be deprecated

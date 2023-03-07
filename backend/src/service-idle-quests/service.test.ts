@@ -2,7 +2,6 @@ import path from "path"
 import { Sequelize } from "sequelize"
 import { v4 } from "uuid"
 import { wellKnownPoliciesMainnet } from "../registry-policies"
-import { loadQuestRegistryFromFs } from "../registry-quests"
 import { Inventory } from "../service-asset-management"
 import { connectToDB } from "../tools-database"
 import { failure, success } from "../tools-utils"
@@ -11,14 +10,14 @@ import { MutableCalendar } from "../tools-utils/calendar"
 import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-service-mock"
 import EvenstatsServiceMock from "../tools-utils/mocks/evenstats-service-mock"
 import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registry"
-import Random from "../tools-utils/random"
 import * as vm from "./game-vm"
-import { QuestOutcome } from "./game-vm"
-import { AvailableQuest, Character, TakenQuest } from "./models"
-import { IdleQuestsServiceDsl } from "./service"
+import { EncounterOutcome } from "./game-vm"
+import { AvailableStakingQuest, Character, TakenStakingQuest } from "./models"
+import { IdleQuestsRandomGenerator, IdleQuestsServiceDsl } from "./service"
 import { IdleQuestsService } from "./service-spec"
-import CharacterState, * as adventurersDB from "./state/character-state"
-import FurnitureState, * as furnitureDB from "./state/furniture-state"
+import { CharacterDB, CharacterState } from "./state/character-state"
+import { FurnitureDB, FurnitureState } from "./state/furniture-state"
+import { loadQuestRegistryFromFs } from "./state/staking-quests-registry"
 
 let service: IdleQuestsService
 let database: Sequelize
@@ -50,7 +49,7 @@ beforeAll(async () => {
         database: "service_db"
     })
     const idleQuestServiceDependencies = {
-        random: new Random("test"),
+        randomSeed: "test",
         calendar,
         database,
         evenstatsService: evenstatsService.service,
@@ -60,9 +59,11 @@ beforeAll(async () => {
         wellKnownPolicies: wellKnownPoliciesMainnet
     }
     service = await IdleQuestsServiceDsl.loadFromConfig(idleQuestServiceDependencies)
-    const rules: vm.IQRuleset = new vm.DefaultRuleset()//wellKnownPoliciesMainnet)
-    characterState = new CharacterState(testMetadataRegistry, wellKnownPoliciesMainnet, rules)
-    furnitureState = new FurnitureState(testMetadataRegistry, wellKnownPoliciesMainnet)
+    const random = new IdleQuestsRandomGenerator("test")
+    const rules: vm.IQRuleset = new vm.DefaultRuleset(random)
+    const objectBuilder = new vm.IQMeatadataObjectBuilder(rules, testMetadataRegistry, wellKnownPoliciesMainnet)
+    characterState = new CharacterState(objectBuilder)
+    furnitureState = new FurnitureState(objectBuilder)
     await service.loadDatabaseModels()
 })
 
@@ -87,9 +88,9 @@ test("Sync Adventurers", async () => {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile1", quantity: "1", chain: false } ]
     }
     await characterState.syncCharacters(userId, assetInventory1)
-    const assets1 = await adventurersDB.CharacterDB.findAll({ where: { userId }})
+    const assets1 = await CharacterDB.findAll({ where: { userId }})
     await characterState.syncCharacters(userId, assetInventory2)
-    const assets2 = await adventurersDB.CharacterDB.findAll({ where: { userId }})
+    const assets2 = await CharacterDB.findAll({ where: { userId }})
 
     expect(assets1.length).toBe(2)
     expect(assets1[0].assetRef).toBe("PixelTile1")
@@ -111,9 +112,9 @@ test("Sync Furniture", async () => {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [ { unit: "PixelTile2", quantity: "1", chain: false } ]
     }
     await furnitureState.syncFurniture(userId, assetInventory1)
-    const assets1 = await furnitureDB.FurnitureDB.findAll({ where: { userId }})
+    const assets1 = await FurnitureDB.findAll({ where: { userId }})
     await furnitureState.syncFurniture(userId, assetInventory2)
-    const assets2 = await furnitureDB.FurnitureDB.findAll({ where: { userId }})
+    const assets2 = await FurnitureDB.findAll({ where: { userId }})
 
     expect(assets1.length).toBe(2)
     expect(assets1[0].assetRef).toBe("PixelTile2")
@@ -123,7 +124,6 @@ test("Sync Furniture", async () => {
     expect(assets1.some(adv => adv.entityId == assets2[0].entityId)).toBeTruthy()
 })
 
-/*
 test("Normal quest flow 1", async () => {
     const userId = v4()
     const adventurers = await getAllAdventurers(userId)
@@ -131,7 +131,7 @@ test("Normal quest flow 1", async () => {
     const adventurersToGoOnQuest = adventurers.map(a => a.entityId)
     const acceptedQuest = await acceptQuest(userId, availableQuests[0].questId, adventurersToGoOnQuest)
     const takenQuests1 = await getTakenQuests(userId)
-    const claimBeforeTimeResponse = await service.claimQuestResult(userId, acceptedQuest.takenQuestId!)
+    const claimBeforeTimeResponse = await service.claimStakingQuestResult(userId, acceptedQuest.takenQuestId!)
     calendar.moveSeconds(acceptedQuest.availableQuest.duration)
     const outcome = await claimQuestResult(userId, acceptedQuest.takenQuestId!)
     const takenQuests2 = await getTakenQuests(userId)
@@ -145,7 +145,6 @@ test("Normal quest flow 1", async () => {
     expect(takenQuests2.length).toBe(0)
     expect(outcome.ctype).toBe("success-outcome")
 })
-*/
 
 async function getAllAdventurers(userId: string): Promise<Character[]> {
     return await expectResponse(
@@ -158,9 +157,9 @@ async function getAllAdventurers(userId: string): Promise<Character[]> {
     )
 }
 
-async function getAvailableQuests(location: string): Promise<AvailableQuest[]> {
+async function getAvailableQuests(location: string): Promise<AvailableStakingQuest[]> {
     return await expectResponse(
-        service.getAvailableQuests(location),
+        service.getAvailableStakingQuests(location),
         response =>
             response.status === "ok" ?
             success(response.availableQuests) :
@@ -169,9 +168,9 @@ async function getAvailableQuests(location: string): Promise<AvailableQuest[]> {
     )
 }
 
-async function acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<TakenQuest> {
+async function acceptQuest(userId: string, questId: string, adventurerIds: string[]): Promise<TakenStakingQuest> {
     return await expectResponse(
-        service.acceptQuest(userId, questId, adventurerIds),
+        service.acceptStakingQuest(userId, questId, adventurerIds),
         response =>
             response.status === "ok" ?
             success(response.takenQuest) :
@@ -180,9 +179,9 @@ async function acceptQuest(userId: string, questId: string, adventurerIds: strin
     )
 }
 
-async function getTakenQuests(userId: string): Promise<TakenQuest[]> {
+async function getTakenQuests(userId: string): Promise<TakenStakingQuest[]> {
     return await expectResponse(
-        service.getTakenQuests(userId),
+        service.getTakenStakingQuests(userId),
         response =>
             response.status === "ok" ?
             success(response.takenQuests) :
@@ -191,9 +190,9 @@ async function getTakenQuests(userId: string): Promise<TakenQuest[]> {
     )
 }
 
-async function claimQuestResult(userId: string, takenQuestId: string): Promise<QuestOutcome> {
+async function claimQuestResult(userId: string, takenQuestId: string): Promise<EncounterOutcome> {
     return await expectResponse(
-        service.claimQuestResult(userId, takenQuestId),
+        service.claimStakingQuestResult(userId, takenQuestId),
         response =>
             response.status === "ok" ?
             success(response.outcome) :

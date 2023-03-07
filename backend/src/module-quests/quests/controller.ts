@@ -25,7 +25,7 @@ const getRandomQuestsV2 = (sequelize: Sequelize, idleQuestsService: IdleQuestsSe
     const userId = request.auth!.userId
     const numberOfQuests = 20;
 
-    return response.status(200).send(await idleQuestsService.getAvailableQuests(userId));
+    return response.status(200).send(await idleQuestsService.getAvailableStakingQuests(userId));
 }
 
 

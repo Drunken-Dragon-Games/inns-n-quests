@@ -2,8 +2,6 @@ import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
 import { Furniture } from "../models"
 import * as am from "../../service-asset-management"
 import * as vm from "../game-vm"
-import { MetadataRegistry } from "../../registry-metadata"
-import { WellKnownPolicies } from "../../registry-policies"
 import { syncData } from "./sync-util"
 
 export type IFurnitureDB = Omit<
@@ -20,34 +18,36 @@ export class FurnitureDB extends Model implements IFurnitureDB {
     declare assetRef: string
 }
 
-export const FurnitureDBTableName = "idle_quests_furniture"
+export const FurnitureDBInfo = {
+    tableName: "idle_quests_furniture",
 
-export const FurnitureDBTableAttributes = {
-    entityId: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        defaultValue: DataTypes.UUIDV4
+    tableAttributes: {
+        entityId: {
+            type: DataTypes.UUID,
+            primaryKey: true,
+            defaultValue: DataTypes.UUIDV4
+        },
+        userId: {
+            type: DataTypes.UUID,
+            allowNull: false
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        assetRef: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
     },
-    userId: {
-        type: DataTypes.UUID,
-        allowNull: false
-    },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    assetRef: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-}
 
-export const configureSequelizeModel = (sequelize: Sequelize): void => {
-    FurnitureDB.init(FurnitureDBTableAttributes, {
-        sequelize, 
-        modelName: 'FurnitureDB', 
-        tableName: FurnitureDBTableName
-    })
+    configureSequelizeModel(sequelize: Sequelize): void {
+        FurnitureDB.init(this.tableAttributes, {
+            sequelize,
+            modelName: 'FurnitureDB',
+            tableName: this.tableName
+        })
+    }
 }
 
 interface InventoryFurniture {
@@ -56,11 +56,10 @@ interface InventoryFurniture {
     quantity: number
 }
 
-export default class FurnitureState {
+export class FurnitureState {
 
     constructor(
-        private readonly metadataRegistry: MetadataRegistry,
-        private readonly wellKnownPolicies: WellKnownPolicies,
+        private readonly objectBuilder: vm.IQMeatadataObjectBuilder,
     ) { }
 
     /**
@@ -74,11 +73,11 @@ export default class FurnitureState {
     async syncFurniture(userId: string, assetInventory: am.Inventory, transaction?: Transaction): Promise<Furniture[]> {
         
         const pickInventoryFurniture = (assetInventory: am.Inventory): InventoryFurniture[] => {
-            const pxs: InventoryFurniture[] = (assetInventory[this.wellKnownPolicies.pixelTiles.policyId] ?? [])
+            const pxs: InventoryFurniture[] = (assetInventory[this.objectBuilder.wellKnownPolicies.pixelTiles.policyId] ?? [])
                 .filter( pxt => 
-                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Adventurer" &&
-                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Monster" &&
-                    this.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Townsfolk" 
+                    this.objectBuilder.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Adventurer" &&
+                    this.objectBuilder.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Monster" &&
+                    this.objectBuilder.metadataRegistry.pixelTilesMetadata[pxt.unit].type !== "Townsfolk" 
                 )
                 .map(pxt => ({ assetRef: pxt.unit, collection: "pixel-tiles", quantity: parseInt(pxt.quantity) }))
             // This is coded like this for when extended for other furniture. See the adventurers sync for reference.
@@ -136,7 +135,7 @@ export default class FurnitureState {
     private makeFurnitureDB(userId: string, furniture: InventoryFurniture): Omit<IFurnitureDB, "entityId"> {
         return {
             userId,
-            name: vm.furnitureDefaultName(this.metadataRegistry)(furniture.assetRef, furniture.collection),
+            name: this.objectBuilder.furnitureDefaultName(furniture.assetRef, furniture.collection),
             assetRef: furniture.assetRef
         }
     }

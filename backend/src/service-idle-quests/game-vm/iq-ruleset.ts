@@ -1,44 +1,48 @@
-import Random from "../../tools-utils/random"
 import { APS, apsSum, CharacterEntity } from "./character-entity"
-import { Reward, QuestRequirement, TakenQuest, QuestOutcome, SatisfiedRequirements, Strategy } from "./encounter"
-import { newRandAPS } from "./object-creation"
+import { EncounterReward, EncounterOutcome, Strategy } from "./encounter"
+import { IQMeatadataObjectBuilder } from "./iq-metadata-object-builder"
+import IQRandom from "./iq-random"
+import { TakenStakingQuest, StakingQuestRequirement, SatisfiedRequirements, StakingReward, StakingQuestOutcome } from "./staking-quest"
 
 export interface IQRuleset {
     name: string
+    rand: IQRandom
     character: CharacterEntityRuleset
-    quest: QuestRuleset
+    stakingQuest: StakingQuestRuleset
+    encounter: EncounterRuleset
 }
 
 export interface CharacterEntityRuleset {
     natMaxHitPoints(ivAPS: APS, xpAPS: APS): number
     evAPS(ivAPS: APS, xpAPS: APS): APS
     totalXPRequiredForNextAPSLevel(currentLevel: number): number
-    levelUp(party: CharacterEntity[], reward: Reward, bonus: APS): CharacterEntity[]
+    levelUp(party: CharacterEntity[], reward: EncounterReward, bonus: APS): CharacterEntity[]
     takeDamage(party: CharacterEntity, challengeAPS: APS): CharacterEntity
     /** Helper functions */
     apsLevelByXP(xp: number): number
 }
 
-export interface QuestRuleset {
-    outcome(takenQuest: TakenQuest, party: CharacterEntity[], rand: Random): QuestOutcome
-    satisfied(requirements: QuestRequirement, party: CharacterEntity[]): SatisfiedRequirements
-    reward(requirements: QuestRequirement): Reward
-    duration(requirements: QuestRequirement): number
+export interface StakingQuestRuleset {
+    outcome(takenQuest: TakenStakingQuest, party: CharacterEntity[]): StakingQuestOutcome
+    satisfied(requirements: StakingQuestRequirement, party: CharacterEntity[]): SatisfiedRequirements
+    reward(requirements: StakingQuestRequirement): StakingReward
+    duration(requirements: StakingQuestRequirement): number
+}
 
-    encounterOutcome(encounter: Strategy, party: CharacterEntity[], rand: Random): QuestOutcome
-    encounterXPReward(encounter: Strategy): Reward 
+export interface EncounterRuleset {
+    outcome(encounter: Strategy, party: CharacterEntity[]): EncounterOutcome
 }
 
 export class CharacterEntityRuleSetProperties {
 
     constructor(
-        public readonly rules: CharacterEntityRuleset,
-        public readonly rand: Random,
+        private readonly rules: CharacterEntityRuleset,
+        private readonly create: IQMeatadataObjectBuilder
     ) {}
 
     apsLevelCongruence = (currentLevel: number) =>
         expect(this.rules.apsLevelByXP(this.rules.totalXPRequiredForNextAPSLevel(currentLevel))).toBe(currentLevel + 1)
     
     apsRandomGenerationCongruence = (targetAPSSum: number) =>
-        expect(apsSum(newRandAPS(targetAPSSum, this.rand))).toBe(targetAPSSum)
+        expect(apsSum(this.create.newRandAPS(targetAPSSum, this.create.rand))).toBe(targetAPSSum)
 }

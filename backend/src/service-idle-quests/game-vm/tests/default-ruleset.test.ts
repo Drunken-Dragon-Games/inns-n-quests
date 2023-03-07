@@ -1,10 +1,19 @@
-import Random from '../../../tools-utils/random'
 import { CharacterEntityRuleSetProperties } from '../iq-ruleset'
 import DefaultRuleset from '../default-ruleset/default-ruleset'
+import IQRandom from '../iq-random'
+import { IQMeatadataObjectBuilder } from '../iq-metadata-object-builder'
+import { emptyMetadataRegistry, emptyWellKnownPolicies } from '../iq-metadata'
 
-const rules = new DefaultRuleset()//wellKnownPoliciesMainnet)
-const rand = new Random("test")
-const characterProperties = new CharacterEntityRuleSetProperties(rules.character, rand)
+class UnsafeIQRandom extends IQRandom {
+    constructor() { super() }
+    genrand(): number { return Math.random() }
+    seed(s: string): IQRandom { return this }
+}
+
+const random = new UnsafeIQRandom()
+const rules = new DefaultRuleset(random)
+const objectBuilder = new IQMeatadataObjectBuilder(rules, emptyMetadataRegistry, emptyWellKnownPolicies)
+const characterProperties = new CharacterEntityRuleSetProperties(rules.character, objectBuilder)
 
 test("Leveling Equations", () => {
     characterProperties.apsLevelCongruence(1)

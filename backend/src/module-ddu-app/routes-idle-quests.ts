@@ -46,7 +46,7 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
 
     router.get('/quests', async (request: Request, response: Response) => {
         const userId = request.auth!.userId
-        const result = await idleQuestsService.getAvailableQuests("Auristar")
+        const result = await idleQuestsService.getAvailableStakingQuests("Auristar")
         response.status(200).send(result)
     })
 
@@ -54,20 +54,20 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
         const questId: string = request.body.quest_id;
         const adventurerIds: string[] = request.body.adventurer_ids;
         const userId: string = request.auth!.userId
-        const result = await idleQuestsService.acceptQuest(userId, questId, adventurerIds)
+        const result = await idleQuestsService.acceptStakingQuest(userId, questId, adventurerIds)
         response.status(200).send(result)
     })
 
     router.get('/taken-quests', async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
-        const result = await idleQuestsService.getTakenQuests(userId)
+        const result = await idleQuestsService.getTakenStakingQuests(userId)
         response.status(200).json(result)
     })
 
     router.post('/claim', async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const takenQuestId: string = request.body.taken_quest_id;
-        const result = await idleQuestsService.claimQuestResult(userId, takenQuestId)
+        const result = await idleQuestsService.claimStakingQuestResult(userId, takenQuestId)
         response.status(200).json(result)
     })
 

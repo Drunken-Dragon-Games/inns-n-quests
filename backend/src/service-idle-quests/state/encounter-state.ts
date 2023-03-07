@@ -10,7 +10,7 @@ export interface IActiveEncounterDB {
     party: string[]
     claimedAt?: Date
     createdAt: Date
-    outcome?: vm.QuestOutcome
+    outcome?: vm.EncounterOutcome
 }
 
 export class ActiveEncounterDB extends Model implements IActiveEncounterDB {
@@ -21,7 +21,7 @@ export class ActiveEncounterDB extends Model implements IActiveEncounterDB {
     declare party: string[]
     declare claimedAt?: Date
     declare createdAt: Date
-    declare outcome?: vm.QuestOutcome
+    declare outcome?: vm.EncounterOutcome
 }
 
 export const ActiveEncounterDBInfo = {
@@ -91,7 +91,7 @@ export class ActiveEncounterState {
         return makeActiveEncounter(result)
     }
 
-    async claim(activeEncounterId: string, claimedAt: Date, outcome: vm.QuestOutcome, transaction?: Transaction): Promise<void> {
+    async claim(activeEncounterId: string, claimedAt: Date, outcome: vm.EncounterOutcome, transaction?: Transaction): Promise<void> {
         await ActiveEncounterDB.update({ claimedAt, outcome }, { where: { activeEncounterId }, transaction })
     }
 }
