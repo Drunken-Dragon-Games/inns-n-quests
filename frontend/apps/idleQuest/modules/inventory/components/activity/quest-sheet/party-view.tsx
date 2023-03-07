@@ -1,9 +1,20 @@
-import { MouseEventHandler, useMemo, useState } from "react"
+import { MouseEventHandler, RefObject, useEffect, useMemo, useRef, useState } from "react"
+import { useSelector } from "react-redux"
 import styled from "styled-components"
+import _ from "underscore"
 import { Character } from "../../../../../common"
 import { notEmpty, PixelArtImage, useDrag, vh, vh1 } from "../../../../../utils"
+import { makeDropBox, DraggableItem, SelectedQuest } from "../../../inventory-dsl"
+import { InventoryState } from "../../../inventory-state"
 import InventoryTransitions from "../../../inventory-transitions"
 import CharacterMini from "./character-mini"
+
+const PartyContainer = styled.div`
+    width: 100%;
+    display: flex;
+    gap: 1vh;
+    flex-direction: row;
+`
 
 const CharacterSlotContainer = styled.div<{ interactuable: boolean }>`
     position: relative;
@@ -110,4 +121,67 @@ const PartySlot = ({ character, emoji, preview }: CharacterSlotProps) => {
     )
 }
 
-export default PartySlot
+type PartyViewState = {
+    dropBoxRef: RefObject<HTMLDivElement>
+    hovering?:Character 
+    picked: Character | null
+}[]
+
+const usePartyViewState = (quest: SelectedQuest, adventurerSlots: (Character | null)[]): PartyViewState => {
+    const boxRef1 = useRef<HTMLDivElement>(null)
+    const boxRef2 = useRef<HTMLDivElement>(null)
+    const boxRef3 = useRef<HTMLDivElement>(null)
+    const boxRef4 = useRef<HTMLDivElement>(null)
+    const boxRef5 = useRef<HTMLDivElement>(null)
+    const dropBoxesRefs = [boxRef1, boxRef2, boxRef3, boxRef4, boxRef5]
+    const box1Bound = boxRef1.current?.getBoundingClientRect()
+
+    useEffect(() => {
+        if (quest.ctype === "taken-quest" || dropBoxesRefs.every(ref => ref.current == null)) return
+        InventoryTransitions.registerDropBoxes("party-pick", dropBoxesRefs.map(makeDropBox))
+        return InventoryTransitions.deregisterDropBoxes
+    }, [boxRef1.current, boxRef2.current, boxRef3.current, boxRef4.current, boxRef5.current, quest,
+        box1Bound?.left, box1Bound?.top, box1Bound?.bottom, box1Bound?.right, 
+    ])
+
+    const dropBoxesState = useSelector((state: InventoryState) => state.dropBoxesState, _.isEqual)
+
+    const slotsState = useMemo<PartyViewState>(() => 
+        dropBoxesRefs.map((dropBoxRef, index) => {
+            const hovering: DraggableItem | undefined = dropBoxesState?.dropBoxes[index]?.hovering
+            return {
+                dropBoxRef,
+                hovering: hovering?.ctype == "character" ? hovering : undefined,
+                picked: adventurerSlots[index]
+            }
+        })
+    , [dropBoxesState, adventurerSlots, quest])
+
+    return slotsState
+    /*
+    return dropBoxesRefs.map((dropBoxRef, index) => {
+        return {
+            dropBoxRef,
+            picked: adventurerSlots[index]
+        }
+    })
+    */
+}
+
+const PartyView = ({ quest, adventurerSlots }: { quest: SelectedQuest, adventurerSlots: (Character | null)[] }) => {
+    const state = usePartyViewState(quest, adventurerSlots)
+    return (
+        <PartyContainer>
+            {state.map(({ dropBoxRef, picked, hovering }, index) =>
+                <div key={"character-slot-" + index} ref={dropBoxRef}>
+                    <PartySlot
+                        character={hovering ? hovering : picked}
+                        preview={notEmpty(hovering) || quest.ctype === "taken-quest"}
+                    />
+                </div>
+            )}
+        </PartyContainer>
+    )
+}
+
+export default PartyView

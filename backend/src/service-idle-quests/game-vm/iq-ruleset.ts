@@ -1,8 +1,9 @@
 import { APS, apsSum, CharacterEntity } from "./character-entity"
-import { EncounterReward, EncounterOutcome, Strategy } from "./encounter"
+import { ConfigurationCharacter, DamageType, EncounterOutcome, EncounterReward, GeneralDamageType, SkillInfo, Strategy, StrategyConfiguration } from "./encounter"
+import { WithEV } from "./iq-entity"
 import { IQMeatadataObjectBuilder } from "./iq-metadata-object-builder"
 import IQRandom from "./iq-random"
-import { TakenStakingQuest, StakingQuestRequirement, SatisfiedRequirements, StakingReward, StakingQuestOutcome } from "./staking-quest"
+import { SatisfiedRequirements, StakingQuestOutcome, StakingQuestRequirement, StakingReward, TakenStakingQuest } from "./staking-quest"
 
 export interface IQRuleset {
     name: string
@@ -30,7 +31,11 @@ export interface StakingQuestRuleset {
 }
 
 export interface EncounterRuleset {
-    outcome(encounter: Strategy, party: CharacterEntity[]): EncounterOutcome
+    outcome(encounter: Strategy, party: ConfigurationCharacter[]): EncounterOutcome
+    strategyConfiguration(strategy: Strategy, party: ConfigurationCharacter[]): StrategyConfiguration
+    skillGeneralDamageTypes(skill: SkillInfo): GeneralDamageType[] 
+    skillPower(skill: SkillInfo | SkillInfo[], character: CharacterEntity & WithEV): number 
+    applyDamageModifiers(power: number, modifiers: { damageTypes: DamageType[], resistances: DamageType[], weaknesses: DamageType[] }): number 
 }
 
 export class CharacterEntityRuleSetProperties {

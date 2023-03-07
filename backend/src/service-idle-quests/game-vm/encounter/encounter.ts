@@ -71,6 +71,9 @@ export type SkillInfo = {
     provokes?: Condition[],
 }
 
+export type GeneralDamageType 
+    = "Will" | "Magic" | "Physical"
+
 export type DamageType
     = WillDamageType | MagicDamageType | PhysicalDamageType
 
