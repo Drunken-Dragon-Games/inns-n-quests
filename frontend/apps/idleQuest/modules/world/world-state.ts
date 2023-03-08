@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { IdSet } from "../../utils"
+import { IdSet } from "../../common"
 import { WorldActivity } from "./activity-dsl"
 import { WorldMap } from "./world-dsl"
 import { BaseInn, NorthWestThioldenPaperMap, WorldMapName } from "./worlds"

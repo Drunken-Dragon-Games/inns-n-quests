@@ -1,6 +1,6 @@
 import { Provider } from "react-redux"
 import styled, { keyframes } from "styled-components"
-import { PixelArtImage, vh1 } from "../../utils"
+import { PixelArtImage, vh1 } from "../../common"
 import QuestBoardArea from "./components/quest-board-area"
 import RefreshButton from "./components/refresh-button"
 import { questBoardStore, useQuestBoardSelector } from "./quest-board-state"

@@ -1,7 +1,6 @@
 import { useMemo } from "react"
 import styled from "styled-components"
-import { Furniture } from "../../../../common"
-import { Units, useComputeHeightFromOriginalImage, PixelArtImage } from "../../../../utils"
+import { Furniture, PixelArtImage, Units, useComputeHeightFromOriginalImage } from "../../../../common"
 
 const ptMeasures = (furniture: Furniture): [number, [number,number]] => {
     const ptNum = furniture.assetRef.split("PixelTile")[1]

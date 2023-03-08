@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import styled, { keyframes } from "styled-components"
-import { useRememberLastValue } from "../utils"
+import { useRememberLastValue } from ".."
 
 const ExperienceAnimation = (start: number, experience: number) => keyframes`
     0% {width: ${start}%;}

@@ -1,6 +1,6 @@
 import { ReactNode } from "react"
 import styled from "styled-components"
-import { NoDragImage, Units } from "../../../utils"
+import { NoDragImage, Units } from "../../../common"
 
 const LayerContainer = styled.div<{ height: string, width: string }>`
     position: absolute;

@@ -1,7 +1,6 @@
 import styled, { keyframes } from "styled-components"
 import { TextOswald } from "../../../../../../utils/components/basic_components"
-import { Character } from "../../../../../common"
-import { Units, vmax1, useRememberLastValue, PixelArtImage, notEmpty } from "../../../../../utils"
+import { Character, notEmpty, PixelArtImage, Units, useRememberLastValue, vmax1 } from "../../../../../common"
 import AdventurerSprite, { SpriteRenderOptions } from "../../sprites/character-sprite"
 
 type ExperienceBarColor = "r" | "g" | "b"

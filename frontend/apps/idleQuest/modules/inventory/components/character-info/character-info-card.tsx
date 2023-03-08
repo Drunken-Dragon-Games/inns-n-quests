@@ -1,10 +1,11 @@
 import { ReactNode, useState } from "react"
+import { useSelector } from "react-redux"
 import styled from "styled-components"
-import { Character, OswaldFontFamily } from "../../../../common"
-import { px } from "../../../../utils"
+import { Character, OswaldFontFamily, px } from "../../../../common"
+import * as vm from "../../../../game-vm"
+import { InventoryState } from "../../inventory-state"
 import InventoryBox from "../browser/inventory-box"
 import { CharacterSprite } from "../sprites"
-import * as vm from "../../../../game-vm"
 
 const CharacterInfoCardContainer = styled.div`
     position: relative;
@@ -202,11 +203,11 @@ const SkillInfo = (info: vm.SkillInfo) =>
 
 interface CharacterInfoCardProps {
     className?: string
-    character: Character
 }
 
-const CharacterInfoCard = ({ className, character }: CharacterInfoCardProps) => {
-    return (
+const CharacterInfoCard = ({ className }: CharacterInfoCardProps) => {
+    const character = useSelector((state: InventoryState) => state.activeCharacterInfo)
+    return character ? 
         <CharacterInfoCardContainer className={className}>
             <Header>
                 <MiniatureBox overflowHidden={true}>
@@ -225,9 +226,10 @@ const CharacterInfoCard = ({ className, character }: CharacterInfoCardProps) => 
                     </APSWrapper>
                 </HeaderInfo>
             </Header>
+            { character.skills ? 
             <InfoWrapper>
                 <Skills>
-                {character.skills?.map(skill => {
+                {character.skills.map(skill => {
                     const skillInfo = vm.Skills[skill]
                     const value = (
                         skillInfo.benefits.athleticism * character.evAPS.athleticism + 
@@ -239,8 +241,9 @@ const CharacterInfoCard = ({ className, character }: CharacterInfoCardProps) => 
                 })}
                 </Skills>
             </InfoWrapper>
+            : <></>}
         </CharacterInfoCardContainer>
-    )
+    : <></>
 }
 
 export default CharacterInfoCard

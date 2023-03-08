@@ -1,6 +1,5 @@
 import { RefObject } from "react"
-import { Character, Furniture, AvailableStakingQuest, SealType, TakenStakingQuest, AvailableEncounter } from "../../common"
-import { notEmpty } from "../../utils"
+import { AvailableEncounter, AvailableStakingQuest, Character, Furniture, notEmpty, SealType, TakenStakingQuest } from "../../common"
 import * as vm from "../../game-vm"
 
 export type SelectedQuest = AvailableStakingQuest | TakenStakingQuest | AvailableEncounter
@@ -47,7 +46,7 @@ export const mapSealImage = (quest: SelectedQuest): { src: string, width: number
         }
         case "kings-plea": return {
             src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/kings_plea_big.png",
-            width: 9 * scale, height: 9.5 * scale, offset: 0
+            width: 9 * scale, height: 9.5 * scale, offset: 4
         }
         case "valiant-adventure": return {
             src: "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/valiant_adventure_big.png",
@@ -85,7 +84,8 @@ export const questDescription = (quest: SelectedQuest): string =>
     //quest.ctype === "taken-staking-quest" ? quest.availableQuest.paper : quest.paper
 
 export const questSeal = (quest: SelectedQuest): SealType =>
-    "heroic-quest"
+    quest.ctype === "taken-staking-quest" || quest.ctype === "available-staking-quest" ? "kings-plea" :
+    "townsfolk"
     //quest.ctype === "taken-staking-quest" ? quest.availableQuest.seal : quest.seal
 
 export function inventoryItemId(item: InventoryItem): string {
@@ -109,7 +109,8 @@ export function draggableItemId(item: DraggableItem): string {
 }
 
 export const mapQuestScroll = (takenQuest: TakenStakingQuest) => {
-    return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/townsfolk.png"
+    const seal = questSeal(takenQuest).replace("-", "_")
+    return `https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/${seal}.png`
     /*
     switch (takenQuest.availableQuest.seal) {
         case "kings-plea": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/kings_plea.png"

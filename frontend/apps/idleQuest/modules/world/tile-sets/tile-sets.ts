@@ -1,5 +1,5 @@
-import { px, vw } from "../../../utils"
-import { TileSet, Proportions } from "./tile-sets-dsl"
+import { px } from "../../../common"
+import { Proportions, TileSet } from "./tile-sets-dsl"
 
 export type TavernBuildingTileSet 
     = "wooden-floor-1" | "wall-south-1" | "window-south-1" | ""

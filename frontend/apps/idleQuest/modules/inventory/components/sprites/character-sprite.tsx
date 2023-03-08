@@ -1,11 +1,9 @@
 import { useMemo } from "react"
 import styled, { keyframes } from "styled-components"
-import { If } from "../../../../common"
-import { Character } from "../../../../common"
 import {
-    notEmpty, PixelArtImage, simpleHash, Units,
+    Character, notEmpty, PixelArtImage, simpleHash, Units,
     useComputeHeightFromOriginalImage, useRememberLastValue, vmax1
-} from "../../../../utils"
+} from "../../../../common"
 
 const ptMeasures = (character: Character): [number, [number,number], number] => {
     if (character.assetRef === "PixelTile42")

@@ -1,7 +1,6 @@
 import { Provider, useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
-import { SansSerifFontFamily, InfoScheme, AlertScheme, SuccessScheme } from "../../common"
-import { useClockSeconds, useTagRemovals } from "../../utils"
+import { AlertScheme, InfoScheme, SansSerifFontFamily, SuccessScheme, useClockSeconds, useTagRemovals } from "../../common"
 import { AppNotification } from "./notifications-dsl"
 import { NotificationsState, notificationsStore } from "./notifications-state"
 import Transitions from "./notifications-transitions"

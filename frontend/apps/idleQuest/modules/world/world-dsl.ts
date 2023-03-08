@@ -1,4 +1,4 @@
-import { Units } from "../../utils"
+import { Units } from "../../common"
 import { TilesRenderMatrix, TileSet } from "./tile-sets/tile-sets-dsl"
 import { WorldMapName } from "./worlds"
 

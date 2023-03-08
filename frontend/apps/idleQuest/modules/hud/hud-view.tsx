@@ -1,6 +1,5 @@
 import styled from "styled-components"
-import { OswaldFontFamily } from "../../common"
-import { PixelArtImage, px, vh } from "../../utils"
+import { OswaldFontFamily, PixelArtImage, px } from "../../common"
 import InventoryApi from "../inventory/inventory-api"
 import { QuestBoardApi } from "../quest-board"
 

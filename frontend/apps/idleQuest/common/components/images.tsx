@@ -1,7 +1,7 @@
 import { default as NImage } from "next/image"
 import { MouseEventHandler, useEffect, useState } from "react"
 import styled, { css } from "styled-components"
-import { Units, vmax1 } from "../utils/units"
+import { Units, vmax1 } from "../units"
 
 /**
  * Computes the height of an image based on its width and the original image's width and height
@@ -79,7 +79,7 @@ export const NoDragImage = (props: {
     if (props.absolute) {
         return (
             <NoDragWrapper position="absolute" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} onClick={props.onClick}>
-                <NoDragWrapper position="relative" $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units}>
+                <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units}>
                     <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
                 </NoDragWrapper>
             </NoDragWrapper>
@@ -97,16 +97,12 @@ export const NoDragImage = (props: {
  * Makes an image pixelated, great for pixel art
  */
 export const PixelArtCss = css`
-    user-select: none;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-crisp-edges;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;  
+    image-rendering: pixelated !important;
 `
 
 /**
  * Pixelated Next Image
  */
 export const PixelArtImage = styled(NoDragImage)`
-    ${PixelArtCss}
+    image-rendering: pixelated !important;
 `

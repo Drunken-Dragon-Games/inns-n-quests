@@ -39,6 +39,7 @@ export type Sector
     & vm.WithTag<"sector">
 
 export type IdleQuestsInventory = {
+    dragonSilver: number
     characters: Record<string, Character> 
     furniture: Record<string, Furniture>
     innState?: Sector

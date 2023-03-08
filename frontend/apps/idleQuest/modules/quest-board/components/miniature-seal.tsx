@@ -1,14 +1,11 @@
-import styled from "styled-components"
 import Image from "next/image"
-import { SealType } from "../../../common"
-import { PixelArtImage, vh } from "../../../utils"
+import styled from "styled-components"
+import { PixelArtImage, SealType, vh } from "../../../common"
 
 const SealWrapperKingsPlea = styled.div`
     position: absolute;
-    bottom: 0vh;
-    right: 1vh;
-    width: 4vh;
-    height: 4vh;
+    bottom: -0.5vh;
+    right: 1.5vh;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
@@ -55,12 +52,12 @@ export default ({ rarity }: { rarity: SealType }) => {
     if (rarity == "kings-plea")
         return (
             <SealWrapperKingsPlea>
-                <Image
+                <PixelArtImage
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/kings_plea.png"
                     alt="paper prop"
-                    width={50}
-                    height={50}
-                    layout="responsive"
+                    width={8}
+                    height={8}
+                    units={vh(1)}
                 />
             </SealWrapperKingsPlea>
         )
@@ -70,9 +67,9 @@ export default ({ rarity }: { rarity: SealType }) => {
                 <PixelArtImage
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/seals/heroic_quest.png"
                     alt="paper prop"
-                    width={50}
-                    height={80}
-                    units={vh(0.1)}
+                    width={5}
+                    height={8}
+                    units={vh(1)}
                 />
             </SealWrapperHeroicQuest>
         )

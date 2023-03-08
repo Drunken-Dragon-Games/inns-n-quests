@@ -1,4 +1,4 @@
-import { simpleHash } from "../utils"
+import { simpleHash } from "../common"
 import { TakenStakingQuest } from "./backend-api"
 
 export type SealType = "kings-plea" | "heroic-quest" | "valiant-adventure" | "townsfolk"

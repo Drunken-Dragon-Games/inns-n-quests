@@ -1,6 +1,5 @@
 import styled from "styled-components"
-import { Character } from "../../../../common"
-import { NoDragImage, PixelArtImage, Units, useComputeHeightFromOriginalImage, vh1 } from "../../../../utils"
+import { Character, NoDragImage, PixelArtImage, Units, useComputeHeightFromOriginalImage, vh1 } from "../../../../common"
 import * as vm from "../../../../game-vm"
 
 const CharacterSplashArtContainer = styled.div<{ units: Units }>`

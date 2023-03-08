@@ -1,4 +1,4 @@
-import { px1 } from "../../utils"
+import { px1 } from "../../common"
 import { TavernBuildingTileSet } from "./tile-sets/tile-sets"
 import { WorldMap } from "./world-dsl"
 

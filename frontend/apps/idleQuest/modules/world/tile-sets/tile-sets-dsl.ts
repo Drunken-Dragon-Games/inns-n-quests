@@ -1,4 +1,4 @@
-import { Units } from "../../../utils"
+import { Units } from "../../../common"
 
 export type TileData<TileId extends string> = 
     { tileId: TileId, size: [number, number], collision: [number, number] }

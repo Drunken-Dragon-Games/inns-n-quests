@@ -1,11 +1,9 @@
 import { AvailableStakingQuest, Character, TakenStakingQuest } from "../../common"
 import IdleQuestsApi from "../../idle-quests-api"
-import {
-    inventoryState, inventoryStore, InventoryThunk
-} from "../../state"
 import { NotificationsApi } from "../notifications"
 import { OverworldApi } from "../overworld"
 import { activityId } from "./inventory-dsl"
+import { inventoryState, inventoryStore, InventoryThunk } from "./inventory-state"
 
 const actions = inventoryState.actions
 

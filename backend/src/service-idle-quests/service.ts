@@ -279,9 +279,9 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             : { ctype: "failure-outcome", hpLoss: [] }
         */
        const outcome = this.rules.stakingQuest.outcome(takenQuest, adventurers)
-        // If success, level up adventurers
-        //if (outcome.ctype == "success-outcome") 
-        //    await this.characterState.setXP(this.rules.character.levelUp(adventurers, outcome.reward, vm.newAPS([1,1,1])), transaction)
+        // If success, grant dragon silver
+        if (outcome.ctype == "success-outcome") 
+            await this.assetManagementService.grant(userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() })
         // Check if any adventurer died
         // TODO
         // Claim quest
@@ -314,9 +314,11 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             this.characterState.syncCharacters(userId, inventoryResult.inventory),
             this.furnitureState.syncFurniture(userId, inventoryResult.inventory),
         ]))
+        const dragonSilver = parseInt(inventoryResult.inventory[this.wellKnownPolicies.dragonSilver.policyId]?.find(a => a.unit == "DragonSilver")?.quantity ?? "0")
         return { 
             status: "ok", 
             inventory: await SectorState.syncPlayerInn(userId, {
+                dragonSilver,
                 characters: vm.makeRecord(characters, c => c.entityId),//testCharacters(userId), c => c.entityId),
                 furniture: vm.makeRecord(furniture, f => f.entityId)
             }) 
@@ -324,7 +326,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async grantTestInventory(userId: string): Promise<GetInventoryResult> {
-        if (process.env.NODE_ENV === "production") return { status: "ok", inventory: { characters: {}, furniture: {} } }
+        if (process.env.NODE_ENV === "production") return { status: "ok", inventory: { dragonSilver: 0, characters: {}, furniture: {} } }
 
         const pickAdventurer = (collection: vm.CharacterCollection, amount: number): AssetUnit[] => {
             if (collection == "pixel-tiles") {

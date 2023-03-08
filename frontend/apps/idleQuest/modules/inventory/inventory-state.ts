@@ -1,11 +1,11 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { Character, Furniture, IdleQuestsInventory, TakenStakingQuest } from "../../common"
-import { notEmpty } from "../../utils"
-import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility, InventoryAsset, sortCharacters } from "./inventory-dsl"
+import { Character, Furniture, IdleQuestsInventory, notEmpty, TakenStakingQuest } from "../../common"
 import * as vm from "../../game-vm"
+import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility } from "./inventory-dsl"
 
 export interface InventoryState {
     open: boolean
+    dragonSilver: number
     characters: Record<string, Character>
     furniture: Record<string, Furniture>
     takenQuests: TakenStakingQuest[]
@@ -26,6 +26,7 @@ export type InventoryThunk<ReturnType = void> =
 
 const inventoryInitialState: InventoryState = { 
     open: false,
+    dragonSilver: 0,
     characters: {},
     furniture: {},
     takenQuests: [],
@@ -43,6 +44,7 @@ export const inventoryState = createSlice({
         },
 
         setInventory: (state, action: PayloadAction<IdleQuestsInventory>) => {
+            state.dragonSilver = action.payload.dragonSilver
             state.characters = action.payload.characters
             state.furniture = action.payload.furniture
             state.activeCharacterInfo = Object.values(action.payload.characters)[0]
@@ -179,6 +181,8 @@ export const inventoryState = createSlice({
             characters.forEach(character => state.characters[character.entityId].inActivity = false)
             if (state.activitySelection?.ctype === "taken-staking-quest" && state.activitySelection.takenQuestId === action.payload.takenQuest.takenQuestId)
                 state.activitySelection.claimedAt = new Date()
+            if (outcome.ctype === "success-outcome")
+                state.dragonSilver += outcome.reward.currency
             /*
             if (outcome.ctype === "success-outcome" && outcome.reward.apsExperience) {
                 const individualXP = individualXPReward(characters, outcome.reward.apsExperience)

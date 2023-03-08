@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import styled from "styled-components"
-import { PixelArtImage } from "../../../utils"
+import { PixelArtImage } from "../../../common"
 import { TileSet, TilesRenderMatrix } from "./tile-sets-dsl"
 
 const TileContainer = styled.div<{ width: string, height: string }>`

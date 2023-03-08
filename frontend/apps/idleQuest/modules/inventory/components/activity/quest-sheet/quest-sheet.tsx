@@ -1,12 +1,12 @@
 import { useMemo } from "react"
 import styled from "styled-components"
-import { Character, PixelFontFamily, Push, takenQuestSecondsLeft } from "../../../../../common"
+import { Character, notEmpty, PixelArtCss, PixelArtImage, PixelFontFamily, Push, takenQuestSecondsLeft, vh1 } from "../../../../../common"
 import * as vm from "../../../../../game-vm"
-import { notEmpty, PixelArtCss, PixelArtImage, vh1 } from "../../../../../utils"
 import { getQuestAPSRequirement, mapSealImage, questDescription, questName, SelectedQuest } from "../../../inventory-dsl"
 import InventoryTransitions from "../../../inventory-transitions"
 import EncounterView from "./encounter-view"
 import PartyView from "./party-view"
+import RewardView from "./reward-view"
 import Signature from "./signature"
 
 const QuestSheetContainer = styled.div`
@@ -123,6 +123,7 @@ const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
                     {quest.ctype == "available-encounter" ?
                         <EncounterView encounter={quest} party={adventurerSlots.filter(notEmpty)} />
                     : <></> }
+                    <RewardView quest={quest} />
                 </QuestInfoLeft>
 
                 <QuestInfoRight>

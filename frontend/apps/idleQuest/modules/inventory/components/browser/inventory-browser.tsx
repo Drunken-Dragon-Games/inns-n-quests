@@ -45,7 +45,6 @@ const CharacterInfoCardContainer = styled(CharacterInfoCard)`
 `
 
 type InventoryBrowserState = {
-    infoCardCharacter?: Character
     open: boolean
     page: InventoryPageName 
     setPage: (page: InventoryPageName) => void
@@ -55,7 +54,6 @@ const useInventoryBrowserState = (): InventoryBrowserState => {
     const [page, setPage] = useState<InventoryPageName>("characters")
     const state = useSelector((state: InventoryState) => ({
         open: state.open,
-        infoCardCharacter: state.activeCharacterInfo
     }), shallowEqual)
     return {...state, page, setPage}
 }
@@ -70,9 +68,7 @@ const InventoryBrowser = () => {
                 <InventoryTab onClick={() => state.setPage("taken-quests")} selected={state.page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
                 <InventoryTab onClick={() => state.setPage("furniture")} selected={state.page === "furniture"}><span>Furniture</span></InventoryTab>
             </InventoryTabsContainer>
-            { state.infoCardCharacter ?
-                <CharacterInfoCardContainer character={state.infoCardCharacter} />
-            : <></>}
+            <CharacterInfoCardContainer />
             <InventoryPagesContainer page={state.page}/>
         </InventoryBrowserContainer>
     )

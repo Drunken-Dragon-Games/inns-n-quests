@@ -39,6 +39,17 @@ export type Sector
     = vm.Sector
     & vm.WithTag<"sector">
 
+export type IdleQuestsInventory = {
+    dragonSilver: number
+    characters: Record<string, Character> 
+    furniture: Record<string, Furniture>
+    innState?: Sector
+}
+
+export type GetInventoryResult 
+    = { status: "ok", inventory: IdleQuestsInventory }
+    | { status: "unknown-user" }
+
 export class IdleQuestsRandomGenerator extends vm.IQRandom {
     private readonly random: randomseed.RandomSeed
     constructor (seed: string) { 
@@ -52,16 +63,6 @@ export class IdleQuestsRandomGenerator extends vm.IQRandom {
 export const random = new IdleQuestsRandomGenerator("dev")
 
 export const rules = new vm.DefaultRuleset(random)
-
-export type IdleQuestsInventory = {
-    characters: Record<string, Character> 
-    furniture: Record<string, Furniture>
-    innState?: Sector
-}
-
-export type GetInventoryResult 
-    = { status: "ok", inventory: IdleQuestsInventory }
-    | { status: "unknown-user" }
 
 /** Encounters */
 
