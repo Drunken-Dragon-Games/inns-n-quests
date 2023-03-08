@@ -1,7 +1,7 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
 import { Character, Furniture, IdleQuestsInventory, notEmpty, TakenStakingQuest } from "../../common"
 import * as vm from "../../game-vm"
-import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility } from "./inventory-dsl"
+import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility, InventoryPageName } from "./inventory-dsl"
 
 export interface InventoryState {
     open: boolean
@@ -11,6 +11,7 @@ export interface InventoryState {
     takenQuests: TakenStakingQuest[]
 
     activitySelection?: ActivitySelection
+    activeInventoryPage: InventoryPageName
     activeCharacterInfo?: Character
 
     draggingState?: DraggingState
@@ -27,6 +28,7 @@ export type InventoryThunk<ReturnType = void> =
 const inventoryInitialState: InventoryState = { 
     open: false,
     dragonSilver: 0,
+    activeInventoryPage: "characters",
     characters: {},
     furniture: {},
     takenQuests: [],
@@ -68,6 +70,11 @@ export const inventoryState = createSlice({
 
         removeTakenQuest: (state, action: PayloadAction<TakenStakingQuest>) => {
             state.takenQuests = state.takenQuests.filter(quest => quest.takenQuestId !== action.payload.takenQuestId)
+        },
+
+        /** Pages */
+        setInventoryPage: (state, action: PayloadAction<InventoryPageName>) => {
+            state.activeInventoryPage = action.payload
         },
 
         /** Activities State */

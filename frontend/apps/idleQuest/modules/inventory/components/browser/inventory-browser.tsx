@@ -5,8 +5,9 @@ import { Character, OswaldFontFamily } from "../../../../common"
 import { InventoryPageName } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
 import { CharacterInfoCard } from "../character-info"
-import InventoryPage from "./inventory-page"
+import InventoryPage from "./inventory-pages"
 import InventoryHeader from "./inventory-header"
+import InventoryTransitions from "../../inventory-transitions"
 
 const InventoryBrowserContainer = styled.div`
     height: 100%;
@@ -33,43 +34,36 @@ const InventoryTab = styled.div<{ selected: boolean }>`
     filter: ${props => props.selected ? "drop-shadow(0px 0px 5px white)" : "none"};
     border-bottom: ${props => props.selected ? "2px solid white" : "2px solid rgba(200,200,200,0.5)"};
     ${OswaldFontFamily}
+    ${props => !props.selected && `
+        &:hover { border-bottom: 2px solid white; }
+        &:hover > span { color: white; filter: drop-shadow(0px 0px 5px white); }
+        &:active { border-bottom: 2px solid white; }
+        &:active > span { color: white; filter: drop-shadow(0px 0px 5px white); }
+    `}
 `
 
 const InventoryPagesContainer = styled(InventoryPage)`
     flex: 1;
 `
 
-const CharacterInfoCardContainer = styled(CharacterInfoCard)`
-    box-sizing: border-box;
-    margin: 10px;
-`
-
-type InventoryBrowserState = {
-    open: boolean
-    page: InventoryPageName 
-    setPage: (page: InventoryPageName) => void
-}
-
-const useInventoryBrowserState = (): InventoryBrowserState => {
-    const [page, setPage] = useState<InventoryPageName>("characters")
-    const state = useSelector((state: InventoryState) => ({
-        open: state.open,
-    }), shallowEqual)
-    return {...state, page, setPage}
+const InventoryTabs = () => {
+    const page = useSelector((state: InventoryState) => state.activeInventoryPage, shallowEqual)
+    return (
+        <InventoryTabsContainer>
+            <InventoryTab onClick={() => InventoryTransitions.selectInventoryPage("characters")} selected={page === "characters"}><span>Adventurers</span></InventoryTab>
+            <InventoryTab onClick={() => InventoryTransitions.selectInventoryPage("furniture")} selected={page === "furniture"}><span>Furniture</span></InventoryTab>
+            <InventoryTab onClick={() => InventoryTransitions.selectInventoryPage("taken-quests")} selected={page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
+        </InventoryTabsContainer>
+    )
 }
 
 const InventoryBrowser = () => {
-    const state = useInventoryBrowserState()
     return (
         <InventoryBrowserContainer>
             <InventoryHeader />
-            <InventoryTabsContainer>
-                <InventoryTab onClick={() => state.setPage("characters")} selected={state.page === "characters"}><span>Adventurers</span></InventoryTab>
-                <InventoryTab onClick={() => state.setPage("taken-quests")} selected={state.page === "taken-quests"}><span>Taken Quests</span></InventoryTab>
-                <InventoryTab onClick={() => state.setPage("furniture")} selected={state.page === "furniture"}><span>Furniture</span></InventoryTab>
-            </InventoryTabsContainer>
-            <CharacterInfoCardContainer />
-            <InventoryPagesContainer page={state.page}/>
+            <CharacterInfoCard />
+            <InventoryTabs />
+            <InventoryPagesContainer />
         </InventoryBrowserContainer>
     )
 }

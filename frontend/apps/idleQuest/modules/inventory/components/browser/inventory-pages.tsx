@@ -1,19 +1,39 @@
-import { MouseEventHandler, TouchEventHandler, useEffect, useMemo, useState } from "react"
+import { MouseEventHandler, ReactNode, TouchEventHandler, useEffect, useMemo, useState } from "react"
 import { shallowEqual, useSelector } from "react-redux"
-import styled from "styled-components"
+import styled, { keyframes } from "styled-components"
 import _ from "underscore"
-import { notEmpty, PixelArtImage, px, takenQuestStatus, takenQuestTimeLeft, useDrag } from "../../../../common"
+import { notEmpty, PixelArtImage, px, takenQuestStatus, takenQuestTimeLeft, useDrag, useRememberLastValue } from "../../../../common"
 import { InventoryItem, InventoryPageName, isDraggableItem, mapQuestScroll, sortCharacters } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
 import InventoryTransitions from "../../inventory-transitions"
 import { CharacterSprite, FurnitureSprite } from "../sprites"
 import InventoryBox from "./inventory-box"
 
-const InventoryPageContainer = styled.div`
+const InventoryPagesContainer = styled.div`
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+`
+
+const SwipePageAnimation = (from: number, to: number) => keyframes`
+    0% { transform: translateX(${from}px); }
+    100% { transform: translateX(${to}px); }
+`
+
+const PagesManagerContainer = styled.div<{ scrollFrom: number, scrollTo: number }>`
+    height: 100%;
+    padding: 10px;
+    position: absolute;
+    display: flex;
+    gap: 10px;
+    transform: translateX(${props => props.scrollTo}px);
+    animation: ${props => SwipePageAnimation(props.scrollFrom, props.scrollTo)} 0.5s ease-in-out;
+`
+
+const Page = styled.div`
     box-sizing: border-box;
-    margin: 5px 0px 5px 5px;
-    padding: 0px 5px 0px 0px;
-    width: calc(100% - 15px);
+    padding: 0 10px;
+    width: 490px;
     
     #background-color: blue;
 
@@ -192,74 +212,85 @@ const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
                 info={state.info}
                 overflowHidden={state.overflowHidden}
             >
-                {item?.ctype === "character" ?
-                    <CharacterSprite
-                        character={item}
-                        emoji={state.hover ? item.entityId : undefined}
-                        units={px(17)}
-                        render={state.hover ? "hovered" : "normal"}
-                    />
-                    : item?.ctype === "taken-staking-quest" ?
-                        <PixelArtImage
-                            src={mapQuestScroll(item)}
-                            alt="quest scroll"
-                            width={7.3} height={6}
-                            units={px(13)}
-                        />
-                        : item?.ctype === "furniture" ?
-                            <FurnitureSprite
-                                furniture={item}
-                                units={px(12)}
-                                render={state.hover ? "hovered" : "normal"}
-                            /> :
-                            <></>}
+            { item?.ctype === "character" ?
+                <CharacterSprite
+                    character={item}
+                    emoji={state.hover ? item.entityId : undefined}
+                    units={px(17)}
+                    render={state.hover ? "hovered" : "normal"}
+                />
+            : item?.ctype === "taken-staking-quest" ?
+                <PixelArtImage
+                    src={mapQuestScroll(item)}
+                    alt="quest scroll"
+                    width={7.3} height={6}
+                    units={px(13)}
+                />
+            : item?.ctype === "furniture" ?
+                <FurnitureSprite
+                    furniture={item}
+                    units={px(12)}
+                    render={state.hover ? "hovered" : "normal"}
+                /> :
+            <></> }
             </InventoryBox>
         </InventoryBoxContainer>
     )
 }
 
-type InventoryPageState = {
-    items: InventoryItem[]
-    emptySlots: number[]
+const pageEmptySlots = (pageItemsAmount: number): number[] => {
+    const slotsTail = pageItemsAmount % 4
+    const extraSlots = slotsTail === 0 ? 4 : 4 - slotsTail
+    const amountIfWithExtraSlots = pageItemsAmount + extraSlots
+    const amountIfWithoutExtraSlots = (4 * 8) - pageItemsAmount 
+    const totalExtraSlots = amountIfWithExtraSlots >= 4 * 8 ? extraSlots : amountIfWithoutExtraSlots
+    const emptySlots = Array(totalExtraSlots).fill(null).map((_, i) => i + pageItemsAmount)
+    return emptySlots
 }
 
-const useInventoryPageState = (page: InventoryPageName): InventoryPageState => {
-    const subState = useSelector((state: InventoryState) => ({ 
-        characters: Object.values(state.characters), 
-        furniture: Object.values(state.furniture), 
-        takenQuests: state.takenQuests,
-        selection: state.activitySelection
-    }), shallowEqual)
-    const itemSlots = useMemo(() => {
-        const items = 
-            page == "characters" ? sortCharacters(subState.characters) :
-            page == "furniture" ? subState.furniture
-            : subState.takenQuests
-        const slotsTail = items.length % 4
-        const extraSlots = slotsTail === 0 ? 4 : 4 - slotsTail
-        const amountIfWithExtraSlots = items.length + extraSlots
-        const amountIfWithoutExtraSlots = (4 * 8) -items.length 
-        const totalExtraSlots = amountIfWithExtraSlots >= 4 * 8 ? extraSlots : amountIfWithoutExtraSlots
-        const emptySlots = Array(totalExtraSlots).fill(null).map((_, i) => i + items.length)
-        return { items, emptySlots }
-    }, [subState.characters, subState.furniture, subState.takenQuests, page])
-    return itemSlots
-}
-
-const InventoryPage = ({ className, page }: { className?: string, page: InventoryPageName }) => {
-    const { items, emptySlots } = useInventoryPageState(page)
+const InventoryPage = ({ page }: { page: InventoryPageName }) => {
+    const items = useSelector((state: InventoryState) => 
+        page === "characters" ? Object.values(state.characters) :
+        page === "furniture" ?  Object.values(state.furniture) :
+        Object.values(state.takenQuests), shallowEqual)
+    const emptySlots = useMemo(() => pageEmptySlots(items.length), [items.length])
     return (
-        <InventoryPageContainer className={className}>
+        <Page>
             <DirectionFix tall={page == "characters"}>
                 {items.map((item, index) =>
                     <InventoryItemView key={index} item={item} />
                 )}
-                {emptySlots.map((key) => 
+                {emptySlots.map((key) =>
                     <InventoryItemView key={key} />
                 )}
             </DirectionFix>
-        </InventoryPageContainer>
+        </Page>
     )
 }
 
-export default InventoryPage
+const pagePosition = (page: InventoryPageName): number => 
+    page == "characters" ? 0 :
+    page == "furniture" ? -500 :
+    -1000
+
+const PagesManager = ({ children }: { children?: ReactNode }) => {
+    const page = useSelector((state: InventoryState) => state.activeInventoryPage, shallowEqual)
+    const lastPage = useRememberLastValue(page, "characters")
+    const scrollState = useMemo(() => ({ scrollFrom: pagePosition(lastPage), scrollTo: pagePosition(page)}), [page])
+    return (
+        <PagesManagerContainer {...scrollState}>
+            {children}
+        </PagesManagerContainer>
+    )
+}
+
+const InventoryPages = ({ className }: { className?: string }) => 
+    <InventoryPagesContainer className={className}>
+        <PagesManager>
+            <InventoryPage page="characters" />
+            <InventoryPage page="furniture" />
+            <InventoryPage page="taken-quests" />
+        </PagesManager>
+    </InventoryPagesContainer>
+
+export default InventoryPages

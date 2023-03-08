@@ -1,8 +1,9 @@
 import { ReactNode, useState } from "react"
-import { useSelector } from "react-redux"
+import { shallowEqual, useSelector } from "react-redux"
 import styled from "styled-components"
 import { Character, OswaldFontFamily, px } from "../../../../common"
 import * as vm from "../../../../game-vm"
+import { InventoryPageName } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
 import InventoryBox from "../browser/inventory-box"
 import { CharacterSprite } from "../sprites"
@@ -12,7 +13,7 @@ const CharacterInfoCardContainer = styled.div`
     display: flex;
     flex-direction: column;
     background-color: rgba(30,30,30,0.5);
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    #box-shadow: 0 0 10px rgba(0,0,0,0.5);
     border-radius: 2px;
 
     color: white;
@@ -206,7 +207,10 @@ interface CharacterInfoCardProps {
 }
 
 const CharacterInfoCard = ({ className }: CharacterInfoCardProps) => {
-    const character = useSelector((state: InventoryState) => state.activeCharacterInfo)
+    const { character, page } = useSelector((state: InventoryState) => ({
+        character: state.activeCharacterInfo, 
+        page: state.activeInventoryPage
+    }), shallowEqual)
     return character ? 
         <CharacterInfoCardContainer className={className}>
             <Header>

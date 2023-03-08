@@ -2,7 +2,7 @@ import { Character, notEmpty, takenQuestSecondsLeft, takenQuestStatus } from "..
 import { NotificationsApi } from "../notifications"
 import { OverworldApi } from "../overworld"
 import { QuestBoardApi } from "../quest-board"
-import { activityId, DraggingState, DropBox, DropBoxUtility, InventoryItem, inventoryItemId, SelectedQuest } from "./inventory-dsl"
+import { activityId, DraggingState, DropBox, DropBoxUtility, InventoryItem, inventoryItemId, InventoryPageName, SelectedQuest } from "./inventory-dsl"
 import { inventoryState, inventoryStore } from "./inventory-state"
 import InventoryThunks from "./inventory-thunks"
 
@@ -46,6 +46,9 @@ const InventoryTransitions = {
     onToggleInventory: () => {
         dispatch(actions.toggleInventory())
     },
+
+    selectInventoryPage: (page: InventoryPageName) => 
+        dispatch(actions.setInventoryPage(page)),
 
     onSelectQuest: (quest: SelectedQuest) => {
         console.log(quest.ctype)
