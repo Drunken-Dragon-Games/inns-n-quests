@@ -1,19 +1,31 @@
 import path from "path"
 import { loadQuestRegistryFromFs } from "../../state/staking-quests-registry"
-import { all, and, apsRequirement, bonus, fighter, oneOf, or, paladin, parseEasyJsonSyntax, successBonus, warlock } from "../staking-quest/staking-quest-requirements"
+import { all, and, apsRequirement, assetRefReq, rewardBonus, collectionReq, fighter, oneOf, or, paladin, parseEasyJsonSyntax, successBonus, warlock } from "../staking-quest/staking-quest-requirements"
 
 test("Quest registry loading yaml", async () => {
     expect(async () => loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "..", "stubs", "test-quest-registry.yaml"), "yaml")).toBeTruthy()
 })
 
-/*
+test("'collections' easy json syntax", () => {
+    expect(parseEasyJsonSyntax({ "collections": ["pixel-tiles", "grandmaster-adventurers", "adventurers-of-thiolden"] }))
+        .toStrictEqual(all([collectionReq("pixel-tiles"), collectionReq("grandmaster-adventurers"), collectionReq("adventurers-of-thiolden")]))
+    expect(() => parseEasyJsonSyntax({ "collections": ["unknown"] }))
+        .toThrow()
+})
+
 test("'classes' easy json syntax", () => {
-    expect(parseEasyJsonSyntax({ "classes": ["fighter", "paladin", "warlock"] }))
+    expect(parseEasyJsonSyntax({ "classes": ["Fighter", "Paladin", "Warlock"] }))
         .toStrictEqual(all([fighter, paladin, warlock]))
     expect(() => parseEasyJsonSyntax({ "classes": ["fighter", "paladin", "warlock", "unknown"] }))
         .toThrow()
 })
-*/
+
+test("'assets' easy json syntax", () => {
+    expect(parseEasyJsonSyntax({ "assets": ["PixelTile1", "AdventurerOfThiolden23", "GrandmasterAdventurer1023"] }))
+        .toStrictEqual(all([assetRefReq("PixelTile1"), assetRefReq("AdventurerOfThiolden23"), assetRefReq("GrandmasterAdventurer1023")]))
+    expect(() => parseEasyJsonSyntax({ "classes": ["PixelTile1", "AdvOfThiolden23"] }))
+        .toThrow()
+})
 
 test("'aps' easy json syntax", () => {
     expect(parseEasyJsonSyntax({ "aps": [1, 1, 1] }))
@@ -44,12 +56,12 @@ test("'and' easy json syntax", () => {
         .toThrow()
 })
 
-test("'bonus' easy json syntax", () => {
-    expect(parseEasyJsonSyntax({ "bonus": [0.1, "warlock", { "aps": [1,1,1] }] }))
-        .toStrictEqual(bonus(0.1, warlock, apsRequirement(1, 1, 1)))
-    expect(parseEasyJsonSyntax({ "bonus": { "amount": 0.1, "condition": "warlock", "requirement": { "aps": [1,1,1] }} }))
-        .toStrictEqual(bonus(0.1, warlock, apsRequirement(1, 1, 1)))
-    expect(() => parseEasyJsonSyntax({ "bonus": [0.1, "warlock", "paladin", "fighter"] }))
+test("'rewardBonus' easy json syntax", () => {
+    expect(parseEasyJsonSyntax({ "rewardBonus": [0.1, "warlock", { "aps": [1,1,1] }] }))
+        .toStrictEqual(rewardBonus(0.1, warlock, apsRequirement(1, 1, 1)))
+    expect(parseEasyJsonSyntax({ "rewardBonus": { "amount": 0.1, "condition": "warlock", "requirement": { "aps": [1,1,1] }} }))
+        .toStrictEqual(rewardBonus(0.1, warlock, apsRequirement(1, 1, 1)))
+    expect(() => parseEasyJsonSyntax({ "rewardBonus": [0.1, "warlock", "paladin", "fighter"] }))
         .toThrow()
 })
 

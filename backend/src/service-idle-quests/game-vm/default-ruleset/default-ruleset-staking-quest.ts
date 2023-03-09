@@ -1,8 +1,8 @@
-import { APS, apsAdd, apsAddBonus, apsMultScalar, apsSum, CharacterEntity, newAPS, oneAPS, zeroAPS } from "../character-entity"
-import { addEncounterRewards, encounterCurrencyReward, encounterAPSReward, noEncounterReward } from "../encounter"
+import { addAPS, APS, apsSum, CharacterEntity, newAPS, zeroAPS } from "../character-entity"
 import IQRandom from "../iq-random"
 import { CharacterEntityRuleset, StakingQuestRuleset } from "../iq-ruleset"
-import { addStakingRewards, AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, OrRequirement, SatisfiedRequirements, StakingQuestOutcome, StakingQuestRequirement, StakingReward, SuccessBonusRequirement, TakenStakingQuest } from "../staking-quest"
+import { addStakingQuestRequirement, addStakingReward, andPossibilities, apsStakingQuestRequirement, assetRefStakingQuestRequirement, BaseStakingQuestRequirement, classStakingQuestRequirement, collectionStakingQuestRequirement, extractPossibleBaseStakingQuestRequirements, orPossibilities, Possible, rewardBonusStakingQuestRequirement, StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementConfiguration, StakingQuestRequirementDSL, StakingQuestRequirementInfo, StakingQuestRequirementSatisfactionPercentage, StakingQuestSatisfactionInfo, StakingReward, successBonusStakingQuestRequirement, TakenStakingQuest, zeroStakingQuestRequirement } from "../staking-quest"
+import { notEmpty } from "../utils"
 
 export default class DefaultQuestRuleset implements StakingQuestRuleset {
 
@@ -11,147 +11,131 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
         private rand: IQRandom,
     ) {}
  
-    outcome(takenQuest: TakenStakingQuest, party: CharacterEntity[]): StakingQuestOutcome {
-        const successRate = this.satisfied(takenQuest.availableQuest.requirements, party)
-        const success = this.rand.randomNumberBetween(1, 100) <= Math.floor(1 * 100)
-        // Outcome data
+    outcome(quest: StakingQuest, party: CharacterEntity[]): StakingQuestOutcome {
+        const configuration = this.questConfiguration(quest, party)
+        const bestSuccessRate = configuration.configurations[configuration.bestIndex].finalSuccessRate
+        const reward = configuration.configurations[configuration.bestIndex].finalReward
+        const success = this.rand.randomNumberBetween(1, 100) <= Math.floor(bestSuccessRate * 100)
         return success 
-            ? { ctype: "success-outcome", reward: this.reward(takenQuest.availableQuest.requirements) } 
+            ? { ctype: "success-outcome", reward } 
             : { ctype: "failure-outcome" }
     }
 
-    satisfied(requirements: StakingQuestRequirement, party: CharacterEntity[]): SatisfiedRequirements {
+    questConfiguration(quest: StakingQuest, party: CharacterEntity[]): StakingQuestConfiguration {
 
-        const and = (requirement: AndRequirement): SatisfiedRequirements => {
-            const left = this.satisfied(requirement.left, party)
-            const right = this.satisfied(requirement.right, party)
-            return { 
-                aps: newAPS([
-                    Math.min(left.aps.athleticism, right.aps.athleticism),
-                    Math.min(left.aps.intellect, right.aps.intellect),
-                    Math.min(left.aps.charisma, right.aps.charisma)
-                ]),
-                class: Math.min(left.class, right.class),
+        const requirementConfiguration = (requirement: StakingQuestRequirement): StakingQuestRequirementConfiguration => {
+            const info = this.satisfaction(requirement, party)
+            const finalSuccessRate = applyFinalSuccessRate(info)
+            const finalReward = applyFinalReward(info)
+            return { satisfactionInfo: info, finalSuccessRate, finalReward }
+        }
+
+        const configurations = quest.requirements.map(requirementConfiguration)
+        const bestIndex = configurations.reduce((best, current, index) => { 
+            if (current.finalSuccessRate > configurations[best].finalSuccessRate) return index
+            else if (current.finalSuccessRate == configurations[best].finalSuccessRate && isBetterReward(current.finalReward, configurations[best].finalReward)) return index
+            else return best
+        }, 0)
+        return { configurations, bestIndex }
+    }
+
+    satisfaction(requirement: StakingQuestRequirement, party: CharacterEntity[]): StakingQuestSatisfactionInfo {
+
+        const baseSatisfaction = (requirement: BaseStakingQuestRequirement): StakingQuestRequirementSatisfactionPercentage => {
+            const ivAPSSatisfaction = (): APS => {
+                const accAPS = party.map(c => c.ivAPS).reduce(addAPS, zeroAPS)
+                return newAPS([
+                    Math.min(1, accAPS.athleticism / requirement.aps.athleticism),
+                    Math.min(1, accAPS.intellect / requirement.aps.intellect),
+                    Math.min(1, accAPS.charisma / requirement.aps.charisma),
+                ])
+            }
+
+            const collectionSatisfaction = (): number | undefined => {
+                if (!requirement.collection || requirement.collection.length === 0) return undefined
+                const allApply = party.every(c => requirement.collection.includes(c.collection))
+                return allApply ? 1 : 0
+            }
+
+            const classSatisfaction = (): number | undefined => {
+                if (requirement.class.length === 0) return 1
+                const allApply = party.every(c => requirement.class.includes(c.characterType.class))
+                return allApply ? 1 : 0
+            }
+
+            const assetRefSatisfaction = (): number | undefined => {
+                if (requirement.assetRef.length === 0) return 1
+                const allApply = party.some(c => requirement.assetRef.includes(c.assetRef))
+                return allApply ? 1 : 0
+            }
+
+            const satisfaction: StakingQuestRequirementSatisfactionPercentage = {
+                aps: ivAPSSatisfaction(),
+                collection: collectionSatisfaction(),
+                class: classSatisfaction(),
+                assetRef: assetRefSatisfaction(),
+                rewardBonus: undefined,
+                successBonus: undefined,
+            }
+
+            return satisfaction
+        }
+
+        const possibleBaseRequirementSuccessRate = (requirement: Possible<BaseStakingQuestRequirement>): number => {
+            if (Array.isArray(requirement)) {
+                return requirement.map(possibleBaseRequirementSuccessRate).some(r => r === 1) ? 1 : 0
+            } else {
+                return baseSuccessRate(baseSatisfaction(requirement))
             }
         }
 
-        const or = (requirement: OrRequirement): SatisfiedRequirements => {
-            const left = this.satisfied(requirement.left, party)
-            const right = this.satisfied(requirement.right, party)
-            if (left.class > right.class) return left
-            if (right.class > left.class) return right
-            if (apsSum(left.aps) > apsSum(right.aps)) return left
-            if (apsSum(right.aps) > apsSum(left.aps)) return right
-            else return left
-        }
+        const info = this.requirementInfo(requirement)
+        const base = baseSatisfaction(requirement)
+        const rewardBonusRequirement = requirement.rewardBonus?.requirement
+        const SuccessBonusRequirement = requirement.successBonus?.requirement
+        const rewardBonus = rewardBonusRequirement ? possibleBaseRequirementSuccessRate(rewardBonusRequirement) == 1 : undefined
+        const successBonus = SuccessBonusRequirement ? possibleBaseRequirementSuccessRate(SuccessBonusRequirement) == 1 : undefined
 
-        const bonus = (requirement: BonusRequirement | SuccessBonusRequirement): SatisfiedRequirements => {
-            const left = this.satisfied(requirement.left, party)
-            const right = this.satisfied(requirement.right, party)
-            if (left.class >= 1 && apsSum(left.aps) >= 3) 
-                return {
-                    aps: apsAddBonus(right.aps, requirement.bonus),
-                    class: right.class
-                } 
-            else 
-                return right
-        }
-
-        const apsS = (requirement: APSRequirement): SatisfiedRequirements => {
-            const partyAPSSum: APS =
-                party.reduce((acc, item) =>
-                    apsAdd(acc, this.characterRuleset.evAPS(item.ivAPS, item.xpAPS))
-                , zeroAPS)
-            return {
-                aps: newAPS([
-                    partyAPSSum.athleticism / requirement.athleticism,
-                    partyAPSSum.intellect / requirement.intellect,
-                    partyAPSSum.charisma / requirement.charisma
-                ]),
-                class: 1
-            }
-        }
-
-        const classS = (requirement: ClassRequirement): SatisfiedRequirements => ({
-            aps: oneAPS,
-            class: party.find(item => item.characterType.class === requirement.class) ? 1 : 0
-        })
-
-        switch (requirements.ctype) {
-            case "and-requirement":
-                return and(requirements)
-            case "or-requirement":
-                return or(requirements)
-            case "aps-requirement":
-                return apsS(requirements)
-            case "class-requirement":
-                return classS(requirements)
-            case "bonus-requirement":
-                return bonus(requirements)
-            case "success-bonus-requirement":
-                return bonus(requirements)
-            case "empty-requirement":
-                return { aps: oneAPS, class: 1 }
-        }
+        return { requirement, requirementInfo: info, satisfaction: { ...base, rewardBonus, successBonus } }
     }
 
-    reward(requirements: StakingQuestRequirement): StakingReward {
-
-        const and = (requirement: AndRequirement | BonusRequirement): StakingReward => {
-            const leftReward = this.reward(requirement.left)
-            const rightReward = this.reward(requirement.right)
-            return addStakingRewards(leftReward, rightReward)
-        }
-
-        const or = (requirement: OrRequirement): StakingReward => {
-            const leftReward = this.reward(requirement.left)
-            const rightReward = this.reward(requirement.right)
-            return leftReward
-        }
-
-        const bonus = (requirement: SuccessBonusRequirement): StakingReward => 
-            this.reward(requirement.right)
-
-        const apsR = (requirement: APSRequirement): StakingReward => {
-            const currency = encounterCurrencyReward(apsSum(requirement))
-            const experienceReward = encounterAPSReward(apsMultScalar(requirement, 100))
-            return addEncounterRewards(currency, experienceReward)
-        }
-
-        const classR = (requirement: ClassRequirement): StakingReward => {
-            return encounterCurrencyReward(100)
-        }
-
-        switch (requirements.ctype) {
-            case "aps-requirement":
-                return apsR(requirements)
-            case "class-requirement":
-                return classR(requirements)
-            case "bonus-requirement":
-                return and(requirements)
-            case "success-bonus-requirement":
-                return bonus(requirements)
-            case "and-requirement":
-                return and(requirements)
-            case "or-requirement":
-                return or(requirements)
-            case "empty-requirement":
-                return noEncounterReward
-        }
-    }
-
-    duration(requirements: StakingQuestRequirement): number {
-        if (requirements.ctype === "aps-requirement")
-            return 60//apsSum({ athleticism: requirements.athleticism, intellect: requirements.intellect, charisma: requirements.charisma }) * 10 * this.durationFactor
-        else if (requirements.ctype === "bonus-requirement")
-            return this.duration(requirements.right)
-        else if (requirements.ctype === "success-bonus-requirement")
-            return this.duration(requirements.right)
-        else if (requirements.ctype === "and-requirement")
-            return this.duration(requirements.left) + this.duration(requirements.right)
-        else if (requirements.ctype === "or-requirement")
-            return Math.max(this.duration(requirements.left), this.duration(requirements.right))
-        else
-            return 0
+    requirementInfo(requirement: StakingQuestRequirement): StakingQuestRequirementInfo {
+        const duration = Math.max(3, apsSum(requirement.aps) / 10)
+        const currency = (
+            Math.max(1, apsSum(requirement.aps) / 10) +
+            requirement.collection.length * 10 +
+            requirement.class.length * 20 +
+            requirement.assetRef.length * 30
+        )
+        const rewardBonus = requirement.rewardBonus?.reward
+        const successBonus = requirement.successBonus?.success
+        return { duration, reward: { currency }, rewardBonus, successBonus }
     }
 }
+
+const baseSuccessRate = (satisfaction: StakingQuestRequirementSatisfactionPercentage): number => {
+    const successArray: number[] = [
+        apsSum(satisfaction.aps) / 3, 
+        satisfaction.collection, 
+        satisfaction.class, 
+        satisfaction.assetRef
+    ].filter(notEmpty)
+    return successArray.reduce((a, b) => a + b, 0) / successArray.length
+}
+
+const applyFinalSuccessRate = (info: StakingQuestSatisfactionInfo): number => {
+    const baseSuccess = baseSuccessRate(info.satisfaction)
+    return info.satisfaction.successBonus && info.requirementInfo.successBonus && info.satisfaction.successBonus 
+        ? Math.min(1, baseSuccess + info.requirementInfo.successBonus) 
+        : baseSuccess
+}
+
+const applyFinalReward = (info: StakingQuestSatisfactionInfo): StakingReward => {
+    const baseReward = info.requirementInfo.reward
+    return info.satisfaction.rewardBonus && info.requirementInfo.rewardBonus && info.satisfaction.rewardBonus 
+        ? addStakingReward(baseReward, info.requirementInfo.rewardBonus) 
+        : baseReward
+}
+
+const isBetterReward = (a: StakingReward, b: StakingReward): boolean => 
+    a.currency > b.currency

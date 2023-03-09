@@ -13,7 +13,7 @@ import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registr
 import * as vm from "./game-vm"
 import { EncounterOutcome } from "./game-vm"
 import { AvailableStakingQuest, Character, TakenStakingQuest } from "./models"
-import { IdleQuestsRandomGenerator, IdleQuestsServiceDsl } from "./service"
+import { IdleQuestsServiceDsl } from "./service"
 import { IdleQuestsService } from "./service-spec"
 import { CharacterDB, CharacterState } from "./state/character-state"
 import { FurnitureDB, FurnitureState } from "./state/furniture-state"
@@ -24,6 +24,7 @@ let database: Sequelize
 let calendar: MutableCalendar = new MutableCalendar(new Date(0))
 let characterState: CharacterState
 let furnitureState: FurnitureState
+let rules: vm.IQRuleset
 
 beforeAll(async () => {
     const assetManagementService = new AssetManagementServiceMock()
@@ -59,8 +60,7 @@ beforeAll(async () => {
         wellKnownPolicies: wellKnownPoliciesMainnet
     }
     service = await IdleQuestsServiceDsl.loadFromConfig(idleQuestServiceDependencies)
-    const random = new IdleQuestsRandomGenerator("test")
-    const rules: vm.IQRuleset = new vm.DefaultRuleset(random)
+    rules = vm.DefaultRuleset.seed("test")
     const objectBuilder = new vm.IQMeatadataObjectBuilder(rules, testMetadataRegistry, wellKnownPoliciesMainnet)
     characterState = new CharacterState(objectBuilder)
     furnitureState = new FurnitureState(objectBuilder)
@@ -132,14 +132,14 @@ test("Normal quest flow 1", async () => {
     const acceptedQuest = await acceptQuest(userId, availableQuests[0].questId, adventurersToGoOnQuest)
     const takenQuests1 = await getTakenQuests(userId)
     const claimBeforeTimeResponse = await service.claimStakingQuestResult(userId, acceptedQuest.takenQuestId!)
-    calendar.moveSeconds(acceptedQuest.availableQuest.duration)
+    calendar.moveSeconds(60 * 60 * 24 * 7 * 4)
     const outcome = await claimQuestResult(userId, acceptedQuest.takenQuestId!)
     const takenQuests2 = await getTakenQuests(userId)
 
     expect(adventurers.length).toBe(6)
     expect(acceptedQuest.availableQuest.questId).toBe(availableQuests[0].questId)
     expect(takenQuests1.length).toBe(1)
-    expect(takenQuests1[0].adventurerIds).toStrictEqual(adventurersToGoOnQuest)
+    expect(takenQuests1[0].characterIds).toStrictEqual(adventurersToGoOnQuest)
     expect(takenQuests1[0].availableQuest.questId).toEqual(availableQuests[0].questId)
     expect(claimBeforeTimeResponse.status).toBe("quest-not-finished")
     expect(takenQuests2.length).toBe(0)

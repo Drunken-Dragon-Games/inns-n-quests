@@ -1,19 +1,19 @@
 import { AdventurerClasses } from "../character-entity"
 import { StakingQuest, StakingReward } from "./staking-quest"
-import { AndRequirement, APSRequirement, BonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirement, SuccessBonusRequirement } from "./staking-quest-requirements"
+import { AndRequirement, APSRequirement, AssetRefRequirement, RewardBonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirementDSL, SuccessBonusRequirement } from "./staking-quest-requirements"
 
-export function isQuestRequirement(obj: any): obj is StakingQuestRequirement {
+export function isStakingQuestRequirementDSL(obj: any): obj is StakingQuestRequirementDSL {
 
     function isAndRequirement(obj: any): obj is AndRequirement {
-        return obj.ctype === "and-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
+        return obj.ctype === "and-requirement" && isStakingQuestRequirementDSL(obj.left) && isStakingQuestRequirementDSL(obj.right)
     }
 
     function isOrRequirement(obj: any): obj is OrRequirement {
-        return obj.ctype === "or-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
+        return obj.ctype === "or-requirement" && isStakingQuestRequirementDSL(obj.left) && isStakingQuestRequirementDSL(obj.right)
     }
 
-    function isBonusRequirement(obj: any): obj is BonusRequirement {
-        return obj.ctype === "bonus-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
+    function isBonusRequirement(obj: any): obj is RewardBonusRequirement {
+        return obj.ctype === "bonus-requirement" && isStakingQuestRequirementDSL(obj.left) && isStakingQuestRequirementDSL(obj.right)
     }
 
     function isAPSRequirement(obj: any): obj is APSRequirement {
@@ -24,8 +24,12 @@ export function isQuestRequirement(obj: any): obj is StakingQuestRequirement {
         return obj.ctype === "class-requirement" && typeof obj.class === "string" && AdventurerClasses.includes(obj.class)
     }
 
+    function isAssetRefRequirement(obj: any): obj is AssetRefRequirement {
+        return obj.ctype === "asset-ref-requirement" && typeof obj.assetRef === "string"
+    }
+
     function isSuccessBonus(obj: any): obj is SuccessBonusRequirement {
-        return obj.ctype === "only-success-bonus-requirement" && isQuestRequirement(obj.left) && isQuestRequirement(obj.right)
+        return obj.ctype === "only-success-bonus-requirement" && isStakingQuestRequirementDSL(obj.left) && isStakingQuestRequirementDSL(obj.right)
     }
 
     function isEmptyRequirement(obj: any): obj is EmptyRequirement {
@@ -37,6 +41,7 @@ export function isQuestRequirement(obj: any): obj is StakingQuestRequirement {
         || isBonusRequirement(obj) 
         || isAPSRequirement(obj) 
         || isClassRequirement(obj)
+        || isAssetRefRequirement(obj)
         || isSuccessBonus(obj)
         || isEmptyRequirement(obj)
 }
@@ -46,5 +51,5 @@ export function isReward(obj: any): obj is StakingReward {
 }
 
 export function isQuest(obj: any): obj is StakingQuest {
-    return typeof obj.questId === "string" && typeof obj.name === "string" && typeof obj.location === "string" && typeof obj.description === "string" && isQuestRequirement(obj.requirements)
+    return typeof obj.questId === "string" && typeof obj.name === "string" && typeof obj.location === "string" && typeof obj.description === "string" 
 }

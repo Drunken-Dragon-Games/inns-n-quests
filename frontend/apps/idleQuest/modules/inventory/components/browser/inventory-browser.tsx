@@ -1,13 +1,11 @@
-import { useState } from "react"
 import { shallowEqual, useSelector } from "react-redux"
-import styled, { keyframes } from "styled-components"
-import { Character, OswaldFontFamily } from "../../../../common"
-import { InventoryPageName } from "../../inventory-dsl"
+import styled from "styled-components"
+import { OswaldFontFamily } from "../../../../common"
 import { InventoryState } from "../../inventory-state"
-import { CharacterInfoCard } from "../character-info"
-import InventoryPage from "./inventory-pages"
-import InventoryHeader from "./inventory-header"
 import InventoryTransitions from "../../inventory-transitions"
+import { CharacterInfoCard } from "../character-info"
+import InventoryHeader from "./inventory-header"
+import InventoryPage from "./inventory-pages"
 
 const InventoryBrowserContainer = styled.div`
     height: 100%;

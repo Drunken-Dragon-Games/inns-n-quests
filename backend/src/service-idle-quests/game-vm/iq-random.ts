@@ -1,3 +1,4 @@
+import randomseed from 'random-seed'
 
 export default abstract class IQRandom {
 
@@ -29,4 +30,14 @@ export default abstract class IQRandom {
     pickRandoms<T>(elements: T[], amount: number): T[] {
         return [...Array(amount)].map(() => elements[this.randomNumberBetween(0, elements.length - 1)])
     }
+}
+
+export class RandomSeedIQRandom extends IQRandom {
+    private readonly random: randomseed.RandomSeed
+    constructor (seed: string) { 
+        super(); this.random = randomseed.create(seed) }
+    genrand(): number { 
+        return this.random.random() }
+    seed(s: string): IQRandom { 
+        return new RandomSeedIQRandom(s) }
 }

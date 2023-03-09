@@ -11,7 +11,6 @@ export class AvailableStakingQuestState {
 
     async getAvailableStakingQuests(location: string, quantity: number = 20): Promise<AvailableStakingQuest[]> {
         return pickRandomQuestsByLocation(location, quantity, this.questsRegistry, this.objectBuilder.rand)
-            .map(this.objectBuilder.newAvailableStakingQuest)
             .map(q => ({ ...q, ctype: "available-staking-quest" }))
     }
 }

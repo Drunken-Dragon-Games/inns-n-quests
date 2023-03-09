@@ -1,6 +1,5 @@
 import dotenv from "dotenv"
 import path from "path"
-import * as randomseed from "random-seed"
 import { QueryInterface, Sequelize } from "sequelize"
 import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
@@ -36,16 +35,6 @@ export interface IdleQuestServiceDependencies
     , wellKnownPolicies: WellKnownPolicies
     }
 
-export class IdleQuestsRandomGenerator extends vm.IQRandom {
-    private readonly random: randomseed.RandomSeed
-    constructor (seed: string) { 
-        super(); this.random = randomseed.create(seed) }
-    genrand(): number { 
-        return this.random.random() }
-    seed(s: string): vm.IQRandom { 
-        return new IdleQuestsRandomGenerator(s) }
-}
-
 export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     private readonly migrator: Umzug<QueryInterface>
@@ -68,8 +57,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
-        const random = new IdleQuestsRandomGenerator(randomSeed)
-        this.rules = new vm.DefaultRuleset(random)
+        this.rules = vm.DefaultRuleset.seed(randomSeed)
         const objectBuilder = new vm.IQMeatadataObjectBuilder(this.rules, metadataRegistry, wellKnownPolicies)
         this.characterState = new CharacterState(objectBuilder)
         this.furnitureState = new FurnitureState(objectBuilder)
@@ -257,18 +245,21 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         // Check quest is not already claimed
         if (takenQuest.claimedAt)
             return { status: "quest-already-claimed" }
-        const duration = this.rules.stakingQuest.duration(takenQuest.availableQuest.requirements)
-        const now = this.calendar.now()
-        // Check quest is finished
-        if (takenQuest.createdAt.getTime() + duration > now.getTime()) 
-            return { status: "quest-not-finished" }
         const transaction = await this.database.transaction()
-        const adventurers = await this.characterState.unsetInChallenge(userId, takenQuest.adventurerIds, transaction)
-        const missing = adventurers.map(a => a.entityId).filter(item => takenQuest.adventurerIds.indexOf(item) < 0)
+        const adventurers = await this.characterState.unsetInChallenge(userId, takenQuest.characterIds, transaction)
+        const missing = adventurers.map(a => a.entityId).filter(item => takenQuest.characterIds.indexOf(item) < 0)
         // Check all adventurers are still in the inventory
         if (missing.length > 0) {
             await transaction.rollback()
             return { status: "missing-adventurers", missing }
+        }
+        const configuration = this.rules.stakingQuest.questConfiguration(takenQuest.availableQuest, adventurers)
+        const duration = configuration.configurations[configuration.bestIndex].satisfactionInfo.requirementInfo.duration
+        const now = this.calendar.now()
+        // Check quest is finished
+        if (takenQuest.createdAt.getTime() + duration > now.getTime()) {
+            await transaction.rollback()
+            return { status: "quest-not-finished" }
         }
         /*
         const successRate = this.rules.quest.satisfied(takenQuest.availableQuest.requirements, adventurers)
@@ -278,7 +269,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             ? { ctype: "success-outcome", reward: this.rules.quest.reward(takenQuest.availableQuest.requirements) } 
             : { ctype: "failure-outcome", hpLoss: [] }
         */
-       const outcome = this.rules.stakingQuest.outcome(takenQuest, adventurers)
+       const outcome = this.rules.stakingQuest.outcome(takenQuest.availableQuest, adventurers)
         // If success, grant dragon silver
         if (outcome.ctype == "success-outcome") 
             await this.assetManagementService.grant(userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() })

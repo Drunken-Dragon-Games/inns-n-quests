@@ -3,6 +3,8 @@ import DefaultRuleset from '../default-ruleset/default-ruleset'
 import IQRandom from '../iq-random'
 import { IQMeatadataObjectBuilder } from '../iq-metadata-object-builder'
 import { emptyMetadataRegistry, emptyWellKnownPolicies } from '../iq-metadata'
+import { loadQuestRegistryFromFs } from '../../state/staking-quests-registry'
+import path from 'path'
 
 class UnsafeIQRandom extends IQRandom {
     constructor() { super() }
@@ -29,6 +31,8 @@ test("APS Generation", () => {
     characterProperties.apsRandomGenerationCongruence(28)
 })
 
-test("playground", () => {
+test("Load quest registry", async () => {
+    const questsRegistry = await loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "..", "..", "stubs", "test-quest-registry.yaml"), "yaml")
+    console.log(JSON.stringify(questsRegistry, null, 2))
     expect(true).toBe(true)
 })

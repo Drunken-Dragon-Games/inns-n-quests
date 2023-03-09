@@ -104,8 +104,8 @@ const makeTakenQuest = (questRegistry: StakingQuestRegistry, objectBuilder: vm.I
         ctype: "taken-staking-quest",
         takenQuestId: takenQuestDB.takenQuestId,
         userId: takenQuestDB.userId,
-        availableQuest: objectBuilder.newAvailableStakingQuest(quest),
-        adventurerIds: takenQuestDB.adventurerIds,
+        availableQuest: quest,
+        characterIds: takenQuestDB.adventurerIds,
         claimedAt: takenQuestDB.claimedAt,
         createdAt: takenQuestDB.createdAt,
         outcome: takenQuestDB.outcome

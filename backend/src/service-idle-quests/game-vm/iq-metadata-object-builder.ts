@@ -5,7 +5,6 @@ import { newIQEntity } from "./iq-entity"
 import { MetadataRegistry, WellKnownPolicies } from "./iq-metadata"
 import IQRandom from "./iq-random"
 import { IQRuleset } from "./iq-ruleset"
-import { AvailableStakingQuest, StakingQuest } from "./staking-quest"
 
 export class IQMeatadataObjectBuilder {
 
@@ -194,15 +193,4 @@ export class IQMeatadataObjectBuilder {
             return assetRef
         }
     }
-
-    newAvailableStakingQuest = (quest: StakingQuest): AvailableStakingQuest => ({
-        questId: quest.questId,
-        name: quest.name,
-        location: quest.location,
-        description: quest.description,
-        requirements: quest.requirements,
-        reward: this.rules.stakingQuest.reward(quest.requirements),
-        duration: this.rules.stakingQuest.duration(quest.requirements),
-        slots: quest.slots ?? 5,
-    })
 }

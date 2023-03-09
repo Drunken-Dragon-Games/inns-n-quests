@@ -17,7 +17,7 @@ export type Furniture
     & vm.WithSprite
 
 export type AvailableStakingQuest
-    = vm.AvailableStakingQuest
+    = vm.StakingQuest
     & vm.WithTag<"available-staking-quest">
 
 export type TakenStakingQuest 

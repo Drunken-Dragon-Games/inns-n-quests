@@ -2,7 +2,7 @@ import axios from "axios"
 import YAML from "yaml"
 import { readFile } from "fs/promises";
 import { URL } from "url";
-import { IQRandom, isQuest, parseEasyJsonSyntax, StakingQuest } from "../game-vm";
+import { IQRandom, isQuest, isStakingQuestRequirementDSL, parseEasyJsonSyntax, parseStakingQuestRequirementsDSL, StakingQuest } from "../game-vm";
 
 export type StakingQuestRegistry = { [questId: string]: StakingQuest }
 
@@ -46,7 +46,7 @@ export function validateJsonQuestRegistry(json: object): StakingQuestRegistry {
 
     const validateQuest = (json: any): StakingQuest => {
         const quest = parseEasyJson(json)
-        if (isQuest(quest)) return quest
+        if (isQuest(quest) && isStakingQuestRequirementDSL(quest.requirements)) return { ...quest, requirements: parseStakingQuestRequirementsDSL(quest.requirements) }
         else throw new Error("The quest registry contains an invalid quest: " + JSON.stringify(quest))
     }
 
