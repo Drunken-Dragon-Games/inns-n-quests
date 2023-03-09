@@ -1,7 +1,7 @@
 import { addAPS, APS, apsSum, CharacterEntity, newAPS, zeroAPS } from "../character-entity"
 import IQRandom from "../iq-random"
 import { CharacterEntityRuleset, StakingQuestRuleset } from "../iq-ruleset"
-import { addStakingQuestRequirement, addStakingReward, andPossibilities, apsStakingQuestRequirement, assetRefStakingQuestRequirement, BaseStakingQuestRequirement, classStakingQuestRequirement, collectionStakingQuestRequirement, extractPossibleBaseStakingQuestRequirements, orPossibilities, Possible, rewardBonusStakingQuestRequirement, StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementConfiguration, StakingQuestRequirementDSL, StakingQuestRequirementInfo, StakingQuestRequirementSatisfactionPercentage, StakingQuestSatisfactionInfo, StakingReward, successBonusStakingQuestRequirement, TakenStakingQuest, zeroStakingQuestRequirement } from "../staking-quest"
+import { addStakingReward, BaseStakingQuestRequirement, Possible, StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementConfiguration, StakingQuestRequirementInfo, StakingQuestRequirementSatisfactionPercentage, StakingQuestSatisfactionInfo, StakingReward } from "../staking-quest"
 import { notEmpty } from "../utils"
 
 export default class DefaultQuestRuleset implements StakingQuestRuleset {
@@ -53,19 +53,19 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
 
             const collectionSatisfaction = (): number | undefined => {
                 if (!requirement.collection || requirement.collection.length === 0) return undefined
-                const allApply = party.every(c => requirement.collection.includes(c.collection))
+                const allApply = party.every(c => requirement.collection!.includes(c.collection))
                 return allApply ? 1 : 0
             }
 
             const classSatisfaction = (): number | undefined => {
-                if (requirement.class.length === 0) return 1
-                const allApply = party.every(c => requirement.class.includes(c.characterType.class))
+                if (!requirement.class || requirement.class.length === 0) return undefined
+                const allApply = party.every(c => requirement.class!.includes(c.characterType.class))
                 return allApply ? 1 : 0
             }
 
             const assetRefSatisfaction = (): number | undefined => {
-                if (requirement.assetRef.length === 0) return 1
-                const allApply = party.some(c => requirement.assetRef.includes(c.assetRef))
+                if (!requirement.assetRef || requirement.assetRef.length === 0) return undefined
+                const allApply = party.some(c => requirement.assetRef!.includes(c.assetRef))
                 return allApply ? 1 : 0
             }
 
@@ -74,8 +74,6 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
                 collection: collectionSatisfaction(),
                 class: classSatisfaction(),
                 assetRef: assetRefSatisfaction(),
-                rewardBonus: undefined,
-                successBonus: undefined,
             }
 
             return satisfaction
@@ -103,9 +101,9 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
         const duration = Math.max(3, apsSum(requirement.aps) / 10)
         const currency = (
             Math.max(1, apsSum(requirement.aps) / 10) +
-            requirement.collection.length * 10 +
-            requirement.class.length * 20 +
-            requirement.assetRef.length * 30
+            (requirement.collection?.length ?? 0) * 10 +
+            (requirement.class?.length ?? 0) * 20 +
+            (requirement.assetRef?.length ?? 0) * 30
         )
         const rewardBonus = requirement.rewardBonus?.reward
         const successBonus = requirement.successBonus?.success

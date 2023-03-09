@@ -1,6 +1,6 @@
-import { AdventurerClasses } from "../character-entity"
+import { AdventurerClasses, CharacterCollections } from "../character-entity"
 import { StakingQuest, StakingReward } from "./staking-quest"
-import { AndRequirement, APSRequirement, AssetRefRequirement, RewardBonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirementDSL, SuccessBonusRequirement } from "./staking-quest-requirements"
+import { AndRequirement, APSRequirement, AssetRefRequirement, RewardBonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirementDSL, SuccessBonusRequirement, CollectionRequirement } from "./staking-quest-requirements"
 
 export function isStakingQuestRequirementDSL(obj: any): obj is StakingQuestRequirementDSL {
 
@@ -18,6 +18,10 @@ export function isStakingQuestRequirementDSL(obj: any): obj is StakingQuestRequi
 
     function isAPSRequirement(obj: any): obj is APSRequirement {
         return obj.ctype === "aps-requirement" && typeof obj.athleticism === "number" && typeof obj.intellect === "number" && typeof obj.charisma === "number"
+    }
+
+    function isCollectionRequirement(obj: any): obj is CollectionRequirement {
+        return obj.ctype === "collection-requirement" && typeof obj.collection === "string" && CharacterCollections.includes(obj.collection)
     }
 
     function isClassRequirement(obj: any): obj is ClassRequirement {
@@ -40,6 +44,7 @@ export function isStakingQuestRequirementDSL(obj: any): obj is StakingQuestRequi
         || isOrRequirement(obj) 
         || isBonusRequirement(obj) 
         || isAPSRequirement(obj) 
+        || isCollectionRequirement(obj)
         || isClassRequirement(obj)
         || isAssetRefRequirement(obj)
         || isSuccessBonus(obj)

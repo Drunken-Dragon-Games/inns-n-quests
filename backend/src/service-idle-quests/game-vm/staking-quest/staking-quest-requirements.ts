@@ -8,9 +8,9 @@ export type StakingQuestRequirement
 
 export type BaseStakingQuestRequirement = {
     aps: APS
-    collection: CharacterCollection[]
-    class: CharacterClass[]
-    assetRef: string[]
+    collection?: CharacterCollection[]
+    class?: CharacterClass[]
+    assetRef?: string[]
 }
 
 export type BonusStakingQuestRequirement = {
@@ -258,17 +258,9 @@ export const ranger: ClassRequirement = {
     class: "Ranger",
 }
 
-export const zeroBaseStakingQuestRequirement: BaseStakingQuestRequirement = {
-    aps: zeroAPS,
-    collection: [],
-    class: [],
-    assetRef: [],
-}
+export const zeroBaseStakingQuestRequirement: BaseStakingQuestRequirement = { aps: zeroAPS, }
 
-export const zeroBonusStakingQuestRequirement: BonusStakingQuestRequirement = {
-    rewardBonus: { requirement: zeroBaseStakingQuestRequirement, reward: zeroStakingReward, },
-    successBonus: { requirement: zeroBaseStakingQuestRequirement, success: 0, },
-}
+export const zeroBonusStakingQuestRequirement: BonusStakingQuestRequirement = {}
 
 export const zeroStakingQuestRequirement: StakingQuestRequirement = 
     { ...zeroBaseStakingQuestRequirement, ...zeroBonusStakingQuestRequirement }
@@ -296,9 +288,9 @@ export const addStakingQuestRequirement = (a: StakingQuestRequirement, b: Stakin
 
 export const addBaseStakingQuestRequirement = (a: BaseStakingQuestRequirement, b: BaseStakingQuestRequirement): BaseStakingQuestRequirement => ({
     aps: addAPS(a.aps, b.aps),
-    collection: a.collection.concat(b.collection),
-    class: a.class.concat(b.class),
-    assetRef: a.assetRef.concat(b.assetRef),
+    collection: a.collection && b.collection ? a.collection.concat(b.collection) : a.collection || b.collection,
+    class: a.class && b.class ? a.class.concat(b.class) : a.class || b.class,
+    assetRef: a.assetRef && b.assetRef ? a.assetRef.concat(b.assetRef) : a.assetRef || b.assetRef,
 })
 
 export const addBonusStakingQuestRequirement = (a: BonusStakingQuestRequirement, b: BonusStakingQuestRequirement): BonusStakingQuestRequirement => {
