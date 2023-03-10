@@ -1,7 +1,7 @@
 import { addAPS, APS, apsSum, CharacterEntity, newAPS, zeroAPS } from "../character-entity"
 import IQRandom from "../iq-random"
 import { CharacterEntityRuleset, StakingQuestRuleset } from "../iq-ruleset"
-import { addStakingReward, BaseStakingQuestRequirement, Possible, StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementConfiguration, StakingQuestRequirementInfo, StakingQuestRequirementSatisfactionPercentage, StakingQuestSatisfactionInfo, StakingReward } from "../staking-quest"
+import { addStakingReward, StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementConfiguration, StakingQuestRequirementInfo, StakingQuestRequirementSatisfactionPercentage, StakingQuestSatisfactionInfo, StakingReward } from "../staking-quest"
 import { notEmpty } from "../utils"
 
 export default class DefaultQuestRuleset implements StakingQuestRuleset {
@@ -41,60 +41,42 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
 
     satisfaction(requirement: StakingQuestRequirement, party: CharacterEntity[]): StakingQuestSatisfactionInfo {
 
-        const baseSatisfaction = (requirement: BaseStakingQuestRequirement): StakingQuestRequirementSatisfactionPercentage => {
-            const ivAPSSatisfaction = (): APS => {
-                const accAPS = party.map(c => c.ivAPS).reduce(addAPS, zeroAPS)
-                return newAPS([
-                    Math.min(1, accAPS.athleticism / requirement.aps.athleticism),
-                    Math.min(1, accAPS.intellect / requirement.aps.intellect),
-                    Math.min(1, accAPS.charisma / requirement.aps.charisma),
-                ])
-            }
-
-            const collectionSatisfaction = (): number | undefined => {
-                if (!requirement.collection || requirement.collection.length === 0) return undefined
-                const allApply = party.every(c => requirement.collection!.includes(c.collection))
-                return allApply ? 1 : 0
-            }
-
-            const classSatisfaction = (): number | undefined => {
-                if (!requirement.class || requirement.class.length === 0) return undefined
-                const allApply = party.every(c => requirement.class!.includes(c.characterType.class))
-                return allApply ? 1 : 0
-            }
-
-            const assetRefSatisfaction = (): number | undefined => {
-                if (!requirement.assetRef || requirement.assetRef.length === 0) return undefined
-                const allApply = party.some(c => requirement.assetRef!.includes(c.assetRef))
-                return allApply ? 1 : 0
-            }
-
-            const satisfaction: StakingQuestRequirementSatisfactionPercentage = {
-                aps: ivAPSSatisfaction(),
-                collection: collectionSatisfaction(),
-                class: classSatisfaction(),
-                assetRef: assetRefSatisfaction(),
-            }
-
-            return satisfaction
+        const ivAPSSatisfaction = (): APS => {
+            const accAPS = party.map(c => c.ivAPS).reduce(addAPS, zeroAPS)
+            return newAPS([
+                Math.min(1, accAPS.athleticism / requirement.aps.athleticism),
+                Math.min(1, accAPS.intellect / requirement.aps.intellect),
+                Math.min(1, accAPS.charisma / requirement.aps.charisma),
+            ])
         }
 
-        const possibleBaseRequirementSuccessRate = (requirement: Possible<BaseStakingQuestRequirement>): number => {
-            if (Array.isArray(requirement)) {
-                return requirement.map(possibleBaseRequirementSuccessRate).some(r => r === 1) ? 1 : 0
-            } else {
-                return baseSuccessRate(baseSatisfaction(requirement))
-            }
+        const collectionSatisfaction = (): number | undefined => {
+            if (!requirement.collection || requirement.collection.length === 0) return undefined
+            const allApply = party.every(c => requirement.collection!.includes(c.collection))
+            return allApply ? 1 : 0
+        }
+
+        const classSatisfaction = (): number | undefined => {
+            if (!requirement.class || requirement.class.length === 0) return undefined
+            const allApply = party.every(c => requirement.class!.includes(c.characterType.class))
+            return allApply ? 1 : 0
+        }
+
+        const assetRefSatisfaction = (): number | undefined => {
+            if (!requirement.assetRef || requirement.assetRef.length === 0) return undefined
+            const allApply = party.some(c => requirement.assetRef!.includes(c.assetRef))
+            return allApply ? 1 : 0
+        }
+
+        const satisfaction: StakingQuestRequirementSatisfactionPercentage = {
+            aps: ivAPSSatisfaction(),
+            collection: collectionSatisfaction(),
+            class: classSatisfaction(),
+            assetRef: assetRefSatisfaction(),
         }
 
         const info = this.requirementInfo(requirement)
-        const base = baseSatisfaction(requirement)
-        const rewardBonusRequirement = requirement.rewardBonus?.requirement
-        const SuccessBonusRequirement = requirement.successBonus?.requirement
-        const rewardBonus = rewardBonusRequirement ? possibleBaseRequirementSuccessRate(rewardBonusRequirement) == 1 : undefined
-        const successBonus = SuccessBonusRequirement ? possibleBaseRequirementSuccessRate(SuccessBonusRequirement) == 1 : undefined
-
-        return { requirement, requirementInfo: info, satisfaction: { ...base, rewardBonus, successBonus } }
+        return { requirement, requirementInfo: info, satisfaction }
     }
 
     requirementInfo(requirement: StakingQuestRequirement): StakingQuestRequirementInfo {
@@ -105,8 +87,8 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
             (requirement.class?.length ?? 0) * 20 +
             (requirement.assetRef?.length ?? 0) * 30
         )
-        const rewardBonus = requirement.rewardBonus?.reward
-        const successBonus = requirement.successBonus?.success
+        const rewardBonus = requirement.rewardBonus
+        const successBonus = requirement.successBonus
         return { duration, reward: { currency }, rewardBonus, successBonus }
     }
 }
@@ -123,14 +105,14 @@ const baseSuccessRate = (satisfaction: StakingQuestRequirementSatisfactionPercen
 
 const applyFinalSuccessRate = (info: StakingQuestSatisfactionInfo): number => {
     const baseSuccess = baseSuccessRate(info.satisfaction)
-    return info.satisfaction.successBonus && info.requirementInfo.successBonus && info.satisfaction.successBonus 
+    return info.requirementInfo.successBonus 
         ? Math.min(1, baseSuccess + info.requirementInfo.successBonus) 
         : baseSuccess
 }
 
 const applyFinalReward = (info: StakingQuestSatisfactionInfo): StakingReward => {
     const baseReward = info.requirementInfo.reward
-    return info.satisfaction.rewardBonus && info.requirementInfo.rewardBonus && info.satisfaction.rewardBonus 
+    return info.requirementInfo.rewardBonus 
         ? addStakingReward(baseReward, info.requirementInfo.rewardBonus) 
         : baseReward
 }

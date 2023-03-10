@@ -2,27 +2,14 @@ import { APS, addAPS, CharacterClass, CharacterCollection, isAssetRef, isCharact
 import { addStakingReward, StakingReward, zeroStakingReward } from "./staking-quest"
 import { isStakingQuestRequirementDSL } from "./staking-quest-validation"
 
-export type StakingQuestRequirement 
-    = BaseStakingQuestRequirement
-    & BonusStakingQuestRequirement
-
-export type BaseStakingQuestRequirement = {
+export type StakingQuestRequirement = {
     aps: APS
     collection?: CharacterCollection[]
     class?: CharacterClass[]
     assetRef?: string[]
+    rewardBonus?: StakingReward
+    successBonus?: number
 }
-
-export type BonusStakingQuestRequirement = {
-    rewardBonus?: {
-        requirement: Possible<BaseStakingQuestRequirement>
-        reward: StakingReward
-    }
-    successBonus?: {
-        requirement: Possible<BaseStakingQuestRequirement>
-        success: number
-    }
-} 
 
 /**
  * Calculated duration and reward from a staking quest requirement.
@@ -42,8 +29,6 @@ export type StakingQuestRequirementSatisfactionPercentage = {
     collection?: number
     class?: number
     assetRef?: number
-    rewardBonus?: boolean
-    successBonus?: boolean
 }
 
 /**
@@ -98,15 +83,11 @@ export type AndRequirement = {
 export type RewardBonusRequirement = {
     ctype: "reward-bonus-requirement",
     bonus: StakingReward,
-    left: StakingQuestRequirementDSL,
-    right: StakingQuestRequirementDSL,
 }
 
 export type SuccessBonusRequirement = {
     ctype: "success-bonus-requirement",
     bonus: number,
-    left: StakingQuestRequirementDSL,
-    right: StakingQuestRequirementDSL,
 }
 
 export type APSRequirement = {
@@ -150,11 +131,9 @@ export const apsRequirement = (athleticism: number, intellect: number, charisma:
     charisma: charisma,
 })
 
-export const rewardBonus = (bonus: number, left: StakingQuestRequirementDSL, right: StakingQuestRequirementDSL): RewardBonusRequirement => ({
+export const rewardBonus = (bonus: number): RewardBonusRequirement => ({
     ctype: "reward-bonus-requirement",
     bonus: { currency: bonus }, 
-    left, 
-    right,
 })
 
 export const all = (requirements: StakingQuestRequirementDSL[]): StakingQuestRequirementDSL => 
@@ -168,9 +147,9 @@ export const none = (requirements: QuestRequirement[]): QuestRequirement =>
     not(all(requirements))
 */
 
-export const successBonus = (bonus: number, left: StakingQuestRequirementDSL, right: StakingQuestRequirementDSL): SuccessBonusRequirement => ({
+export const successBonus = (bonus: number): SuccessBonusRequirement => ({
     ctype: "success-bonus-requirement",
-    bonus, left, right,
+    bonus, 
 })
 
 export const and = (left: StakingQuestRequirementDSL, right: StakingQuestRequirementDSL): AndRequirement => ({
@@ -258,12 +237,8 @@ export const ranger: ClassRequirement = {
     class: "Ranger",
 }
 
-export const zeroBaseStakingQuestRequirement: BaseStakingQuestRequirement = { aps: zeroAPS, }
-
-export const zeroBonusStakingQuestRequirement: BonusStakingQuestRequirement = {}
-
 export const zeroStakingQuestRequirement: StakingQuestRequirement = 
-    { ...zeroBaseStakingQuestRequirement, ...zeroBonusStakingQuestRequirement }
+    { aps: zeroAPS, }
 
 export const apsStakingQuestRequirement = (aps: APS): StakingQuestRequirement => 
     ({ ...zeroStakingQuestRequirement, aps })
@@ -277,41 +252,20 @@ export const classStakingQuestRequirement = (classType: CharacterClass): Staking
 export const assetRefStakingQuestRequirement = (assetRef: string): StakingQuestRequirement =>
     ({ ...zeroStakingQuestRequirement, assetRef: [assetRef] })
 
-export const rewardBonusStakingQuestRequirement = (reward: StakingReward, requirement: Possible<BaseStakingQuestRequirement>): StakingQuestRequirement =>
-    ({ ...zeroStakingQuestRequirement, rewardBonus: { requirement, reward, }})
+export const rewardBonusStakingQuestRequirement = (reward: StakingReward): StakingQuestRequirement =>
+    ({ ...zeroStakingQuestRequirement, rewardBonus: reward})
 
-export const successBonusStakingQuestRequirement = (success: number, requirement: Possible<BaseStakingQuestRequirement>): StakingQuestRequirement =>
-    ({ ...zeroStakingQuestRequirement, successBonus: { requirement, success, }})
+export const successBonusStakingQuestRequirement = (success: number): StakingQuestRequirement =>
+    ({ ...zeroStakingQuestRequirement, successBonus: success})
 
-export const addStakingQuestRequirement = (a: StakingQuestRequirement, b: StakingQuestRequirement): StakingQuestRequirement => 
-    ({...addBaseStakingQuestRequirement(a, b), ...addBonusStakingQuestRequirement(a, b)})
-
-export const addBaseStakingQuestRequirement = (a: BaseStakingQuestRequirement, b: BaseStakingQuestRequirement): BaseStakingQuestRequirement => ({
+export const addStakingQuestRequirement = (a: StakingQuestRequirement, b: StakingQuestRequirement): StakingQuestRequirement => ({
     aps: addAPS(a.aps, b.aps),
     collection: a.collection && b.collection ? a.collection.concat(b.collection) : a.collection || b.collection,
     class: a.class && b.class ? a.class.concat(b.class) : a.class || b.class,
     assetRef: a.assetRef && b.assetRef ? a.assetRef.concat(b.assetRef) : a.assetRef || b.assetRef,
+    rewardBonus: a.rewardBonus && b.rewardBonus ? addStakingReward(a.rewardBonus, b.rewardBonus) : a.rewardBonus || b.rewardBonus,
+    successBonus: a.successBonus && b.successBonus ? a.successBonus + b.successBonus : a.successBonus || b.successBonus,
 })
-
-export const addBonusStakingQuestRequirement = (a: BonusStakingQuestRequirement, b: BonusStakingQuestRequirement): BonusStakingQuestRequirement => {
-    const rewardBonus: Omit<BonusStakingQuestRequirement, "successBonus"> = 
-        !a.rewardBonus && b.rewardBonus ? { rewardBonus: b.rewardBonus } :
-        !b.rewardBonus && a.rewardBonus ? { rewardBonus: a.rewardBonus } :
-        a.rewardBonus && b.rewardBonus ? { rewardBonus: {
-            requirement: andPossibilities(addBaseStakingQuestRequirement)(a.rewardBonus.requirement, b.rewardBonus.requirement),
-            reward: addStakingReward(a.rewardBonus.reward, b.rewardBonus.reward),
-        } } :
-        {}
-    const successBonus: Omit<BonusStakingQuestRequirement, "rewardBonus"> =
-        !a.successBonus && b.successBonus ? { successBonus: b.successBonus } :
-        !b.successBonus && a.successBonus ? { successBonus: a.successBonus } :
-        a.successBonus && b.successBonus ? { successBonus: {
-            requirement: andPossibilities(addBaseStakingQuestRequirement)(a.successBonus.requirement, b.successBonus.requirement),
-            success: a.successBonus.success + b.successBonus.success,
-        } } :
-        {}
-    return { ...rewardBonus, ...successBonus }
-}
 
 /**
  * Flattens two possible staking quest requirements together. 
@@ -359,12 +313,13 @@ export const orPossibilities = <T>(a: Possible<T>, b: Possible<T>): Possible<T> 
  * @param possible 
  * @returns 
  */
+/*
 export const extractPossibleBaseStakingQuestRequirements = (requirements: Possible<StakingQuestRequirement>): Possible<BaseStakingQuestRequirement> => 
     Array.isArray(requirements) ? requirements.map(extractBaseRequirements) : extractBaseRequirements(requirements)
 
 export const extractBaseRequirements = (requirements: StakingQuestRequirement): BaseStakingQuestRequirement =>
     ({ aps: requirements.aps, collection: requirements.collection, class: requirements.class, assetRef: requirements.assetRef })
-
+*/
 
 export const parseStakingQuestRequirementsDSL = (dsl: StakingQuestRequirementDSL): StakingQuestRequirement[] => {
     const parse = (requirements: StakingQuestRequirementDSL): Possible<StakingQuestRequirement> => {
@@ -378,13 +333,9 @@ export const parseStakingQuestRequirementsDSL = (dsl: StakingQuestRequirementDSL
             case "asset-ref-requirement":
                 return assetRefStakingQuestRequirement(requirements.assetRef)
             case "success-bonus-requirement":
-                return andPossibilities(addStakingQuestRequirement)(
-                    successBonusStakingQuestRequirement(requirements.bonus, extractPossibleBaseStakingQuestRequirements(parse(requirements.left))),
-                    parse(requirements.right))
+                return successBonusStakingQuestRequirement(requirements.bonus)
             case "reward-bonus-requirement":
-                return andPossibilities(addStakingQuestRequirement)(
-                    rewardBonusStakingQuestRequirement(requirements.bonus, extractPossibleBaseStakingQuestRequirements(parse(requirements.left))),
-                    parse(requirements.right))
+                return rewardBonusStakingQuestRequirement(requirements.bonus)
             case "empty-requirement":
                 return zeroStakingQuestRequirement
             case "and-requirement":
@@ -430,23 +381,19 @@ export function parseEasyJsonSyntax(json: any): StakingQuestRequirementDSL {
             else if (key == "aps")
                 throw new Error("Invalid APS requirement: " + JSON.stringify(json))
             
-            else if (key == "rewardBonus" && typeof value["amount"] == "number" && (value.amount > 1 || value.amount <= 0))
-                throw new Error("A bonus cannot be greater than 1 or less than or equal to 0: " + JSON.stringify(json))
-            else if (key == "rewardBonus" && typeof value["amount"] == "number" && value.condition !== "undefined" && value.requirement !== "undefined")
-                return rewardBonus(value.amount, parseEasyJsonSyntax(value.condition), parseEasyJsonSyntax(value.requirement))
-            else if (key == "rewardBonus" && Array.isArray(value) && value.length == 3 && typeof value[0] == "number" && typeof value[1] !== "undefined" && typeof value[2] !== "undefined")
-                return rewardBonus(value[0], parseEasyJsonSyntax(value[1]), parseEasyJsonSyntax(value[2]))
+            else if (key == "rewardBonus" && typeof value == "number" && (value > 100 || value <= 0))
+                throw new Error("A reward bonus cannot be greater than 100 or less than or equal to 0: " + JSON.stringify(json))
+            else if (key == "rewardBonus" && typeof value == "number")
+                return rewardBonus(value)
             else if (key == "rewardBonus")
-                throw new Error("Invalid bonus requirement: " + JSON.stringify(json))
+                throw new Error("Invalid reward bonus: " + JSON.stringify(json))  
 
-            else if (key == "successBonus" && typeof value["amount"] == "number" && (value.amount > 1 || value.amount <= 0))
+            else if (key == "successBonus" && typeof value == "number" && (value > 1 || value <= 0))
                 throw new Error("A success bonus cannot be greater than 1 or less than or equal to 0: " + JSON.stringify(json))
-            else if (key == "successBonus" && typeof value["amount"] == "number" && value.condition !== "undefined" && value.requirement !== "undefined")
-                return successBonus(value.amount, parseEasyJsonSyntax(value.condition), parseEasyJsonSyntax(value.requirement))
-            else if (key == "successBonus" && Array.isArray(value) && value.length == 3 && typeof value[0] == "number" && typeof value[1] !== "undefined" && typeof value[2] !== "undefined")
-                return successBonus(value[0], parseEasyJsonSyntax(value[1]), parseEasyJsonSyntax(value[2]))
+            else if (key == "successBonus" && typeof value == "number")
+                return successBonus(value)
             else if (key == "successBonus")
-                throw new Error("Invalid success bonus requirement: " + JSON.stringify(json))
+                throw new Error("Invalid success bonus: " + JSON.stringify(json))  
 
             else if (key == "and" && Array.isArray(value) && value.length == 2) 
                 return and(parseEasyJsonSyntax(value[0]), parseEasyJsonSyntax(value[1]))

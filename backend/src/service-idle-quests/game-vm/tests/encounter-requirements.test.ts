@@ -57,21 +57,13 @@ test("'and' easy json syntax", () => {
 })
 
 test("'rewardBonus' easy json syntax", () => {
-    expect(parseEasyJsonSyntax({ "rewardBonus": [0.1, "warlock", { "aps": [1,1,1] }] }))
-        .toStrictEqual(rewardBonus(0.1, warlock, apsRequirement(1, 1, 1)))
-    expect(parseEasyJsonSyntax({ "rewardBonus": { "amount": 0.1, "condition": "warlock", "requirement": { "aps": [1,1,1] }} }))
-        .toStrictEqual(rewardBonus(0.1, warlock, apsRequirement(1, 1, 1)))
-    expect(() => parseEasyJsonSyntax({ "rewardBonus": [0.1, "warlock", "paladin", "fighter"] }))
-        .toThrow()
+    expect(parseEasyJsonSyntax({ "rewardBonus": 0.1 }))
+        .toStrictEqual(rewardBonus(0.1))
 })
 
 test("'successBonus' easy json syntax", () => {
-    expect(parseEasyJsonSyntax({ "successBonus": [0.1, "warlock", { "aps": [1,1,1] }] }))
-        .toStrictEqual(successBonus(0.1, warlock, apsRequirement(1, 1, 1)))
-    expect(parseEasyJsonSyntax({ "successBonus": { "amount": 0.1, "condition": "warlock", "requirement": { "aps": [1,1,1] }} }))
-        .toStrictEqual(successBonus(0.1, warlock, apsRequirement(1, 1, 1)))
-    expect(() => parseEasyJsonSyntax({ "successBonus": [0.1, "warlock", "paladin", "fighter"] }))
-        .toThrow()
+    expect(parseEasyJsonSyntax({ "successBonus": 0.1 }))
+        .toStrictEqual(successBonus(0.1))
 })
 
 test("'all' easy json syntax", () => {

@@ -12,8 +12,12 @@ export function isStakingQuestRequirementDSL(obj: any): obj is StakingQuestRequi
         return obj.ctype === "or-requirement" && isStakingQuestRequirementDSL(obj.left) && isStakingQuestRequirementDSL(obj.right)
     }
 
-    function isBonusRequirement(obj: any): obj is RewardBonusRequirement {
-        return obj.ctype === "bonus-requirement" && isStakingQuestRequirementDSL(obj.left) && isStakingQuestRequirementDSL(obj.right)
+    function isRewardBonusRequirement(obj: any): obj is RewardBonusRequirement {
+        return obj.ctype === "reward-bonus-requirement" && isReward(obj.bonus)
+    }
+
+    function isSuccessBonusRequirement(obj: any): obj is SuccessBonusRequirement {
+        return obj.ctype === "success-bonus-requirement" && typeof obj.bonus === "number"
     }
 
     function isAPSRequirement(obj: any): obj is APSRequirement {
@@ -42,7 +46,8 @@ export function isStakingQuestRequirementDSL(obj: any): obj is StakingQuestRequi
 
     return isAndRequirement(obj) 
         || isOrRequirement(obj) 
-        || isBonusRequirement(obj) 
+        || isRewardBonusRequirement(obj) 
+        || isSuccessBonusRequirement(obj)
         || isAPSRequirement(obj) 
         || isCollectionRequirement(obj)
         || isClassRequirement(obj)

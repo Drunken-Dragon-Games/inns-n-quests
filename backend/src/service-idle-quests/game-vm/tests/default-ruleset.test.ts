@@ -33,6 +33,5 @@ test("APS Generation", () => {
 
 test("Load quest registry", async () => {
     const questsRegistry = await loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "..", "..", "stubs", "test-quest-registry.yaml"), "yaml")
-    console.log(JSON.stringify(questsRegistry, null, 2))
     expect(true).toBe(true)
 })

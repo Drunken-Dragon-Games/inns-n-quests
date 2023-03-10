@@ -1,14 +1,47 @@
 
 questId: "quest-1"
-name: "Lost in the woods"
+name: "Test Quest 1"
 location: "Auristar"
-description: "A"
+description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s."
 requirements: 
 - aps: [10, 20, 15]
 - or:
   - all:
     - collections: ["pixel-tiles", "grandmaster-adventurers"]
     - classes: ["Mage", "Warlock"]
+  - all:
+    - rewardBonus: 10
+    - assets: ["PixelTile1"]
+
+---
+
+questId: "quest-2"
+name: "Test Quest 2"
+location: "Auristar"
+description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s."
+requirements: 
+- aps: [50, 10, 6]
+- collections: ["adventurers-of-thiolden"]
+
+---
+
+questId: "quest-3"
+name: "Test Quest 3"
+location: "Auristar"
+description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s."
+requirements: 
+- aps: [1, 60, 1]
+
+---
+
+questId: "quest-4"
+name: "Test Quest 4"
+location: "Auristar"
+description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s."
+requirements: 
+- aps: [1, 1, 1]
+- oneOf:
   - assets: ["PixelTile1"]
-
-
+  - assets: ["PixelTile2"]
+  - assets: ["PixelTile3"]
+  - aps: [0, 59, 0]
