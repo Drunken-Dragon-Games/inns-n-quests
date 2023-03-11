@@ -1,4 +1,4 @@
-import { apsAdd, APS, zeroAPS } from "../character-entity"
+import { addAPS, APS, zeroAPS } from "../character-entity"
 
 export type EncounterReward = { 
     items: {}, 
@@ -34,5 +34,5 @@ export const addEncounterItemReward = (a: EncounterItemReward, b: EncounterItemR
 export const addEncounterRewards = (a: EncounterReward, b: EncounterReward): EncounterReward => ({
     items: addEncounterItemReward(a.items, b.items),
     currency: a.currency + b.currency,
-    experience: apsAdd(a.experience, b.experience)
+    experience: addAPS(a.experience, b.experience)
 })

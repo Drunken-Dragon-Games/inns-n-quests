@@ -82,10 +82,10 @@ export const inventoryState = createSlice({
             const activity = action.payload
             state.activitySelection = activity
             if (activity?.ctype === "available-staking-quest")
-                state.selectedParty = Array(activity.slots).fill(null)
+                state.selectedParty = Array(5).fill(null)
             else if (activity?.ctype === "taken-staking-quest")
-                state.selectedParty = Array(activity.availableQuest.slots).fill(null).map((_, index) => 
-                    state.characters[activity.adventurerIds[index]] ?? null)
+                state.selectedParty = Array(5).fill(null).map((_, index) => {
+                    return state.characters[activity.partyIds[index]] ?? null })
                     //state.characters.find(character => character.entityId === activity.adventurerIds[index]) ?? null)
             else 
                 state.selectedParty = Array(5).fill(null)
@@ -186,8 +186,10 @@ export const inventoryState = createSlice({
             const outcome = action.payload.outcome
             const characters = action.payload.characters
             characters.forEach(character => state.characters[character.entityId].inActivity = false)
-            if (state.activitySelection?.ctype === "taken-staking-quest" && state.activitySelection.takenQuestId === action.payload.takenQuest.takenQuestId)
+            if (state.activitySelection?.ctype === "taken-staking-quest" && state.activitySelection.takenQuestId === action.payload.takenQuest.takenQuestId) {
                 state.activitySelection.claimedAt = new Date()
+                state.activitySelection.outcome = outcome
+            }
             if (outcome.ctype === "success-outcome")
                 state.dragonSilver += outcome.reward.currency
             /*

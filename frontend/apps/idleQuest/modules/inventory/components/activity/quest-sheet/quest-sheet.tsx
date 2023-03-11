@@ -1,13 +1,17 @@
 import { useMemo } from "react"
+import { shallowEqual, useSelector } from "react-redux"
 import styled from "styled-components"
-import { Character, notEmpty, PixelArtCss, PixelArtImage, PixelFontFamily, Push, takenQuestSecondsLeft, vh1 } from "../../../../../common"
+import _ from "underscore"
+import { AnimatedText, Character, notEmpty, PixelArtCss, PixelArtImage, PixelFontFamily, Push, rules, takenQuestSecondsLeft, vh1 } from "../../../../../common"
 import * as vm from "../../../../../game-vm"
-import { getQuestAPSRequirement, mapSealImage, questDescription, questName, SelectedQuest } from "../../../inventory-dsl"
+import { addAPS, StakingQuestConfiguration } from "../../../../../game-vm"
+import { mapSealImage, questDescription, questName, SelectedQuest } from "../../../inventory-dsl"
+import { InventoryState } from "../../../inventory-state"
 import InventoryTransitions from "../../../inventory-transitions"
-import EncounterView from "./encounter-view"
 import PartyView from "./party-view"
 import RewardView from "./reward-view"
 import Signature from "./signature"
+import StakingQuestRequirementsView from "./staking-quest-requirements-view"
 
 const QuestSheetContainer = styled.div`
     box-sizing: border-box;
@@ -81,49 +85,61 @@ const Footer = styled.div`
     height: 10vh;
 `
 
+const printOutcome = (outcome: vm.StakingQuestOutcome) => {
+    switch (outcome.ctype) {
+        case "failure-outcome": return "Failed"
+        case "success-outcome": return "Success"
+    }
+}
+
 type QuestSheetState = {
+    quest: SelectedQuest
+    title: string
+    party: (Character | null)[]
     signatureType: "in-progress" | "finished" | "claimed" | "available-no-adventurers" | "available"
-    apsRequired: vm.APS
-    apsAccumulated: vm.APS
+    configuration: StakingQuestConfiguration
+    accumulatedAPS: vm.APS
+    claimed: boolean
     sealImage: { src: string, width: number, height: number, offset: number }
 }
 
-const useQuestCardState = (quest: SelectedQuest, adventurerSlots: (Character | null)[]): QuestSheetState => 
-    useMemo<QuestSheetState>(() => ({
+const useQuestCardState = (): QuestSheetState | undefined => {
+    const { quest, party } = useSelector((state: InventoryState) => ({
+        quest: state.activitySelection,
+        party: state.selectedParty
+    }), _.isEqual)
+    if (!quest || (quest.ctype !== "available-staking-quest" && quest.ctype !== "taken-staking-quest")) return undefined
+    return {
+        quest: quest,
+        party: party,
+        title: quest.ctype == "taken-staking-quest" && quest.outcome ? printOutcome(quest.outcome) : questName(quest),
         signatureType: 
-            quest.ctype == "available-staking-quest" && adventurerSlots.filter(notEmpty).length > 0 ? "available" : 
+            quest.ctype == "available-staking-quest" && party.filter(notEmpty).length > 0 ? "available" : 
             quest.ctype == "available-staking-quest" ? "available-no-adventurers" : 
             quest.ctype == "taken-staking-quest" && quest.claimedAt ? "claimed" :
             quest.ctype == "taken-staking-quest" && takenQuestSecondsLeft(quest) <= 0 ? "finished" : 
             "in-progress",
-        apsRequired: 
-            getQuestAPSRequirement(quest),
-        apsAccumulated: 
-            adventurerSlots.filter(notEmpty).reduce((acc, character) =>
-                vm.apsAdd(acc, character.evAPS), vm.zeroAPS),
+        configuration: 
+            rules.stakingQuest.questConfiguration(quest.ctype == "taken-staking-quest" ? quest.availableQuest : quest, party.filter(notEmpty)),
+        accumulatedAPS: 
+            party.filter(notEmpty).map(c => c.evAPS).reduce(addAPS, vm.zeroAPS),
+        claimed:
+            quest.ctype == "taken-staking-quest" && quest.claimedAt ? true : false,
         sealImage: 
             mapSealImage(quest)
-    }), [quest, adventurerSlots])
-
-interface QuestSheetProps {
-    className?: string,
-    quest: SelectedQuest, 
-    adventurerSlots: (Character | null)[],
+    }
 }
 
-const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
-    if (!quest) return <></>
-    const state = useQuestCardState(quest, adventurerSlots)
+const QuestSheet = () => {
+    const state = useQuestCardState()
+    if (!state) return <></>
     return (
-        <QuestSheetContainer className={className}>
+        <QuestSheetContainer>
             <QuestInfo>
                 <QuestInfoLeft>
-                    <Title>{questName(quest)}</Title>
-                    <Details dangerouslySetInnerHTML={{ __html: questDescription(quest) }} />
-                    {quest.ctype == "available-encounter" ?
-                        <EncounterView encounter={quest} party={adventurerSlots.filter(notEmpty)} />
-                    : <></> }
-                    <RewardView quest={quest} />
+                    <Title><AnimatedText text={state.title} duration={1000} animate={state.title == "Success" || state.title == "Failed"} /></Title>
+                    <Details dangerouslySetInnerHTML={{ __html: questDescription(state.quest) }} />
+                    <RewardView configuration={state.configuration.configurations[state.configuration.bestIndex]} claimed={state.claimed} />
                 </QuestInfoLeft>
 
                 <QuestInfoRight>
@@ -137,8 +153,9 @@ const QuestSheet = ({ className, quest, adventurerSlots }: QuestSheetProps) => {
                 </QuestInfoRight>
             </QuestInfo>
 
+            <StakingQuestRequirementsView configuration={state.configuration} accumulatedAPS={state.accumulatedAPS} claimed={state.claimed} />
             <Push />
-            <PartyView quest={quest} adventurerSlots={adventurerSlots} />
+            <PartyView quest={state.quest} adventurerSlots={state.party} />
 
             <Footer>
                 <Signature

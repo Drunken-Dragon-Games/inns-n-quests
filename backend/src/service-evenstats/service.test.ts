@@ -52,7 +52,7 @@ const mockTakenQuest = (userId: string): TakenStakingQuest => ({
         requirements: [],
         slots: 1,
     },
-    characterIds: [],
+    partyIds: [],
     claimedAt: new Date(),
     createdAt: new Date(),
     outcome: { ctype: "success-outcome", reward: noEncounterReward  },

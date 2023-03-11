@@ -2,7 +2,7 @@ import { RefObject } from "react"
 import { AvailableEncounter, AvailableStakingQuest, Character, Furniture, notEmpty, SealType, TakenStakingQuest } from "../../common"
 import * as vm from "../../game-vm"
 
-export type SelectedQuest = AvailableStakingQuest | TakenStakingQuest | AvailableEncounter
+export type SelectedQuest = AvailableStakingQuest | TakenStakingQuest 
 
 export type InventoryPageName = "characters" | "taken-quests" | "furniture"
 
@@ -69,9 +69,7 @@ export const takenQuestId = (quest?: SelectedQuest): string =>
     quest?.ctype === "taken-staking-quest" ? quest.takenQuestId : ""
 
 export const questId = (quest: SelectedQuest): string =>
-    quest.ctype === "taken-staking-quest" ? quest.availableQuest.questId : 
-    quest.ctype === "available-staking-quest" ? quest.questId :
-    quest.encounterId
+    quest.ctype === "taken-staking-quest" ? quest.availableQuest.questId : quest.questId
 
 export const questName = (quest: SelectedQuest): string =>
     quest.ctype === "taken-staking-quest" ? quest.availableQuest.name : quest.name
@@ -120,24 +118,6 @@ export const mapQuestScroll = (takenQuest: TakenStakingQuest) => {
         default: return ""
     }
     */
-}
-
-export function getQuestAPSRequirement(selectedQuest: SelectedQuest): vm.APS {
-    /*
-    const search = (requirement: QuestRequirement): APSRequirement => {
-        if (requirement.ctype === "aps-requirement") return requirement
-        else if (requirement.ctype === "or-requirement") return mergeAPSRequirementMax(search(requirement.left), search(requirement.right))
-        else if (requirement.ctype === "and-requirement") return mergeAPSRequirementMax(search(requirement.left), search(requirement.right))
-        else if (requirement.ctype === "bonus-requirement") return search(requirement.right)
-        else if (requirement.ctype === "success-bonus-requirement") return search(requirement.right)
-        else if (requirement.ctype === "not-requirement") return search(requirement.continuation)
-        else return { ctype: "aps-requirement", athleticism: 0, intellect: 0, charisma: 0 }
-    }
-    const quest = selectedQuest.ctype === "available-staking-quest" ? selectedQuest : selectedQuest.quest
-    const requirement = search(quest.requirements)
-    return { athleticism: requirement.athleticism, intellect: requirement.intellect, charisma: requirement.charisma }
-    */
-    return { athleticism: 10, intellect: 10, charisma: 10 }
 }
 
 export const sortCharacters = (adventurers: Character[]) => {

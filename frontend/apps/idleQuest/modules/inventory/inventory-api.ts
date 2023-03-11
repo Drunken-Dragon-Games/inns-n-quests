@@ -7,6 +7,9 @@ const InventoryApi = {
     isOpen: () => 
         inventoryStore.getState().open,
     
+    getCharacters: () => 
+        inventoryStore.getState().characters,
+
     activeActivity: () =>
         inventoryStore.getState().activitySelection?.ctype,
 

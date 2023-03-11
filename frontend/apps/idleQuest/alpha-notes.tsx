@@ -2,23 +2,17 @@ import { useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { PixelFontFamily } from "./common"
 
-const date = "02 March 2023"
+const date = "10 March 2023"
 
 const notes = [
     "'Q' to toggle the quest board.",
     "'B' to toggle the inventory.",
-    "29 Feb________",
-    "* Adventurers and Furniture can now be placed in the Inn.",
-    "* Inn persists.",
-    "28 Feb________",
-    "* Drag and drop of adventurers for quests working.",
-    "* Map has been disabled for now. It will be reimplemented within the game engine instead of using HTML.",
-    "* Hit enter to take or complete quests.",
-    "* Notifications now tell you when a quest is done.",
-    "* Notifications now tell you the outcome of a quest.",
-    "* Now the quests close after 3 seconds of hitting complete.",
-    "* Performance improvements.",
-    "* Furniture added to inventory.",
+    "________",
+    "* Complex requirements implemented for staking quests.",
+    "* Current quests have some test requirements.",
+    "* Staking quests are now labeled as 'Idle Adventure'.",
+    "* Inventory scroll horizontally and preserves scroll height.",
+    "* UI and animation improvements.",
     "________",
     "Thank you for testing Idle Adventures!",
     "- Vledic"

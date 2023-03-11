@@ -1,32 +1,21 @@
-import { StakingQuestRuleset } from "../iq-ruleset"
-import { StakingQuestRequirement } from "./staking-quest-requirements"
+import { StakingQuestRequirement, StakingQuestRequirementDSL } from "./staking-quest-requirements"
 
 export type StakingQuest = {
     questId: string,
     name: string,
     location: string,
     description: string,
-    requirements: StakingQuestRequirement,
+    requirements: StakingQuestRequirement[],
     timeModifier?: { operator: "multiply" | "add" | "replace", modifier: number },
     rewardModifier?: { operator: "multiply" | "add" | "replace", modifier: StakingReward },
     slots?: number,
 }
 
-export type AvailableStakingQuest = {
-    questId: string,
-    name: string,
-    location: string,
-    description: string,
-    requirements: StakingQuestRequirement,
-    reward: StakingReward,
-    duration: number,
-    slots: number,
-}
-
 export type TakenStakingQuest = {
     takenQuestId: string,
-    availableQuest: AvailableStakingQuest,
-    adventurerIds: string[],
+    availableQuest: StakingQuest,
+    requirementsIndex: number,
+    partyIds: string[],
     claimedAt?: Date,
     createdAt: Date,
     outcome?: StakingQuestOutcome,
@@ -47,8 +36,14 @@ export type StakingReward = {
     currency: number,
 }
 
-export const noStakingReward: StakingReward = { currency: 0 }
+export const zeroStakingReward: StakingReward = { currency: 0 }
 
-export const addStakingRewards = (a: StakingReward, b: StakingReward): StakingReward => ({
+export const stakingReward: (currency: number) => StakingReward = (currency) => ({ currency })
+
+export const addStakingReward: (a: StakingReward, b: StakingReward) => StakingReward = (a, b) => ({
     currency: a.currency + b.currency,
+})
+
+export const multiplyStakingReward: (a: StakingReward, b: StakingReward) => StakingReward = (a, b) => ({
+    currency: a.currency * b.currency,
 })

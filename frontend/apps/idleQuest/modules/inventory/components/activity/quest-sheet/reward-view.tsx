@@ -1,6 +1,6 @@
-import styled, { css, keyframes } from "styled-components"
-import { AnimatedNumberMedal, Medal, NoDragImage, notEmpty, PixelFontFamily, vh1 } from "../../../../../common"
-import { SelectedQuest } from "../../../inventory-dsl"
+import styled, { css } from "styled-components"
+import { AnimatedNumberMedal, Medal, NoDragImage, PixelFontFamily, vh1 } from "../../../../../common"
+import { StakingQuestRequirementConfiguration } from "../../../../../game-vm"
 
 const RewardViewContainer = styled.div`
     width: 100%;
@@ -36,19 +36,13 @@ const DragonSilverMedal = styled(AnimatedNumberMedal)`
     ${MedalCss}
 `
 
-const RewardView = ({ quest }: { quest: SelectedQuest }) => {
-    const reward
-        = quest.ctype === "taken-staking-quest" ? 
-            { ...quest.availableQuest.reward, ctype: "staking-reward", claimed: notEmpty(quest.claimedAt) }
-        : quest.ctype === "available-encounter" ? 
-            { ...quest.reward, ctype: "encounter-reward", claimed: false }
-        :   { ...quest.reward, ctype: "staking-reward", claimed: false }
+const RewardView = ({ configuration, claimed }: { configuration: StakingQuestRequirementConfiguration, claimed: boolean }) => {
     return (
         <RewardViewContainer>
             <InfoMedal>
-                <span>{reward.ctype === "staking-reward" ? "Staking Quest" : "Adventure Quest"}</span>
+                <span>Idle Adventure</span>
             </InfoMedal>
-            <DragonSilverMedal amount={reward.claimed ? 0 : reward.currency} animate={reward.claimed}>
+            <DragonSilverMedal amount={claimed ? 0 : configuration.finalReward.currency} animate>
                 <DragonSilverIcon
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/dragon_silver.png"
                     alt="dragon silver reward"

@@ -25,7 +25,7 @@ export const Races: Race[] =
 export type CharacterCollection 
     = "grandmaster-adventurers" | "adventurers-of-thiolden" | "pixel-tiles"
 
-export const adventurerCollections: CharacterCollection[] = 
+export const CharacterCollections: CharacterCollection[] = 
     [ "grandmaster-adventurers" , "adventurers-of-thiolden" , "pixel-tiles" ]
 
 /** Adventurer Character */
@@ -54,3 +54,15 @@ export type Crafter = {
 export type CrafterClass 
     = "Blacksmith" | "Alchemist" | "Carpenter" 
     | "Cook" | "Brewer" | "Host" | "Trader"
+
+export const CrafterClasses: CrafterClass[] =
+    [ "Blacksmith" , "Alchemist" , "Carpenter"
+    , "Cook" , "Brewer" , "Host" , "Trader"
+    ]
+
+/** All Classes */
+
+export type CharacterClass = AdventurerClass | CrafterClass
+
+export const CharacterClasses: CharacterClass[] = 
+    (AdventurerClasses as CharacterClass[]).concat(CrafterClasses)

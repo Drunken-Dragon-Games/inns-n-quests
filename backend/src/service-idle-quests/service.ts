@@ -61,7 +61,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         const objectBuilder = new vm.IQMeatadataObjectBuilder(this.rules, metadataRegistry, wellKnownPolicies)
         this.characterState = new CharacterState(objectBuilder)
         this.furnitureState = new FurnitureState(objectBuilder)
-        this.takenQuestState = new TakenStakingQuestState(questsRegistry, objectBuilder)
+        this.takenQuestState = new TakenStakingQuestState(questsRegistry)
         this.availbleStakingQuestState = new AvailableStakingQuestState(questsRegistry, objectBuilder)
 
         this.activeEncounterState = new ActiveEncounterState()
@@ -205,15 +205,21 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @returns 
      */
     async acceptStakingQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptStakingQuestResult> {
-        if (this.questsRegistry[questId] === undefined) 
+        const quest = this.questsRegistry[questId]
+        if (!quest) 
             return { status: "unknown-quest" }
         const transaction = await this.database.transaction()
-        const adventurers = await this.characterState.setInActivity(userId, adventurerIds, transaction)
-        if (adventurers.length != adventurerIds.length) {
+        const characters = await this.characterState.setInActivity(userId, adventurerIds, transaction)
+        if (characters.length != adventurerIds.length) {
             await transaction.rollback()
             return { status: "invalid-adventurers" }
         }
-        const takenQuest = await this.takenQuestState.create(userId, questId, adventurers.map(a => a.entityId), this.calendar.now(), transaction)
+        const takenQuest = await this.takenQuestState.create({ 
+            userId, 
+            questId, 
+            partyIds: characters.map(a => a.entityId), 
+            createdAt: this.calendar.now() 
+        }, transaction)
         await transaction.commit()
         return { status: "ok", takenQuest }
     }
@@ -246,8 +252,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         if (takenQuest.claimedAt)
             return { status: "quest-already-claimed" }
         const transaction = await this.database.transaction()
-        const adventurers = await this.characterState.unsetInChallenge(userId, takenQuest.characterIds, transaction)
-        const missing = adventurers.map(a => a.entityId).filter(item => takenQuest.characterIds.indexOf(item) < 0)
+        const adventurers = await this.characterState.unsetInChallenge(userId, takenQuest.partyIds, transaction)
+        const missing = adventurers.map(a => a.entityId).filter(item => takenQuest.partyIds.indexOf(item) < 0)
         // Check all adventurers are still in the inventory
         if (missing.length > 0) {
             await transaction.rollback()

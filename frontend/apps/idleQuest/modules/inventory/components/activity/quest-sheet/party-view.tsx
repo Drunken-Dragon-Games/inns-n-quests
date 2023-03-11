@@ -64,10 +64,10 @@ const useCharacterSlotState = (props: CharacterSlotProps): CharacterSlotState & 
 
     const renderState = useMemo<CharacterSlotState>(() => ({
         interactuable: !props.preview && notEmpty(props.character),
-        displayedEmoji: props.preview ? undefined : notEmpty(props.character) && hovering ? "cross" : props.emoji,
+        displayedEmoji: notEmpty(props.character) && hovering && !props.preview ? "cross" : props.emoji,
         render: props.preview || notEmpty(props.character) && hovering ? "hovered" : "normal",
         hovering
-    }), [props.character, props.preview, hovering])
+    }), [props.character, props.preview, hovering, props.emoji])
 
     const { dragging, startDrag } = useDrag({
         onDrag: (position) =>
@@ -177,6 +177,9 @@ const PartyView = ({ quest, adventurerSlots }: { quest: SelectedQuest, adventure
                     <PartySlot
                         character={hovering ? hovering : picked}
                         preview={notEmpty(hovering) || quest.ctype === "taken-staking-quest"}
+                        emoji={
+                            quest.ctype === "taken-staking-quest" && quest.outcome ? 
+                            quest.outcome.ctype == "failure-outcome" ? "bad" : "good" : undefined}
                     />
                 </div>
             )}

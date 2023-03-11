@@ -6,8 +6,11 @@ import {
     AcceptEncounterResult, AcceptStakingQuestResult, AvailableStakingQuest, Character, ClaimEncounterResult, 
     ClaimStakingQuestResult, GetActiveEncountersResult, GetAvailableEncountersResult, GetAvailableStakingQuestsResult, GetInventoryResult, 
     GetTakenStakingQuestsResult, 
+    hydrateTakenQuests, 
     TakenStakingQuest 
 } from "./common"
+import InventoryApi from "./modules/inventory/inventory-api"
+import { NotificationsApi } from "./modules/notifications"
 
 const IdleQuestsApi = {
 
@@ -39,12 +42,30 @@ const IdleQuestsApi = {
     async takeAvailableStakingQuest(quest: AvailableStakingQuest, party: Character[]): Promise<AcceptStakingQuestResult> {
         const adventurerIds = party.map(adventurer => adventurer.entityId)
         const response = await IdleQuestsRequestWRefresh("post", "/staking-quest/accept", {questId: quest.questId, adventurerIds})
-        return response.data
+        if (response.data.status === "ok") {
+            const takenQuest = hydrateTakenQuests(InventoryApi.getCharacters())(response.data.takenQuest)
+            if (takenQuest.ctype === "missing-adventurers") {
+                NotificationsApi.notify("Something went wrong, please contact us and describe the issue.", "alert")
+                return { status: "invalid-adventurers" }
+            } else 
+                return { status: "ok", takenQuest: takenQuest.quest }
+        } else
+            return response.data
     },
 
     async getInProgressStakingQuests(): Promise<GetTakenStakingQuestsResult> {
         const response = await IdleQuestsRequestWRefresh("get", "/staking-quest/taken")
-        return response.data
+        if (response.data.status === "ok") {
+            const hydratedTakenQuests = (response.data.takenQuests as TakenStakingQuest[]).map(hydrateTakenQuests(InventoryApi.getCharacters()))
+            const questsWithMissingAdventurers = hydratedTakenQuests
+                .filter(takenQuest => takenQuest.ctype === "missing-adventurers")
+            const takenQuests = hydratedTakenQuests
+                .filter(takenQuest => takenQuest.ctype === "valid-quest").map(q => q.quest)
+            questsWithMissingAdventurers.forEach(takenQuest => 
+                NotificationsApi.notify(`Quest failed because adventurers were transfered early: ${takenQuest.quest.availableQuest.name}`, "info"))
+            return { status: "ok", takenQuests: takenQuests }
+        } else
+            return response.data
     },
 
     async claimTakenStakingQuest(quest: TakenStakingQuest): Promise<ClaimStakingQuestResult> {

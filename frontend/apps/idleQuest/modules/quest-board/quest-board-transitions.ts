@@ -25,8 +25,8 @@ const QuestBoardTransitions = {
     onClearAvailableEncounters: () =>
         questBoardStore.dispatch(clearAvailableEncounters()),
 
-    onClickAvailableEncounter: (availableEncounter: AvailableEncounter) =>
-        InventoryApi.selectQuest(availableEncounter),
+    onClickAvailableEncounter: (availableEncounter: AvailableEncounter) => {},
+        //InventoryApi.selectQuest(availableEncounter),
     
     onRemoveAvailableEncounter: (availableEncounter: AvailableEncounter) =>
         questBoardStore.dispatch(removeAvailableEncounter(availableEncounter)),

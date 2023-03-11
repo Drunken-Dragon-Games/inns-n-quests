@@ -1,9 +1,8 @@
-import { APS, apsSum, CharacterEntity } from "./character-entity"
+import { APS, CharacterEntity } from "./character-entity"
 import { ConfigurationCharacter, DamageType, EncounterOutcome, EncounterReward, GeneralDamageType, SkillInfo, Strategy, StrategyConfiguration } from "./encounter"
 import { WithEV } from "./iq-entity"
-import { IQMeatadataObjectBuilder } from "./iq-metadata-object-builder"
 import IQRandom from "./iq-random"
-import { SatisfiedRequirements, StakingQuestOutcome, StakingQuestRequirement, StakingReward, TakenStakingQuest } from "./staking-quest"
+import { StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementInfo, StakingQuestSatisfactionInfo } from "./staking-quest"
 
 export interface IQRuleset {
     name: string
@@ -24,10 +23,10 @@ export interface CharacterEntityRuleset {
 }
 
 export interface StakingQuestRuleset {
-    outcome(takenQuest: TakenStakingQuest, party: CharacterEntity[]): StakingQuestOutcome
-    satisfied(requirements: StakingQuestRequirement, party: CharacterEntity[]): SatisfiedRequirements
-    reward(requirements: StakingQuestRequirement): StakingReward
-    duration(requirements: StakingQuestRequirement): number
+    outcome(quest: StakingQuest, party: CharacterEntity[]): StakingQuestOutcome
+    questConfiguration(quest: StakingQuest, party: CharacterEntity[]): StakingQuestConfiguration 
+    satisfaction(requirement: StakingQuestRequirement, party: CharacterEntity[]): StakingQuestSatisfactionInfo
+    requirementInfo(requirement: StakingQuestRequirement): StakingQuestRequirementInfo
 }
 
 export interface EncounterRuleset {

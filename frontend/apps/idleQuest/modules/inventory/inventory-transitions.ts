@@ -16,7 +16,9 @@ const InventoryTransitions = {
         const interval = setInterval(() => {
             const state = inventoryStore.getState()
             const finishedQuests = state.takenQuests.filter(quest => takenQuestSecondsLeft(quest) == -1)
-            finishedQuests.forEach(quest => NotificationsApi.notify(`Quest ${quest.availableQuest.name} finished!`, "info"))
+            finishedQuests.forEach(quest => {
+                NotificationsApi.notify(`Quest ${quest.availableQuest.name} finished!`, "info")
+            })
         }, 1000)
 
         inventoryStore.subscribe(() => {
@@ -40,7 +42,6 @@ const InventoryTransitions = {
 
     onRefreshInventory: () => {
         dispatch(InventoryThunks.getInventory())
-        dispatch(InventoryThunks.getInProgressQuests())
     },
 
     onToggleInventory: () => {
@@ -51,9 +52,10 @@ const InventoryTransitions = {
         dispatch(actions.setInventoryPage(page)),
 
     onSelectQuest: (quest: SelectedQuest) => {
-        console.log(quest.ctype)
         dispatch(actions.openActivity(quest))
         dispatch(actions.toggleInventory(true))
+        if(quest.ctype == "available-staking-quest") 
+            dispatch(actions.setInventoryPage("characters"))
     },
 
     closeActivity: () => {
@@ -66,7 +68,8 @@ const InventoryTransitions = {
         const adventurers = state.selectedParty.filter(notEmpty)
         if (quest?.ctype == "available-staking-quest" && adventurers.length > 0) {
             dispatch(InventoryThunks.takeAvailableQuest(quest, adventurers))
-            dispatch(actions.toggleInventory())
+            dispatch(actions.setInventoryPage("taken-quests"))
+            dispatch(actions.closeActivity())
             QuestBoardApi.removeAvailableQuest(quest)
         } 
         else if (quest?.ctype == "taken-staking-quest" && takenQuestStatus(quest) === "claimed")

@@ -14,7 +14,7 @@ export type StakingQuest = {
 export type TakenStakingQuest = {
     takenQuestId: string,
     availableQuest: StakingQuest,
-    characterIds: string[],
+    partyIds: string[],
     claimedAt?: Date,
     createdAt: Date,
     outcome?: StakingQuestOutcome,

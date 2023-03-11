@@ -1,11 +1,32 @@
-import { simpleHash } from "../common"
-import { TakenStakingQuest } from "./backend-api"
+import { simpleHash } from "."
+import { Character, rules, TakenStakingQuest } from "./backend-api"
 
 export type SealType = "kings-plea" | "heroic-quest" | "valiant-adventure" | "townsfolk"
 
 export const sealTypes = ["kings-plea", "heroic-quest", "valiant-adventure", "townsfolk"] 
 
 export type TakenQuestStatus = "in-progress" | "finished" | "claimed"
+
+export type HydratedTakenQuest 
+    = { ctype: "valid-quest", quest: TakenStakingQuest } 
+    | { ctype: "missing-adventurers", quest: TakenStakingQuest, missing: number }
+
+export const hydrateTakenQuests = (characters: Record<string, Character>) => (takenQuest: TakenStakingQuest): HydratedTakenQuest => {
+    const missingAdventurers = takenQuest.partyIds.filter(entityId => !characters[entityId])
+    if (missingAdventurers.length > 0) return {
+        ctype: "missing-adventurers",
+        quest: takenQuest,
+        missing: missingAdventurers.length
+    }
+    const configuration = rules.stakingQuest.questConfiguration(takenQuest.availableQuest, takenQuest.partyIds.map(id => characters[id]))
+    return {
+        ctype: "valid-quest",
+        quest: {
+            ...takenQuest,
+            configuration,
+        }
+    }
+}
 
 export function takenQuestStatus(takenQuest: TakenStakingQuest): TakenQuestStatus {
     if (takenQuest.claimedAt) return "claimed"
@@ -16,7 +37,8 @@ export function takenQuestStatus(takenQuest: TakenStakingQuest): TakenQuestStatu
 export function takenQuestSecondsLeft(takenQuest: TakenStakingQuest): number {
     const nowSeconds = Math.round(Date.now() / 1000)
     const createdOn = Math.round(new Date(takenQuest.createdAt).getTime() / 1000)
-    return createdOn + takenQuest.availableQuest.duration - nowSeconds
+    const configuration = takenQuest.configuration.configurations[takenQuest.configuration.bestIndex]
+    return createdOn + configuration.satisfactionInfo.requirementInfo.duration - nowSeconds
 }
 
 export function takenQuestTimeLeft(takenQuest: TakenStakingQuest): string {

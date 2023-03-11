@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import styled, { css } from "styled-components"
-import { AvailableEncounter, AvailableStakingQuest, PixelArtImage, vh } from "../../../common"
+import { AvailableStakingQuest, PixelArtImage, vh } from "../../../common"
 import { questSeal } from "../../inventory/inventory-dsl"
 import { useQuestBoardSelector } from "../quest-board-state"
 import QuestBoardTransitions from "../quest-board-transitions"
@@ -27,7 +27,6 @@ const QuestPreviewCardContainer = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
 `
 
 const Title = styled.h2`
@@ -80,19 +79,14 @@ const PaperBackgroundHover4 = styled(PixelArtImage)<{hovering: boolean}>`
     ${PaperBackgroundHoverCommon}
 `
 
-const QuestPreviewCard = ({ quest }: { quest: AvailableEncounter | AvailableStakingQuest }) => {
+const QuestPreviewCard = ({ quest }: { quest: AvailableStakingQuest }) => {
     const questStyle = 1
     const [hovering, setHovering] = useState(false)
     const PaperBackgroundHover = [PaperBackgroundHover1, PaperBackgroundHover2, PaperBackgroundHover3, PaperBackgroundHover4][questStyle - 1]!
     const seal = questSeal(quest)
     return (
         <QuestPreviewCardContainer 
-            onClick={() => {
-                if (quest.ctype === "available-staking-quest")
-                    QuestBoardTransitions.onClickAvailableQuest(quest)
-                else if (quest.ctype === "available-encounter")
-                    QuestBoardTransitions.onClickAvailableEncounter(quest)
-            }} 
+            onClick={() => QuestBoardTransitions.onClickAvailableQuest(quest)} 
             onMouseEnter={() => setHovering(true)} 
             onMouseLeave={() => setHovering(false)}
         >
@@ -129,7 +123,7 @@ const QuestBoardArea = () => {
     }, [availableQuests.length])
     return (
         <QuestBoardAreaContainer>
-            {availableQuests.slice(0, 5).map((quest: (AvailableStakingQuest | AvailableEncounter), index: number) =>
+            {availableQuests.slice(0, 5).map((quest: (AvailableStakingQuest), index: number) =>
                 <QuestPreviewCard quest={quest} key={"quest-" + index} />
             )}
         </QuestBoardAreaContainer>

@@ -43,21 +43,19 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
 
         const ivAPSSatisfaction = (): APS => {
             const accAPS = party.map(c => c.ivAPS).reduce(addAPS, zeroAPS)
-            return newAPS([
-                Math.min(1, accAPS.athleticism / requirement.aps.athleticism),
-                Math.min(1, accAPS.intellect / requirement.aps.intellect),
-                Math.min(1, accAPS.charisma / requirement.aps.charisma),
-            ])
+            return accAPS
         }
 
         const collectionSatisfaction = (): number | undefined => {
             if (!requirement.collection || requirement.collection.length === 0) return undefined
+            if (party.length === 0) return 0
             const allApply = party.every(c => requirement.collection!.includes(c.collection))
             return allApply ? 1 : 0
         }
 
         const classSatisfaction = (): number | undefined => {
             if (!requirement.class || requirement.class.length === 0) return undefined
+            if (party.length === 0) return 0
             const allApply = party.every(c => requirement.class!.includes(c.characterType.class))
             return allApply ? 1 : 0
         }
@@ -80,9 +78,9 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
     }
 
     requirementInfo(requirement: StakingQuestRequirement): StakingQuestRequirementInfo {
-        const duration = Math.max(3, apsSum(requirement.aps) / 10)
+        const duration = Math.round(Math.max(30, apsSum(requirement.aps)))
         const currency = (
-            Math.max(1, apsSum(requirement.aps) / 10) +
+            Math.round(Math.max(1, apsSum(requirement.aps) / 10)) +
             (requirement.collection?.length ?? 0) * 10 +
             (requirement.class?.length ?? 0) * 20 +
             (requirement.assetRef?.length ?? 0) * 30
@@ -93,18 +91,23 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
     }
 }
 
-const baseSuccessRate = (satisfaction: StakingQuestRequirementSatisfactionPercentage): number => {
+const baseSuccessRate = (info: StakingQuestSatisfactionInfo): number => {
+    const cappedAPS = newAPS([
+        Math.min(info.requirement.aps.athleticism, info.satisfaction.aps.athleticism),
+        Math.min(info.requirement.aps.intellect, info.satisfaction.aps.intellect),
+        Math.min(info.requirement.aps.charisma, info.satisfaction.aps.charisma),
+    ])
     const successArray: number[] = [
-        apsSum(satisfaction.aps) / 3, 
-        satisfaction.collection, 
-        satisfaction.class, 
-        satisfaction.assetRef
+        apsSum(cappedAPS) / apsSum(info.requirement.aps), 
+        info.satisfaction.collection, 
+        info.satisfaction.class, 
+        info.satisfaction.assetRef
     ].filter(notEmpty)
     return successArray.reduce((a, b) => a + b, 0) / successArray.length
 }
 
 const applyFinalSuccessRate = (info: StakingQuestSatisfactionInfo): number => {
-    const baseSuccess = baseSuccessRate(info.satisfaction)
+    const baseSuccess = baseSuccessRate(info)
     return info.requirementInfo.successBonus 
         ? Math.min(1, baseSuccess + info.requirementInfo.successBonus) 
         : baseSuccess

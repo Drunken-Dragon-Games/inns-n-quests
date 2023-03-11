@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import styled, { keyframes } from "styled-components"
 import {
-    Character, notEmpty, PixelArtImage, simpleHash, Units,
+    Character, notEmpty, PixelArtImage, rules, simpleHash, Units,
     useComputeHeightFromOriginalImage, useRememberLastValue, vmax1
 } from "../../../../common"
 
@@ -167,7 +167,9 @@ const emojiMapping = (emoji?: string) => {
         case "panicking": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/panicking.webp"
         case "terrified": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/mood/terrified.webp"
         case "cross": return "https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/close_icon.png"
-        default: return `https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/emoji_${(Math.abs(simpleHash(emoji ?? "") % 6) + 1)}.webp`
+        case "good": return `https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/emoji_${rules.rand.randomNumberBetween(1,6)}.webp`
+        case "bad": return `https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/emoji_${rules.rand.randomNumberBetween(7,11)}.webp`
+        default: return `https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/emoji/emoji_${rules.rand.randomNumberBetween(1,6)}.webp`
     }
 }
 

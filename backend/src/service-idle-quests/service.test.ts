@@ -139,7 +139,7 @@ test("Normal quest flow 1", async () => {
     expect(adventurers.length).toBe(6)
     expect(acceptedQuest.availableQuest.questId).toBe(availableQuests[0].questId)
     expect(takenQuests1.length).toBe(1)
-    expect(takenQuests1[0].characterIds).toStrictEqual(adventurersToGoOnQuest)
+    expect(takenQuests1[0].partyIds).toStrictEqual(adventurersToGoOnQuest)
     expect(takenQuests1[0].availableQuest.questId).toEqual(availableQuests[0].questId)
     expect(claimBeforeTimeResponse.status).toBe("quest-not-finished")
     expect(takenQuests2.length).toBe(0)

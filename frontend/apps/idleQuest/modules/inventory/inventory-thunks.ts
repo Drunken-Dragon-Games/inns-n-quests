@@ -10,13 +10,20 @@ const actions = inventoryState.actions
 const InventoryThunks = {
 
     getInventory: (): InventoryThunk => async (dispatch) => {
-        const response = await IdleQuestsApi.getInventory()
-        if (response.status == "ok") {
-            dispatch(actions.setInventory(response.inventory))
-            OverworldApi.setInitialInnState(response.inventory)
+        const itemResponse = await IdleQuestsApi.getInventory()
+        if (itemResponse.status == "ok") {
+            dispatch(actions.setInventory(itemResponse.inventory))
+            OverworldApi.setInitialInnState(itemResponse.inventory)
         }
         else
-            NotificationsApi.notify(`Error getting inventory: ${response.status}`, "alert")
+            NotificationsApi.notify(`Error getting inventory: ${itemResponse.status}`, "alert")
+
+        const stakingQuestsResponse = await IdleQuestsApi.getInProgressStakingQuests()
+        if (stakingQuestsResponse.status == "ok") {
+            dispatch(actions.setTakenQuests(stakingQuestsResponse.takenQuests))
+        } else {
+            NotificationsApi.notify(`Error getting in progress quests: ${stakingQuestsResponse.status}`, "alert")
+        }
     },
 
     takeAvailableQuest: (quest: AvailableStakingQuest, characters: Character[]): InventoryThunk  => async (dispatch) => {
@@ -28,15 +35,6 @@ const InventoryThunks = {
             dispatch(actions.closeActivity())
         } else {
             NotificationsApi.notify(`Error taking quest: ${response.status}`, "alert")
-        }
-    },
-
-    getInProgressQuests: (): InventoryThunk => async (dispatch) => {
-        const response = await IdleQuestsApi.getInProgressStakingQuests()
-        if (response.status == "ok") {
-            dispatch(actions.setTakenQuests(response.takenQuests))
-        } else {
-            NotificationsApi.notify(`Error getting in progress quests: ${response.status}`, "alert")
         }
     },
 

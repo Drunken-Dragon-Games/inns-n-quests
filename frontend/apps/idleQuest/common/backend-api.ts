@@ -1,4 +1,3 @@
-import * as randomseed from "random-seed"
 import * as vm from "../game-vm"
 
 export type Character 
@@ -18,13 +17,14 @@ export type Furniture
     & vm.WithSprite
 
 export type AvailableStakingQuest
-    = vm.AvailableStakingQuest
+    = vm.StakingQuest
     & vm.WithTag<"available-staking-quest">
 
 export type TakenStakingQuest 
     = vm.TakenStakingQuest
     & vm.WithTag<"taken-staking-quest">
     & vm.WithOwner
+    & { configuration: vm.StakingQuestConfiguration }
 
 export type AvailableEncounter
     = vm.Encounter
@@ -39,6 +39,8 @@ export type Sector
     = vm.Sector
     & vm.WithTag<"sector">
 
+export const rules = vm.DefaultRuleset.seed("frontend-dev")
+
 export type IdleQuestsInventory = {
     dragonSilver: number
     characters: Record<string, Character> 
@@ -49,20 +51,6 @@ export type IdleQuestsInventory = {
 export type GetInventoryResult 
     = { status: "ok", inventory: IdleQuestsInventory }
     | { status: "unknown-user" }
-
-export class IdleQuestsRandomGenerator extends vm.IQRandom {
-    private readonly random: randomseed.RandomSeed
-    constructor (seed: string) { 
-        super(); this.random = randomseed.create(seed) }
-    genrand(): number { 
-        return this.random.random() }
-    seed(s: string): vm.IQRandom { 
-        return new IdleQuestsRandomGenerator(s) }
-}
-
-export const random = new IdleQuestsRandomGenerator("dev")
-
-export const rules = new vm.DefaultRuleset(random)
 
 /** Encounters */
 
@@ -96,6 +84,7 @@ export type AcceptStakingQuestResult
 
 export type GetTakenStakingQuestsResult
     = { status: "ok", takenQuests: TakenStakingQuest[] }
+    | { status: "missing-adventurers" }
 
 export type ClaimStakingQuestResult
     = { status: "ok", outcome: vm.StakingQuestOutcome }
