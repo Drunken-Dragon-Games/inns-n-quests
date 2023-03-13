@@ -1,6 +1,4 @@
-import { RefObject } from "react"
-import { AvailableEncounter, AvailableStakingQuest, Character, Furniture, notEmpty, SealType, TakenStakingQuest } from "../../common"
-import * as vm from "../../game-vm"
+import { AvailableStakingQuest, Character, Furniture, SealType, TakenStakingQuest } from "../../common"
 
 export type SelectedQuest = AvailableStakingQuest | TakenStakingQuest 
 
@@ -10,32 +8,9 @@ export type InventoryAsset = Character | Furniture
 
 export type InventoryItem = Character | TakenStakingQuest | Furniture
 
-export type ActivitySelection = SelectedQuest | Character | Furniture
+export type ActivitySelection = SelectedQuest | Character | Furniture | { ctype: "overworld-dropbox" }
 
-export type DraggableItem = Character | Furniture
-
-export type DraggingState = {
-    item: DraggableItem
-    hide?: boolean
-    position: [number, number]
-}
-
-export type DropBox = {
-    top: number
-    bottom: number
-    left: number
-    right: number
-    dropped?: DraggableItem
-    hovering?: DraggableItem
-}
-
-export type DropBoxesState = {
-    utility: DropBoxUtility
-    dragging: boolean
-    dropBoxes: DropBox[]
-}
-
-export type DropBoxUtility = "party-pick" | "overworld-drop" | "other"
+export type CharacterParty = (Character | null)[]
 
 export const mapSealImage = (quest: SelectedQuest): { src: string, width: number, height: number, offset: number } => {
     const scale = 1.8
@@ -95,17 +70,6 @@ export function inventoryItemId(item: InventoryItem): string {
         return item.takenQuestId
 }
 
-export function isDraggableItem(item?: any): item is DraggableItem {
-    return item && (item.ctype === "character" || item.ctype === "furniture")
-}
-
-export function draggableItemId(item: DraggableItem): string {
-    if (item.ctype === "character")
-        return item.entityId
-    else //if (item.ctype === "furniture")
-        return item.entityId
-}
-
 export const mapQuestScroll = (takenQuest: TakenStakingQuest) => {
     const seal = questSeal(takenQuest).replace("-", "_")
     return `https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/console/scrolls/${seal}.png`
@@ -130,38 +94,4 @@ export const sortCharacters = (adventurers: Character[]) => {
         }
         return 0
     })
-}
-
-export const makeDropBox = (ref: RefObject<HTMLDivElement>): DropBox => {
-    if (!ref.current) throw new Error("Ref for dropbox not set")
-    const { top, left, bottom, right } = ref.current.getBoundingClientRect()
-    return { top, left, bottom, right }
-}
-
-export function draggingIntersects(dropBoxesState?: DropBoxesState, draggingState?: DraggingState): [DropBoxesState | undefined, DraggingState | undefined] {
-    if (!dropBoxesState) return [undefined, undefined]
-    else {
-        const dropBoxes: DropBox[] = dropBoxesState.dropBoxes.map(dropBox => {
-            const hovering =
-                draggingState &&
-                    dropBox.top < draggingState.position[1] &&
-                    dropBox.bottom > draggingState.position[1] &&
-                    dropBox.left < draggingState.position[0] &&
-                    dropBox.right > draggingState.position[0] ?
-                    draggingState.item : undefined
-            return { ...dropBox, hovering }
-        })
-        const dragging = notEmpty(draggingState)
-        const hide = dropBoxes.some(dropBox => dropBox.hovering)
-        return [{
-            ...dropBoxesState,
-            dropBoxes,
-            dragging
-        },
-            draggingState ? {
-                ...draggingState,
-                hide
-            } : undefined
-        ]
-    }
 }

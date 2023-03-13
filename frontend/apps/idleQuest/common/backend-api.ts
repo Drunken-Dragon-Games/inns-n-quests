@@ -48,6 +48,12 @@ export type IdleQuestsInventory = {
     innState?: Sector
 }
 
+export const isCharacter = (obj?: any): obj is Character => 
+    obj?.ctype === "character"
+
+export const isFurniture = (obj?: any): obj is Furniture =>
+    obj?.ctype === "furniture"
+
 export type GetInventoryResult 
     = { status: "ok", inventory: IdleQuestsInventory }
     | { status: "unknown-user" }

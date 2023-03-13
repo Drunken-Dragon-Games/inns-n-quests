@@ -1,7 +1,7 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { Character, Furniture, IdleQuestsInventory, notEmpty, TakenStakingQuest } from "../../common"
+import { Character, Furniture, IdleQuestsInventory, TakenStakingQuest } from "../../common"
 import * as vm from "../../game-vm"
-import { ActivitySelection, draggingIntersects, DraggingState, DropBox, DropBoxesState, DropBoxUtility, InventoryPageName } from "./inventory-dsl"
+import { ActivitySelection, CharacterParty, InventoryPageName } from "./inventory-dsl"
 
 export interface InventoryState {
     open: boolean
@@ -14,9 +14,7 @@ export interface InventoryState {
     activeInventoryPage: InventoryPageName
     activeCharacterInfo?: Character
 
-    draggingState?: DraggingState
-    dropBoxesState?: DropBoxesState
-    selectedParty: (Character | null)[]
+    selectedParty: CharacterParty
 }
 
 export type InventoryStoreState = 
@@ -101,35 +99,6 @@ export const inventoryState = createSlice({
             state.activeCharacterInfo = action.payload
         },
 
-        /** Drag & Drop */
-        registerDropBoxes: (state, action: PayloadAction<{utility: DropBoxUtility, dropBoxes: DropBox[]}>) => {
-            const { utility, dropBoxes } = action.payload
-            if (dropBoxes.length === 0) state.dropBoxesState = undefined
-            else state.dropBoxesState = { utility, dragging: notEmpty(state.draggingState), dropBoxes, }
-        },
-
-        setDraggingState: (state, action: PayloadAction<DraggingState | undefined>) => {
-            const [ newDropBoxesState, newDraggingState ] = draggingIntersects(state.dropBoxesState, action.payload)
-            state.draggingState = newDraggingState
-            state.dropBoxesState = newDropBoxesState
-        },
-
-        dragItemEnded: (state) => {
-            if (state.dropBoxesState?.utility === "party-pick")
-                state.dropBoxesState.dropBoxes.forEach((dropBox, index) => {
-                    if (dropBox.hovering?.ctype === "character") state.selectedParty[index] = dropBox.hovering
-                    dropBox.hovering = undefined
-                })
-
-            else if (state.dropBoxesState) 
-                state.dropBoxesState.dropBoxes.forEach(dropBox => {
-                    if (dropBox.hovering) dropBox.dropped = dropBox.hovering
-                    dropBox.hovering = undefined
-                })
-
-            state.draggingState = undefined
-        },
-
         /** Party Pick */
         addCharacterToParty: (state, action: PayloadAction<{ character: Character, slot?: number }>) => {
             const character = action.payload.character
@@ -168,17 +137,6 @@ export const inventoryState = createSlice({
             action.payload.characters.forEach(character => {
                 state.characters[character.entityId].inActivity = action.payload.inActivity
             })
-            /*
-            state.characters.forEach(character => {
-                action.payload.characters.forEach((actionCharacter) => {
-                    if(actionCharacter.entityId == character.entityId){
-                        character.inActivity = action.payload.inActivity
-                        return 
-                    }
-                })
-            })
-            state.characters = sortCharacters(state.characters)
-            */
         },
 
         /** Quest State */
@@ -192,26 +150,6 @@ export const inventoryState = createSlice({
             }
             if (outcome.ctype === "success-outcome")
                 state.dragonSilver += outcome.reward.currency
-            /*
-            if (outcome.ctype === "success-outcome" && outcome.reward.apsExperience) {
-                const individualXP = individualXPReward(characters, outcome.reward.apsExperience)
-                characters.forEach(character => {
-                    const newCharacter = 
-                        setRealAPS({
-                            ...character,
-                            inActivity: false,
-                            athXP: character.athXP + individualXP[character.entityId].athleticism,
-                            intXP: character.intXP + individualXP[character.entityId].intellect,
-                            chaXP: character.chaXP + individualXP[character.entityId].charisma,
-                        })
-                    state.characters[character.entityId] = neCharacterw
-                })
-            } else if (outcome.ctype === "failure-outcome") {
-                characters.forEach(character => {
-                    state.characters[character.entityId].inActivity = false
-                })
-            }
-            */
         },
     },
 });

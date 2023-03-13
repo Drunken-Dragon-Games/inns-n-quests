@@ -1,10 +1,7 @@
-import { Response, 
-         Request,
-         NextFunction } from "express"
+import { Response, Request, NextFunction } from "express"
 import ApiError from "./api_error"
 
-
-const apiErrorHandler = (err: any, request: Request, response: Response, next: NextFunction) => {
+const apiErrorHandler = (err: Error, request: Request, response: Response, next: NextFunction) => {
     console.error(err)
     if (err instanceof ApiError) {
         return response.status(err.status).json({
@@ -14,13 +11,13 @@ const apiErrorHandler = (err: any, request: Request, response: Response, next: N
     }
     else if (err.name === "UnauthorizedError") {
         return response.status(401).send({
-          message: "The token is invalid",
-          code: "invalid_token"
+          message: "The authentication token is invalid",
+          code: "invalid-token"
         });
       }
     return response.status(500).json({
         message: "Something went wrong",
-        code: "server_error"
+        code: "server-error"
     });
 }
 

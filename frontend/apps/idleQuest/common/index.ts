@@ -4,7 +4,6 @@ export * from "./components"
 export * from "./internal-state-effects"
 export * from "./staking-quests"
 export * from "./time-effects"
-export * from "./ui-effects"
 export * from "./units"
 
 export type IdSet<T> = { [id: string] : T }

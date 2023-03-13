@@ -7,14 +7,14 @@ export default class OverworldCharacter {
     public lastClickTime: number = 0
 
     constructor(
-        public readonly adventurer: Character,
+        public readonly character: Character,
         public readonly sprite: Phaser.Physics.Arcade.Sprite,
         private readonly overworld: Overworld
     ){}
 
-    static init (adventurer: Character, overworld: Overworld, position: Phaser.Math.Vector2): OverworldCharacter {
-        const sprite = OverworldCharacter.createSprite(adventurer, overworld, position)
-        const owAdventurer = new OverworldCharacter(adventurer, sprite, overworld)
+    static init (character: Character, overworld: Overworld, position: Phaser.Math.Vector2): OverworldCharacter {
+        const sprite = OverworldCharacter.createSprite(character, overworld, position)
+        const owAdventurer = new OverworldCharacter(character, sprite, overworld)
         overworld.adventurers.push(owAdventurer)
         sprite.on("pointerup", OverworldCharacter.onPointerUp(overworld, owAdventurer))
         sprite.on("dragstart", OverworldCharacter.onDragStart(overworld, owAdventurer))
@@ -23,24 +23,33 @@ export default class OverworldCharacter {
         return owAdventurer
     }
 
-    static createSprite (adventurer: Character, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite {
-        const i = parseInt(adventurer.assetRef.match(/(\d+)/)![0])
-        // Later check adventurer collection and load from right sprite sheet
+    static createSprite (character: Character, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite {
+        const i = parseInt(character.assetRef.match(/(\d+)/)![0])
+        // Later check character collection and load from right sprite sheet
         const sheet = 
-            adventurer.collection === "grandmaster-adventurers" ? 
+            character.collection === "grandmaster-adventurers" ? 
                 "grandmaster-adventurers-front" :
-            adventurer.collection === "adventurers-of-thiolden" && (adventurer.sprite.includes("dethiol") || adventurer.sprite.includes("ilinmyr")) ?
+            character.collection === "adventurers-of-thiolden" && (character.sprite.includes("dethiol") || character.sprite.includes("ilinmyr")) ?
                 "adventurers-of-thiolden-big-front" :
-            adventurer.collection === "adventurers-of-thiolden" ?
+            character.collection === "adventurers-of-thiolden" ?
                 "adventurers-of-thiolden-front" :
             "pixel-tiles-adventurers-front"
         const index = 
-            adventurer.collection === "grandmaster-adventurers" ? i-1 :
-            adventurer.collection === "adventurers-of-thiolden" ? adventurerOfThioldenSpritesheetMap(adventurer.sprite)
+            character.collection === "grandmaster-adventurers" ? i-1 :
+            character.collection === "adventurers-of-thiolden" ? adventurerOfThioldenSpritesheetMap(character.sprite)
             : pixelTilesSpritesheetMap(i)
         const sprite = overworld.physics.add.sprite(position.x, position.y, sheet, index)
+
         sprite.setSize(32, 16) /** Collision box size */
-        sprite.setOffset(10, 59) /** Collision box offset */
+        if (character.collection === "grandmaster-adventurers")
+            sprite.setOffset(10, 59) /** Collision box offset */
+        else if (character.collection === "adventurers-of-thiolden" && (character.sprite.includes("dethiol") || character.sprite.includes("ilinmyr"))) 
+            sprite.setOffset(41, 80) /** Collision box offset */
+        else if (character.collection === "adventurers-of-thiolden")
+            sprite.setOffset(16, 64) /** Collision box offset */
+        else if (character.collection === "pixel-tiles")
+            sprite.setOffset(0, 48) /** Collision box offset */
+
         sprite.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
         overworld.input.setDraggable(sprite)
         overworld.physics.add.collider(sprite, overworld.walls)
@@ -49,37 +58,40 @@ export default class OverworldCharacter {
 
     destroy() {
         this.sprite.destroy()
-        this.overworld.adventurers = this.overworld.adventurers.filter(a => a.adventurer.entityId !== this.adventurer.entityId)
+        this.overworld.adventurers = this.overworld.adventurers.filter(a => a.character.entityId !== this.character.entityId)
+        OverworldTransitions.removeObject(this.character)
     }
 
-    static onPointerUp = (overworld: Overworld, adventurer: OverworldCharacter) => (pointer: Phaser.Input.Pointer) => {
+    static onPointerUp = (overworld: Overworld, character: OverworldCharacter) => (pointer: Phaser.Input.Pointer) => {
         const now = Date.now()
-        const isDoubleClick = now - adventurer.lastClickTime < 300
-        adventurer.lastClickTime = now
+        const isDoubleClick = now - character.lastClickTime < 300
+        character.lastClickTime = now
 
-        if (isDoubleClick) return adventurer.destroy()
-        if (pointer.getDuration() < 300) return adventurer.sprite.flipX = !adventurer.sprite.flipX
+        if (isDoubleClick) return character.destroy()
+        if (pointer.getDuration() < 300) return character.sprite.flipX = !character.sprite.flipX
     }
 
-    static onDragStart = (overworld: Overworld, adventurer: OverworldCharacter) => () => {
-        overworld.draggingItem = adventurer
+    static onDragStart = (overworld: Overworld, character: OverworldCharacter) => () => {
+        overworld.draggingItem =character 
     }
 
-    static onDrag = (overworld: Overworld, adventurer: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-        adventurer.sprite.x = dragX
-        adventurer.sprite.y = dragY
+    static onDrag = (overworld: Overworld, character: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+        character.sprite.x = dragX
+        character.sprite.y = dragY
     }
 
-    static onDragEnd = (overworld: Overworld, adventurer: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+    static onDragEnd = (overworld: Overworld, character: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
         overworld.draggingItem = undefined
-        adventurer.updateLocationState()
+        character.updateLocationState()
     }
 
-    get objectId() { return this.adventurer.entityId }
+    get objectId() { return this.character.entityId }
 
     get depth() { return this.sprite.depth }
 
-    set depth(depth: number) { this.sprite.depth = depth }
+    setDepth() { 
+        this.sprite.depth = this.sprite.y + this.sprite.height / 2
+    }
 
     get x() { return this.sprite.x }
 
@@ -89,7 +101,7 @@ export default class OverworldCharacter {
 
     set y(y: number) { this.sprite.y = y }
 
-    updateLocationState() { OverworldTransitions.setObjectLocation(this.adventurer, [this.x, this.y]) }
+    updateLocationState() { OverworldTransitions.setObjectLocation(this.character, [this.x, this.y]) }
 }
 
 const pixelTilesSpritesheetMap = (pxNum: number) => {

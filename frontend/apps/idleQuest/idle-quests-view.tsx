@@ -6,6 +6,7 @@ import { InventoryView } from "./modules/inventory"
 import { NotificationsView } from "./modules/notifications"
 import { OverworldView } from "./modules/overworld"
 import { QuestBoardView } from "./modules/quest-board"
+import { DragNDropView } from "./modules/drag-n-drop"
 
 const IdleQuestsContainer = styled.section`
     position: relative;
@@ -39,6 +40,7 @@ const IdleQuestsView = () => {
     useIdleQuestsKeyMap()
     return (
         <IdleQuestsContainer>
+            <DragNDropView />
             <OverworldModule />
             <HudModule />
             <NotificationsModule />

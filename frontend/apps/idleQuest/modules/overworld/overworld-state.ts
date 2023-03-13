@@ -39,13 +39,14 @@ export const overworldState = createSlice({
                 else innConfiguration[obj.entityId].location = location
             }
         },
+
+        removeObject: (state, action: PayloadAction<Character | Furniture>) => {
+            const innConfiguration = state.innConfiguration
+            if (innConfiguration && innConfiguration[action.payload.entityId]) 
+                    delete innConfiguration[action.payload.entityId]
+        },
     }
 })
-
-export const {
-    setInitialInnState,
-    setObjectLocation,
-} = overworldState.actions
 
 export const overworldStore = configureStore({
     reducer: overworldState.reducer,

@@ -1,9 +1,9 @@
 import { MouseEventHandler, ReactNode, TouchEventHandler, useEffect, useMemo, useState } from "react"
 import { shallowEqual, useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
-import _ from "underscore"
-import { notEmpty, PixelArtImage, px, takenQuestStatus, takenQuestTimeLeft, useDrag, useRememberLastValue } from "../../../../common"
-import { InventoryItem, InventoryPageName, isDraggableItem, mapQuestScroll, sortCharacters } from "../../inventory-dsl"
+import { Character, Furniture, isCharacter, isFurniture, notEmpty, PixelArtImage, px, takenQuestStatus, takenQuestTimeLeft, useRememberLastValue, vh } from "../../../../common"
+import { DragNDropApi } from "../../../drag-n-drop"
+import { ActivitySelection, CharacterParty, InventoryItem, InventoryPageName, mapQuestScroll } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
 import InventoryTransitions from "../../inventory-transitions"
 import { CharacterSprite, FurnitureSprite } from "../sprites"
@@ -85,6 +85,9 @@ const InventoryBoxContainer = styled.div`
     height: 100%;
 `
 
+const isDraggableItem = (item?: InventoryItem): item is (Character | Furniture) => 
+    notEmpty(item) && item.ctype !== "taken-staking-quest"
+
 type InventoryItemViewState = {
     info?: string
     selected?: boolean
@@ -99,22 +102,17 @@ type InventoryItemViewState = {
     startDragTouch: TouchEventHandler,
 }
 
-const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState => {
-    const subState = useSelector((state: InventoryState) => ({ 
-        selection: state.activitySelection,
-        selectedParty: state.selectedParty,
-        otherDraggingHappening: notEmpty(state.draggingState)
-    }), _.isEqual)
+const useInventoryItemViewState = (activity?: ActivitySelection, party: CharacterParty = [], item?: InventoryItem): InventoryItemViewState => {
     const boxState = useMemo(() => {
         if (item && item.ctype === "character") {
             return {
                 info: `${item.evAPS.athleticism}/${item.evAPS.intellect}/${item.evAPS.charisma}`,
                 selected:
-                    subState.selectedParty?.some((a) => a && a.entityId === item.entityId) ||
-                    subState.selection?.ctype === "character" &&
-                    subState.selection?.entityId === item.entityId,
+                    party.some((a) => a && a.entityId === item.entityId) ||
+                    activity?.ctype === "character" &&
+                    activity?.entityId === item.entityId,
                 disabled:
-                    subState.selection?.ctype === "available-staking-quest" && 
+                    activity?.ctype === "available-staking-quest" && 
                     item.inActivity,
                 center: false,
                 overflowHidden: false,
@@ -123,9 +121,8 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
             return {
                 info: takenQuestTimeLeft(item),
                 selected:
-                    subState.selection &&
-                    subState.selection.ctype === "taken-staking-quest" &&
-                    subState.selection.takenQuestId === item.takenQuestId,
+                    activity?.ctype === "taken-staking-quest" &&
+                    activity.takenQuestId === item.takenQuestId,
                 disabled: false,
                 center: true,
                 overflowHidden: true,
@@ -134,48 +131,32 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
             return {
                 info: "",
                 selected:
-                    subState.selection &&
-                    subState.selection.ctype === "furniture" &&
-                    subState.selection.entityId === item.entityId,
+                    activity?.ctype === "furniture" &&
+                    activity.entityId === item.entityId,
                 disabled: false,
                 center: false,
                 overflowHidden: true,
             }
         } else return {}
-    }, [item, subState.selection, subState.selectedParty])
+    }, [item, activity, party])
 
-    const { startDrag, startDragTouch } = useDrag({
-        onDrag: (position) =>
-            isDraggableItem(item) && InventoryTransitions.setDraggingState({ item: item, position }),
-        onDrop: () =>
-            isDraggableItem(item) && InventoryTransitions.onItemDragEnded(),
+    const enableDragging = !boxState.disabled && isDraggableItem(item)
+    const { dragging, startDrag, startDragTouch } = DragNDropApi.useDrag({
+        utility: !activity ? "overworld-drop" :  "party-pick",
+        payload: item,
+        enabled: enableDragging,
+        onDragStart: () => {
+            if (!activity) InventoryTransitions.openOverworldDropbox()
+        },
+        onDragStop: () => 
+            InventoryTransitions.closeOverworldDropbox(),
+        draggingView: () => 
+            isCharacter(item) ? <CharacterSprite character={item} render="hovered" units={vh(1.7)} /> :
+            isFurniture(item) ? <FurnitureSprite furniture={item} render="hovered" units={vh(1.7)} /> :
+            <></>
     })
 
-    /*
-    const draggingState = useMemo(() => ({
-        dragging:
-            !boxState.disabled &&
-            isDraggableItem(item) &&
-            notEmpty(vector) && 
-            (Math.abs(vector[0]) > 20 || Math.abs(vector[1]) > 20),
-    }), [item, boxState.disabled, vector])
-    */
-
-    const callbacks = useMemo(() => ({
-        itemClick: () => !boxState.disabled && /*!draggingState.dragging &&*/ item && InventoryTransitions.onItemClick(item),
-        hoverOn: () => {
-            const allowedHover = !boxState.disabled && !subState.otherDraggingHappening
-            setHover(allowedHover)
-            if (allowedHover && item?.ctype === "character")
-                InventoryTransitions.setCharacterInfo(item)
-        },
-        hoverOff: () => setHover(false),
-    }), [item, boxState.disabled, /*draggingState.dragging,*/ subState.otherDraggingHappening])
-
-    const [hover, setHover] = useState(false)
-
     const [ timedInfo, setTimedInfo ] = useState<{ info?: string } | undefined>(undefined)
-
     useEffect(() => {
         if (item?.ctype === "taken-staking-quest" && takenQuestStatus(item) === "in-progress") {
             setTimedInfo({ info: takenQuestTimeLeft(item) }) 
@@ -189,12 +170,24 @@ const useInventoryItemViewState = (item?: InventoryItem): InventoryItemViewState
         }
     }, [item])
 
+    const [hover, setHover] = useState(false)
+    const callbacks = useMemo(() => ({
+        itemClick: () => !boxState.disabled && !dragging && item && InventoryTransitions.onItemClick(item),
+        hoverOn: () => {
+            const allowedHover = !boxState.disabled && !DragNDropApi.dragging()
+            setHover(allowedHover)
+            if (allowedHover && item?.ctype === "character")
+                InventoryTransitions.setCharacterInfo(item)
+        },
+        hoverOff: () => setHover(false),
+    }), [item, boxState.disabled, /*draggingState.dragging,*/ DragNDropApi.dragging()])
+
     return { ...boxState, /*...draggingState,*/ ...callbacks, hover, startDrag, startDragTouch, ...timedInfo }
 
 }
 
-const InventoryItemView = ({ item }: { item?: InventoryItem }) => {
-    const state = useInventoryItemViewState(item)
+const InventoryItemView = ({ item, activity, party }: { item?: InventoryItem, activity?: ActivitySelection, party?: CharacterParty }) => {
+    const state = useInventoryItemViewState(activity, party, item)
     return (
         <InventoryBoxContainer>
             <InventoryBox
@@ -249,19 +242,23 @@ const pageEmptySlots = (pageItemsAmount: number): number[] => {
 }
 
 const InventoryPage = ({ page }: { page: InventoryPageName }) => {
-    const items = useSelector((state: InventoryState) => 
-        page === "characters" ? Object.values(state.characters) :
-        page === "furniture" ?  Object.values(state.furniture) :
-        Object.values(state.takenQuests), shallowEqual)
-    const emptySlots = useMemo(() => pageEmptySlots(items.length), [items.length])
+    const state = useSelector((state: InventoryState) => ({
+        items:
+            page === "characters" ? Object.values(state.characters) :
+            page === "furniture" ?  Object.values(state.furniture) :
+            Object.values(state.takenQuests),
+        activity: state.activitySelection,
+        party: page == "characters" ? state.selectedParty : [],
+    }), shallowEqual)
+    const emptySlots = useMemo(() => pageEmptySlots(state.items.length), [state.items.length])
     return (
         <Page>
             <DirectionFix tall={page == "characters"}>
-                {items.map((item, index) =>
-                    <InventoryItemView key={index} item={item} />
+                {state.items.map((item, index) =>
+                    <InventoryItemView key={index} item={item} activity={state.activity} party={state.party} />
                 )}
                 {emptySlots.map((key) =>
-                    <InventoryItemView key={key} />
+                    <InventoryItemView key={key} activity={state.activity} />
                 )}
             </DirectionFix>
         </Page>

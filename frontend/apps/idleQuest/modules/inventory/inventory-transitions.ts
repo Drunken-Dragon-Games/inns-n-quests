@@ -1,8 +1,7 @@
 import { Character, notEmpty, takenQuestSecondsLeft, takenQuestStatus } from "../../common"
 import { NotificationsApi } from "../notifications"
-import { OverworldApi } from "../overworld"
 import { QuestBoardApi } from "../quest-board"
-import { activityId, DraggingState, DropBox, DropBoxUtility, InventoryItem, inventoryItemId, InventoryPageName, SelectedQuest } from "./inventory-dsl"
+import { activityId, InventoryItem, inventoryItemId, InventoryPageName, SelectedQuest } from "./inventory-dsl"
 import { inventoryState, inventoryStore } from "./inventory-state"
 import InventoryThunks from "./inventory-thunks"
 
@@ -20,23 +19,6 @@ const InventoryTransitions = {
                 NotificationsApi.notify(`Quest ${quest.availableQuest.name} finished!`, "info")
             })
         }, 1000)
-
-        inventoryStore.subscribe(() => {
-            const state = inventoryStore.getState()
-            const dropBoxesState = state.dropBoxesState
-            const draggingState = state.draggingState
-            if (dropBoxesState?.utility == "overworld-drop") {
-                const hovering = dropBoxesState?.dropBoxes[0]?.hovering
-                const droped = dropBoxesState?.dropBoxes[0]?.dropped
-                if ((droped?.ctype === "character" || droped?.ctype == "furniture") && !draggingState)
-                    OverworldApi.draggingItemIntoOverworld(droped)
-                else if ((hovering?.ctype === "character" || hovering?.ctype == "furniture") && draggingState?.position)
-                    OverworldApi.draggingItemIntoOverworld(hovering, draggingState.position)
-                else if (!hovering && !droped)
-                    OverworldApi.cancelDraggingItemIntoOverworld()
-            }
-        })
-
         return interval 
     },
 
@@ -51,6 +33,20 @@ const InventoryTransitions = {
     selectInventoryPage: (page: InventoryPageName) => 
         dispatch(actions.setInventoryPage(page)),
 
+    openOverworldDropbox: () => {
+        dispatch(actions.openActivity({ ctype: "overworld-dropbox" }))
+    },
+
+    closeOverworldDropbox: () => {
+        const activity = inventoryStore.getState().activitySelection
+        if (activity?.ctype == "overworld-dropbox") 
+            dispatch(actions.closeActivity())
+    },
+
+    closeActivity: () => {
+        dispatch(actions.closeActivity())
+    },
+
     onSelectQuest: (quest: SelectedQuest) => {
         dispatch(actions.openActivity(quest))
         dispatch(actions.toggleInventory(true))
@@ -58,10 +54,6 @@ const InventoryTransitions = {
             dispatch(actions.setInventoryPage("characters"))
     },
 
-    closeActivity: () => {
-        dispatch(actions.closeActivity())
-    },
-    
     onSignQuest: () => {
         const state = inventoryStore.getState()
         const quest = state.activitySelection
@@ -102,24 +94,6 @@ const InventoryTransitions = {
 
     setCharacterInfo: (character: Character) => {
         dispatch(actions.setCharacterInfo(character))
-    },
-
-    setDraggingState: (state: DraggingState) => {
-        //if (state.item.ctype == "character")
-        //    OverworldApi.draggingItemIntoOverworld(state.item, state.position)
-        dispatch(actions.setDraggingState(state))
-    },
-
-    registerDropBoxes: (utility: DropBoxUtility, dropBoxes: DropBox[]) => {
-        dispatch(actions.registerDropBoxes({ utility, dropBoxes, }))
-    },
-
-    deregisterDropBoxes: () => {
-        dispatch(actions.registerDropBoxes({utility: "other", dropBoxes: []}))
-    },
-
-    onItemDragEnded: () => {
-        dispatch(actions.dragItemEnded())
     },
 
     onRecruitCharacter: () => {

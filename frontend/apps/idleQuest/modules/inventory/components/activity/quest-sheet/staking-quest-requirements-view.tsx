@@ -9,6 +9,7 @@ const StakingQuestViewContainer = styled.div`
 `
 
 const RequirementsTitle = styled.h2`
+    font-size: 2.5vh;
     margin-right: 7vh;
     direction: rtl;
 `

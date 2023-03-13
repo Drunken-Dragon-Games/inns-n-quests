@@ -29,15 +29,13 @@ const buildApp = async (identityService: IdentityService, assetManagementService
     const healthEndpoint = Router()
     healthEndpoint.get("/health", (req: Request, res: Response) => { res.status(200).json({ status: "ok" }) })
     
+    // MIDDLEWARE
+    //app.use("/static", express.static(__dirname + "/static"));
     app.use(helmet({crossOriginResourcePolicy: false,}))
     app.disable('x-powered-by')
-
-    // MIDDLEWARE
-    app.use("/static", express.static(__dirname + "/static"));
     app.use(express.json())
     app.use(cookieParser())
     app.use(cors(corsOptions))
-    app.use(questRootPath, healthEndpoint)
     app.use(compression())
     app.use(questRootPath, jwtMiddleware)
     app.use(questRootPath, getStakeAddressMiddleware(identityService))
@@ -52,7 +50,7 @@ const buildApp = async (identityService: IdentityService, assetManagementService
     
     // QUEST MODULE ROUTES
     app.use(questRootPath, loadPlayerRoutes(identityService, assetManagementService, wellKnownPolicies))
-    app.use(questRootPath, [limitRequestsPerSecondByUserId, idleQuestRoutes(idleQuestsService)])
+    app.use(questRootPath, idleQuestRoutes(idleQuestsService))
     
     // Error handler middleware
     app.use(apiErrorHandler)

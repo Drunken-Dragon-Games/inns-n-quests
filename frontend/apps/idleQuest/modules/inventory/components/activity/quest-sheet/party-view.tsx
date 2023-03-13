@@ -1,12 +1,10 @@
-import { MouseEventHandler, RefObject, useEffect, useMemo, useRef, useState } from "react"
-import { useSelector } from "react-redux"
+import { MouseEventHandler, RefObject, TouchEventHandler, useState } from "react"
 import styled from "styled-components"
-import _ from "underscore"
-import { Character, notEmpty, PixelArtImage, useDrag, vh, vh1 } from "../../../../../common"
-import { DraggableItem, makeDropBox, SelectedQuest } from "../../../inventory-dsl"
-import { InventoryState } from "../../../inventory-state"
+import { Character, isCharacter, notEmpty, PixelArtImage, vh, vh1 } from "../../../../../common"
+import { DragNDropApi } from "../../../../drag-n-drop"
+import { SelectedQuest } from "../../../inventory-dsl"
 import InventoryTransitions from "../../../inventory-transitions"
-import CharacterMini from "./character-mini"
+import { CharacterSprite } from "../../sprites"
 
 const PartyContainer = styled.div`
     width: 100%;
@@ -16,7 +14,7 @@ const PartyContainer = styled.div`
     justify-content: center;
 `
 
-const CharacterSlotContainer = styled.div<{ interactuable: boolean }>`
+const PartySlotContainer = styled.div<{ interactuable: boolean }>`
     position: relative;
     height: 10vh;
     width: 10vh;
@@ -48,7 +46,9 @@ type CharacterSlotState = {
     hovering: boolean
     interactuable: boolean
     displayedEmoji: string | undefined
+    renderCharacter: Character | null
     render: "normal" | "hovered"
+    dropbox: RefObject<HTMLDivElement>
 }
 
 type CharacterSlotCallbacks = {
@@ -56,135 +56,106 @@ type CharacterSlotCallbacks = {
     onMouseLeave: MouseEventHandler
     onMouseUp: MouseEventHandler
     onMouseDown: MouseEventHandler
+    onTouchStart: TouchEventHandler
+    onTouchEnd: TouchEventHandler
 }
 
-const useCharacterSlotState = (props: CharacterSlotProps): CharacterSlotState & CharacterSlotCallbacks => {
+const dragNDropUtility: string = "party-pick"
+
+const useCharacterSlotState = (quest: SelectedQuest, character: Character | null, index: number): CharacterSlotState & CharacterSlotCallbacks => {
 
     const [hovering, setHovering] = useState<boolean>(false)
+    const [draggingOver, setDraggingOver] = useState<Character | null>(null)
 
-    const renderState = useMemo<CharacterSlotState>(() => ({
-        interactuable: !props.preview && notEmpty(props.character),
-        displayedEmoji: notEmpty(props.character) && hovering && !props.preview ? "cross" : props.emoji,
-        render: props.preview || notEmpty(props.character) && hovering ? "hovered" : "normal",
-        hovering
-    }), [props.character, props.preview, hovering, props.emoji])
+    const preview = quest.ctype === "taken-staking-quest"
+    const interactuable = !preview && notEmpty(character)
+    const displayedEmoji = (
+        hovering && interactuable ? "cross" : 
+        preview && quest.outcome?.ctype === "failure-outcome" ? "bad" : 
+        preview && quest.outcome?.ctype === "success-outcome" ? "good" : 
+        undefined)
+    const renderCharacter = draggingOver || character
+    const render = interactuable && hovering || draggingOver ? "hovered" : "normal"
 
-    const { dragging, startDrag } = useDrag({
-        onDrag: (position) =>
-            renderState.interactuable && InventoryTransitions.setDraggingState({ item: props.character!, position }),
-        onDrop: () =>
-            InventoryTransitions.onItemDragEnded(),
-        effectiveDraggingVectorMagnitude: 30,
+    const { ref: dropbox, clearDropbox } = DragNDropApi.useDropbox({
+        utility: dragNDropUtility,
+        onHoveringEnter: (dropbox) =>
+            isCharacter(dropbox.hoveringPayload) && setDraggingOver(dropbox.hoveringPayload),
+        onHoveringLeave: () => 
+            setDraggingOver(null),
+        onDropped: (dropbox) => {
+            isCharacter(dropbox.droppedPayload) && setDraggingOver(null)
+            isCharacter(dropbox.droppedPayload) && InventoryTransitions.addCharacterToParty(dropbox.droppedPayload, index)
+        },
     })
 
-    const callbacks = useMemo<CharacterSlotCallbacks>(() => ({
-        onMouseOver: () => { setHovering(true) },
-        onMouseLeave: () => { setHovering(false); dragging && InventoryTransitions.removeCharacterFromParty(props.character) },
-        onMouseUp: () => renderState.interactuable && InventoryTransitions.removeCharacterFromParty(props.character),
-        onMouseDown: (event) => {
-            if (renderState.interactuable) { startDrag(event) }
+    const { startDrag, startDragTouch } = DragNDropApi.useDrag({
+        utility: dragNDropUtility,
+        payload: character,
+        effectiveDraggingVectorMagnitude: 30,
+        enabled: interactuable,
+        onDragStart: () => {
+            clearDropbox()
+            InventoryTransitions.removeCharacterFromParty(character)
         },
-    }), [props.character, renderState.interactuable, dragging])
+        draggingView: () => 
+            interactuable && <CharacterSprite character={character} render="hovered" units={vh(1.7)} />
+    })
 
-    return { ...renderState, ...callbacks }
+    return {
+        hovering,
+        interactuable,
+        displayedEmoji,
+        renderCharacter,
+        render,
+        dropbox,
+        onMouseOver: () => notEmpty(character) && setHovering(true),
+        onMouseLeave: () => notEmpty(character) && setHovering(false),
+        onMouseUp: () => interactuable && InventoryTransitions.removeCharacterFromParty(character),
+        onMouseDown: startDrag,
+        onTouchStart: startDragTouch,
+        onTouchEnd: () => interactuable && InventoryTransitions.removeCharacterFromParty(character),
+    }
 }
 
-interface CharacterSlotProps {
-    character: Character | null
-    emoji?: string
-    preview?: boolean
-}
-
-const PartySlot = ({ character, emoji, preview }: CharacterSlotProps) => {
-    const state = useCharacterSlotState({ character, emoji, preview })
+const PartySlot = ({ quest, character, index }: { quest: SelectedQuest, character: Character | null, index: number }) => {
+    const state = useCharacterSlotState(quest, character, index)
     return (
-        <CharacterSlotContainer
+        <PartySlotContainer
+            ref={state.dropbox}
             onMouseOver={state.onMouseOver}
             onMouseLeave={state.onMouseLeave}
             onMouseUp={state.onMouseUp}
             onMouseDown={state.onMouseDown}
+            onTouchStart={state.onTouchStart}
+            onTouchEnd={state.onTouchEnd}
             interactuable={state.interactuable}
         >
             <EmptySlot />
-            { notEmpty(character) ? 
+            { notEmpty(state.renderCharacter) && 
                 <CharacterMiniWrapper>
-                    <CharacterMini
-                        character={character}
-                        emoji={state.displayedEmoji}
+                    <CharacterSprite
+                        character={state.renderCharacter}
                         render={state.render}
-                        displayAPS={false}
+                        emoji={state.displayedEmoji}
                         units={vh(1.7)}
                     />
                 </CharacterMiniWrapper>
-            : <></> }
-        </CharacterSlotContainer>
-    )
-}
-
-type PartyViewState = {
-    dropBoxRef: RefObject<HTMLDivElement>
-    hovering?:Character 
-    picked: Character | null
-}[]
-
-const usePartyViewState = (quest: SelectedQuest, adventurerSlots: (Character | null)[]): PartyViewState => {
-    const boxRef1 = useRef<HTMLDivElement>(null)
-    const boxRef2 = useRef<HTMLDivElement>(null)
-    const boxRef3 = useRef<HTMLDivElement>(null)
-    const boxRef4 = useRef<HTMLDivElement>(null)
-    const boxRef5 = useRef<HTMLDivElement>(null)
-    const dropBoxesRefs = [boxRef1, boxRef2, boxRef3, boxRef4, boxRef5]
-    const box1Bound = boxRef1.current?.getBoundingClientRect()
-
-    useEffect(() => {
-        if (quest.ctype === "taken-staking-quest" || dropBoxesRefs.every(ref => ref.current == null)) return
-        InventoryTransitions.registerDropBoxes("party-pick", dropBoxesRefs.map(makeDropBox))
-        return InventoryTransitions.deregisterDropBoxes
-    }, [boxRef1.current, boxRef2.current, boxRef3.current, boxRef4.current, boxRef5.current, quest,
-        box1Bound?.left, box1Bound?.top, box1Bound?.bottom, box1Bound?.right, 
-    ])
-
-    const dropBoxesState = useSelector((state: InventoryState) => state.dropBoxesState, _.isEqual)
-
-    const slotsState = useMemo<PartyViewState>(() => 
-        dropBoxesRefs.map((dropBoxRef, index) => {
-            const hovering: DraggableItem | undefined = dropBoxesState?.dropBoxes[index]?.hovering
-            return {
-                dropBoxRef,
-                hovering: hovering?.ctype == "character" ? hovering : undefined,
-                picked: adventurerSlots[index]
             }
-        })
-    , [dropBoxesState, adventurerSlots, quest])
-
-    return slotsState
-    /*
-    return dropBoxesRefs.map((dropBoxRef, index) => {
-        return {
-            dropBoxRef,
-            picked: adventurerSlots[index]
-        }
-    })
-    */
-}
-
-const PartyView = ({ quest, adventurerSlots }: { quest: SelectedQuest, adventurerSlots: (Character | null)[] }) => {
-    const state = usePartyViewState(quest, adventurerSlots)
-    return (
-        <PartyContainer>
-            {state.map(({ dropBoxRef, picked, hovering }, index) =>
-                <div key={"character-slot-" + index} ref={dropBoxRef}>
-                    <PartySlot
-                        character={hovering ? hovering : picked}
-                        preview={notEmpty(hovering) || quest.ctype === "taken-staking-quest"}
-                        emoji={
-                            quest.ctype === "taken-staking-quest" && quest.outcome ? 
-                            quest.outcome.ctype == "failure-outcome" ? "bad" : "good" : undefined}
-                    />
-                </div>
-            )}
-        </PartyContainer>
+        </PartySlotContainer>
     )
 }
+
+const PartyView = ({ quest, adventurerSlots }: { quest: SelectedQuest, adventurerSlots: (Character | null)[] }) => 
+    <PartyContainer>
+        {adventurerSlots.map((adventurerSlot, index) =>
+            <PartySlot
+                character={adventurerSlot}
+                quest={quest}
+                index={index}
+                key={index}
+            />
+        )}
+    </PartyContainer>
 
 export default PartyView

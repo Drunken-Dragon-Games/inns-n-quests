@@ -1,5 +1,4 @@
-import { useMemo } from "react"
-import { shallowEqual, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import styled from "styled-components"
 import _ from "underscore"
 import { AnimatedText, Character, notEmpty, PixelArtCss, PixelArtImage, PixelFontFamily, Push, rules, takenQuestSecondsLeft, vh1 } from "../../../../../common"
@@ -93,7 +92,6 @@ const printOutcome = (outcome: vm.StakingQuestOutcome) => {
 }
 
 type QuestSheetState = {
-    quest: SelectedQuest
     title: string
     party: (Character | null)[]
     signatureType: "in-progress" | "finished" | "claimed" | "available-no-adventurers" | "available"
@@ -103,15 +101,10 @@ type QuestSheetState = {
     sealImage: { src: string, width: number, height: number, offset: number }
 }
 
-const useQuestCardState = (): QuestSheetState | undefined => {
-    const { quest, party } = useSelector((state: InventoryState) => ({
-        quest: state.activitySelection,
-        party: state.selectedParty
-    }), _.isEqual)
-    if (!quest || (quest.ctype !== "available-staking-quest" && quest.ctype !== "taken-staking-quest")) return undefined
+const useQuestCardState = (quest: SelectedQuest): QuestSheetState => {
+    const party = useSelector((state: InventoryState) => state.selectedParty, _.isEqual)
     return {
-        quest: quest,
-        party: party,
+        party,
         title: quest.ctype == "taken-staking-quest" && quest.outcome ? printOutcome(quest.outcome) : questName(quest),
         signatureType: 
             quest.ctype == "available-staking-quest" && party.filter(notEmpty).length > 0 ? "available" : 
@@ -130,15 +123,14 @@ const useQuestCardState = (): QuestSheetState | undefined => {
     }
 }
 
-const QuestSheet = () => {
-    const state = useQuestCardState()
-    if (!state) return <></>
+const QuestSheet = ({ quest }: { quest: SelectedQuest }) => {
+    const state = useQuestCardState(quest)
     return (
-        <QuestSheetContainer>
+        <QuestSheetContainer onClick={(e) => e.stopPropagation()}>
             <QuestInfo>
                 <QuestInfoLeft>
                     <Title><AnimatedText text={state.title} duration={1000} animate={state.title == "Success" || state.title == "Failed"} /></Title>
-                    <Details dangerouslySetInnerHTML={{ __html: questDescription(state.quest) }} />
+                    <Details dangerouslySetInnerHTML={{ __html: questDescription(quest) }} />
                     <RewardView configuration={state.configuration.configurations[state.configuration.bestIndex]} claimed={state.claimed} />
                 </QuestInfoLeft>
 
@@ -155,7 +147,7 @@ const QuestSheet = () => {
 
             <StakingQuestRequirementsView configuration={state.configuration} accumulatedAPS={state.accumulatedAPS} claimed={state.claimed} />
             <Push />
-            <PartyView quest={state.quest} adventurerSlots={state.party} />
+            <PartyView quest={quest} adventurerSlots={state.party} />
 
             <Footer>
                 <Signature

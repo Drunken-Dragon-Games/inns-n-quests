@@ -48,7 +48,7 @@ export class Overworld extends Phaser.Scene {
             else {
                 if (item.ctype === "character")
                     this.draggingItem = 
-                        this.adventurers.filter(adventurer => adventurer.adventurer.entityId === item.entityId)[0] ||
+                        this.adventurers.filter(adventurer => adventurer.character.entityId === item.entityId)[0] ||
                         OverworldCharacter.init(item, this, overworldPosition)
                 else if (item.ctype === "furniture")
                     this.draggingItem = 
@@ -125,9 +125,9 @@ export class Overworld extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        this.adventurers.forEach(adventurer => adventurer.depth = adventurer.y + 10)
-        this.furniture.forEach(furniture => furniture.depth = furniture.y + 10)
-        this.walls.forEach(wall => wall.depth = wall.y + 10)
+        this.adventurers.forEach(adventurer => adventurer.setDepth())
+        this.furniture.forEach(furniture => furniture.setDepth())
+        //this.walls.forEach(wall => wall.depth = wall.y + 10)
         this.cameraControls.update(delta)
 
         if (this.game.input.activePointer.isDown && !this.draggingItem) {

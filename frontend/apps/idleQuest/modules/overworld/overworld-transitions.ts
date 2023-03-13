@@ -2,7 +2,11 @@ import _ from "underscore"
 import { Character, Furniture } from "../../common"
 import IdleQuestsApi from "../../idle-quests-api"
 import { SectorConfiguration } from "./overworld-dsl"
-import { overworldStore, setInitialInnState, setObjectLocation } from "./overworld-state"
+import { overworldState, overworldStore } from "./overworld-state"
+
+const actions = overworldState.actions
+
+const dispatch = overworldStore.dispatch
 
 let lastInnState: { name?: string, innConfiguration?: SectorConfiguration } = {}
 
@@ -29,10 +33,13 @@ const OverworldTransitions = {
     },
 
     setObjectLocation: (obj: Character | Furniture, location: [number, number]) => 
-        overworldStore.dispatch(setObjectLocation({ obj, location })),
+        dispatch(actions.setObjectLocation({ obj, location })),
+
+    removeObject: (obj: Character | Furniture) =>
+        dispatch(actions.removeObject(obj)),
     
     setInitialInnState: (name:string, innConfiguration: SectorConfiguration) => {
-        overworldStore.dispatch(setInitialInnState({ name, innConfiguration }))
+        dispatch(actions.setInitialInnState({ name, innConfiguration }))
         lastInnState = { name, innConfiguration }
     },
 }

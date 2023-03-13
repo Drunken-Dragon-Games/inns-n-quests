@@ -2,7 +2,9 @@ import { NextFunction, Response } from "express"
 import { Request } from "express-jwt"
 import NodeCache from "node-cache"
 
-const Cache = new NodeCache({deleteOnExpire: true});
+const Cache = new NodeCache({
+    deleteOnExpire: true
+})
 
 export const limitRequestsPerSecondByUserId = (request: Request, response: Response, next: NextFunction) => {
     const userId: string = request.auth!.userId
@@ -14,7 +16,7 @@ export const limitRequestsPerSecondByUserId = (request: Request, response: Respo
             "code": "too-many-requests"
         })
     }
-    let cacheStatus = Cache.set(`key`, null, 2)
+    let cacheStatus = Cache.set(`key`, null, 1)
     if (!cacheStatus) {
         throw new Error("Transaction could not be stored in memory")
     }
