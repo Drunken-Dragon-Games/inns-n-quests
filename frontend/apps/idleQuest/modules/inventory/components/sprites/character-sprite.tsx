@@ -311,7 +311,8 @@ const CharacterSprite = ({className, character, render = "normal", emoji, units 
         <CharacterSpriteContainer 
             className={className} 
             dimensions={dimensions}
-            render={render} >
+            render={render} 
+        >
             <EmojiImage emoji={emoji} dimensions={dimensions} />
             <CharacterImageContainer dimensions={dimensions}>
                 <PixelArtImage

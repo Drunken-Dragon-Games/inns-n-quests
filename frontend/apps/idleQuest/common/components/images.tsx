@@ -3,6 +3,8 @@ import { MouseEventHandler, useEffect, useState } from "react"
 import styled, { css } from "styled-components"
 import { Units, vmax1 } from "../units"
 
+const imageSizesCache: Record<string, number> = {}
+
 /**
  * Computes the height of an image based on its width and the original image's width and height
  * 
@@ -11,15 +13,21 @@ import { Units, vmax1 } from "../units"
  */
 export const useComputeHeightFromOriginalImage = (src: string, desiredWidth: number): number => {
     const [desiredHeight, setHeight] = useState<number>(0)
+    const cacheValue = imageSizesCache[`${src}-${desiredWidth}`]
     useEffect(() => {
+        if (cacheValue) return
         const img = new Image()
         img.src = src
-        img.onload = () => {
+        const onLoad = () => {
             const height = (desiredWidth * img.height) / img.width
-            setHeight(Math.round(height * 10) / 10)
+            const roundedHeight = Math.round(height * 10) / 10
+            setHeight(roundedHeight)
+            imageSizesCache[`${src}-${desiredWidth}`] = roundedHeight
         }
-    }, [src])
-    return desiredHeight
+        img.addEventListener("load", onLoad)
+        return () => img.removeEventListener("load", onLoad)
+    }, [src, desiredWidth])
+    return cacheValue ?? desiredHeight
 }
 
 /**
@@ -50,12 +58,15 @@ const NoDragWrapper = styled.div<{
     height?: number,
     width?: number,
     zIndex?: number,
-    units: Units 
+    units: Units,
+    max?: Units
 }>`
     position: ${props => props.position};
     ${props => props.$fill ? "width: 100%; height: 100%;" : ""}
     ${props => props.height ? `height: ${props.units.u(props.height)}};` : ""}
     ${props => props.width ? `width: ${props.units.u(props.width)};` : ""}
+    ${props => props.max ? `max-width: ${props.max.u(props.width)};` : ""}
+    ${props => props.max ? `max-height: ${props.max.u(props.height)};` : ""}
     ${props => props.zIndex ? `z-index: ${props.zIndex};` : ""}
 `
 
@@ -72,21 +83,22 @@ export const NoDragImage = (props: {
     height?: number,
     width?: number,
     units?: Units,
+    max?: Units,
     zIndex?: number,
     onClick?: MouseEventHandler<HTMLDivElement>
 }) => {
     const units = props.units ?? vmax1
     if (props.absolute) {
         return (
-            <NoDragWrapper position="absolute" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} onClick={props.onClick}>
-                <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units}>
+            <NoDragWrapper position="absolute" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} max={props.max} onClick={props.onClick}>
+                <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} max={props.max}>
                     <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
                 </NoDragWrapper>
             </NoDragWrapper>
         )
     } else {
         return (
-            <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} onClick={props.onClick}>
+            <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} max={props.max} onClick={props.onClick}>
                 <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
             </NoDragWrapper>
         )

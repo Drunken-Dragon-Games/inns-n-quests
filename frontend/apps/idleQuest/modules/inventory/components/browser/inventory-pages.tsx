@@ -1,7 +1,8 @@
 import { MouseEventHandler, ReactNode, TouchEventHandler, useEffect, useMemo, useState } from "react"
 import { shallowEqual, useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
-import { Character, Furniture, isCharacter, isFurniture, notEmpty, PixelArtImage, px, takenQuestStatus, takenQuestTimeLeft, useRememberLastValue, vh } from "../../../../common"
+import _ from "underscore"
+import { Character, Furniture, isCharacter, isFurniture, notEmpty, PixelArtImage, px, takenQuestStatus, takenQuestTimeLeft, useRememberLastValue, vh, vw } from "../../../../common"
 import { DragNDropApi } from "../../../drag-n-drop"
 import { ActivitySelection, CharacterParty, InventoryItem, InventoryPageName, mapQuestScroll } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
@@ -16,24 +17,29 @@ const InventoryPagesContainer = styled.div`
 `
 
 const SwipePageAnimation = (from: number, to: number) => keyframes`
-    0% { transform: translateX(${from}px); }
-    100% { transform: translateX(${to}px); }
+    0% { transform: translateX(${from}%); }
+    100% { transform: translateX(${to}%); }
 `
 
 const PagesManagerContainer = styled.div<{ scrollFrom: number, scrollTo: number }>`
     height: 100%;
-    padding: 10px;
+    width: 300%;
+    padding: 2%;
     position: absolute;
     display: flex;
-    gap: 10px;
-    transform: translateX(${props => props.scrollTo}px);
+    gap: 1.5%;
+
+    #background-color: red;
+
+    transform: translateX(${props => props.scrollTo}%);
     animation: ${props => SwipePageAnimation(props.scrollFrom, props.scrollTo)} 0.5s ease-in-out;
 `
 
 const Page = styled.div`
     box-sizing: border-box;
-    padding: 0 10px;
-    width: 490px;
+    padding-left: 0.66%;
+    width: 33%;
+    
     
     #background-color: blue;
 
@@ -42,24 +48,24 @@ const Page = styled.div`
     overflow-y: scroll;
 
     ::-webkit-scrollbar {
-        width: 0.4vw; 
+        width: 5px; 
       }
       
     /* Track */
     ::-webkit-scrollbar-track {
         background: #495362;
         background-clip: padding-box;
-        border-left: 0.1vw solid transparent;
-        border-right: 0.1vw solid transparent;
+        border-left: 1px solid transparent;
+        border-right: 1px solid transparent;
     }
        
     /* Handle */
     ::-webkit-scrollbar-thumb {
         background: rgba(0, 0, 0, 0);
-        border-top: 0.3vw solid rgba(0, 0, 0, 0);
-        border-right: 0.5vw  solid #8A8780;
-        border-bottom: 0.3vw  solid rgba(0, 0, 0, 0);;
-        border-left: 0.5vw  solid #8A8780;
+        border-top: 2px solid rgba(0, 0, 0, 0);
+        border-right: 3px  solid #8A8780;
+        border-bottom: 2px  solid rgba(0, 0, 0, 0);;
+        border-left: 3px  solid #8A8780;
     }
       
     /* Handle on hover */
@@ -74,15 +80,15 @@ const DirectionFix = styled.div<{ tall?: boolean }>`
 
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: minmax(${props => props.tall ? "180px" : "108.5px"}, 1fr);
     grid-gap: 10px;
+    & > * { aspect-ratio: ${props => props.tall ? "1/1.75" : "1/1"}; }
 
     width: 100%;
 `
 
-const InventoryBoxContainer = styled.div`
-    display: inline-block;
-    height: 100%;
+const InventoryItemViewContainer = styled.div`
+    #display: inline-block;
+    #height: 100%;
 `
 
 const isDraggableItem = (item?: InventoryItem): item is (Character | Furniture) => 
@@ -189,45 +195,45 @@ const useInventoryItemViewState = (activity?: ActivitySelection, party: Characte
 const InventoryItemView = ({ item, activity, party }: { item?: InventoryItem, activity?: ActivitySelection, party?: CharacterParty }) => {
     const state = useInventoryItemViewState(activity, party, item)
     return (
-        <InventoryBoxContainer>
-            <InventoryBox
-                //onClick={() => !state.disabled && props.onItemClick && item && props.onItemClick(item)}
-                onMouseUp={state.itemClick}
-                onMouseDown={state.startDrag}
-                onMouseEnter={state.hoverOn}
-                onMouseLeave={state.hoverOff}
-                onTouchStart={state.startDragTouch}
-                selected={state.selected}
-                disabled={state.disabled}
-                center={state.center}
-                hover={state.hover}
-                empty={!item}
-                info={state.info}
-                overflowHidden={state.overflowHidden}
-            >
-            { item?.ctype === "character" ?
-                <CharacterSprite
-                    character={item}
-                    emoji={state.hover ? item.entityId : undefined}
-                    units={px(17)}
-                    render={state.hover ? "hovered" : "normal"}
-                />
-            : item?.ctype === "taken-staking-quest" ?
-                <PixelArtImage
-                    src={mapQuestScroll(item)}
-                    alt="quest scroll"
-                    width={7.3} height={6}
-                    units={px(13)}
-                />
-            : item?.ctype === "furniture" ?
-                <FurnitureSprite
-                    furniture={item}
-                    units={px(12)}
-                    render={state.hover ? "hovered" : "normal"}
-                /> :
-            <></> }
-            </InventoryBox>
-        </InventoryBoxContainer>
+        <InventoryBox
+            //onClick={() => !state.disabled && props.onItemClick && item && props.onItemClick(item)}
+            onMouseUp={state.itemClick}
+            onMouseDown={state.startDrag}
+            onMouseEnter={state.hoverOn}
+            onMouseLeave={state.hoverOff}
+            onTouchStart={state.startDragTouch}
+            selected={state.selected}
+            disabled={state.disabled}
+            center={state.center}
+            hover={state.hover}
+            empty={!item}
+            info={state.info}
+            overflowHidden={state.overflowHidden}
+        >
+        { item?.ctype === "character" ?
+            <CharacterSprite
+                character={item}
+                emoji={state.hover ? item.entityId : undefined}
+                //units={px(17)}
+                units={vh(1.5)}
+                //max={px(17)}
+                render={state.hover ? "hovered" : "normal"}
+            />
+        : item?.ctype === "taken-staking-quest" ?
+            <PixelArtImage
+                src={mapQuestScroll(item)}
+                alt="quest scroll"
+                width={7.3} height={6}
+                units={vh(1.5)}
+            />
+        : item?.ctype === "furniture" ?
+            <FurnitureSprite
+                furniture={item}
+                units={vh(0.9)}
+                render={state.hover ? "hovered" : "normal"}
+            /> :
+        <></> }
+        </InventoryBox>
     )
 }
 
@@ -249,7 +255,7 @@ const InventoryPage = ({ page }: { page: InventoryPageName }) => {
             Object.values(state.takenQuests),
         activity: state.activitySelection,
         party: page == "characters" ? state.selectedParty : [],
-    }), shallowEqual)
+    }), _.isEqual)
     const emptySlots = useMemo(() => pageEmptySlots(state.items.length), [state.items.length])
     return (
         <Page>
@@ -267,8 +273,8 @@ const InventoryPage = ({ page }: { page: InventoryPageName }) => {
 
 const pagePosition = (page: InventoryPageName): number => 
     page == "characters" ? 0 :
-    page == "furniture" ? -500 :
-    -1000
+    page == "furniture" ? -33.3333 :
+    -66.6666
 
 const PagesManager = ({ children }: { children?: ReactNode }) => {
     const page = useSelector((state: InventoryState) => state.activeInventoryPage, shallowEqual)

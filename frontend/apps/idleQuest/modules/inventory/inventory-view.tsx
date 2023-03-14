@@ -28,11 +28,13 @@ const InventoryContainer = styled.div<{ open: boolean, activityOpen: boolean }>`
     animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
 
     display: flex;
-    width: ${props => props.activityOpen ? "100%" : "500px"};
+    width: ${props => props.activityOpen ? "100%" : "40vh"};
+    #max-width: ${props => props.activityOpen ? "100%" : "500px"};
 `
 
 const BrowserContainer = styled.div<{ open: boolean }>`
-    width: 500px;
+    width: 40vh;
+    #max-width: 500px;
     backdrop-filter: blur(5px);
     background-color: rgba(20,20,20,0.5);
 `

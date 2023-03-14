@@ -1,9 +1,8 @@
 import { ReactNode, useState } from "react"
 import { shallowEqual, useSelector } from "react-redux"
 import styled from "styled-components"
-import { Character, OswaldFontFamily, px } from "../../../../common"
+import { OswaldFontFamily, px } from "../../../../common"
 import * as vm from "../../../../game-vm"
-import { InventoryPageName } from "../../inventory-dsl"
 import { InventoryState } from "../../inventory-state"
 import InventoryBox from "../browser/inventory-box"
 import { CharacterSprite } from "../sprites"
@@ -13,19 +12,18 @@ const CharacterInfoCardContainer = styled.div`
     display: flex;
     flex-direction: column;
     background-color: rgba(30,30,30,0.5);
-    #box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    border-radius: 2px;
 
     color: white;
     ${OswaldFontFamily}
 `
 
 const CharacterName = styled.h2`
-
+    font-size: 2vh;
 `
 
 const CharacterClass = styled.h3`
-    color: rgb(200,200,200)
+    color: rgb(200,200,200);
+    font-size: 1.5vh;
 `
 
 const InfoWrapper = styled.div`
@@ -33,39 +31,39 @@ const InfoWrapper = styled.div`
 `
 
 const Header = styled.div`
-    padding: 10px;
+    padding: 1.5vh;
     display: flex;
     flex-align: center;
     flex-justify: center;
 `
 
 const MiniatureBox = styled(InventoryBox)`
-    width: 120px;
-    height: 180px;
+    width: 9vh;
+    height: 15vh;
 `
 
 const HeaderInfo = styled.div`
-    padding: 10px;
+    padding: 0.5vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 10px;
+    gap: 0.5vh;
 `
 
 const Skills = styled.div`
     width: 100%;
-    padding: 10px;
+    padding: 0.5vh;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-gap: 5px;
+    grid-gap: 0.3vh;
 `
     
 const APSWrapper = styled.div`
     display: flex;
-    gap: 5px;
+    gap: 0.3vh;
     & > * {
-        width: 70px;
-        font-size: 14px !important;
+        width: 5vh;
+        font-size: 1.2vh !important;
     }
 `
 
@@ -80,7 +78,7 @@ const StatContainer = styled.div<{ hovering: boolean }>`
     ${props => props.hovering && "filter: drop-shadow(0 0px 3px rgba(0, 0, 0, 0.5));"}
     
     background-color: ${ props => props.hovering ? "rgba(40,40,40,1)" : "rgba(20,20,20,1)"};
-    font-size: 12px;
+    font-size: 1vh;
     ${props => props.hovering && "z-index: 10;"}
 `
 
@@ -141,7 +139,7 @@ const Stat = ({ children, name, value }: { children?: ReactNode, name: string, v
 
 const SkillInfoContainer = styled.div`
     width: 100%;
-    padding: 10px;
+    padding: 0.5vh;
     padding-top: 0px;
 `
 
@@ -154,7 +152,7 @@ const SkillInfoBox = styled.div`
 const SkillBenefits = styled.div`
     color: rgb(200,200,200);
     padding-right: 5px;
-    font-size: 10px;
+    font-size: 0.5vh;
 `
 
 const SkillInfoName = styled.div`

@@ -1,7 +1,6 @@
 import { Game } from "phaser"
 import { useEffect } from "react"
 import OverworldApi from "./overworld-api"
-import OverworldTransitions from "./overworld-transitions"
 
 async function loadPhaser(containerId: string, onReady: () => void): Promise<Game> {
     const Phaser = await import("phaser")
@@ -11,8 +10,6 @@ async function loadPhaser(containerId: string, onReady: () => void): Promise<Gam
     const game = new Phaser.Game({
         type: Phaser.AUTO,
         title: "Inns & Quests Overworld",
-        //width: window.innerWidth * window.devicePixelRatio / zoom,
-        //height: window.innerHeight * window.devicePixelRatio / zoom,
         pixelArt: true,
         scale: { 
             mode: Phaser.Scale.ENVELOP,

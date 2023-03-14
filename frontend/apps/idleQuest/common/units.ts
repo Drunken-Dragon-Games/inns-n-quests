@@ -24,6 +24,8 @@ export const vmax = (scale: number) => new Units("vmax", scale)
 
 export const vmax1 = new Units("vmax", 1)
 
+export const pct = (scale: number) => new Units("%", scale)
+
 export const px = (scale: number) => new Units("px", scale)
 
 export const px1 = new Units("px", 1)
