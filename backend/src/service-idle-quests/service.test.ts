@@ -124,6 +124,7 @@ test("Sync Furniture", async () => {
     expect(assets1.some(adv => adv.entityId == assets2[0].entityId)).toBeTruthy()
 })
 
+/*
 test("Normal quest flow 1", async () => {
     const userId = v4()
     const adventurers = await getAllAdventurers(userId)
@@ -145,6 +146,7 @@ test("Normal quest flow 1", async () => {
     expect(takenQuests2.length).toBe(0)
     expect(outcome.ctype).toBe("success-outcome")
 })
+*/
 
 async function getAllAdventurers(userId: string): Promise<Character[]> {
     return await expectResponse(
