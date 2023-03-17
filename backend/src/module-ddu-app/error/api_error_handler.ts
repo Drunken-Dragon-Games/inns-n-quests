@@ -11,13 +11,13 @@ const apiErrorHandler = (err: Error, request: Request, response: Response, next:
     }
     else if (err.name === "UnauthorizedError") {
         return response.status(401).send({
-          message: "The authentication token is invalid",
-          code: "invalid-token"
+          message: "The token is invalid",
+          code: "invalid_token"
         });
       }
     return response.status(500).json({
         message: "Something went wrong",
-        code: "server-error"
+        code: "server_error"
     });
 }
 

@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import { useIsMobile } from "../is-mobile"
 import AlphaNotes from "./alpha-notes"
 import { useIdleQuestsKeyMap } from "./idle-quests-key-map"
 import { DragNDropView } from "./modules/drag-n-drop"
@@ -37,6 +38,9 @@ const OverworldModule = styled(OverworldView)`
 `
 
 const IdleQuestsView = () => {
+    const isMobile = useIsMobile()
+    if (isMobile && typeof window !== "undefined") window.screen.orientation.lock('landscape')
+
     useIdleQuestsKeyMap()
     return (
         <IdleQuestsContainer>
