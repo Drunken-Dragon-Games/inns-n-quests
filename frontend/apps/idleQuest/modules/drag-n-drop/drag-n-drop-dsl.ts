@@ -5,6 +5,8 @@ export type UseDragParams = {
     payload: any, 
     enabled?: boolean, 
     effectiveDraggingVectorMagnitude?: number, 
+    effectiveDraggingVectorMin?: [number, number],
+    effectiveDraggingVectorMax?: [number, number],
     draggingView: () => ReactNode, 
     onDragStart?: () => void 
     onDragStop?: () => void

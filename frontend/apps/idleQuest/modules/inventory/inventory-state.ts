@@ -104,6 +104,10 @@ export const inventoryState = createSlice({
             const character = action.payload.character
             const slotNumber = action.payload.slot
 
+            // Remove character from party if already selected
+            state.selectedParty = state.selectedParty.map(character => 
+                character?.entityId === action.payload.character.entityId ? null : character)
+
             if (slotNumber) {
                 state.selectedParty[slotNumber] =character 
             } else {
@@ -156,4 +160,5 @@ export const inventoryState = createSlice({
 
 export const inventoryStore = configureStore({
     reducer: inventoryState.reducer,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
 })

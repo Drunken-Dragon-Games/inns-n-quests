@@ -1,12 +1,12 @@
 import styled from "styled-components"
 import AlphaNotes from "./alpha-notes"
 import { useIdleQuestsKeyMap } from "./idle-quests-key-map"
+import { DragNDropView } from "./modules/drag-n-drop"
 import { HudView } from "./modules/hud"
 import { InventoryView } from "./modules/inventory"
 import { NotificationsView } from "./modules/notifications"
 import { OverworldView } from "./modules/overworld"
 import { QuestBoardView } from "./modules/quest-board"
-import { DragNDropView } from "./modules/drag-n-drop"
 
 const IdleQuestsContainer = styled.section`
     position: relative;

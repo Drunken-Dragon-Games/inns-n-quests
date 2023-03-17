@@ -1,5 +1,5 @@
 import { default as NImage } from "next/image"
-import { MouseEventHandler, useEffect, useState } from "react"
+import { HTMLAttributes, MouseEventHandler, useEffect, useState } from "react"
 import styled, { css } from "styled-components"
 import { Units, vmax1 } from "../units"
 
@@ -70,12 +70,7 @@ const NoDragWrapper = styled.div<{
     ${props => props.zIndex ? `z-index: ${props.zIndex};` : ""}
 `
 
-/**
- * Unselectable and undraggable Next Image.
- * Has better control over sizes than the standard Next Image.
- */
-export const NoDragImage = (props: {
-    className?: string,
+export interface NoDragImageProps extends HTMLAttributes<HTMLDivElement> {
     src: string,
     alt?: string,
     absolute?: boolean,
@@ -85,21 +80,36 @@ export const NoDragImage = (props: {
     units?: Units,
     max?: Units,
     zIndex?: number,
-    onClick?: MouseEventHandler<HTMLDivElement>
-}) => {
-    const units = props.units ?? vmax1
-    if (props.absolute) {
+}
+
+/**
+ * Unselectable and undraggable Next Image.
+ * Has better control over sizes than the standard Next Image.
+ */
+export const NoDragImage = ({ 
+    src,
+    alt,
+    absolute,
+    fill,
+    height,
+    width,
+    units = vmax1,
+    max,
+    zIndex,
+    ...rest
+ }: NoDragImageProps) => {
+    if (absolute) {
         return (
-            <NoDragWrapper position="absolute" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} max={props.max} onClick={props.onClick}>
-                <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} max={props.max}>
-                    <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
+            <NoDragWrapper position="absolute" {...rest} $fill={fill} height={height} width={width} zIndex={zIndex} units={units} max={max}>
+                <NoDragWrapper position="relative" className={rest.className} $fill={fill} height={height} width={width} zIndex={zIndex} units={units} max={max}>
+                    <NoDragImageExt src={src} alt={src} layout="fill" />
                 </NoDragWrapper>
             </NoDragWrapper>
         )
     } else {
         return (
-            <NoDragWrapper position="relative" className={props.className} $fill={props.fill} height={props.height} width={props.width} zIndex={props.zIndex} units={units} max={props.max} onClick={props.onClick}>
-                <NoDragImageExt src={props.src} alt={props.src} layout="fill" />
+            <NoDragWrapper position="relative" {...rest} $fill={fill} height={height} width={width} zIndex={zIndex} units={units} max={max}>
+                <NoDragImageExt src={src} alt={src} layout="fill" />
             </NoDragWrapper>
         )
     }

@@ -18,20 +18,24 @@ const leaveAnimation = keyframes`
 const SnackBar = styled.div`
     position: absolute;
     top: 0;
-    left: 45vw;
-    width: 20vw;
     display: flex;
     align-items: flex-start;
     flex-direction: column;
     gap: 0.2vw;
-    padding-top: 0.2vw;
     z-index: 100;
+
+    @media (min-width: 1025px) {
+        left: 45vw;
+        width: 20vw;
+        padding-top: 0.2vw;
+    }
+
+    @media (max-width: 1024px) {
+        right: 0;
+    }
 `
 
 const Snack = styled.div<{ ctype: AppNotification["ctype"], $display: boolean }>`
-    padding: 0.5vw 1vw;
-    border-radius: 0.2vw;
-    min-width: 10vw;
     ${SansSerifFontFamily}
     ${props => 
         props.ctype === "info" ? InfoScheme :  
@@ -41,6 +45,20 @@ const Snack = styled.div<{ ctype: AppNotification["ctype"], $display: boolean }>
     opacity: ${props => props.$display ? 1 : 0};
     animation: ${props => props.$display ? enterAnimation : leaveAnimation} 1s ease-in-out;
     position: ${props => props.$display ? "relative" : "absolute"};
+
+    @media (min-width: 1025px) {
+        padding: 0.5vw 1vw;
+        border-radius: 0.2vw;
+        min-width: 10vw;
+    }
+
+    @media (max-width: 1024px) {
+        background-color: rgba(0,0,0,0.5);
+        padding: 1vw 2vw;
+        border-radius: 0.5vw;
+        min-width: 20vw;
+        font-size: 14px;
+    }
 `
 
 const SnackList = () => {

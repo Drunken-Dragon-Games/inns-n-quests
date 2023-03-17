@@ -1,6 +1,6 @@
 import { MouseEventHandler, RefObject, TouchEventHandler, useState } from "react"
 import styled from "styled-components"
-import { Character, isCharacter, notEmpty, PixelArtImage, vh, vh1 } from "../../../../../common"
+import { Character, isCharacter, notEmpty, PixelArtImage, vh, vh1, vw } from "../../../../../common"
 import { DragNDropApi } from "../../../../drag-n-drop"
 import { SelectedQuest } from "../../../inventory-dsl"
 import InventoryTransitions from "../../../inventory-transitions"
@@ -16,15 +16,23 @@ const PartyContainer = styled.div`
 
 const PartySlotContainer = styled.div<{ interactuable: boolean }>`
     position: relative;
-    height: 10vh;
-    width: 10vh;
     display: flex;
     flex-direction: column-reverse;
     justify-content: center;
     align-items: center;
     background-color: rgba(20,20,20,0.1);
-    border-radius: 1vh;
+    border-radius: 1vw;
     ${props => props.interactuable ? `cursor: pointer;` : ``}
+
+    @media (min-width: 1025px) {
+        height: 10vh;
+        width: 10vh;
+    }
+
+    @media (max-width: 1024px) {
+        height: 15vw;
+        width: 15vw;
+    }
 `
 
 const CharacterMiniWrapper = styled.div`
@@ -62,7 +70,7 @@ type CharacterSlotCallbacks = {
 
 const dragNDropUtility: string = "party-pick"
 
-const useCharacterSlotState = (quest: SelectedQuest, character: Character | null, index: number): CharacterSlotState & CharacterSlotCallbacks => {
+const useCharacterSlotState = (isMobile: boolean, quest: SelectedQuest, character: Character | null, index: number): CharacterSlotState & CharacterSlotCallbacks => {
 
     const [hovering, setHovering] = useState<boolean>(false)
     const [draggingOver, setDraggingOver] = useState<Character | null>(null)
@@ -96,7 +104,10 @@ const useCharacterSlotState = (quest: SelectedQuest, character: Character | null
         enabled: interactuable,
         onDragStart: () => {
             clearDropbox()
-            InventoryTransitions.removeCharacterFromParty(character)
+            isMobile ? setDraggingOver(character) : InventoryTransitions.removeCharacterFromParty(character)
+        },
+        onDragStop: () => {
+            isMobile && setDraggingOver(null)
         },
         draggingView: () => 
             interactuable && <CharacterSprite character={character} render="hovered" units={vh(1.7)} />
@@ -118,8 +129,8 @@ const useCharacterSlotState = (quest: SelectedQuest, character: Character | null
     }
 }
 
-const PartySlot = ({ quest, character, index }: { quest: SelectedQuest, character: Character | null, index: number }) => {
-    const state = useCharacterSlotState(quest, character, index)
+const PartySlot = ({ isMobile, quest, character, index }: { isMobile: boolean, quest: SelectedQuest, character: Character | null, index: number }) => {
+    const state = useCharacterSlotState(isMobile, quest, character, index)
     return (
         <PartySlotContainer
             ref={state.dropbox}
@@ -138,7 +149,7 @@ const PartySlot = ({ quest, character, index }: { quest: SelectedQuest, characte
                         character={state.renderCharacter}
                         render={state.render}
                         emoji={state.displayedEmoji}
-                        units={vh(1.7)}
+                        units={isMobile ? vw(2.8) : vh(1.7)}
                     />
                 </CharacterMiniWrapper>
             }
@@ -146,10 +157,11 @@ const PartySlot = ({ quest, character, index }: { quest: SelectedQuest, characte
     )
 }
 
-const PartyView = ({ quest, adventurerSlots }: { quest: SelectedQuest, adventurerSlots: (Character | null)[] }) => 
+const PartyView = ({ isMobile, quest, adventurerSlots }: { isMobile: boolean, quest: SelectedQuest, adventurerSlots: (Character | null)[] }) => 
     <PartyContainer>
         {adventurerSlots.map((adventurerSlot, index) =>
             <PartySlot
+                isMobile={isMobile}
                 character={adventurerSlot}
                 quest={quest}
                 index={index}

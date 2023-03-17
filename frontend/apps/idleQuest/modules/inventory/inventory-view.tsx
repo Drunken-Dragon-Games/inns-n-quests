@@ -14,37 +14,49 @@ const openAnimation = keyframes`
     100% { opacity: 1; }
 `
 
-const closeAnimation = keyframes`
-    0% { opacity: 1; top: 0; }
-    99% { top: 0; }
-    100% { opacity: 0; top: -100vh; }
+const closeAnimation = (position: "bottom" | "top") => keyframes`
+    0% { opacity: 1; ${position}: 0; }
+    99% { ${position}: 0; }
+    100% { opacity: 0; ${position}: -100vh; }
 `
 
 const InventoryContainer = styled.div<{ open: boolean, activityOpen: boolean }>`
     position: absolute;
-    height: 100%;
-    ${props => props.open ? "top: 0;" : "top: -100vh;"};
-    opacity: ${props => props.open ? "1" : "0"};
-    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
-
     display: flex;
-    width: ${props => props.activityOpen ? "100%" : "40vh"};
-    #max-width: ${props => props.activityOpen ? "100%" : "500px"};
+    opacity: ${props => props.open ? "1" : "0"};
+
+    @media (min-width: 1025px) {
+        height: 100%;
+        width: ${props => props.activityOpen ? "100%" : "40vh"};
+        ${props => props.open ? "top: 0;" : "top: -100vh;"};
+        animation: ${props => props.open ? openAnimation : closeAnimation("top")} 0.5s ease-in-out;
+    }
+
+    @media (max-width: 1024px) {
+        bottom: 0;
+        width: 100%;
+        height: ${props => props.activityOpen ? "100%" : "calc(17vh + 39px)"};
+        ${props => props.open ? "bottom: 0;" : "bottom: -100vh;"};
+        animation: ${props => props.open ? openAnimation : closeAnimation("bottom")} 0.5s ease-in-out;
+        flex-direction: column-reverse;
+    }
 `
 
+/*
 const BrowserContainer = styled.div<{ open: boolean }>`
-    width: 40vh;
-    #max-width: 500px;
-    backdrop-filter: blur(5px);
-    background-color: rgba(20,20,20,0.5);
+    background-color: red;
+    @media (max-width: 1024px) {
+        width: 100%;
+    }
 `
+*/
 
 const ActivityContainer = styled.div<{ open: boolean, backshadow: boolean }>`
     flex: 1;
     display: ${props => props.open ? "flex" : "none"};
     ${props => props.open ? "top: 0;" : "top: -100vh;"};
     opacity: ${props => props.open ? "1" : "0"};
-    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
+    animation: ${props => props.open ? openAnimation : closeAnimation("top")} 0.5s ease-in-out;
 
     align-items: center;
     justify-content: center;
@@ -81,9 +93,7 @@ const Inventory = ({ className }: { className?: string }) => {
     const state = useInventoryState()
     return (
         <InventoryContainer className={className} open={state.open} activityOpen={state.open && notEmpty(state.activity)}>
-            <BrowserContainer className={className} open={state.open}>
-                <InventoryBrowser />
-            </BrowserContainer>
+            <InventoryBrowser />
             <ActivityContainer className={className} open={state.open && notEmpty(state.activity)} onClick={InventoryTransitions.closeActivity} backshadow={state.activity?.ctype !== "overworld-dropbox"}>
                 <ActivityView activity={state.activity} />
             </ActivityContainer>

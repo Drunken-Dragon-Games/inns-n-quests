@@ -1,6 +1,7 @@
 import { Provider } from "react-redux"
 import styled, { keyframes } from "styled-components"
-import { PixelArtImage, vh1 } from "../../common"
+import { useIsMobile } from "../../../is-mobile"
+import { PixelArtImage, vh, vh1 } from "../../common"
 import QuestBoardArea from "./components/quest-board-area"
 import RefreshButton from "./components/refresh-button"
 import { questBoardStore, useQuestBoardSelector } from "./quest-board-state"
@@ -25,26 +26,30 @@ const QuestBoardContainer = styled.div<{ open: boolean }>`
     ${props => props.open ? "top: 0;" : "top: -100vh;"};
     opacity: ${props => props.open ? "1" : "0"};
     animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
-    #background-color: #523438;
     display: flex;
     position: relative;
     overflow: hidden;
-    #background-image: url("https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp");
-    #background-repeat: no-repeat;
-    #background-position: center;
 `
 
 const AvailableQuestsWrapper = styled.div`
-    width: 100vh;
-    height: 60vh;
     position: relative;
-    padding: 3vh;
-    margin: auto;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 1vh;
+
+    @media (min-width: 1025px) {
+        width: 100vh;
+        height: 60vh;
+        padding: 3vh;
+        margin: auto;
+        border-radius: 1vh;
+        flex-direction: column;
+    }
+
+    @media (max-width: 1024px) {
+        width: 100%;
+        height: calc(100% - 17vh - 39px);
+    }
 `
 
 const QuestBoardBackground = styled(PixelArtImage)`
@@ -55,6 +60,7 @@ const QuestBoardBackground = styled(PixelArtImage)`
 
 const QuestBoard = ({ className }: { className?: string }) => {
     const open = useQuestBoardSelector(state => state.open)
+    const isMobile = useIsMobile()
     return (
         <QuestBoardContainer className={className} open={open} onClick={() => QuestBoardTransitions.onToggleQuestBoard() }>
             <AvailableQuestsWrapper onClick={(e) => e.stopPropagation()}>
@@ -63,7 +69,7 @@ const QuestBoard = ({ className }: { className?: string }) => {
                     alt="Quest Board Background"
                     width={100}
                     height={60}
-                    units={vh1}
+                    units={isMobile ? vh(0.8) : vh1}
                     absolute
                 />
                 <QuestBoardArea />

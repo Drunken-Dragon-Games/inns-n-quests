@@ -70,7 +70,10 @@ export const dragNDropState = createSlice({
             const dropboxId = action.payload
             Object.keys(state.dropBoxes).forEach((utility) => {
                 const dropbox = state.dropBoxes[utility][dropboxId]
-                if (dropbox) delete dropbox.data.droppedPayload
+                if (dropbox) {
+                    delete dropbox.data.droppedPayload
+                    delete dropbox.data.hoveringPayload
+                }
             })
         },
 

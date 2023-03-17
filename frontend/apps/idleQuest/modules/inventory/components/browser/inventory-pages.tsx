@@ -2,6 +2,7 @@ import { MouseEventHandler, ReactNode, TouchEventHandler, useEffect, useMemo, us
 import { shallowEqual, useSelector } from "react-redux"
 import styled, { keyframes } from "styled-components"
 import _ from "underscore"
+import { useIsMobile } from "../../../../../is-mobile"
 import { Character, Furniture, isCharacter, isFurniture, notEmpty, PixelArtImage, px, takenQuestStatus, takenQuestTimeLeft, useRememberLastValue, vh, vw } from "../../../../common"
 import { DragNDropApi } from "../../../drag-n-drop"
 import { ActivitySelection, CharacterParty, InventoryItem, InventoryPageName, mapQuestScroll } from "../../inventory-dsl"
@@ -13,7 +14,15 @@ import InventoryBox from "./inventory-box"
 const InventoryPagesContainer = styled.div`
     width: 100%;
     position: relative;
-    overflow: hidden;
+
+    @media (min-width: 1025px) {
+        overflow: hidden;
+    }
+
+    @media (max-width: 1024px) {
+        height: 17vh;
+        overflow: visible;
+    }
 `
 
 const SwipePageAnimation = (from: number, to: number) => keyframes`
@@ -22,55 +31,72 @@ const SwipePageAnimation = (from: number, to: number) => keyframes`
 `
 
 const PagesManagerContainer = styled.div<{ scrollFrom: number, scrollTo: number }>`
-    height: 100%;
-    width: 300%;
-    padding: 2%;
+    width: 400%;
     position: absolute;
     display: flex;
-    gap: 1.5%;
 
-    #background-color: red;
+    @media (min-width: 1025px) {
+        height: 100%;
+        padding: 2% 0;
+    }
+
+    @media (max-width: 1024px) {
+        top: -4vh;
+    }
 
     transform: translateX(${props => props.scrollTo}%);
     animation: ${props => SwipePageAnimation(props.scrollFrom, props.scrollTo)} 0.5s ease-in-out;
 `
 
 const Page = styled.div`
-    box-sizing: border-box;
-    padding-left: 0.66%;
-    width: 33%;
-    
-    
-    #background-color: blue;
 
-    direction: rtl;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    @media (min-width: 1025px) {
+        width: calc(24.5%);
 
-    ::-webkit-scrollbar {
-        width: 5px; 
-      }
-      
-    /* Track */
-    ::-webkit-scrollbar-track {
-        background: #495362;
-        background-clip: padding-box;
-        border-left: 1px solid transparent;
-        border-right: 1px solid transparent;
+        padding: 0 0.5%;
+        margin-left: 0.5%;
+        direction: rtl;
+        overflow-x: hidden;
+        overflow-y: scroll;
+
+        ::-webkit-scrollbar {
+            width: 5px; 
+        }
+        
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: #495362;
+            background-clip: padding-box;
+            border-left: 1px solid transparent;
+            border-right: 1px solid transparent;
+        }
+        
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0);
+            border-top: 2px solid rgba(0, 0, 0, 0);
+            border-right: 3px  solid #8A8780;
+            border-bottom: 2px  solid rgba(0, 0, 0, 0);;
+            border-left: 3px  solid #8A8780;
+        }
+        
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #585652; 
+        }
     }
-       
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0);
-        border-top: 2px solid rgba(0, 0, 0, 0);
-        border-right: 3px  solid #8A8780;
-        border-bottom: 2px  solid rgba(0, 0, 0, 0);;
-        border-left: 3px  solid #8A8780;
-    }
-      
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-        background: #585652; 
+
+    @media (max-width: 1024px) {
+        width: 25%;
+
+        padding: 0 1vh;
+        direction: ltr;
+        overflow-x: scroll;
+
+        ::-webkit-scrollbar {
+            height: 0px; 
+            width: 0px;
+        }
     }
 `
 
@@ -78,23 +104,36 @@ const DirectionFix = styled.div<{ tall?: boolean }>`
     direction: ltr;
     overflow: visible;
 
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-gap: 10px;
     & > * { aspect-ratio: ${props => props.tall ? "1/1.75" : "1/1"}; }
 
-    width: 100%;
+    @media (min-width: 1025px) {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 10px;
+    }
+
+    @media (max-width: 1024px) {
+        display: flex;
+        gap: 1vh;
+        & > * { 
+            margin-top: 5vh; 
+            margin-bottom: 1vh;
+        }
+    }
 `
 
-const InventoryItemViewContainer = styled.div`
-    #display: inline-block;
-    #height: 100%;
+const InvBox = styled(InventoryBox)`
+    @media (max-width: 1024px) {
+        width: 15vh;
+        height: 15vh;
+    }
 `
 
 const isDraggableItem = (item?: InventoryItem): item is (Character | Furniture) => 
     notEmpty(item) && item.ctype !== "taken-staking-quest"
 
 type InventoryItemViewState = {
+    isMobile: boolean
     info?: string
     selected?: boolean
     disabled?: boolean
@@ -109,6 +148,8 @@ type InventoryItemViewState = {
 }
 
 const useInventoryItemViewState = (activity?: ActivitySelection, party: CharacterParty = [], item?: InventoryItem): InventoryItemViewState => {
+    const isMobile = useIsMobile()    
+
     const boxState = useMemo(() => {
         if (item && item.ctype === "character") {
             return {
@@ -151,6 +192,8 @@ const useInventoryItemViewState = (activity?: ActivitySelection, party: Characte
         utility: !activity ? "overworld-drop" :  "party-pick",
         payload: item,
         enabled: enableDragging,
+        effectiveDraggingVectorMin: isMobile ? [-0.5, -1] : undefined,
+        effectiveDraggingVectorMax: isMobile ? [0.5, -1] : undefined,
         onDragStart: () => {
             if (!activity) InventoryTransitions.openOverworldDropbox()
         },
@@ -188,14 +231,14 @@ const useInventoryItemViewState = (activity?: ActivitySelection, party: Characte
         hoverOff: () => setHover(false),
     }), [item, boxState.disabled, /*draggingState.dragging,*/ DragNDropApi.dragging()])
 
-    return { ...boxState, /*...draggingState,*/ ...callbacks, hover, startDrag, startDragTouch, ...timedInfo }
+    return { isMobile, ...boxState, /*...draggingState,*/ ...callbacks, hover, startDrag, startDragTouch, ...timedInfo }
 
 }
 
 const InventoryItemView = ({ item, activity, party }: { item?: InventoryItem, activity?: ActivitySelection, party?: CharacterParty }) => {
     const state = useInventoryItemViewState(activity, party, item)
     return (
-        <InventoryBox
+        <InvBox
             //onClick={() => !state.disabled && props.onItemClick && item && props.onItemClick(item)}
             onMouseUp={state.itemClick}
             onMouseDown={state.startDrag}
@@ -224,16 +267,16 @@ const InventoryItemView = ({ item, activity, party }: { item?: InventoryItem, ac
                 src={mapQuestScroll(item)}
                 alt="quest scroll"
                 width={7.3} height={6}
-                units={vh(1.5)}
+                units={state.isMobile ? vh(2) : vh(1.5)}
             />
         : item?.ctype === "furniture" ?
             <FurnitureSprite
                 furniture={item}
-                units={vh(0.9)}
+                units={state.isMobile ? vh(1.5) : vh(0.9)}
                 render={state.hover ? "hovered" : "normal"}
             /> :
         <></> }
-        </InventoryBox>
+        </InvBox>
     )
 }
 
@@ -273,8 +316,8 @@ const InventoryPage = ({ page }: { page: InventoryPageName }) => {
 
 const pagePosition = (page: InventoryPageName): number => 
     page == "characters" ? 0 :
-    page == "furniture" ? -33.3333 :
-    -66.6666
+    page == "furniture" ? -25 :
+    -50
 
 const PagesManager = ({ children }: { children?: ReactNode }) => {
     const page = useSelector((state: InventoryState) => state.activeInventoryPage, shallowEqual)

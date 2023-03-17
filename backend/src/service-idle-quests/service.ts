@@ -311,6 +311,10 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             this.characterState.syncCharacters(userId, inventoryResult.inventory),
             this.furnitureState.syncFurniture(userId, inventoryResult.inventory),
         ]))
+
+        if (process.env.NODE_ENV === "development" && characters.length == 0)
+            return await this.grantTestInventory(userId)
+
         const dragonSilver = parseInt(inventoryResult.inventory[this.wellKnownPolicies.dragonSilver.policyId]?.find(a => a.unit == "DragonSilver")?.quantity ?? "0")
         return { 
             status: "ok", 
@@ -323,7 +327,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async grantTestInventory(userId: string): Promise<GetInventoryResult> {
-        if (process.env.NODE_ENV === "production") return { status: "ok", inventory: { dragonSilver: 0, characters: {}, furniture: {} } }
+        if (process.env.NODE_ENV !== "development") return { status: "ok", inventory: { dragonSilver: 0, characters: {}, furniture: {} } }
 
         const pickAdventurer = (collection: vm.CharacterCollection, amount: number): AssetUnit[] => {
             if (collection == "pixel-tiles") {

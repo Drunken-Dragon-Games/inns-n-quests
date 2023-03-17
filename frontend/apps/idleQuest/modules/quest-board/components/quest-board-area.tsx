@@ -7,26 +7,49 @@ import QuestBoardTransitions from "../quest-board-transitions"
 import PropStamp from "./miniature-seal"
 
 const QuestBoardAreaContainer = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
     width: 100%;
-    height: 100%;
-
     font-family: VT323;
     color: #793312;
+    z-index: 2;
+`
+
+const ScrollingArea = styled.div`
+    display: flex;
+
+    @media (min-width: 1025px) {
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    @media (max-width: 1024px) {
+        overflow-x: scroll;
+        
+        ::-webkit-scrollbar {
+            height: 0px; 
+            width: 0px;
+        }
+    }
 `
 
 const QuestPreviewCardContainer = styled.div`
     position: relative;
-    cursor: pointer;
-    width: 30vh;
-    height: 30vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    @media (min-width: 1025px) {
+        cursor: pointer;
+        width: 30vh;
+        height: 30vh;
+    }
+
+    @media (max-width: 1024px) {
+        padding: 3vh;
+    }
 `
 
 const Title = styled.h2`
@@ -123,9 +146,11 @@ const QuestBoardArea = () => {
     }, [availableQuests.length])
     return (
         <QuestBoardAreaContainer>
+            <ScrollingArea>
             {availableQuests.slice(0, 5).map((quest: (AvailableStakingQuest), index: number) =>
                 <QuestPreviewCard quest={quest} key={"quest-" + index} />
             )}
+            </ScrollingArea>
         </QuestBoardAreaContainer>
     )
 }

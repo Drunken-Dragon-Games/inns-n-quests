@@ -19,6 +19,7 @@ export const userDataFetch = () : GeneralReducerThunk => async(dispatch) => {
     catch (err:  unknown ) {      
         
         if(err instanceof AxiosError ){
+            console.log("THIS", err)
             dispatch(setFetchUserDataStatusRejected(err))
             dispatch(fetchRefreshToken( () => dispatch(userDataFetch()), err))
         }

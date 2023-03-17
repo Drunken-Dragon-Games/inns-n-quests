@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { HTMLAttributes } from "react"
 import styled from "styled-components"
 import { useRememberLastValue } from "../internal-state-effects"
 import { useNumberAnimation } from "../time-effects"
@@ -9,19 +9,17 @@ const MedalContainer = styled.div`
     align-items: center;
 `
 
-const AnimatedNumberMedalManager = ({ children, className, lastAmount, amount, animate }: AnimatedNumberMedalProps & { lastAmount: number }) => {
+const AnimatedNumberMedalManager = ({ children, lastAmount, amount, animate, ...rest }: AnimatedNumberMedalProps & { lastAmount: number }) => {
     const renderAmount = useNumberAnimation(lastAmount, amount, animate)
     return (
-        <MedalContainer className={className}>
+        <MedalContainer {...rest}>
             <span>{renderAmount}</span>
             {children}
         </MedalContainer>
     )
 }
 
-interface AnimatedNumberMedalProps { 
-    children?: ReactNode, 
-    className?: string, 
+interface AnimatedNumberMedalProps extends HTMLAttributes<HTMLDivElement> { 
     amount: number, 
     animate?: boolean 
 }
@@ -31,7 +29,5 @@ export const AnimatedNumberMedal = (props: AnimatedNumberMedalProps) => {
     return <AnimatedNumberMedalManager {...{ ...props, lastAmount }} />
 }
 
-export const Medal = ({ children, className }: { children?: ReactNode, className?: string }) => 
-    <MedalContainer className={className}>
-        {children}
-    </MedalContainer>
+export const Medal = (props: HTMLAttributes<HTMLDivElement>) => 
+    <MedalContainer {...props} />

@@ -57,24 +57,53 @@ const DragNDropApi = {
      * Handles the dragging of any element by keeping track of a location pair. 
      * Returns a function that can be used as a mouse event handler or touch event handler to start the drag.
      * Should be used on an * 'onMouseDown' event handler or ''.
-     * 
-     * @param currentLocation 
-     * @param onDrag 
+
      * @returns 
      */
-    useDrag({ utility, payload, draggingView, onDragStart, onDragStop, enabled = true, effectiveDraggingVectorMagnitude = 1 }: UseDragParams): DragInitiators & { dragging: boolean } {
+    useDrag({ 
+        utility, 
+        payload, 
+        draggingView, 
+        onDragStart, 
+        onDragStop, 
+        enabled = true, 
+        effectiveDraggingVectorMagnitude = 1, 
+        effectiveDraggingVectorMin, 
+        effectiveDraggingVectorMax 
+    }: UseDragParams): DragInitiators & { dragging: boolean } {
         const [initialPosition, setInitialPosition] = useState<[number, number] | undefined>(undefined)
         const currentPosition = useRef<[number, number] | undefined>(undefined)
         const savedPayload = useRef<any>(undefined)
         const effectiveDraggingStarted = useRef(false)
         const dragging = notEmpty(initialPosition)
 
+        const draggingVector = (): [number, number] => [
+            (currentPosition.current ?? [0,0])[0] - (initialPosition ?? [0,0])[0], 
+            (currentPosition.current ?? [0,0])[1] - (initialPosition ?? [0,0])[1]
+        ]
+
         const draggingMagnitude = (): number => {
-            const vector: [number, number] = [
-                (currentPosition.current ?? [0,0])[0] - (initialPosition ?? [0,0])[0], 
-                (currentPosition.current ?? [0,0])[1] - (initialPosition ?? [0,0])[1]]
+            const vector = draggingVector()
             return Math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         }
+
+        const angleBetweenVectors = (vector1: [number, number], vector2: [number, number]): number => {
+            const dotProduct = vector1[0] * vector2[0] + vector1[1] * vector2[1]
+            const magnitude1 = Math.sqrt(vector1[0] ** 2 + vector1[1] ** 2)
+            const magnitude2 = Math.sqrt(vector2[0] ** 2 + vector2[1] ** 2)
+            return Math.acos(dotProduct / (magnitude1 * magnitude2))
+        }
+
+        const isDraggingVectorBetweenMinAndMax = (): boolean => {
+            if (!effectiveDraggingVectorMin || !effectiveDraggingVectorMax) return true
+            const angleBetweenDraggingAndMin = angleBetweenVectors(draggingVector(), effectiveDraggingVectorMin)
+            const angleBetweenDraggingAndMax = angleBetweenVectors(draggingVector(), effectiveDraggingVectorMax)
+            const angleBetweenMinAndMax = angleBetweenVectors(effectiveDraggingVectorMin, effectiveDraggingVectorMax)
+            return angleBetweenDraggingAndMin < angleBetweenMinAndMax && angleBetweenDraggingAndMax < angleBetweenMinAndMax
+        }
+
+        const isDraggingEffective = (): boolean => 
+            draggingMagnitude() >= effectiveDraggingVectorMagnitude && isDraggingVectorBetweenMinAndMax()
 
         const initDragging = (position: [number, number]) => {
             if (!enabled) return
@@ -144,17 +173,21 @@ const DragNDropApi = {
             const handleMove = (clientX: number, clientY: number) => {
                 currentPosition.current = [clientX, clientY]
                 if (effectiveDraggingStarted.current) notifyHovering()
-                else if (draggingMagnitude() >= effectiveDraggingVectorMagnitude) {
+                else if (isDraggingEffective()) {
                     effectiveDraggingStarted.current = true
                     onDragStart && onDragStart()
+                    notifyHovering()
                 }
             }
 
-            const handleMouseMove = (event: MouseEvent) => 
+            const handleMouseMove = (event: MouseEvent) => {
                 handleMove(event.clientX, event.clientY)
+            }
 
-            const handleTouchMove = (event: TouchEvent) => 
+            const handleTouchMove = (event: TouchEvent) => {
+                if (effectiveDraggingStarted.current) event.preventDefault()
                 handleMove(event.touches[0].clientX, event.touches[0].clientY)
+            }
 
             const handleStop = () => {
                 if (effectiveDraggingStarted.current) notifyDrop()
@@ -164,12 +197,14 @@ const DragNDropApi = {
 
             const handleMouseUp = () => {
                 handleStop()
+                unregisterListeners()
                 window.removeEventListener('mousemove', handleMouseMove)
                 window.removeEventListener('mouseup', handleMouseUp)
             }
 
             const handleTouchEnd = () => {
                 handleStop()
+                unregisterListeners()
                 window.removeEventListener('touchmove', handleTouchMove)
                 window.removeEventListener('touchend', handleTouchEnd)
             }

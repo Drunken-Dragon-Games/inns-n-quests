@@ -6,7 +6,7 @@ export * from "./staking-quests"
 export * from "./time-effects"
 export * from "./units"
 
-export type IdSet<T> = { [id: string] : T }
+export type IdSet<T> = { [id: string]: T }
 
 export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
     return value !== null && value !== undefined
@@ -28,9 +28,9 @@ export function notEmpty<TValue>(value: TValue | null | undefined): value is TVa
  * @return {number} a hash code value for the given string.
  */
 export const simpleHash = (s: string): number => {
-  let h = 0, l = s.length, i = 0
-  if ( l > 0 )
-    while (i < l)
-      h = (h << 5) - h + s.charCodeAt(i++) | 0
-  return h
+    let h = 0, l = s.length, i = 0
+    if (l > 0)
+        while (i < l)
+            h = (h << 5) - h + s.charCodeAt(i++) | 0
+    return h
 }

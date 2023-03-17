@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import { useIsMobile } from "../../../is-mobile"
 import { OswaldFontFamily, PixelArtImage, px } from "../../common"
 import InventoryApi from "../inventory/inventory-api"
 import { QuestBoardApi } from "../quest-board"
@@ -24,35 +25,37 @@ const HudButton = styled(PixelArtImage)`
     }
 `
 
-const Letter = styled.div<{ letter: string }>`
+const Letter = styled.div`
     color white;
     ${OswaldFontFamily}
     font-size: 26px;
-    position: absolute;
     filter: drop-shadow(0px 0px 3px black);
-    ${props => props.letter === "q" ? "left: 45vw;" : "right: 45vw;"}
 `
 
-const HudView = ({ className }: { className?: string }) =>
-    <HudContainer>
-        <HudButtons className={className}>
-            <HudButton
-                onClick={QuestBoardApi.toggleQuestBoard}
-                src="https://cdn.ddu.gg/modules/quests/icons/quests-icon.png"
-                width={80}
-                height={68}
-                units={px(0.6)}
-            />
-            <Letter letter="q"> Q </Letter>
-            <HudButton
-                onClick={InventoryApi.toggleInventory}
-                src="https://cdn.ddu.gg/modules/quests/icons/inventory-icon.png"
-                width={80}
-                height={68}
-                units={px(0.6)}
-            />
-            <Letter letter="b"> B </Letter>
-        </HudButtons>
-    </HudContainer>
+const HudView = ({ className }: { className?: string }) => {
+    const isMobile = useIsMobile()
+    return (
+        <HudContainer>
+            <HudButtons className={className}>
+                { !isMobile && <Letter> Q </Letter> }
+                <HudButton
+                    onMouseUp={QuestBoardApi.toggleQuestBoard}
+                    src="https://cdn.ddu.gg/modules/quests/icons/quests-icon.png"
+                    width={80}
+                    height={68}
+                    units={px(0.6)}
+                />
+                <HudButton
+                    onMouseUp={InventoryApi.toggleInventory}
+                    src="https://cdn.ddu.gg/modules/quests/icons/inventory-icon.png"
+                    width={80}
+                    height={68}
+                    units={px(0.6)}
+                />
+                { !isMobile && <Letter> B </Letter> }
+            </HudButtons>
+        </HudContainer>
+    )
+}
 
 export default HudView

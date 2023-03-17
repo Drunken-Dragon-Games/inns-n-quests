@@ -3,7 +3,6 @@ import React, { useState } from "react"
 import styled from "styled-components"
 import { AnimatedNumberMedal, If, NoDragImage, OswaldFontFamily, Push, px1, SansSerifFontFamily } from "../../../../common"
 import Transitions from "../../inventory-transitions"
-import { BigHopsButton } from "../../../../common"
 import { useSelector } from "react-redux"
 import { InventoryState } from "../../inventory-state"
 
@@ -46,7 +45,7 @@ const InventoryHeader = ({ className }: InventoryHeaderProps) => {
     const dragonSilver = useSelector((state: InventoryState) => state.dragonSilver)
     return (
         <DragonSilverDisplayContainer className={className}>
-            <BigHopsButton onClick={Transitions.onRecruitCharacter} text="Recruit" />
+            {/*<BigHopsButton onClick={Transitions.onRecruitCharacter} text="Recruit" />*/}
             <Push />
             <DragonSilverMedal amount={dragonSilver} animate>
                 <NoDragImage

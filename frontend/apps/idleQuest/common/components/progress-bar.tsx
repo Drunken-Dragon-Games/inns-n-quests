@@ -9,7 +9,7 @@ const ExperienceAnimation = (start: number, experience: number) => keyframes`
 
 const ProgressBarContainer = styled.div<{ backgroundColor?: string }>`
     height: 1vh;
-    min-width: 8vh;
+    width: 8vh;
     border-radius: 5px;
     overflow: hidden;
     color: white;

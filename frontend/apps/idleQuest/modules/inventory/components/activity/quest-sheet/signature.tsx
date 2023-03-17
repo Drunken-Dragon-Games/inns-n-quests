@@ -1,6 +1,6 @@
 import { useState } from "react"
 import style, { keyframes } from "styled-components"
-import { PixelArtImage } from "../../../../../common"
+import { PixelArtImage, vh1, vw } from "../../../../../common"
 
 const glow = keyframes`
     100% {text-shadow: 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.2); }
@@ -21,22 +21,43 @@ const SignatureContainer = style.div<{ interactuable?: boolean, hover?: boolean,
         margin-left:${props => props.interactuable ? "4" : "4"}vh;
         opacity: ${props => props.hover ? "0.5": "1"};
     }
+
+    @media (max-width: 1024px) {
+        height: 10vw;
+        width: 50vw;
+        p{
+            font-size: 6vw;
+            margin-top: 2.5vw;
+            margin-left: 10.1vw;
+        }
+    }
 `
 
 const SignatureImage = style(PixelArtImage)`
     bottom: -0.4vh;
-    left: 3vh;
+    left: 6vh;
+
+    @media (max-width: 1024px) {
+        bottom: -0.6vw;
+        left: 4.5vw;
+    }
 `
 
-interface Signature {
+interface SignatureProps {
+    isMobile: boolean
     signatureType: "in-progress" | "finished" | "claimed" | "available-no-adventurers" | "available"
     onClick?: React.MouseEventHandler<HTMLDivElement> & React.MouseEventHandler<HTMLButtonElement>,
 }
 
 const Background = () => 
-    <PixelArtImage src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png" alt="signature" fill absolute />
+    <PixelArtImage 
+        src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/signature.png" 
+        alt="signature" 
+        fill 
+        absolute 
+    />
 
-const Signature = ({ signatureType, onClick }: Signature) => {
+const Signature = ({ isMobile, signatureType, onClick }: SignatureProps) => {
     const [hover, setOnHover] = useState<boolean>(false)
     if (signatureType == "available")//available")
         return (
@@ -67,6 +88,7 @@ const Signature = ({ signatureType, onClick }: Signature) => {
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/signature/drunken_dragon_signature.webp" 
                     alt="signature" 
                     width={12} height={3} 
+                    units={isMobile ? vw(3.5): vh1 }
                     absolute
                 />
             </SignatureContainer>
