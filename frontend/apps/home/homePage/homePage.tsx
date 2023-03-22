@@ -11,18 +11,15 @@ const HomePageComponent = styled.section`
     }
 `
 
-const HomePage = ():JSX.Element => {
-    return (<>
-            <HomePageComponent>
-                <BannerSection/>
-                <SocialMediaSection/>
-                {/* <RoadMapSection/> */}
-                <DeadQueenSection/>
-                <IdleQuestsSection/>
-                <CollectionsSection/>
-                <TavernSection/>
-            </HomePageComponent>
-    </>)
-}
+const HomePage = (): JSX.Element =>
+    <HomePageComponent>
+        <BannerSection />
+        <SocialMediaSection />
+        {/* <RoadMapSection/> */}
+        <TavernSection />
+        <IdleQuestsSection />
+        <CollectionsSection />
+        <DeadQueenSection />
+    </HomePageComponent>
 
 export default HomePage

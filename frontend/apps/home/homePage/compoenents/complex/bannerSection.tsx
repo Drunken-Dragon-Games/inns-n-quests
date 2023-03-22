@@ -29,9 +29,10 @@ const Banner = styled.div`
     max-width: 2048px;
     max-height: 727.04px;
     
-    border: 0.2vw solid #cbc7bf;
+    #border: 0.2vw solid #cbc7bf;
     padding: 0vw 0vw 0vw 0.08vw;
     position: relative;
+    filter: drop-shadow(0px 0px 0.5vw #000000);
 
     .slick-dots{
 
@@ -96,9 +97,11 @@ const BannerSection = (): JSX.Element => {
             <BannerSectionComponent>
                 <PositionRelative>
                 <Banner>  
+                    {/*
                     <CornerOrnament>
                         <Image src ="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/home/banner_ornament.svg" alt = "drunken dragon ornament" width = {100} height = {100} layout ="responsive"/>
                     </CornerOrnament>
+                    */}
                     
                     <SimpleSlider>
                         <BannerCard src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/home/banner.png"/>

@@ -9,15 +9,12 @@ const HomeComponent = styled.div`
 `
 
 
-const HomeApp = () =>{
-    return (<>
-            <HomeComponent>
-                <LateralBar/>
-                <NavBarApp/>
-                <HomePage/>
-                <Footer/>
-            </HomeComponent>
-    </>)
-}
+const HomeApp = () =>
+    <HomeComponent>
+        {/*<LateralBar/>*/}
+        <NavBarApp />
+        <HomePage />
+        <Footer />
+    </HomeComponent>
 
 export default HomeApp
