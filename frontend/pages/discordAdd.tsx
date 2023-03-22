@@ -5,21 +5,16 @@ import DiscordAdd from '../apps/accountSettings/accountSettings/discordAdd';
 import { generalStore } from '../features/generalReducer';
 
 
-const validate: NextPage = () => {
+const validate: NextPage = () =>
+    <>
+        <Head>
+            <title>Associate Discord Account</title>
+            <meta name="Drunken Dragon Inns & Quests" content="A Drunken Dragon Universe Game" />
+        </Head>
 
-
-    return (
-        <>
-            <Head>
-                <title>Validate | Drunken Dragon</title>
-                <meta name="description" content="Validation discord page" />
-            </Head>
-
-            <Provider store={generalStore}>
-                <DiscordAdd/>
-            </Provider>
-        </>
-    )
-}
+        <Provider store={generalStore}>
+            <DiscordAdd />
+        </Provider>
+    </>
 
 export default validate
