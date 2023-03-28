@@ -8,6 +8,7 @@ const discordAPI = "https://discord.com/api/v10/oauth2/token";
 export type DiscordConfig = {
     clientId: string,
     clientSecret: string,
+    redirect: string,
     redirectValidate: string,
     redirectAdd: string,
 }
@@ -39,7 +40,7 @@ export const verifyDiscordAuthCode = async (code: string, config: DiscordConfig,
             code, 
             client_id: config.clientId, 
             client_secret: config.clientSecret, 
-            redirect_uri: verifyType == "add" ? config.redirectAdd : config.redirectValidate,
+            redirect_uri: config.redirect, //verifyType == "add" ? config.redirectAdd : config.redirectValidate,
             grant_type: 'authorization_code', 
         }).toString();
         const response = await axios.post(discordAPI, params, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });

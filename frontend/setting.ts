@@ -1,7 +1,21 @@
-export const discord_client_id = typeof process.env["NEXT_PUBLIC_DISCORD_CLIENT_ID"] == "string" ? process.env["NEXT_PUBLIC_DISCORD_CLIENT_ID"]! : "1006949761749897357"
-export const discord_redirect_uri = typeof process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI"] == "string" ? process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI"]! : "http%3A%2F%2Flocalhost%3A3000%2FdiscordValidate"
-export const discord_redirect_uri_add_to_account = typeof process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT"] == "string" ? process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT"]! : "http%3A%2F%2Flocalhost%3A3000%2FdiscordAdd"
+
+export const discord_client_id = 
+    typeof process.env["NEXT_PUBLIC_DISCORD_CLIENT_ID"] == "string" ? 
+        process.env["NEXT_PUBLIC_DISCORD_CLIENT_ID"]! : 
+        "1006949761749897357"
+
+export const discord_redirect_uri = 
+    typeof process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI"] == "string" ? 
+        process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI"]! : 
+        "http%3A%2F%2Flocalhost%3A3000%2F" //discordValidate"
+
+export const discord_redirect_uri_add_to_account = 
+    typeof process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT"] == "string" ? 
+        process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT"]! : 
+        "http%3A%2F%2Flocalhost%3A3000%2FdiscordAdd"
+
 export const discord_response_type = "code"
+
 export const discord_scope = "identify%20email"
 
 export const cardano_network = () : 0 | 1  =>{

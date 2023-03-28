@@ -91,7 +91,7 @@ export type ResolveUserResult
     | { status: "unknown-user-id" }
 
 export type ResolveSesionResult
-    = { status: "ok", info: UserFullInfo;}
+    = { status: "ok", info: UserFullInfo}
     | { status: "unknown-session-id"} 
     | { status: "invalid-discord-token"} 
     | { status: "unknown-user-id"}

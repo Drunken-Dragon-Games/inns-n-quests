@@ -1,17 +1,16 @@
-import { Logo, TokenDisplayer, AuthenticationMethodIcon, GamesButton} from "./basic_components"
-import { ProfileInformation } from "./complex_components"
-import styled from "styled-components"
-import {  useGeneralSelector, useGeneralDispatch } from "../../../features/hooks" 
-import { selectGeneralReducer } from "../../../features/generalReducer"
-import { ConditionalRender,  Button, TextOswald } from "../components/basic_components"
-import {  useRedirect } from "../hooks"
-import { useGetUserData } from "./hooks"
-import { gamesButtonSection } from "../../../setting"
-import { useErrorHandler } from "./hooks"
-import { claimDragonSilver } from "./features/claimSilverDragon"
-import { useGetAuthenticationIcon } from '../navBar/hooks'
-import { useState, useEffect } from "react"
 import Image from "next/image"
+import { useEffect, useState } from "react"
+import styled from "styled-components"
+import { selectGeneralReducer } from "../../../features/generalReducer"
+import { useGeneralDispatch, useGeneralSelector } from "../../../features/hooks"
+import { AccountHeader } from "../../account"
+import { Button } from "../components/basic_components"
+import { useRedirect } from "../hooks"
+import { useGetAuthenticationIcon } from '../navBar/hooks'
+import { AuthenticationMethodIcon, TokenDisplayer } from "./basic_components"
+import { ProfileInformation } from "./complex_components"
+import { claimDragonSilver } from "./features/claimSilverDragon"
+import { useErrorHandler, useGetUserData } from "./hooks"
 
 const NavbarComponent = styled.nav`
     width: 100vw;
@@ -32,7 +31,7 @@ const HeaderBarContainer = styled.div`
     padding: 1vh 5vw;
 
     @media only screen and (max-width: 414px) {
-        padding: 2vh 0;
+        padding: 2vh 3vw;
     }
 `
 
@@ -47,6 +46,7 @@ const LogoWrapper = styled.div`
     height: 75px;
 
     @media only screen and (max-width: 414px) {
+        display: none;
     }
 `
 
@@ -158,7 +158,9 @@ const Navbar = (): JSX.Element =>{
                     />
                 </LogoWrapper>
 
-                { isDataUser == "fulfilled" ? 
+                <AccountHeader />
+
+                {/* isDataUser == "fulfilled" ? 
                 
                     <PositionRelative>
                         <ProfileInformationWrapper>
@@ -207,7 +209,7 @@ const Navbar = (): JSX.Element =>{
 
                     <Button action={() => redirectPath("/login")}>Sign Up/In</Button>
 
-                : <></> }
+                                    : <></> */}
             </HeaderBarContainer>
 
         </NavbarComponent>

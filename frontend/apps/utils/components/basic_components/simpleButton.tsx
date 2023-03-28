@@ -37,10 +37,7 @@ const Center = styled.div`
     margin: auto;
 `
 
-interface hover {
-    hover: boolean
-}
-const ImageWrapper = styled.div<hover>`
+const ImageWrapper = styled.div<{ hover: boolean }>`
     width: inherit;
     height: inherit;
     max-width: 333.338px;
@@ -50,7 +47,7 @@ const ImageWrapper = styled.div<hover>`
     visibility: ${props => props.hover ? "hidden" : "visibility"};
 `
 
-const ImageWrapperHover = styled.div<hover>`
+const ImageWrapperHover = styled.div<{ hover: boolean }>`
     width: inherit;
     height: inherit;
     max-width: 333.338px;
@@ -59,24 +56,24 @@ const ImageWrapperHover = styled.div<hover>`
     top : 0vw;
     visibility: ${props => props.hover ? "visibility" : "hidden"};
 `
+
 interface SimpleButton {
     children: string | string []
-    action: () => void
+    action?: () => void
 }
-const SimpleButton = ({ children, action } : SimpleButton) : JSX.Element =>{
 
+const SimpleButton = ({ children, action } : SimpleButton) => {
     const [ hover, setHover ] = useState<boolean>(false)
-    return (<>
-        <SimpleButtonComponent onMouseOver = {() => setHover(true)} onMouseLeave = {() => setHover(false)} onClick = {action}>
+    return (
+        <SimpleButtonComponent onMouseOver = {() => setHover(true)} onMouseLeave = {() => setHover(false)} onClick={action}>
 
-            <ImageWrapperHover hover = {hover}>
-                <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/utils/simple_button/simple_button_hover.svg"alt = "simple button drunken dragon" width={288} height = {77} layout = "responsive"/>
+            <ImageWrapperHover hover={hover}>
+                <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/utils/simple_button/simple_button_hover.svg" alt="simple button drunken dragon" width={288} height={77} layout="responsive" />
             </ImageWrapperHover>
 
-            <ImageWrapper hover = {hover}>
-                <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/utils/simple_button/simple_button.svg" alt = "simple button drunken dragon" width={288} height = {77} layout = "responsive"/>
+            <ImageWrapper hover={hover}>
+                <Image src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/utils/simple_button/simple_button.svg" alt="simple button drunken dragon" width={288} height={77} layout="responsive" />
             </ImageWrapper>
-            
 
             <TextWrapper>
                 <Center>
@@ -84,7 +81,7 @@ const SimpleButton = ({ children, action } : SimpleButton) : JSX.Element =>{
                 </Center>
             </TextWrapper>
         </SimpleButtonComponent>
-    </>)
+    )
 }
 
 export default SimpleButton

@@ -8,18 +8,19 @@ interface LinkDisable {
     openExternal?: boolean
 }
 
-const external = ({ children, url }: { children?: ReactNode, url: string }) => 
+const External = ({ children, url }: { children?: ReactNode, url: string }) => 
     <Link href={url} passHref>
         <a target="_blank">{children}</a>
     </Link>
 
-const internal = ({ children, url }: { children?: ReactNode, url: string }) =>
+const Internal = ({ children, url }: { children?: ReactNode, url: string }) => 
     <Link href={url} passHref>{children}</Link>
 
 const LinkDisable = ({children, url, disable, openExternal}: LinkDisable) => {
     if (disable) return <>{children}</>
-    else if (openExternal) return external({children, url})
-    else return internal({children, url})
+    else if (openExternal) return <External url={url}>{children}</External>
+    //return external({children, url})
+    else return <Internal url={url}>{children}</Internal>
 }
 
 export default LinkDisable

@@ -38,7 +38,7 @@ export class Users {
             return succeeded(existingUser.userId)
         }
         else {
-            const nickname = await generateRandomNickname()
+            const nickname = discordUserInfo.result.discordName
             const nameIdentifier = await generateIdentenfier(nickname)
             const discordUserName = discordUserInfo.result.discordName
             const email = discordUserInfo.result.email

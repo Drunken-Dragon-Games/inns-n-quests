@@ -19,6 +19,7 @@ import { loadQuestRegistry } from "./service-idle-quests/state/staking-quests-re
 import { EvenstatsServiceDsl } from "./service-evenstats/service";
 import { KiliaBotServiceDsl } from "./service-kilia-bot";
 import { commonCalendar } from "./tools-utils/calendar";
+import { AccountServiceDsl } from "./service-account";
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -50,12 +51,13 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
+    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService })
     
     // Soon to be deprecated
     //await loadQuestModuleModels(database)
-    const app = await buildApp(identityService, assetManagementService, idleQuestsService, wellKnownPolicies, database)
+    const app = await buildApp(identityService, assetManagementService, accountService, idleQuestsService, wellKnownPolicies)
 
     app.listen(PORT, () => console.log(`Server running on port ${PORT}...`));
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))

@@ -11,7 +11,7 @@ const HomeComponent = styled.div`
 
 const HomeApp = () =>
     <HomeComponent>
-        {/*<LateralBar/>*/}
+        <LateralBar/>
         <NavBarApp />
         <HomePage />
         <Footer />

@@ -1,0 +1,97 @@
+import { v4 } from "uuid"
+import axios, { AxiosError, AxiosResponse, Method } from "axios"
+import urljoin from "url-join"
+import { useRouter } from "next/router"
+
+export const AccountBackend = {
+
+    async authenticateDiscord(code: string): Promise<AuthenticationResult> {
+        const result = await accountRequest<AuthenticationResult>("post", "/discord/authenticate", {code})
+        return result.data
+    }
+}
+
+export type AuthenticationResult
+    = { status: "ok", tokens: AuthenticationTokens, inventory: { dragonSilver: number, dragonSilverToClaim: number }, info: UserFullInfo }
+    | { status: "bad-credentials" }
+    | { status: "unknown-user" }
+
+export type RefreshResult
+    = { status: "ok", tokens: AuthenticationTokens }
+    | { status: "bad-refresh-token" }
+
+export type Session = {
+    userId: string, 
+    sessionId: string, 
+    authType: AuthType, 
+    expiration: number
+}
+
+export type AuthType = "Sig" | "Discord" | "Email"
+
+export type AuthenticationTokens = {
+    session: Session, 
+    refreshToken: string
+}
+
+export type UserFullInfo = {
+    userId: string, 
+    nickname: string, 
+    knownDiscord?: string, 
+    knownStakeAddresses: string[],
+    imageLink: string,
+    knownEmail: string
+}
+
+
+async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
+    return await withTokenRefresh(() => accountRequest(method, endpoint, data))
+}
+
+async function accountRequest<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
+    const traceId = v4()
+    const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "api/account")
+    //if (baseURL.includes("acceptance.") || baseURL.includes("testnet.") || baseURL.includes("localhost")) 
+        console.log(`${method}: ${endpoint}\ntrace-id: ${traceId}`)
+    return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
+        method,
+        baseURL,
+        url: endpoint,
+        data,
+        headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+            "Trace-ID": traceId
+        },
+        timeout: 5000,
+        withCredentials: true,
+    })
+}
+
+async function withTokenRefresh<T>(fn: () => Promise<T>): Promise<T> {
+    try { return await fn() }
+    catch (err) { 
+        if (await refreshToken(err)) return await fn()
+        else throw err 
+    }
+}
+
+async function refreshToken(error: any): Promise<boolean> {
+    const router = useRouter()
+    const refreshToken = localStorage.getItem("refresh")
+    if(error instanceof AxiosError && error.response?.status == 401 && refreshToken){
+        try {
+            const response = await accountRequest("post", "/api/refreshSession/", { "fullRefreshToken": refreshToken })
+            localStorage.setItem("refresh", response.data.refreshToken)
+            return true
+        }
+        catch (err) { 
+            localStorage.removeItem("refresh")
+            router.push("/")
+            return false 
+        }
+    } else {
+        router.push("/")
+        return false
+    }
+}
