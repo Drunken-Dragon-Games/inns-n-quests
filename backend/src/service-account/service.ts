@@ -1,6 +1,6 @@
-import { IdentityService } from "../service-identity"
+import { AuthenticationTokens, IdentityService } from "../service-identity"
 import * as idenser from "../service-identity"
-import { AccountService, AuthenticateDiscordResult } from "./service-spec"
+import { AccountService, AuthenticateResult, SignOutResult } from "./service-spec"
 import { AssetManagementService } from "../service-asset-management"
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 
@@ -38,18 +38,32 @@ export class AccountServiceDsl implements AccountService {
     async unloadDatabaseModels(): Promise<void> {
     }
 
-    async authenticateDiscord(code: string): Promise<AuthenticateDiscordResult> {
+    async authenticateDiscord(code: string): Promise<AuthenticateResult> {
         const credentials: idenser.Credentials = {ctype: "discord", deviceType: "Browser", authCode: code }
         const authResponse = await this.identityService.authenticate(credentials)
         if (authResponse.status != "ok") return authResponse
-        const sessionResponse = await this.identityService.resolveSession(authResponse.tokens.session.sessionId)
+        return await this.resolveSessionFromTokens(authResponse.tokens)
+    }
+
+    async signout(sessionId: string): Promise<SignOutResult> {
+        return this.identityService.signout(sessionId)
+    }
+
+    async refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult> {
+        const refreshResult = await this.identityService.refresh(sessionId, refreshToken)
+        if (refreshResult.status != "ok") return { status: "bad-credentials" }
+        return await this.resolveSessionFromTokens(refreshResult.tokens)
+    }
+
+    private async resolveSessionFromTokens(tokens: AuthenticationTokens): Promise<AuthenticateResult> {
+        const sessionResponse = await this.identityService.resolveSession(tokens.session.sessionId)
         if (sessionResponse.status != "ok") return {status: "unknown-user"}
-        const assetList = await this.assetManagementService.list(authResponse.tokens.session.userId, { policies: onlyPolicies(this.wellKnownPolicies) })
+        const assetList = await this.assetManagementService.list(tokens.session.userId, { policies: onlyPolicies(this.wellKnownPolicies) })
         if (assetList.status != "ok") return {status: "unknown-user"}
         const inventory = assetList.inventory
         const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
         const dragonSilver = parseInt(invDragonSilver?.find(a => a.chain)?.quantity ?? "0")
         const dragonSilverToClaim = parseInt(invDragonSilver?.find(a => !a.chain)?.quantity ?? "0")
-        return {status: "ok", tokens: authResponse.tokens, inventory: {dragonSilver, dragonSilverToClaim}, info: sessionResponse.info}
+        return {status: "ok", tokens, inventory: {dragonSilver, dragonSilverToClaim}, info: sessionResponse.info}
     }
 }

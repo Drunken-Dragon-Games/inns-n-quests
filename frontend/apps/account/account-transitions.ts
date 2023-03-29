@@ -1,18 +1,27 @@
-import { v4 } from "uuid"
+import { hasCookie, getCookies } from "cookies-next"
 import { NextRouter } from "next/router"
-import { accountState, accountStore } from "./account-state"
+import { useEffect, useMemo } from "react"
+import { v4 } from "uuid"
 import { discord_client_id, discord_redirect_uri, discord_response_type, discord_scope } from "../../setting"
-import { useEffect, useMemo, useState } from "react"
+import { notEmpty } from "../common"
+import { accountState, accountStore } from "./account-state"
 import { AccountThunks } from "./account-thunks"
 
 const actions = accountState.actions
 
 const dispatch = accountStore.dispatch
 
-// import { hasCookie } from "cookies-next"
-// const authenticated = hasCookie("access")
-
 export const AccountTransitions = {
+
+    signed(): boolean {
+        const hasAuthCookie = hasCookie("access")
+        const hasRefreshToken = notEmpty(localStorage.getItem("refresh"))
+        const hasUserInfo = notEmpty(accountStore.getState().userInfo)
+        const signed = hasAuthCookie && hasRefreshToken && hasUserInfo
+        const missingData = !signed && (hasAuthCookie || hasRefreshToken || hasUserInfo)
+        if (missingData) console.error("Missing data for signed in user. Has auth cookie:", hasAuthCookie, "has refresh token:", hasRefreshToken, "has user info:", hasUserInfo)
+        return signed
+    },
 
     startDiscordAuth(router: NextRouter): void {
         const nonce = v4()
@@ -57,5 +66,26 @@ export const AccountTransitions = {
             dispatch(AccountThunks.authenticateDiscord(code, router))
             return true
         }
+    },
+
+    signout(router: NextRouter): void {
+        dispatch(AccountThunks.signout(router))
+    },
+
+    useRefreshSession(callback?: (signed: boolean) => void): void {
+        useEffect(() => AccountTransitions.refreshSession(callback), [])
+    },
+
+    /**
+     * Refreshes the current session if and only if the session token is saved in the browser's local storage
+     * and the access cookie is set.
+     */
+    refreshSession(callback?: (signed: boolean) => void): void {
+        dispatch(AccountThunks.refreshSession(callback))
+    },
+
+    test: () => {
+        console.log("get cookies", getCookies({ path: "/api/account/session/test", domain: "localhost:5000" }))
+        dispatch(AccountThunks.test())
     },
 }

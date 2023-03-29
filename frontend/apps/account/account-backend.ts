@@ -7,8 +7,26 @@ export const AccountBackend = {
 
     async authenticateDiscord(code: string): Promise<AuthenticationResult> {
         const result = await accountRequest<AuthenticationResult>("post", "/discord/authenticate", {code})
+        console.log(result)
+        console.log(result.headers)
         return result.data
-    }
+    },
+
+    async signout(): Promise<SignOutResult> {
+        const result = await accountRequest<SignOutResult>("post", "/session/signout")
+        return result.data
+    },
+
+    async refreshSession(refreshToken: string): Promise<AuthenticationResult> {
+        const result = await accountRequest<AuthenticationResult>("post", "/session/refresh", {refreshToken})
+        return result.data
+    },
+
+    async test(): Promise<void> {
+        const result = await accountRequest("post", "/session/test")
+        console.log(result)
+        console.log(result.headers)
+    },
 }
 
 export type AuthenticationResult
@@ -16,9 +34,9 @@ export type AuthenticationResult
     | { status: "bad-credentials" }
     | { status: "unknown-user" }
 
-export type RefreshResult
-    = { status: "ok", tokens: AuthenticationTokens }
-    | { status: "bad-refresh-token" }
+export type SignOutResult
+    = { status: "ok" }
+    | { status: "unknown-session" }
 
 export type Session = {
     userId: string, 

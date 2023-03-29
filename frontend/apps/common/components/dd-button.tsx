@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { MessiriFontFamily } from "../common-css"
+import { colors, MessiriFontFamily } from "../common-css"
 
 export const DDButton = styled.button`
     ${MessiriFontFamily}
@@ -17,5 +17,20 @@ export const DDButton = styled.button`
 
     &:hover {
         background-image: url("https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/utils/button/button_hover.svg");
+    }
+`
+
+export const SimpleDDButton = styled.button`
+    ${MessiriFontFamily}
+    cursor: pointer;
+    border: 1px solid ${colors.dduGold};
+    border-radius: 3px;
+    background-color: ${colors.dduBackground};
+    color: white;
+    padding: 5px 10px;
+    font-weight: bold;
+
+    &:hover {
+        border: 1px solid white;
     }
 `

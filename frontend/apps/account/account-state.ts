@@ -20,8 +20,12 @@ export const accountState = createSlice({
     initialState: accountInitialState,
     reducers: {
 
-        setUserInfo: (state, action: PayloadAction<UserInfo>) => {
+        signin: (state, action: PayloadAction<UserInfo>) => {
             state.userInfo = action.payload
+        },
+
+        signout: (state) => {
+            state.userInfo = undefined
         },
 
         updateUserInfo: (state, action: PayloadAction<Partial<UserInfo>>) => {

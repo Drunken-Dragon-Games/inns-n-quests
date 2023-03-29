@@ -78,7 +78,7 @@ export class Users {
             const addresses = await UserStakeAdress.findAll({ where: { userId: user.userId }, attributes: ["stakeAddress"] })
             return succeeded({
                 userId: user.userId,
-                nickname: user.nickname + "#" + user.nameIdentifier,
+                nickname: user.nickname,
                 knownDiscord: user.discordUserName,
                 knownStakeAddresses: addresses.map(a => a.stakeAddress)
             })
@@ -89,7 +89,7 @@ export class Users {
         const users = await User.findAll({ where: { userId: userIds } })
         const usersInfo: UserInfo[] = users.map(user => ({
             userId: user.userId,
-            nickname: user.nickname + "#" + user.nameIdentifier,
+            nickname: user.nickname,
             knownDiscord: user.discordUserName,
             knownStakeAddresses: []
         }))
@@ -103,7 +103,7 @@ export class Users {
             const addresses = await UserStakeAdress.findAll({ where: { userId: user.userId }, attributes: ["stakeAddress"] })
             return succeeded({
                 userId: user.userId,
-                nickname: user.nickname + "#" + user.nameIdentifier,
+                nickname: user.nickname,
                 knownDiscord: user.discordUserName,
                 knownStakeAddresses: addresses.map(a => a.stakeAddress),
                 imageLink: user.imageLink,

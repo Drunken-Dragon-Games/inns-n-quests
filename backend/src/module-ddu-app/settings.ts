@@ -12,6 +12,7 @@ export const corsOptions = {
         if (corsOrigins.includes(requestOrigin ?? "")) callback(null, true)
         else callback(new Error('Not allowed by CORS'))
     },
+    allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With", "Trace-ID"],
     credentials: true 
 }
 
