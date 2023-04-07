@@ -17,16 +17,13 @@ const HomePage = (): JSX.Element => {
     return (
         <HomePageComponent>
             <BannerSection />
-            { signedin ? 
-                <DashboardView /> 
-            : <>
-                <SocialMediaSection />
-                {/* <RoadMapSection/> */}
-                <TavernSection />
-                <IdleQuestsSection />
-                <CollectionsSection />
-                <DeadQueenSection />
-            </> }
+            <DashboardView /> 
+            <SocialMediaSection />
+            {/* <RoadMapSection/> */}
+            <TavernSection />
+            <IdleQuestsSection />
+            <CollectionsSection />
+            <DeadQueenSection />
         </HomePageComponent>
     )
 }
