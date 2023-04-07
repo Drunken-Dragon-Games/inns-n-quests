@@ -5,6 +5,11 @@ import { useRouter } from "next/router"
 
 export const AccountBackend = {
 
+    async authenticateDevelopment(nickname: string): Promise<AuthenticationResult> {
+        const result = await accountRequest<AuthenticationResult>("post", "/development/authenticate", {nickname})
+        return result.data
+    },
+
     async authenticateDiscord(code: string): Promise<AuthenticationResult> {
         const result = await accountRequest<AuthenticationResult>("post", "/discord/authenticate", {code})
         console.log(result)

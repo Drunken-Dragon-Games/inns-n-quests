@@ -9,7 +9,7 @@ export type HealthStatus = {
 
 export type DeviceType = "Browser" | "Desktop" | "Mobile"
 
-export type AuthType = "Sig" | "Discord" | "Email"
+export type AuthType = "Sig" | "Discord" | "Email" | "Development"
 
 export type Address
     = { addressType: "stake", address: string }
@@ -19,6 +19,7 @@ export type Credentials
     = { ctype: "email-pass", deviceType: DeviceType, email: string, password: string }
     | { ctype: "sig", deviceType: DeviceType, publicKey: string, nonce: string, signedNonce: string }
     | { ctype: "discord", deviceType: DeviceType, authCode: string }
+    | { ctype: "development", deviceType: DeviceType, nickname: string }
 
 export type UserInfo = {
     userId: string, 

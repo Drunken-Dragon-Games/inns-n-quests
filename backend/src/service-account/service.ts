@@ -1,8 +1,8 @@
-import { AuthenticationTokens, IdentityService } from "../service-identity"
-import * as idenser from "../service-identity"
-import { AccountService, AuthenticateResult, SignOutResult } from "./service-spec"
-import { AssetManagementService } from "../service-asset-management"
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
+import { AssetManagementService } from "../service-asset-management"
+import * as idenser from "../service-identity"
+import { AuthenticationTokens, IdentityService } from "../service-identity"
+import { AccountService, AuthenticateResult, SignOutResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -36,6 +36,13 @@ export class AccountServiceDsl implements AccountService {
     }
 
     async unloadDatabaseModels(): Promise<void> {
+    }
+
+    async authenticateDevelopment(nickname: string): Promise<AuthenticateResult> {
+        const credentials: idenser.Credentials = {ctype: "development", deviceType: "Browser", nickname }
+        const authResponse = await this.identityService.authenticate(credentials)
+        if (authResponse.status != "ok") return authResponse
+        return await this.resolveSessionFromTokens(authResponse.tokens)
     }
 
     async authenticateDiscord(code: string): Promise<AuthenticateResult> {

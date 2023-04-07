@@ -2,10 +2,17 @@ import { Action, ThunkDispatch } from "@reduxjs/toolkit"
 import { NextRouter } from "next/router"
 import { AccountBackend, AuthenticationResult } from "./account-backend"
 import { AccountState, accountState, AccountThunk } from "./account-state"
+import { SupportedWallet } from "./account-models"
 
 const actions = accountState.actions
 
 export const AccountThunks = {
+
+    authenticateDevelopment: (nickname: string, router: NextRouter): AccountThunk => async (dispatch) => {
+        const response = await AccountBackend.authenticateDevelopment(nickname)
+        signin(response, dispatch)
+        setTimeout(() => router.push("/"), 100)
+    },
 
     authenticateDiscord: (code: string, router: NextRouter): AccountThunk => async (dispatch) => {
         const response = await AccountBackend.authenticateDiscord(code)
@@ -30,6 +37,10 @@ export const AccountThunks = {
         const response = await AccountBackend.refreshSession(refreshToken)
         const signedIn = signin(response, dispatch)
         callback && callback(signedIn)
+    },
+
+    connectWallet: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
+        
     },
 
     test: (): AccountThunk => async (dispatch) => {

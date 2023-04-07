@@ -23,6 +23,7 @@ import * as sessionsDB from "./sessions/session-db"
 import * as usersDB from "./users/users-db"
 import path from "path"
 import { Umzug } from "umzug"
+import { NODE_ENV } from "../module-ddu-app/settings"
 
 export interface IdentityServiceConfig 
     { network: string
@@ -130,6 +131,10 @@ export class IdentityServiceDsl implements IdentityService {
                     return { status: "ok", tokens }
                 }
             }
+        } else if (credentials.ctype === "development" && NODE_ENV === "development") {
+            const userId = await Users.registerSimpleUser(credentials.nickname)
+            const tokens = await this.sessions.create(userId, "Development", credentials.deviceType)
+            return { status: "ok", tokens }
         } else {
             return <AuthenticationResult>{}
         }

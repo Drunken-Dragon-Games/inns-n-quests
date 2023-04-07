@@ -1,6 +1,7 @@
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
 
 export interface AccountService {
+    authenticateDevelopment(nickname: string): Promise<AuthenticateResult>
     authenticateDiscord(code: string): Promise<AuthenticateResult>
     signout(sessionId: string): Promise<SignOutResult>
     refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult>

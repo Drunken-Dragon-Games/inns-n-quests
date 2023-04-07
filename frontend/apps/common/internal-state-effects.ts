@@ -37,3 +37,24 @@ export const useTagRemovals = <T>(currentValues: T[], initialValues: T[], revers
     }, [currentValues])
     return difference
 }
+
+/**
+ * Allows components to react to changes in the local storage api.
+ * 
+ * @param key 
+ * @param fallbackValue 
+ * @returns 
+ */
+export function useLocalStorage<T>(key: string, fallbackValue?: T) {
+    const [value, setValue] = useState(fallbackValue);
+    useEffect(() => {
+        const stored = localStorage.getItem(key);
+        setValue(stored ? JSON.parse(stored) : fallbackValue);
+    }, [fallbackValue, key]);
+
+    useEffect(() => {
+        localStorage.setItem(key, JSON.stringify(value));
+    }, [key, value]);
+
+    return [value, setValue] as const;
+}

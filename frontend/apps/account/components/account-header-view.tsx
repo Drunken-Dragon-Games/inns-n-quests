@@ -2,9 +2,9 @@ import { useRouter } from "next/router"
 import { useSelector } from "react-redux"
 import { Provider } from "react-redux"
 import styled from "styled-components"
-import { colors, DDButton, MessiriFontFamily, OswaldFontFamily, SimpleDDButton } from "../common"
-import { AccountState, accountStore } from "./account-state"
-import { AccountTransitions } from "./account-transitions"
+import { colors, DDButton, OswaldFontFamily, SimpleDDButton } from "../../common"
+import { AccountState, accountStore } from "../account-state"
+import { AccountTransitions } from "../account-transitions"
 
 const AccountHeaderContainer = styled.div`
     display: flex;
@@ -25,7 +25,7 @@ const Nickname = styled.div`
     font-size: 16px;
 `
 
-export const AccountHeaderContent = () => {
+const AccountHeaderContent = () => {
     const router = useRouter()
     const userInfo = useSelector((state: AccountState) => state.userInfo)
     const isDiscordFinish = AccountTransitions.useDiscordFinish(router)

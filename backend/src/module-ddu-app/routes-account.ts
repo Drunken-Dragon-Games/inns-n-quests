@@ -10,6 +10,15 @@ import { AuthenticationResult } from "../service-identity"
 export const accountRoutes = (accountService: AccountService) => {
     const router = Router()    
 
+    router.post("/development/authenticate", async (request: Request, response: Response) => {
+        const nickname: string = request.body.nickname
+        const result = await accountService.authenticateDevelopment(nickname)
+        if (result.status == "ok") {
+            return response.status(200).json(signJWTAndSetCookie(result, response))
+        } else 
+            return response.status(401).json(result)
+    })
+
     router.post("/discord/authenticate", async (request: Request, response: Response) => {
         const code: string = request.body.code
         const result = await accountService.authenticateDiscord(code)

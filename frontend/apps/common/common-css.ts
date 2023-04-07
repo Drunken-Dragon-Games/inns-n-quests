@@ -10,6 +10,7 @@ export const colors = {
     textGray:          "rgb(74, 83, 98)",
     textBeige:         "#CAC6BE",
     dduBackground:     "#0B1015",
+    dduBrackground2:   "rgb(20, 33, 44)",
     dduGold:           "#ca9f44",
 }
 
@@ -49,4 +50,13 @@ export const PixelFontFamily = css`
 
 export const OswaldFontFamily = css`
     font-family: ${fontFamilies.oswald};
+`
+
+export const Unselectable = css`
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 `

@@ -6,6 +6,14 @@ import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
 
 export class Users {
 
+    static registerSimpleUser = async (nickname: string): Promise<string> => {
+        const existingUser = await User.findOne({ where: { nickname } })
+        if (existingUser) return existingUser.userId
+        const nameIdentifier = await generateIdentenfier(nickname)
+        const user = await User.create({ nickname, nameIdentifier })
+        return user.userId
+    }
+
     static registerWithStakingAddress = async (stakeAddress: string): Promise<string> => {
         const existingRegistration = await UserStakeAdress.findOne({ where: { stakeAddress } });
         if (existingRegistration) return existingRegistration.userId
