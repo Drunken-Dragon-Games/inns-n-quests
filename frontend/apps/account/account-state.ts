@@ -1,8 +1,9 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { UserInfo } from "./account-models"
+import { UserInfo, WalletApi } from "./account-dsl"
 
 export interface AccountState {
     userInfo?: UserInfo
+    walletApi?: WalletApi
 }
 
 export type AccountStoreState = 
@@ -31,6 +32,10 @@ export const accountState = createSlice({
         updateUserInfo: (state, action: PayloadAction<Partial<UserInfo>>) => {
             if (state.userInfo == null) throw new Error("Cannot update user info when it is not set")
             state.userInfo = { ...state.userInfo, ...action.payload }
+        },
+
+        setWalletApi: (state, action: PayloadAction<WalletApi>) => {
+            state.walletApi = action.payload
         },
     }
 })

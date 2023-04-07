@@ -27,6 +27,11 @@ export const AccountBackend = {
         return result.data
     },
 
+    async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {
+        const result = await accountRequest("post", "/association/nonce", {stakeAddress})
+        return result.data
+    },
+
     async test(): Promise<void> {
         const result = await accountRequest("post", "/session/test")
         console.log(result)
@@ -42,6 +47,11 @@ export type AuthenticationResult
 export type SignOutResult
     = { status: "ok" }
     | { status: "unknown-session" }
+
+export type GetAssociationNonceResult
+    = { status: "ok", nonce: string }
+    | { status: "bad-address" }
+
 
 export type Session = {
     userId: string, 

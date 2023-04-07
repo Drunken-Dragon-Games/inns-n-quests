@@ -2,7 +2,7 @@ import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService } from "../service-asset-management"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, SignOutResult } from "./service-spec"
+import { AccountService, AuthenticateResult, GetAssociationNonceResult, SignOutResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -72,5 +72,9 @@ export class AccountServiceDsl implements AccountService {
         const dragonSilver = parseInt(invDragonSilver?.find(a => a.chain)?.quantity ?? "0")
         const dragonSilverToClaim = parseInt(invDragonSilver?.find(a => !a.chain)?.quantity ?? "0")
         return {status: "ok", tokens, inventory: {dragonSilver, dragonSilverToClaim}, info: sessionResponse.info}
+    }
+
+    async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {
+        return await this.identityService.createSigNonce(stakeAddress)
     }
 }

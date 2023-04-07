@@ -5,6 +5,7 @@ export interface AccountService {
     authenticateDiscord(code: string): Promise<AuthenticateResult>
     signout(sessionId: string): Promise<SignOutResult>
     refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult>
+    getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult>
 }
 
 export type AuthenticateResult
@@ -15,3 +16,7 @@ export type AuthenticateResult
 export type SignOutResult
     = { status: "ok" }
     | { status: "unknown-session" }
+
+export type GetAssociationNonceResult
+    = { status: "ok", nonce: string }
+    | { status: "bad-address" }

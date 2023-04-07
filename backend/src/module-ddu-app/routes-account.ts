@@ -60,6 +60,13 @@ export const accountRoutes = (accountService: AccountService) => {
         response.sendStatus(200)
     })
 
+    router.post("/association/nonce", async (request: Request, response: Response) => {
+        const stakeAddress: string = request.body.stakeAddress
+        const result = await accountService.getAssociationNonce(stakeAddress)
+        if (result.status == "ok") return response.status(200).json(result)
+        else return response.status(400).json(result)
+    })
+
     return router
 }
 

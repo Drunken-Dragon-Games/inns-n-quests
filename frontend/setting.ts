@@ -34,6 +34,9 @@ export const cardano_network = () : 0 | 1  =>{
     return number
 }
 
+export const networkName = (network: 0 | 1): string =>
+    network == 0 ? "testnet" : "mainnet"
+
 interface appsToShow {
     url: string
     name: string

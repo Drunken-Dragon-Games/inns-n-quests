@@ -2,7 +2,8 @@ import { Action, ThunkDispatch } from "@reduxjs/toolkit"
 import { NextRouter } from "next/router"
 import { AccountBackend, AuthenticationResult } from "./account-backend"
 import { AccountState, accountState, AccountThunk } from "./account-state"
-import { SupportedWallet } from "./account-models"
+import { SupportedWallet } from "./account-dsl"
+import { cardano_network, networkName } from "../../setting"
 
 const actions = accountState.actions
 
@@ -39,8 +40,31 @@ export const AccountThunks = {
         callback && callback(signedIn)
     },
 
-    connectWallet: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
+    associateWallet: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
         
+        dispatch(actions.setWalletApi({ ctype: "loading" }))
+
+        // Extract wallet api
+        const api = 
+            wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
+            wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
+            undefined
+        if (!api) 
+            return dispatch(actions.setWalletApi({ ctype: "error", error: `${wallet}'s browser extension not found.` }))
+        const net: 1 | 0 = await api.getNetworkId()
+        const currentNetwork = cardano_network()
+        if (net != currentNetwork) 
+            return dispatch(actions.setWalletApi({ ctype: "error", error: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
+        dispatch(actions.setWalletApi({ ctype: "api", wallet, api }))
+        
+        // Extract stake address
+        const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
+        const raw = await api.getRewardAddresses()
+        const serializedStakeAddress = raw[0]
+        const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32() 
+
+        // Nonce flow
+
     },
 
     test: (): AccountThunk => async (dispatch) => {

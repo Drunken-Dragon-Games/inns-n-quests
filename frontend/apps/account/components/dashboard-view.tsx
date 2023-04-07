@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
 import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1 } from "../../common"
-import { UserInfo } from "../account-models"
+import { UserInfo } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 
 const WalletAssociationWidgetContainer = styled.div`
