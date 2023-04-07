@@ -10,7 +10,7 @@ asset-claim-dsl.ts -> has claim logic
 ## Dragon Silver Widjet TODO
 
 - [ ] Figure this shit out
-- [ ] Dispplay DS to claim
+- [x] Dispplay DS to claim
 - [ ] Display current DS
 - [ ] claim DS to Claim
 

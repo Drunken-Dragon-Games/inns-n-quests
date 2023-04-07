@@ -1,7 +1,7 @@
 import { ReactNode } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
-import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1 } from "../../common"
+import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue } from "../../common"
 import { UserInfo } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 
@@ -64,12 +64,15 @@ const WalletAssociationWidget = (userInfo: UserInfo) => {
 
 const DragonSilverWidgetContainer = styled.div`
     width: 100%;
+    color: white;
 `
 
 const DragonSilverWidget = (userInfo: UserInfo) => {
+    const lastAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
+    const renderAmount = useNumberAnimation(lastAmount, userInfo.dragonSilverToClaim, true)
     return (
         <DragonSilverWidgetContainer>
-
+            <span>{renderAmount}</span>
         </DragonSilverWidgetContainer>
     )
 }
