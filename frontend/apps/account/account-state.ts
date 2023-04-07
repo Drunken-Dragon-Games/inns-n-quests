@@ -34,6 +34,11 @@ export const accountState = createSlice({
             state.userInfo = { ...state.userInfo, ...action.payload }
         },
 
+        addStakeAddress: (state, action: PayloadAction<string>) => {
+            if (state.userInfo == null) throw new Error("Cannot add stake address when user info is not set")
+            state.userInfo.stakeAddresses.push(action.payload)
+        },
+
         setWalletApi: (state, action: PayloadAction<WalletApi>) => {
             state.walletApi = action.payload
         },
@@ -42,5 +47,5 @@ export const accountState = createSlice({
 
 export const accountStore = configureStore({
     reducer: accountState.reducer,
-    //middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
 })

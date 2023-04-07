@@ -12,8 +12,6 @@ export const AccountBackend = {
 
     async authenticateDiscord(code: string): Promise<AuthenticationResult> {
         const result = await accountRequest<AuthenticationResult>("post", "/discord/authenticate", {code})
-        console.log(result)
-        console.log(result.headers)
         return result.data
     },
 
@@ -29,6 +27,11 @@ export const AccountBackend = {
 
     async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {
         const result = await accountRequest("post", "/association/nonce", {stakeAddress})
+        return result.data
+    },
+
+    async submitAssociationSignature(nonce: string, signedMessage: string): Promise<SubmitAssociationSignatureResult> {
+        const result = await accountRequest("post", "/association/signature", {nonce, signedMessage})
         return result.data
     },
 
@@ -51,6 +54,11 @@ export type SignOutResult
 export type GetAssociationNonceResult
     = { status: "ok", nonce: string }
     | { status: "bad-address" }
+
+export type SubmitAssociationSignatureResult
+    = { status: "ok" }
+    | { status: "bad-credentials" }
+    | { status: "stake-address-used" }
 
 
 export type Session = {

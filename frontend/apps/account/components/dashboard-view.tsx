@@ -4,6 +4,7 @@ import styled from "styled-components"
 import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1 } from "../../common"
 import { UserInfo } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
+import { AccountTransitions } from "../account-transitions"
 
 const WalletAssociationWidgetContainer = styled.div`
     width: 100%;
@@ -39,8 +40,8 @@ const AssociatedWalletRow = (props: { stakeAddress: string }) =>
 
 const WalletAssociationWidget = (userInfo: UserInfo) => {
     const dropdownButtons = {
-        "Nami": () => {},
-        "Eternl": () => {},
+        "Nami": () => { AccountTransitions.associateWallet("Nami") },
+        "Eternl": () => { AccountTransitions.associateWallet("Eternl") },
     }
     return (
         <WalletAssociationWidgetContainer>

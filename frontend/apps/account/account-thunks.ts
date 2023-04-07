@@ -63,8 +63,19 @@ export const AccountThunks = {
         const serializedStakeAddress = raw[0]
         const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32() 
 
-        // Nonce flow
+        // Request nonce
+        const nonceResponse = await AccountBackend.getAssociationNonce(stakeAddress)
+        if (nonceResponse.status != "ok") 
+            return dispatch(actions.setWalletApi({ ctype: "error", error: nonceResponse.status }))
+        const nonce = nonceResponse.nonce
 
+        // Sign nonce
+        const hex = require("string-hex")
+        const signedMessage = await api.signData(serializedStakeAddress, hex(`${nonce}`))
+        const signatureResponse = await AccountBackend.submitAssociationSignature(nonce, signedMessage)
+        if (signatureResponse.status != "ok") 
+            return dispatch(actions.setWalletApi({ ctype: "error", error: signatureResponse.status }))
+        dispatch(actions.addStakeAddress(stakeAddress))
     },
 
     test: (): AccountThunk => async (dispatch) => {
