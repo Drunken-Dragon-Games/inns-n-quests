@@ -5,6 +5,7 @@ export * from "./internal-state-effects"
 export * from "./staking-quests"
 export * from "./time-effects"
 export * from "./units"
+export * from "./token-displayer"
 
 export type IdSet<T> = { [id: string]: T }
 
