@@ -1,7 +1,7 @@
 import { ReactNode } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
-import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer } from "../../common"
+import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton } from "../../common"
 import { UserInfo } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 
@@ -66,9 +66,17 @@ const DragonSilverWidgetContainer = styled.div`
   width: 100%;
   color: white;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-around;
   --min-font-size: calc(14px + 0.45vw);
+`;
+
+const TokenRowContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 10px;
 `;
 
 const IndividualTokenPosition = styled.div`
@@ -77,8 +85,15 @@ const IndividualTokenPosition = styled.div`
   &:first-child {
     margin-left: 0vw;
   }
-  width: max(15vw, 100px);
+  width: max(20vw, 100px);
   position: relative;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
 `;
 
 const DragonSilverWidget = (userInfo: UserInfo) => {
@@ -86,16 +101,21 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
     const renderedOnChain = useNumberAnimation(lastAmount, userInfo.dragonSilver, true)
     const renderedClaimable = useNumberAnimation(lastAmount, userInfo.dragonSilverToClaim, true)
     return (
-        <DragonSilverWidgetContainer>
-            <IndividualTokenPosition>
-                <TokenDisplayer icon="dragon_silver" number={renderedOnChain}  />
-            </IndividualTokenPosition>
-            <IndividualTokenPosition>
-                <TokenDisplayer icon="dragon_silver_toClaim" number={renderedClaimable}  />
-            </IndividualTokenPosition>
-        </DragonSilverWidgetContainer>
-    )
-}
+      <DragonSilverWidgetContainer>
+        <TokenRowContainer>
+          <IndividualTokenPosition>
+            <TokenDisplayer icon="dragon_silver" number={renderedOnChain} />
+          </IndividualTokenPosition>
+          <IndividualTokenPosition>
+            <TokenDisplayer icon="dragon_silver_toClaim" number={renderedClaimable} />
+          </IndividualTokenPosition>
+        </TokenRowContainer>
+        <ButtonContainer>
+          <ClaimButton onClick={()=>{console.log("not implemented yet")}}>CLaim</ClaimButton>
+        </ButtonContainer>
+      </DragonSilverWidgetContainer>
+    );
+  };
 
 const DashboardCardContainer = styled.div`
     ${MessiriFontFamily}
