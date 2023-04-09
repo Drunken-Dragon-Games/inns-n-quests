@@ -4,6 +4,7 @@ import styled from 'styled-components';
 const OvalContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   background-color: rgba(240, 240, 240, 0.1); // Lighter gray background
   border: 1px solid rgba(128, 128, 128, 0.3); // Gray border
   border-radius: 25px;

@@ -65,6 +65,9 @@ const WalletAssociationWidget = (userInfo: UserInfo) => {
 const DragonSilverWidgetContainer = styled.div`
   width: 100%;
   color: white;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
   --min-font-size: calc(14px + 0.45vw);
 `;
 
@@ -74,13 +77,19 @@ const IndividualTokenPosition = styled.div`
   &:first-child {
     margin-left: 0vw;
   }
+  width: max(15vw, 100px);
+  position: relative;
 `;
 
 const DragonSilverWidget = (userInfo: UserInfo) => {
     const lastAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
+    const renderedOnChain = useNumberAnimation(lastAmount, userInfo.dragonSilver, true)
     const renderedClaimable = useNumberAnimation(lastAmount, userInfo.dragonSilverToClaim, true)
     return (
         <DragonSilverWidgetContainer>
+            <IndividualTokenPosition>
+                <TokenDisplayer icon="dragon_silver" number={renderedOnChain}  />
+            </IndividualTokenPosition>
             <IndividualTokenPosition>
                 <TokenDisplayer icon="dragon_silver_toClaim" number={renderedClaimable}  />
             </IndividualTokenPosition>
