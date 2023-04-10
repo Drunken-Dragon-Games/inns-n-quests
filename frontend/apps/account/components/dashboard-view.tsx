@@ -97,9 +97,10 @@ const ButtonContainer = styled.div`
 `;
 
 const DragonSilverWidget = (userInfo: UserInfo) => {
-    const lastAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
-    const renderedOnChain = useNumberAnimation(lastAmount, userInfo.dragonSilver, true)
-    const renderedClaimable = useNumberAnimation(lastAmount, userInfo.dragonSilverToClaim, true)
+    const lastonChainAmount = useRememberLastValue(userInfo.dragonSilver, 0)
+    const lastClaimedAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
+    const renderedOnChain = useNumberAnimation(lastonChainAmount, userInfo.dragonSilver, true)
+    const renderedClaimable = useNumberAnimation(lastClaimedAmount, userInfo.dragonSilverToClaim, true)
     return (
       <DragonSilverWidgetContainer>
         <TokenRowContainer>
