@@ -18,3 +18,6 @@ export type WalletApi
     = { ctype: "api", wallet: SupportedWallet, api: any }
     | { ctype: "error", error: string }
     | { ctype: "loading" }
+
+export type ClaimState = {}
+export type ClaimRequested = {ctype: "claim-state-claim-requested", stakeAddress: string, wallet: SupportedWallet}

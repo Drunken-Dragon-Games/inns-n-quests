@@ -38,8 +38,8 @@ export const AccountBackend = {
         console.log(result.headers)
     },
 
-    async claim(): Promise<claimAssetResult> {
-        const result = await userRequesr("POST", "/claimDS")
+    async claim(stakeAddress: string): Promise<ClaimAssetResult> {
+        const result = await accountRequest("POST", "/assets/claim-dragon-silver", {stakeAddress})
         return result.data
     }
 }
@@ -57,7 +57,7 @@ export type GetAssociationNonceResult
     = { status: "ok", nonce: string }
     | { status: "bad-address" }
 
-export type claimAssetResult 
+export type ClaimAssetResult 
     = { status: "ok", claimId: string, tx: string, remainingAmount: number }
     | { status: "invalid", reason: string, remainingAmount: number }
 
@@ -93,7 +93,7 @@ async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Meth
 just  to keep working wile i wait for the senior Devs aprobal */
 async function userRequesr<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
     const traceId = v4()
-    const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000/", "api")
+    const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "api")
         console.log(`${method}: ${endpoint}\ntrace-id: ${traceId}`)
     return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
         method,

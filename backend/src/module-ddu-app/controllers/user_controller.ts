@@ -76,15 +76,15 @@ export const claimDragonSilver = (assetManagementService: AssetManagementService
     const assetList: assets.ListResponse = await assetManagementService.list(id, { policies: [ dsPolicyId ] }, logger)
     if (assetList.status == "ok"){
         const inventory: assets.Inventory = assetList.inventory
-        const DSTC = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
+        const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
         const options = {
             unit: "DragonSilver",
             policyId: dsPolicyId,
-            quantity: DSTC
+            quantity: dragonSilverToClaim
         }
         const claimResponse = await assetManagementService.claim(id, stakeAddress, options, logger)
         if (claimResponse.status == "ok") return response.status(200).json({ ...claimResponse, remainingAmount: 0 })
-        else  return response.status(409).json({ ...claimResponse, remainingAmount: parseInt(DSTC) })
+        else  return response.status(409).json({ ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) })
     }
 }
 

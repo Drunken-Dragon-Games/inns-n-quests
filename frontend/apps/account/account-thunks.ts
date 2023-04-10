@@ -72,8 +72,8 @@ export const AccountThunks = {
         await AccountBackend.test()
     },
 
-    claim: (): AccountThunk => async (dispatch) => {
-        const claimResponse =  await AccountBackend.claim()
+    claim: (stakeAddress: string): AccountThunk => async (dispatch) => {
+        const claimResponse =  await AccountBackend.claim(stakeAddress)
         //storing it as a reference to use in the future IDK maybe i need to add it to the state
         const txRef = useRef ("no claiming transaction found")
         if (claimResponse.status == "ok"){

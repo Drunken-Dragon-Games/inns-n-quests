@@ -67,6 +67,8 @@ export const accountRoutes = (accountService: AccountService) => {
         else return response.status(400).json(result)
     })
 
+    router.post("/assets/claim-dragon-silver")
+
     return router
 }
 
