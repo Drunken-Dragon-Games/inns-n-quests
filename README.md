@@ -11,7 +11,7 @@ asset-claim-dsl.ts -> has claim logic
 
 - [ ] Figure this shit out
 - [x] Dispplay DS to claim
-- [ ] Display current DS
+- [x] Display current DS
 - [ ] claim DS to Claim
 
 
