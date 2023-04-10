@@ -4,6 +4,7 @@ import { AccountBackend, AuthenticationResult } from "./account-backend"
 import { AccountState, accountState, AccountThunk } from "./account-state"
 import { SupportedWallet } from "./account-dsl"
 import { cardano_network, networkName } from "../../setting"
+import { useRef } from "react"
 
 const actions = accountState.actions
 
@@ -70,6 +71,17 @@ export const AccountThunks = {
     test: (): AccountThunk => async (dispatch) => {
         await AccountBackend.test()
     },
+
+    claim: (): AccountThunk => async (dispatch) => {
+        const claimResponse =  await AccountBackend.claim()
+        //storing it as a reference to use in the future IDK maybe i need to add it to the state
+        const txRef = useRef ("no claiming transaction found")
+        if (claimResponse.status == "ok"){
+            txRef.current = claimResponse.tx
+            //TODO: update dragon silver after tx is confirmed
+            dispatch(actions.updateUserInfo({dragonSilverToClaim: 0}))
+        }
+    }
 }
 
 function signin(response: AuthenticationResult, dispatch: ThunkDispatch<AccountState, unknown, Action<string>>): boolean {

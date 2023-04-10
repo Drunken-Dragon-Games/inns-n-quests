@@ -5,7 +5,8 @@ import {
     logout,
     getDragonSilver,
     getAvailableProfilePicks,
-    setNickName
+    setNickName,
+    claimDragonSilver
 } from "../controllers/user_controller";
 import { IdentityService } from "../../service-identity";
 import { AssetManagementService } from "../../service-asset-management";
@@ -18,6 +19,7 @@ const loadUserRoutes = (identityService: IdentityService, assetManagementService
     router.get('/logout', jwtMiddleware, logout(identityService));
     router.get('/availablePicks', jwtMiddleware, getAvailableProfilePicks)
     router.post('/setNickName', jwtMiddleware, setNickName(identityService))
+    router.post('/claimDS', jwtMiddleware, claimDragonSilver(assetManagementService, wellKnownPolicies))
     return router
 }
 

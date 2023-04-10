@@ -4,6 +4,7 @@ import styled from "styled-components"
 import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton } from "../../common"
 import { UserInfo } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
+import { AccountTransitions } from "../account-transitions"
 
 const WalletAssociationWidgetContainer = styled.div`
     width: 100%;
@@ -112,7 +113,7 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
           </IndividualTokenPosition>
         </TokenRowContainer>
         <ButtonContainer>
-          <ClaimButton onClick={()=>{console.log("not implemented yet")}}>CLaim</ClaimButton>
+          <ClaimButton disabled onClick={AccountTransitions.claimDS}>CLaim</ClaimButton>
         </ButtonContainer>
       </DragonSilverWidgetContainer>
     );

@@ -95,4 +95,9 @@ export const AccountTransitions = {
         console.log("get cookies", getCookies({ path: "/api/account/session/test", domain: "localhost:5000" }))
         dispatch(AccountThunks.test())
     },
+
+    claimDS: () => {
+        console.log("Claiming DS");
+        dispatch(AccountThunks.claim())
+    }
 }
