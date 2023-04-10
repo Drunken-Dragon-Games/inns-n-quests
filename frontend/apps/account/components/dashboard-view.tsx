@@ -40,8 +40,8 @@ const AssociatedWalletRow = (props: { stakeAddress: string }) =>
 
 const WalletAssociationWidget = (userInfo: UserInfo) => {
     const dropdownButtons = {
-        "Nami": () => {},
-        "Eternl": () => {},
+        "Nami": () => { AccountTransitions.associateWallet("Nami") },
+        "Eternl": () => { AccountTransitions.associateWallet("Eternl") },
     }
     return (
         <WalletAssociationWidgetContainer>

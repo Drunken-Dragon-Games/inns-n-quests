@@ -2,7 +2,7 @@ import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService } from "../service-asset-management"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, GetAssociationNonceResult, SignOutResult } from "./service-spec"
+import { AccountService, AuthenticateResult, GetAssociationNonceResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -76,5 +76,12 @@ export class AccountServiceDsl implements AccountService {
 
     async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {
         return await this.identityService.createSigNonce(stakeAddress)
+    }
+
+    async submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult> {
+        const associateResponse = await this.identityService.associate(userId, 
+            {ctype: "sig", deviceType: "Browser", publicKey, nonce, signedNonce: signature })
+        if (associateResponse.status == "discord-used") throw new Error("Discord accounts should not affect here.")
+        return associateResponse
     }
 }

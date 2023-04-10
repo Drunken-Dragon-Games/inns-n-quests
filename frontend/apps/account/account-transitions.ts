@@ -6,6 +6,7 @@ import { discord_client_id, discord_redirect_uri, discord_response_type, discord
 import { notEmpty } from "../common"
 import { accountState, accountStore } from "./account-state"
 import { AccountThunks } from "./account-thunks"
+import { SupportedWallet } from "./account-dsl"
 
 const actions = accountState.actions
 
@@ -17,12 +18,12 @@ export const AccountTransitions = {
         // TODO: We need to figure out how to check if the user is signed in on the server side.
         // There is a known bug in most browsers where cross site cookies are invisible to the browser.
         if (typeof window === "undefined") return false
-        //const hasAuthCookie = hasCookie("access")
+        const hasAuthCookie = hasCookie("access")
         const hasRefreshToken = notEmpty(localStorage.getItem("refresh"))
         const hasUserInfo = notEmpty(accountStore.getState().userInfo)
-        const signed = /*hasAuthCookie &&*/ hasRefreshToken && hasUserInfo
-        const missingData = !signed && (/*hasAuthCookie ||*/ hasRefreshToken || hasUserInfo)
-        if (missingData) console.error("Missing data for signed in user.", /*"Has auth cookie:", hasAuthCookie,*/ "has refresh token:", hasRefreshToken, "has user info:", hasUserInfo)
+        const signed = hasAuthCookie && hasRefreshToken && hasUserInfo
+        //const missingData = !signed && (hasAuthCookie || hasRefreshToken || hasUserInfo)
+        //if (missingData) console.error("Missing data for signed in user.", "Has auth cookie:", hasAuthCookie, "has refresh token:", hasRefreshToken, "has user info:", hasUserInfo)
         return signed
     },
 
@@ -89,6 +90,10 @@ export const AccountTransitions = {
      */
     refreshSession(callback?: (signed: boolean) => void): void {
         dispatch(AccountThunks.refreshSession(callback))
+    },
+
+    associateWallet(wallet: SupportedWallet): void {
+        dispatch(AccountThunks.associateWallet(wallet))
     },
 
     test: () => {

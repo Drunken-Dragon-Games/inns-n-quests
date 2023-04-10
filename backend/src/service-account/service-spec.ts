@@ -6,6 +6,7 @@ export interface AccountService {
     signout(sessionId: string): Promise<SignOutResult>
     refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult>
     getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult>
+    submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult>
 }
 
 export type AuthenticateResult
@@ -20,3 +21,8 @@ export type SignOutResult
 export type GetAssociationNonceResult
     = { status: "ok", nonce: string }
     | { status: "bad-address" }
+
+export type SubmitAssociationSignatureResult
+    = { status: "ok" }
+    | { status: "bad-credentials" }
+    | { status: "stake-address-used" }

@@ -1,11 +1,12 @@
-import { v4 } from "uuid"
 import { Response, Router } from "express"
 import { Request } from "express-jwt"
-import { AccountService } from "../service-account"
 import jwt from "jsonwebtoken"
+import { v4 } from "uuid"
+import { AccountService } from "../service-account"
+import { AuthenticationResult } from "../service-identity"
 import { COOKIE_EXPIRACY, SECRET_KEY } from "./settings"
 import { AuthRequest } from "./types"
-import { AuthenticationResult } from "../service-identity"
+import { jwtMiddleware } from "./middleware/jwt_middleware"
 
 export const accountRoutes = (accountService: AccountService) => {
     const router = Router()    
@@ -28,8 +29,8 @@ export const accountRoutes = (accountService: AccountService) => {
             return response.status(401).json(result)
     })
 
-    router.post("/session/signout", async (request: Request, response: Response) => {
-        const sessionId = (request as AuthRequest).auth.sessionId
+    router.post("/session/signout", jwtMiddleware, async (request: Request, response: Response) => {
+        const sessionId = request.auth!.sessionId
         const result = await accountService.signout(sessionId)
         response.cookie("access", "", { maxAge: 0, sameSite: "none", secure: true })
         if (result.status == "ok") return response.status(200).json(result)
@@ -49,6 +50,22 @@ export const accountRoutes = (accountService: AccountService) => {
             response.cookie("access", "", { maxAge: 0, sameSite: "none", secure: true })
             return response.status(401).json({ status: "bad-credentials" })
         }
+    })
+
+    router.post("/association/nonce", jwtMiddleware, async (request: Request, response: Response) => {
+        const stakeAddress: string = request.body.stakeAddress
+        const result = await accountService.getAssociationNonce(stakeAddress)
+        if (result.status == "ok") return response.status(200).json(result)
+        else return response.status(400).json(result)
+    })
+
+    router.post("/association/signature", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const nonce = request.body.nonce
+        const { key, signature } = request.body.signedMessage
+        const result = await accountService.submitAssociationSignature(userId, nonce, key, signature)
+        if (result.status == "ok") return response.status(200).json(result)
+        else return response.status(400).json(result)
     })
 
     router.post("/session/test", async (request: Request, response: Response) => {
