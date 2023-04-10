@@ -83,8 +83,8 @@ export const claimDragonSilver = (assetManagementService: AssetManagementService
             quantity: DSTC
         }
         const claimResponse = await assetManagementService.claim(id, stakeAddress, options, logger)
-        if (claimResponse.status == "ok") return response.status(200).json({ ...claimResponse, remainingAmount: "0" })
-        else  return response.status(409).json({ ...claimResponse, remainingAmount: DSTC })
+        if (claimResponse.status == "ok") return response.status(200).json({ ...claimResponse, remainingAmount: 0 })
+        else  return response.status(409).json({ ...claimResponse, remainingAmount: parseInt(DSTC) })
     }
 }
 
