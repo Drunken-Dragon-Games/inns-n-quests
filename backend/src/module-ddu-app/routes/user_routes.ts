@@ -5,7 +5,8 @@ import {
     logout,
     getDragonSilver,
     getAvailableProfilePicks,
-    setNickName
+    setNickName,
+    claimDragonSilver
 } from "../controllers/user_controller";
 import { IdentityService } from "../../service-identity";
 import { AssetManagementService } from "../../service-asset-management";

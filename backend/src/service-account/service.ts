@@ -2,7 +2,7 @@ import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService } from "../service-asset-management"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, GetAssociationNonceResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -74,14 +74,58 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok", tokens, inventory: {dragonSilver, dragonSilverToClaim}, info: sessionResponse.info}
     }
 
+    async getUserInventory(userId: string): Promise<getUserInventoryResult> {
+        const assetList = await this.assetManagementService.list(userId, { policies: onlyPolicies(this.wellKnownPolicies) })
+        if (assetList.status != "ok") return {status: "unknown-user"}
+        const inventory = assetList.inventory
+        const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
+        const dragonSilver = parseInt(invDragonSilver?.find(a => a.chain)?.quantity ?? "0")
+        const dragonSilverToClaim = parseInt(invDragonSilver?.find(a => !a.chain)?.quantity ?? "0")
+        return {status: "ok", dragonSilver, dragonSilverToClaim}
+    }
+
     async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {
         return await this.identityService.createSigNonce(stakeAddress)
     }
 
-    async submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult> {
+    async submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string){
         const associateResponse = await this.identityService.associate(userId, 
             {ctype: "sig", deviceType: "Browser", publicKey, nonce, signedNonce: signature })
         if (associateResponse.status == "discord-used") throw new Error("Discord accounts should not affect here.")
         return associateResponse
     }
+
+    async claimDragonSilver(userId: string, stakeAddress: string): Promise<ClaimDragonSilverResult>{
+        const dsPolicyId = this.wellKnownPolicies.dragonSilver.policyId
+        //For now we just claim ALL OF IT
+        //const { amount } = request.body
+        const assetList = await this.assetManagementService.list(userId, { policies: [ dsPolicyId ] })
+        if (assetList.status == "ok"){
+            const inventory= assetList.inventory
+            const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
+            const options = {
+                unit: "DragonSilver",
+                policyId: dsPolicyId,
+                quantity: dragonSilverToClaim
+            }
+            const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, options)
+            if (claimResponse.status == "ok") return { ...claimResponse, remainingAmount: 0 }
+            else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
+        }
+        else return { status: "invalid", reason: assetList.status}
+    }
+
+    async claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
+        return this.assetManagementService.submitClaimSignature(claimId, tx, witness)
+    }
+
+    async claimStatus(claimId: string): Promise<ClaimStatusResult> {
+        return this.assetManagementService.claimStatus(claimId)
+    }
+
+    async grantTest(userId: string): Promise<void>{
+        if (process.env.NODE_ENV !== "development") return 
+        this.assetManagementService.grant(userId, {policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: "100"})
+    }
 }
+

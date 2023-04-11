@@ -66,6 +66,28 @@ const getDragonSilver = (assetManagementService: AssetManagementService, wellKno
     }
 }
 
+export const claimDragonSilver = (assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => async (request: Request, response: Response) => {
+    const dsPolicyId = wellKnownPolicies.dragonSilver.policyId
+    const logger = withTracing(request)
+    const id: string = (request as AuthRequest).auth.userId
+    const stakeAddress = request.auth!.stake_address
+    //For now we just claim ALL OF IT
+    //const { amount } = request.body
+    const assetList: assets.ListResponse = await assetManagementService.list(id, { policies: [ dsPolicyId ] }, logger)
+    if (assetList.status == "ok"){
+        const inventory: assets.Inventory = assetList.inventory
+        const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
+        const options = {
+            unit: "DragonSilver",
+            policyId: dsPolicyId,
+            quantity: dragonSilverToClaim
+        }
+        const claimResponse = await assetManagementService.claim(id, stakeAddress, options, logger)
+        if (claimResponse.status == "ok") return response.status(200).json({ ...claimResponse, remainingAmount: 0 })
+        else  return response.status(409).json({ ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) })
+    }
+}
+
 const getAvailableProfilePicks = async (request: Request, response: Response, next: NextFunction) => {
     const logger = withTracing(request)
     //TODO: get from asset manager

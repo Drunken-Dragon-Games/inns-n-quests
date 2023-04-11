@@ -5,12 +5,19 @@ export * from "./internal-state-effects"
 export * from "./staking-quests"
 export * from "./time-effects"
 export * from "./units"
+export * from "./token-displayer"
 
 export type IdSet<T> = { [id: string]: T }
 
 export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
     return value !== null && value !== undefined
 }
+
+export function isEmpty<TValue>(value: TValue | null | undefined): value is null | undefined {
+    return value == null || value == undefined
+}
+
+export const not = (x: boolean): boolean => !x
 
 /**
  * Taken from https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0

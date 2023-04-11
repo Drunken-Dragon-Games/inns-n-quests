@@ -1,10 +1,11 @@
 import { ReactNode } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
-import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1 } from "../../common"
+import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton } from "../../common"
 import { UserInfo } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
+import { AccountThunks } from "../account-thunks"
 
 const WalletAssociationWidgetContainer = styled.div`
     width: 100%;
@@ -64,13 +65,64 @@ const WalletAssociationWidget = (userInfo: UserInfo) => {
 }
 
 const DragonSilverWidgetContainer = styled.div`
-    width: 100%;
-`
+  width: 100%;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  --min-font-size: calc(14px + 0.45vw);
+`;
+
+const TokenRowContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 10px;
+`;
+
+const IndividualTokenPosition = styled.div`
+  margin: auto 0vw;
+  margin-left: 1.5vw;
+  &:first-child {
+    margin-left: 0vw;
+  }
+  width: max(20vw, 100px);
+  position: relative;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+`;
 
 const DragonSilverWidget = (userInfo: UserInfo) => {
+    const lastonChainAmount = useRememberLastValue(userInfo.dragonSilver, 0)
+    const lastClaimedAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
+    const renderedOnChain = useNumberAnimation(lastonChainAmount, userInfo.dragonSilver, true)
+    const renderedClaimable = useNumberAnimation(lastClaimedAmount, userInfo.dragonSilverToClaim, true)
+    const claimState = useSelector((state: AccountState) => state.claimState)
+    const dropdownButtons = {
+        "Nami": () => { AccountTransitions.claimDragonSilver("Nami") },
+        "Eternl": () => { AccountTransitions.claimDragonSilver("Eternl") },
+    }
     return (
         <DragonSilverWidgetContainer>
-
+            <TokenRowContainer>
+                <IndividualTokenPosition>
+                    <TokenDisplayer icon="dragon_silver" number={renderedOnChain} />
+                </IndividualTokenPosition>
+                <IndividualTokenPosition>
+                    <TokenDisplayer icon="dragon_silver_toClaim" number={renderedClaimable} />
+                </IndividualTokenPosition>
+            </TokenRowContainer>
+            <ButtonContainer>
+                <button onClick = {AccountTransitions.grantTest}>Grant</button>
+                <DropdownMenu buttons={dropdownButtons} />
+            </ButtonContainer>
+            <span>{claimState.ctype} {claimState.ctype == "claim-state-error"? claimState.error: ""}</span>
         </DragonSilverWidgetContainer>
     )
 }

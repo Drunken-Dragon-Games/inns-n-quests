@@ -1,9 +1,10 @@
 import { Action, ThunkDispatch } from "@reduxjs/toolkit"
 import { NextRouter } from "next/router"
-import { AccountBackend, AuthenticationResult } from "./account-backend"
-import { AccountState, accountState, AccountThunk } from "./account-state"
-import { SupportedWallet } from "./account-dsl"
 import { cardano_network, networkName } from "../../setting"
+import { isEmpty } from "../common"
+import { AccountBackend, AuthenticationResult } from "./account-backend"
+import { SupportedWallet } from "./account-dsl"
+import { AccountState, AccountThunk, accountState } from "./account-state"
 
 const actions = accountState.actions
 
@@ -76,11 +77,76 @@ export const AccountThunks = {
         if (signatureResponse.status != "ok") 
             return dispatch(actions.setWalletApi({ ctype: "error", error: signatureResponse.status }))
         dispatch(actions.addStakeAddress(stakeAddress))
+        dispatch(AccountThunks.updateInventory())
+    },
+
+    updateInventory: (): AccountThunk => async (dispatch) => {
+        const inventoryResult = await AccountBackend.getUserInventory()
+        if (inventoryResult.status !== "ok")
+            return dispatch(actions.setWalletApi({ ctype: "error", error: inventoryResult.status }))
+        dispatch(actions.updateUserInfo({dragonSilver: inventoryResult.dragonSilver , dragonSilverToClaim: inventoryResult.dragonSilverToClaim}))
     },
 
     test: (): AccountThunk => async (dispatch) => {
         await AccountBackend.test()
     },
+
+    claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
+        try {dispatch(actions.setClaimState({ctype: "claim-state-loading"}))
+        // Extract wallet api
+        const walletApi = 
+            wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
+            wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
+            undefined
+        
+        if (isEmpty(walletApi))
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `${wallet}'s browser extension not found.` }))
+        const net: 1 | 0 = await walletApi.getNetworkId()
+        const currentNetwork = cardano_network()
+        if (net != currentNetwork) 
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
+        
+        // Extract stake address
+        const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
+        const raw = await walletApi.getRewardAddresses()
+        const serializedStakeAddress = raw[0]
+        const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32()
+        const claimResponse =  await AccountBackend.claim(stakeAddress)
+        
+        if (claimResponse.status !== "ok")
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: claimResponse.reason }))
+
+        dispatch(actions.updateUserInfo({dragonSilverToClaim: claimResponse.remainingAmount}))
+        const witness = await walletApi.signTx(claimResponse.tx, true)
+        const signature = await AccountBackend.claimSignAndSubmit(witness, claimResponse.tx, claimResponse.claimId )
+        if ( signature.status !== "ok")
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `Somethig when wrong on the backend ${signature.reason}` }))
+        dispatch(actions.setClaimState({ ctype: "claim-state-submited" }))
+        dispatch(AccountThunks.claimStatus(claimResponse.claimId))
+        }catch (error: any){
+            console.log(error.message);
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: error.message}))
+        }
+    },
+
+    claimStatus: ( claimId: string): AccountThunk => async (dispatch) => {
+        setTimeout(async () => {
+            const statusResult = await AccountBackend.claimStatus(claimId)
+            if (statusResult.status !== "ok")
+                return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: "could not retrive bloqchain transaction status"}))
+            if (statusResult.claimStatus == "created" || statusResult.claimStatus == "submitted")
+                return dispatch(AccountThunks.claimStatus(claimId))
+            if (statusResult.claimStatus == "timed-out")
+                return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: "transaction timed out"}))
+            dispatch(actions.setClaimState({ ctype: "claim-state-succeded"}))
+            setTimeout( () => dispatch(actions.setClaimState({ ctype: "claim-state-idle" })), 5000)
+        }, 2000)
+    },
+
+    testGrant: (): AccountThunk => async (dispatch) => {
+        await AccountBackend.granteTest()
+        dispatch(AccountThunks.updateInventory())
+    }
 }
 
 function signin(response: AuthenticationResult, dispatch: ThunkDispatch<AccountState, unknown, Action<string>>): boolean {

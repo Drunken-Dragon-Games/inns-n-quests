@@ -100,4 +100,12 @@ export const AccountTransitions = {
         console.log("get cookies", getCookies({ path: "/api/account/session/test", domain: "localhost:5000" }))
         dispatch(AccountThunks.test())
     },
+
+    claimDragonSilver: (wallet: SupportedWallet) => {
+        dispatch(AccountThunks.claim(wallet))
+    },
+
+    grantTest: () => {
+        dispatch(AccountThunks.testGrant())
+    }
 }

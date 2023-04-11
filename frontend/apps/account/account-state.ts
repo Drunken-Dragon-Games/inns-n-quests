@@ -1,9 +1,10 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { UserInfo, WalletApi } from "./account-dsl"
+import { ClaimState, UserInfo, WalletApi } from "./account-dsl"
 
 export interface AccountState {
     userInfo?: UserInfo
     walletApi?: WalletApi
+    claimState: ClaimState
 }
 
 export type AccountStoreState = 
@@ -13,7 +14,7 @@ export type AccountThunk<ReturnType = void> =
     ThunkAction<ReturnType, AccountStoreState, unknown, Action<string>>
 
 const accountInitialState: AccountState = {
-
+    claimState: {ctype: "claim-state-idle"}
 }
 
 export const accountState = createSlice({
@@ -42,6 +43,10 @@ export const accountState = createSlice({
         setWalletApi: (state, action: PayloadAction<WalletApi>) => {
             state.walletApi = action.payload
         },
+
+        setClaimState: (state, action: PayloadAction<ClaimState>) => {
+            state.claimState = action.payload
+        }
     }
 })
 

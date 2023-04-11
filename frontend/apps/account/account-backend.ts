@@ -40,6 +40,31 @@ export const AccountBackend = {
         console.log(result)
         console.log(result.headers)
     },
+
+    async claim(stakeAddress: string): Promise<ClaimAssetResult> {
+        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress})
+        return result.data
+    },
+
+    async claimSignAndSubmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
+        const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {witness, tx, claimId})
+        return result.data
+    },
+
+    async claimStatus(claimId: string): Promise<ClaimStatusResult>{
+        const result = await accountRequest("POST", "/assets/claim/status", {claimId})
+        return result.data
+    },
+
+    async getUserInventory(): Promise<getUserInventoryResult>{
+        const result = await accountRequest("GET", "/assets/inventory")
+        return result.data
+    },
+
+    async granteTest(){
+        const result = await accountRequest("GET", "/assets/test/grant")
+        return result.data
+    }
 }
 
 export type AuthenticationResult
@@ -55,10 +80,31 @@ export type GetAssociationNonceResult
     = { status: "ok", nonce: string }
     | { status: "bad-address" }
 
+export type ClaimAssetResult 
+    = { status: "ok", claimId: string, tx: string, remainingAmount: number }
+    | { status: "invalid", reason: string, remainingAmount: number }
+    
 export type SubmitAssociationSignatureResult
     = { status: "ok" }
     | { status: "bad-credentials" }
     | { status: "stake-address-used" }
+
+export type ClaimSignAndSubbmitResult 
+    = { status: "ok", txId: string }
+    | { status: "invalid", reason: string }
+
+type ClaimStatus 
+    = "created"
+    | "submitted"
+    | "timed-out"
+    | "confirmed"
+export type ClaimStatusResult
+    = { status: "ok", claimStatus: ClaimStatus }
+    | { status: "invalid", reason: string }
+
+export type getUserInventoryResult
+    = { status: "ok", dragonSilverToClaim: number, dragonSilver: number}
+    | { status: "unknown-user" }
 
 
 export type Session = {
