@@ -102,22 +102,28 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
     const lastClaimedAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
     const renderedOnChain = useNumberAnimation(lastonChainAmount, userInfo.dragonSilver, true)
     const renderedClaimable = useNumberAnimation(lastClaimedAmount, userInfo.dragonSilverToClaim, true)
+
+    const dropdownButtons = {
+        "Nami": () => { AccountTransitions.claimDragonSilver("Nami") },
+        "Eternl": () => { AccountTransitions.claimDragonSilver("Eternl") },
+    }
     return (
-      <DragonSilverWidgetContainer>
-        <TokenRowContainer>
-          <IndividualTokenPosition>
-            <TokenDisplayer icon="dragon_silver" number={renderedOnChain} />
-          </IndividualTokenPosition>
-          <IndividualTokenPosition>
-            <TokenDisplayer icon="dragon_silver_toClaim" number={renderedClaimable} />
-          </IndividualTokenPosition>
-        </TokenRowContainer>
-        <ButtonContainer>
-          <ClaimButton disabled onClick={AccountTransitions.claimDS}>CLaim</ClaimButton>
-        </ButtonContainer>
-      </DragonSilverWidgetContainer>
-    );
-  };
+        <DragonSilverWidgetContainer>
+            <TokenRowContainer>
+                <IndividualTokenPosition>
+                    <TokenDisplayer icon="dragon_silver" number={renderedOnChain} />
+                </IndividualTokenPosition>
+                <IndividualTokenPosition>
+                    <TokenDisplayer icon="dragon_silver_toClaim" number={renderedClaimable} />
+                </IndividualTokenPosition>
+            </TokenRowContainer>
+            <ButtonContainer>
+                {/*<ClaimButton disabled onClick={AccountTransitions.claimDS}>CLaim</ClaimButton>*/}
+                <DropdownMenu buttons={dropdownButtons} />
+            </ButtonContainer>
+        </DragonSilverWidgetContainer>
+    )
+}
 
 const DashboardCardContainer = styled.div`
     ${MessiriFontFamily}

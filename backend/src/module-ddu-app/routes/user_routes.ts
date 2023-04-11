@@ -19,7 +19,6 @@ const loadUserRoutes = (identityService: IdentityService, assetManagementService
     router.get('/logout', jwtMiddleware, logout(identityService));
     router.get('/availablePicks', jwtMiddleware, getAvailableProfilePicks)
     router.post('/setNickName', jwtMiddleware, setNickName(identityService))
-    router.post('/claim-dragon-silver', jwtMiddleware, claimDragonSilver(assetManagementService, wellKnownPolicies))
     return router
 }
 

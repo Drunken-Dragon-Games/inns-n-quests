@@ -101,8 +101,8 @@ export const AccountTransitions = {
         dispatch(AccountThunks.test())
     },
 
-    claimDS: (stakeAddress: string) => {
+    claimDragonSilver: (wallet: SupportedWallet) => {
         console.log("Claiming Dragon silver");
-        dispatch(AccountThunks.claim(stakeAddress))
+        dispatch(AccountThunks.claim(wallet))
     }
 }

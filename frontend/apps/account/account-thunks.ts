@@ -83,7 +83,26 @@ export const AccountThunks = {
         await AccountBackend.test()
     },
 
-    claim: (stakeAddress: string): AccountThunk => async (dispatch) => {
+    claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
+        // Extract wallet api
+        const api = 
+            wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
+            wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
+            undefined
+        if (!api) 
+            return dispatch(actions.setWalletApi({ ctype: "error", error: `${wallet}'s browser extension not found.` }))
+        const net: 1 | 0 = await api.getNetworkId()
+        const currentNetwork = cardano_network()
+        if (net != currentNetwork) 
+            return dispatch(actions.setWalletApi({ ctype: "error", error: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
+        dispatch(actions.setWalletApi({ ctype: "api", wallet, api }))
+        
+        // Extract stake address
+        const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
+        const raw = await api.getRewardAddresses()
+        const serializedStakeAddress = raw[0]
+        const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32() 
+
         const claimResponse =  await AccountBackend.claim(stakeAddress)
         //storing it as a reference to use in the future IDK maybe i need to add it to the state
         const txRef = useRef ("no claiming transaction found")
