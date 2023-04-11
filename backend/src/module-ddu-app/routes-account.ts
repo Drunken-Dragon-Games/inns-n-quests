@@ -84,7 +84,7 @@ export const accountRoutes = (accountService: AccountService) => {
         else return response.status(400).json(result)
     })
 
-    router.post("/assets/claim-dragon-silver", async (request: Request, response: Response) => {
+    router.post("/assets/claim-dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
         const result = await accountService.claimDragonSilver(userId, stakeAddress)

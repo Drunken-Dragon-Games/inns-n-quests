@@ -85,26 +85,36 @@ export const AccountThunks = {
     },
 
     claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
-        dispatch(actions.setClaimState({ctype: "claim-state-loading"}))
+        try {dispatch(actions.setClaimState({ctype: "claim-state-loading"}))
+        console.log("trying to get wallet api");
         // Extract wallet api
         const walletApi = 
             wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
             wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
             undefined
+        
+        
         if (isEmpty(walletApi))
             return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `${wallet}'s browser extension not found.` }))
+        console.log("got wallet api");
         const net: 1 | 0 = await walletApi.getNetworkId()
         const currentNetwork = cardano_network()
         if (net != currentNetwork) 
             return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
-    
+        console.log("got correct network");
+        
         // Extract stake address
         const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
         const raw = await walletApi.getRewardAddresses()
         const serializedStakeAddress = raw[0]
         const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32()
-
+        console.log("got satke address");
+        console.log("sending claim to backend");
+        
         const claimResponse =  await AccountBackend.claim(stakeAddress)
+
+        console.log("got response from backend");
+        
         if (claimResponse.status !== "ok")
             return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: claimResponse.reason }))
 
@@ -114,7 +124,11 @@ export const AccountThunks = {
         if ( signature.status !== "ok")
             return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `Somethig when wrong on the backend ${signature.reason}` }))
         dispatch(actions.setClaimState({ ctype: "claim-state-succeded" }))
-        setTimeout( () => dispatch(actions.setClaimState({ ctype: "claim-state-idle" })), 5000)
+        setTimeout( () => dispatch(actions.setClaimState({ ctype: "claim-state-idle" })), 5000)}
+        catch (error: any){
+            console.log(error.message);
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: error.message}))
+        }
     }
 }
 
