@@ -9,6 +9,7 @@ export interface AccountService {
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult>
     claimDragonSilver(userId: string, stakeAddress: string): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult>
+    getUserInventory(userId: string): Promise<getUserInventoryResult>
 }
 
 export type AuthenticateResult
@@ -37,3 +38,7 @@ export type ClaimDragonSilverResult
 export type ClaimSignAndSubbmitResult 
     = { status: "ok", txId: string }
     | { status: "invalid", reason: string }
+
+export type getUserInventoryResult
+    = { status: "ok", dragonSilverToClaim: number, dragonSilver: number}
+    | { status: "unknown-user" }

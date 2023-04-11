@@ -99,6 +99,13 @@ export const accountRoutes = (accountService: AccountService) => {
         else return response.status(400).json(result)
     })
 
+    router.get("/assets/inventory", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await accountService.getUserInventory(userId)
+        if (result.status == "ok") return response.status(200).json(result)
+        else return response.status(400).json(result)
+    })
+
     return router
 }
 

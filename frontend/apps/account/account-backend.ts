@@ -49,6 +49,11 @@ export const AccountBackend = {
     async claimSignAndSubmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
         const result = await accountRequest("POST", "/assets/claim-sign-and-submit", {witness, tx, claimId})
         return result.data
+    },
+
+    async getUserInventory(): Promise<getUserInventoryResult>{
+        const result = await accountRequest("POST", "/assets/inventory")
+        return result.data
     }
 }
 
@@ -77,6 +82,10 @@ export type SubmitAssociationSignatureResult
 export type ClaimSignAndSubbmitResult 
     = { status: "ok", txId: string }
     | { status: "invalid", reason: string }
+
+export type getUserInventoryResult
+    = { status: "ok", dragonSilverToClaim: number, dragonSilver: number}
+    | { status: "unknown-user" }
 
 
 export type Session = {

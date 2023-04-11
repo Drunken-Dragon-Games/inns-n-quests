@@ -78,6 +78,10 @@ export const AccountThunks = {
         if (signatureResponse.status != "ok") 
             return dispatch(actions.setWalletApi({ ctype: "error", error: signatureResponse.status }))
         dispatch(actions.addStakeAddress(stakeAddress))
+        const inventoryResult = await AccountBackend.getUserInventory()
+        if (inventoryResult.status !== "ok")
+            return dispatch(actions.setWalletApi({ ctype: "error", error: inventoryResult.status }))
+        dispatch(actions.updateUserInfo({dragonSilver: inventoryResult.dragonSilver , dragonSilverToClaim: inventoryResult.dragonSilverToClaim}))
     },
 
     test: (): AccountThunk => async (dispatch) => {
