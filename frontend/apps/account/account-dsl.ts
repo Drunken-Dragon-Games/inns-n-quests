@@ -22,5 +22,6 @@ export type WalletApi
 export type ClaimState
     = { ctype: "claim-state-idle"}
     | { ctype: "claim-state-loading"}
+    | { ctype: "claim-state-submited"}
     | { ctype: "claim-state-succeded"}
     | { ctype: "claim-state-error", error: string}

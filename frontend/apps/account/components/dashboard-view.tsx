@@ -5,6 +5,7 @@ import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily,
 import { UserInfo } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
+import { AccountThunks } from "../account-thunks"
 
 const WalletAssociationWidgetContainer = styled.div`
     width: 100%;
@@ -118,6 +119,7 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 </IndividualTokenPosition>
             </TokenRowContainer>
             <ButtonContainer>
+                <button onClick = {AccountTransitions.grantTest}>Grant</button>
                 <DropdownMenu buttons={dropdownButtons} />
             </ButtonContainer>
             <span>{claimState.ctype} {claimState.ctype == "claim-state-error"? claimState.error: ""}</span>

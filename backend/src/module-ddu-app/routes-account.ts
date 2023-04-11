@@ -84,7 +84,7 @@ export const accountRoutes = (accountService: AccountService) => {
         else return response.status(400).json(result)
     })
 
-    router.post("/assets/claim-dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
+    router.post("/assets/claim/dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
         const result = await accountService.claimDragonSilver(userId, stakeAddress)
@@ -92,9 +92,17 @@ export const accountRoutes = (accountService: AccountService) => {
         else return response.status(400).json(result)
     })
 
-    router.post("/assets/claim-sign-and-submit", async (request: Request, response: Response) => {
+    router.post("/assets/claim/sign-and-submit", async (request: Request, response: Response) => {
         const {witness, tx, claimId} = request.body
         const result = await accountService.claimSignAndSubbmit(witness, tx, claimId)
+        if (result.status == "ok") return response.status(200).json(result)
+        else return response.status(400).json(result)
+    })
+
+    router.post("/assets/claim/status", async (request: Request, response: Response) => {
+        const {claimId} = request.body
+        console.log({claimId});
+        const result = await accountService.claimStatus(claimId)
         if (result.status == "ok") return response.status(200).json(result)
         else return response.status(400).json(result)
     })
@@ -104,6 +112,12 @@ export const accountRoutes = (accountService: AccountService) => {
         const result = await accountService.getUserInventory(userId)
         if (result.status == "ok") return response.status(200).json(result)
         else return response.status(400).json(result)
+    })
+
+    router.get("/assets/test/grant", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await accountService.grantTest(userId)
+        return response.status(200).json({status: "ok"})
     })
 
     return router

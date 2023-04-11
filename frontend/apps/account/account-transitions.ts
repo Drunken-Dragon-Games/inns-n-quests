@@ -103,5 +103,9 @@ export const AccountTransitions = {
 
     claimDragonSilver: (wallet: SupportedWallet) => {
         dispatch(AccountThunks.claim(wallet))
+    },
+
+    grantTest: () => {
+        dispatch(AccountThunks.testGrant())
     }
 }
