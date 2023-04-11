@@ -2,7 +2,7 @@ import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService } from "../service-asset-management"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, GetAssociationNonceResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, GetAssociationNonceResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -103,6 +103,10 @@ export class AccountServiceDsl implements AccountService {
             else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
         }
         else return { status: "invalid", reason: assetList.status}
+    }
+
+    async claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
+        return this.assetManagementService.submitClaimSignature(claimId, tx, witness)
     }
 }
 

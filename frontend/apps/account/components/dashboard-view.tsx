@@ -102,7 +102,7 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
     const lastClaimedAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
     const renderedOnChain = useNumberAnimation(lastonChainAmount, userInfo.dragonSilver, true)
     const renderedClaimable = useNumberAnimation(lastClaimedAmount, userInfo.dragonSilverToClaim, true)
-
+    const claimState = useSelector((state: AccountState) => state.claimState)
     const dropdownButtons = {
         "Nami": () => { AccountTransitions.claimDragonSilver("Nami") },
         "Eternl": () => { AccountTransitions.claimDragonSilver("Eternl") },
@@ -118,9 +118,9 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 </IndividualTokenPosition>
             </TokenRowContainer>
             <ButtonContainer>
-                {/*<ClaimButton disabled onClick={AccountTransitions.claimDS}>CLaim</ClaimButton>*/}
                 <DropdownMenu buttons={dropdownButtons} />
             </ButtonContainer>
+            <span>{claimState.ctype} {claimState.ctype == "claim-state-error"? claimState.error: ""}</span>
         </DragonSilverWidgetContainer>
     )
 }

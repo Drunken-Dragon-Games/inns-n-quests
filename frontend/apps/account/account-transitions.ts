@@ -102,7 +102,6 @@ export const AccountTransitions = {
     },
 
     claimDragonSilver: (wallet: SupportedWallet) => {
-        console.log("Claiming Dragon silver");
         dispatch(AccountThunks.claim(wallet))
     }
 }

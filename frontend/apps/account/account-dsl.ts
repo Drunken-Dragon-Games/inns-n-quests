@@ -19,8 +19,8 @@ export type WalletApi
     | { ctype: "error", error: string }
     | { ctype: "loading" }
 
-export type ClaimState = ClaimInitial | ClaimRequesting | ClaimRequested | awaitingStatus
-export type ClaimInitial = {ctype: "claim-state-idle"}
-export type ClaimRequesting = {ctype: "claim-state-claim-requested", stakeAddress: string, wallet: SupportedWallet}
-export type ClaimRequested = {ctype: "claim-state-claim-requested", stakeAddress: string, wallet: SupportedWallet, tx: string, claimId: string}
-export type awaitingStatus = {ctype: "claim-state-claim-requested", stakeAddress: string, wallet: SupportedWallet, tx: string, claimId: string}
+export type ClaimState
+    = { ctype: "claim-state-idle"}
+    | { ctype: "claim-state-loading"}
+    | { ctype: "claim-state-succeded"}
+    | { ctype: "claim-state-error", error: string}

@@ -5,6 +5,7 @@ import { AccountState, accountState, AccountThunk } from "./account-state"
 import { SupportedWallet } from "./account-dsl"
 import { cardano_network, networkName } from "../../setting"
 import { useRef } from "react"
+import { isEmpty, not, notEmpty } from "../common"
 
 const actions = accountState.actions
 
@@ -84,33 +85,36 @@ export const AccountThunks = {
     },
 
     claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
+        dispatch(actions.setClaimState({ctype: "claim-state-loading"}))
         // Extract wallet api
-        const api = 
+        const walletApi = 
             wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
             wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
             undefined
-        if (!api) 
-            return dispatch(actions.setWalletApi({ ctype: "error", error: `${wallet}'s browser extension not found.` }))
-        const net: 1 | 0 = await api.getNetworkId()
+        if (isEmpty(walletApi))
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `${wallet}'s browser extension not found.` }))
+        const net: 1 | 0 = await walletApi.getNetworkId()
         const currentNetwork = cardano_network()
         if (net != currentNetwork) 
-            return dispatch(actions.setWalletApi({ ctype: "error", error: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
-        dispatch(actions.setWalletApi({ ctype: "api", wallet, api }))
-        
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
+    
         // Extract stake address
         const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
-        const raw = await api.getRewardAddresses()
+        const raw = await walletApi.getRewardAddresses()
         const serializedStakeAddress = raw[0]
-        const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32() 
+        const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32()
 
         const claimResponse =  await AccountBackend.claim(stakeAddress)
-        //storing it as a reference to use in the future IDK maybe i need to add it to the state
-        const txRef = useRef ("no claiming transaction found")
-        if (claimResponse.status == "ok"){
-            txRef.current = claimResponse.tx
-            //TODO: update dragon silver after tx is confirmed
-            dispatch(actions.updateUserInfo({dragonSilverToClaim: 0}))
-        }
+        if (claimResponse.status !== "ok")
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: claimResponse.reason }))
+
+        dispatch(actions.updateUserInfo({dragonSilverToClaim: claimResponse.remainingAmount}))
+        const witness = await walletApi.signTx(claimResponse.tx, true)
+        const signature = await AccountBackend.claimSignAndSubmit(witness, claimResponse.tx, claimResponse.claimId )
+        if ( signature.status !== "ok")
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `Somethig when wrong on the backend ${signature.reason}` }))
+        dispatch(actions.setClaimState({ ctype: "claim-state-succeded" }))
+        setTimeout( () => dispatch(actions.setClaimState({ ctype: "claim-state-idle" })), 5000)
     }
 }
 

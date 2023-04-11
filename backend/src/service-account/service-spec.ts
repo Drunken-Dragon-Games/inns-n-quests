@@ -8,6 +8,7 @@ export interface AccountService {
     getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult>
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult>
     claimDragonSilver(userId: string, stakeAddress: string): Promise<ClaimDragonSilverResult>
+    claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult>
 }
 
 export type AuthenticateResult
@@ -31,3 +32,8 @@ export type SubmitAssociationSignatureResult
 export type ClaimDragonSilverResult
     = { status: "ok", claimId: string, tx: string, remainingAmount: number }
     | { status: "invalid", reason: string, remainingAmount?: number }
+
+
+export type ClaimSignAndSubbmitResult 
+    = { status: "ok", txId: string }
+    | { status: "invalid", reason: string }

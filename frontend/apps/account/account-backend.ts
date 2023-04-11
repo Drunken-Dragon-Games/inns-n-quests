@@ -44,6 +44,11 @@ export const AccountBackend = {
     async claim(stakeAddress: string): Promise<ClaimAssetResult> {
         const result = await accountRequest("POST", "/assets/claim-dragon-silver", {stakeAddress})
         return result.data
+    },
+
+    async claimSignAndSubmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
+        const result = await accountRequest("POST", "/assets/claim-sign-and-submit", {witness, tx, claimId})
+        return result.data
     }
 }
 
@@ -68,6 +73,10 @@ export type SubmitAssociationSignatureResult
     = { status: "ok" }
     | { status: "bad-credentials" }
     | { status: "stake-address-used" }
+
+export type ClaimSignAndSubbmitResult 
+    = { status: "ok", txId: string }
+    | { status: "invalid", reason: string }
 
 
 export type Session = {
@@ -96,27 +105,6 @@ export type UserFullInfo = {
 
 async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
     return await withTokenRefresh(() => accountRequest(method, endpoint, data))
-}
-
-/*Temporary implmentation 
-just  to keep working wile i wait for the senior Devs aprobal */
-async function userRequesr<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
-    const traceId = v4()
-    const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "api")
-        console.log(`${method}: ${endpoint}\ntrace-id: ${traceId}`)
-    return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
-        method,
-        baseURL,
-        url: endpoint,
-        data,
-        headers: {
-            "Content-Type": "application/json",
-            accept: "application/json",
-            "Trace-ID": traceId
-        },
-        timeout: 5000,
-        withCredentials: true,
-    })
 }
 
 async function accountRequest<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {

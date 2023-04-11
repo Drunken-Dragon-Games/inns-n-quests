@@ -13,6 +13,12 @@ export function notEmpty<TValue>(value: TValue | null | undefined): value is TVa
     return value !== null && value !== undefined
 }
 
+export function isEmpty<TValue>(value: TValue | null | undefined): value is null | undefined {
+    return value == null || value == undefined
+}
+
+export const not = (x: boolean): boolean => !x
+
 /**
  * Taken from https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0
  * Returns a hash code for a string.
