@@ -1,10 +1,10 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { ClaimState, UserInfo, WalletApi } from "./account-dsl"
+import { UserInfo, WalletActionPayload, WalletActionState } from "./account-dsl"
 
 export interface AccountState {
     userInfo?: UserInfo
-    walletApi?: WalletApi
-    claimState: ClaimState
+    claimState: WalletActionState
+    associateState: WalletActionState
 }
 
 export type AccountStoreState = 
@@ -14,7 +14,8 @@ export type AccountThunk<ReturnType = void> =
     ThunkAction<ReturnType, AccountStoreState, unknown, Action<string>>
 
 const accountInitialState: AccountState = {
-    claimState: {ctype: "claim-state-idle"}
+    claimState: {ctype: "wallet-action-state-idle", action: "claim"},
+    associateState: {ctype: "wallet-action-state-idle", action: "associate"}
 }
 
 export const accountState = createSlice({
@@ -40,13 +41,19 @@ export const accountState = createSlice({
             state.userInfo.stakeAddresses.push(action.payload)
         },
 
-        setWalletApi: (state, action: PayloadAction<WalletApi>) => {
-            state.walletApi = action.payload
-        },
+        setAssociateState: (state, action: PayloadAction<WalletActionPayload>) => {
+            state.associateState = {
+              ...action.payload,
+              action: "associate"
+            };
+          },
 
-        setClaimState: (state, action: PayloadAction<ClaimState>) => {
-            state.claimState = action.payload
-        }
+          setClaimState: (state, action: PayloadAction<WalletActionPayload>) => {
+            state.claimState = {
+              ...action.payload,
+              action: "claim"
+            };
+          }
     }
 })
 

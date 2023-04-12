@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
 import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton } from "../../common"
-import { UserInfo, renderClaimStateDetails } from "../account-dsl"
+import { UserInfo, renderWalletActionDetails } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
 import { AccountThunks } from "../account-thunks"
@@ -44,6 +44,7 @@ const WalletAssociationWidget = (userInfo: UserInfo) => {
         "Nami": () => { AccountTransitions.associateWallet("Nami") },
         "Eternl": () => { AccountTransitions.associateWallet("Eternl") },
     }
+    const associateState = useSelector((state: AccountState) => state.associateState)
     return (
         <WalletAssociationWidgetContainer>
             { userInfo.stakeAddresses.map((stakeAddress, index) =>
@@ -60,6 +61,7 @@ const WalletAssociationWidget = (userInfo: UserInfo) => {
                 <Push />
                 <DropdownMenu buttons={dropdownButtons} />
             </AssociatedWalletRowContainer>
+            <span style={{ color: 'white' }}>{renderWalletActionDetails(associateState)}</span>
         </WalletAssociationWidgetContainer>
     )
 }
@@ -123,7 +125,7 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 <button onClick = {AccountTransitions.grantTest}>Grant</button>
                 <DropdownMenu buttons={dropdownButtons} />
             </ButtonContainer>
-            {renderClaimStateDetails(claimState)}
+            {renderWalletActionDetails(claimState)}
         </DragonSilverWidgetContainer>
     )
 }
