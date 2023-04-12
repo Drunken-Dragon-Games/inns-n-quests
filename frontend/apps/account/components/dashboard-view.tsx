@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
 import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton } from "../../common"
-import { UserInfo } from "../account-dsl"
+import { UserInfo, renderClaimStateDetails } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
 import { AccountThunks } from "../account-thunks"
@@ -98,6 +98,7 @@ const ButtonContainer = styled.div`
   margin-top: 10px;
 `;
 
+
 const DragonSilverWidget = (userInfo: UserInfo) => {
     const lastonChainAmount = useRememberLastValue(userInfo.dragonSilver, 0)
     const lastClaimedAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
@@ -122,7 +123,7 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 <button onClick = {AccountTransitions.grantTest}>Grant</button>
                 <DropdownMenu buttons={dropdownButtons} />
             </ButtonContainer>
-            <span>{claimState.ctype} {claimState.ctype == "claim-state-error"? claimState.error: ""}</span>
+            {renderClaimStateDetails(claimState)}
         </DragonSilverWidgetContainer>
     )
 }

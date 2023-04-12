@@ -92,40 +92,43 @@ export const AccountThunks = {
     },
 
     claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
-        try {dispatch(actions.setClaimState({ctype: "claim-state-loading"}))
-        // Extract wallet api
-        const walletApi = 
-            wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
-            wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
-            undefined
-        
-        if (isEmpty(walletApi))
-            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `${wallet}'s browser extension not found.` }))
-        const net: 1 | 0 = await walletApi.getNetworkId()
-        const currentNetwork = cardano_network()
-        if (net != currentNetwork) 
-            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
-        
-        // Extract stake address
-        const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
-        const raw = await walletApi.getRewardAddresses()
-        const serializedStakeAddress = raw[0]
-        const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32()
-        const claimResponse =  await AccountBackend.claim(stakeAddress)
-        
-        if (claimResponse.status !== "ok")
-            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: claimResponse.reason }))
+        try {
+            dispatch(actions.setClaimState({ctype: "claim-state-loading", details: "getting Wallet"}))
+            // Extract wallet api
+            const walletApi = 
+                wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
+                wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
+                undefined
+            
+            if (isEmpty(walletApi))
+                return dispatch(actions.setClaimState({ ctype: "claim-state-error", details: `${wallet}'s browser extension not found.` }))
+            const net: 1 | 0 = await walletApi.getNetworkId()
+            const currentNetwork = cardano_network()
+            if (net != currentNetwork) 
+                return dispatch(actions.setClaimState({ ctype: "claim-state-error", details: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
+            
+            // Extract stake address
+            const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
+            const raw = await walletApi.getRewardAddresses()
+            const serializedStakeAddress = raw[0]
+            const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32()
+            dispatch(actions.setClaimState({ctype: "claim-state-loading", details: "building Transaction"}))
+            const claimResponse =  await AccountBackend.claim(stakeAddress)
+            
+            if (claimResponse.status !== "ok")
+                return dispatch(actions.setClaimState({ ctype: "claim-state-error", details: claimResponse.reason }))
 
-        dispatch(actions.updateUserInfo({dragonSilverToClaim: claimResponse.remainingAmount}))
-        const witness = await walletApi.signTx(claimResponse.tx, true)
-        const signature = await AccountBackend.claimSignAndSubmit(witness, claimResponse.tx, claimResponse.claimId )
-        if ( signature.status !== "ok")
-            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: `Somethig when wrong on the backend ${signature.reason}` }))
-        dispatch(actions.setClaimState({ ctype: "claim-state-submited" }))
-        dispatch(AccountThunks.claimStatus(claimResponse.claimId))
+            dispatch(actions.updateUserInfo({dragonSilverToClaim: claimResponse.remainingAmount}))
+            dispatch(actions.setClaimState({ctype: "claim-state-loading", details: "waiting for users signature"}))
+            const witness = await walletApi.signTx(claimResponse.tx, true)
+            const signature = await AccountBackend.claimSignAndSubmit(witness, claimResponse.tx, claimResponse.claimId )
+            if ( signature.status !== "ok")
+                return dispatch(actions.setClaimState({ ctype: "claim-state-error", details: `Somethig when wrong on the backend ${signature.reason}` }))
+            dispatch(actions.setClaimState({ ctype: "claim-state-submited", details: "polling" }))
+            dispatch(AccountThunks.claimStatus(claimResponse.claimId))
         }catch (error: any){
             console.log(error.message);
-            return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: error.message}))
+            return dispatch(actions.setClaimState({ ctype: "claim-state-error", details: error.message}))
         }
     },
 
@@ -133,11 +136,13 @@ export const AccountThunks = {
         setTimeout(async () => {
             const statusResult = await AccountBackend.claimStatus(claimId)
             if (statusResult.status !== "ok")
-                return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: "could not retrive bloqchain transaction status"}))
-            if (statusResult.claimStatus == "created" || statusResult.claimStatus == "submitted")
+                return dispatch(actions.setClaimState({ ctype: "claim-state-error", details: "could not retrive bloqchain transaction status"}))
+            if (statusResult.claimStatus == "created" || statusResult.claimStatus == "submitted"){
+                dispatch(actions.setClaimState({ ctype: "claim-state-submited", details: statusResult.status }))
                 return dispatch(AccountThunks.claimStatus(claimId))
+            }
             if (statusResult.claimStatus == "timed-out")
-                return dispatch(actions.setClaimState({ ctype: "claim-state-error", error: "transaction timed out"}))
+                return dispatch(actions.setClaimState({ ctype: "claim-state-error", details: "transaction timed out"}))
             dispatch(actions.setClaimState({ ctype: "claim-state-succeded"}))
             setTimeout( () => dispatch(actions.setClaimState({ ctype: "claim-state-idle" })), 5000)
         }, 2000)
