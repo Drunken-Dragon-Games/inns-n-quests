@@ -125,7 +125,7 @@ export class AccountServiceDsl implements AccountService {
 
     async grantTest(userId: string): Promise<void>{
         if (process.env.NODE_ENV !== "development") return 
-        this.assetManagementService.grant(userId, {policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: "100"})
+        this.assetManagementService.grant(userId, {policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: "10"})
     }
 }
 

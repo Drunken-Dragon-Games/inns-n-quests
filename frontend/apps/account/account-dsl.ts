@@ -22,7 +22,8 @@ export type WalletActionState
     | { ctype: "wallet-action-state-submitted", action: WalletAction, details: string }
     | { ctype: "wallet-action-state-succeeded", action: WalletAction}
     | { ctype: "wallet-action-state-error", action: WalletAction, details: string }
-//Why you ask -> because Omit<WalletActionState, 'action'> does not work like its supposed to
+    
+//Omit<WalletActionState, 'action'> does not work like its supposed to so here we are
 export type WalletActionPayload
     = { ctype: "wallet-action-state-idle" }
     | { ctype: "wallet-action-state-loading", details: string }

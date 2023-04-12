@@ -85,6 +85,8 @@ export const AccountThunks = {
         const inventoryResult = await AccountBackend.getUserInventory()
         if (inventoryResult.status !== "ok")
             return dispatch(actions.setAssociateState({ ctype: "wallet-action-state-error", details: inventoryResult.status }))
+        console.log(`update inventory got ${inventoryResult.dragonSilver} dragon silver`);
+        
         dispatch(actions.updateUserInfo({dragonSilver: inventoryResult.dragonSilver , dragonSilverToClaim: inventoryResult.dragonSilverToClaim}))
     },
 
@@ -146,6 +148,7 @@ export const AccountThunks = {
             if (statusResult.claimStatus == "timed-out")
                 return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: "transaction timed out"}))
             dispatch(actions.setClaimState({ ctype: "wallet-action-state-succeeded"}))
+            dispatch(AccountThunks.updateInventory())
             setTimeout( () => dispatch(actions.setClaimState({ ctype: "wallet-action-state-idle" })), 5000)
         }, 2000)
     },
