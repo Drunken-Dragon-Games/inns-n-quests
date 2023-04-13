@@ -258,90 +258,69 @@ export class cardano {
 	}
 
 	static deserializeAndLogTransaction = async (cborHex: string): Promise<void> => {
-		const cborBytes = Buffer.from(cborHex, 'hex')
-		const cborObject = await cbor.decodeFirst(cborBytes)
-
-		// Check if the decoded object is an array
-		if (!Array.isArray(cborObject)) {
-			throw new Error('Failed to deserialize Cardano transactions: expected an array')
-		}
-
-		const transactions: CardanoTransaction[] = []
-
-		// Iterate over each transaction object in the array
-		for (const cborTransaction of cborObject) {
-			try {
-			const hasHashField = cborTransaction.has(7)
-			const hash = hasHashField ? cborTransaction.get(7).toString('hex') : undefined
-
-			// Check if the hash field is defined
-			if (!hash) {
-				throw new Error('Missing hash field')
+		const decodeCBOR = async (cborHex: string) => {
+			const cborBytes = Buffer.from(cborHex, 'hex');
+			return await cbor.decodeFirst(cborBytes);
+		};
+		  
+		const ensureArray = (cborObject: any): any[] => {
+			if (!Array.isArray(cborObject)) {
+				throw new Error('Failed to deserialize Cardano transactions: expected an array');
 			}
-
-			const hasInputs = cborTransaction.has(0)
-			const inputs = hasInputs ? cborTransaction.get(0).map((input: any) => ({
+			return cborObject;
+		};
+		
+		const processInputs = (transaction: any) => {
+			const hasInputs = transaction.has(0);
+			return hasInputs ? transaction.get(0).map((input: any) => ({
 				txId: input[0].toString('hex'),
 				index: input[1],
-			})) : []
-
-			const hasOutputs = cborTransaction.has(1)
-			const outputs = hasOutputs ? cborTransaction.get(1).map((output: any) => ({
+			})) : [];
+		};
+		
+		const processOutputs = (transaction: any) => {
+			const hasOutputs = transaction.has(1);
+			return hasOutputs ? transaction.get(1).map((output: any) => ({
 				address: Buffer.isBuffer(output[0]) ? output[0].toString('hex') : output[0],
 				amount: Array.isArray(output[1]) ? output[1][0] : output[1],
-			})) : []
-
-			const hasFee = cborTransaction.has(2)
-			const fee = hasFee ? cborTransaction.get(2) : undefined
-
-			const hasValidityIntervalStart = cborTransaction.has(3)
-			const validityIntervalStart = hasValidityIntervalStart ? cborTransaction.get(3) : undefined
-
-			const hasMint = cborTransaction.has(9)
-			const mint = hasMint && {
-				policy: cborTransaction.get(9).keys().next().value.toString('hex'),
-				assets: Object.fromEntries([...cborTransaction.get(9).values().next().value.entries()].map(([k, v]) => [k.toString(), v])),
-			}
-
-			const transaction: CardanoTransaction = {
-				hash,
-				inputs,
-				outputs,
-				fee,
-				validityIntervalStart,
-				mint,
-			}
-
-			transactions.push(transaction)
-			} catch (error: any) {
-			
-			}
-		}
-
-		console.log(transactions[0])
+			})) : [];
+		};
 		
+		const processMint = (transaction: any) => {
+			const hasMint = transaction.has(9);
+			return hasMint && {
+				policy: transaction.get(9).keys().next().value.toString('hex'),
+				assets: Object.fromEntries([...transaction.get(9).values().next().value.entries()].map(([k, v]) => [k.toString(), v])),
+			};
+		};
+		
+		const processTransaction = (transaction: any) => {
+			try {
+				if (typeof transaction.has !== 'function') {return}
+				const hash = transaction.has(7) ? transaction.get(7).toString('hex') : undefined;
+				if (!hash) {return}
+				return {
+				hash,
+				inputs: processInputs(transaction),
+				outputs: processOutputs(transaction),
+				fee: transaction.has(2) ? transaction.get(2) : undefined,
+				validityIntervalStart: transaction.has(3) ? transaction.get(3) : undefined,
+				mint: processMint(transaction),
+				};
+			} catch (error: any) {
+				console.error(error);
+				return undefined;
+			}
+		};
+		
+		const cborObject = await decodeCBOR(cborHex);
+		const transactionsArray = ensureArray(cborObject);
+		const transactions = transactionsArray.map(processTransaction).filter(Boolean);
+
+		console.log(transactions[0]);
+				
 	}
 }
-
-interface CardanoTransaction {
-	hash: string
-	inputs: {
-	  txId: string
-	  index: number
-	}[]
-	outputs: {
-	  address: string
-	  amount: number
-	}[]
-	fee: number
-	validityIntervalStart: number
-	mint?: {
-	  policy: string
-	  assets: {
-		[assetName: string]: number
-	  }
-	}
-  }
 
   
   
