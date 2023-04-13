@@ -72,6 +72,7 @@ export class AssetClaimDsl {
 
 		const tx = await buildTx()
 		console.log(tx)
+		cardano.deserializeAndLogTransaction(tx)
 		const claimId = await createClaim(tx)
 		await updateAvailableAssets()
 		await transaction.commit()

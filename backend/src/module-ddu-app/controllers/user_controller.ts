@@ -32,9 +32,9 @@ const getInfo = (identityService: IdentityService, assetManagementService: Asset
             const assetList: assets.ListResponse = await assetManagementService.list(userId, { policies: onlyPolicies(wellKnownPolicies) }, logger)
             if (assetList.status == "ok"){
                 const inventory: assets.Inventory = assetList.inventory
-                console.log({dsPolicyId});
+                //console.log({dsPolicyId});
                 const DSamount = inventory[dsPolicyId!]?.find(i => i.chain === true)?.quantity ?? "0"
-                console.log({DSamount})
+                //console.log({DSamount})
                 const DSTC = inventory[dsPolicyId!]?.find(i => i.chain === false)?.quantity ?? "0"
                 const nftAmount = 0 // We wont use this anymore (the whole endpoint)
                 return res.status(201).json({

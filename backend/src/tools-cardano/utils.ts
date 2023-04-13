@@ -256,9 +256,92 @@ export class cardano {
 		txBuilder.add_change_if_needed(address)
 		return txBuilder.build_tx()
 	}
+
+	static deserializeAndLogTransaction = async (cborHex: string): Promise<void> => {
+		const cborBytes = Buffer.from(cborHex, 'hex')
+		const cborObject = await cbor.decodeFirst(cborBytes)
+
+		// Check if the decoded object is an array
+		if (!Array.isArray(cborObject)) {
+			throw new Error('Failed to deserialize Cardano transactions: expected an array')
+		}
+
+		const transactions: CardanoTransaction[] = []
+
+		// Iterate over each transaction object in the array
+		for (const cborTransaction of cborObject) {
+			try {
+			const hasHashField = cborTransaction.has(7)
+			const hash = hasHashField ? cborTransaction.get(7).toString('hex') : undefined
+
+			// Check if the hash field is defined
+			if (!hash) {
+				throw new Error('Missing hash field')
+			}
+
+			const hasInputs = cborTransaction.has(0)
+			const inputs = hasInputs ? cborTransaction.get(0).map((input: any) => ({
+				txId: input[0].toString('hex'),
+				index: input[1],
+			})) : []
+
+			const hasOutputs = cborTransaction.has(1)
+			const outputs = hasOutputs ? cborTransaction.get(1).map((output: any) => ({
+				address: Buffer.isBuffer(output[0]) ? output[0].toString('hex') : output[0],
+				amount: Array.isArray(output[1]) ? output[1][0] : output[1],
+			})) : []
+
+			const hasFee = cborTransaction.has(2)
+			const fee = hasFee ? cborTransaction.get(2) : undefined
+
+			const hasValidityIntervalStart = cborTransaction.has(3)
+			const validityIntervalStart = hasValidityIntervalStart ? cborTransaction.get(3) : undefined
+
+			const hasMint = cborTransaction.has(9)
+			const mint = hasMint && {
+				policy: cborTransaction.get(9).keys().next().value.toString('hex'),
+				assets: Object.fromEntries([...cborTransaction.get(9).values().next().value.entries()].map(([k, v]) => [k.toString(), v])),
+			}
+
+			const transaction: CardanoTransaction = {
+				hash,
+				inputs,
+				outputs,
+				fee,
+				validityIntervalStart,
+				mint,
+			}
+
+			transactions.push(transaction)
+			} catch (error: any) {
+			
+			}
+		}
+
+		console.log(transactions[0])
+		
+	}
 }
 
-
+interface CardanoTransaction {
+	hash: string
+	inputs: {
+	  txId: string
+	  index: number
+	}[]
+	outputs: {
+	  address: string
+	  amount: number
+	}[]
+	fee: number
+	validityIntervalStart: number
+	mint?: {
+	  policy: string
+	  assets: {
+		[assetName: string]: number
+	  }
+	}
+  }
 
   
   
