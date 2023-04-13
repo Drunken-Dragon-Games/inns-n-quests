@@ -12,6 +12,14 @@ const nextConfig = {
   images : {
     domains : ['d1f9hywwzs4bxo.cloudfront.net', 'cdn.ddu.gg', 'www.drunkendragon.games']
   },
+  webpack: function (config, options) {
+    return {
+      ...config, 
+      experiments: {
+        topLevelAwait: true
+      }
+    }
+  },
   rewrites: async () =>
     [
       {

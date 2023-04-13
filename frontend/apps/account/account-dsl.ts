@@ -1,3 +1,4 @@
+import { Lucid } from "lucid-cardano"
 
 export type UserInfo = {
     userId: string
@@ -38,6 +39,8 @@ export const renderWalletActionDetails = (walletActionState: WalletActionState) 
         const details = ctype === "wallet-action-state-loading" || ctype === "wallet-action-state-submitted" || ctype === "wallet-action-state-error" ? walletActionState.details : undefined;
     
         return `${action}-${ctype} ${details || ""}`;
-    };
+    }
 
-    
+export type ExtractWalletResult
+    = {status: "ok", walletApi: Lucid, stakeAddress: string, }
+    | {status: "error", details: string}

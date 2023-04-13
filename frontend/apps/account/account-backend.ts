@@ -2,6 +2,7 @@ import { v4 } from "uuid"
 import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
+import { SignedMessage } from "lucid-cardano"
 
 export const AccountBackend = {
 
@@ -30,7 +31,7 @@ export const AccountBackend = {
         return result.data
     },
 
-    async submitAssociationSignature(nonce: string, signedMessage: string): Promise<SubmitAssociationSignatureResult> {
+    async submitAssociationSignature(nonce: string, signedMessage: SignedMessage): Promise<SubmitAssociationSignatureResult> {
         const result = await accountRequest("post", "/association/signature", {nonce, signedMessage})
         return result.data
     },

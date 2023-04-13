@@ -1,3 +1,4 @@
+import { Network } from "lucid-cardano"
 
 export const discord_client_id = 
     typeof process.env["NEXT_PUBLIC_DISCORD_CLIENT_ID"] == "string" ? 
@@ -18,21 +19,14 @@ export const discord_response_type = "code"
 
 export const discord_scope = "identify%20email"
 
-export const cardano_network = () : 0 | 1  =>{
-    let number : 0 | 1 = 0
-
-    if( typeof process.env["NEXT_PUBLIC_CARDANO_NETWORK"] == "string"){
-        if(process.env["NEXT_PUBLIC_CARDANO_NETWORK"] == "mainnet"){
-            
-            number = 1
-            return number
-        }
-
-        return number
-    }
-
-    return number
+const isNetwork = (net: string | undefined | null): net is Network => {
+    return net == "Mainnet" || net == "Preview" || net == "Preprod" || net == "Custom"
 }
+
+export const cardanoNetwork: Network  = 
+    isNetwork(process.env["NEXT_PUBLIC_CARDANO_NETWORK"])?
+    process.env["NEXT_PUBLIC_CARDANO_NETWORK"] : "Preprod"
+
 
 export const networkName = (network: 0 | 1): string =>
     network == 0 ? "testnet" : "mainnet"

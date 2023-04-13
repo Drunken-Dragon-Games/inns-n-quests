@@ -25,6 +25,7 @@
     "babel-plugin-styled-components": "^2.0.7",
     "cookies-next": "^2.1.1",
     "formik": "^2.2.9",
+    "lucid-cardano": "^0.10.1",
     "next": "12.2.5",
     "phaser": "^3.55.2",
     "random-seed": "^0.3.0",

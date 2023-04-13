@@ -1,15 +1,43 @@
 import { Action, ThunkDispatch } from "@reduxjs/toolkit"
 import { NextRouter } from "next/router"
-import { cardano_network, networkName } from "../../setting"
+import { cardanoNetwork} from "../../setting"
 import { isEmpty } from "../common"
 import { AccountBackend, AuthenticationResult } from "./account-backend"
-import { SupportedWallet } from "./account-dsl"
+import { ExtractWalletResult, SupportedWallet } from "./account-dsl"
 import { AccountState, AccountThunk, accountState } from "./account-state"
+import { Blockfrost, Lucid, C } from "lucid-cardano"
 
 const actions = accountState.actions
 
+
+
 export const AccountThunks = {
 
+    extractWalletApiAndStakeAddress: async (wallet: SupportedWallet ): Promise<ExtractWalletResult> => {
+
+        const lucid = await Lucid.new(
+            new Blockfrost("https://cardano-preprod.blockfrost.io/api/v0", "preprod3AJiD07toi4rcvmhnVSZ92Auip8fh2RW"), "Preprod",
+          );
+        
+        const walletApi = 
+            wallet == "Nami" && window?.cardano?.nami ? lucid.selectWallet(await window.cardano.nami.enable()) :
+            wallet == "Eternl" && window?.cardano?.eternl ?  lucid.selectWallet(await window.cardano.eternl.enable()) :
+            undefined
+        
+        if (isEmpty(walletApi)) {
+          return {status: "error", details: `${wallet}'s browser extension not found.`}
+        }
+      
+        if ( walletApi.network != cardanoNetwork) {
+          return {status: "error", details: `${wallet} has to be on ${cardanoNetwork} but is configured on ${walletApi.network}.`}
+        }
+        const stakeAddress = await walletApi.wallet.rewardAddress();
+        if (isEmpty(stakeAddress))
+            return {status: "error", details: `${wallet} does not have a reward address`}
+       
+        return { status: "ok", walletApi, stakeAddress };
+      },
+      
     authenticateDevelopment: (nickname: string, router: NextRouter): AccountThunk => async (dispatch) => {
         const response = await AccountBackend.authenticateDevelopment(nickname)
         signin(response, dispatch)
@@ -42,25 +70,14 @@ export const AccountThunks = {
     },
 
     associateWallet: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
+
         dispatch(actions.setAssociateState({ctype: "wallet-action-state-loading", details: "getting wallet"}))
 
-        // Extract wallet api
-        const walletApi = 
-            wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
-            wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
-            undefined
-            if (isEmpty(walletApi))
-            return dispatch(actions.setAssociateState({ ctype: "wallet-action-state-error", details: `${wallet}'s browser extension not found.` }))
-        const net: 1 | 0 = await walletApi.getNetworkId()
-        const currentNetwork = cardano_network()
-        if (net != currentNetwork) 
-            return dispatch(actions.setAssociateState({ ctype: "wallet-action-state-error", details: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
+        const extractedResult = await AccountThunks.extractWalletApiAndStakeAddress(wallet)
+        if (extractedResult.status !== "ok")
+            return dispatch(actions.setAssociateState({ ctype: "wallet-action-state-error", details: extractedResult.details }))
      
-        // Extract stake address
-        const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
-        const raw = await walletApi.getRewardAddresses()
-        const serializedStakeAddress = raw[0]
-        const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32() 
+        const { walletApi, stakeAddress } = extractedResult
 
         // Request nonce
         dispatch(actions.setAssociateState({ctype: "wallet-action-state-loading", details: "Generating Nonce"}))
@@ -72,7 +89,7 @@ export const AccountThunks = {
         // Sign nonce
         const hex = require("string-hex")
         dispatch(actions.setAssociateState({ctype: "wallet-action-state-loading", details: "Waiting for User Signature"}))
-        const signedMessage = await walletApi.signData(serializedStakeAddress, hex(`${nonce}`))
+        const signedMessage = await walletApi.wallet.signMessage(stakeAddress, hex(`${nonce}`))
         dispatch(actions.setAssociateState({ctype: "wallet-action-state-loading", details: "Submiting User signature"}))
         const signatureResponse = await AccountBackend.submitAssociationSignature(nonce, signedMessage)
         if (signatureResponse.status != "ok") 
@@ -99,24 +116,14 @@ export const AccountThunks = {
     claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
         try {
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Getting Wallet"}))
-            // Extract wallet api
-            const walletApi = 
-                wallet == "Nami" && window?.cardano?.nami ? await window.cardano.nami.enable() :
-                wallet == "Eternl" && window?.cardano?.eternl ? await window.cardano.eternl.enable() :
-                undefined
+            const extractedResult = await AccountThunks.extractWalletApiAndStakeAddress(wallet)
+            if (extractedResult.status !== "ok")
+                return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: extractedResult.details }))
+        
+            const { walletApi, stakeAddress } = extractedResult
             
-            if (isEmpty(walletApi))
-                return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: `${wallet}'s browser extension not found.` }))
-            const net: 1 | 0 = await walletApi.getNetworkId()
-            const currentNetwork = cardano_network()
-            if (net != currentNetwork) 
-                return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: `${wallet} has to be on ${networkName(currentNetwork)} but is configured on ${networkName(net)}.` }))
-            
-            // Extract stake address
-            const { Address } = await import("@emurgo/cardano-serialization-lib-asmjs")
-            const raw = await walletApi.getRewardAddresses()
-            const serializedStakeAddress = raw[0]
-            const stakeAddress = Address.from_bytes(Buffer.from(serializedStakeAddress, "hex")).to_bech32()
+            //console.log(await walletApi.getUtxos()[0])
+       
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Building Transaction"}))
             const claimResponse =  await AccountBackend.claim(stakeAddress)
             
@@ -125,15 +132,16 @@ export const AccountThunks = {
 
             dispatch(actions.updateUserInfo({dragonSilverToClaim: claimResponse.remainingAmount}))
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Waiting for User Signature"}))
-            const witness = await walletApi.signTx(claimResponse.tx, true)
+            const tt = C.Transaction.from_bytes(new Uint8Array(Buffer.from( claimResponse.tx, 'hex')))
+            const witness = await walletApi.wallet.signTx(tt)
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Submiting User Signature"}))
-            const signature = await AccountBackend.claimSignAndSubmit(witness, claimResponse.tx, claimResponse.claimId )
+            const signature = await AccountBackend.claimSignAndSubmit(witness.to_json(), claimResponse.tx, claimResponse.claimId )
             if ( signature.status !== "ok")
                 return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: `Somethig when wrong on the backend ${signature.reason}` }))
             dispatch(actions.setClaimState({ ctype: "wallet-action-state-submitted", details: "polling" }))
             dispatch(AccountThunks.claimStatus(claimResponse.claimId))
         }catch (error: any){
-            console.log(error.message);
+            console.error(error);
             return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: error.message}))
         }
     },
