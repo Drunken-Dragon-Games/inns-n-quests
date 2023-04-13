@@ -54,7 +54,6 @@ export const UserStakeAdressTableAttributes = {
             key: 'userId'
         },
         allowNull: false,
-        unique: true,
     },
     stakeAddress: {
         type: DataTypes.STRING,

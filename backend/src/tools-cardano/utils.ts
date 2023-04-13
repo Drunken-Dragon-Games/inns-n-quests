@@ -3,6 +3,7 @@ import { Address, AssetName, BaseAddress, BigNum, hash_transaction, Int, LinearF
 		 TransactionBuilder, TransactionBuilderConfigBuilder, TransactionHash, TransactionInput, TransactionOutput, TransactionOutputBuilder, 
 		 TransactionWitnessSet, Value, Vkeywitness, Vkeywitnesses } from "@emurgo/cardano-serialization-lib-nodejs"
 import { bech32 } from "bech32"
+import * as cbor from 'cbor';
 
 export type CardanoNetwork = "mainnet" | "testnet"
 
@@ -256,3 +257,9 @@ export class cardano {
 		return txBuilder.build_tx()
 	}
 }
+
+
+
+  
+  
+  

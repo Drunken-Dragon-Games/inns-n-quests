@@ -79,6 +79,8 @@ export const AccountThunks = {
             return dispatch(actions.setAssociateState({ ctype: "wallet-action-state-error", details: signatureResponse.status }))
         dispatch(actions.addStakeAddress(stakeAddress))
         dispatch(AccountThunks.updateInventory())
+        dispatch(actions.setAssociateState({ ctype: "wallet-action-state-succeeded"}))
+        setTimeout( () => dispatch(actions.setAssociateState({ ctype: "wallet-action-state-idle" })), 5000)
     },
 
     updateInventory: (): AccountThunk => async (dispatch) => {
@@ -147,8 +149,8 @@ export const AccountThunks = {
             }
             if (statusResult.claimStatus == "timed-out")
                 return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: "transaction timed out"}))
-            dispatch(actions.setClaimState({ ctype: "wallet-action-state-succeeded"}))
             dispatch(AccountThunks.updateInventory())
+            dispatch(actions.setClaimState({ ctype: "wallet-action-state-succeeded"}))
             setTimeout( () => dispatch(actions.setClaimState({ ctype: "wallet-action-state-idle" })), 5000)
         }, 2000)
     },
