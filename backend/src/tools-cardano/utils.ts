@@ -4,12 +4,13 @@ import { Address, AssetName, BaseAddress, BigNum, hash_transaction, Int, LinearF
 		 TransactionWitnessSet, Value, Vkeywitness, Vkeywitnesses } from "@emurgo/cardano-serialization-lib-nodejs"
 import { bech32 } from "bech32"
 import * as cbor from 'cbor';
+import { Network } from "lucid-cardano"
 
-export type CardanoNetwork = "mainnet" | "testnet"
+export type CardanoNetwork = Network
 
 export const cardanoNetworkFromString = (raw?: string): CardanoNetwork => {
-	if (raw == "mainnet" || raw == "testnet") return raw
-	else throw new Error(`${raw} is not equal to CardanoNetwork 'mainnet' | 'testnet'`)
+	if (raw == "Mainnet" || raw == "Preprod") return raw
+	else throw new Error(`${raw} is not equal to CardanoNetwork 'Mainnet' | 'Preprod'`)
 }
 
 export interface UtxoLike {

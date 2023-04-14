@@ -92,4 +92,26 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         const response = await this.base.revertStaledClaims(serviceLogger)
         return response
     }
+
+    async lucidClaim(userId: string, stakeAddress: string, asset: { unit: string; policyId: string; quantity?: string | undefined; }, logger?: LoggingContext | undefined): Promise<models.LucidClaimResponse> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.log.info(`lucid claim for user ${userId}`, { stakeAddress, asset })
+        const response = await this.base.lucidClaim(userId, stakeAddress, asset, serviceLogger)
+        if (response.status == "invalid")
+            serviceLogger?.log.info(`invalid lucid claim for user ${userId} reason:${response.reason}`)
+        else 
+            serviceLogger?.log.info(`lucid claim successful`)
+        return response
+    }
+
+    async lucidReportSubmission(claimId: string, logger?: LoggingContext): Promise<models.LucidReportSubmissionResponse> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.log.info(`Submitting lucid report for claim ${claimId}`)
+        const response = await this.base.lucidReportSubmission(claimId, serviceLogger)
+        if (response.status == "invalid")
+            serviceLogger?.log.info(`Lucid report invalid for claim ${claimId} reason:${response.reason}`)
+        else 
+            serviceLogger?.log.info(`Lucid report submited`)
+        return response
+    }
 }

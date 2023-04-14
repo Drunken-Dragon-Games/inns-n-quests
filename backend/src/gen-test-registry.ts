@@ -8,7 +8,7 @@ function findArgFlagOrReturnDefault(flag: string, defaultValue: string): string 
 
 (async () => {
 
-    const network = findArgFlagOrReturnDefault("--network", "testnet") == "testnet" ? "testnet" : "mainnet"
+    const network = findArgFlagOrReturnDefault("--network", "Preprod") == "Preprod" ? "Preprod" : "Mainnet"
     const salt = findArgFlagOrReturnDefault("--salt", "{{ENCRYPTION_SALT}}")
     const password = findArgFlagOrReturnDefault("--password", "password")
     const registry = new Registry(network, { salt, password })

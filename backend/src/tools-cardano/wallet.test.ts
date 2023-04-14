@@ -6,7 +6,7 @@ import { Wallet } from "./wallet"
 import { NativeScript, Transaction } from "@emurgo/cardano-serialization-lib-nodejs"
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 
-const network: CardanoNetwork = "testnet"
+const network: CardanoNetwork = "Preprod"
 
 const blockfrost: BlockFrostAPI = new BlockFrostAPI({ projectId: "preprod3AJiD07toi4rcvmhnVSZ92Auip8fh2RW" })
 
@@ -49,7 +49,7 @@ const nftMintExample = async (): Promise<string> => {
         stubPath("stake.skey"))
     const signingWallet = Wallet
         .recover(network, await fs.readFile(stubPath("wallet1"), "utf8"), "password")
-    const stakeAddress = signingWallet.stakeAddress.to_address().to_bech32()
+    const stakeAddress = signingWallet.stakeAddress().to_address().to_bech32()
     const script = mintingWallet.hashNativeScript()
     const unsignedTx = await cardano.createNFTMintTransaction(stakeAddress, nftOptions(script), blockfrost)
     const witness1 = signingWallet.signTx(Transaction.from_hex(unsignedTx.to_hex()))
@@ -66,7 +66,7 @@ const tokenMintExample = async (): Promise<string> => {
         stubPath("stake.skey"))
     const signingWallet = Wallet
         .recover(network, await fs.readFile(stubPath("wallet1"), "utf8"), "password")
-    const stakeAddress = signingWallet.stakeAddress.to_address().to_bech32()
+    const stakeAddress = signingWallet.stakeAddress().to_address().to_bech32()
     const script = mintingWallet.hashNativeScript()
     const unsignedTx = await cardano.createTokenMintTransaction(stakeAddress, tokenOptions(script, "100"), blockfrost)
     const witness1 = signingWallet.signTx(Transaction.from_hex(unsignedTx.to_hex()))

@@ -1,6 +1,7 @@
 import { LoggingContext } from "../tools-tracing"
 import { HealthStatus } from "../tools-utils"
 import * as models from "./models"
+import { C as LucidCore, TxComplete } from "lucid-cardano"
 
 export interface SecureSigningService {
 
@@ -13,4 +14,6 @@ export interface SecureSigningService {
     signWithPolicy(policyId: string, transaction: string, logger?: LoggingContext): Promise<models.SignTxResult>
 
     signData(policyId: string, payload: string, logger?: LoggingContext): Promise<models.SignDataResult>
+
+    lucidSignTx(policyId: string, transaction: TxComplete, logger?: LoggingContext): Promise<models.SignTxResult> 
 }

@@ -22,4 +22,8 @@ export interface AssetManagementService {
     claimStatus(claimId: string, logger?: LoggingContext): Promise<models.ClaimStatusResponse>
 
     revertStaledClaims(logger?: LoggingContext): Promise<number>
+
+    lucidClaim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<models.LucidClaimResponse>
+
+    lucidReportSubmission(claimId: string, logger?: LoggingContext): Promise<models.LucidReportSubmissionResponse>
 }

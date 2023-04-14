@@ -57,7 +57,7 @@ jobs:
       run: |
         echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
         echo -e "NEXT_PUBLIC_API_BASE_HOSTNAME=https://ddu.gg" >> .env.local 
-        echo -e "NEXT_PUBLIC_CARDANO_NETWORK=testnet" >> .env.local 
+        echo -e "NEXT_PUBLIC_CARDANO_NETWORK=Preprod" >> .env.local 
         echo -e "NEXT_PUBLIC_DISCORD_CLIENT_ID='1017194651008106516'" >> .env.local 
         echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI=https%3A%2F%2Fddu.gg%2FdiscordValidate" >> .env.local 
         echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT=https%3A%2F%2Fddu.gg%2FdiscordAdd" >> .env.local 

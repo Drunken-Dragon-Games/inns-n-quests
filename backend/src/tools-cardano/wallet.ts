@@ -1,12 +1,12 @@
 import fs from "fs/promises"
 
-import cbor from "cbor"
-import { mnemonicToEntropy, generateMnemonic } from "bip39"
-import { Address, BaseAddress, Bip32PrivateKey, Ed25519Signature, make_vkey_witness, NativeScript, NetworkInfo, PrivateKey, PublicKey, RewardAddress, ScriptPubkey, StakeCredential, Transaction, TransactionWitnessSet, Vkeywitness } from "@emurgo/cardano-serialization-lib-nodejs"
 import { AlgorithmId, BigNum, CBORValue, COSEKey, COSESign1, COSESign1Builder, HeaderMap, Headers, Int, KeyType, Label, ProtectedHeaderMap } from "@emurgo/cardano-message-signing-nodejs"
+import { Address, BaseAddress, Bip32PrivateKey, Ed25519Signature, make_vkey_witness, NativeScript, NetworkInfo, PrivateKey, PublicKey, RewardAddress, ScriptPubkey, StakeCredential, Transaction, TransactionWitnessSet, Vkeywitness } from "@emurgo/cardano-serialization-lib-nodejs"
+import { generateMnemonic, mnemonicToEntropy } from "bip39"
+import cbor from "cbor"
 
+import { Lucid, C as LucidCore } from "lucid-cardano"
 import { cardano, CardanoNetwork } from "./utils"
-import { Lucid, C as LucidCore} from "lucid-cardano"
 
 export type MnemonicRecovery = 
     { ctype: "mnemonic", mnemonic: string, password: string }
@@ -17,30 +17,25 @@ export type WalletRecovery =
 
 export class Wallet {
 
-    public lucid: Lucid 
-
     constructor (
-        public networkId: number,
+        public network: CardanoNetwork,
         public stakePvtKey: PrivateKey,
         public stakePubKey: PublicKey,
         public paymentPvtKey: PrivateKey,
         public paymentPubKey: PublicKey,
         public recovery: WalletRecovery,
-        lucid_: Lucid
-    ){
-        this.lucid = lucid_.selectWalletFromPrivateKey(this.paymentPvtKey.to_bech32())
-    }
+    ){}
 
     static networkId = (network: CardanoNetwork): number => {
-        if (network == "mainnet") return NetworkInfo.mainnet().network_id()
+        if (network == "Mainnet") return NetworkInfo.mainnet().network_id()
         else return NetworkInfo.testnet_preprod().network_id()
     }
 
-    static generate(network: CardanoNetwork, password: string, lucid: Lucid): Wallet {
-        return Wallet.recover(network, generateMnemonic(), password, lucid)
+    static generate(network: CardanoNetwork, password: string): Wallet {
+        return Wallet.recover(network, generateMnemonic(), password)
     }
 
-    static recover(network: CardanoNetwork, mnemonicPhrase: string, password: string, lucid: Lucid): Wallet {
+    static recover(network: CardanoNetwork, mnemonicPhrase: string, password: string): Wallet {
         const harden = (num: number): number => 0x80000000 + num
         const entropy = mnemonicToEntropy(mnemonicPhrase)
         const rootKey = Bip32PrivateKey
@@ -58,22 +53,22 @@ export class Wallet {
             .derive(0)
             .to_raw_key()
         const recovery: WalletRecovery = { ctype: "mnemonic", mnemonic: mnemonicPhrase, password }
-        return new Wallet(Wallet.networkId(network), stakePvtKey, stakePvtKey.to_public(), paymentPvtKey, paymentPvtKey.to_public(), recovery, lucid)
+        return new Wallet(network, stakePvtKey, stakePvtKey.to_public(), paymentPvtKey, paymentPvtKey.to_public(), recovery)
     }
 
-    static async loadFromFiles(network: CardanoNetwork, paymentPath: string, stakePath: string, lucid: Lucid): Promise<Wallet> {
+    static async loadFromFiles(network: CardanoNetwork, paymentPath: string, stakePath: string): Promise<Wallet> {
         const loadKeyFromFile = async (filepath: string): Promise<{cborHex: string}> => 
             JSON.parse(await fs.readFile(filepath, "utf8")) as {cborHex: string}
-        return Wallet.loadFromJson(network, { payment: await loadKeyFromFile(paymentPath), stake: await loadKeyFromFile(stakePath) }, lucid)
+        return Wallet.loadFromJson(network, { payment: await loadKeyFromFile(paymentPath), stake: await loadKeyFromFile(stakePath) })
     }
 
-    static async loadFromJson(network: CardanoNetwork, json: { payment: {cborHex: string}, stake: {cborHex: string} }, lucid: Lucid): Promise<Wallet> {
+    static async loadFromJson(network: CardanoNetwork, json: { payment: {cborHex: string}, stake: {cborHex: string} }): Promise<Wallet> {
         const paymentPrvKey = PrivateKey.from_normal_bytes(await cbor.decodeFirst(json.payment.cborHex))
         const paymentPubKey = paymentPrvKey.to_public()
         const stakePrvKey = PrivateKey.from_normal_bytes(await cbor.decodeFirst(json.stake.cborHex))
         const stakePubKey = stakePrvKey.to_public()
         const recovery: WalletRecovery = { ...json, ctype: "files"}
-        return new Wallet(Wallet.networkId(network), stakePrvKey, stakePubKey, paymentPrvKey, paymentPubKey, recovery, lucid)
+        return new Wallet(network, stakePrvKey, stakePubKey, paymentPrvKey, paymentPubKey, recovery)
     }
 
     public exportWallet(): string {
@@ -86,16 +81,22 @@ export class Wallet {
         else return Wallet.recover(network, recovery.mnemonic, recovery.password)
     }
 
-    public baseAddress: BaseAddress =
-        BaseAddress.new(this.networkId,
+    public async toLucid(lucid: Lucid): Promise<Lucid> {
+        return lucid.selectWalletFromPrivateKey(this.paymentPvtKey.to_bech32())
+    }
+
+    public baseAddress(): BaseAddress {
+        return BaseAddress.new(Wallet.networkId(this.network),
             StakeCredential.from_keyhash(this.paymentPubKey.hash()),
             StakeCredential.from_keyhash(this.stakePubKey.hash()),
         )
+    }
     
-    public stakeAddress: RewardAddress =
-        RewardAddress.new(this.networkId,
+    public stakeAddress(): RewardAddress {
+        return RewardAddress.new(Wallet.networkId(this.network),
             StakeCredential.from_keyhash(this.stakePubKey.hash()),
         )
+    }
     
     public buildPaymentWitness = (transaction: Transaction): Vkeywitness =>
         make_vkey_witness(cardano.hashTx(transaction), this.paymentPvtKey)
@@ -122,7 +123,7 @@ export class Wallet {
     }
 
     public signData(payload: string): { signature: string, key: string } {
-        const address = this.stakeAddress.to_address().to_hex()
+        const address = this.stakeAddress().to_address().to_hex()
         const protectedHeaders = HeaderMap.new()
         protectedHeaders.set_algorithm_id(Label.from_algorithm_id(AlgorithmId.EdDSA))
         protectedHeaders.set_header(Label.new_text("address"), CBORValue.new_bytes(Buffer.from(address, "hex")))
@@ -156,7 +157,7 @@ export class Wallet {
     }
 
     public verifySignature(signature: string, key: string, payload: string): boolean {
-        const address = this.stakeAddress.to_address().to_hex()
+        const address = this.stakeAddress().to_address().to_hex()
         return Wallet.verifySignature(signature, key, payload, address)
     }
 
@@ -172,7 +173,7 @@ export class Wallet {
     }
 
     public hashNativeScript(): NativeScript {
-        const policyKeyHash = this.baseAddress.payment_cred().to_keyhash()!
+        const policyKeyHash = this.baseAddress().payment_cred().to_keyhash()!
         const nativeScript = NativeScript.new_script_pubkey(ScriptPubkey.new(policyKeyHash))
         return nativeScript
     }

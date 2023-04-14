@@ -122,8 +122,14 @@ export const AccountThunks = {
         
             const { walletApi, stakeAddress } = extractedResult
             
-            //console.log(await walletApi.getUtxos()[0])
+            const utxos = await walletApi.wallet.getUtxos()
+            const pickedUtxos = utxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("2000000"))
+
+            if (pickedUtxos.length == 0)
+                return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: "Not enough ADA, you must have an available utxo with at least 2 ADA." }))
+            console.log(pickedUtxos)
        
+            /*
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Building Transaction"}))
             const claimResponse =  await AccountBackend.claim(stakeAddress)
             
@@ -140,6 +146,7 @@ export const AccountThunks = {
                 return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: `Somethig when wrong on the backend ${signature.reason}` }))
             dispatch(actions.setClaimState({ ctype: "wallet-action-state-submitted", details: "polling" }))
             dispatch(AccountThunks.claimStatus(claimResponse.claimId))
+            */
         }catch (error: any){
             console.error(error);
             return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: error.message}))

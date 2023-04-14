@@ -5,8 +5,8 @@ import { SignatureVerificationState } from "./signature-verification-db"
 
 test("Verify sig", async () => {
     const nonce = "nonce"
-    const wallet = Wallet.generate("mainnet", "password")
-    const stakeAddress = wallet.stakeAddress.to_address().to_bech32()
+    const wallet = Wallet.generate("Mainnet", "password")
+    const stakeAddress = wallet.stakeAddress().to_address().to_bech32()
     SignatureVerificationState.findOne = jest.fn(async () => {
         return { 
             address: stakeAddress, 

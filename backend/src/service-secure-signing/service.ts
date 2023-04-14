@@ -8,6 +8,7 @@ import Registry from "./registry/registry"
 import { LoggingContext } from "../tools-tracing"
 import { CardanoNetwork, cardanoNetworkFromString } from "../tools-cardano"
 import { config, HealthStatus } from "../tools-utils"
+import { Lucid, C as LucidCore, TxComplete } from "lucid-cardano"
 
 export interface SecureSigningServiceConfig
     { network: CardanoNetwork
@@ -22,7 +23,7 @@ export class SecureSigningServiceDsl implements SecureSigningService {
     static async loadFromEnv(salt: string, logger?: LoggingContext): Promise<SecureSigningService> {
         dotenv.config()
         return SecureSigningServiceDsl.loadFromConfig(salt,
-            { network: cardanoNetworkFromString(config.stringOrElse("CARDANO_NETWORK", "testnet"))
+            { network: cardanoNetworkFromString(config.stringOrElse("CARDANO_NETWORK", "Preprod"))
             , encryptionPassword: config.stringOrError("ENCRYPTION_PASSWORD")
             , initialRegistry: config.stringOrError("ENCRYPTED_REGISTRY")
             }, logger)
@@ -92,5 +93,11 @@ export class SecureSigningServiceDsl implements SecureSigningService {
         } catch (_) {
             return { status: "bad-tx" }
         }
+    }
+
+    public async lucidSignTx(policyId: string, transaction: TxComplete, logger?: LoggingContext): Promise<models.SignTxResult> {
+        const response = await this.registry.lucidSignTx(policyId, transaction)
+        if (response == null) return { status: "forbidden" }
+        return { status: "ok", witness: response }
     }
 }

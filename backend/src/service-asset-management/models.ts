@@ -48,3 +48,11 @@ export type SubmitClaimSignatureResponse
 export type ClaimStatusResponse
     = { status: "ok", claimStatus: ClaimStatus }
     | { status: "invalid", reason: string }
+
+export type LucidClaimResponse
+    = { status: "ok", claimId: string, tx: string, dragonSilverWitness: string }
+    | { status: "invalid", reason: string }
+
+export type LucidReportSubmissionResponse 
+    = { status: "ok" }
+    | { status: "invalid", reason: string }

@@ -11,6 +11,7 @@ export default class SecureSigningServiceMock {
             signTx: jest.fn(),
             signWithPolicy: jest.fn(),
             signData: jest.fn(),
+            lucidSignTx: jest.fn(),
         }
     }
 

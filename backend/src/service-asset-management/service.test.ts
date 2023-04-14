@@ -5,6 +5,7 @@ import { connectToDB, DBConfig } from "../tools-database";
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock";
 import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock";
 import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock";
+import { Emulator, Lucid } from "lucid-cardano";
 
 let dsl: ServiceTestDsl
 let service: AssetManagementService
@@ -21,6 +22,8 @@ beforeEach(async () => {
     const identityService = new IdentityServiceMock()
     const secureSigningService = new SecureSigningServiceMock()
     const blockfrost = new BlockFrostAPIMock()
+    const emulator = new Emulator([])
+    const lucid = await Lucid.new(emulator, "Preprod")
     service = await AssetManagementServiceDsl.loadFromConfig(
         { claimsConfig: 
             { feeAddress: "addr_test1qr50mcpmrfavg9ca0pd7mq3gc9uvqhr7gm78f346e2cc07l7u3q390npuc24v47udvsrr7h0t4d4m26h4f6gjpvw393sfwrk9j"
@@ -32,6 +35,7 @@ beforeEach(async () => {
         , blockfrost: blockfrost.service
         , identityService: identityService.service
         , secureSigningService: secureSigningService.service
+        , lucid: lucid
         }
     )
     dsl = new ServiceTestDsl(

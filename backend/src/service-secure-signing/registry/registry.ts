@@ -1,6 +1,7 @@
 import { CardanoNetwork, AES256, Wallet, cardano } from "../../tools-cardano"
 import cbor from "cbor"
 import { NativeScript, Transaction, TransactionWitnessSet } from "@emurgo/cardano-serialization-lib-nodejs";
+import { Lucid, C as LucidCore, Provider as LucidProvider, TransactionWitnesses, TxComplete } from "lucid-cardano"
 
 export type RegistryCache = 
     { [policyId: string]: 
@@ -12,12 +13,16 @@ export default class Registry {
     private aes256: AES256
     private cache: RegistryCache = {}
 
-    constructor(private network: CardanoNetwork, options: { salt: string, password: string }){
+    constructor(
+        private network: CardanoNetwork, 
+        options: { salt: string, password: string }
+    ){
         this.aes256 = new AES256(options)
     }
 
-    public addToCache(wallet: Wallet, script: NativeScript): void {
-        this.cache[cardano.policyId(script)] = { signer: wallet, policy: script }
+    public async addToCache(wallet: Wallet, script: NativeScript): Promise<void> {
+        const signer = wallet
+        this.cache[cardano.policyId(script)] = { signer, policy: script }
     }
 
     public getCache(): RegistryCache {
@@ -27,11 +32,13 @@ export default class Registry {
     public async importCache(data: string): Promise<void> {
         const cborHash = this.aes256.decrypt(data)
         const undecoded = (await cbor.decodeFirst(cborHash)) as { [policyId: string]: { signer: string, policy: string } }
-        for (const k in undecoded)
+        for (const k in undecoded) {
+            const signer = await Wallet.importWallet(this.network, undecoded[k].signer)
             this.cache[k] = { 
-                signer: await Wallet.importWallet(this.network, undecoded[k].signer), 
+                signer, 
                 policy: NativeScript.from_bytes(await cbor.decodeFirst(undecoded[k].policy)) 
             }
+        }
     }
 
     public async exportCache(): Promise<string> {
@@ -67,5 +74,11 @@ export default class Registry {
         const info = this.cache[policyId]
         if (info == undefined) return null
         else return info.signer.signData(payload)
+    }
+
+    public async lucidSignTx(policyId: string, transaction: TxComplete): Promise<TransactionWitnesses | null> {
+        const info = this.cache[policyId]
+        if (info == undefined) return null
+        else return transaction.partialSignWithPrivateKey(info.signer.paymentPvtKey.to_bech32()) 
     }
 }

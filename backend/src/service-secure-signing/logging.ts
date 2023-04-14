@@ -2,6 +2,7 @@ import { LoggingContext } from "../tools-tracing"
 import { HealthStatus } from "../tools-utils"
 import * as models from "./models"
 import { SecureSigningService } from "./service-spec"
+import { C as LucidCore, TxComplete } from "lucid-cardano"
 
 export class SecureSigningServiceLogging implements SecureSigningService {
 
@@ -48,6 +49,14 @@ export class SecureSigningServiceLogging implements SecureSigningService {
         serviceLogger?.info("signing data", { policyId })
         const response = await this.base.signData(policyId, payload, serviceLogger)
         serviceLogger?.info("signing data outcome", { status: response.status })
+        return response
+    }
+
+    async lucidSignTx(policyId: string, transaction: TxComplete, logger?: LoggingContext): Promise<models.SignTxResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info("signing transaction", { policyId })
+        const response = await this.base.lucidSignTx(policyId, transaction, serviceLogger)
+        serviceLogger?.info("transaction signing outcome", { status: response.status })
         return response
     }
 }

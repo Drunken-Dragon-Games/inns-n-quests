@@ -15,11 +15,12 @@ import { AssetManagementServiceLogging } from "./logging"
 
 import { 
     ClaimResponse, ClaimStatusResponse, GrantResponse, HealthStatus, 
-    ListResponse, SubmitClaimSignatureResponse 
+    ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitClaimSignatureResponse 
 } from "./models"
 
 import * as offChainStoreDB from "./assets/offchain-store-db"
 import * as assetClaimDB from "./assets/asset-claim-db"
+import { Lucid } from "lucid-cardano"
 
 export interface AssetManagementServiceConfig 
     { claimsConfig: AssetClaimDslConfig
@@ -30,6 +31,7 @@ export interface AssetManagemenetServiceDependencies
     , blockfrost: BlockFrostAPI
     , identityService: IdentityService
     , secureSigningService: SecureSigningService
+    , lucid: Lucid
     }
 
 export class AssetManagementServiceDsl implements AssetManagementService {
@@ -44,9 +46,10 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         blockfrost: BlockFrostAPI,
         private readonly identityService: IdentityService,
         secureSigningService: SecureSigningService,
+        lucid: Lucid,
     ) {
         this.assets = new AssetStoreDsl(blockfrost)
-        this.claims = new AssetClaimDsl(assetClaimConfig, database, blockfrost, secureSigningService, this.assets)
+        this.claims = new AssetClaimDsl(assetClaimConfig, database, blockfrost, secureSigningService, this.assets, lucid)
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
     }
@@ -69,6 +72,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
             dependencies.blockfrost,
             dependencies.identityService,
             dependencies.secureSigningService,
+            dependencies.lucid,
         ))
         await service.loadDatabaseModels()
         return service
@@ -140,5 +144,28 @@ export class AssetManagementServiceDsl implements AssetManagementService {
 
     async revertStaledClaims(logger?: LoggingContext): Promise<number> {
         return await this.claims.revertStaledClaims(logger)
+    }
+
+    async lucidClaim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<LucidClaimResponse> {
+        /*
+        const result = await this.claims.lucidClaim(userId, stakeAddress, asset, logger)
+        if (result.ctype == "success") 
+            return { status: "ok", claimId: result.result.claimId, tx: result.result.tx }
+        else {
+            return { status: "invalid", reason: result.error }        
+        }
+        */
+        return { status: "invalid", reason: "unimplemented" }        
+    }
+
+    async lucidReportSubmission(claimId: string, logger?: LoggingContext): Promise<LucidReportSubmissionResponse> {
+        /*
+        const result = await this.claims.lucidReportSubmission(claimId, logger)
+        if (result.ctype == "success") 
+            return { status: "ok", txId: result.result }
+        else 
+            return { status: "invalid", reason: result.error }
+        */
+        return { status: "invalid", reason: "unimplemented" }        
     }
 }

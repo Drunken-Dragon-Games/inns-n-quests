@@ -6,7 +6,8 @@ const stubDiscordConfig: DiscordConfig = {
     clientId: "",
     clientSecret: "",
     redirectValidate: "",
-    redirectAdd: ""
+    redirectAdd: "",
+    redirect: "",
 }
 
 test("discord code verification", async () => {
