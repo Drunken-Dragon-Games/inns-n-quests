@@ -1,9 +1,9 @@
-import { addDateReferenceColumns, MigrationFun } from '../../tools-database'
-import { CharacterDBInfo } from '../state/character-state'
-import { ActiveEncounterDBInfo } from '../state/encounter-state'
-import { FurnitureDBInfo } from '../state/furniture-state'
-import { SectorDBInfo } from '../state/sector-state'
-import { TakenStakingQuestDBInfo } from '../state/taken-staking-quest-state'
+import { addDateReferenceColumns, MigrationFun } from '../../tools-database.js'
+import { CharacterDBInfo } from '../state/character-state.js'
+import { ActiveEncounterDBInfo } from '../state/encounter-state.js'
+import { FurnitureDBInfo } from '../state/furniture-state.js'
+import { SectorDBInfo } from '../state/sector-state.js'
+import { TakenStakingQuestDBInfo } from '../state/taken-staking-quest-state.js'
 
 export const up: MigrationFun = async ({ context: query }) => {
   await query.createTable(CharacterDBInfo.tableName, addDateReferenceColumns(CharacterDBInfo.tableAttributes))

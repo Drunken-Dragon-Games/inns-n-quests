@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
-import { Adventurer, IAdventurer } from "../../adventurers/models/adventurer_model"
-import { TakenQuest } from "./taken_quest_model"
+import { Adventurer, IAdventurer } from "../../adventurers/models/adventurer_model.js"
+import { TakenQuest } from "./taken_quest_model.js"
 
 type IEnroll = {
     taken_quest_id: string,

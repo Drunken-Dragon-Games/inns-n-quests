@@ -1,4 +1,4 @@
-import { IQEntity } from "./iq-entity"
+import { IQEntity } from "./iq-entity.js"
 
 export type FurnitureEntity = IQEntity<"furniture-entity"> & {
     collection: FurnitureCollection 

@@ -6,7 +6,7 @@
 // const workingSignature = '84582aa201276761646472657373581de1a577df99b6a12f3bc0496fbf8805b57500a11bb52ecd32caaf774e02a166686173686564f4536c6f6f6b696e676172726f756e64617265776558407cb5964b0ea9e6704120d21f7ad559e37583f590db5288b2fb71ee592e48f3a48272fd584634d8c7d697f0858614e64624dae31fc61035de2bb082441fdd7d0b'
 // const workingKey = 'a40101032720062158209701ab0d6a4204abc52e73a337588d40c004f9f280922881f8fe0c177aac816b'
 
-// import {buildSession, buildSessionToExpire} from "./mockServices"
+// import {buildSession, buildSessionToExpire} from "./mockServices.js"
 
 // export const okWalletAccount =async () => {
 //     const r = await api.post("/api/validate").send({ stakeAddress: stakeAddress }).expect(201);

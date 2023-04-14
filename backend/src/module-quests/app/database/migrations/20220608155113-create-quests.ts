@@ -1,6 +1,6 @@
 import { DataTypes, QueryInterface } from 'sequelize'
-import { Migration } from '../migration_scripts/migrate'
-import generateQuests from '../migration_scripts/quest_generation'
+import { Migration } from '../migration_scripts/migrate.js'
+import generateQuests from '../migration_scripts/quest_generation.js'
 
 export const up: Migration = async ({ context: sequelize }) => {
 	await sequelize.getQueryInterface().createTable('quests', {

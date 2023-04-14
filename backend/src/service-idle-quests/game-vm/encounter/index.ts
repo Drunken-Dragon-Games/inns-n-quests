@@ -1,3 +1,3 @@
-export * from "./encounter"
-export * from "./encounter-reward"
-export * from "./encounter-configuration"
+export * from "./encounter.js"
+export * from "./encounter-reward.js"
+export * from "./encounter-configuration.js"

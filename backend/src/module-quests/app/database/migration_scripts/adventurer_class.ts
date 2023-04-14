@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
-import { Adventurer } from "../../../adventurers/models";
-import { gmasMetadata, pixelTileClass } from "../../metadata/metadata";
+import { Adventurer } from "../../../adventurers/models.js";
+import { gmasMetadata, pixelTileClass } from "../../metadata/metadata.js";
 
 const addAdventurerClass = async (sequelize: Sequelize) => {
     let adventurers: Adventurer[] = await Adventurer.findAll()

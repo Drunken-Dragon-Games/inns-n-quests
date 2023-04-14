@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { jwtMiddleware } from "../middleware/jwt_middleware"
+import { jwtMiddleware } from "../middleware/jwt_middleware.js"
 
 import {
     addWallet,
@@ -7,8 +7,8 @@ import {
     mergeAccounts,
     getAccountData,
     refreshSession
-} from "../controllers/account_controller";
-import { IdentityService } from "../../service-identity";
+} from "../controllers/account_controller.js";
+import { IdentityService } from "../../service-identity.js";
 
 
 const loadAccountManagementRoutes = (identityService: IdentityService) => {

@@ -1,8 +1,8 @@
 import { DataTypes, Model, Optional, Sequelize, Transaction } from "sequelize"
-import { createMintNftTx } from '../faucet'
-import { LoggingContext } from "../../../tools-tracing"
-import { AssetManagementService } from "../../../service-asset-management"
-import { WellKnownPolicies } from "../../../registry-policies"
+import { createMintNftTx } from '../faucet.js'
+import { LoggingContext } from "../../../tools-tracing.js"
+import { AssetManagementService } from "../../../service-asset-management.js"
+import { WellKnownPolicies } from "../../../registry-policies.js"
 
 interface IPlayer {
     user_id: string

@@ -1,23 +1,23 @@
 import { NextFunction, Response } from "express";
 import sequelize, { Sequelize } from "sequelize"
 import { Request } from "express-jwt";
-// import { sequelize } from "../app/database/database";
-import { IFilteredAdventurers } from "../app/types";
+// import { sequelize } from "../app/database/database.js";
+import { IFilteredAdventurers } from "../app/types.js";
 import { Model } from "sequelize";
-import { handleQuestsByAdventurerLevel } from "./utils";
-import { shuffle } from "../app/utils";
-import ApiError from "../app/error/api_error";
+import { handleQuestsByAdventurerLevel } from "./utils.js";
+import { shuffle } from "../app/utils.js";
+import ApiError from "../app/error/api_error.js";
 import { Adventurer,
-         IAdventurer } from "../adventurers/models"
+         IAdventurer } from "../adventurers/models.js"
 import { Enrolled, 
          Quest,
          IQuest,
          IQuestCreation,
-         TakenQuest } from "./models";
-import { withTracing } from "../base-logger";
-import { AssetManagementService } from "../../service-asset-management";
-import { config } from '../../tools-utils'
-import { IdleQuestsService } from "../../service-idle-quests";
+         TakenQuest } from "./models.js";
+import { withTracing } from "../base-logger.js";
+import { AssetManagementService } from "../../service-asset-management.js";
+import { config } from '../../tools-utils.js'
+import { IdleQuestsService } from "../../service-idle-quests.js";
 
 const { Op } = require("sequelize");
 

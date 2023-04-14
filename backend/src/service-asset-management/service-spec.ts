@@ -1,5 +1,5 @@
-import { LoggingContext } from "../tools-tracing"
-import * as models from "./models"
+import { LoggingContext } from "../tools-tracing.js"
+import * as models from "./models.js"
 
 export interface AssetManagementService {
 

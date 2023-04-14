@@ -1,6 +1,6 @@
-import { Attempt, failed, succeeded } from "../../tools-utils";
-import { AuthType, DeviceType, AuthenticationTokens, SessionInfo } from "../models";
-import { StoredSession } from "./session-db";
+import { Attempt, failed, succeeded } from "../../tools-utils.js";
+import { AuthType, DeviceType, AuthenticationTokens, SessionInfo } from "../models.js";
+import { StoredSession } from "./session-db.js";
 
 export type SessionsConfig = {
     duration: number

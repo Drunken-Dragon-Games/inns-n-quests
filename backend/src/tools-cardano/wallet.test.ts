@@ -1,8 +1,8 @@
 import path from "path"
 import fs from "fs/promises"
 
-import { NFTMintOptions, cardano, TokenMintOptions, CardanoNetwork } from "./utils"
-import { Wallet } from "./wallet"
+import { NFTMintOptions, cardano, TokenMintOptions, CardanoNetwork } from "./utils.js"
+import { Wallet } from "./wallet.js"
 import { NativeScript, Transaction } from "@emurgo/cardano-serialization-lib-nodejs"
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 

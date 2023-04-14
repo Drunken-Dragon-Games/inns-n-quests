@@ -1,6 +1,6 @@
-import { LoggingContext } from "../tools-tracing"
-import * as models from "./models"
-import * as vm from "./game-vm"
+import { LoggingContext } from "../tools-tracing.js"
+import * as models from "./models.js"
+import * as vm from "./game-vm.js"
 
 export interface IdleQuestsService {
 

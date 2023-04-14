@@ -1,6 +1,6 @@
 // import { DataTypes, Model } from "sequelize"
-// import { sequelize } from "../../app/database/database"
-// import { Player } from "./player_model"
+// import { sequelize } from "../../app/database/database.js"
+// import { Player } from "./player_model.js"
 
 // interface IClaimedDragonSilver {
 //     stake_address: string,

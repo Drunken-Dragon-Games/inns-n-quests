@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize"
-import { createMigrator } from "./migrate"
+import { createMigrator } from "./migrate.js"
 
 
 /**

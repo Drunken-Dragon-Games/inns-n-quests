@@ -1,9 +1,9 @@
-import { CharacterEntityRuleSetProperties } from '../iq-ruleset'
-import DefaultRuleset from '../default-ruleset/default-ruleset'
-import IQRandom from '../iq-random'
-import { IQMeatadataObjectBuilder } from '../iq-metadata-object-builder'
-import { emptyMetadataRegistry, emptyWellKnownPolicies } from '../iq-metadata'
-import { loadQuestRegistryFromFs } from '../../state/staking-quests-registry'
+import { CharacterEntityRuleSetProperties } from '../iq-ruleset.js'
+import DefaultRuleset from '../default-ruleset/default-ruleset.js'
+import IQRandom from '../iq-random.js'
+import { IQMeatadataObjectBuilder } from '../iq-metadata-object-builder.js'
+import { emptyMetadataRegistry, emptyWellKnownPolicies } from '../iq-metadata.js'
+import { loadQuestRegistryFromFs } from '../../state/staking-quests-registry.js'
 import path from 'path'
 
 class UnsafeIQRandom extends IQRandom {

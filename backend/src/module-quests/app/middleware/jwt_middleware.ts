@@ -1,9 +1,9 @@
 import { Request } from "express"
-import { SECRET_KEY } from "../settings"
+import { SECRET_KEY } from "../settings.js"
 
 import { expressjwt, ExpressJwtRequest } from "express-jwt";
 import { Jwt } from "jsonwebtoken";
-import { IToken } from "../types";
+import { IToken } from "../types.js";
 
 // FUNCTION TO RETRIEVE AUTH TOKEN FROM THE COOKIES INSTED OF THE HEADERS
 const getToken = async (request: Request) => {

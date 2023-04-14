@@ -1,29 +1,29 @@
 import dotenv from "dotenv"
 import { QueryInterface, Sequelize } from "sequelize"
-import { validateStakeAddress } from "./cardano/address"
-import { generateNonce, verifySig } from "./cardano/signature-verification"
-import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./discord/code-verification"
-import { Users } from "./users/users"
-import { Sessions, SessionsConfig } from "./sessions/sessions";
-import { IdentityService } from "./service-spec"
-import { LoggingContext } from "../tools-tracing"
-import { connectToDB, DBConfig, buildMigrator } from "../tools-database"
-import { IdentityServiceLogging } from "./logging"
-import { config, HealthStatus } from "../tools-utils"
+import { validateStakeAddress } from "./cardano/address.js"
+import { generateNonce, verifySig } from "./cardano/signature-verification.js"
+import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./discord/code-verification.js"
+import { Users } from "./users/users.js"
+import { Sessions, SessionsConfig } from "./sessions/sessions.js";
+import { IdentityService } from "./service-spec.js"
+import { LoggingContext } from "../tools-tracing.js"
+import { connectToDB, DBConfig, buildMigrator } from "../tools-database.js"
+import { IdentityServiceLogging } from "./logging.js"
+import { config, HealthStatus } from "../tools-utils.js"
 
 import { 
     CreateNonceResult, Credentials, AuthenticationResult, RegistrationResult, AssociationResult, 
     RefreshResult, ListSessionsResult, SignOutResult, ResolveUserResult, ResolveSesionResult, 
     UpdateUserResult, 
     UserInfo
-} from "./models"
+} from "./models.js"
 
-import * as cardanoDB from "./cardano/signature-verification-db"
-import * as sessionsDB from "./sessions/session-db"
-import * as usersDB from "./users/users-db"
+import * as cardanoDB from "./cardano/signature-verification-db.js"
+import * as sessionsDB from "./sessions/session-db.js"
+import * as usersDB from "./users/users-db.js"
 import path from "path"
 import { Umzug } from "umzug"
-import { NODE_ENV } from "../module-ddu-app/settings"
+import { NODE_ENV } from "../module-ddu-app/settings.js"
 
 export interface IdentityServiceConfig 
     { network: string

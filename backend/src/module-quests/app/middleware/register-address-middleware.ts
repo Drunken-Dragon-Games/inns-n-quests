@@ -1,4 +1,4 @@
-import { Player } from "../../players/models";
+import { Player } from "../../players/models.js";
 import { Response, NextFunction } from "express";
 import { Request } from "express-jwt";
 

@@ -1,5 +1,5 @@
-import { IQEntity } from "../iq-entity"
-import { APS } from "./aps"
+import { IQEntity } from "../iq-entity.js"
+import { APS } from "./aps.js"
 
 export type CharacterEntity = IQEntity<"character-entity"> & {
     characterType: CharacterType

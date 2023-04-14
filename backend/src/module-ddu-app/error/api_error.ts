@@ -1,5 +1,5 @@
-//import { logger } from "../middleware/winston_middleware";
-import { logger } from "../base-logger"
+//import { logger } from "../middleware/winston_middleware.js";
+import { logger } from "../base-logger.js"
 
 class ApiError extends Error {
     readonly status: number;

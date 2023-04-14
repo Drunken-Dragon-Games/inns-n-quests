@@ -1,13 +1,13 @@
 import axios from 'axios';
 import crypto from "crypto"
-import { User } from "./users/users-db"
-import { IdentityServiceDsl } from "./service"
-import { IdentityService } from "./service-spec";
-import { CardanoNetwork, Wallet } from "../tools-cardano";
-import { success, failure, unit } from "../tools-utils";
-import { AuthenticationTokens, UserInfo, UserFullInfo } from "./models";
-import { expectResponse } from "../tools-utils/api-expectations";
-import { connectToDB, DBConfig } from "../tools-database";
+import { User } from "./users/users-db.js"
+import { IdentityServiceDsl } from "./service.js"
+import { IdentityService } from "./service-spec.js";
+import { CardanoNetwork, Wallet } from "../tools-cardano.js";
+import { success, failure, unit } from "../tools-utils.js";
+import { AuthenticationTokens, UserInfo, UserFullInfo } from "./models.js";
+import { expectResponse } from "../tools-utils/api-expectations.js";
+import { connectToDB, DBConfig } from "../tools-database.js";
 
 let network: CardanoNetwork = "Preprod"
 let service: IdentityService

@@ -1,9 +1,9 @@
-import { APS, apsSum, CharacterEntity } from "./character-entity"
-import { ConfigurationCharacter, DamageType, EncounterOutcome, EncounterReward, GeneralDamageType, SkillInfo, Strategy, StrategyConfiguration } from "./encounter"
-import { WithEV } from "./iq-entity"
-import { IQMeatadataObjectBuilder } from "./iq-metadata-object-builder"
-import IQRandom from "./iq-random"
-import { StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementInfo, StakingQuestSatisfactionInfo } from "./staking-quest"
+import { APS, apsSum, CharacterEntity } from "./character-entity.js"
+import { ConfigurationCharacter, DamageType, EncounterOutcome, EncounterReward, GeneralDamageType, SkillInfo, Strategy, StrategyConfiguration } from "./encounter.js"
+import { WithEV } from "./iq-entity.js"
+import { IQMeatadataObjectBuilder } from "./iq-metadata-object-builder.js"
+import IQRandom from "./iq-random.js"
+import { StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementInfo, StakingQuestSatisfactionInfo } from "./staking-quest.js"
 
 export interface IQRuleset {
     name: string

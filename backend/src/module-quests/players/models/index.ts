@@ -1,8 +1,8 @@
-import { Player, IPlayer } from "./player_model";
-// import { PlayerToVerify, IPlayerToVerify } from "./player_to_verify_model";
-// import { ClaimedDragonSilver, IClaimedDragonSilver } from "./claimed_ds_model";
-import { Adventurer } from "../../adventurers/models";
-import { TakenQuest } from "../../quests/models";
+import { Player, IPlayer } from "./player_model.js";
+// import { PlayerToVerify, IPlayerToVerify } from "./player_to_verify_model.js";
+// import { ClaimedDragonSilver, IClaimedDragonSilver } from "./claimed_ds_model.js";
+import { Adventurer } from "../../adventurers/models.js";
+import { TakenQuest } from "../../quests/models.js";
 
 // ClaimedDragonSilver.belongsTo(Player, {
 //     foreignKey: "stake_address"

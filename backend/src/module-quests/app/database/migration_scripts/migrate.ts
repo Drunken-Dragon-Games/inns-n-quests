@@ -1,22 +1,22 @@
 import { Umzug, SequelizeStorage, MigrationMeta } from "umzug"
 import path from "path";
-import generateQuests from "./quest_generation";
-import executeRequirementGeneration from "./random-requirements";
-import addAdventurerClass from "./adventurer_class";
-import addAdventurerRace from "./adventurer_race";
+import generateQuests from "./quest_generation.js";
+import executeRequirementGeneration from "./random-requirements.js";
+import addAdventurerClass from "./adventurer_class.js";
+import addAdventurerRace from "./adventurer_race.js";
 import { Sequelize } from "sequelize";
-import { loadPlayerModel } from "../../../players/models/player_model";
-import { loadAdventurerModel } from "../../../adventurers/models/adventurer_model";
-import { loadQuestModel } from "../../../quests/models/quest_model";
-import { loadEnrolledModel } from "../../../quests/models/enroll_model";
-import { loadWarEffortModel } from "../../../war-effort/models/war_effort_model";
-import { loadWarEffortQuestModel } from "../../../war-effort/models/war_effort_quest_model";
-import { loadWarEffortFactionModel } from "../../../war-effort/models/war_effort_factions_model";
-import { loadTakenQuestModel } from "../../../quests/models/taken_quest_model";
-import { loadPlayerAssosiations } from "../../../players/models";
-import { loadWarEffortAssosiations } from "../../../war-effort/models";
-import { loadQuestAssosiations } from "../../../quests/models";
-import { loadAdventurerAssosiations } from "../../../adventurers/models";
+import { loadPlayerModel } from "../../../players/models/player_model.js";
+import { loadAdventurerModel } from "../../../adventurers/models/adventurer_model.js";
+import { loadQuestModel } from "../../../quests/models/quest_model.js";
+import { loadEnrolledModel } from "../../../quests/models/enroll_model.js";
+import { loadWarEffortModel } from "../../../war-effort/models/war_effort_model.js";
+import { loadWarEffortQuestModel } from "../../../war-effort/models/war_effort_quest_model.js";
+import { loadWarEffortFactionModel } from "../../../war-effort/models/war_effort_factions_model.js";
+import { loadTakenQuestModel } from "../../../quests/models/taken_quest_model.js";
+import { loadPlayerAssosiations } from "../../../players/models.js";
+import { loadWarEffortAssosiations } from "../../../war-effort/models.js";
+import { loadQuestAssosiations } from "../../../quests/models.js";
+import { loadAdventurerAssosiations } from "../../../adventurers/models.js";
 
 /**
  * Umzug object builder to execute Sequelize migrations programmatically

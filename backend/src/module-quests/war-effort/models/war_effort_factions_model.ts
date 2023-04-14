@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional, Sequelize, Transaction } from "sequelize";
-import { WarEffort } from './war_effort_model'
+import { WarEffort } from './war_effort_model.js'
 
 interface IWarEffortFaction {
     name: string

@@ -1,6 +1,6 @@
 import { DataTypes, ModelAttributes, QueryInterface } from 'sequelize'
-import { AssetClaimTableName, AssetClaimTableAttributes } from '../assets/asset-claim-db'
-import { OffChainStoreTableName, OffChainStoreTableAttributes } from '../assets/offchain-store-db'
+import { AssetClaimTableName, AssetClaimTableAttributes } from '../assets/asset-claim-db.js'
+import { OffChainStoreTableName, OffChainStoreTableAttributes } from '../assets/offchain-store-db.js'
 
 type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
 

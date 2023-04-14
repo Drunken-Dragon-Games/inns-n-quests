@@ -1,14 +1,14 @@
-// import { buildApp } from "../app"
+// import { buildApp } from "../app.js"
 // import { Server } from "http"
 
 test("placeholder", async () => {
     expect(true).toBeTruthy()
 })
 
-// import * as mock from "./mockServices"
-// import * as flow from "./flow"
+// import * as mock from "./mockServices.js"
+// import * as flow from "./flow.js"
 
-// import registry from "../assets/registry";
+// import registry from "../assets/registry.js";
 
 // let server: Server
 

@@ -1,4 +1,4 @@
-import { addAPS, APS, zeroAPS } from "../character-entity"
+import { addAPS, APS, zeroAPS } from "../character-entity.js"
 
 export type EncounterReward = { 
     items: {}, 

@@ -1,8 +1,8 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
-// import { sequelize } from '../../app/database/database'
-import { calculateDeathCooldown } from "../utils";
-import { getLevelFromXp } from "../utils";
-import { calculateExperienceGained } from "../../quests/utils"
+// import { sequelize } from '../../app/database/database.js'
+import { calculateDeathCooldown } from "../utils.js";
+import { getLevelFromXp } from "../utils.js";
+import { calculateExperienceGained } from "../../quests/utils.js"
 
 interface IAdventurerRes extends IAdventurer {
     name?: string,

@@ -1,17 +1,17 @@
 import { Response, NextFunction} from "express"
-import { COOKIE_EXPIRACY } from '../app/settings'
-import { AuthRequest } from "../app/types";
-import { validateAddress } from "../app/middleware/validate_address";
+import { COOKIE_EXPIRACY } from '../app/settings.js'
+import { AuthRequest } from "../app/types.js";
+import { validateAddress } from "../app/middleware/validate_address.js";
 import { Request } from "express-jwt";
-import { blockfrost } from "../blockfrost/intializer";
-import ApiError from "../app/error/api_error";
-import { getRandomNFT, getCollectionPolicy } from "./app-logic/testnet/random-nft";
-import { handleSignVerification, handleRefreshToken } from "./app-logic/authentication";
-// import { registry } from "../app/utils";
-import { withTracing } from "../base-logger"
-import { IdentityService } from "../../service-identity";
-import { AssetManagementService } from "../../service-asset-management";
-import { onlyPolicies, WellKnownPolicies } from "../../registry-policies";
+import { blockfrost } from "../blockfrost/intializer.js";
+import ApiError from "../app/error/api_error.js";
+import { getRandomNFT, getCollectionPolicy } from "./app-logic/testnet/random-nft.js";
+import { handleSignVerification, handleRefreshToken } from "./app-logic/authentication.js";
+// import { registry } from "../app/utils.js";
+import { withTracing } from "../base-logger.js"
+import { IdentityService } from "../../service-identity.js";
+import { AssetManagementService } from "../../service-asset-management.js";
+import { onlyPolicies, WellKnownPolicies } from "../../registry-policies.js";
 
 ////////////////// GET NONCE ////////////////////
 /* 

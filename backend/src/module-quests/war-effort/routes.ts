@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createWarEffort, 
          getActiveWarEfforts,
-         createWarEffortQuest } from "./controller";
+         createWarEffortQuest } from "./controller.js";
 
 export const loadWarEffortRoutes = () => {
     const router = Router();

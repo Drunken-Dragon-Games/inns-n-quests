@@ -3,9 +3,9 @@ import { Adventurer,
          IAdventurerData, 
          IAdventurerMetadata, 
          IAdventurerRes, 
-         IDeadAdventurerData } from "./adventurer_model";
-import { Player } from "../../players/models";
-import { Enrolled } from "../../quests/models";
+         IDeadAdventurerData } from "./adventurer_model.js";
+import { Player } from "../../players/models.js";
+import { Enrolled } from "../../quests/models.js";
 
 export const loadAdventurerAssosiations = () => {
     Adventurer.belongsTo(Player, {

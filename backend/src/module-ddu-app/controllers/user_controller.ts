@@ -3,18 +3,18 @@ import { Response, NextFunction } from "express"
 import { Request } from "express-jwt";
 
 //Middleware iports
-import { AuthRequest } from "../types";
+import { AuthRequest } from "../types.js";
 
 //Libraryes imports
-import * as s from "../../service-identity"
+import * as s from "../../service-identity.js"
 
-import * as assets from "../../service-asset-management"
+import * as assets from "../../service-asset-management.js"
 
-import { withTracing } from "../base-logger";
+import { withTracing } from "../base-logger.js";
 
-import { IdentityService } from "../../service-identity";
-import { AssetManagementService } from "../../service-asset-management";
-import { onlyPolicies, WellKnownPolicies } from "../../registry-policies";
+import { IdentityService } from "../../service-identity.js";
+import { AssetManagementService } from "../../service-asset-management.js";
+import { onlyPolicies, WellKnownPolicies } from "../../registry-policies.js";
 
 /**
  * @param req debe contener coockie de auth

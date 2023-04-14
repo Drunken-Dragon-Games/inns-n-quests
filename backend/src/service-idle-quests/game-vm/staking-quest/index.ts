@@ -1,3 +1,3 @@
-export * from "./staking-quest"
-export * from "./staking-quest-requirements"
-export * from "./staking-quest-validation"
+export * from "./staking-quest.js"
+export * from "./staking-quest-requirements.js"
+export * from "./staking-quest-validation.js"

@@ -1,24 +1,24 @@
 // const supertest = require("supertest");
 // const {app, sequelize} = require("../app")
 // const crypto = require("crypto")
-// //import server from "../server";
+// //import server from "../server.js";
 // import { Server } from "http"
 // import jwt from "jsonwebtoken";
-// import { SECRET_KEY } from "../settings"
-// import { Player } from "../../players/models";
-// import { Adventurer } from "../../adventurers/models";
-// import { Quest, TakenQuest } from "../../quests/models";
-// import SyncAssets from "../../adventurers/sync_assets"
-// import { identityServiceClient } from "../../microservices/identity-service-initializer";
+// import { SECRET_KEY } from "../settings.js"
+// import { Player } from "../../players/models.js";
+// import { Adventurer } from "../../adventurers/models.js";
+// import { Quest, TakenQuest } from "../../quests/models.js";
+// import SyncAssets from "../../adventurers/sync_assets.js"
+// import { identityServiceClient } from "../../microservices/identity-service-initializer.js";
 // import { CreateNonceResponse, 
 //          AuthenticationResponse, 
 //          Credentials,
 //          ResolveUserResponse } from "@dde/identity-service/dist";
-// import * as faucet from "../../players/faucet";
-// import { assetManagementServiceClient } from "../../microservices/asset-manager-initializer";
+// import * as faucet from "../../players/faucet.js";
+// import { assetManagementServiceClient } from "../../microservices/asset-manager-initializer.js";
 // import { SubmitClaimSignatureResponse, GrantResponse, ListResponse, Inventory } from "@dde/asset-management-service/dist";
-// import { registry } from "../utils"
-// import  * as randomNft from "../../players/app-logic/testnet/random-nft"
+// import { registry } from "../utils.js"
+// import  * as randomNft from "../../players/app-logic/testnet/random-nft.js"
 
 test("placeholder", async () => {
     expect(true).toBeTruthy()

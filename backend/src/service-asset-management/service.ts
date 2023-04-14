@@ -1,25 +1,25 @@
 import dotenv from "dotenv"
-import { AssetManagementService } from "./service-spec"
+import { AssetManagementService } from "./service-spec.js"
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import { QueryInterface, Sequelize } from "sequelize"
-import { AssetStoreDsl } from "./assets/assets-dsl"
-import { IdentityService } from "../service-identity"
-import { SecureSigningService } from "../service-secure-signing"
-import { AssetClaimDsl, AssetClaimDslConfig } from "./assets/asset-claim-dsl"
-import { LoggingContext } from "../tools-tracing"
-import { buildMigrator } from "../tools-database"
-import { config } from "../tools-utils"
+import { AssetStoreDsl } from "./assets/assets-dsl.js"
+import { IdentityService } from "../service-identity.js"
+import { SecureSigningService } from "../service-secure-signing.js"
+import { AssetClaimDsl, AssetClaimDslConfig } from "./assets/asset-claim-dsl.js"
+import { LoggingContext } from "../tools-tracing.js"
+import { buildMigrator } from "../tools-database.js"
+import { config } from "../tools-utils.js"
 import path from "path"
 import { Umzug } from "umzug"
-import { AssetManagementServiceLogging } from "./logging"
+import { AssetManagementServiceLogging } from "./logging.js"
 
 import { 
     ClaimResponse, ClaimStatusResponse, GrantResponse, HealthStatus, 
     ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitClaimSignatureResponse 
-} from "./models"
+} from "./models.js"
 
-import * as offChainStoreDB from "./assets/offchain-store-db"
-import * as assetClaimDB from "./assets/asset-claim-db"
+import * as offChainStoreDB from "./assets/offchain-store-db.js"
+import * as assetClaimDB from "./assets/asset-claim-db.js"
 import { Lucid } from "lucid-cardano"
 
 export interface AssetManagementServiceConfig 

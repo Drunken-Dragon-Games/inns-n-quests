@@ -1,4 +1,4 @@
-import { SecureSigningService, PolicyResult, SignTxResult } from "../../service-secure-signing"
+import { SecureSigningService, PolicyResult, SignTxResult } from "../../service-secure-signing.js"
 
 export default class SecureSigningServiceMock {
 

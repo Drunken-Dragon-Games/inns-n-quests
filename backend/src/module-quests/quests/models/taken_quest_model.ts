@@ -1,16 +1,16 @@
 import { DataTypes, Model, Optional, Sequelize, Transaction } from "sequelize";
-import { Quest, IQuest } from "./quest_model";
-import { Enrolled, IEnroll } from "./enroll_model";
-import { questOutcome } from "../utils";
-import { IPlayer, Player } from "../../players/models/player_model";
-import { adventurerDeath } from "../../adventurers/utils";
-import { Adventurer, IDeadAdventurerData } from "../../adventurers/models/adventurer_model";
+import { Quest, IQuest } from "./quest_model.js";
+import { Enrolled, IEnroll } from "./enroll_model.js";
+import { questOutcome } from "../utils.js";
+import { IPlayer, Player } from "../../players/models/player_model.js";
+import { adventurerDeath } from "../../adventurers/utils.js";
+import { Adventurer, IDeadAdventurerData } from "../../adventurers/models/adventurer_model.js";
 import { handleQuestsByAdventurerLevel,
-         calculateRewardMultiplicator } from "../utils";
-import { IFilteredAdventurers } from "../../app/types";
-import { LoggingContext } from "../../../tools-tracing"
-import { AssetManagementService } from "../../../service-asset-management";
-import { WellKnownPolicies } from "../../../registry-policies";
+         calculateRewardMultiplicator } from "../utils.js";
+import { IFilteredAdventurers } from "../../app/types.js";
+import { LoggingContext } from "../../../tools-tracing.js"
+import { AssetManagementService } from "../../../service-asset-management.js";
+import { WellKnownPolicies } from "../../../registry-policies.js";
 
 interface ITakenQuest {
     id?: string

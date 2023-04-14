@@ -1,19 +1,19 @@
 //types imports
-import { AccountDataOutput } from "../types"
+import { AccountDataOutput } from "../types.js"
 
 //Express Imports
 import { Response, NextFunction } from "express"
 import { Request } from "express-jwt";
-import { SECRET_KEY, COOKIE_EXPIRACY } from '../settings'
+import { SECRET_KEY, COOKIE_EXPIRACY } from '../settings.js'
 
 //Middleware iports
-import { AuthRequest } from "../types";
+import { AuthRequest } from "../types.js";
 
 //Libraryes imports
 import jwt from "jsonwebtoken";
-import * as s from "../../service-identity"
-import { withTracing } from "../base-logger"
-import { IdentityService } from "../../service-identity";
+import * as s from "../../service-identity.js"
+import { withTracing } from "../base-logger.js"
+import { IdentityService } from "../../service-identity.js";
 
 /**
  * Generates and stores nonce for wallet address

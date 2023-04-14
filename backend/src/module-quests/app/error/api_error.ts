@@ -1,4 +1,4 @@
-import { logger } from "../middleware/winston_middleware";
+import { logger } from "../middleware/winston_middleware.js";
 
 class ApiError extends Error {
     readonly status: number;

@@ -1,6 +1,6 @@
-import { pixelTileMetaData, gmasMetadata } from "../../app/metadata/metadata"
-import { SPRITE_SCALE, SPRITE_SITE } from "../../app/settings"
-import { IAdventurerRes } from "../../adventurers/models/adventurer_model";
+import { pixelTileMetaData, gmasMetadata } from "../../app/metadata/metadata.js"
+import { SPRITE_SCALE, SPRITE_SITE } from "../../app/settings.js"
+import { IAdventurerRes } from "../../adventurers/models/adventurer_model.js";
 
 const tokenNameToIdx = (advOfThioldenOnChainRef: string): number => 
     parseInt(advOfThioldenOnChainRef.replace("AdventurerOfThiolden", "")) - 1

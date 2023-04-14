@@ -1,12 +1,12 @@
-// import * as s from "../../service-identity"
+// import * as s from "../../service-identity.js"
 
-// import * as a from "../../service-asset-management"
-// import {assetClient} from "../assets/client"
+// import * as a from "../../service-asset-management.js"
+// import {assetClient} from "../assets/client.js"
 
-// import { SECRET_KEY } from "../settings"
+// import { SECRET_KEY } from "../settings.js"
 // import jwt from "jsonwebtoken";
 
-// import { logger } from "../base-logger"
+// import { logger } from "../base-logger.js"
 
 // export const CreateSigNonceOk =async () => {
 //     identityClient.createSigNonce = jest.fn(async (address: string, logger): Promise<s.CreateNonceResult> => {

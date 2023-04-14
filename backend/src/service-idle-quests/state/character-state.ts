@@ -1,9 +1,9 @@
 import { DataTypes, Model, Op, Sequelize, Transaction } from "sequelize"
-import * as am from "../../service-asset-management"
-import * as vm from "../game-vm"
-import { newAPS } from "../game-vm"
-import { Character } from "../models"
-import { syncData } from "./sync-util"
+import * as am from "../../service-asset-management.js"
+import * as vm from "../game-vm.js"
+import { newAPS } from "../game-vm.js"
+import { Character } from "../models.js"
+import { syncData } from "./sync-util.js"
 
 export type ICharacterDB = Omit<
     vm.CharacterEntity & 

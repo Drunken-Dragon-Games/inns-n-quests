@@ -1,6 +1,6 @@
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
-import { toHex, fromHex, extractStakeAddress } from "./Utils";
-import * as config from "./Config"
+import { toHex, fromHex, extractStakeAddress } from "./Utils.js";
+import * as config from "./Config.js"
 
 export interface DrunkenDragonInventory {
 	dragon_silver: { name: string, quantity: number }[]

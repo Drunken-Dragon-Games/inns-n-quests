@@ -1,4 +1,4 @@
-import { AuthenticationTokens, UserFullInfo } from "../service-identity"
+import { AuthenticationTokens, UserFullInfo } from "../service-identity.js"
 
 export interface AccountService {
     authenticateDevelopment(nickname: string): Promise<AuthenticateResult>

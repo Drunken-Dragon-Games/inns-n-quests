@@ -1,4 +1,4 @@
-import { Result } from "./utypes";
+import { Result } from "./utypes.js";
 
 export const fail = <A>(message: string): A => {
     try { throw new Error(message) }

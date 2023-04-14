@@ -1,7 +1,7 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
-import { Quest } from "../../quests/models/quest_model"
-import { WarEffortFaction } from "./war_effort_factions_model"
-import { WarEffort } from "./war_effort_model"
+import { Quest } from "../../quests/models/quest_model.js"
+import { WarEffortFaction } from "./war_effort_factions_model.js"
+import { WarEffort } from "./war_effort_model.js"
 import { Transaction } from "sequelize"
 
 interface IWarEffortQuest {

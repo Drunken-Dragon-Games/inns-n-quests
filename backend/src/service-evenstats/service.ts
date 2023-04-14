@@ -1,12 +1,12 @@
 import { QueryInterface, Sequelize } from "sequelize"
-import { EvenstatsEvent, Leaderboard, EvenstatsSubscriber, QuestSucceededEntry } from "./models"
-import { EvenstatsService } from "./service-spec"
+import { EvenstatsEvent, Leaderboard, EvenstatsSubscriber, QuestSucceededEntry } from "./models.js"
+import { EvenstatsService } from "./service-spec.js"
 
-import * as leaderboardDB from "./leaderboard/leaderboard-db"
+import * as leaderboardDB from "./leaderboard/leaderboard-db.js"
 import { Umzug } from "umzug"
 import path from "path"
-import { buildMigrator } from "../tools-database"
-import { TakenStakingQuest } from "../service-idle-quests"
+import { buildMigrator } from "../tools-database.js"
+import { TakenStakingQuest } from "../service-idle-quests.js"
 
 export type EvenstatsServiceDependencies = {
     database: Sequelize

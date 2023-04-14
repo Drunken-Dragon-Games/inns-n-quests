@@ -1,10 +1,10 @@
 import { Router } from "express"
-import { IdentityService } from "../../service-identity";
+import { IdentityService } from "../../service-identity.js";
 import {
     discordRegistration,
     getAuthenticationNonce,
     verifySignature
-} from "../controllers/account_controller"
+} from "../controllers/account_controller.js"
 
 const loadAccountRegisterRoutes = (identityService: IdentityService) => {
     const router = Router();

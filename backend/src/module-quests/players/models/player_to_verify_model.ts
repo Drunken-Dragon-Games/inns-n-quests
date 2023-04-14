@@ -1,5 +1,5 @@
 // import { DataTypes, Model } from "sequelize"
-// import { sequelize } from '../../app/database/database'
+// import { sequelize } from '../../app/database/database.js'
 // import { WhereOptions } from "sequelize";
 // var crypto = require("crypto");
 

@@ -1,4 +1,4 @@
-import { AssetManagementDsl } from './AssetManagementDsl';
+import { AssetManagementDsl } from './AssetManagementDsl.js';
 import { BlockFrostAPI } from '@blockfrost/blockfrost-js';
 
 const blockfrostApiKey = process.env.BLOCKFROST_API_KEY!

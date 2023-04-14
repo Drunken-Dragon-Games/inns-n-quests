@@ -1,4 +1,4 @@
-import { StakingQuestRequirement, StakingQuestRequirementDSL } from "./staking-quest-requirements"
+import { StakingQuestRequirement, StakingQuestRequirementDSL } from "./staking-quest-requirements.js"
 
 export type StakingQuest = {
     questId: string,

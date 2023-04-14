@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
-import { DeviceType, AuthType } from "../models"
-import { User, UserTableName } from "../users/users-db"
+import { DeviceType, AuthType } from "../models.js"
+import { User, UserTableName } from "../users/users-db.js"
 
 export interface IStoredSession {
     sessionId: string, 

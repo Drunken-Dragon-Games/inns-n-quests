@@ -1,4 +1,4 @@
-import { IMonsterData, IRarity, IRewards, INarrative } from "../types"
+import { IMonsterData, IRarity, IRewards, INarrative } from "../types.js"
 
 const NARRATIVES: INarrative[] = [
     {

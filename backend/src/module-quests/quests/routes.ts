@@ -1,9 +1,9 @@
 import { Router } from "express"
-import { acceptQuest, getTakenQuest, claimQuestReward, getRandomQuestsV2 } from "./controller"
-import { checkTransactionLimit, checkAddressAvailability } from "../players/vending_machine"
+import { acceptQuest, getTakenQuest, claimQuestReward, getRandomQuestsV2 } from "./controller.js"
+import { checkTransactionLimit, checkAddressAvailability } from "../players/vending_machine.js"
 import { Sequelize } from "sequelize"
-import { AssetManagementService } from "../../service-asset-management"
-import { IdleQuestsService } from "../../service-idle-quests"
+import { AssetManagementService } from "../../service-asset-management.js"
+import { IdleQuestsService } from "../../service-idle-quests.js"
 
 import { Request } from "express-jwt"
 import { NextFunction, Response } from "express"

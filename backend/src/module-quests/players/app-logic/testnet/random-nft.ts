@@ -1,8 +1,8 @@
-import { getRandomElement } from "../../../app/utils";
-import { ADVENTURER_PIXELTILES } from "../../../app/settings";
-import { pixelTileMetaData, gmasMetadata, getAdvofThioldenMetadata } from "../../../app/metadata/metadata";
-import { IPixelTileMetaData, IGMAMetadata, IAdvOfThioldenMetadata } from "../../../app/metadata/metadata";
-import { WellKnownPolicies } from "../../../../registry-policies";
+import { getRandomElement } from "../../../app/utils.js";
+import { ADVENTURER_PIXELTILES } from "../../../app/settings.js";
+import { pixelTileMetaData, gmasMetadata, getAdvofThioldenMetadata } from "../../../app/metadata/metadata.js";
+import { IPixelTileMetaData, IGMAMetadata, IAdvOfThioldenMetadata } from "../../../app/metadata/metadata.js";
+import { WellKnownPolicies } from "../../../../registry-policies.js";
 
 type NFTMetadata = IPixelTileMetaData | IGMAMetadata | IAdvOfThioldenMetadata
 

@@ -6,7 +6,7 @@ import { generateMnemonic, mnemonicToEntropy } from "bip39"
 import cbor from "cbor"
 
 import { Lucid, C as LucidCore } from "lucid-cardano"
-import { cardano, CardanoNetwork } from "./utils"
+import { cardano, CardanoNetwork } from "./utils.js"
 
 export type MnemonicRecovery = 
     { ctype: "mnemonic", mnemonic: string, password: string }

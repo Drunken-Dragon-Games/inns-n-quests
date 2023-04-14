@@ -1,7 +1,7 @@
-import { Quest } from "../../../quests/models"
-import { getRandomElement, getNumberInRange } from "../../utils"
-import { IQuestRequirements, ICharacterRequirements } from "../../../quests/models"
-import { races, classes } from "../../metadata/dd-data"
+import { Quest } from "../../../quests/models.js"
+import { getRandomElement, getNumberInRange } from "../../utils.js"
+import { IQuestRequirements, ICharacterRequirements } from "../../../quests/models.js"
+import { races, classes } from "../../metadata/dd-data.js"
 import sequelize, { Sequelize, Transaction } from "sequelize"
 
 type RequirementType = "all" | "balanced" | "character"

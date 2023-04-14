@@ -1,1 +1,1 @@
-export { default as DefaultRuleset } from "./default-ruleset"
+export { default as DefaultRuleset } from "./default-ruleset.js"

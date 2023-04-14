@@ -1,7 +1,7 @@
 import {Router} from "express"
-import { WellKnownPolicies } from "../../registry-policies";
-import { AssetManagementService } from "../../service-asset-management";
-import { IdentityService } from "../../service-identity";
+import { WellKnownPolicies } from "../../registry-policies.js";
+import { AssetManagementService } from "../../service-asset-management.js";
+import { IdentityService } from "../../service-identity.js";
 import { 
     getAuthenticationNonce, 
     verifySignature,
@@ -12,7 +12,7 @@ import {
     getDragonSilverToClaim,
     claimDragonSilver,
     refreshToken
-} from "./controller";
+} from "./controller.js";
 
 
 export const loadPlayerRoutes = (identityService: IdentityService, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => {

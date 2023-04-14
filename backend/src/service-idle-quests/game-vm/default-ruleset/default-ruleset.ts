@@ -1,8 +1,8 @@
-import IQRandom, { RandomSeedIQRandom } from "../iq-random"
-import { CharacterEntityRuleset, EncounterRuleset, IQRuleset, StakingQuestRuleset } from "../iq-ruleset"
-import DefaultCharacterRuleset from "./default-ruleset-character-entity"
-import DefaultEncounterRuleset from "./default-ruleset-encounter"
-import DefaultQuestRuleset from "./default-ruleset-staking-quest"
+import IQRandom, { RandomSeedIQRandom } from "../iq-random.js"
+import { CharacterEntityRuleset, EncounterRuleset, IQRuleset, StakingQuestRuleset } from "../iq-ruleset.js"
+import DefaultCharacterRuleset from "./default-ruleset-character-entity.js"
+import DefaultEncounterRuleset from "./default-ruleset-encounter.js"
+import DefaultQuestRuleset from "./default-ruleset-staking-quest.js"
 
 export default class DefaultRuleset implements IQRuleset {
 

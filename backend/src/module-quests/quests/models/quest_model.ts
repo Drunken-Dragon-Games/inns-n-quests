@@ -1,10 +1,10 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize"
-import ApiError from "../../app/error/api_error"
-import { Adventurer } from "../../adventurers/models/adventurer_model"
-import { IEnroll, Enrolled } from "./enroll_model"
-import { ITakenQuest, TakenQuest } from "./taken_quest_model"
-import { WarEffort } from "../../war-effort/models/war_effort_model"
-import { WarEffortQuest } from "../../war-effort/models/war_effort_quest_model"
+import ApiError from "../../app/error/api_error.js"
+import { Adventurer } from "../../adventurers/models/adventurer_model.js"
+import { IEnroll, Enrolled } from "./enroll_model.js"
+import { ITakenQuest, TakenQuest } from "./taken_quest_model.js"
+import { WarEffort } from "../../war-effort/models/war_effort_model.js"
+import { WarEffortQuest } from "../../war-effort/models/war_effort_quest_model.js"
 
 interface ICharacterRequirements {
     class?: string

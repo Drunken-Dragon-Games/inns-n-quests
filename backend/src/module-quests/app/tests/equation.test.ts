@@ -1,7 +1,7 @@
- import { AssetStoreDsl } from "../../../service-asset-management/assets/assets-dsl";
+ import { AssetStoreDsl } from "../../../service-asset-management/assets/assets-dsl.js";
 import { getLevelFromXp,
           calculateLevel,
-         } from "../../adventurers/utils";
+         } from "../../adventurers/utils.js";
 
 test('get level from experience', async () => {
     let level = getLevelFromXp(0);

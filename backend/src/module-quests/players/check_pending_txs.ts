@@ -1,8 +1,8 @@
-// // import { ClaimedDragonSilver } from "./models";
-// import { blockfrost } from "../blockfrost/intializer";
-// import { TX_TTL } from "../app/settings";
-// import { sequelize } from "../app/database/database";
-// import { Player } from "./models";
+// // import { ClaimedDragonSilver } from "./models.js";
+// import { blockfrost } from "../blockfrost/intializer.js";
+// import { TX_TTL } from "../app/settings.js";
+// import { sequelize } from "../app/database/database.js";
+// import { Player } from "./models.js";
 // const { Op } = require("sequelize")
 
 // //////////////// FUNCTION THAT CHECKS TX STATUS OF DS TO CLAIM ///////////////////

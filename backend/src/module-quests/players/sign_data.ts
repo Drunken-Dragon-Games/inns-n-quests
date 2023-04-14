@@ -2,7 +2,7 @@ import { COSESign1, HeaderMap, Label } from "@emurgo/cardano-message-signing-nod
 import { PublicKey, Ed25519Signature, Address } from "@emurgo/cardano-serialization-lib-nodejs"
 import { decode, encode } from "cbor"
 import { BufferLike } from "cbor/types/lib/decoder";
-import ApiError from "../app/error/api_error";
+import ApiError from "../app/error/api_error.js";
 const { Buffer } = require('buffer');
 
 interface ISignedData {

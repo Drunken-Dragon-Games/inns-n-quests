@@ -1,4 +1,4 @@
-import { Policy } from "../app/types";
+import { Policy } from "../app/types.js";
 
 // FUNCTION THAT CALCULATES THE EXPERIENCE REQUIRED TO LEVEL UP
 /*

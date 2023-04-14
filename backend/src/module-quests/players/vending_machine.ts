@@ -8,9 +8,9 @@ import { MAX_DS_PER_TX,
          TX_LIMIT,
          TIME_BLOCKED,
          DS_DECIMAL
-    } from "../app/settings";
-import { InMemoryTx } from "../app/types";
-import { logger } from "../app/middleware/winston_middleware";
+    } from "../app/settings.js";
+import { InMemoryTx } from "../app/types.js";
+import { logger } from "../app/middleware/winston_middleware.js";
 
 const Cache = new NodeCache({deleteOnExpire: true});
 

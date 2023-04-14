@@ -1,11 +1,11 @@
 import CardanoWasm from "@emurgo/cardano-serialization-lib-nodejs";
 import cbor from "cbor";
-import { blockfrost } from "../blockfrost/intializer";
+import { blockfrost } from "../blockfrost/intializer.js";
 import { FEE_ADDRESS,
          DD_FEE_AMOUNT,
-         TX_TTL } from "../app/settings"
-import ApiError from "../app/error/api_error"
-import { NFTMetadata } from "./app-logic/testnet/random-nft"
+         TX_TTL } from "../app/settings.js"
+import ApiError from "../app/error/api_error.js"
+import { NFTMetadata } from "./app-logic/testnet/random-nft.js"
 
 interface IUtxoAmount {
   unit: string,

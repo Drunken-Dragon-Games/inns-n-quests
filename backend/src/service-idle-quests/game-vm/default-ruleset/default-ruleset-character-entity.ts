@@ -1,7 +1,7 @@
-import { APS, CharacterEntity, newAPS } from "../character-entity";
-import { CharacterEntityRuleset } from "../iq-ruleset";
-import { EncounterReward } from "../encounter";
-import { cubicSolver } from "../utils";
+import { APS, CharacterEntity, newAPS } from "../character-entity.js";
+import { CharacterEntityRuleset } from "../iq-ruleset.js";
+import { EncounterReward } from "../encounter.js";
+import { cubicSolver } from "../utils.js";
 
 class DefaultCharacterRuleset implements CharacterEntityRuleset {
 

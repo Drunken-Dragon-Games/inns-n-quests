@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
-import * as vm from "../game-vm"
-import { ActiveEncounter } from "../models"
+import * as vm from "../game-vm.js"
+import { ActiveEncounter } from "../models.js"
 
 export interface IActiveEncounterDB {
     activeEncounterId: string

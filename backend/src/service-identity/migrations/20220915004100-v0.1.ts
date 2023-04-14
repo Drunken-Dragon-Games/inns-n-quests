@@ -1,7 +1,7 @@
 import { DataTypes, ModelAttributes, QueryInterface } from 'sequelize'
-import { SignatureVerificationStateTableAttributes, SignatureVerificationStateTableName } from '../cardano/signature-verification-db';
-import { StoredSessionTableAttributes, StoredSessionTableName } from '../sessions/session-db';
-import { UserStakeAddressTableName, UserStakeAdressTableAttributes, UserTableAttributes, UserTableName } from '../users/users-db';
+import { SignatureVerificationStateTableAttributes, SignatureVerificationStateTableName } from '../cardano/signature-verification-db.js';
+import { StoredSessionTableAttributes, StoredSessionTableName } from '../sessions/session-db.js';
+import { UserStakeAddressTableName, UserStakeAdressTableAttributes, UserTableAttributes, UserTableName } from '../users/users-db.js';
 
 type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
 

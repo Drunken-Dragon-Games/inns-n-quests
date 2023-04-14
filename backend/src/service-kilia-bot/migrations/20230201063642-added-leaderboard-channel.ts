@@ -1,5 +1,5 @@
 import { QueryInterface } from 'sequelize'
-import { ConfigDBTableAttributes, ConfigDBTableName } from '../config/config-db'
+import { ConfigDBTableAttributes, ConfigDBTableName } from '../config/config-db.js'
 
 type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
 

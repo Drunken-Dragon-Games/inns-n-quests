@@ -1,6 +1,6 @@
 import { Response, NextFunction} from "express"
 import { Request } from "express-jwt"
-import { ValidateAddress } from "../types";
+import { ValidateAddress } from "../types.js";
 
 ////////////////// MIDDLEWARE THAT VALIDATES THE STAKE ADDRESS  ////////////////////
 /* 

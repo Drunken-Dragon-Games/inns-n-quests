@@ -1,9 +1,9 @@
-import { Quest, IQuest, IQuestCreation, IQuestRequirements, ICharacterRequirements } from "./quest_model";
-import { Enrolled, IEnroll } from "./enroll_model";
-import { TakenQuest, ITakenQuest, ITakenQuestCreation } from "./taken_quest_model";
-import { Adventurer } from "../../adventurers/models";
-import { Player } from "../../players/models";
-import { WarEffortQuest } from "../../war-effort/models";
+import { Quest, IQuest, IQuestCreation, IQuestRequirements, ICharacterRequirements } from "./quest_model.js";
+import { Enrolled, IEnroll } from "./enroll_model.js";
+import { TakenQuest, ITakenQuest, ITakenQuestCreation } from "./taken_quest_model.js";
+import { Adventurer } from "../../adventurers/models.js";
+import { Player } from "../../players/models.js";
+import { WarEffortQuest } from "../../war-effort/models.js";
 
 
 export const loadQuestAssosiations = () => {

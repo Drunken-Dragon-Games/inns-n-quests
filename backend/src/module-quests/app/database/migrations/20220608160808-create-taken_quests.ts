@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize'
-import { Migration } from '../migration_scripts/migrate'
+import { Migration } from '../migration_scripts/migrate.js'
 
 export const up: Migration = async ({ context: sequelize }) => {
 	await sequelize.getQueryInterface().createTable('taken_quests', {

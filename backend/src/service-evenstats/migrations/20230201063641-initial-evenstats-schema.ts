@@ -1,5 +1,5 @@
 import { DataTypes, ModelAttributes, QueryInterface } from 'sequelize'
-import { LeaderboardDBTableAttributes, LeaderboardDBTableName } from '../leaderboard/leaderboard-db'
+import { LeaderboardDBTableAttributes, LeaderboardDBTableName } from '../leaderboard/leaderboard-db.js'
 
 type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
 

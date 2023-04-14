@@ -1,21 +1,21 @@
 import axios from "axios"
-import { NFT_MOCK_URL } from "../app/settings";
-import { IApiNFTs, IWalletNFT } from "../app/types";
+import { NFT_MOCK_URL } from "../app/settings.js";
+import { IApiNFTs, IWalletNFT } from "../app/types.js";
 import { Adventurer,
          IAdventurerData,
          IAdventurer,
-         IAdventurerMetadata } from "./models";
+         IAdventurerMetadata } from "./models.js";
 import { Model, Sequelize } from "sequelize";
-import { gmasMetadata, pixelTileClass, advOfThioldenGameMetadata } from "../app/metadata/metadata"
+import { gmasMetadata, pixelTileClass, advOfThioldenGameMetadata } from "../app/metadata/metadata.js"
 import { Optional } from "sequelize"
-import { AssetManagementService, Inventory } from "../../service-asset-management"
-import ApiError from "../app/error/api_error";
-import { Policy } from "../app/types";
-import { ADVENTURER_PIXELTILES } from "../app/settings";
-import { LoggingContext } from "../../tools-tracing"
-import { Enrolled, Quest, TakenQuest } from "../quests/models";
-import { Player } from "../players/models";
-import { onlyPolicies, WellKnownPolicies } from "../../registry-policies";
+import { AssetManagementService, Inventory } from "../../service-asset-management.js"
+import ApiError from "../app/error/api_error.js";
+import { Policy } from "../app/types.js";
+import { ADVENTURER_PIXELTILES } from "../app/settings.js";
+import { LoggingContext } from "../../tools-tracing.js"
+import { Enrolled, Quest, TakenQuest } from "../quests/models.js";
+import { Player } from "../players/models.js";
+import { onlyPolicies, WellKnownPolicies } from "../../registry-policies.js";
 
 /////////// SYNCHRONIZATION CLASS //////////
 /* 

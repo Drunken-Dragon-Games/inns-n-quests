@@ -2,11 +2,11 @@ import { Response, Router } from "express"
 import { Request } from "express-jwt"
 import jwt from "jsonwebtoken"
 import { v4 } from "uuid"
-import { AccountService } from "../service-account"
-import { AuthenticationResult } from "../service-identity"
-import { COOKIE_EXPIRACY, SECRET_KEY } from "./settings"
-import { AuthRequest } from "./types"
-import { jwtMiddleware } from "./middleware/jwt_middleware"
+import { AccountService } from "../service-account.js"
+import { AuthenticationResult } from "../service-identity.js"
+import { COOKIE_EXPIRACY, SECRET_KEY } from "./settings.js"
+import { AuthRequest } from "./types.js"
+import { jwtMiddleware } from "./middleware/jwt_middleware.js"
 
 export const accountRoutes = (accountService: AccountService) => {
     const router = Router()    

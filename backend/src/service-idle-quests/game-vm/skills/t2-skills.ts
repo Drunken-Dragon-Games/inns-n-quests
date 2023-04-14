@@ -1,6 +1,6 @@
-import { newAPS } from "../character-entity"
-import { skillTag, classTag, conditionTag, damageTag } from "./helpers"
-import { Tier1SkillName } from "./t1-skills"
+import { newAPS } from "../character-entity.js"
+import { skillTag, classTag, conditionTag, damageTag } from "./helpers.js"
+import { Tier1SkillName } from "./t1-skills.js"
 
 const skillsTagT1 = (types?: Tier1SkillName[]): Tier1SkillName[] | undefined => types
 

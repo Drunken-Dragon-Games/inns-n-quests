@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
-import { WarEffortFaction } from './war_effort_factions_model'
-import ApiError from '../../app/error/api_error'
+import { WarEffortFaction } from './war_effort_factions_model.js'
+import ApiError from '../../app/error/api_error.js'
 
 interface IWarEffort {
     id: string

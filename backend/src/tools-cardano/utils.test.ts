@@ -1,5 +1,5 @@
-import { AES256 } from "./aes256"
-import { UtxoLike, cardano } from "./utils"
+import { AES256 } from "./aes256.js"
+import { UtxoLike, cardano } from "./utils.js"
 
 const utxo = (amount: { unit: string, quantity: string }[]): UtxoLike => {
     return { tx_index: 0, tx_hash: "0", amount, block: "0" }

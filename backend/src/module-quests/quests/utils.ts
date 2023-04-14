@@ -1,6 +1,6 @@
-import { IFilteredAdventurers } from "../app/types";
-import { XP_BALANCER, DS_BALANCER } from "../app/settings" 
-import { calculateLevel } from '../adventurers/utils'
+import { IFilteredAdventurers } from "../app/types.js";
+import { XP_BALANCER, DS_BALANCER } from "../app/settings.js" 
+import { calculateLevel } from '../adventurers/utils.js'
 
 
 //////////////// FUNCTION THAT CALCULATES QUEST OUTCOME ///////////////////

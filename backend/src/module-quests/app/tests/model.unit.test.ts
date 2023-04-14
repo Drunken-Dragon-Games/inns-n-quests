@@ -1,8 +1,8 @@
-// import { Adventurer } from "../../adventurers/models";
-// import { Quest } from "../../quests/models";
+// import { Adventurer } from "../../adventurers/models.js";
+// import { Quest } from "../../quests/models.js";
 // import { Transaction } from "sequelize/types";
-// import * as adventurerUtils from "../../adventurers/utils";
-// import { calculateExperienceGained } from "../../quests/utils";
+// import * as adventurerUtils from "../../adventurers/utils.js";
+// import { calculateExperienceGained } from "../../quests/utils.js";
 
 test("placeholder", async () => {
     expect(true).toBeTruthy()

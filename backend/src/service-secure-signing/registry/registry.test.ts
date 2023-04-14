@@ -2,8 +2,8 @@ import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import CardanoWasm, { NativeScript, TimelockExpiry } from "@emurgo/cardano-serialization-lib-nodejs"
 import path from "path"
 import fs from "fs/promises"
-import { CardanoNetwork, Wallet, NFTMintOptions, cardano } from "../../tools-cardano"
-import Registry from "./registry"
+import { CardanoNetwork, Wallet, NFTMintOptions, cardano } from "../../tools-cardano.js"
+import Registry from "./registry.js"
 
 const network: CardanoNetwork = "Preprod"
 

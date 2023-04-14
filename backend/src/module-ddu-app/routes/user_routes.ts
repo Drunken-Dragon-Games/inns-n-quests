@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { jwtMiddleware } from "../middleware/jwt_middleware"
+import { jwtMiddleware } from "../middleware/jwt_middleware.js"
 import {
     getInfo,
     logout,
@@ -7,10 +7,10 @@ import {
     getAvailableProfilePicks,
     setNickName,
     claimDragonSilver
-} from "../controllers/user_controller";
-import { IdentityService } from "../../service-identity";
-import { AssetManagementService } from "../../service-asset-management";
-import { WellKnownPolicies } from "../../registry-policies";
+} from "../controllers/user_controller.js";
+import { IdentityService } from "../../service-identity.js";
+import { AssetManagementService } from "../../service-asset-management.js";
+import { WellKnownPolicies } from "../../registry-policies.js";
 
 const loadUserRoutes = (identityService: IdentityService, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => {
     const router = Router()

@@ -1,4 +1,4 @@
-import { User } from "./users-db";
+import { User } from "./users-db.js";
 
 const getRandomInt = (min: number, max: number) => {
     min = Math.ceil(min);

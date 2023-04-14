@@ -1,10 +1,10 @@
-import { NARRATIVES, RARITES, MONSTERS, REWARDS } from "../../metadata/quest_data";
-import { INarrative, IRarity, IRewards } from "../../types"
-import { IQuest, Quest } from "../../../quests/models";
-import { calculateDragonSilver } from "../../../quests/utils"
-import { getRandomElement } from "../../utils"
+import { NARRATIVES, RARITES, MONSTERS, REWARDS } from "../../metadata/quest_data.js";
+import { INarrative, IRarity, IRewards } from "../../types.js"
+import { IQuest, Quest } from "../../../quests/models.js";
+import { calculateDragonSilver } from "../../../quests/utils.js"
+import { getRandomElement } from "../../utils.js"
 import { Optional } from 'sequelize'
-import { getNumberInRange } from "../../utils"
+import { getNumberInRange } from "../../utils.js"
 
 async function generateQuests(questNumber: number){
     let quests = new Array;

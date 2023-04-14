@@ -1,3 +1,3 @@
-export * from "./service-spec"
-export * from "./service"
-export * from "./models"
+export * from "./service-spec.js"
+export * from "./service.js"
+export * from "./models.js"
