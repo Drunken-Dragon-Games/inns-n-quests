@@ -5,8 +5,8 @@ import {
 } from "./controller.js";
 import { getAdvofThioldenMetadata } from "../app/metadata/metadata.js"
 import { Sequelize } from "sequelize";
-import { AssetManagementService } from "../../service-asset-management.js";
-import { IdleQuestsService } from "../../service-idle-quests.js";
+import { AssetManagementService } from "../../service-asset-management/index.js";
+import { IdleQuestsService } from "../../service-idle-quests/index.js";
 import { WellKnownPolicies } from "../../registry-policies.js";
 
 

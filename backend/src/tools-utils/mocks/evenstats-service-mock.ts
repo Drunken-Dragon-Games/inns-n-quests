@@ -1,4 +1,4 @@
-import { EvenstatsService } from "../../service-evenstats.js"
+import { EvenstatsService } from "../../service-evenstats/index.js"
 
 export default class EvenstatsServiceMock {
 

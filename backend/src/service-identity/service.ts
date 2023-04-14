@@ -6,10 +6,10 @@ import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./
 import { Users } from "./users/users.js"
 import { Sessions, SessionsConfig } from "./sessions/sessions.js";
 import { IdentityService } from "./service-spec.js"
-import { LoggingContext } from "../tools-tracing.js"
-import { connectToDB, DBConfig, buildMigrator } from "../tools-database.js"
+import { LoggingContext } from "../tools-tracing/index.js"
+import { connectToDB, DBConfig, buildMigrator } from "../tools-database/index.js"
 import { IdentityServiceLogging } from "./logging.js"
-import { config, HealthStatus } from "../tools-utils.js"
+import { config, HealthStatus } from "../tools-utils/index.js"
 
 import { 
     CreateNonceResult, Credentials, AuthenticationResult, RegistrationResult, AssociationResult, 

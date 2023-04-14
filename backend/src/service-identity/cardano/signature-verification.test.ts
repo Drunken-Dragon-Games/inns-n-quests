@@ -1,5 +1,5 @@
-import { Wallet } from "../../tools-cardano.js"
-import { success } from "../../tools-utils.js"
+import { Wallet } from "../../tools-cardano/index.js"
+import { success } from "../../tools-utils/index.js"
 import { verifySig } from "./signature-verification.js"
 import { SignatureVerificationState } from "./signature-verification-db.js"
 

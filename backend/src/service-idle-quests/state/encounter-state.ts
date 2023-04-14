@@ -1,6 +1,7 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
-import * as vm from "../game-vm.js"
 import { ActiveEncounter } from "../models.js"
+import { EncounterOutcome } from "../game-vm/encounter/encounter.js"
+import { testEncounter } from "../game-vm/index.js"
 
 export interface IActiveEncounterDB {
     activeEncounterId: string
@@ -10,7 +11,7 @@ export interface IActiveEncounterDB {
     party: string[]
     claimedAt?: Date
     createdAt: Date
-    outcome?: vm.EncounterOutcome
+    outcome?: EncounterOutcome
 }
 
 export class ActiveEncounterDB extends Model implements IActiveEncounterDB {
@@ -21,7 +22,7 @@ export class ActiveEncounterDB extends Model implements IActiveEncounterDB {
     declare party: string[]
     declare claimedAt?: Date
     declare createdAt: Date
-    declare outcome?: vm.EncounterOutcome
+    declare outcome?: EncounterOutcome
 }
 
 export const ActiveEncounterDBInfo = {
@@ -91,13 +92,13 @@ export class ActiveEncounterState {
         return makeActiveEncounter(result)
     }
 
-    async claim(activeEncounterId: string, claimedAt: Date, outcome: vm.EncounterOutcome, transaction?: Transaction): Promise<void> {
+    async claim(activeEncounterId: string, claimedAt: Date, outcome: EncounterOutcome, transaction?: Transaction): Promise<void> {
         await ActiveEncounterDB.update({ claimedAt, outcome }, { where: { activeEncounterId }, transaction })
     }
 }
 
 const makeActiveEncounter = (activeEncounterDB: ActiveEncounterDB): ActiveEncounter => {
-    const encounter = vm.testEncounter
+    const encounter = testEncounter
     return {
         ctype: "active-encounter",
         activeEncounterId: activeEncounterDB.activeEncounterId,

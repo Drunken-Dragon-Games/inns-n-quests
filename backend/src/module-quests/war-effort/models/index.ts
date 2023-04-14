@@ -1,7 +1,7 @@
 import { WarEffort } from "./war_effort_model.js";
 import { WarEffortFaction } from "./war_effort_factions_model.js";
 import { WarEffortQuest } from "./war_effort_quest_model.js";
-import { Quest } from "../../quests/models.js";
+import { Quest } from "../../quests/models/index.js";
 
 export const loadWarEffortAssosiations = () => {
     WarEffortQuest.belongsTo(Quest, {

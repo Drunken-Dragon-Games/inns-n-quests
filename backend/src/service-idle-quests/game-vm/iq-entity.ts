@@ -1,6 +1,6 @@
 import { v4 } from "uuid"
-import { APS } from "./character-entity.js"
-import { SkillName } from "./skills.js"
+import { APS } from "./character-entity/index.js"
+import { SkillName } from "./skills/index.js"
 
 export type IQEntity<EType extends IQEntityType> = {
     entityId: string

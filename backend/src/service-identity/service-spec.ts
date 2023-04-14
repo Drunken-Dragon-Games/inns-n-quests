@@ -1,4 +1,4 @@
-import { LoggingContext } from "../tools-tracing.js"
+import { LoggingContext } from "../tools-tracing/index.js"
 import * as models from "./models.js"
 
 export interface IdentityService {

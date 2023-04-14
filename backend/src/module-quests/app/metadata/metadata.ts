@@ -1,6 +1,7 @@
 import fs from "fs"
 import path from "path"
 import axios from "axios"
+import { fileURLToPath } from "url"
 
 export interface IPixelTileMetaData {
   name: string,
@@ -75,6 +76,9 @@ export interface IAdvOfThioldenGameMetadata {
 interface IAdvOfThiolden {
   [key: string]: IAdvOfThioldenMetadata
 }
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const rawPixelTileMetadata: Buffer = fs.readFileSync(path.join(__dirname, '..', '..', '..', '..', 'nfts_metadata', 'pixeltiles', 'metadata.json'))
 export const pixelTileMetaData: IPixelTile = JSON.parse(rawPixelTileMetadata.toString())

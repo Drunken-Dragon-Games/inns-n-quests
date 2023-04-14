@@ -1,4 +1,4 @@
-import { CharacterEntity } from "../character-entity.js"
+import { CharacterEntity } from "../character-entity/index.js"
 import { WithEV, WithSkills } from "../iq-entity.js"
 import { Challenge, Combat, SkillInfo, Strategy } from "./encounter.js"
 

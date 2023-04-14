@@ -3,11 +3,11 @@ import crypto from "crypto"
 import { User } from "./users/users-db.js"
 import { IdentityServiceDsl } from "./service.js"
 import { IdentityService } from "./service-spec.js";
-import { CardanoNetwork, Wallet } from "../tools-cardano.js";
-import { success, failure, unit } from "../tools-utils.js";
+import { CardanoNetwork, Wallet } from "../tools-cardano/index.js";
+import { success, failure, unit } from "../tools-utils/index.js";
 import { AuthenticationTokens, UserInfo, UserFullInfo } from "./models.js";
 import { expectResponse } from "../tools-utils/api-expectations.js";
-import { connectToDB, DBConfig } from "../tools-database.js";
+import { connectToDB, DBConfig } from "../tools-database/index.js";
 
 let network: CardanoNetwork = "Preprod"
 let service: IdentityService

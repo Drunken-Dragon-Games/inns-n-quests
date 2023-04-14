@@ -1,4 +1,4 @@
-import { config } from "./tools-utils.js"
+import { config } from "./tools-utils/index.js"
 
 export type RegistryPolicy =
     { policyId: string

@@ -2,7 +2,7 @@ import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import { OffChainStore } from "./offchain-store-db.js";
 import { Transaction, WhereOptions } from "sequelize";
 import { Inventory } from "../models.js";
-import { cardano } from "../../tools-cardano.js";
+import { cardano } from "../../tools-cardano/index.js";
 
 type Options = { count: number, page: number, chain?: boolean , policies: string[] }
 

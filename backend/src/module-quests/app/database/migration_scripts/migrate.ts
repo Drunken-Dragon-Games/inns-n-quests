@@ -13,10 +13,10 @@ import { loadWarEffortModel } from "../../../war-effort/models/war_effort_model.
 import { loadWarEffortQuestModel } from "../../../war-effort/models/war_effort_quest_model.js";
 import { loadWarEffortFactionModel } from "../../../war-effort/models/war_effort_factions_model.js";
 import { loadTakenQuestModel } from "../../../quests/models/taken_quest_model.js";
-import { loadPlayerAssosiations } from "../../../players/models.js";
-import { loadWarEffortAssosiations } from "../../../war-effort/models.js";
-import { loadQuestAssosiations } from "../../../quests/models.js";
-import { loadAdventurerAssosiations } from "../../../adventurers/models.js";
+import { loadPlayerAssosiations } from "../../../players/models/index.js";
+import { loadWarEffortAssosiations } from "../../../war-effort/models/index.js";
+import { loadQuestAssosiations } from "../../../quests/models/index.js";
+import { loadAdventurerAssosiations } from "../../../adventurers/models/index.js";
 
 /**
  * Umzug object builder to execute Sequelize migrations programmatically

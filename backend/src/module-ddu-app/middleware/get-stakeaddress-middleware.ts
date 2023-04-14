@@ -2,7 +2,7 @@ import { Request } from "express-jwt";
 import { Response, NextFunction } from "express";
 import ApiError from "../../module-quests/app/error/api_error.js";
 import { withTracing } from "../../module-quests/base-logger.js";
-import { IdentityService } from "../../service-identity.js";
+import { IdentityService } from "../../service-identity/index.js";
 
 export const getStakeAddressMiddleware = (identityService: IdentityService) => async (request: Request, response: Response, next: NextFunction) => {
     if (request.auth == undefined) return next()

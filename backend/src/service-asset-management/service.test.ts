@@ -1,7 +1,7 @@
 import ServiceTestDsl from "./service.test-dsl.js";
 import { AssetManagementService } from "./service-spec.js";
 import { AssetManagementServiceDsl } from "./service.js";
-import { connectToDB, DBConfig } from "../tools-database.js";
+import { connectToDB, DBConfig } from "../tools-database/index.js";
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock.js";
 import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock.js";
 import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock.js";

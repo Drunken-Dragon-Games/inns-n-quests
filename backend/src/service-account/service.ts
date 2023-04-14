@@ -1,7 +1,7 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies.js"
-import { AssetManagementService } from "../service-asset-management.js"
-import * as idenser from "../service-identity.js"
-import { AuthenticationTokens, IdentityService } from "../service-identity.js"
+import { AssetManagementService } from "../service-asset-management/index.js"
+import * as idenser from "../service-identity/index.js"
+import { AuthenticationTokens, IdentityService } from "../service-identity/index.js"
 import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec.js"
 
 export interface AccountServiceDependencies {

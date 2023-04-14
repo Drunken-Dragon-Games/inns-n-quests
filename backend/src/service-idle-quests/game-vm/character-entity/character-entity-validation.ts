@@ -1,5 +1,5 @@
 import { APS } from "./aps.js"
-import { AdventurerClass, AdventurerClasses, CharacterClass, CharacterCollection, CharacterCollections, CrafterClass, CrafterClasses } from "./character-entity.js"
+import { CharacterCollection, CharacterCollections, CharacterClass, AdventurerClasses, CrafterClasses, AdventurerClass, CrafterClass } from "./character-entity.js"
 
 export function isAPS(obj: any): obj is APS {
     return typeof obj.athleticism === "number" && typeof obj.intellect === "number" && typeof obj.charisma === "number"

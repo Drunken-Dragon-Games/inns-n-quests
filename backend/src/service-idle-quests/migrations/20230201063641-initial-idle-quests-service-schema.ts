@@ -1,4 +1,4 @@
-import { addDateReferenceColumns, MigrationFun } from '../../tools-database.js'
+import { addDateReferenceColumns, MigrationFun } from '../../tools-database/index.js'
 import { CharacterDBInfo } from '../state/character-state.js'
 import { ActiveEncounterDBInfo } from '../state/encounter-state.js'
 import { FurnitureDBInfo } from '../state/furniture-state.js'

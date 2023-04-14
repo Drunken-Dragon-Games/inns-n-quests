@@ -1,4 +1,4 @@
-import { Adventurer, IAdventurer, IAdventurerMetadata} from "./models.js"
+import { Adventurer, IAdventurer, IAdventurerMetadata} from "./models/index.js"
 import SyncAssets from "./sync_assets.js";
 import { NextFunction, Response} from "express"
 import { Request } from "express-jwt";
@@ -7,8 +7,8 @@ import { AuthRequest } from "../app/types.js";
 import { Model, Sequelize } from "sequelize";
 import { getAdventurerToReturn } from "./app-logic/get-adventurer-sprite.js";
 import { withTracing } from "../base-logger.js";
-import { AssetManagementService } from "../../service-asset-management.js";
-import { IdleQuestsService } from "../../service-idle-quests.js";
+import { AssetManagementService } from "../../service-asset-management/index.js";
+import { IdleQuestsService } from "../../service-idle-quests/index.js";
 import { WellKnownPolicies } from "../../registry-policies.js";
 
 ///////////////////// ASSET SYNCHRONIZATION  //////////////////////////

@@ -2,7 +2,7 @@ import SyncAssets from "../../adventurers/sync_assets.js";
 import { getAdventurerPolicies } from "../../adventurers/utils.js";
 import { getAdvofThioldenMetadata } from "../metadata/metadata.js"
 import { logger } from "../../base-logger.js"
-import { ListResponse } from "../../../service-asset-management.js";
+import { ListResponse } from "../../../service-asset-management/index.js";
 
 test("placeholder", async () => {
     expect(true).toBeTruthy()

@@ -1,7 +1,8 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
 import { StakingQuestRegistry } from "./staking-quests-registry.js"
 import { TakenStakingQuest } from "../models.js"
-import * as vm from "../game-vm.js"
+import * as vm from "../game-vm/index.js"
+import { StakingQuestOutcome } from "../game-vm/staking-quest/staking-quest.js"
 
 export interface ITakenStakingQuestDB {
     takenQuestId: string
@@ -10,7 +11,7 @@ export interface ITakenStakingQuestDB {
     partyIds: string[]
     claimedAt?: Date
     createdAt: Date
-    outcome? : vm.StakingQuestOutcome
+    outcome? : StakingQuestOutcome
 }
 
 export class TakenStakingQuestDB extends Model implements ITakenStakingQuestDB {
@@ -20,7 +21,7 @@ export class TakenStakingQuestDB extends Model implements ITakenStakingQuestDB {
     declare partyIds: string[]
     declare claimedAt?: Date
     declare createdAt: Date
-    declare outcome? : vm.StakingQuestOutcome
+    declare outcome? : StakingQuestOutcome
 }
 
 export const TakenStakingQuestDBInfo = {
@@ -91,7 +92,7 @@ export class TakenStakingQuestState {
         return makeTakenQuest(this.questRegistry)(result)
     }
 
-    async claimQuest(takenQuestId: string, claimedAt: Date, outcome: vm.StakingQuestOutcome, transaction?: Transaction): Promise<void> {
+    async claimQuest(takenQuestId: string, claimedAt: Date, outcome: StakingQuestOutcome, transaction?: Transaction): Promise<void> {
         await TakenStakingQuestDB.update({ claimedAt, outcome }, { where: { takenQuestId }, transaction })
     }
 

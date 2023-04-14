@@ -1,4 +1,4 @@
-import { newAPS } from "../character-entity.js"
+import { newAPS } from "../character-entity/index.js"
 import { skillTag, damageTag } from "./helpers.js"
 
 export type Tier1SkillName = keyof typeof Tier1Skills

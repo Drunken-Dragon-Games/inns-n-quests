@@ -9,8 +9,8 @@ import { getRandomNFT, getCollectionPolicy } from "./app-logic/testnet/random-nf
 import { handleSignVerification, handleRefreshToken } from "./app-logic/authentication.js";
 // import { registry } from "../app/utils.js";
 import { withTracing } from "../base-logger.js"
-import { IdentityService } from "../../service-identity.js";
-import { AssetManagementService } from "../../service-asset-management.js";
+import { IdentityService } from "../../service-identity/index.js";
+import { AssetManagementService } from "../../service-asset-management/index.js";
 import { onlyPolicies, WellKnownPolicies } from "../../registry-policies.js";
 
 ////////////////// GET NONCE ////////////////////

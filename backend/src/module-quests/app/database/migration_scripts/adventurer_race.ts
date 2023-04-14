@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize";
-import { Adventurer } from "../../../adventurers/models.js";
+import { Adventurer } from "../../../adventurers/models/index.js";
 import { gmasMetadata, pixelTileClass } from "../../metadata/metadata.js";
 
 const addAdventurerRace = async (sequelize: Sequelize) => {

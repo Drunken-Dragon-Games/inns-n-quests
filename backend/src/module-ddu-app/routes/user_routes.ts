@@ -8,8 +8,8 @@ import {
     setNickName,
     claimDragonSilver
 } from "../controllers/user_controller.js";
-import { IdentityService } from "../../service-identity.js";
-import { AssetManagementService } from "../../service-asset-management.js";
+import { IdentityService } from "../../service-identity/index.js";
+import { AssetManagementService } from "../../service-asset-management/index.js";
 import { WellKnownPolicies } from "../../registry-policies.js";
 
 const loadUserRoutes = (identityService: IdentityService, assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => {

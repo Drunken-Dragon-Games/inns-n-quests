@@ -1,5 +1,5 @@
 import { Request } from "express"
-import { LoggerLevel, LoggingContext } from "../tools-tracing.js"
+import { LoggerLevel, LoggingContext } from "../tools-tracing/index.js"
 
 export const logger = new LoggingContext({
     ctype: "params",

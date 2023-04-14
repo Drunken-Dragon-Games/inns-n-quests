@@ -1,5 +1,5 @@
-import { AdventurerClass, APS, CharacterEntity, CrafterClass, newAPS, zeroAPS } from "../character-entity.js";
-import { SkillName } from "../skills.js";
+import { AdventurerClass, APS, CharacterEntity, CrafterClass, newAPS, zeroAPS } from "../character-entity/index.js";
+import { SkillName } from "../skills/index.js";
 import { EncounterReward } from "./encounter-reward.js";
 
 export type Encounter = {

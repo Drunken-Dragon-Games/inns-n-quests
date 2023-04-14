@@ -60,6 +60,7 @@
     "@types/jest": "^29.0.0",
     "@types/node": "^18.15.11",
     "@types/yaml": "^1.9.7",
+    "babel-register": "^6.26.0",
     "nodemon": "^2.0.19",
     "sequelize-cli": "^6.4.1",
     "shx": "^0.3.4",

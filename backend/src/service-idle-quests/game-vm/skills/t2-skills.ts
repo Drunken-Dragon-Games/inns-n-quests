@@ -1,4 +1,4 @@
-import { newAPS } from "../character-entity.js"
+import { newAPS } from "../character-entity/index.js"
 import { skillTag, classTag, conditionTag, damageTag } from "./helpers.js"
 import { Tier1SkillName } from "./t1-skills.js"
 

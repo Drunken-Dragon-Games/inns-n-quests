@@ -1,6 +1,6 @@
-import { APS, addAPS, CharacterClass, CharacterCollection, isAssetRef, isCharacterClass, isCharacterCollection, zeroAPS } from "../character-entity.js"
 import { addStakingReward, StakingReward, zeroStakingReward } from "./staking-quest.js"
 import { isStakingQuestRequirementDSL } from "./staking-quest-validation.js"
+import { addAPS, APS, CharacterClass, CharacterCollection, isAssetRef, isCharacterClass, isCharacterCollection, zeroAPS } from "../index.js"
 
 export type StakingQuestRequirement = {
     aps: APS

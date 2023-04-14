@@ -1,5 +1,5 @@
 import Registry from "./service-secure-signing/registry/registry.js"
-import { cardano, Wallet } from "./tools-cardano.js"
+import { cardano, Wallet } from "./tools-cardano/index.js"
 
 function findArgFlagOrReturnDefault(flag: string, defaultValue: string): string {
     const index = process.argv.findIndex((arg, index) => arg == flag && index + 1 < process.argv.length) 

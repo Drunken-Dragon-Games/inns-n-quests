@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express"
 import { Sequelize, Transaction } from "sequelize"
-import { Quest } from "../quests/models.js"
-import { WarEffort, WarEffortFaction, WarEffortQuest } from "./models.js"
+import { Quest } from "../quests/models/index.js"
+import { WarEffort, WarEffortFaction, WarEffortQuest } from "./models/index.js"
 
 const createWarEffort = async (request: Request, response: Response) => {
     const { name, description, faction_names } = request.body

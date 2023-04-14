@@ -5,8 +5,9 @@ import { EvenstatsService } from "./service-spec.js"
 import * as leaderboardDB from "./leaderboard/leaderboard-db.js"
 import { Umzug } from "umzug"
 import path from "path"
-import { buildMigrator } from "../tools-database.js"
-import { TakenStakingQuest } from "../service-idle-quests.js"
+import { buildMigrator } from "../tools-database/index.js"
+import { TakenStakingQuest } from "../service-idle-quests/index.js"
+import { fileURLToPath } from "url"
 
 export type EvenstatsServiceDependencies = {
     database: Sequelize
@@ -24,6 +25,8 @@ export class EvenstatsServiceDsl implements EvenstatsService {
     constructor(
         private readonly database: Sequelize,
     ) {
+        const __filename = fileURLToPath(import.meta.url)
+        const __dirname = path.dirname(__filename)
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
     }

@@ -1,15 +1,15 @@
 import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
-import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats.js"
-import { Character, TakenStakingQuest } from "../service-idle-quests.js"
-import { config } from "../tools-utils.js"
+import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats/index.js"
+import { Character, TakenStakingQuest } from "../service-idle-quests/index.js"
+import { config } from "../tools-utils/index.js"
 import { QueryInterface, Sequelize } from "sequelize"
 
 import * as configDB from "./config/config-db.js"
 import { Umzug } from "umzug"
-import { buildMigrator } from "../tools-database.js"
+import { buildMigrator } from "../tools-database/index.js"
 import path from "path"
-import { IdentityService } from "../service-identity.js"
+import { IdentityService } from "../service-identity/index.js"
 
 export type KiliaBotServiceDependencies = {
     database: Sequelize

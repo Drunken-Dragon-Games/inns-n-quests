@@ -1,5 +1,5 @@
-import { AdventurerClass, CrafterClass } from "../character-entity.js"
-import { DamageType, Condition, SkillInfo } from "../encounter.js"
+import { AdventurerClass, CrafterClass } from "../character-entity/index.js"
+import { DamageType, Condition, SkillInfo } from "../encounter/index.js"
 
 export const skillTag = (info: SkillInfo): SkillInfo => info
 

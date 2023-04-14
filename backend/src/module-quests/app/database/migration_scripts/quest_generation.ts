@@ -1,6 +1,6 @@
 import { NARRATIVES, RARITES, MONSTERS, REWARDS } from "../../metadata/quest_data.js";
 import { INarrative, IRarity, IRewards } from "../../types.js"
-import { IQuest, Quest } from "../../../quests/models.js";
+import { IQuest, Quest } from "../../../quests/models/index.js";
 import { calculateDragonSilver } from "../../../quests/utils.js"
 import { getRandomElement } from "../../utils.js"
 import { Optional } from 'sequelize'

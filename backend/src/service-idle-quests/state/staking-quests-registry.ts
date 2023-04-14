@@ -2,7 +2,7 @@ import axios from "axios"
 import YAML from "yaml"
 import { readFile } from "fs/promises";
 import { URL } from "url";
-import { IQRandom, isQuest, isStakingQuestRequirementDSL, parseEasyJsonSyntax, parseStakingQuestRequirementsDSL, StakingQuest } from "../game-vm.js";
+import { IQRandom, StakingQuest, isQuest, isStakingQuestRequirementDSL, parseEasyJsonSyntax, parseStakingQuestRequirementsDSL } from "../game-vm/index.js";
 
 export type StakingQuestRegistry = { [questId: string]: StakingQuest }
 

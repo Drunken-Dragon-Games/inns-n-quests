@@ -8,16 +8,16 @@ import { handleQuestsByAdventurerLevel } from "./utils.js";
 import { shuffle } from "../app/utils.js";
 import ApiError from "../app/error/api_error.js";
 import { Adventurer,
-         IAdventurer } from "../adventurers/models.js"
+         IAdventurer } from "../adventurers/models/index.js"
 import { Enrolled, 
          Quest,
          IQuest,
          IQuestCreation,
-         TakenQuest } from "./models.js";
+         TakenQuest } from "./models/index.js";
 import { withTracing } from "../base-logger.js";
-import { AssetManagementService } from "../../service-asset-management.js";
-import { config } from '../../tools-utils.js'
-import { IdleQuestsService } from "../../service-idle-quests.js";
+import { AssetManagementService } from "../../service-asset-management/index.js";
+import { config } from '../../tools-utils/index.js'
+import { IdleQuestsService } from "../../service-idle-quests/index.js";
 
 const { Op } = require("sequelize");
 

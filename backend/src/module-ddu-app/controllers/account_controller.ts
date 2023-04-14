@@ -11,9 +11,9 @@ import { AuthRequest } from "../types.js";
 
 //Libraryes imports
 import jwt from "jsonwebtoken";
-import * as s from "../../service-identity.js"
+import * as s from "../../service-identity/index.js"
 import { withTracing } from "../base-logger.js"
-import { IdentityService } from "../../service-identity.js";
+import { IdentityService } from "../../service-identity/index.js";
 
 /**
  * Generates and stores nonce for wallet address

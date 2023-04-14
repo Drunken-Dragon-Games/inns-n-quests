@@ -1,7 +1,7 @@
 import {Router} from "express"
 import { WellKnownPolicies } from "../../registry-policies.js";
-import { AssetManagementService } from "../../service-asset-management.js";
-import { IdentityService } from "../../service-identity.js";
+import { AssetManagementService } from "../../service-asset-management/index.js";
+import { IdentityService } from "../../service-identity/index.js";
 import { 
     getAuthenticationNonce, 
     verifySignature,

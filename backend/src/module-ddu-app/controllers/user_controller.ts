@@ -6,14 +6,14 @@ import { Request } from "express-jwt";
 import { AuthRequest } from "../types.js";
 
 //Libraryes imports
-import * as s from "../../service-identity.js"
+import * as s from "../../service-identity/index.js"
 
-import * as assets from "../../service-asset-management.js"
+import * as assets from "../../service-asset-management/index.js"
 
 import { withTracing } from "../base-logger.js";
 
-import { IdentityService } from "../../service-identity.js";
-import { AssetManagementService } from "../../service-asset-management.js";
+import { IdentityService } from "../../service-identity/index.js";
+import { AssetManagementService } from "../../service-asset-management/index.js";
 import { onlyPolicies, WellKnownPolicies } from "../../registry-policies.js";
 
 /**

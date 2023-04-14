@@ -1,9 +1,9 @@
-import { Player } from "../models.js"
-import { Credentials, IdentityService } from "../../../service-identity.js"
+import { Player } from "../models/index.js"
+import { Credentials, IdentityService } from "../../../service-identity/index.js"
 import ApiError from "../../app/error/api_error.js"
 import jwt from "jsonwebtoken"
 import { SECRET_KEY } from "../../app/settings.js"
-import { LoggingContext } from "../../../tools-tracing.js"
+import { LoggingContext } from "../../../tools-tracing/index.js"
 
 type TokenType = "refresh" | "access"
 type AccessToken = {

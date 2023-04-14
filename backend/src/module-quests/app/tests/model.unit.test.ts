@@ -1,5 +1,5 @@
-// import { Adventurer } from "../../adventurers/models.js";
-// import { Quest } from "../../quests/models.js";
+// import { Adventurer } from "../../adventurers/models/index.js";
+// import { Quest } from "../../quests/models/index.js";
 // import { Transaction } from "sequelize/types";
 // import * as adventurerUtils from "../../adventurers/utils.js";
 // import { calculateExperienceGained } from "../../quests/utils.js";

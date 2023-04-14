@@ -1,17 +1,17 @@
 import fs from "fs/promises"
 import cbor from "cbor"
 import { v4 } from "uuid"
-import { AssetManagementService, ClaimStatus, Inventory } from "../service-asset-management.js"
+import { AssetManagementService, ClaimStatus, Inventory } from "../service-asset-management/index.js"
 
 import path from "path"
 import { Transaction } from "@emurgo/cardano-serialization-lib-nodejs"
-import { Wallet, cardano } from "../tools-cardano.js"
-import { failure, success, unit } from "../tools-utils.js"
+import { Wallet, cardano } from "../tools-cardano/index.js"
+import { failure, success, unit } from "../tools-utils/index.js"
 import { expectResponse } from "../tools-utils/api-expectations.js"
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock.js"
 import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock.js"
 import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock.js"
-import { UserInfo } from "../service-identity.js"
+import { UserInfo } from "../service-identity/index.js"
 
 export type User = {
     info: UserInfo

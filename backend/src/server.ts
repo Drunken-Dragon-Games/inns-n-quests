@@ -3,25 +3,26 @@ import dotenv from 'dotenv'
 import { setTimeout } from "timers/promises"
 import { buildApp } from "./module-ddu-app/app.js"
 import { PORT } from "./module-ddu-app/settings.js"
-import { AssetManagementService } from "./service-asset-management.js"
+import { AssetManagementService } from "./service-asset-management/index.js"
 import { AssetManagementServiceDsl } from "./service-asset-management/service.js"
-import { IdentityServiceDsl } from "./service-identity.js"
+import { IdentityServiceDsl } from "./service-identity/index.js"
 import { IdleQuestsServiceDsl } from "./service-idle-quests/service.js"
-import { SecureSigningServiceDsl } from "./service-secure-signing.js"
-import { connectToDB } from "./tools-database.js"
-import { LoggingContext } from "./tools-tracing.js"
-import { config } from "./tools-utils.js"
+import { SecureSigningServiceDsl } from "./service-secure-signing/index.js"
+import { connectToDB } from "./tools-database/index.js"
+import { LoggingContext } from "./tools-tracing/index.js"
+import { config } from "./tools-utils/index.js"
 
 import path from "path"
 import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata.js"
 import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./registry-policies.js"
 import { loadQuestRegistry } from "./service-idle-quests/state/staking-quests-registry.js"
 import { EvenstatsServiceDsl } from "./service-evenstats/service.js"
-import { KiliaBotServiceDsl } from "./service-kilia-bot.js"
+import { KiliaBotServiceDsl } from "./service-kilia-bot/index.js"
 import { commonCalendar } from "./tools-utils/calendar.js"
-import { AccountServiceDsl } from "./service-account.js"
+import { AccountServiceDsl } from "./service-account/index.js"
 import { Blockfrost, Lucid } from "lucid-cardano"
-import { cardanoNetworkFromString } from "./tools-cardano.js"
+import { cardanoNetworkFromString } from "./tools-cardano/index.js"
+import { fileURLToPath } from "url"
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -31,7 +32,10 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
 }
 
 (async () => {
+    console.log("Starting DDU backend")
     dotenv.config()
+    const __filename = fileURLToPath(import.meta.url)
+    const __dirname = path.dirname(__filename)
     const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
     const calendar = commonCalendar
     const metadataRegistry = await loadMetadataCache(loadMetadataLocationsFromEnv())

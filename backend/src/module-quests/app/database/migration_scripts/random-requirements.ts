@@ -1,6 +1,6 @@
-import { Quest } from "../../../quests/models.js"
+import { Quest } from "../../../quests/models/index.js"
 import { getRandomElement, getNumberInRange } from "../../utils.js"
-import { IQuestRequirements, ICharacterRequirements } from "../../../quests/models.js"
+import { IQuestRequirements, ICharacterRequirements } from "../../../quests/models/index.js"
 import { races, classes } from "../../metadata/dd-data.js"
 import sequelize, { Sequelize, Transaction } from "sequelize"
 

@@ -1,6 +1,6 @@
-// import * as s from "../../service-identity.js"
+// import * as s from "../../service-identity/index.js"
 
-// import * as a from "../../service-asset-management.js"
+// import * as a from "../../service-asset-management/index.js"
 // import {assetClient} from "../assets/client.js"
 
 // import { SECRET_KEY } from "../settings.js"

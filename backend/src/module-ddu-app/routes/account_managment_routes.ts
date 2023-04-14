@@ -8,7 +8,7 @@ import {
     getAccountData,
     refreshSession
 } from "../controllers/account_controller.js";
-import { IdentityService } from "../../service-identity.js";
+import { IdentityService } from "../../service-identity/index.js";
 
 
 const loadAccountManagementRoutes = (identityService: IdentityService) => {

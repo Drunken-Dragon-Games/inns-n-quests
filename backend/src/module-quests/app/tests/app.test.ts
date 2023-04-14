@@ -5,9 +5,9 @@
 // import { Server } from "http"
 // import jwt from "jsonwebtoken";
 // import { SECRET_KEY } from "../settings.js"
-// import { Player } from "../../players/models.js";
-// import { Adventurer } from "../../adventurers/models.js";
-// import { Quest, TakenQuest } from "../../quests/models.js";
+// import { Player } from "../../players/models/index.js";
+// import { Adventurer } from "../../adventurers/models/index.js";
+// import { Quest, TakenQuest } from "../../quests/models/index.js";
 // import SyncAssets from "../../adventurers/sync_assets.js"
 // import { identityServiceClient } from "../../microservices/identity-service-initializer.js";
 // import { CreateNonceResponse, 

@@ -1,12 +1,13 @@
 import { DataTypes, Model, Op, Sequelize, Transaction } from "sequelize"
-import * as am from "../../service-asset-management.js"
-import * as vm from "../game-vm.js"
-import { newAPS } from "../game-vm.js"
+import * as am from "../../service-asset-management/index.js"
+import * as vm from "../game-vm/index.js"
+import { IQMeatadataObjectBuilder, newAPS } from "../game-vm/index.js"
 import { Character } from "../models.js"
 import { syncData } from "./sync-util.js"
+import { CharacterCollection, CharacterEntity } from "../game-vm/character-entity/character-entity.js"
 
 export type ICharacterDB = Omit<
-    vm.CharacterEntity & 
+    CharacterEntity & 
     vm.WithOwner & 
     vm.WithActivityState, 
     "entityType" | 
@@ -80,14 +81,14 @@ export const CharacterDBInfo = {
 
 type InventoryCharacter = {
     assetRef: string
-    collection: vm.CharacterCollection
+    collection: CharacterCollection
     quantity: number
 }
 
 export class CharacterState {
 
     constructor(
-        private readonly objectBuilder: vm.IQMeatadataObjectBuilder,
+        private readonly objectBuilder: IQMeatadataObjectBuilder,
     ) { }
 
     /**
@@ -211,7 +212,7 @@ export class CharacterState {
  * @param characterDB 
  * @returns 
  */
-const makeCharacter = (objectBuilder: vm.IQMeatadataObjectBuilder) => (characterDB: ICharacterDB): Character => {
+const makeCharacter = (objectBuilder: IQMeatadataObjectBuilder) => (characterDB: ICharacterDB): Character => {
     const collection = objectBuilder.characterCollection(characterDB.assetRef)
     const evAPS = objectBuilder.rules.character.evAPS(characterDB.ivAPS, characterDB.xpAPS)
     return {
@@ -238,7 +239,7 @@ const makeCharacter = (objectBuilder: vm.IQMeatadataObjectBuilder) => (character
     }
 }
 
-const makeCharacterDB = (objectBuilder: vm.IQMeatadataObjectBuilder) => (userId: string, character: InventoryCharacter): Omit<ICharacterDB, "entityId"> => {
+const makeCharacterDB = (objectBuilder: IQMeatadataObjectBuilder) => (userId: string, character: InventoryCharacter): Omit<ICharacterDB, "entityId"> => {
     const ivAPS = objectBuilder.characterIVAPS(character.assetRef, character.collection)
     const xpAPS = vm.zeroAPS
     return {
