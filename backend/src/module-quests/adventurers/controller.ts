@@ -4,7 +4,7 @@ import { NextFunction, Response} from "express"
 import { Request } from "express-jwt";
 import { IAdventurerRes } from "../adventurers/models/adventurer_model";
 import { AuthRequest } from "../app/types";
-import { Model, Sequelize } from "sequelize/types";
+import { Model, Sequelize } from "sequelize";
 import { getAdventurerToReturn } from "./app-logic/get-adventurer-sprite";
 import { withTracing } from "../base-logger";
 import { AssetManagementService } from "../../service-asset-management";

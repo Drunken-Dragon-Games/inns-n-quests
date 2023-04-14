@@ -1,4 +1,4 @@
-import { Model, ModelDefined } from "sequelize/types";
+import { Model, ModelDefined } from "sequelize"
 import { Request } from "express"
 
 type IToken = {
