@@ -1,3 +1,4 @@
+import { MinimalUTxO } from "../tools-cardano"
 
 export type HealthStatus =
     { status: "ok" | "warning" | "faulty"
@@ -22,6 +23,11 @@ export type DDUAsset =
     , quantity: string 
     , chain: boolean
     }
+
+export type ClaimerInfo = {
+    utxos: MinimalUTxO[],
+    receivingAddress: string,
+}
 
 export type ListResponse 
     = { status: "ok", inventory: Inventory }

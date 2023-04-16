@@ -1,5 +1,5 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService } from "../service-asset-management"
+import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
@@ -95,7 +95,7 @@ export class AccountServiceDsl implements AccountService {
         return associateResponse
     }
 
-    async claimDragonSilver(userId: string, stakeAddress: string): Promise<ClaimDragonSilverResult>{
+    async claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>{
         const dsPolicyId = this.wellKnownPolicies.dragonSilver.policyId
         //For now we just claim ALL OF IT
         //const { amount } = request.body
@@ -108,7 +108,7 @@ export class AccountServiceDsl implements AccountService {
                 policyId: dsPolicyId,
                 quantity: dragonSilverToClaim
             }
-            const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, options)
+            const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, options, claimerInfo)
             if (claimResponse.status == "ok") return { ...claimResponse, remainingAmount: 0 }
             else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
         }

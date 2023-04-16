@@ -3,8 +3,8 @@ import { NextRouter } from "next/router"
 import { cardanoNetwork} from "../../setting"
 import { isEmpty } from "../common"
 import { AccountBackend, AuthenticationResult } from "./account-backend"
-import { ExtractWalletResult, SupportedWallet } from "./account-dsl"
-import { AccountState, AccountThunk, accountState } from "./account-state"
+import { ExtractWalletResult, SupportedWallet, minimalUtxoFromLucidUTxO } from "./account-dsl"
+import { AccountState, AccountThunk, accountState, accountStore } from "./account-state"
 import { Blockfrost, Lucid, C } from "lucid-cardano"
 
 const actions = accountState.actions
@@ -115,6 +115,10 @@ export const AccountThunks = {
 
     claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
         try {
+            const state = accountStore.getState()
+            if (!state.userInfo || state.userInfo.dragonSilverToClaim == 0)
+                return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: "Nothing to claim." }))
+
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Getting Wallet"}))
             const extractedResult = await AccountThunks.extractWalletApiAndStakeAddress(wallet)
             if (extractedResult.status !== "ok")
@@ -122,14 +126,14 @@ export const AccountThunks = {
         
             const { walletApi, stakeAddress } = extractedResult
             
-            const utxos = await walletApi.wallet.getUtxos()
-            const pickedUtxos = utxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("2000000"))
+            const allUtxos = await walletApi.wallet.getUtxos()
+            const utxos = allUtxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("2000000"))
 
-            if (pickedUtxos.length == 0)
+            if (utxos.length == 0)
                 return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: "Not enough ADA or transaction ongoing." }))
        
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Building Transaction"}))
-            const claimResponse =  await AccountBackend.claim(stakeAddress)
+            const claimResponse =  await AccountBackend.claim(stakeAddress, { utxos: minimalUtxoFromLucidUTxO(utxos), receivingAddress: utxos[0].address })
             
             if (claimResponse.status !== "ok")
                 return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: claimResponse.reason }))

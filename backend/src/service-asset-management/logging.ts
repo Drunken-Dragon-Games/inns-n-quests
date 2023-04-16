@@ -55,10 +55,10 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return response
     }
 
-    async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<models.ClaimResponse> {
+    async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, claimerInfo?: models.ClaimerInfo, logger?: LoggingContext): Promise<models.ClaimResponse> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`claiming assets for user ${userId}`, { stakeAddress, asset })
-        const response = await this.base.claim(userId, stakeAddress, asset, serviceLogger)
+        const response = await this.base.claim(userId, stakeAddress, asset, claimerInfo, serviceLogger)
         if (response.status == "invalid")
             serviceLogger?.log.info(`invalid claim for user ${userId} reason:${response.reason}`)
         else 

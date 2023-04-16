@@ -3,6 +3,7 @@ import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
 import { SignedMessage } from "lucid-cardano"
+import { ClaimerInfo } from "./account-dsl"
 
 export const AccountBackend = {
 
@@ -42,8 +43,8 @@ export const AccountBackend = {
         console.log(result.headers)
     },
 
-    async claim(stakeAddress: string): Promise<ClaimAssetResult> {
-        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress})
+    async claim(stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimAssetResult> {
+        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress, claimerInfo})
         return result.data
     },
 

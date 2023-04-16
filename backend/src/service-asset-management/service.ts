@@ -14,7 +14,7 @@ import { Umzug } from "umzug"
 import { AssetManagementServiceLogging } from "./logging"
 
 import { 
-    ClaimResponse, ClaimStatusResponse, GrantResponse, HealthStatus, 
+    ClaimResponse, ClaimStatusResponse, ClaimerInfo, GrantResponse, HealthStatus, 
     ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitClaimSignatureResponse 
 } from "./models"
 
@@ -114,8 +114,8 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         return { status: "ok" }
     }
 
-    async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<ClaimResponse> {
-        const result = await this.claims.claim(userId, stakeAddress, assets, logger)
+    async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, claimerInfo?: ClaimerInfo, logger?: LoggingContext): Promise<ClaimResponse> {
+        const result = await this.claims.claim(userId, stakeAddress, assets, claimerInfo, logger)
         if (result.ctype == "success") 
             return { status: "ok", claimId: result.result.claimId, tx: result.result.tx }
         else {

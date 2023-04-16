@@ -1,3 +1,4 @@
+import { ClaimerInfo } from "../service-asset-management"
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
 
 export interface AccountService {
@@ -7,7 +8,7 @@ export interface AccountService {
     refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult>
     getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult>
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult>
-    claimDragonSilver(userId: string, stakeAddress: string): Promise<ClaimDragonSilverResult>
+    claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string): Promise<getUserInventoryResult>
     claimStatus(claimId: string): Promise<ClaimStatusResult>

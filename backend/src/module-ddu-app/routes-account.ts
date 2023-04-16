@@ -7,6 +7,7 @@ import { AuthenticationResult } from "../service-identity"
 import { COOKIE_EXPIRACY, SECRET_KEY } from "./settings"
 import { AuthRequest } from "./types"
 import { jwtMiddleware } from "./middleware/jwt_middleware"
+import { ClaimerInfo } from "../service-asset-management"
 
 export const accountRoutes = (accountService: AccountService) => {
     const router = Router()    
@@ -87,14 +88,14 @@ export const accountRoutes = (accountService: AccountService) => {
     router.post("/assets/claim/dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
-        const result = await accountService.claimDragonSilver(userId, stakeAddress)
+        const claimerInfo: ClaimerInfo = request.body.claimerInfo
+        const result = await accountService.claimDragonSilver(userId, stakeAddress, claimerInfo)
         if (result.status == "ok") return response.status(200).json(result)
         else return response.status(400).json(result)
     })
 
     router.post("/assets/claim/sign-and-submit", async (request: Request, response: Response) => {
         const {witness, tx, claimId} = request.body
-        console.log({witness, tx, claimId})
         const result = await accountService.claimSignAndSubbmit(witness, tx, claimId)
         if (result.status == "ok") return response.status(200).json(result)
         else return response.status(400).json(result)
@@ -102,7 +103,6 @@ export const accountRoutes = (accountService: AccountService) => {
 
     router.post("/assets/claim/status", async (request: Request, response: Response) => {
         const {claimId} = request.body
-        console.log({claimId});
         const result = await accountService.claimStatus(claimId)
         if (result.status == "ok") return response.status(200).json(result)
         else return response.status(400).json(result)

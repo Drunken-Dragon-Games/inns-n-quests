@@ -1,4 +1,4 @@
-import { Lucid } from "lucid-cardano"
+import { Lucid, UTxO as LucidUTxO, Utils } from "lucid-cardano"
 
 export type UserInfo = {
     userId: string
@@ -32,7 +32,21 @@ export type WalletActionPayload
     | { ctype: "wallet-action-state-succeeded" }
     | { ctype: "wallet-action-state-error", details: string };
 
+export type ClaimerInfo = {
+    utxos: UTxOMinimal[],
+    receivingAddress: string,
+}
 
+export type UTxOMinimal = {
+    txHash: string
+    outputIndex: number
+    assets: Assets
+    address: string
+}
+
+export declare type Unit = string
+
+export declare type Assets = Record<Unit | "lovelace", string>
 
 export const renderWalletActionDetails = (walletActionState: WalletActionState) => {
         const { ctype, action } = walletActionState;
@@ -44,3 +58,10 @@ export const renderWalletActionDetails = (walletActionState: WalletActionState) 
 export type ExtractWalletResult
     = {status: "ok", walletApi: Lucid, stakeAddress: string, }
     | {status: "error", details: string}
+
+export const minimalUtxoFromLucidUTxO = (utxo: LucidUTxO[]): UTxOMinimal[] => utxo.map(utxo => ({
+    txHash: utxo.txHash,
+    outputIndex: utxo.outputIndex,
+    assets: Object.keys(utxo.assets).reduce((acc, key) => ({ ...acc, [key]: utxo.assets[key].toString() }), {}),
+    address: utxo.address,
+}))

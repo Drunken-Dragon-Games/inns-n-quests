@@ -73,6 +73,7 @@ export const claimDragonSilver = (assetManagementService: AssetManagementService
     const stakeAddress = request.auth!.stake_address
     //For now we just claim ALL OF IT
     //const { amount } = request.body
+    /*
     const assetList: assets.ListResponse = await assetManagementService.list(id, { policies: [ dsPolicyId ] }, logger)
     if (assetList.status == "ok"){
         const inventory: assets.Inventory = assetList.inventory
@@ -86,6 +87,7 @@ export const claimDragonSilver = (assetManagementService: AssetManagementService
         if (claimResponse.status == "ok") return response.status(200).json({ ...claimResponse, remainingAmount: 0 })
         else  return response.status(409).json({ ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) })
     }
+    */
 }
 
 const getAvailableProfilePicks = async (request: Request, response: Response, next: NextFunction) => {
