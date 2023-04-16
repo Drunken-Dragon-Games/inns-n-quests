@@ -94,6 +94,7 @@ export const accountRoutes = (accountService: AccountService) => {
 
     router.post("/assets/claim/sign-and-submit", async (request: Request, response: Response) => {
         const {witness, tx, claimId} = request.body
+        console.log({witness, tx, claimId})
         const result = await accountService.claimSignAndSubbmit(witness, tx, claimId)
         if (result.status == "ok") return response.status(200).json(result)
         else return response.status(400).json(result)

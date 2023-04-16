@@ -48,6 +48,9 @@ export const AccountBackend = {
     },
 
     async claimSignAndSubmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
+        console.log("witness", witness)
+        console.log("tx", tx)
+        console.log("claimId", claimId)
         const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {witness, tx, claimId})
         return result.data
     },

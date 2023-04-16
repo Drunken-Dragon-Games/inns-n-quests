@@ -37,7 +37,9 @@ export type TokenMintOptions = {
 	metadata?: { key: string, data: object }, 
 	script: NativeScript, 
 	amount: string,
-	ttl?: number 
+	ttl?: number,
+	receivingAddress?: string,
+	utxos?: UtxoLike[],
 }
 
 export class cardano {
@@ -226,9 +228,13 @@ export class cardano {
 	}
 
 	static createTokenMintTransaction = async (sourceAddress: string, options: TokenMintOptions, blockfrost: BlockFrostAPI): Promise<Transaction> => {
-		const receivingAddresses = (await blockfrost.accountsAddresses(sourceAddress)).map(a => a.address)
+		const receivingAddresses = options.receivingAddress ? 
+			[options.receivingAddress] : 
+			(await blockfrost.accountsAddresses(sourceAddress)).map(a => a.address)
 		const currentSlot = (await blockfrost.blocksLatest()).slot
-		const utxos = (await Promise.all(receivingAddresses.map(address => blockfrost.addressesUtxosAll(address)))).flat()
+		const utxos = options.utxos ?
+			options.utxos :
+			(await Promise.all(receivingAddresses.map(address => blockfrost.addressesUtxosAll(address)))).flat()
 		const address = Address.from_bech32(receivingAddresses[0])
 		const txBuilder = cardano.makeTxBuilder()
 		if (options.fee !== undefined) {

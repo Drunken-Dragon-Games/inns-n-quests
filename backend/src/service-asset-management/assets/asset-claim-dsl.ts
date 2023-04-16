@@ -11,7 +11,6 @@ import { failure, Result, success } from "../../tools-utils"
 import { LoggingContext } from "../../tools-tracing"
 import { cardano, TokenMintOptions } from "../../tools-cardano"
 import { ClaimStatus } from "../models"
-import { Lucid, C as LucidCore, NativeScript as LucidNativeScript, fromText } from "lucid-cardano"
 
 export type AssetClaimDslConfig = {
 	feeAddress: string,
@@ -33,7 +32,7 @@ export class AssetClaimDsl {
 		private readonly blockfrost: BlockFrostAPI,
 		private readonly secureSigningService: SecureSigningService,
 		private readonly assetStore: AssetStoreDsl,
-		private readonly lucid: Lucid
+		//private readonly lucid: Lucid
 	){}
 
 	public async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string}, logger?: LoggingContext): Promise<ClaimResult> {
@@ -57,6 +56,8 @@ export class AssetClaimDsl {
 			return hexTx
 		}
 
+		/*
+		// This will be moved to an esm module after we figure out interop that type checks between esm and commonjs modules
 		const buildTxLucid = async (): Promise<string> => {
 			const rawScript = policyResponse.policy as LucidNativeScript
 			const script = this.lucid.utils.nativeScriptFromJson(rawScript)
@@ -72,6 +73,7 @@ export class AssetClaimDsl {
 				.complete()
 			return tx.toString()
 		}
+		*/
 
 		const updateAvailableAssets = async() => {
 			const newAvailableQuantity = (BigInt(availableAssets.quantity) - BigInt(quantityToClaim)).toString()
@@ -90,7 +92,7 @@ export class AssetClaimDsl {
 			).claimId
 		}
 
-		const tx = await buildTxLucid() //await buildTx()
+		const tx = await buildTx() //await buildTxLucid() 
 		cardano.deserializeAndLogTransaction(tx)
 		const claimId = await createClaim(tx)
 		await updateAvailableAssets()
@@ -157,63 +159,6 @@ export class AssetClaimDsl {
 		}
         return success(claim.state)
     }
-
-	/*
-    async lucidClaim(userId: string, receivingAddress: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<LucidClaimResult> {
-		const policyResponse = await this.secureSigningService.policy(asset.policyId, logger)
-		if (policyResponse.status == "unknown-policy") 
-			return failure("unknown-policy")
-		const databaseTransaction = await this.db.transaction()
-		const availableAssets = await OffChainStore.findOne({ where: { userId, policyId: asset.policyId, unit: asset.unit }, transaction: databaseTransaction })
-		const quantityToClaim = (asset.quantity ?? availableAssets?.quantity) ?? "0"
-
-		if (availableAssets == null || BigInt(availableAssets.quantity) < BigInt(quantityToClaim)) {
-			await databaseTransaction.commit()
-			return failure("not-enough-assets")
-		}
-
-		const buildTx = async (): Promise<string> => {
-			const rawScript = policyResponse.policy as LucidNativeScript
-			const script = this.lucid.utils.nativeScriptFromJson(rawScript)
-			const policyId = this.lucid.utils.mintingPolicyToId(script)
-			const unit = policyId + fromText(asset.unit)
-			const tx = await (this.lucid.selectWalletFrom({ address: receivingAddress })).newTx()
-				.mintAssets({ [unit]: BigInt(quantityToClaim) })
-				.payToAddress(this.config.feeAddress, { lovelace: BigInt(this.config.feeAmount) })
-				.payToAddress(receivingAddress, { [unit]: BigInt(quantityToClaim) })
-				.attachMetadata(133722, { "dd-tx-type": "asset-claim" })
-				.validTo(Date.now() + this.config.txTTL * 1000)
-				.attachMintingPolicy(script)
-				.complete()
-			return tx.toString()
-		}
-
-		const updateAvailableAssets = async() => {
-			const newAvailableQuantity = (BigInt(availableAssets.quantity) - BigInt(quantityToClaim)).toString()
-			if (newAvailableQuantity == "0") 
-				await availableAssets.destroy({ transaction: databaseTransaction })
-			else {
-				availableAssets.quantity = newAvailableQuantity
-				await availableAssets.save({ transaction: databaseTransaction })
-			}
-		}
-
-		const createClaim = async (tx: string): Promise<string> => {
-			const txHash = crypto.createHash("sha512").update(tx).digest("hex")
-			return (await AssetClaim.create({ 
-				userId, quantity: quantityToClaim, policyId: asset.policyId, unit: asset.unit, txHash }, { transaction: databaseTransaction })
-			).claimId
-		}
-
-		const tx = await buildTx()
-		cardano.deserializeAndLogTransaction(tx)
-		const claimId = await createClaim(tx)
-		await updateAvailableAssets()
-		await databaseTransaction.commit()
-		logger?.log.info({ message: "AssetClaimDsl.claimStatus:created", claimId, policyId: asset.policyId, unit: asset.unit, quantity: asset.quantity })
-		return success({ claimId, tx })
-	}
-	*/
 
 	async revertStaledClaims(logger?: LoggingContext): Promise<number> {
 		const activeClaims = await AssetClaim.findAll({ where: { state: "created" }})

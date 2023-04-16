@@ -126,10 +126,8 @@ export const AccountThunks = {
             const pickedUtxos = utxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("2000000"))
 
             if (pickedUtxos.length == 0)
-                return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: "Not enough ADA, you must have an available utxo with at least 2 ADA." }))
-            console.log(pickedUtxos)
+                return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: "Not enough ADA or transaction ongoing." }))
        
-            /*
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Building Transaction"}))
             const claimResponse =  await AccountBackend.claim(stakeAddress)
             
@@ -138,15 +136,16 @@ export const AccountThunks = {
 
             dispatch(actions.updateUserInfo({dragonSilverToClaim: claimResponse.remainingAmount}))
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Waiting for User Signature"}))
-            const tt = C.Transaction.from_bytes(new Uint8Array(Buffer.from( claimResponse.tx, 'hex')))
-            const witness = await walletApi.wallet.signTx(tt)
+
+            const transaction = C.Transaction.from_bytes(new Uint8Array(Buffer.from( claimResponse.tx, 'hex')))
+            const witness = await walletApi.wallet.signTx(transaction)
+            const witnessHex = Buffer.from(witness.to_bytes()).toString("hex")
             dispatch(actions.setClaimState({ctype: "wallet-action-state-loading", details: "Submiting User Signature"}))
-            const signature = await AccountBackend.claimSignAndSubmit(witness.to_json(), claimResponse.tx, claimResponse.claimId )
+            const signature = await AccountBackend.claimSignAndSubmit(witnessHex, claimResponse.tx, claimResponse.claimId )
             if ( signature.status !== "ok")
                 return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: `Somethig when wrong on the backend ${signature.reason}` }))
             dispatch(actions.setClaimState({ ctype: "wallet-action-state-submitted", details: "polling" }))
             dispatch(AccountThunks.claimStatus(claimResponse.claimId))
-            */
         }catch (error: any){
             console.error(error);
             return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: error.message}))
