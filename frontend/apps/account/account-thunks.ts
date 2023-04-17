@@ -173,9 +173,13 @@ export const AccountThunks = {
             }
             if (statusResult.claimStatus == "timed-out")
                 return dispatch(actions.setClaimState({ ctype: "wallet-action-state-error", details: "transaction timed out"}))
-            dispatch(AccountThunks.updateInventory())
-            dispatch(actions.setClaimState({ ctype: "wallet-action-state-succeeded"}))
-            setTimeout( () => dispatch(actions.setClaimState({ ctype: "wallet-action-state-idle" })), 5000)
+            dispatch(actions.setClaimState({ ctype: "wallet-action-state-submitted", details: "getting assets"}))
+            // Wait for 3 seconds to allow Blockfrost to update before proceeding.
+            setTimeout( () => {
+                dispatch(AccountThunks.updateInventory())
+                dispatch(actions.setClaimState({ ctype: "wallet-action-state-succeeded"}))
+                setTimeout( () => dispatch(actions.setClaimState({ ctype: "wallet-action-state-idle" })), 5000)
+            }, 3000)
         }, 2000)
     },
 
