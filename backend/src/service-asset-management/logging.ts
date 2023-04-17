@@ -55,6 +55,13 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return response
     }
 
+	async userClaims(userId: string, unit: string, page?: number, logger?: LoggingContext): Promise<models.UserClaimsResponse> {
+        const serviceLogger = this.withComponent(logger)
+        const response = await this.base.userClaims(userId, unit, page, serviceLogger)
+        serviceLogger?.log.info(`listing claims for user ${userId}, result was ${response.status}`)
+        return response
+    }
+
     async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, claimerInfo?: models.ClaimerInfo, logger?: LoggingContext): Promise<models.ClaimResponse> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`claiming assets for user ${userId}`, { stakeAddress, asset })

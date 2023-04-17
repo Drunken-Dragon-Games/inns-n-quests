@@ -113,6 +113,12 @@ export const AccountThunks = {
         await AccountBackend.test()
     },
 
+    getDragonSilverClaims: (page?: number): AccountThunk => async (dispatch) => {
+        const response = await AccountBackend.getDragonSilverClaims(page)
+        if (response.status !== "ok")
+            return dispatch(actions.setAssociateState({ ctype: "wallet-action-state-error", details: response.status }))
+    },
+
     claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
         try {
             const state = accountStore.getState()

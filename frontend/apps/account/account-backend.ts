@@ -8,39 +8,44 @@ import { ClaimerInfo } from "./account-dsl"
 export const AccountBackend = {
 
     async authenticateDevelopment(nickname: string): Promise<AuthenticationResult> {
-        const result = await accountRequest<AuthenticationResult>("post", "/development/authenticate", {nickname})
+        const result = await accountRequest<AuthenticationResult>("POST", "/development/authenticate", {nickname})
         return result.data
     },
 
     async authenticateDiscord(code: string): Promise<AuthenticationResult> {
-        const result = await accountRequest<AuthenticationResult>("post", "/discord/authenticate", {code})
+        const result = await accountRequest<AuthenticationResult>("POST", "/discord/authenticate", {code})
         return result.data
     },
 
     async signout(): Promise<SignOutResult> {
-        const result = await accountRequest<SignOutResult>("post", "/session/signout")
+        const result = await accountRequest<SignOutResult>("POST", "/session/signout")
         return result.data
     },
 
     async refreshSession(refreshToken: string): Promise<AuthenticationResult> {
-        const result = await accountRequest<AuthenticationResult>("post", "/session/refresh", {refreshToken})
+        const result = await accountRequest<AuthenticationResult>("POST", "/session/refresh", {refreshToken})
         return result.data
     },
 
     async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {
-        const result = await accountRequest("post", "/association/nonce", {stakeAddress})
+        const result = await accountRequest("POST", "/association/nonce", {stakeAddress})
         return result.data
     },
 
     async submitAssociationSignature(nonce: string, signedMessage: SignedMessage): Promise<SubmitAssociationSignatureResult> {
-        const result = await accountRequest("post", "/association/signature", {nonce, signedMessage})
+        const result = await accountRequest("POST", "/association/signature", {nonce, signedMessage})
         return result.data
     },
 
     async test(): Promise<void> {
-        const result = await accountRequest("post", "/session/test")
+        const result = await accountRequest("POST", "/session/test")
         console.log(result)
         console.log(result.headers)
+    },
+
+    async getDragonSilverClaims(page?: number): Promise<GetDragonSilverClaimsResult> {
+        const result = await accountRequest("GET", "/assets/claim/dragon-silver", {page})
+        return result.data
     },
 
     async claim(stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimAssetResult> {
@@ -49,9 +54,6 @@ export const AccountBackend = {
     },
 
     async claimSignAndSubmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
-        console.log("witness", witness)
-        console.log("tx", tx)
-        console.log("claimId", claimId)
         const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {witness, tx, claimId})
         return result.data
     },
@@ -84,6 +86,17 @@ export type SignOutResult
 export type GetAssociationNonceResult
     = { status: "ok", nonce: string }
     | { status: "bad-address" }
+
+export type GetDragonSilverClaimsResult
+    = { status: "ok", 
+        claims: { 
+            claimId: string, 
+            quantity: string,
+            state: ClaimStatus,
+            txId?: string,
+            createdAt: string
+        }[] }
+    | { status: "invalid", reason: string }
 
 export type ClaimAssetResult 
     = { status: "ok", claimId: string, tx: string, remainingAmount: number }
@@ -173,7 +186,7 @@ async function refreshToken(error: any): Promise<boolean> {
     const refreshToken = localStorage.getItem("refresh")
     if(error instanceof AxiosError && error.response?.status == 401 && refreshToken){
         try {
-            const response = await accountRequest("post", "/api/refreshSession/", { "fullRefreshToken": refreshToken })
+            const response = await accountRequest("POST", "/api/refreshSession/", { "fullRefreshToken": refreshToken })
             localStorage.setItem("refresh", response.data.refreshToken)
             return true
         }

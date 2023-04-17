@@ -35,6 +35,10 @@ export class AssetClaimDsl {
 		//private readonly lucid: Lucid
 	){}
 
+	public async userClaims(userId: string, unit: string, page?: number, logger?: LoggingContext): Promise<AssetClaim[]> {
+		return AssetClaim.findAll({ where: { userId, unit }, limit: 5, offset: page && page * 5, order: [["createdAt", "DESC"]] })
+	}
+
 	public async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string}, claimerInfo?: ClaimerInfo, logger?: LoggingContext): Promise<ClaimResult> {
 		const policyResponse = await this.secureSigningService.policy(asset.policyId, logger)
 		if (policyResponse.status == "unknown-policy") 

@@ -5,6 +5,7 @@ export interface AccountState {
     userInfo?: UserInfo
     claimState: WalletActionState
     associateState: WalletActionState
+
 }
 
 export type AccountStoreState = 

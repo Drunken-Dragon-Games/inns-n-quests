@@ -15,7 +15,7 @@ import { AssetManagementServiceLogging } from "./logging"
 
 import { 
     ClaimResponse, ClaimStatusResponse, ClaimerInfo, GrantResponse, HealthStatus, 
-    ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitClaimSignatureResponse 
+    ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitClaimSignatureResponse, UserClaimsResponse 
 } from "./models"
 
 import * as offChainStoreDB from "./assets/offchain-store-db"
@@ -112,6 +112,11 @@ export class AssetManagementServiceDsl implements AssetManagementService {
     async grantMany(userId: string, assets: { unit: string, policyId: string, quantity: string }[], logger: LoggingContext): Promise<GrantResponse> {
         await Promise.all(assets.map(a => this.assets.grant(userId, a.unit, a.policyId, a.quantity)))
         return { status: "ok" }
+    }
+
+	async userClaims(userId: string, unit: string, page?: number, logger?: LoggingContext): Promise<UserClaimsResponse> {
+        const result = await this.claims.userClaims(userId, unit, page, logger)
+        return { status: "ok", claims: result }
     }
 
     async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, claimerInfo?: ClaimerInfo, logger?: LoggingContext): Promise<ClaimResponse> {

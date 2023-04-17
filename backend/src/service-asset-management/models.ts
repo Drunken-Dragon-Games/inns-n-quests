@@ -24,6 +24,17 @@ export type DDUAsset =
     , chain: boolean
     }
 
+export interface AssetClaim {
+    claimId: string,
+    userId: string,
+    policyId: string,
+    unit: string,
+    quantity: string,
+    state: ClaimStatus,
+    txId?: string,
+    createdAt: string
+}
+
 export type ClaimerInfo = {
     utxos: MinimalUTxO[],
     receivingAddress: string,
@@ -38,6 +49,10 @@ export type ClaimStatus
     | "submitted"
     | "timed-out"
     | "confirmed"
+
+export type UserClaimsResponse
+    = { status: "ok", claims: AssetClaim[] }
+    | { status: "invalid", reason: string }
 
 export type GrantResponse
     = { status: "ok" }

@@ -2,7 +2,7 @@ import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -93,6 +93,20 @@ export class AccountServiceDsl implements AccountService {
             {ctype: "sig", deviceType: "Browser", publicKey, nonce, signedNonce: signature })
         if (associateResponse.status == "discord-used") throw new Error("Discord accounts should not affect here.")
         return associateResponse
+    }
+
+    async getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult> {
+        const result = await this.assetManagementService.userClaims(userId, "DragonSilver", page)
+        if (result.status == "ok")
+            return { status: "ok", claims: result.claims.map(claim => ({
+                claimId: claim.claimId,
+                quantity: claim.quantity,
+                state: claim.state,
+                txId: claim.txId,
+                createdAt: claim.createdAt, 
+            })) }
+        else 
+            return result
     }
 
     async claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>{

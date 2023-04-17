@@ -8,6 +8,7 @@ export interface AccountService {
     refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult>
     getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult>
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult>
+    getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult>
     claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string): Promise<getUserInventoryResult>
@@ -32,6 +33,17 @@ export type SubmitAssociationSignatureResult
     = { status: "ok" }
     | { status: "bad-credentials" }
     | { status: "stake-address-used" }
+
+export type GetDragonSilverClaimsResult
+    = { status: "ok", 
+        claims: { 
+            claimId: string, 
+            quantity: string,
+            state: ClaimStatus,
+            txId?: string,
+            createdAt: string
+        }[] }
+    | { status: "invalid", reason: string }
 
 export type ClaimDragonSilverResult
     = { status: "ok", claimId: string, tx: string, remainingAmount: number }

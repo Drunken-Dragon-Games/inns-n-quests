@@ -34,8 +34,7 @@ export const accountRoutes = (accountService: AccountService) => {
         const sessionId = request.auth!.sessionId
         const result = await accountService.signout(sessionId)
         response.cookie("access", "", { maxAge: 0, sameSite: "none", secure: true })
-        if (result.status == "ok") return response.status(200).json(result)
-        else return response.status(400).json(result)
+        return response.status(200).json(result)
     })
 
     router.post("/session/refresh", async (request: Request, response: Response) => {
@@ -56,8 +55,7 @@ export const accountRoutes = (accountService: AccountService) => {
     router.post("/association/nonce", jwtMiddleware, async (request: Request, response: Response) => {
         const stakeAddress: string = request.body.stakeAddress
         const result = await accountService.getAssociationNonce(stakeAddress)
-        if (result.status == "ok") return response.status(200).json(result)
-        else return response.status(400).json(result)
+        return response.status(200).json(result)
     })
 
     router.post("/association/signature", jwtMiddleware, async (request: Request, response: Response) => {
@@ -65,8 +63,7 @@ export const accountRoutes = (accountService: AccountService) => {
         const nonce = request.body.nonce
         const { key, signature } = request.body.signedMessage
         const result = await accountService.submitAssociationSignature(userId, nonce, key, signature)
-        if (result.status == "ok") return response.status(200).json(result)
-        else return response.status(400).json(result)
+        return response.status(200).json(result)
     })
 
     router.post("/session/test", async (request: Request, response: Response) => {
@@ -81,8 +78,14 @@ export const accountRoutes = (accountService: AccountService) => {
     router.post("/association/nonce", async (request: Request, response: Response) => {
         const stakeAddress: string = request.body.stakeAddress
         const result = await accountService.getAssociationNonce(stakeAddress)
-        if (result.status == "ok") return response.status(200).json(result)
-        else return response.status(400).json(result)
+        return response.status(200).json(result)
+    })
+
+    router.get("/assets/claim/dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const page: number | undefined = request.body.page
+        const result = await accountService.getDragonSilverClaims(userId, page)
+        return response.status(200).json(result)
     })
 
     router.post("/assets/claim/dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
@@ -90,29 +93,25 @@ export const accountRoutes = (accountService: AccountService) => {
         const stakeAddress: string = request.body.stakeAddress
         const claimerInfo: ClaimerInfo = request.body.claimerInfo
         const result = await accountService.claimDragonSilver(userId, stakeAddress, claimerInfo)
-        if (result.status == "ok") return response.status(200).json(result)
-        else return response.status(400).json(result)
+        return response.status(200).json(result)
     })
 
     router.post("/assets/claim/sign-and-submit", async (request: Request, response: Response) => {
         const {witness, tx, claimId} = request.body
         const result = await accountService.claimSignAndSubbmit(witness, tx, claimId)
-        if (result.status == "ok") return response.status(200).json(result)
-        else return response.status(400).json(result)
+        return response.status(200).json(result)
     })
 
     router.post("/assets/claim/status", async (request: Request, response: Response) => {
         const {claimId} = request.body
         const result = await accountService.claimStatus(claimId)
-        if (result.status == "ok") return response.status(200).json(result)
-        else return response.status(400).json(result)
+        return response.status(200).json(result)
     })
 
     router.get("/assets/inventory", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const result = await accountService.getUserInventory(userId)
-        if (result.status == "ok") return response.status(200).json(result)
-        else return response.status(400).json(result)
+        return response.status(200).json(result)
     })
 
     router.get("/assets/test/grant", jwtMiddleware, async (request: Request, response: Response) => {
