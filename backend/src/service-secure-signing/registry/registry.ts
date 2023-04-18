@@ -36,7 +36,7 @@ export default class Registry {
             const signer = await Wallet.importWallet(this.network, undecoded[k].signer)
             this.cache[k] = { 
                 signer, 
-                policy: NativeScript.from_bytes(await cbor.decodeFirst(undecoded[k].policy)) 
+                policy: NativeScript.from_bytes(await cbor.decodeFirst(undecoded[k].policy))
             }
         }
     }
