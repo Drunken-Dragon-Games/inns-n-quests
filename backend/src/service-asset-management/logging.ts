@@ -26,10 +26,11 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return status 
     }
 
-    async list(userId: string, options: { count?: number, page?: number, chain?: boolean , policies?: string[] }, logger?: LoggingContext): Promise<models.ListResponse> {
+    async list(userId: string, options: { count?: number, page?: number, chain?: boolean , policies?: string[] }, caller: string, logger?: LoggingContext): Promise<models.ListResponse> {
         const serviceLogger = this.withComponent(logger)
-        const response = await this.base.list(userId, options, serviceLogger)
-        serviceLogger?.log.info(`listing assets for user ${userId}, result was ${response.status}`, options)
+        const response = await this.base.list(userId, options, caller, serviceLogger)
+        //serviceLogger?.log.info(`listing assets for user ${userId}, result was ${response.status}`, options)
+        console.log(`${caller} listing assets`)
         return response
     }
 

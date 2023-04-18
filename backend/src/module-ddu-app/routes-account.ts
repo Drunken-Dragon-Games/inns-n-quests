@@ -40,6 +40,7 @@ export const accountRoutes = (accountService: AccountService) => {
     router.post("/session/refresh", async (request: Request, response: Response) => {
         const fullRefreshToken = request.body.refreshToken
         try {
+            console.log(`/session/refresh - endpoint - being used`)
             const refreshPayload = jwt.verify(fullRefreshToken, SECRET_KEY)
             if (typeof refreshPayload == "string") throw new Error()
             const { sessionId, refreshToken } = refreshPayload

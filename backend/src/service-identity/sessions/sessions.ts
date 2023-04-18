@@ -31,6 +31,7 @@ export class Sessions {
         if (existingSession.refreshToken != refreshToken) return failed
         await existingSession.destroy()
         const newSession = await this.create(existingSession.userId, existingSession.authType, existingSession.deviceType)
+        console.log("/session/refresh - Sessions- renew got a new session")
         return succeeded(newSession)
     }
 

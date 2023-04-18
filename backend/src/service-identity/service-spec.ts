@@ -23,11 +23,11 @@ export interface IdentityService {
 
     signout(sessionId: string, logger?: LoggingContext): Promise<models.SignOutResult>
 
-    resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, logger?: LoggingContext): Promise<models.ResolveUserResult>
+    resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, caller: string, logger?: LoggingContext): Promise<models.ResolveUserResult>
 
     resolveUsers(userIds: string[], logger?: LoggingContext): Promise<models.UserInfo[]>
 
-    resolveSession(sessionId: string, logger?: LoggingContext): Promise<models.ResolveSesionResult>
+    resolveSession(sessionId: string, caller: string, logger?: LoggingContext): Promise<models.ResolveSesionResult>
 
     updateUser(userId: string, info: { nickname: string }, logger?: LoggingContext): Promise<models.UpdateUserResult>
 }

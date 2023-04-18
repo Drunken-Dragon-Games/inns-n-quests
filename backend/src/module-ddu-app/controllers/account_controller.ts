@@ -107,7 +107,7 @@ const addDiscord = (identityService: IdentityService) => async (request: Request
         logger.log.info({id})
         const credentials: s.Credentials = {ctype: "discord", deviceType: "Browser", authCode: code }
         const associateResponse: s.AssociationResult = await identityService.associate(id, credentials, logger)
-        const userInfo: s.ResolveUserResult = await identityService.resolveUser({ctype: "user-id", userId: id}, logger)
+        const userInfo: s.ResolveUserResult = await identityService.resolveUser({ctype: "user-id", userId: id}, "addDiscord",logger)
         logger.log.info(`associate reponse status ${associateResponse.status}`)
         logger.log.info(`User Info reponse status ${userInfo.status}`)
         if (associateResponse.status == "ok" && userInfo.status == "ok") return response.status(200).json({responseCode: "discord-associated", updatedInfo: userInfo})
@@ -137,7 +137,7 @@ const addWallet = (identityService: IdentityService) => async (request: Request,
         logger.log.info({id})
         const credentials: s.Credentials = {ctype: "sig", deviceType: "Browser", publicKey: key, nonce, signedNonce: signature }
         const associateResponse: s.AssociationResult = await identityService.associate(id, credentials, logger)
-        const userInfo: s.ResolveUserResult = await identityService.resolveUser({ctype: "user-id", userId: id}, logger)
+        const userInfo: s.ResolveUserResult = await identityService.resolveUser({ctype: "user-id", userId: id}, "addWallet",logger)
         logger.log.info(`associate reponse status ${associateResponse.status}`)
         logger.log.info(`User Info reponse status ${userInfo.status}`)
         if (associateResponse.status == "ok" && userInfo.status == "ok") return response.status(200).json({responseCode: "wallet-associated", stakeAddresses: userInfo.info.knownStakeAddresses})
@@ -204,7 +204,7 @@ export const getAccountData = (identityService: IdentityService) => async (reque
     const logger = withTracing(request)
     try {
         const id: string = (request as AuthRequest).auth.userId
-        const userInfo: s.ResolveUserResult = await identityService.resolveUser({ctype: "user-id", userId: id}, logger)
+        const userInfo: s.ResolveUserResult = await identityService.resolveUser({ctype: "user-id", userId: id}, "getAccountData", logger)
         if (userInfo.status == "ok"){
             const [nickname, nameIdentifier] = userInfo.info.nickname.split("#")
             //logger.log.info({nickname}, {nameIdentifier});
@@ -227,8 +227,7 @@ export const refreshSession = (identityService: IdentityService) => async (reque
     const logger = withTracing(request)
     try {
         const {fullRefreshToken} = request.body
-        console.log({fullRefreshToken});
-        console.log("getting the payload");
+        console.log("OldRefresSession - enpoint - being used");
         let refreshPayload: string | jwt.JwtPayload
         try {
             refreshPayload = jwt.verify(fullRefreshToken,SECRET_KEY)

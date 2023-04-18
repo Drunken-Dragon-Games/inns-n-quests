@@ -9,7 +9,7 @@ export interface AssetManagementService {
 
     health(logger?: LoggingContext): Promise<models.HealthStatus>
 
-    list(userId: string, options: { count?: number, page?: number, chain?: boolean , policies?: string[] }, logger?: LoggingContext): Promise<models.ListResponse>
+    list(userId: string, options: { count?: number, page?: number, chain?: boolean , policies?: string[] }, caller: string, logger?: LoggingContext): Promise<models.ListResponse>
 
     grant(userId: string, asset: models.AssetUnit, logger?: LoggingContext): Promise<models.GrantResponse>
 

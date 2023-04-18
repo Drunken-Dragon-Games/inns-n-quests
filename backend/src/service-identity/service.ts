@@ -168,6 +168,7 @@ export class IdentityServiceDsl implements IdentityService {
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<RefreshResult> {
         const newSession = await this.sessions.renew(sessionId, refreshToken)
+        console.log(`/session/refresh - Identity Service DSL - refresh got a new session with status ${newSession.ctype}`)
         if (newSession.ctype == "failure") return { status: "bad-refresh-token" }
         else return { status: "ok", tokens: newSession.result }
     }
@@ -183,7 +184,7 @@ export class IdentityServiceDsl implements IdentityService {
         else return { status: "unknown-session" }
     }
 
-    async resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, logger?: LoggingContext): Promise<ResolveUserResult> {
+    async resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, caller: string, logger?: LoggingContext): Promise<ResolveUserResult> {
         const user = await Users.resolve(info)
         if (user.ctype == "failure") return { status: "unknown-user-id" }
         else return { status: "ok", info: user.result }
@@ -193,16 +194,17 @@ export class IdentityServiceDsl implements IdentityService {
         return await Users.resolveUsersNoStakeAddresses(userIds)
     }
 
-    async resolveSession(sessionId: string, logger?: LoggingContext): Promise<ResolveSesionResult> {
+    async resolveSession(sessionId: string, caller: string, logger?: LoggingContext): Promise<ResolveSesionResult> {
         const session = await this.sessions.resolve(sessionId)
         if (session.ctype == "failure") return { status: "unknown-session-id" }
         if (session.result.authType == "Discord"){
+            console.log(`${caller} - Resolve Session - validating Discord tokens`)
             const discordSession = await validateDiscordSession(session.result, this.discordConfig)
             if (discordSession.ctype == "failure") return { status: "invalid-discord-token" }
         }
         const user = await Users.getinfo(session.result.userId)
         if (user.ctype == "failure") return { status: "unknown-user-id" }
-            else return { status: "ok", info: user.result }
+        else return { status: "ok", info: user.result }
     }
 
     async updateUser(userId: string, info: { nickname: string }, logger?: LoggingContext): Promise<UpdateUserResult> { 

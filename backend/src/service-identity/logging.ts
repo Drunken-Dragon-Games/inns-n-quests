@@ -60,9 +60,9 @@ export class IdentityServiceLogging implements IdentityService {
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<models.RefreshResult> {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.info("refreshing user token", { sessionId })
+        //serviceLogger?.info("refreshing user token", { sessionId })
         const response = await this.base.refresh(sessionId, refreshToken, serviceLogger)
-        serviceLogger?.info(`token refresh status: ${response.status}`)
+        //serviceLogger?.info(`token refresh status: ${response.status}`)
         return response
     }
 
@@ -82,11 +82,11 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
-    async resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, logger?: LoggingContext): Promise<models.ResolveUserResult> {
+    async resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, caller: string, logger?: LoggingContext): Promise<models.ResolveUserResult> {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.info("resolving user", { info })
-        const response = await this.base.resolveUser(info, serviceLogger)
-        serviceLogger?.info(`user resolution status: ${response.status}`)
+        //serviceLogger?.info("resolving user", { info })
+        const response = await this.base.resolveUser(info, caller, serviceLogger)
+        console.log(`${caller} - resolve user got status: ${response.status}`)
         return response
     }
 
@@ -98,11 +98,12 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
-    async resolveSession(sessionId: string, logger?: LoggingContext): Promise<models.ResolveSesionResult> {
+    async resolveSession(sessionId: string, caller: string ,logger?: LoggingContext): Promise<models.ResolveSesionResult> {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.info("resolving session", { sessionId })
-        const response = await this.base.resolveSession(sessionId, serviceLogger)
-        serviceLogger?.info(`session resolution status: ${response.status}`)
+        //serviceLogger?.info("resolving session", { sessionId })
+        const response = await this.base.resolveSession(sessionId, caller ,serviceLogger)
+        //serviceLogger?.info(`session resolution status: ${response.status}`)
+        console.log(`${caller} resolve session got a user with status ${response.status}`)
         return response
     }
 

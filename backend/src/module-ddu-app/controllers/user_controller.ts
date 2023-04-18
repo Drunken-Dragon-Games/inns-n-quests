@@ -25,11 +25,12 @@ const getInfo = (identityService: IdentityService, assetManagementService: Asset
     const logger = withTracing(request)
     try {
         const sessionId = (request as AuthRequest).auth.sessionId
-        const UserInfo = await identityService.resolveSession(sessionId, logger)
+        console.log(`/api/UserInfo - Endpoint - user controler calling resolve sesion`)
+        const UserInfo = await identityService.resolveSession(sessionId, "/api/UserInfo - " ,logger)
         if (UserInfo.status == "ok"){
             const userId = UserInfo.info.userId
             const dsPolicyId = wellKnownPolicies.dragonSilver.policyId
-            const assetList: assets.ListResponse = await assetManagementService.list(userId, { policies: onlyPolicies(wellKnownPolicies) }, logger)
+            const assetList: assets.ListResponse = await assetManagementService.list(userId, { policies: onlyPolicies(wellKnownPolicies) }, "/api/UserInfo - ",logger)
             if (assetList.status == "ok"){
                 const inventory: assets.Inventory = assetList.inventory
                 //console.log({dsPolicyId});
@@ -57,7 +58,7 @@ const getDragonSilver = (assetManagementService: AssetManagementService, wellKno
     const dsPolicyId = wellKnownPolicies.dragonSilver.policyId
     const logger = withTracing(request)
     const id: string = (request as AuthRequest).auth.userId
-    const assetList: assets.ListResponse = await assetManagementService.list(id, { policies: [ dsPolicyId ] }, logger)
+    const assetList: assets.ListResponse = await assetManagementService.list(id, { policies: [ dsPolicyId ] }, "api/UserDragonSilver", logger)
     if (assetList.status == "ok"){
         const inventory: assets.Inventory = assetList.inventory
         const DS = inventory[dsPolicyId!].find(i => i.chain === true)?.quantity ?? "0"
@@ -192,7 +193,7 @@ export const setNickName = (identityService: IdentityService) => async (request:
         console.log({nickname})
         const updateUserReponse: s.UpdateUserResult = await identityService.updateUser(id, {nickname}, logger)
         console.log(`updateUserReponse status is ${updateUserReponse.status}`);
-        const UserInfo = await identityService.resolveUser({ctype: "user-id", userId: id}, logger)
+        const UserInfo = await identityService.resolveUser({ctype: "user-id", userId: id}, '/setNickName', logger)
         console.log(`resolveUser status is ${UserInfo.status}`);
         if (updateUserReponse.status == "ok" && UserInfo.status == "ok") {
             const [nickName, identifier] = UserInfo.info.nickname.split("#")

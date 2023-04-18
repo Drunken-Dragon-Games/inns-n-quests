@@ -96,8 +96,8 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         }
     }
 
-    async list(userId: string, options: { count?: number, page?: number, chain?: boolean, policies: string[] }, logger?: LoggingContext, ): Promise<ListResponse> {
-        const userInfo = await this.identityService.resolveUser({ ctype: "user-id", userId }, logger)
+    async list(userId: string, options: { count?: number, page?: number, chain?: boolean, policies: string[] }, caller: string, logger?: LoggingContext, ): Promise<ListResponse> {
+        const userInfo = await this.identityService.resolveUser({ ctype: "user-id", userId }, caller, logger)
         if (userInfo.status == "unknown-user-id") return { status: "unknown-user" }
         const inventory = await this.assets.list(userId, userInfo.info.knownStakeAddresses, 
             { count: options?.count ?? 100, page: options?.page ?? 0, chain: options?.chain, policies: options.policies })

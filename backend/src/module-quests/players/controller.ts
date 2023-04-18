@@ -111,7 +111,7 @@ const getDragonSilverToClaim = (assetManagementService: AssetManagementService, 
     try {
         const policy = wellKnownPolicies.dragonSilver.policyId
         if (policy == undefined) throw new Error("Dragon silver policy is undefined")
-        const amResponse = await assetManagementService.list(userId, { policies: onlyPolicies(wellKnownPolicies) }, logger)
+        const amResponse = await assetManagementService.list(userId, { policies: onlyPolicies(wellKnownPolicies) }, "getDragonSilverToClaim",logger)
         if (amResponse.status == "unknown-user") throw new Error("AssetManagement: Unknown User")
         const dragonSilverQuantity = amResponse.inventory[policy]?.find(asset => asset.unit == "DragonSilver")?.quantity ?? "0"
         return response.status(200).json({

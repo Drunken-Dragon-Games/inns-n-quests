@@ -25,7 +25,7 @@ import { cardanoNetworkFromString } from "./tools-cardano"
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
     const amountReverted = await assetManagementService.revertStaledClaims(logger)
-    logger.info(`Reverted ${amountReverted} staled claims`)
+    //logger.info(`Reverted ${amountReverted} staled claims`)
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
 
