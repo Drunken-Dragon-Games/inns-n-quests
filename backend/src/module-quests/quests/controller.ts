@@ -3,7 +3,7 @@ import sequelize, { Sequelize } from "sequelize"
 import { Request } from "express-jwt";
 // import { sequelize } from "../app/database/database";
 import { IFilteredAdventurers } from "../app/types";
-import { Model } from "sequelize/types";
+import { Model } from "sequelize";
 import { handleQuestsByAdventurerLevel } from "./utils";
 import { shuffle } from "../app/utils";
 import ApiError from "../app/error/api_error";

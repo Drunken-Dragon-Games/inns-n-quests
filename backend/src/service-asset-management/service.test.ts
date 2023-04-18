@@ -1,10 +1,10 @@
-import ServiceTestDsl from "./service.test-dsl";
-import { AssetManagementService } from "./service-spec";
-import { AssetManagementServiceDsl } from "./service";
 import { connectToDB, DBConfig } from "../tools-database";
+import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock";
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock";
 import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock";
-import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock";
+import { AssetManagementServiceDsl } from "./service";
+import { AssetManagementService } from "./service-spec";
+import ServiceTestDsl from "./service.test-dsl";
 
 let dsl: ServiceTestDsl
 let service: AssetManagementService

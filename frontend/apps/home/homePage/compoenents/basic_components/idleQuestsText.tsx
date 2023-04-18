@@ -1,7 +1,8 @@
+import Image from "next/image"
+import Link from "next/link"
 import styled from "styled-components"
 import { gamesButtonSection } from "../../../../../setting"
-import { TextElMessiri, TextOswald, SimpleButton, LinkDisable } from "../../../../utils/components/basic_components"
-import Image from "next/image"
+import { SimpleButton, TextElMessiri, TextOswald } from "../../../../utils/components/basic_components"
 
 
 const IdleQuestsTextComponent = styled.div`
@@ -93,9 +94,9 @@ const IdleQuestsText = ():JSX.Element => {
             <TextElMessiri children={"Gain Dragon Silver!"} fontsize={2.188} color={"#CAC6BE"} textAlign="center" fontsizeMobile={5} lineHeightMobil={5.5}/>  
             <ButtonWrapper>
                 <Center>
-                    <LinkDisable url={gamesButtonSection.quests} openExternal ={true}>
-                        <SimpleButton action = {() => null}>Open Quest Board</SimpleButton>
-                    </LinkDisable>
+                    <Link href={gamesButtonSection.quests} legacyBehavior>
+                        <a><SimpleButton action = {() => null}>Open Quest Board</SimpleButton></a>
+                    </Link>
                 </Center>
             </ButtonWrapper>          
         </IdleQuestsTextWrapper>

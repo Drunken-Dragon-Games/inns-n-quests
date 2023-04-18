@@ -282,6 +282,7 @@ const claimDragonSilver = (assetManagementService: AssetManagementService, wellK
         // }) 
 
         // await t.commit();
+        /*
         const dragonSilverPolicy = wellKnownPolicies.dragonSilver.policyId
         if (dragonSilverPolicy == undefined) throw new Error("Dragon Silver policy id not found")
         const options = {
@@ -295,6 +296,7 @@ const claimDragonSilver = (assetManagementService: AssetManagementService, wellK
             tx: amResponse.tx,
             claimId: amResponse.claimId
         })
+        */
     } catch (error: any) {
         next(error);
     }

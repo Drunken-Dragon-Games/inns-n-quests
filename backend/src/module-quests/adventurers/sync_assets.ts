@@ -5,7 +5,7 @@ import { Adventurer,
          IAdventurerData,
          IAdventurer,
          IAdventurerMetadata } from "./models";
-import { Model, Sequelize } from "sequelize/types";
+import { Model, Sequelize } from "sequelize";
 import { gmasMetadata, pixelTileClass, advOfThioldenGameMetadata } from "../app/metadata/metadata"
 import { Optional } from "sequelize"
 import { AssetManagementService, Inventory } from "../../service-asset-management"

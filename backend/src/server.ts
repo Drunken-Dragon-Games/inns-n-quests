@@ -1,24 +1,26 @@
-import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
-import dotenv from 'dotenv';
-import { setTimeout } from "timers/promises";
-import { buildApp } from "./module-ddu-app/app";
-import { PORT } from "./module-ddu-app/settings";
-import { AssetManagementService } from "./service-asset-management";
-import { AssetManagementServiceDsl } from "./service-asset-management/service";
-import { IdentityServiceDsl } from "./service-identity";
-import { IdleQuestsServiceDsl } from "./service-idle-quests/service";
-import { SecureSigningServiceDsl } from "./service-secure-signing";
-import { connectToDB } from "./tools-database";
-import { LoggingContext } from "./tools-tracing";
-import { config } from "./tools-utils";
+import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
+import dotenv from 'dotenv'
+import { setTimeout } from "timers/promises"
+import { buildApp } from "./module-ddu-app/app"
+import { PORT } from "./module-ddu-app/settings"
+import { AssetManagementService } from "./service-asset-management"
+import { AssetManagementServiceDsl } from "./service-asset-management/service"
+import { IdentityServiceDsl } from "./service-identity"
+import { IdleQuestsServiceDsl } from "./service-idle-quests/service"
+import { SecureSigningServiceDsl } from "./service-secure-signing"
+import { connectToDB } from "./tools-database"
+import { LoggingContext } from "./tools-tracing"
+import { config } from "./tools-utils"
 
-import path from "path";
-import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata";
-import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./registry-policies";
-import { loadQuestRegistry } from "./service-idle-quests/state/staking-quests-registry";
-import { EvenstatsServiceDsl } from "./service-evenstats/service";
-import { KiliaBotServiceDsl } from "./service-kilia-bot";
-import { commonCalendar } from "./tools-utils/calendar";
+import path from "path"
+import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata"
+import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./registry-policies"
+import { loadQuestRegistry } from "./service-idle-quests/state/staking-quests-registry"
+import { EvenstatsServiceDsl } from "./service-evenstats/service"
+import { KiliaBotServiceDsl } from "./service-kilia-bot"
+import { commonCalendar } from "./tools-utils/calendar"
+import { AccountServiceDsl } from "./service-account"
+import { cardanoNetworkFromString } from "./tools-cardano"
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -37,7 +39,9 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
         config.stringOrElse("QUEST_REGISTRY_LOCATION", path.join(__dirname, "..", "stubs", "test-quest-registry.yaml")), 
         config.typeOrElse("QUEST_REGISTRY_FORMAT", "yaml", (obj: any): obj is "yaml" | "json" => obj === "yaml" || obj === "json"), 
     )
-    const blockfrost = new BlockFrostAPI({ projectId: config.stringOrError("BLOCKFROST_API_KEY") })    
+    const network = cardanoNetworkFromString(config.stringOrElse("CARDANO_NETWORK", "Preprod"))
+    const blockfrostApiKey = config.stringOrError("BLOCKFROST_API_KEY")
+    const blockfrost = new BlockFrostAPI({ projectId: blockfrostApiKey })    
     const database = connectToDB({ 
         host: config.stringOrError("DB_HOST"),
         port: config.intOrError("DB_PORT"),
@@ -50,13 +54,14 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
+    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService })
     
     // Soon to be deprecated
     //await loadQuestModuleModels(database)
-    const app = await buildApp(identityService, assetManagementService, idleQuestsService, wellKnownPolicies, database)
+    const app = await buildApp(identityService, assetManagementService, accountService, idleQuestsService, wellKnownPolicies)
 
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}...`));
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
 })()

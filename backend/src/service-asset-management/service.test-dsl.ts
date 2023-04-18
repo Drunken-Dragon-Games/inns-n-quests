@@ -36,13 +36,13 @@ export default class ServiceTestDsl {
     ) {}
 
     async createUser(options?: { nickname?: string, addresses?: string[] }): Promise<User> {
-        const wallet = Wallet.recover("testnet", 
+        const wallet = Wallet.recover("Preprod", 
             await fs.readFile(this.stubPath("user-wallet"), "utf8"), "password")
         return {
             info: {
                 userId: v4(),
                 nickname: options?.nickname ?? "user#0001",
-                knownStakeAddresses: options?.addresses ?? [ wallet.stakeAddress.to_address().to_bech32() ]
+                knownStakeAddresses: options?.addresses ?? [ wallet.stakeAddress().to_address().to_bech32() ]
             },
             wallet
         }
@@ -84,11 +84,11 @@ export default class ServiceTestDsl {
     }
 
     async claimTestToken(user: User, quantity?: string): Promise<TestClaim> {
-        const testTokenPolicySigner = await Wallet.loadFromFiles("testnet", 
+        const testTokenPolicySigner = await Wallet.loadFromFiles("Preprod", 
             this.stubPath("policy-signer-payment.skey"), 
             this.stubPath("policy-signer-stake.skey"))
         const policy = testTokenPolicySigner.hashNativeScript().to_js_value()
-        const stakeAddr = user.wallet.stakeAddress.to_address().to_bech32()
+        const stakeAddr = user.wallet.stakeAddress().to_address().to_bech32()
         this.secureSigningService.policyReturns({ status: "ok", policy })
         this.setClaimBlockfrostMocks()
         return await expectResponse(

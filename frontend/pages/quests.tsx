@@ -1,6 +1,6 @@
 import type { GetServerSidePropsContext, NextPage } from 'next'
 import Head from 'next/head'
-import IdleQuestsView from '../apps/idleQuest'
+import IdleQuestsView from '../apps/game'
 import { getIsSsrMobile } from '../apps/is-mobile'
 
 const Quests: NextPage = () =>

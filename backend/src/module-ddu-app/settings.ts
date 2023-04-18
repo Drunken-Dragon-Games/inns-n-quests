@@ -1,9 +1,19 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
+export const NODE_ENV = (process.env.NODE_ENV ?? "development") as string
+
+const corsOrigins = typeof process.env.CORS_ORIGIN == "string" ? process.env.CORS_ORIGIN.split(",") : ["http://localhost:3000"]
+
+type StaticOrigin = boolean | string | RegExp | (boolean | string | RegExp)[]
+
 export const corsOptions = {
-    origin: process.env.CORS_ORIGIN as string,
-    credentials: true
+    origin: (requestOrigin: string | undefined, callback: (err: Error | null, origin?: StaticOrigin) => void) => {
+        if (corsOrigins.includes(requestOrigin ?? "")) callback(null, true)
+        else callback(new Error('Not allowed by CORS'))
+    },
+    allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With", "Trace-ID"],
+    credentials: true 
 }
 
 export const envOrElse = (varKey: string, orElse: string): string => {

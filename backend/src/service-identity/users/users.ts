@@ -6,6 +6,14 @@ import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
 
 export class Users {
 
+    static registerSimpleUser = async (nickname: string): Promise<string> => {
+        const existingUser = await User.findOne({ where: { nickname } })
+        if (existingUser) return existingUser.userId
+        const nameIdentifier = await generateIdentenfier(nickname)
+        const user = await User.create({ nickname, nameIdentifier })
+        return user.userId
+    }
+
     static registerWithStakingAddress = async (stakeAddress: string): Promise<string> => {
         const existingRegistration = await UserStakeAdress.findOne({ where: { stakeAddress } });
         if (existingRegistration) return existingRegistration.userId
@@ -38,7 +46,7 @@ export class Users {
             return succeeded(existingUser.userId)
         }
         else {
-            const nickname = await generateRandomNickname()
+            const nickname = discordUserInfo.result.discordName
             const nameIdentifier = await generateIdentenfier(nickname)
             const discordUserName = discordUserInfo.result.discordName
             const email = discordUserInfo.result.email
@@ -71,14 +79,17 @@ export class Users {
             user = await User.findOne({ where: { userId } })
         } else {
             const [nickname, nameIdentifier] = info.nickname.split("#")
-            user = await User.findOne({ where: { nickname, nameIdentifier } })
+            if (!nameIdentifier) 
+                user = await User.findOne({ where: { nickname } })
+            else
+                user = await User.findOne({ where: { nickname, nameIdentifier } })
         }
         if (user == null) return failed
         else {
             const addresses = await UserStakeAdress.findAll({ where: { userId: user.userId }, attributes: ["stakeAddress"] })
             return succeeded({
                 userId: user.userId,
-                nickname: user.nickname + "#" + user.nameIdentifier,
+                nickname: user.nickname,
                 knownDiscord: user.discordUserName,
                 knownStakeAddresses: addresses.map(a => a.stakeAddress)
             })
@@ -89,7 +100,7 @@ export class Users {
         const users = await User.findAll({ where: { userId: userIds } })
         const usersInfo: UserInfo[] = users.map(user => ({
             userId: user.userId,
-            nickname: user.nickname + "#" + user.nameIdentifier,
+            nickname: user.nickname,
             knownDiscord: user.discordUserName,
             knownStakeAddresses: []
         }))
@@ -103,7 +114,7 @@ export class Users {
             const addresses = await UserStakeAdress.findAll({ where: { userId: user.userId }, attributes: ["stakeAddress"] })
             return succeeded({
                 userId: user.userId,
-                nickname: user.nickname + "#" + user.nameIdentifier,
+                nickname: user.nickname,
                 knownDiscord: user.discordUserName,
                 knownStakeAddresses: addresses.map(a => a.stakeAddress),
                 imageLink: user.imageLink,

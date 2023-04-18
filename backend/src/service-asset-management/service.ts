@@ -14,12 +14,13 @@ import { Umzug } from "umzug"
 import { AssetManagementServiceLogging } from "./logging"
 
 import { 
-    ClaimResponse, ClaimStatusResponse, GrantResponse, HealthStatus, 
-    ListResponse, SubmitClaimSignatureResponse 
+    ClaimResponse, ClaimStatusResponse, ClaimerInfo, GrantResponse, HealthStatus, 
+    ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitClaimSignatureResponse, UserClaimsResponse 
 } from "./models"
 
 import * as offChainStoreDB from "./assets/offchain-store-db"
 import * as assetClaimDB from "./assets/asset-claim-db"
+//import { Lucid } from "lucid-cardano"
 
 export interface AssetManagementServiceConfig 
     { claimsConfig: AssetClaimDslConfig
@@ -46,7 +47,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         secureSigningService: SecureSigningService,
     ) {
         this.assets = new AssetStoreDsl(blockfrost)
-        this.claims = new AssetClaimDsl(assetClaimConfig, database, blockfrost, secureSigningService, this.assets)
+        this.claims = new AssetClaimDsl(assetClaimConfig, database, blockfrost, secureSigningService, this.assets)//, lucid)
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
     }
@@ -113,8 +114,13 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         return { status: "ok" }
     }
 
-    async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<ClaimResponse> {
-        const result = await this.claims.claim(userId, stakeAddress, assets, logger)
+	async userClaims(userId: string, unit: string, page?: number, logger?: LoggingContext): Promise<UserClaimsResponse> {
+        const result = await this.claims.userClaims(userId, unit, page, logger)
+        return { status: "ok", claims: result }
+    }
+
+    async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, claimerInfo?: ClaimerInfo, logger?: LoggingContext): Promise<ClaimResponse> {
+        const result = await this.claims.claim(userId, stakeAddress, assets, claimerInfo, logger)
         if (result.ctype == "success") 
             return { status: "ok", claimId: result.result.claimId, tx: result.result.tx }
         else {

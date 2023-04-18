@@ -1,53 +1,57 @@
-import { Logo, TokenDisplayer, AuthenticationMethodIcon, GamesButton} from "./basic_components"
-import { ProfileInformation } from "./complex_components"
+import Image from "next/image"
+import { useEffect, useState } from "react"
 import styled from "styled-components"
-import {  useGeneralSelector, useGeneralDispatch } from "../../../features/hooks" 
 import { selectGeneralReducer } from "../../../features/generalReducer"
-import { ConditionalRender,  Button, TextOswald } from "../components/basic_components"
-import {  useRedirect } from "../hooks"
-import { useGetUserData } from "./hooks"
-import { gamesButtonSection } from "../../../setting"
-import { useErrorHandler } from "./hooks"
-import { claimDragonSilver } from "./features/claimSilverDragon"
+import { useGeneralDispatch, useGeneralSelector } from "../../../features/hooks"
+import { AccountHeader } from "../../account"
+import { Button } from "../components/basic_components"
+import { useRedirect } from "../hooks"
 import { useGetAuthenticationIcon } from '../navBar/hooks'
-import { useState, useEffect } from "react"
-
+import { AuthenticationMethodIcon, TokenDisplayer } from "./basic_components"
+import { ProfileInformation } from "./complex_components"
+import { claimDragonSilver } from "./features/claimSilverDragon"
+import { useErrorHandler, useGetUserData } from "./hooks"
 
 const NavbarComponent = styled.nav`
     width: 100vw;
-    height: 12vh;
     background-color: #0B1015;
 
     @media only screen and (max-width: 414px) {
-        height: 16vh;
         position: fixed;
         z-index: 11;
     }
 `
 
-const Flex = styled.div`
+const HeaderBarContainer = styled.div`
     width: inherit;
     height: inherit;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1vh 5vw;
 
     @media only screen and (max-width: 414px) {
-        height: 8vh;
+        padding: 2vh 3vw;
     }
 `
 
-const LogoPosition = styled.div`
-    margin: auto 0vw;
-    margin-left: max(13vw, 249.6px);
+const EmptyDiv = styled.div`
+    width: 1vw;
+    height: 1vw;
+`
 
+const LogoWrapper = styled.div`
+    position: relative;
+    width: 210px;
+    height: 75px;
 
     @media only screen and (max-width: 414px) {
         display: none;
     }
 `
 
-const ProfileInformationPosition = styled.div`
+const ProfileInformationWrapper = styled.div`
     display: flex;
-    margin: auto 3vw auto auto;    
 `
 
 const ProfileInformationPicture = styled.div`
@@ -97,19 +101,6 @@ const LineOrnament = styled.div`
     }
 `
 
-const ButtonPosition = styled.div`
-    margin: auto 5vw auto auto;
-    display: flex;
-`
-
-const TextWrapper = styled.div`
-    margin: auto 1vw;
-
-    @media only screen and (max-width: 414px) {
-        margin: auto 3vw;
-    }
-`
-
 const AuthenticationMethodIconPosition = styled.div`
     z-index: 2;
     margin: auto 0vw auto 2vw;
@@ -117,23 +108,6 @@ const AuthenticationMethodIconPosition = styled.div`
 
     @media only screen and (max-width: 414px) {
         width: 6vw;
-    }
-`
-
-const GamesButtonsSections = styled.div`
-    display: flex;
-    margin: auto max(10vw, 192px) auto max(5vw, 96px);
-
-    @media only screen and (max-width: 414px) {
-        display: none;
-    }
-`
-
-const GameIconsPosition = styled.div`
-    margin-right: 1.5vw;
-    
-    &:last-child{
-        margin-right: 0vw;
     }
 `
 
@@ -146,25 +120,12 @@ const ProfileInformationPictureMobile = styled.div`
     }
 `
 
-const GameIconsMobile = styled.div`
-
-    display: none;
-
-    @media only screen and (max-width: 414px) {
-        display: flex;
-    }
-`
-
-const GameIconsPositionMobile = styled.div`
-    margin: auto;
-`
-
 const Navbar = (): JSX.Element =>{
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-
+    /**
     const amountDragonSilver = generalSelector.userDataNavBar.data.DSTC
-    
+     
     const [redirectPath, redirectUrl] = useRedirect()
     
     const isDataUser = useGetUserData()
@@ -172,122 +133,87 @@ const Navbar = (): JSX.Element =>{
     const generalDispatch = useGeneralDispatch()
 
     const authenticationMethod = useGetAuthenticationIcon()
-
+    */
     useErrorHandler()
 
     const [isAvailable, setIsAvailable] = useState<boolean>(true)
-    
+
     useEffect(() => {
-        if(isAvailable == false){
-            setTimeout(()=> setIsAvailable(true), 5000 )
+        if (isAvailable == false) {
+            setTimeout(() => setIsAvailable(true), 5000)
         }
-    },[isAvailable])
-    
-    return (<>
-      
+    }, [isAvailable])
+
+    return (
         <NavbarComponent>
+            <HeaderBarContainer>
+                <EmptyDiv />
+                {/*<GamesButton game="inns" url={gamesButtonSection.quests} toolTip="Inns" />*/}
+                <LogoWrapper>
+                    {/*<Logo />*/}
+                    <Image 
+                        src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/drunken_logo.svg" 
+                        alt="drunken dragon logo grey version ddu app" 
+                        layout="fill"
+                    />
+                </LogoWrapper>
 
-            <Flex>
-            
-            <LogoPosition>
-                <Logo/>
-            </LogoPosition>
+                <AccountHeader />
 
-            <GamesButtonsSections>
-
-                <GameIconsPosition>
-                    <GamesButton game="inns" url = {gamesButtonSection.inns} openExternal = {true} ToolTip ="Inns"/>
-                </GameIconsPosition>
-
-                <GameIconsPosition>
-                    <GamesButton game = "quests" url = {gamesButtonSection.quests} openExternal = {false} ToolTip = "Quests"/>
-                </GameIconsPosition>
+                {/* isDataUser == "fulfilled" ? 
                 
-            </GamesButtonsSections>
-            
-
-            
-            <ConditionalRender condition ={isDataUser == "fulfilled"}>
-       
-                <PositionRelative>
-                    
-                    <ProfileInformationPosition>
-
-                    
+                    <PositionRelative>
+                        <ProfileInformationWrapper>
                             <TokenDisplayerPosition>
 
                                 <ProfileInformationPictureMobile>
-                                    <ProfileInformation nick_name={generalSelector.userDataNavBar.data.nickName!} profile_picture_url={generalSelector.userDataNavBar.data.imgLink!}/>
+                                    <ProfileInformation nick_name={generalSelector.userDataNavBar.data.nickName!} profile_picture_url={generalSelector.userDataNavBar.data.imgLink!} />
                                 </ProfileInformationPictureMobile>
 
                                 <IndividualTokenPosition>
-                                    <TokenDisplayer icon="collection_symbols" number = {generalSelector.userDataNavBar.data.amountNFT} />
+                                    <TokenDisplayer icon="collection_symbols" number={generalSelector.userDataNavBar.data.amountNFT} />
                                 </IndividualTokenPosition>
 
                                 <IndividualTokenPosition>
-                                    <TokenDisplayer icon="dragon_silver" number={generalSelector.userDataNavBar.data.DS}  />
+                                    <TokenDisplayer icon="dragon_silver" number={generalSelector.userDataNavBar.data.DS} />
                                 </IndividualTokenPosition>
 
                                 <IndividualTokenPosition>
-                                    <TokenDisplayer 
+                                    <TokenDisplayer
                                         icon="dragon_silver_toClaim"
-                                        number={ "+" + generalSelector.userDataNavBar.data.DSTC} 
-                                        optionalText="Claim" 
-                                        functionOnclick = { isAvailable ?  () => {
+                                        number={"+" + generalSelector.userDataNavBar.data.DSTC}
+                                        optionalText="Claim"
+                                        functionOnclick={isAvailable ? () => {
                                             generalDispatch(claimDragonSilver(amountDragonSilver, authenticationMethod))
                                             setIsAvailable(false)
                                         } : () => null}
                                     />
                                 </IndividualTokenPosition>
-                                
-                                
+
+
                             </TokenDisplayerPosition>
-                            
+
                             <ProfileInformationPicture>
-                                <ProfileInformation nick_name={generalSelector.userDataNavBar.data.nickName!} profile_picture_url={generalSelector.userDataNavBar.data.imgLink!}/>
+                                <ProfileInformation nick_name={generalSelector.userDataNavBar.data.nickName!} profile_picture_url={generalSelector.userDataNavBar.data.imgLink!} />
                             </ProfileInformationPicture>
 
                             <AuthenticationMethodIconPosition>
-                                <AuthenticationMethodIcon/>
+                                <AuthenticationMethodIcon />
                             </AuthenticationMethodIconPosition>
-                          
-                    </ProfileInformationPosition>
-                    <LineOrnament/>
-                </PositionRelative>
 
-                
-            </ConditionalRender>
-
-          
+                        </ProfileInformationWrapper>
+                        <LineOrnament />
+                    </PositionRelative>
             
-            <ConditionalRender condition={isDataUser == "rejected"}>
-    
-                <ButtonPosition>
-                    <TextWrapper>
-                        <TextOswald fontsize={0.9} color="#CAC6BE" fontsizeMobile={5} lineHeightMobil = {6}>
-                            Join us!
-                        </TextOswald>
-                    </TextWrapper>
-                    
-                    <Button action={() => redirectPath("/login") }>Sign Up/In</Button>
-                </ButtonPosition>
-            </ConditionalRender>
-           
-            
-            </Flex>
-           
-           <GameIconsMobile>
-                <GameIconsPositionMobile>
-                    <GamesButton game="inns" url = {gamesButtonSection.inns} openExternal = {true} ToolTip ="Inns" textMobile ="Inns"/>
-                </GameIconsPositionMobile>
+                : isDataUser == "rejected" ?
 
-                <GameIconsPositionMobile>
-                    <GamesButton game = "quests" url = {gamesButtonSection.quests} openExternal = {true} ToolTip = "Quests"/>
-                </GameIconsPositionMobile>
-           </GameIconsMobile>
+                    <Button action={() => redirectPath("/login")}>Sign Up/In</Button>
+
+                                    : <></> */}
+            </HeaderBarContainer>
 
         </NavbarComponent>
-    </>)
+    )
 }
 
 export default Navbar

@@ -81,12 +81,12 @@ const MobileIconAndTextWrapper = styled.div`
 interface GamesButton{
     game: "inns" | "quests"
     url: string
-    openExternal: boolean
-    ToolTip: string [] | string
+    external?: boolean
+    toolTip: string [] | string
     textMobile?: string
 }
 
-const GamesButton = ({game, url, openExternal, ToolTip} : GamesButton) : JSX.Element => {
+const GamesButton = ({game, url, external = false, toolTip} : GamesButton) : JSX.Element => {
 
 
     const [hover, setHover] = useState<boolean>(false)
@@ -94,18 +94,18 @@ const GamesButton = ({game, url, openExternal, ToolTip} : GamesButton) : JSX.Ele
     return (<>
         <GamesButtonWrapper onMouseOver = {() => setHover(true)}  onMouseLeave = {() => setHover(false)}>
 
-            <LinkDisable openExternal = {openExternal} url ={url}>
+            <LinkDisable openExternal={external} url ={url}>
                 <GamesButtonHover>
                     <Image src = {`https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/game_icons/${game}.webp`} alt = "game button drunken dragon entertainment" width = {55} height = {55} layout = "responsive"/>
                 </GamesButtonHover>
             </LinkDisable>
 
-            <Tooltip hover={hover}>{ToolTip}</Tooltip>
+            <Tooltip hover={hover}>{toolTip}</Tooltip>
 
         </GamesButtonWrapper>
 
         <GamesButtonWrapperMobile>
-            <LinkDisable openExternal = {openExternal} url ={url}>
+            <LinkDisable openExternal={external} url ={url}>
                 <>
                     <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/game_icons/button_game_ornament.svg" alt = "game button drunken dragon entertainment" width = {170} height = {41} layout = "responsive"/>
                     <MobileIconAndTextWrapper>
@@ -115,7 +115,7 @@ const GamesButton = ({game, url, openExternal, ToolTip} : GamesButton) : JSX.Ele
                         <TextWrapper>
                             <Flex>
                                 <Center>
-                                    <TextElMessiri fontsize = {0.9} color = "white" fontsizeMobile={5} lineHeightMobil = {4.5}>{ToolTip}</TextElMessiri>
+                                    <TextElMessiri fontsize = {0.9} color = "white" fontsizeMobile={5} lineHeightMobil = {4.5}>{toolTip}</TextElMessiri>
                                 </Center>
                             </Flex>
                         </TextWrapper>

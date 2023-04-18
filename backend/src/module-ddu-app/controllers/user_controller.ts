@@ -32,9 +32,9 @@ const getInfo = (identityService: IdentityService, assetManagementService: Asset
             const assetList: assets.ListResponse = await assetManagementService.list(userId, { policies: onlyPolicies(wellKnownPolicies) }, logger)
             if (assetList.status == "ok"){
                 const inventory: assets.Inventory = assetList.inventory
-                console.log({dsPolicyId});
+                //console.log({dsPolicyId});
                 const DSamount = inventory[dsPolicyId!]?.find(i => i.chain === true)?.quantity ?? "0"
-                console.log({DSamount})
+                //console.log({DSamount})
                 const DSTC = inventory[dsPolicyId!]?.find(i => i.chain === false)?.quantity ?? "0"
                 const nftAmount = 0 // We wont use this anymore (the whole endpoint)
                 return res.status(201).json({
@@ -64,6 +64,30 @@ const getDragonSilver = (assetManagementService: AssetManagementService, wellKno
         const DSTC = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
         return response.status(200).json({responseCode: "ok", DS, DSTC})
     }
+}
+
+export const claimDragonSilver = (assetManagementService: AssetManagementService, wellKnownPolicies: WellKnownPolicies) => async (request: Request, response: Response) => {
+    const dsPolicyId = wellKnownPolicies.dragonSilver.policyId
+    const logger = withTracing(request)
+    const id: string = (request as AuthRequest).auth.userId
+    const stakeAddress = request.auth!.stake_address
+    //For now we just claim ALL OF IT
+    //const { amount } = request.body
+    /*
+    const assetList: assets.ListResponse = await assetManagementService.list(id, { policies: [ dsPolicyId ] }, logger)
+    if (assetList.status == "ok"){
+        const inventory: assets.Inventory = assetList.inventory
+        const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
+        const options = {
+            unit: "DragonSilver",
+            policyId: dsPolicyId,
+            quantity: dragonSilverToClaim
+        }
+        const claimResponse = await assetManagementService.claim(id, stakeAddress, options, logger)
+        if (claimResponse.status == "ok") return response.status(200).json({ ...claimResponse, remainingAmount: 0 })
+        else  return response.status(409).json({ ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) })
+    }
+    */
 }
 
 const getAvailableProfilePicks = async (request: Request, response: Response, next: NextFunction) => {
