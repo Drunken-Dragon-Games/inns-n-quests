@@ -46,6 +46,7 @@ export const connectNami = (): GeneralReducerThunk => async (dispatch, getState)
 
   try {
 
+    /*
     //realiza la coneccion con la cartera funcion que regresa la api requerida
     let api = getState().wallet.data.api
 
@@ -70,7 +71,7 @@ export const connectNami = (): GeneralReducerThunk => async (dispatch, getState)
       dispatch(setWalletStatusRejected(message))
 
     }
-
+    */
 
   }
   catch (err) {
@@ -91,6 +92,7 @@ export const connectNami = (): GeneralReducerThunk => async (dispatch, getState)
 export const connectEternl = (): GeneralReducerThunk => async (dispatch, getState) => {
 
 
+  /*
   dispatch(setWalletStatusPending())
 
 
@@ -141,7 +143,7 @@ export const connectEternl = (): GeneralReducerThunk => async (dispatch, getStat
 
     }
   }
-
+  */
 }
 
 // reducer para moniterear el estado de la llamada a las carteras

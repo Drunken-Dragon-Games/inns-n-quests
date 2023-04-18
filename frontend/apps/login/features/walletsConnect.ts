@@ -48,6 +48,7 @@ export const connectNami = (): LoginThunk => async (dispatch, getState) => {
 
   try {
 
+    /*
     //realiza la coneccion con la cartera funcion que regresa la api requerida
     let api = getState().wallet.data.api
     
@@ -75,7 +76,7 @@ export const connectNami = (): LoginThunk => async (dispatch, getState) => {
     }
 
     dispatch(setWalletStatusFulfilled())
-
+*/
 
   }
   catch (err) {
@@ -102,6 +103,7 @@ export const connectEternl = (): LoginThunk => async (dispatch, getState) => {
 
   try {
 
+    /*
     //realiza la coneccion con la cartera funcion que regresa la api requerida
     let api = getState().wallet.data.api
     
@@ -134,7 +136,7 @@ export const connectEternl = (): LoginThunk => async (dispatch, getState) => {
     }
 
     dispatch(setWalletStatusFulfilled())
-
+    */
   }
   catch (err) {
 
