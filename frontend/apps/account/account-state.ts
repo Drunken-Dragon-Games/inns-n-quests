@@ -1,11 +1,11 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { UserInfo, WalletActionPayload, WalletActionState } from "./account-dsl"
+import { ClaimInfo, ClaimProcessState, UserInfo, WalletAssociationProcessState } from "./account-dsl"
 
 export interface AccountState {
     userInfo?: UserInfo
-    claimState: WalletActionState
-    associateState: WalletActionState
-
+    claimProcessState: ClaimProcessState
+    associateProcessState: WalletAssociationProcessState
+    dragonSilverClaims: ClaimInfo[]
 }
 
 export type AccountStoreState = 
@@ -15,8 +15,9 @@ export type AccountThunk<ReturnType = void> =
     ThunkAction<ReturnType, AccountStoreState, unknown, Action<string>>
 
 const accountInitialState: AccountState = {
-    claimState: {ctype: "wallet-action-state-idle", action: "claim"},
-    associateState: {ctype: "wallet-action-state-idle", action: "associate"}
+    claimProcessState: { ctype: "idle" },
+    associateProcessState: { ctype: "idle" },
+    dragonSilverClaims: [],
 }
 
 export const accountState = createSlice({
@@ -42,19 +43,17 @@ export const accountState = createSlice({
             state.userInfo.stakeAddresses.push(action.payload)
         },
 
-        setAssociateState: (state, action: PayloadAction<WalletActionPayload>) => {
-            state.associateState = {
-              ...action.payload,
-              action: "associate"
-            };
-          },
+        setAssociateProcessState: (state, action: PayloadAction<WalletAssociationProcessState>) => {
+            state.associateProcessState = action.payload
+        },
 
-          setClaimState: (state, action: PayloadAction<WalletActionPayload>) => {
-            state.claimState = {
-              ...action.payload,
-              action: "claim"
-            };
-          }
+        setClaimProcessState: (state, action: PayloadAction<ClaimProcessState>) => {
+            state.claimProcessState = action.payload
+        },
+
+        setDragonSilverClaims: (state, action: PayloadAction<ClaimInfo[]>) => {
+            state.dragonSilverClaims = action.payload
+        },
     }
 })
 

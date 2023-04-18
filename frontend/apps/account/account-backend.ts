@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
 import { SignedMessage } from "lucid-cardano"
-import { ClaimerInfo } from "./account-dsl"
+import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, UserFullInfo } from "./account-dsl"
 
 export const AccountBackend = {
 
@@ -89,13 +89,7 @@ export type GetAssociationNonceResult
 
 export type GetDragonSilverClaimsResult
     = { status: "ok", 
-        claims: { 
-            claimId: string, 
-            quantity: string,
-            state: ClaimStatus,
-            txId?: string,
-            createdAt: string
-        }[] }
+        claims: ClaimInfo[] }
     | { status: "invalid", reason: string }
 
 export type ClaimAssetResult 
@@ -111,11 +105,6 @@ export type ClaimSignAndSubbmitResult
     = { status: "ok", txId: string }
     | { status: "invalid", reason: string }
 
-type ClaimStatus 
-    = "created"
-    | "submitted"
-    | "timed-out"
-    | "confirmed"
 export type ClaimStatusResult
     = { status: "ok", claimStatus: ClaimStatus }
     | { status: "invalid", reason: string }
@@ -123,30 +112,6 @@ export type ClaimStatusResult
 export type getUserInventoryResult
     = { status: "ok", dragonSilverToClaim: number, dragonSilver: number}
     | { status: "unknown-user" }
-
-
-export type Session = {
-    userId: string, 
-    sessionId: string, 
-    authType: AuthType, 
-    expiration: number
-}
-
-export type AuthType = "Sig" | "Discord" | "Email"
-
-export type AuthenticationTokens = {
-    session: Session, 
-    refreshToken: string
-}
-
-export type UserFullInfo = {
-    userId: string, 
-    nickname: string, 
-    knownDiscord?: string, 
-    knownStakeAddresses: string[],
-    imageLink: string,
-    knownEmail: string
-}
 
 
 async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {

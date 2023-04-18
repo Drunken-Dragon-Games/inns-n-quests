@@ -101,6 +101,10 @@ export const AccountTransitions = {
         dispatch(AccountThunks.test())
     },
 
+    getDragonSilverClaims: (page?: number) => {
+        dispatch(AccountThunks.getDragonSilverClaims(page))
+    },
+
     claimDragonSilver: (wallet: SupportedWallet) => {
         dispatch(AccountThunks.claim(wallet))
     },

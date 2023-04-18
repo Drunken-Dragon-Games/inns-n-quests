@@ -49,6 +49,7 @@ export type ClaimStatus
     | "submitted"
     | "timed-out"
     | "confirmed"
+//    | "error"
 
 export type UserClaimsResponse
     = { status: "ok", claims: AssetClaim[] }
