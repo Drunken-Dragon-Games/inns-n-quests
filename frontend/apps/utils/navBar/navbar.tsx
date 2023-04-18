@@ -123,9 +123,9 @@ const ProfileInformationPictureMobile = styled.div`
 const Navbar = (): JSX.Element =>{
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
-
+    /**
     const amountDragonSilver = generalSelector.userDataNavBar.data.DSTC
-    
+     
     const [redirectPath, redirectUrl] = useRedirect()
     
     const isDataUser = useGetUserData()
@@ -133,7 +133,7 @@ const Navbar = (): JSX.Element =>{
     const generalDispatch = useGeneralDispatch()
 
     const authenticationMethod = useGetAuthenticationIcon()
-
+    */
     useErrorHandler()
 
     const [isAvailable, setIsAvailable] = useState<boolean>(true)
