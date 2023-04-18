@@ -5,6 +5,8 @@ import styled from "styled-components"
 import { colors, DDButton, OswaldFontFamily, SimpleDDButton } from "../../common"
 import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
+import { GamesButton } from "../../utils/navBar/basic_components"
+import { gamesButtonSection } from "../../../setting"
 
 const AccountHeaderContainer = styled.div`
     display: flex;
@@ -33,6 +35,7 @@ const AccountHeaderContent = () => {
     return (
         <AccountHeaderContainer>
             { userInfo ? <>
+                <GamesButton game="inns" url={gamesButtonSection.quests} toolTip="My Inn" />
                 <Nickname>{userInfo.nickname}</Nickname> 
                 <SimpleDDButton onClick={() => AccountTransitions.signout(router)}>Sign Out</SimpleDDButton>
             </>: isDiscordFinish ?

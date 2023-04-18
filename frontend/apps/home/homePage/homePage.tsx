@@ -2,6 +2,8 @@ import styled from "styled-components"
 import TavernSection from "./compoenents/complex/tavernSection"
 import { BannerSection, IdleQuestsSection, DeadQueenSection, CollectionsSection, SocialMediaSection, RoadMapSection } from "./compoenents/complex"
 import { AccountApi, DashboardView } from "../../account"
+import { GamesButton } from "../../utils/navBar/basic_components"
+import { gamesButtonSection } from "../../../setting"
 
 const HomePageComponent = styled.section`
     background-color: #0B1015;
@@ -16,8 +18,8 @@ const HomePage = (): JSX.Element => {
     const signedin = AccountApi.signed()
     return (
         <HomePageComponent>
-            <BannerSection />
             <DashboardView /> 
+            <BannerSection />
             <SocialMediaSection />
             {/* <RoadMapSection/> */}
             <TavernSection />

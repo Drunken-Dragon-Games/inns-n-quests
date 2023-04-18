@@ -169,7 +169,7 @@ const DragonSilverClaimRow = ({ claimInfo }: { claimInfo: ClaimInfo }) =>
     </WidgetRow>
 
 const claimRowMessage = (claimable: number, state: ClaimProcessState) =>
-    state.ctype == "idle" && claimable == 0 ? "Quest or stake to DND pool." :
+    state.ctype == "idle" && claimable == 0 ? "Quest or stake to DND pool to earn Dragon Silver!" :
     state.ctype == "idle" ? "Claimable" :
     state.ctype == "loading" ? state.details :
     state.ctype == "error" ? state.details :
@@ -231,6 +231,11 @@ const DashboardCardContainer = styled.div`
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 5px;
     box-shadow: 0 0 20px 0 rgba(0,0,0,0.8);
+
+    @media only screen and (max-width: 1400px) {
+        width: 100%;
+        max-width: 900px;
+    }
 `
 
 const DashboardCardTitle = styled.h1`
@@ -259,6 +264,13 @@ const DashboardContainer = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+
+    @media only screen and (max-width: 1400px) {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
 `
 
 const DashboardViewContent = () => {
