@@ -30,6 +30,14 @@ const WidgetRowTextBeige = styled.p`
     max-width: 80%;
 `
 
+const DragonSilverIcon = ({ white }: { white?: boolean }) => 
+    <NoDragImage
+        src={`https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver${white ? "_toClaim" : ""}.svg`}
+        width={20}
+        height={20}
+        units={px1}
+    />
+
 const WidgetRow = (props: { 
     status: "tick" | "no-tick", 
     text?: string, 
@@ -91,7 +99,31 @@ const ButtonContainer = styled.div`
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-top: 10px;
+    margin: 10px 0px 10px 0px;
+`
+
+const DragonSilverDisplayContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+    gap: 10px;
+`
+
+const DragonSilverDisplay = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    #border: 1px solid ${colors.textGray};
+    #border-radius: 20px;
+    #padding: 3px 10px;
+`
+
+const DragonSilverDisplayText = styled.span`
+    font-size: 21px;
+    color: ${colors.textGray};
 `
 
 const ClaimStatusMedal = styled.span<{ state: ClaimStatus | "claim" | "error" }>`
@@ -105,10 +137,13 @@ const ClaimStatusMedal = styled.span<{ state: ClaimStatus | "claim" | "error" }>
     ${props => props.state == "confirmed" ? `
         background-color: ${colors.dduGold};
         color: white;
+    ` : props.state == "claim" ? `
+        #border: 1px solid ${colors.dduGold};
+        color: transparent;
     ` : props.state == "timed-out" ? `
         border: 1px solid ${colors.textGray};
         color: ${colors.textGray};
-    ` : props.state == "created" || props.state == "claim" ? `
+    ` : props.state == "created" ? `
         border: 1px solid ${colors.dduGold};
         color: white;
     ` : props.state == "submitted" ? `
@@ -127,12 +162,7 @@ const TimeStamp = styled(WidgetRowTextGray)`
 const DragonSilverClaimRow = ({ claimInfo }: { claimInfo: ClaimInfo }) => 
     <WidgetRow status="tick">
         <ClaimStatusMedal state={claimInfo.state}>{claimInfo.state}</ClaimStatusMedal>
-        <NoDragImage
-            src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver.svg"
-            width={20}
-            height={20}
-            units={px1}
-        />
+        <DragonSilverIcon />
         <WidgetRowTextGray>{claimInfo.quantity}</WidgetRowTextGray>
         <Push />
         <TimeStamp>{claimInfo.createdAt}</TimeStamp>
@@ -166,14 +196,20 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
     } : undefined
     return (
         <DragonSilverWidgetContainer>
+            <DragonSilverDisplayContainer>
+                <DragonSilverDisplay>
+                    <DragonSilverIcon white />
+                    <DragonSilverDisplayText>{renderedClaimable}</DragonSilverDisplayText>
+                </DragonSilverDisplay>
+                <DragonSilverDisplay>
+                    <DragonSilverIcon />
+                    <DragonSilverDisplayText>{renderedOnChain}</DragonSilverDisplayText>
+                </DragonSilverDisplay>
+            </DragonSilverDisplayContainer>
+
             <WidgetRow status="no-tick" actions={claimButtonActions} >
                 <ClaimStatusMedal state={medalState}>{medalState}</ClaimStatusMedal>
-                <NoDragImage
-                    src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver.svg"
-                    width={20}
-                    height={20}
-                    units={px1}
-                />
+                <DragonSilverIcon white />
                 <WidgetRowTextBeige>{renderedClaimable}</WidgetRowTextBeige>
                 <WidgetRowTextBeige>{claimRowMessage(userInfo.dragonSilverToClaim, claimProcessState)}</WidgetRowTextBeige>
             </WidgetRow>

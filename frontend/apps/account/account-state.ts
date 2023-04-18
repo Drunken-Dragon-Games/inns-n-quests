@@ -54,6 +54,11 @@ export const accountState = createSlice({
         setDragonSilverClaims: (state, action: PayloadAction<ClaimInfo[]>) => {
             state.dragonSilverClaims = action.payload
         },
+
+        addDragonSilver: (state, action: PayloadAction<number>) => {
+            if (state.userInfo == null) throw new Error("Cannot set dragon silver to claim to claimed when user info is not set")
+            state.userInfo.dragonSilver += action.payload
+        },
     }
 })
 

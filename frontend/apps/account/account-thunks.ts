@@ -9,8 +9,6 @@ import { Blockfrost, Lucid, C } from "lucid-cardano"
 
 const actions = accountState.actions
 
-
-
 export const AccountThunks = {
 
     extractWalletApiAndStakeAddress: async (wallet: SupportedWallet ): Promise<ExtractWalletResult> => {
@@ -157,6 +155,7 @@ export const AccountThunks = {
                 return displayErrorAndHeal("Not enough ADA or transaction ongoing")
        
             dispatch(actions.setClaimProcessState({ctype: "loading", claimStatus: "created", details: "Building transaction..."}))
+            const dragonSilverToClaim = state.userInfo.dragonSilverToClaim
             const claimResponse =  await AccountBackend.claim(stakeAddress, { utxos: minimalUtxoFromLucidUTxO(utxos), receivingAddress: utxos[0].address })
             
             if (claimResponse.status !== "ok")
@@ -173,27 +172,28 @@ export const AccountThunks = {
             if ( signature.status !== "ok")
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`)
             dispatch(actions.setClaimProcessState({ ctype: "loading", claimStatus: "submitted", details: "Tx submitted, waiting for confirmation..." }))
-            dispatch(AccountThunks.claimStatus(claimResponse.claimId))
+            dispatch(AccountThunks.claimStatus(claimResponse.claimId, dragonSilverToClaim))
         }catch (error: any){
             console.error(error)
             return displayErrorAndHeal(error.info ?? error.message)
         }
     },
 
-    claimStatus: ( claimId: string): AccountThunk => async (dispatch) => {
+    claimStatus: (claimId: string, dragonSilverToClaim: number): AccountThunk => async (dispatch) => {
         setTimeout(async () => {
             const statusResult = await AccountBackend.claimStatus(claimId)
             if (statusResult.status !== "ok")
                 return dispatch(actions.setClaimProcessState({ ctype: "error", details: "could not retrive bloqchain transaction status"}))
             if (statusResult.claimStatus == "created" || statusResult.claimStatus == "submitted"){
-                return dispatch(AccountThunks.claimStatus(claimId))
+                return dispatch(AccountThunks.claimStatus(claimId, dragonSilverToClaim))
             }
             if (statusResult.claimStatus == "timed-out")
                 return dispatch(actions.setClaimProcessState({ ctype: "loading", claimStatus: "timed-out", details: "Transaction timed out"}))
             dispatch(actions.setClaimProcessState({ ctype: "loading", claimStatus: "submitted", details: "Transaction confirmed!" }))
             setTimeout(() => {
                 dispatch(actions.setClaimProcessState({ ctype: "idle" }))
-                dispatch(AccountThunks.updateInventory())
+                dispatch(AccountThunks.getDragonSilverClaims())
+                dispatch(actions.addDragonSilver(dragonSilverToClaim))
             }, 5000)
         }, 2000)
     },
