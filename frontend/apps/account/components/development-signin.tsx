@@ -1,5 +1,5 @@
 import { useRouter } from "next/router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Provider } from "react-redux"
 import styled from "styled-components"
 import { colors, OswaldFontFamily } from "../../common"
@@ -42,7 +42,9 @@ const InputWrapper = styled.div`
 
 const DevelopmnentSigninContent = () => {
     const router = useRouter()
-    if (process.env.NODE_ENV !== "development") router.push("/")
+    useEffect(() => {
+        if (process.env.NODE_ENV !== "development") router.push("/")
+    }, [])
     const [nickname, setNickname] = useState("Test User")
     return (
         <Background>

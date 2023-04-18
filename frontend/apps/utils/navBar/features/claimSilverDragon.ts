@@ -33,6 +33,7 @@ const [setClaimDragonSilverStatusIdle, setClaimDragonSilverStatusPending, setCla
 
 const signPolicy = (transaction: string, claimId: string, authenticationMethod: string | null): GeneralReducerThunk => async (dispatch, state) => {
 
+    /*
     let api = null
     console.log(api)
     try {
@@ -56,7 +57,7 @@ const signPolicy = (transaction: string, claimId: string, authenticationMethod: 
     } catch (err) {
         //   dispatch(setSignPolicyStatusErrors())
     }
-
+    */
 }
 
 const submitTransactionPost = (witness: string, tx: string, claimId: string): GeneralReducerThunk => async (dispatch, state) => {
