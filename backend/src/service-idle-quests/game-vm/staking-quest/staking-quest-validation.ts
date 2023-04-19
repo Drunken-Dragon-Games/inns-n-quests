@@ -1,4 +1,4 @@
-import { AdventurerClasses, CharacterCollections } from "../character-entity"
+import { AdventurerClasses, CharacterCollections, CrafterClasses } from "../character-entity"
 import { StakingQuest, StakingReward } from "./staking-quest"
 import { AndRequirement, APSRequirement, AssetRefRequirement, RewardBonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirementDSL, SuccessBonusRequirement, CollectionRequirement } from "./staking-quest-requirements"
 
@@ -29,7 +29,7 @@ export function isStakingQuestRequirementDSL(obj: any): obj is StakingQuestRequi
     }
 
     function isClassRequirement(obj: any): obj is ClassRequirement {
-        return obj.ctype === "class-requirement" && typeof obj.class === "string" && AdventurerClasses.includes(obj.class)
+        return obj.ctype === "class-requirement" && typeof obj.class === "string" && (AdventurerClasses.includes(obj.class) || CrafterClasses.includes(obj.class))
     }
 
     function isAssetRefRequirement(obj: any): obj is AssetRefRequirement {
