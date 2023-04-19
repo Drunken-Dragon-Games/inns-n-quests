@@ -58,7 +58,7 @@ export class AssetStoreDsl {
 			const inventories = await Promise
 				.all(addresses.map(async a => await this.fetchOnChainAssets(a, options)))
 			if (inventories.length == 0) return {}
-			else return inventories.reduce(this.shallowInventoryMerge)
+			else return inventories.reduce(this.deepInventoryMerge)
 		} catch {
 			return {}
 		}
@@ -130,4 +130,19 @@ export class AssetStoreDsl {
         })
         return b
     }
+
+	private deepInventoryMerge = (a: Inventory, b: Inventory): Inventory => {
+		const merged = {...b}
+		Object.keys(a).forEach(k1 => {
+            if (merged[k1] == undefined) merged[k1] = a[k1]
+            else merged[k1] = merged[k1].concat(a[k1]).reduce((acc, currentValue) => {
+				const {unit, quantity, chain} = currentValue
+				const xs = acc.map((x,index) => ({x,index})).find(({x, index}) => x.unit == unit && x.chain == chain)
+				if (xs) acc[xs.index].quantity = (BigInt(acc[xs.index].quantity) + BigInt(quantity)).toString()
+				else acc.push(currentValue)
+				return acc
+			},[] as {unit: string, quantity: string, chain: boolean}[])
+        })
+        return merged
+	}
 }

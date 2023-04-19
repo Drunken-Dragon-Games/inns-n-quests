@@ -75,7 +75,7 @@ export class AccountServiceDsl implements AccountService {
     }
 
     async getUserInventory(userId: string): Promise<getUserInventoryResult> {
-        const assetList = await this.assetManagementService.list(userId, { policies: onlyPolicies(this.wellKnownPolicies) })
+        const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId] })
         if (assetList.status != "ok") return {status: "unknown-user"}
         const inventory = assetList.inventory
         const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
