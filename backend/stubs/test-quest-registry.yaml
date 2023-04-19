@@ -3,9 +3,11 @@ name: "Lost in the Woods"
 location: "Auristar"
 description: "Thelas has become seperated from Aki and Arin in the deep undergrowth of the dense Thiolden forest. You stumble across a tavern and require 2 hunters to track them down."
 requirements: 
-- aps: [10, 12, 6]
-- collections: ["pixel-tiles", "grandmaster-adventurers"]
-- classes: ["Ranger"]
+- aps: [10, 12, 6] # 2.8 
+- collections: ["pixel-tiles", "grandmaster-adventurers"] # (colections.length):3 - n = 1
+- classes: ["Ranger"] # (AdventurerClasses.length +  CrafterClasses. lenght):17 - n = 16
+
+# 21
 
 ---
 
@@ -14,9 +16,11 @@ name: "The Best in the West"
 location: "Auristar"
 description: "Thiolden is holding its annual fighting championships over this week and you must enter your best fighter to try and win the tournament!"
 requirements: 
-- aps: [10, 8, 5]
-- collections: ["pixel-tiles", "grandmaster-adventurers"]
-- classes: ["Fighter"]    
+- aps: [10, 8, 5]  #roundup(2.3 * 2) = 6
+- collections: ["pixel-tiles", "grandmaster-adventurers"] # 1 * 1 
+- classes: ["Fighter"] #16 * 1 
+
+# 23
 ---
 
 questId: "quest-2"
@@ -24,8 +28,8 @@ name: "Marlanye's Honeymead"
 location: "Auristar"
 description: "Marlanye requires the best ingredients for her famous Honeymead. Travel the Thiolden plains and collect 10 vials of the sweetest honey."
 requirements: 
-- aps: [2, 3, 5]
-
+- aps: [2, 3, 5] # .9
+#2
 ---
 
 questId: "quest-3"

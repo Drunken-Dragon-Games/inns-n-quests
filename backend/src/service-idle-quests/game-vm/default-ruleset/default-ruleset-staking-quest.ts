@@ -1,4 +1,4 @@
-import { addAPS, APS, apsSum, CharacterEntity, newAPS, zeroAPS } from "../character-entity"
+import { addAPS, AdventurerClasses, APS, apsSum, CharacterCollections, CharacterEntity, CrafterClasses, newAPS, zeroAPS } from "../character-entity"
 import IQRandom from "../iq-random"
 import { CharacterEntityRuleset, StakingQuestRuleset } from "../iq-ruleset"
 import { addStakingReward, StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementConfiguration, StakingQuestRequirementInfo, StakingQuestRequirementSatisfactionPercentage, StakingQuestSatisfactionInfo, StakingReward } from "../staking-quest"
@@ -78,11 +78,12 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
     }
 
     requirementInfo(requirement: StakingQuestRequirement): StakingQuestRequirementInfo {
-        const duration = Math.round(Math.max(30, apsSum(requirement.aps)))
+        //const duration = Math.round(Math.max(30, apsSum(requirement.aps)))
+        const duration = 60 * 60 * 24 * 3
         const currency = (
-            Math.round(Math.max(1, apsSum(requirement.aps) / 10)) +
-            (requirement.collection?.length ?? 0) * 10 +
-            (requirement.class?.length ?? 0) * 20 +
+            Math.round(Math.max(1, apsSum(requirement.aps) / 10)) * 2 +
+            (requirement.collection?.length ? (CharacterCollections.length - requirement.collection.length) : 0)  +
+            (requirement.class?.length ? (AdventurerClasses.length + CrafterClasses.length - requirement.class.length) : 0) +
             (requirement.assetRef?.length ?? 0) * 30
         )
         const rewardBonus = requirement.rewardBonus
