@@ -80,6 +80,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             client,
             dependencies.identityService,
         )
+        //setting up DB and pre loading cache
         await service.loadDatabaseModels()
         dependencies.evenstatsService.subscribe(service, 
             "claimed-quest-event",
@@ -179,34 +180,40 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     async commandConfig(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) return
         const subcommand = interaction.options.getSubcommand()
-
-        if (subcommand === "quests-channel") {
-            const channel = interaction.options.getChannel("channel")
-            if (!channel || !interaction.guildId) return
-            if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
-            this.configCache[interaction.guildId].questsNotificationChannelId = channel.id
-            await configDB.ConfigDB.upsert({ serverId: interaction.guildId, questsNotificationChannelId: channel.id, returning: true })
-            await interaction.reply(`Quests channel set to ${channel.name}`)
-        } else if (subcommand === "leaderboard-channel") {
-            const channel = interaction.options.getChannel("channel")
-            if (!channel || !interaction.guildId) return
-            if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
-            this.configCache[interaction.guildId].leaderboardNotificationChannelId = channel.id
-            await configDB.ConfigDB.upsert({ serverId: interaction.guildId, leaderboardNotificationChannelId: channel.id, returning: true })
-            await interaction.reply(`Leaderboard channel set to ${channel.name}`)
-        } else if (subcommand === "governance-admin-channel") {
-            const channel = interaction.options.getChannel("channel")
-            if (!channel || !interaction.guildId) return await this.reply(interaction, "Channel not found or not in a server.")
-            //adding the current server to the cache
-            if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
-            this.configCache[interaction.guildId].governanceAdminChannelId = channel.id
-            await configDB.ConfigDB.upsert({ serverId: interaction.guildId, governanceAdminChannelId: channel.id })
-            return await this.reply(interaction, `Info received to set ${channel.name} as governance. Feature not yet complete.`)
-        } else 
-            await interaction.reply("Pong!")
+    
+        if (subcommand === "quests-channel") return await this.reply(interaction, await this.setChannel(interaction, "questsNotificationChannelId"))
+        else if (subcommand === "leaderboard-channel") return await this.reply(interaction, await this.setChannel(interaction, "leaderboardNotificationChannelId"))
+        else if (subcommand === "governance-admin-channel") return await this.reply(interaction, await this.setChannel(interaction, "governanceAdminChannelId"))
+        else return await this.reply(interaction, "Kilia-config command unknokwn")
+        
     }
 
-    async reply(interaction: ChatInputCommandInteraction, messagge: string): Promise<void>{
+    private async setChannel (interaction: CommandInteraction, channelIdKey: configDB.KiliaChannelsNames): Promise<string> {
+        if (!interaction.isChatInputCommand()) return "Interaction is not a chat input command"
+        const channel = interaction.options.getChannel("channel")
+        if (!channel || !interaction.guildId) return "Channel not found or not in a server."
+        if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
+        this.configCache[interaction.guildId][channelIdKey] = channel.id;
+        await configDB.ConfigDB.upsert({ serverId: interaction.guildId, [channelIdKey]: channel.id});
+
+        if (channelIdKey == "governanceAdminChannelId") return `${channel.name} set as Governance Admin channel`
+        else if (channelIdKey == "leaderboardNotificationChannelId") return `${channel.name} set as Leaderboard channel`
+        else if (channelIdKey == "questsNotificationChannelId") return `${channel.name} set as Quests channel`
+        else return "Unknown Kilia-config command"
+    }
+
+    async commandGovernance(interaction: CommandInteraction): Promise<void> {
+        if (!interaction.isChatInputCommand()) return
+        const subcommand = interaction.options.getSubcommand()
+        if (subcommand === "quests-channel") {
+            const channel = interaction.options.getChannel("channel")
+            if (!channel || !interaction.guildId) return await this.reply(interaction, "Channel not found or not in a server.")
+        } 
+        else return await this.reply(interaction, "unknown governance command")
+    }
+
+    //added this function just so could do a return void to the reply method, cuss i thinks it reads a million times nicer
+    private async reply(interaction: ChatInputCommandInteraction, messagge: string): Promise<void>{
         await interaction.reply(messagge)
         return
     }   
