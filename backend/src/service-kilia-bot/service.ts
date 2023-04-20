@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js"
+import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
 import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
 import { Character, TakenStakingQuest } from "../service-idle-quests"
@@ -38,10 +38,18 @@ const commandsBuilder = (): Command[] => {
             .setDescription("Set the channel where the leaderboard updates will be sent.")
             .addChannelOption(option => option
                 .setName("channel")
-                .setDescription("The channel where notifications will be sent."))
-        ).toJSON()
+                .setDescription("The channel where notifications will be sent.")))
+        .addSubcommand(subcommand => subcommand
+            .setName("governance-admin-channel")
+            .setDescription("Set the channel where governance questions will be posted.")
+            .addChannelOption(option => option
+                .setName("channel")
+                .setDescription("The channel where governance questions will be posted.")
+                .setRequired(true)))
+        .toJSON()
     return [ config ]
 }
+
 
 export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
@@ -186,7 +194,21 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             this.configCache[interaction.guildId].leaderboardNotificationChannelId = channel.id
             await configDB.ConfigDB.upsert({ serverId: interaction.guildId, leaderboardNotificationChannelId: channel.id, returning: true })
             await interaction.reply(`Leaderboard channel set to ${channel.name}`)
+        } else if (subcommand === "governance-admin-channel") {
+            const channel = interaction.options.getChannel("channel")
+            if (!channel || !interaction.guildId) return await this.reply(interaction, "Channel not found or not in a server.")
+            //adding the current server to the cache
+            if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
+            this.configCache[interaction.guildId].governanceAdminChannelId = channel.id
+            await configDB.ConfigDB.upsert({ serverId: interaction.guildId, governanceAdminChannelId: channel.id })
+            return await this.reply(interaction, `Info received to set ${channel.name} as governance. Feature not yet complete.`)
         } else 
             await interaction.reply("Pong!")
     }
+
+    async reply(interaction: ChatInputCommandInteraction, messagge: string): Promise<void>{
+        await interaction.reply(messagge)
+        return
+    }   
 }
+
