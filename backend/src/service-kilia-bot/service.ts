@@ -6,12 +6,13 @@ import { config } from "../tools-utils"
 import { QueryInterface, Sequelize } from "sequelize"
 
 import * as configDB from "./config/config-db"
-import * as messagesDSL from "./discord-messages-dsl"
 import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
 import path from "path"
 import { IdentityService } from "../service-identity"
-import YAML from "yaml"
+
+import * as messagesDSL from "./discord-messages-dsl"
+import * as ballotDSL from "./ballot-dsl"
 
 export type KiliaBotServiceDependencies = {
     database: Sequelize
@@ -52,37 +53,6 @@ const slashCommandsBuilder = (): Command[] => {
 
     return [kiliaConfig];
 }
-
-interface Ballot {
-    question: string
-    options: string[]
-  }
-const isBallot = (obj: any): obj is Ballot => {
-    return (
-      typeof obj === "object" &&
-      obj !== null &&
-      typeof obj.question === "string" &&
-      Array.isArray(obj.options) &&
-      obj.options.every((option: any) => typeof option === "string")
-    )
-  }
-const parseBallotYML = (argumentsString: string): {status: "ok" , payload: Ballot} | {status: "error" , reason: string} => {
-      try {
-        const parsedYAML = YAML.parse(argumentsString)
-    
-        if (isBallot(parsedYAML)) {
-          return { status: "ok", payload: parsedYAML }
-        } else {
-          return { status: "error", reason: "Invalid YAML format. Please provide a YAML string with a 'question' property and an 'options' array containing string elements:\n```\nquestion: <Your question here>\noptions:\n  - Option 1\n  - Option 2\n  - Option 3\n```" }
-        }
-      } catch (error) {
-        console.error("Error parsing YAML:", error)
-        return { status: "error", reason: "Invalid YAML format. Please provide a YAML string with a 'question' property and an 'options' array containing string elements:\n```\nquestion: <Your question here>\noptions:\n  - Option 1\n  - Option 2\n  - Option 3\n```" }
-      }
-
-
-  }
-
 
 
 export class KiliaBotServiceDsl implements EvenstatsSubscriber {
@@ -261,15 +231,11 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             
             const preprocessedArgsString = messagesDSL.preprocessYAML(messagesDSL.getArguments(message))
 
-            const ballotResult = parseBallotYML(preprocessedArgsString)
+            const ballotResult = ballotDSL.parseBallotYML(preprocessedArgsString)
             if (ballotResult.status !== "ok") return this.replyMessage(message, ballotResult.reason)
-            console.log("Question:", ballotResult.payload.question)
-            console.log("Options:", ballotResult.payload.options)
-            const ballotPreview = `**Preview of Ballot:**\n\n**Question:** ${ballotResult.payload.question}\n\n**Options:**\n${ballotResult.payload.options
-                .map((option, index) => `${index + 1}. ${option}`)
-                .join("\n")}`;
-          
-              return await this.replyMessage(message, ballotPreview);
+            
+            //TODO: add reply to confirm funcitonality
+            return await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
         } 
         else return await this.replyMessage(message, "unknown governance command")
     }
