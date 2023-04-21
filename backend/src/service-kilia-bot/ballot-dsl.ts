@@ -36,4 +36,4 @@ export const parseBallotYML = (argumentsString: string): {status: "ok" , payload
   export const genBallotPreview = (ballot: Ballot): string =>  
   `**Preview of Ballot:**\n\n**Question:** ${ballot.question}\n\n**Options:**\n${ballot.options
         .map((option, index) => `${index + 1}. ${option}`)
-        .join("\n")}`
+        .join("\n")}\n\nPlease confirm by replying with **yes**. If you wish to cancel, reply with **no** or wait for 60 seconds for this request to time out.`

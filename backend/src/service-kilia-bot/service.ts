@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message } from "discord.js"
+import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
 import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
 import { Character, TakenStakingQuest } from "../service-idle-quests"
@@ -234,8 +234,26 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             const ballotResult = ballotDSL.parseBallotYML(preprocessedArgsString)
             if (ballotResult.status !== "ok") return this.replyMessage(message, ballotResult.reason)
             
-            //TODO: add reply to confirm funcitonality
-            return await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
+            await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
+
+            const filter = (m: Message) => m.author.id === message.author.id && ['yes', 'no'].includes(m.content.toLowerCase())
+
+            // Create a message collector that waits 60 seconds for a message
+            const collector = new MessageCollector(message.channel, { filter, time: 60000})
+
+            collector.on('collect', async (m: Message) => {
+                if (m.content.toLowerCase() === 'yes') {
+
+                    // Store the ballot
+                    console.log('Storing ballot:', ballotResult.payload)
+                    await this.replyMessage( message, 'Ballot confirmed and stored successfully.')
+                } 
+                else await this.replyMessage( message, 'Ballot confirmation canceled. No changes were made.')
+                collector.stop()
+            })
+
+            collector.on('end', (collected, reason) => { if (reason === 'time') 
+                { this.replyMessage( message, 'Ballot confirmation timed out. No changes were made.')}})
         } 
         else return await this.replyMessage(message, "unknown governance command")
     }
