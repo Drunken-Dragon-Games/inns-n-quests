@@ -10,15 +10,19 @@ import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
 import path from "path"
 import { IdentityService } from "../service-identity"
+import { GovernanceService } from "../service-governance/service-spec"
 
 //not sure how you would like me to manage this, mor info on the files themselves
 import * as messagesDSL from "./discord-messages-dsl"
-import * as ballotDSL from "./ballot-dsl"
+import * as ballotDSL from "./ballots/ballot-dsl"
+import { ConfirmMessagge } from "./models"
+
 
 export type KiliaBotServiceDependencies = {
     database: Sequelize
     evenstatsService: EvenstatsService,
     identityService: IdentityService,
+    //governanceService: GovernanceService
 }
 
 export type KiliaBotServiceConfig = {
@@ -237,24 +241,11 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             
             await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
 
-            const filter = (m: Message) => m.author.id === message.author.id && ['yes', 'no'].includes(m.content.toLowerCase())
+            await this.waitForconfirmation(message, 60, 
+                {cancel: 'Ballot confirmation canceled. No changes were made.', 
+                timeout: 'Ballot confirmation timed out. No changes were made.' },
+                 async () => "Ballot confirmed and stored successfully.")
 
-            // Create a message collector that waits 60 seconds for a message
-            const collector = new MessageCollector(message.channel, { filter, time: 60000})
-
-            collector.on('collect', async (m: Message) => {
-                if (m.content.toLowerCase() === 'yes') {
-
-                    // Store the ballot
-                    console.log('Storing ballot:', ballotResult.payload)
-                    await this.replyMessage( message, 'Ballot confirmed and stored successfully.')
-                } 
-                else await this.replyMessage( message, 'Ballot confirmation canceled. No changes were made.')
-                collector.stop()
-            })
-
-            collector.on('end', (collected, reason) => { if (reason === 'time') 
-                { this.replyMessage( message, 'Ballot confirmation timed out. No changes were made.')}})
         } 
         else return await this.replyMessage(message, "unknown governance command")
     }
@@ -267,6 +258,34 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
     private async replyMessage(message: Message, content: string): Promise<void> {
         await message.reply(content)
+      }
+
+      /**
+       * 
+       * @param message 
+       * @param TTL Time in seconds for confirmation to timeout
+       * @param mesages mesagges to send on confirm, cancel and timeout. if no confirm message is provided preloadedCallback string response is used
+       * @param preloadedCallback function to be called on confirmation
+       */
+      private async waitForconfirmation(message: Message, TTL: number, mesages: ConfirmMessagge, preloadedCallback: () => Promise<string | void>) {
+        const filterYesNo = (m: Message) => m.author.id === message.author.id && ['yes', 'no'].includes(m.content.toLowerCase())
+
+            const collector = new MessageCollector(message.channel, { filter: filterYesNo, time: TTL * 1000})
+
+            collector.on('collect', async (m: Message) => {
+                if (m.content.toLowerCase() === 'yes') {
+
+                    const reponse = await preloadedCallback()
+                    if (mesages.confirm) await this.replyMessage( message, mesages.confirm)
+                    else if (reponse) await this.replyMessage( message, reponse)
+                    else await this.replyMessage( message, "Message confirmed")
+                } 
+                else await this.replyMessage( message, mesages.cancel)
+                collector.stop()
+            })
+
+            collector.on('end', (collected, reason) => { if (reason === 'time') 
+                { this.replyMessage( message, mesages.timeout)}})
       }
 }
 

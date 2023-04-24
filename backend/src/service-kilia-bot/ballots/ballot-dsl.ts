@@ -1,10 +1,5 @@
-//same story as with the discord message dsl
-//i whant this fucnitonality and i think this makes it cleaner
-// but i dont know were should i add this 
-//              --santiago
-
 import YAML from "yaml"
-import { Ballot } from "./models"
+import { Ballot } from "../models"
 
 export const isBallot = (obj: any): obj is Ballot => {
     return (
