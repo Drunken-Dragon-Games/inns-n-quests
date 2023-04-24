@@ -7,5 +7,5 @@ export interface GovernanceService {
 
     health(): Promise<HealthStatus>
 
-    addBallot(ballot: models.Ballot):Promise<models.AddBallotResponse>
+    addBallot(ballot: models.registerBallot):Promise<models.RegisterBallotResponse>
 }

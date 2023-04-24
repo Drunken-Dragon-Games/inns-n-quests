@@ -17,18 +17,6 @@ export class Ballot extends Model {
     set optionsArray(value: string[]) {
         this.setDataValue('options', JSON.stringify(value));
     }
-    /**
-     * `createBallot` simplifies ballot creation, managing the options array
-     * serialization internally.
-     */
-    static async createBallot(inquiry: string, options: string[]): Promise<Ballot> {
-        return this.create({
-            inquiry,
-            state: 'open',
-            options: JSON.stringify(options),
-        });
-    }
-
 }
 
 export const BallotTableAttributes = {

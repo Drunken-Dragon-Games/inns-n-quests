@@ -10,6 +10,8 @@ import * as ballotDB from "./ballots/ballots-db"
 
 import { config, HealthStatus } from "../tools-utils"
 
+import { Ballots } from "./ballots/ballot-dsl"
+
 export type GovernanceServiceDependencies = {
     database: Sequelize
 }
@@ -59,8 +61,8 @@ export class GovernanceServiceDsl implements GovernanceService {
         }
     }
 
-    async addBallot(ballot: models.Ballot):Promise<models.AddBallotResponse>{
-        return {state: "error", reason: "not implemented yet"}
+    async addBallot(ballot: models.registerBallot):Promise<models.RegisterBallotResponse>{
+        return await Ballots.register(ballot)
     }
 
 }

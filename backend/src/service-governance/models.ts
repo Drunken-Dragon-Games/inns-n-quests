@@ -1,9 +1,9 @@
 //type repeted in kilia service
-export interface Ballot {
-    question: string
+export interface registerBallot {
+    inquiry: string
     options: string[]
   }
 
-export type AddBallotResponse = 
-  { state: "success", ballotId: string} |
-  { state: "error", reason: string}
+export type RegisterBallotResponse = 
+  { status: "success", ballotId: string} |
+  { status: "error", reason: string}
