@@ -72,11 +72,11 @@ export class GovernanceServiceDsl implements GovernanceService {
     }
 
     async getBallot(ballotId: string): Promise<models.GetBallotResponse> {
-        throw new Error("Method not implemented.")
+        return await Ballots.getProcessedBallot(ballotId)
     }
 
     async closeBallot(ballotId: string): Promise<models.CloseBallotResponse> {
-        throw new Error("Method not implemented.")
+       return await Ballots.closeBallot(ballotId)
     }
 
 

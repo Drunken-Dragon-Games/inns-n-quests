@@ -13,7 +13,7 @@ export type RegisterBallotResponse =
   { ctype: "error", reason: string}
 
 export type MultipleBallots =
-  {[ballotId: string]: StoredBallot}|
+  {ctype: "success", ballots: {[ballotId: string]: StoredBallot}}|
   {ctype: "error", reason: string}
 
 export type GetBallotResponse = 
@@ -21,4 +21,5 @@ export type GetBallotResponse =
   {ctype: "error", reason: string}
 
 export type CloseBallotResponse = 
-{ctype: "success", inquiry: string, winner: {option: string, dragonGold: string}}
+{ctype: "success", inquiry: string, winners: {option: string, dragonGold: string}[]} |
+{ctype: "error", reason: string}
