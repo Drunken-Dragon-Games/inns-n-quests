@@ -1,9 +1,10 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
+import { BallotState } from "../models"
 export const BallotTableName = "ballots"
 export class Ballot extends Model {
     declare ballotId: string
     declare inquiry: string
-    declare state: "open"|"closed" | "archived"
+    declare state: BallotState
 
     /**
      * `optionsArray` is a workaround to store arrays of strings since Sequelize

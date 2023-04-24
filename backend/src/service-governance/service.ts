@@ -30,6 +30,7 @@ export class GovernanceServiceDsl implements GovernanceService {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
     }
+
     static async loadFromEnv(dependencies: GovernanceServiceDependencies): Promise<GovernanceService> {
         dotenv.config()
         return await GovernanceServiceDsl.loadFromConfig({}, dependencies)
@@ -64,5 +65,18 @@ export class GovernanceServiceDsl implements GovernanceService {
     async addBallot(ballot: models.registerBallot):Promise<models.RegisterBallotResponse>{
         return await Ballots.register(ballot)
     }
+
+    async getBallots(state?: models.BallotState | undefined): Promise<models.MultipleBallots> {
+        throw new Error("Method not implemented.")
+    }
+    
+    async getBallot(ballotId: string): Promise<models.GetBallotResponse> {
+        throw new Error("Method not implemented.")
+    }
+    
+    async closeBallot(ballotId: string): Promise<models.CloseBallotResponse> {
+        throw new Error("Method not implemented.")
+    }
+    
 
 }

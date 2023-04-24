@@ -8,4 +8,10 @@ export interface GovernanceService {
     health(): Promise<HealthStatus>
 
     addBallot(ballot: models.registerBallot):Promise<models.RegisterBallotResponse>
+
+    getBallots(state?: models.BallotState):Promise<models.MultipleBallots>
+
+    getBallot(ballotId: string):Promise<models.GetBallotResponse>
+
+    closeBallot(ballotId: string): Promise<models.CloseBallotResponse>
 }
