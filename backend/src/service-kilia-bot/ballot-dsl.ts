@@ -4,11 +4,8 @@
 //              --santiago
 
 import YAML from "yaml"
+import { Ballot } from "./models"
 
-export interface Ballot {
-    question: string
-    options: string[]
-  }
 export const isBallot = (obj: any): obj is Ballot => {
     return (
       typeof obj === "object" &&

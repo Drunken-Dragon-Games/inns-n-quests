@@ -11,6 +11,7 @@ import { buildMigrator } from "../tools-database"
 import path from "path"
 import { IdentityService } from "../service-identity"
 
+//not sure how you would like me to manage this, mor info on the files themselves
 import * as messagesDSL from "./discord-messages-dsl"
 import * as ballotDSL from "./ballot-dsl"
 
