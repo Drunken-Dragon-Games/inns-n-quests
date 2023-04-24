@@ -67,16 +67,18 @@ export class GovernanceServiceDsl implements GovernanceService {
     }
 
     async getBallots(state?: models.BallotState | undefined): Promise<models.MultipleBallots> {
-        throw new Error("Method not implemented.")
+        const ballots = await Ballots.getBallots(state)
+        return Ballots.processBallots(ballots)
     }
-    
+
     async getBallot(ballotId: string): Promise<models.GetBallotResponse> {
         throw new Error("Method not implemented.")
     }
-    
+
     async closeBallot(ballotId: string): Promise<models.CloseBallotResponse> {
         throw new Error("Method not implemented.")
     }
-    
+
 
 }
+
