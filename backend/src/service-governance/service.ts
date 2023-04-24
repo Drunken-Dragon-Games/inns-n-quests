@@ -49,6 +49,16 @@ export class GovernanceServiceDsl implements GovernanceService {
         await this.database.close()
     }
 
+    async health(): Promise<HealthStatus> {
+        let dbHealth: "ok" | "faulty"
+        try { await this.database.authenticate(); dbHealth = "ok" }
+        catch (e) { console.error(e); dbHealth = "faulty" }
+        return {
+            status: dbHealth,
+            dependencies: [{ name: "database", status: dbHealth }]
+        }
+    }
+
     async addBallot(ballot: models.Ballot):Promise<models.AddBallotResponse>{
         return {state: "error", reason: "not implemented yet"}
     }
