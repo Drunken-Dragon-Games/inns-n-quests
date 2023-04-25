@@ -204,6 +204,9 @@ export const AccountThunks = {
     }
 }
 
+//local storage set
+//se debe llamar dentro de un hook de use efect para que el server side rendering no este chingando
+//      --santiago
 function signin(response: AuthenticationResult, dispatch: ThunkDispatch<AccountState, unknown, Action<string>>): boolean {
     if (response.status != "ok") return false
     localStorage.setItem("refresh", response.tokens.refreshToken)

@@ -25,6 +25,9 @@ const Nickname = styled.div`
     ${OswaldFontFamily}
     color: ${colors.textGray};
     font-size: 16px;
+    @media (max-width: 414px) {
+        display: none;
+    }
 `
 
 const AccountHeaderContent = () => {

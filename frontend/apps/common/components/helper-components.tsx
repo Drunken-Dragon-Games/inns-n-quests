@@ -7,3 +7,9 @@ export const Push = styled.div`
 
 export const If = ({children, $if}: { children: ReactNode, $if?: boolean }) => 
     $if ? <>{children}</> : <></>
+
+export const MobileHidden = styled.div`
+    @media (max-width: 414px) {
+        display: none;
+    }
+    `
