@@ -1,8 +1,8 @@
 //type repeted in kilia service
-export interface registerBallot {
-    inquiry: string
-    options: string[]
-  }
+export interface Ballot {
+  question: string
+  options: {title: string, description: string}[]
+}
 
 export type BallotState = "open"|"closed" | "archived"
 

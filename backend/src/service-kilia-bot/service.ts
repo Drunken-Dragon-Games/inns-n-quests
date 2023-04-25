@@ -233,10 +233,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
       
             if (!message.channelId || !message.guildId) return await this.replyMessage(message, "Channel or server could not be verified")
             if (this.configCache[message.guildId].governanceAdminChannelId !== message.channelId) return await this.replyMessage(message, "Command not sent from a registered governance admin channel.")
-            
-            const preprocessedArgsString = messagesDSL.preprocessYAML(messagesDSL.getArguments(message))
+        
 
-            const ballotResult = ballotDSL.parseBallotYML(preprocessedArgsString)
+            const ballotResult = ballotDSL.parseBallotInput(messagesDSL.getArguments(message))
             if (ballotResult.status !== "ok") return this.replyMessage(message, ballotResult.reason)
             
             await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
@@ -260,32 +259,32 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         await message.reply(content)
       }
 
-      /**
-       * 
-       * @param message 
-       * @param TTL Time in seconds for confirmation to timeout
-       * @param mesages mesagges to send on confirm, cancel and timeout. if no confirm message is provided preloadedCallback string response is used
-       * @param preloadedCallback function to be called on confirmation
-       */
-      private async waitForconfirmation(message: Message, TTL: number, mesages: ConfirmMessagge, preloadedCallback: () => Promise<string | void>) {
-        const filterYesNo = (m: Message) => m.author.id === message.author.id && ['yes', 'no'].includes(m.content.toLowerCase())
+    /**
+     * 
+     * @param message 
+     * @param TTL Time in seconds for confirmation to timeout
+     * @param mesages mesagges to send on confirm, cancel and timeout. if no confirm message is provided preloadedCallback string response is used
+     * @param preloadedCallback function to be called on confirmation
+     */
+    private async waitForconfirmation(message: Message, TTL: number, mesages: ConfirmMessagge, preloadedCallback: () => Promise<string | void>) {
+    const filterYesNo = (m: Message) => m.author.id === message.author.id && ['yes', 'no'].includes(m.content.toLowerCase())
 
-            const collector = new MessageCollector(message.channel, { filter: filterYesNo, time: TTL * 1000})
+        const collector = new MessageCollector(message.channel, { filter: filterYesNo, time: TTL * 1000})
 
-            collector.on('collect', async (m: Message) => {
-                if (m.content.toLowerCase() === 'yes') {
+        collector.on('collect', async (m: Message) => {
+            if (m.content.toLowerCase() === 'yes') {
 
-                    const reponse = await preloadedCallback()
-                    if (mesages.confirm) await this.replyMessage( message, mesages.confirm)
-                    else if (reponse) await this.replyMessage( message, reponse)
-                    else await this.replyMessage( message, "Message confirmed")
-                } 
-                else await this.replyMessage( message, mesages.cancel)
-                collector.stop()
-            })
+                const reponse = await preloadedCallback()
+                if (mesages.confirm) await this.replyMessage( message, mesages.confirm)
+                else if (reponse) await this.replyMessage( message, reponse)
+                else await this.replyMessage( message, "Message confirmed")
+            } 
+            else await this.replyMessage( message, mesages.cancel)
+            collector.stop()
+        })
 
-            collector.on('end', (collected, reason) => { if (reason === 'time') 
-                { this.replyMessage( message, mesages.timeout)}})
-      }
+        collector.on('end', (collected, reason) => { if (reason === 'time') 
+            { this.replyMessage( message, mesages.timeout)}})
+    }
 }
 

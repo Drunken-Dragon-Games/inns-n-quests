@@ -7,21 +7,12 @@ import { Message } from "discord.js"
 export const getCommand = (message: Message): string => message.content.slice(1).trim().split(/ +/g).shift()?.toLowerCase() ?? ""
 
 export const getSubCommand = (message: Message): string => {
-    const words = message.content.trim().split(/ +/g)
+    const words = message.content.trim().split(/[\s\n]+/)
     return words.length >= 2 ? words[1].toLowerCase() : ""
   }
 
 export const getArguments = (message: Message): string => {
-    const words = message.content.trim().split(/ +/g)
-    return words.length >= 3 ? words.slice(2).join(" ") : ""
+    const words = message.content.trim().split(/[\s\n]+/)
+    return words.slice(2).join(" ")
   }
 
-//this is needes becouse Discord removes whitespace on messages 
-export const preprocessYAML = (input: string): string => {
-    const lines = input.split("\n")
-    const preprocessedLines = lines.map((line) => {
-      if (line.startsWith("- ")) return `  ${line}`
-      return line
-    })
-    return preprocessedLines.join("\n")
-  }
