@@ -72,7 +72,7 @@ requirements:
 questId: "quest-7"
 name: "The Siege of the Auristar"
 location: "Auristar"
-description: "Tyr, Spearhead of the Seven Lights of Auristar, and his Seven Lights guides and guards the capital. You, having sold your soul to the Kullmyr, now, must lead or rather "misguide" a team of adventurers and siege the capital, facing off against deadly "enemies" and powerful magic to disrupt its peace."
+description: "Tyr, Spearhead of the Seven Lights of Auristar, and his Seven Lights guides and guards the capital. You, having sold your soul to the Kullmyr, now, must lead or rather 'misguide' a team of adventurers and siege the capital, facing off against deadly 'enemies' and powerful magic to disrupt its peace."
 requirements: 
 - aps: [5, 20, 25]
 - classes: ["Rogue", "Warlock"]
