@@ -1,7 +1,7 @@
 import { MouseEventHandler, ReactNode, useEffect } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
-import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton } from "../../common"
+import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton, MobileHidden } from "../../common"
 import { ClaimInfo, ClaimProcessState, ClaimStatus, UserInfo, WalletAssociationProcessState } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
@@ -20,6 +20,9 @@ const WidgetRowTextGray = styled.p`
     text-overflow: ellipsis;
     overflow: hidden;
     max-width: 80%;
+    @media (max-width: 414px) {
+        font-size: 5vw;
+    }
 `
 
 const WidgetRowTextBeige = styled.p`
@@ -29,6 +32,7 @@ const WidgetRowTextBeige = styled.p`
     overflow: hidden;
     max-width: 80%;
 `
+
 
 const DragonSilverIcon = ({ white }: { white?: boolean }) => 
     <NoDragImage
@@ -75,13 +79,15 @@ const WalletAssociationWidget = (userInfo: UserInfo) => {
     const associateState = useSelector((state: AccountState) => state.associateProcessState)
     return (
         <WalletAssociationWidgetContainer>
-            <WidgetRow status="no-tick" text={walletAssociationMessage(associateState)} actions={{
-                "Nami": () => { AccountTransitions.associateWallet("Nami") },
-                "Eternl": () => { AccountTransitions.associateWallet("Eternl") },
-            }} />
-            {userInfo.stakeAddresses.map((stakeAddress, index) =>
-                <WidgetRow key={index} status="tick" text={stakeAddress} />
-            )}
+            <MobileHidden>
+                <WidgetRow status="no-tick" text={walletAssociationMessage(associateState)} actions={{
+                    "Nami": () => { AccountTransitions.associateWallet("Nami") },
+                    "Eternl": () => { AccountTransitions.associateWallet("Eternl") },
+                }} />
+            </MobileHidden>
+                {userInfo.stakeAddresses.map((stakeAddress, index) =>
+                    <WidgetRow key={index} status="tick" text={stakeAddress} />
+                )}
         </WalletAssociationWidgetContainer>
     )
 }
@@ -157,7 +163,11 @@ const ClaimStatusMedal = styled.span<{ state: ClaimStatus | "claim" | "error" }>
 
 const TimeStamp = styled(WidgetRowTextGray)`
     font-size: 14px;
+    @media only screen and (max-width: 414px) {
+        display: none;
+    }
 `
+
 
 const DragonSilverClaimRow = ({ claimInfo }: { claimInfo: ClaimInfo }) => 
     <WidgetRow status="tick">
@@ -207,20 +217,22 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 </DragonSilverDisplay>
             </DragonSilverDisplayContainer>
 
-            <WidgetRow status="no-tick" actions={claimButtonActions} >
-                <ClaimStatusMedal state={medalState}>{medalState}</ClaimStatusMedal>
-                <DragonSilverIcon white />
-                <WidgetRowTextBeige>{renderedClaimable}</WidgetRowTextBeige>
-                <WidgetRowTextBeige>{claimRowMessage(userInfo.dragonSilverToClaim, claimProcessState)}</WidgetRowTextBeige>
-            </WidgetRow>
+            <MobileHidden>
+                <WidgetRow status="no-tick" actions={claimButtonActions} >
+                    <ClaimStatusMedal state={medalState}>{medalState}</ClaimStatusMedal>
+                    <DragonSilverIcon white />
+                    <WidgetRowTextBeige>{renderedClaimable}</WidgetRowTextBeige>
+                    <WidgetRowTextBeige>{claimRowMessage(userInfo.dragonSilverToClaim, claimProcessState)}</WidgetRowTextBeige>
+                </WidgetRow>
+            </MobileHidden>
 
             {dragonSilverClaims.map((claimInfo, index) =>
                 <DragonSilverClaimRow key={index} claimInfo={claimInfo} /> 
             )}
 
-            <ButtonContainer>
+            {/* <ButtonContainer>
                 <button onClick = {AccountTransitions.grantTest}>Grant</button>
-            </ButtonContainer>
+            </ButtonContainer> */}
         </DragonSilverWidgetContainer>
     )
 }

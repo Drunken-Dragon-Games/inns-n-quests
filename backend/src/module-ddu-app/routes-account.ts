@@ -114,11 +114,11 @@ export const accountRoutes = (accountService: AccountService) => {
         return response.status(200).json(result)
     })
 
-    router.get("/assets/test/grant", jwtMiddleware, async (request: Request, response: Response) => {
+    /* router.get("/assets/test/grant", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const result = await accountService.grantTest(userId)
         return response.status(200).json({status: "ok"})
-    })
+    }) */
 
     return router
 }
