@@ -15,14 +15,14 @@ import { GovernanceService } from "../service-governance/service-spec"
 //not sure how you would like me to manage this, mor info on the files themselves
 import * as messagesDSL from "./discord-messages-dsl"
 import * as ballotDSL from "./ballots/ballot-dsl"
-import { ConfirmMessagge } from "./models"
+import { ConfirmMessagge, registerBallotType } from "./models"
 
 
 export type KiliaBotServiceDependencies = {
     database: Sequelize
     evenstatsService: EvenstatsService,
     identityService: IdentityService,
-    //governanceService: GovernanceService
+    governanceService: GovernanceService
 }
 
 export type KiliaBotServiceConfig = {
@@ -69,6 +69,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         private readonly database: Sequelize,
         private readonly client: Client,
         private readonly identityService: IdentityService,
+        private readonly governanceService: GovernanceService
     ){
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -89,6 +90,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             dependencies.database, 
             client,
             dependencies.identityService,
+            dependencies.governanceService
         )
         //setting up DB and pre loading cache
         await service.loadDatabaseModels()
@@ -228,14 +230,12 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     }
 
     async commandGovernance(message: Message): Promise<void> {
+        if (!this.verifyGovernanceChannel(message)) return await this.replyMessage(message, "The command could not be verified to have come from a registered governance channel or server.")
         const subcommand = messagesDSL.getSubCommand(message)
-        if (subcommand === "add") {
-      
-            if (!message.channelId || !message.guildId) return await this.replyMessage(message, "Channel or server could not be verified")
-            if (this.configCache[message.guildId].governanceAdminChannelId !== message.channelId) return await this.replyMessage(message, "Command not sent from a registered governance admin channel.")
-        
 
-            const ballotResult = ballotDSL.parseBallotInput(messagesDSL.getArguments(message))
+        if (subcommand === "add") {
+            const ballotInout = messagesDSL.getArguments(message)
+            const ballotResult = ballotDSL.parseBallotInput(ballotInout)
             if (ballotResult.status !== "ok") return this.replyMessage(message, ballotResult.reason)
             
             await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
@@ -243,9 +243,22 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             await this.waitForconfirmation(message, 60, 
                 {cancel: 'Ballot confirmation canceled. No changes were made.', 
                 timeout: 'Ballot confirmation timed out. No changes were made.' },
-                 async () => "Ballot confirmed and stored successfully.")
+                 async () => {
+                    const r = await this.governanceService.addBallot(ballotResult.payload)
+                    if (r.ctype !== "success") return r.reason
+                    return `Ballot confirmed and stored successfully under ID ${r.ballotId}`
+                 })
 
-        } 
+        }
+        else if (subcommand === "get") {
+            const ballotResult = await this.governanceService.getBallot(messagesDSL.getArguments(message))
+            if (ballotResult.ctype !== "succes") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, ballotDSL.formatStoredBallot(ballotResult.ballot))
+
+        }
+        else if (subcommand == "help"){
+            const helpMessage = ``
+        }
         else return await this.replyMessage(message, "unknown governance command")
     }
 
@@ -261,7 +274,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
     /**
      * 
-     * @param message 
+     * @param message Discord message that requires confirmation
      * @param TTL Time in seconds for confirmation to timeout
      * @param mesages mesagges to send on confirm, cancel and timeout. if no confirm message is provided preloadedCallback string response is used
      * @param preloadedCallback function to be called on confirmation
@@ -285,6 +298,17 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
         collector.on('end', (collected, reason) => { if (reason === 'time') 
             { this.replyMessage( message, mesages.timeout)}})
+    }
+
+    private verifyGovernanceChannel(message: Message): Boolean {
+        try{
+            if (message.channelId && message.guildId) return  this.configCache[message.guildId].governanceAdminChannelId === message.channelId
+            else return false
+        } catch (e: any){
+            console.log(`Error when trying to check governance channel ID ${e}`)
+            return false
+        }
+        
     }
 }
 

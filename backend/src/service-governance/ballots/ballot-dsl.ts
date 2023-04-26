@@ -3,8 +3,16 @@ import { Ballot, BallotVote } from "./ballots-db"
 
 export class Ballots {
     static async register(ballot: registerBallot): Promise<RegisterBallotResponse> {
-        try{return {ctype: "success", ballotId: (await Ballot.create({ inquiry: ballot.question, state: 'open', options: JSON.stringify(ballot.options), descriptions: JSON.stringify(ballot.options) })).ballotId}}
-        catch(e: any) {return {ctype: "error", reason: e.message}}
+        try{
+            const optionTitles: string[] = []
+            const optionDescriptions: string[] = []
+
+            for (const option of ballot.options) {
+                optionTitles.push(option.title)
+                optionDescriptions.push(option.description)
+            }
+            return {ctype: "success", ballotId: (await Ballot.create({ inquiry: ballot.question, state: 'open', options: JSON.stringify(optionTitles), descriptions: JSON.stringify(optionDescriptions) })).ballotId}
+        }   catch(e: any) {return {ctype: "error", reason: e.message}}
     }
 
     static async getProcesseSingledBallot(ballotId: string): Promise<GetBallotResponse>{

@@ -3,9 +3,9 @@ export interface registerBallot {
   question: string
   options: {title: string, description: string}[]
 }
-
+//type repeted in kilia service
 export type BallotState = "open"|"closed" | "archived"
-
+//type repeted in kilia service
 export type StoredBallot = {inquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
 
 export type RegisterBallotResponse = 

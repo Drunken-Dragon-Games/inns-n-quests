@@ -1,6 +1,8 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
 import { BallotState } from "../models"
+
 export const BallotTableName = "ballots"
+
 export class Ballot extends Model {
     declare ballotId: string
     declare inquiry: string
