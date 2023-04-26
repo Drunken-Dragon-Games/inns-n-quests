@@ -11,9 +11,10 @@ export interface AccountService {
     getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult>
     claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult>
-    getUserInventory(userId: string): Promise<getUserInventoryResult>
+    getUserInventory(userId: string): Promise<GetUserInventoryResult>
     claimStatus(claimId: string): Promise<ClaimStatusResult>
     grantTest(userId: string): Promise<void>
+    getOpenBallots(): Promise<OpenBallotsResult>
     voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult>
 }
 
@@ -65,11 +66,18 @@ export type ClaimStatusResult
     = { status: "ok", claimStatus: ClaimStatus }
     | { status: "invalid", reason: string }
 
-export type getUserInventoryResult
+export type GetUserInventoryResult
     = { status: "ok", dragonSilverToClaim: number, dragonSilver: number}
     | { status: "unknown-user" }
+
+export type OpenBallotsResult
+    = { status: "ok", payload: {[ballotId: string]: StoredBallot}}
+    | { status: "invalid", reason: string }
 
 export type VoteResult 
     = { status: "ok" }
     | { status: "invalid", reason: string }
 
+//types repeted from governance service
+type BallotState = "open"|"closed" | "archived"
+type StoredBallot = {inquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}

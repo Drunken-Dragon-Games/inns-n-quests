@@ -4,14 +4,16 @@ export interface registerBallot {
   options: {title: string, description: string}[]
 }
 //type repeted in kilia service
+//type repeted in account service
 export type BallotState = "open"|"closed" | "archived"
 //type repeted in kilia service
+//type repeted in account service
 export type StoredBallot = {inquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
 
 export type RegisterBallotResponse = 
   { ctype: "success", ballotId: string} |
   { ctype: "error", reason: string}
-
+//type repeted in account service
 export type MultipleBallots =
   {ctype: "success", ballots: {[ballotId: string]: StoredBallot}}|
   {ctype: "error", reason: string}

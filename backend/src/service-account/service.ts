@@ -3,7 +3,7 @@ import { AssetManagementService, ClaimerInfo } from "../service-asset-management
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, SignOutResult, SubmitAssociationSignatureResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -78,7 +78,7 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok", tokens, inventory: {dragonSilver, dragonSilverToClaim}, info: sessionResponse.info}
     }
 
-    async getUserInventory(userId: string): Promise<getUserInventoryResult> {
+    async getUserInventory(userId: string): Promise<GetUserInventoryResult> {
         const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId] })
         if (assetList.status != "ok") return {status: "unknown-user"}
         const inventory = assetList.inventory
@@ -144,6 +144,12 @@ export class AccountServiceDsl implements AccountService {
     async grantTest(userId: string): Promise<void>{
         if (process.env.NODE_ENV !== "development") return 
         this.assetManagementService.grant(userId, {policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: "10"})
+    }
+
+    async getOpenBallots(): Promise<OpenBallotsResult> {
+        const openBallotsResult = await this.governanceService.getBallots("open")
+        if (openBallotsResult.ctype !== "success") return {status: "invalid", reason: openBallotsResult.reason}
+        return {status: "ok", payload: openBallotsResult.ballots}
     }
 
     async voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult> {

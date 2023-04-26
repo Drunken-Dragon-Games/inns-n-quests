@@ -234,8 +234,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         const subcommand = messagesDSL.getSubCommand(message)
 
         if (subcommand === "add") {
-            const ballotInout = messagesDSL.getArguments(message)
-            const ballotResult = ballotDSL.parseBallotInput(ballotInout)
+            const ballotInput = messagesDSL.getArguments(message)
+            const ballotResult = ballotDSL.parseBallotInput(ballotInput)
             if (ballotResult.status !== "ok") return this.replyMessage(message, ballotResult.reason)
             
             await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
