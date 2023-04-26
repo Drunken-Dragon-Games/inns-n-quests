@@ -1,12 +1,14 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
+import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
+    governanceService: GovernanceService
     wellKnownPolicies: WellKnownPolicies
 }
 
@@ -15,6 +17,7 @@ export class AccountServiceDsl implements AccountService {
     constructor (
         private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
+        private readonly governanceService: GovernanceService,
         private readonly wellKnownPolicies: WellKnownPolicies,
     ){}
 
@@ -26,6 +29,7 @@ export class AccountServiceDsl implements AccountService {
         const service = new AccountServiceDsl(
             dependencies.identityService,
             dependencies.assetManagementService,
+            dependencies.governanceService,
             dependencies.wellKnownPolicies,
         )
         await service.loadDatabaseModels()
@@ -140,6 +144,19 @@ export class AccountServiceDsl implements AccountService {
     async grantTest(userId: string): Promise<void>{
         if (process.env.NODE_ENV !== "development") return 
         this.assetManagementService.grant(userId, {policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: "10"})
+    }
+
+    async voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult> {
+        //TODO: This is working with draogn silver as a test
+        //This WILL have to be changed to DragonGold
+        const dsPolicyId = this.wellKnownPolicies.dragonSilver.policyId
+        const listResponse = await this.assetManagementService.list(userId, {chain: true,  policies: [ dsPolicyId ]})
+        if (listResponse.status !== "ok") return {status: "invalid", reason: listResponse.status}
+        const dragonGold = listResponse.inventory[dsPolicyId][0].quantity
+        //CHECKME: currenlty hanlding draonGold as number, is posible it will need to be changed to a bigInt
+        const voteResult = await this.governanceService.voteForBallot(ballotId, optionIndex, userId, parseInt(dragonGold))
+        if (voteResult.ctype !== "success") return {status: "invalid", reason: voteResult.reason}
+        return {status: "ok"}
     }
 }
 

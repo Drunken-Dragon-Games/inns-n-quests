@@ -120,6 +120,13 @@ export const accountRoutes = (accountService: AccountService) => {
         return response.status(200).json({status: "ok"})
     })
 
+    router.post("governance/vote", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const {ballotId, optionIndex} = request.body
+        const result = await accountService.voteForBallot(userId, ballotId, optionIndex)
+        return response.status(200).json(result)
+    })
+
     return router
 }
 

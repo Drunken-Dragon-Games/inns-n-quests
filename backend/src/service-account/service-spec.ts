@@ -14,6 +14,7 @@ export interface AccountService {
     getUserInventory(userId: string): Promise<getUserInventoryResult>
     claimStatus(claimId: string): Promise<ClaimStatusResult>
     grantTest(userId: string): Promise<void>
+    voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult>
 }
 
 export type AuthenticateResult
@@ -67,4 +68,8 @@ export type ClaimStatusResult
 export type getUserInventoryResult
     = { status: "ok", dragonSilverToClaim: number, dragonSilver: number}
     | { status: "unknown-user" }
+
+export type VoteResult 
+    = { status: "ok" }
+    | { status: "invalid", reason: string }
 
