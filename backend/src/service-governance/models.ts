@@ -23,3 +23,7 @@ export type GetBallotResponse =
 export type CloseBallotResponse = 
 {ctype: "success", inquiry: string, winners: {option: string, dragonGold: string}[]} |
 {ctype: "error", reason: string}
+
+export type voteResponse = 
+{ctype: "success"} |
+{ctype: "error", reason: string}

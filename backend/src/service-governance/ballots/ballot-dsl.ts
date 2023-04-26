@@ -1,4 +1,4 @@
-import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, registerBallot } from "../models"
+import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, registerBallot, voteResponse } from "../models"
 import { Ballot, BallotVote } from "./ballots-db"
 
 export class Ballots {
@@ -15,7 +15,7 @@ export class Ballots {
         }   catch(e: any) {return {ctype: "error", reason: e.message}}
     }
 
-    static async getProcesseSingledBallot(ballotId: string): Promise<GetBallotResponse>{
+    static async getSingle(ballotId: string): Promise<GetBallotResponse>{
         try{
             const unprossedBallot = await Ballot.findByPk(ballotId)
             if (!unprossedBallot) return {ctype: "error", reason: "unknown Ballot ID"}
@@ -28,7 +28,7 @@ export class Ballots {
         
     }
 
-    static async getProcessedBallots(state?: BallotState): Promise<MultipleBallots> {
+    static async getMultiple(state?: BallotState): Promise<MultipleBallots> {
         try {
 
             const ballots = state ? await Ballot.findAll({ where: { state } }) : await Ballot.findAll()
@@ -46,7 +46,7 @@ export class Ballots {
         }
     }
 
-    static processSingleBallot(ballot: Ballot,votes: BallotVote[] ): StoredBallot {
+    private static processSingleBallot(ballot: Ballot,votes: BallotVote[] ): StoredBallot {
     
         const options = ballot.optionsArray.map((option, index) => {
             const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
@@ -58,7 +58,7 @@ export class Ballots {
         return { inquiry: ballot.inquiry, options, state: ballot.state }
     }
 
-    static async closeBallot(ballotId: string): Promise<CloseBallotResponse> {
+    static async close(ballotId: string): Promise<CloseBallotResponse> {
         const ballot = await Ballot.findByPk(ballotId)
         if (!ballot) return {ctype: "error", reason: "unknown Ballot ID"}
         ballot.state = "closed"
@@ -71,5 +71,20 @@ export class Ballots {
         const winners = proccedBallot.options.filter(option => option.dragonGold === maxDragonGold)
 
         return { ctype: "success", inquiry: ballot.inquiry, winners }
+    }
+
+    static async vote(ballotId: string, optionIndex: number, userId: string, dragonGold: number): Promise<voteResponse>{
+        try {
+            const ballot = await Ballot.findByPk(ballotId)
+        if (!ballot) return {ctype: "error", reason: "unknown Ballot ID"}
+        if(ballot.state !== "open") return {ctype: "error", reason: "Ballot is no longer accepting votes"}
+        const vote = BallotVote.create({userId, ballotId, optionIndex, dragonGold})
+        return {ctype: "success"}
+        }catch(error: any){
+            console.error(error)
+            return {ctype: "error", reason: error.message}
+        }
+        
+ 
     }
 }
