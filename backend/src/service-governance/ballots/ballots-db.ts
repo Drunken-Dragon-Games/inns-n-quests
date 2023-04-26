@@ -18,6 +18,14 @@ export class Ballot extends Model {
     set optionsArray(value: string[]) {
         this.setDataValue('options', JSON.stringify(value));
     }
+
+    get descriptionArray(): string[] {
+        return JSON.parse(this.getDataValue('descriptions'));
+    }
+
+    set descriptionArray(value: string[]) {
+        this.setDataValue('descriptions', JSON.stringify(value));
+    }
 }
 
 export const BallotTableAttributes = {
@@ -47,6 +55,14 @@ export const BallotTableAttributes = {
             allowNull: false,
         }
     },
+    descriptions: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        options: {
+            type: DataTypes.TEXT,
+            allowNull: false,
+        }
+    }
     
 }
 

@@ -67,12 +67,11 @@ export class GovernanceServiceDsl implements GovernanceService {
     }
 
     async getBallots(state?: models.BallotState | undefined): Promise<models.MultipleBallots> {
-        const ballots = await Ballots.getBallots(state)
-        return Ballots.processBallots(ballots)
+        return Ballots.getProcessedBallots(state)
     }
 
     async getBallot(ballotId: string): Promise<models.GetBallotResponse> {
-        return await Ballots.getProcessedBallot(ballotId)
+        return await Ballots.getProcesseSingledBallot(ballotId)
     }
 
     async closeBallot(ballotId: string): Promise<models.CloseBallotResponse> {

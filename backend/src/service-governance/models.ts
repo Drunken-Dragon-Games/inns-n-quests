@@ -1,12 +1,12 @@
 //type repeted in kilia service
-export interface Ballot {
+export interface registerBallot {
   question: string
   options: {title: string, description: string}[]
 }
 
 export type BallotState = "open"|"closed" | "archived"
 
-export type StoredBallot = {inquiry: string, options: {option: string, dragonGold: string}[], state: BallotState}
+export type StoredBallot = {inquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
 
 export type RegisterBallotResponse = 
   { ctype: "success", ballotId: string} |
