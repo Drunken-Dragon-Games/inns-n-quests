@@ -1,6 +1,6 @@
 //type repeted in kilia service
-export interface registerBallot {
-  question: string
+export interface registerBallotType {
+  question: {inquiry: string, description: string}
   options: {title: string, description: string}[]
 }
 //type repeted in kilia service
@@ -8,7 +8,7 @@ export interface registerBallot {
 export type BallotState = "open"|"closed" | "archived"
 //type repeted in kilia service
 //type repeted in account service
-export type StoredBallot = {inquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
+export type StoredBallot = {inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
 
 export type RegisterBallotResponse = 
   { ctype: "success", ballotId: string} |

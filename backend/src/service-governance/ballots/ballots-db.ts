@@ -6,6 +6,7 @@ export const BallotTableName = "ballots"
 export class Ballot extends Model {
     declare ballotId: string
     declare inquiry: string
+    declare description: string
     declare state: BallotState
 
     /**
@@ -41,6 +42,10 @@ export const BallotTableAttributes = {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     state: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -50,6 +55,7 @@ export const BallotTableAttributes = {
         }
     },
     options: {
+        //https://www.postgresql.org/docs/current/datatype-character.html
         type: DataTypes.TEXT,
         allowNull: false,
         options: {

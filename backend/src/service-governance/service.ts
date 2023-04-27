@@ -62,7 +62,7 @@ export class GovernanceServiceDsl implements GovernanceService {
         }
     }
 
-    async addBallot(ballot: models.registerBallot):Promise<models.RegisterBallotResponse>{
+    async addBallot(ballot: models.registerBallotType):Promise<models.RegisterBallotResponse>{
         return await Ballots.register(ballot)
     }
 

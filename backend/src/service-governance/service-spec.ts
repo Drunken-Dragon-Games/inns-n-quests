@@ -7,7 +7,7 @@ export interface GovernanceService {
 
     health(): Promise<HealthStatus>
 
-    addBallot(ballot: models.registerBallot):Promise<models.RegisterBallotResponse>
+    addBallot(ballot: models.registerBallotType):Promise<models.RegisterBallotResponse>
 
     getBallots(state?: models.BallotState):Promise<models.MultipleBallots>
 

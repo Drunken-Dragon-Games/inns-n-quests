@@ -1,8 +1,8 @@
-import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, registerBallot, voteResponse } from "../models"
+import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, registerBallotType, voteResponse } from "../models"
 import { Ballot, BallotVote } from "./ballots-db"
 
 export class Ballots {
-    static async register(ballot: registerBallot): Promise<RegisterBallotResponse> {
+    static async register(ballot: registerBallotType): Promise<RegisterBallotResponse> {
         try{
             const optionTitles: string[] = []
             const optionDescriptions: string[] = []
@@ -11,7 +11,7 @@ export class Ballots {
                 optionTitles.push(option.title)
                 optionDescriptions.push(option.description)
             }
-            return {ctype: "success", ballotId: (await Ballot.create({ inquiry: ballot.question, state: 'open', options: JSON.stringify(optionTitles), descriptions: JSON.stringify(optionDescriptions) })).ballotId}
+            return {ctype: "success", ballotId: (await Ballot.create({ inquiry: ballot.question.inquiry, description: ballot.question.description, state: 'open', options: JSON.stringify(optionTitles), descriptions: JSON.stringify(optionDescriptions) })).ballotId}
         }   catch(e: any) {return {ctype: "error", reason: e.message}}
     }
 
@@ -55,7 +55,7 @@ export class Ballots {
             return { option, description, dragonGold: dragonGoldSum.toString() }
         })
   
-        return { inquiry: ballot.inquiry, options, state: ballot.state }
+        return { inquiry: ballot.inquiry, descriptionOfInquiry: ballot.description ,options, state: ballot.state }
     }
 
     static async close(ballotId: string): Promise<CloseBallotResponse> {
