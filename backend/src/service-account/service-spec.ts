@@ -80,4 +80,4 @@ export type VoteResult
 
 //types repeted from governance service
 type BallotState = "open"|"closed" | "archived"
-export type StoredBallot = {inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
+export type StoredBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}

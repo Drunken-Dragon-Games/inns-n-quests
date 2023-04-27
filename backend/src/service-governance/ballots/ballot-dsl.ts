@@ -55,7 +55,7 @@ export class Ballots {
             return { option, description, dragonGold: dragonGoldSum.toString() }
         })
   
-        return { inquiry: ballot.inquiry, descriptionOfInquiry: ballot.description ,options, state: ballot.state }
+        return { id: ballot.ballotId, inquiry: ballot.inquiry, descriptionOfInquiry: ballot.description ,options, state: ballot.state }
     }
 
     static async close(ballotId: string): Promise<CloseBallotResponse> {

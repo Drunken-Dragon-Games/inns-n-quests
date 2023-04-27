@@ -8,7 +8,7 @@ export interface registerBallotType {
 //type repeted in account service
 //type repeted in frontend accoundSL
 export type BallotState = "open"|"closed" | "archived"
-export type StoredBallot = {inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
+export type StoredBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
 
 export type RegisterBallotResponse = 
   { ctype: "success", ballotId: string} |
