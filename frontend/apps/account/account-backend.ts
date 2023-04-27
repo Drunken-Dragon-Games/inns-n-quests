@@ -75,7 +75,11 @@ export const AccountBackend = {
 
     async getOpenBallots(): Promise<GetOpenBallotsResult>{
         const result = await accountRequest("GET", "/governance/open")
-        console.log(`governance open  got a ${result.data}`)
+        return result.data
+    },
+
+    async votForBallot(ballotId: string, optionIndex: string): Promise<VoteResult>{
+        const result = await accountRequest("POST", "/governance/vote", {ballotId, optionIndex})
         return result.data
     }
 }
@@ -121,6 +125,10 @@ export type getUserInventoryResult
 
 export type GetOpenBallotsResult
     = { status: "ok", payload: GovernanceBallots}
+    | { status: "invalid", reason: string }
+
+export type VoteResult 
+    = { status: "ok" }
     | { status: "invalid", reason: string }
 
 async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {

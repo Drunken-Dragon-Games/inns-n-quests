@@ -257,7 +257,8 @@ const GoverncanceVotingWidget = ({ userInfo }: { userInfo: UserInfo | undefined 
                     {ballot.options.map((option, index) => (
                         <div key={index}>
                             <p>Option: {option.option} Description: {option.description}</p>
-                            <button onClick={() => {}}>Clik me!</button>
+                            <p>{index}</p>
+                            {/* <button onClick={AccountTransitions.voteForBallot("id", index)}>Vote!</button> */}
                         </div>
                     ))}
                     <p>Ballot State: {ballot.state}</p>

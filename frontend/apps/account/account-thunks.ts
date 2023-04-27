@@ -209,7 +209,16 @@ export const AccountThunks = {
             dispatch(actions.setGovernanceState({ ctype: "error", details: response.status }))
         else 
             dispatch(actions.setGovernanceBallots(response.payload))
-    }
+    },
+
+    voteForGovernanceBallot: (ballotId: string, optionIndex: string): AccountThunk => async (dispatch) => {
+        actions.setGovernanceState({ ctype: "loading", details: "submiting vote"})
+        const response = await AccountBackend.votForBallot(ballotId, optionIndex)
+        if (response.status !== "ok")
+            dispatch(actions.setGovernanceState({ ctype: "error", details: response.status }))
+        else 
+            actions.setGovernanceState({ ctype: "idle"})
+    }   
 }
 
 //local storage set
