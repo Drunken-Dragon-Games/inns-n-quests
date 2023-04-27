@@ -78,6 +78,8 @@ export class Ballots {
             const ballot = await Ballot.findByPk(ballotId)
             if (!ballot) return {ctype: "error", reason: "unknown Ballot ID"}
             if(ballot.state !== "open") return {ctype: "error", reason: "Ballot is no longer accepting votes"}
+            const exisitingVote = await Ballot.findOne({where: {ballotId, userId}})
+            if (exisitingVote) return {ctype: "error", reason: "User already voted for this Ballot"}
             const vote = BallotVote.create({userId, ballotId, optionIndex, dragonGold})
             return {ctype: "success"}
         }catch(error: any){
