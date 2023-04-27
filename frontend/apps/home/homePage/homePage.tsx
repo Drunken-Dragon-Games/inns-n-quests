@@ -4,6 +4,7 @@ import { BannerSection, IdleQuestsSection, DeadQueenSection, CollectionsSection,
 import { AccountApi, DashboardView } from "../../account"
 import { GamesButton } from "../../utils/navBar/basic_components"
 import { gamesButtonSection } from "../../../setting"
+import CookieConsentBanner from "../../common/components/cookie-consent-component"
 
 const HomePageComponent = styled.section`
     background-color: #0B1015;
@@ -17,16 +18,19 @@ const HomePageComponent = styled.section`
 const HomePage = (): JSX.Element => {
     const signedin = AccountApi.signed()
     return (
-        <HomePageComponent>
-            <DashboardView /> 
-            <BannerSection />
-            <SocialMediaSection />
-            {/* <RoadMapSection/> */}
-            <TavernSection />
-            <IdleQuestsSection />
-            <CollectionsSection />
-            <DeadQueenSection />
-        </HomePageComponent>
+        <>
+            <HomePageComponent>
+                <DashboardView /> 
+                <BannerSection />
+                <SocialMediaSection />
+                {/* <RoadMapSection/> */}
+                <TavernSection />
+                <IdleQuestsSection />
+                <CollectionsSection />
+                <DeadQueenSection />
+            </HomePageComponent>
+            <CookieConsentBanner />
+        </>
     )
 }
 

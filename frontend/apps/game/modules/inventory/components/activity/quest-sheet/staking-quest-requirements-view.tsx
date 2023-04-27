@@ -163,13 +163,13 @@ const ConfigurationView = (props: ConfigurationViewProps) => {
 
             {collectionRequirement && (
                 <RequirementBox checked={collectionSatisfaction}>
-                    <span>{collectionRequirement.map(printCollection).join(" or ")}</span>
+                    <span>{collectionRequirement.map(printCollection).join(" or ")} only.</span>
                 </RequirementBox>
             )}
 
             {classRequirement && (
                 <RequirementBox checked={classSatisfaction}>
-                    <span>{classRequirement.map(c => c+"s").join(" or ")}</span>
+                    <span>{classRequirement.map(c => c+"s").join(" or ")} only.</span>
                 </RequirementBox>
             )}
 

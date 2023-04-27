@@ -1,5 +1,6 @@
 import styled from "styled-components";
 
+//mi boton feo que fran me dijo especificamente que no le gustaba
 export const ClaimButton = styled.button`
   background: linear-gradient(135deg, #9f692c, #fab94d, #cc9d54);
   color: #333;
