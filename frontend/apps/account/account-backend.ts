@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
 import { SignedMessage } from "lucid-cardano"
-import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, UserFullInfo } from "./account-dsl"
+import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, UserFullInfo } from "./account-dsl"
 
 export const AccountBackend = {
 
@@ -71,6 +71,12 @@ export const AccountBackend = {
     async granteTest(){
         const result = await accountRequest("GET", "/assets/test/grant")
         return result.data
+    },
+
+    async getOpenBallots(): Promise<GetOpenBallotsResult>{
+        const result = await accountRequest("GET", "/governance/open")
+        console.log(`governance open  got a ${result.data}`)
+        return result.data
     }
 }
 
@@ -113,6 +119,9 @@ export type getUserInventoryResult
     = { status: "ok", dragonSilverToClaim: number, dragonSilver: number}
     | { status: "unknown-user" }
 
+export type GetOpenBallotsResult
+    = { status: "ok", payload: GovernanceBallots}
+    | { status: "invalid", reason: string }
 
 async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
     return await withTokenRefresh(() => accountRequest(method, endpoint, data))

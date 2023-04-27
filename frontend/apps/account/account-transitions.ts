@@ -111,5 +111,9 @@ export const AccountTransitions = {
 
     grantTest: () => {
         dispatch(AccountThunks.testGrant())
+    },
+
+    getOpenBallots: () => {
+        dispatch(AccountThunks.getGoverncanceBallots())
     }
-}
+} 

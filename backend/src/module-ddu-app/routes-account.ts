@@ -120,12 +120,12 @@ export const accountRoutes = (accountService: AccountService) => {
         return response.status(200).json({status: "ok"})
     }) */
 
-    router.get("governance/open", async (request: Request, response: Response) => {
+    router.get("/governance/open", async (request: Request, response: Response) => {
         const result = await accountService.getOpenBallots()
         return response.status(200).json(result)
     })
 
-    router.post("governance/vote", jwtMiddleware, async (request: Request, response: Response) => {
+    router.post("/governance/vote", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const {ballotId, optionIndex} = request.body
         const result = await accountService.voteForBallot(userId, ballotId, optionIndex)

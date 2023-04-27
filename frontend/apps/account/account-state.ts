@@ -1,11 +1,13 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { ClaimInfo, ClaimProcessState, UserInfo, WalletAssociationProcessState } from "./account-dsl"
+import { ClaimInfo, ClaimProcessState, GovernaceState, GovernanceBallots, UserInfo, WalletAssociationProcessState } from "./account-dsl"
 
 export interface AccountState {
     userInfo?: UserInfo
     claimProcessState: ClaimProcessState
     associateProcessState: WalletAssociationProcessState
     dragonSilverClaims: ClaimInfo[]
+    governanceBallots: GovernanceBallots
+    governanceState: GovernaceState
 }
 
 export type AccountStoreState = 
@@ -18,6 +20,8 @@ const accountInitialState: AccountState = {
     claimProcessState: { ctype: "idle" },
     associateProcessState: { ctype: "idle" },
     dragonSilverClaims: [],
+    governanceBallots: {},
+    governanceState: {ctype: "idle"}
 }
 
 export const accountState = createSlice({
@@ -58,6 +62,14 @@ export const accountState = createSlice({
         addDragonSilver: (state, action: PayloadAction<number>) => {
             if (state.userInfo == null) throw new Error("Cannot set dragon silver to claim to claimed when user info is not set")
             state.userInfo.dragonSilver += action.payload
+        },
+
+        setGovernanceBallots: (state, action: PayloadAction<GovernanceBallots>) => {
+            state.governanceBallots = action.payload
+        },
+
+        setGovernanceState: (state, action: PayloadAction<GovernaceState>) => {
+            state.governanceState = action.payload
         },
     }
 })

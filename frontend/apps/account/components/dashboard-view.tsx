@@ -237,6 +237,36 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
     )
 }
 
+const GoverncanceVotingWidget = ({ userInfo }: { userInfo: UserInfo | undefined }) => {
+    const { governanceState, governanceBallots } = useSelector((state: AccountState) => ({
+        governanceState: state.governanceState,
+        governanceBallots: state.governanceBallots,
+    }))
+    useEffect(() => {
+        AccountTransitions.getOpenBallots()
+    }, [])
+    const ballotArray = Object.entries(governanceBallots)
+
+    return (
+        <>  <p>Current Voting Power: {userInfo ? userInfo.dragonSilver: <>0</>}</p>
+            {ballotArray.map(([ballotId, ballot]) => (
+                <div key={ballotId}>
+                    <hr />
+                    <h3>{ballot.inquiry}</h3>
+                    <p>{ballot.descriptionOfInquiry}</p>
+                    {ballot.options.map((option, index) => (
+                        <div key={index}>
+                            <p>Option: {option.option} Description: {option.description}</p>
+                            <button>Clik me!</button>
+                        </div>
+                    ))}
+                    <p>Ballot State: {ballot.state}</p>
+                </div>
+            ))}
+        </>
+    )
+}
+
 const DashboardCardContainer = styled.div`
     ${MessiriFontFamily}
     padding: 20px;
@@ -284,19 +314,49 @@ const DashboardContainer = styled.div`
         justify-content: center;
     }
 `
+const DashboardWideCardContainer = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
+    @media only screen and (max-width: 1400px) {
+        flex-direction: column;
+        align-items: center;
+    }
+`
+const WideDashboardCardContainer = styled(DashboardCardContainer)`
+    width: 90%;
+    color: white;
+    @media only screen and (max-width: 1400px) {
+        width: 100%;
+    }
+`
+const WideDashboardCard = (props: { children?: ReactNode, title: string }) => (
+    <WideDashboardCardContainer>
+        <DashboardCardTitle>{props.title}</DashboardCardTitle>
+        <DashboardCardContent>{props.children}</DashboardCardContent>
+    </WideDashboardCardContainer>
+)
 
 const DashboardViewContent = () => {
     const userInfo = useSelector((state: AccountState) => state.userInfo)
-    return userInfo ? (
-        <DashboardContainer>
-            <DashboardCard key="dragon-silver-widget" title="Dragon Silver">
-                <DragonSilverWidget {...userInfo} />
-            </DashboardCard>
-            <DashboardCard key="wallet-authentication-widget" title="Associated Wallets">
-                <WalletAssociationWidget {...userInfo} />
-            </DashboardCard>
-        </DashboardContainer>
-    ): <></>
+    return <>
+        {userInfo ? (
+                <DashboardContainer>
+                    <DashboardCard key="dragon-silver-widget" title="Dragon Silver">
+                        <DragonSilverWidget {...userInfo} />
+                    </DashboardCard>
+                    <DashboardCard key="wallet-authentication-widget" title="Associated Wallets">
+                        <WalletAssociationWidget {...userInfo} />
+                    </DashboardCard>
+                </DashboardContainer>
+            ) : null}
+            <DashboardWideCardContainer>
+                <WideDashboardCard  key="governance-voting-widget" title="Governance">
+                <   GoverncanceVotingWidget userInfo={userInfo} />
+                </WideDashboardCard >
+            </DashboardWideCardContainer>
+        </>
 }
 
 export const DashboardView = () => 

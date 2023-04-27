@@ -201,6 +201,14 @@ export const AccountThunks = {
     testGrant: (): AccountThunk => async (dispatch) => {
         await AccountBackend.granteTest()
         dispatch(AccountThunks.updateInventory())
+    },
+
+    getGoverncanceBallots: (): AccountThunk => async (dispatch) => {
+        const response = await AccountBackend.getOpenBallots()
+        if (response.status !== "ok")
+            dispatch(actions.setGovernanceState({ ctype: "error", details: response.status }))
+        else 
+            dispatch(actions.setGovernanceBallots(response.payload))
     }
 }
 

@@ -38,6 +38,16 @@ export type UserFullInfo = {
     knownEmail: string
 }
 
+export type BallotState = "open"|"closed" | "archived"
+export type StoredBallot = {inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
+export type GovernanceBallots
+    = {[ballotId: string]: StoredBallot}
+
+export type GovernaceState
+    = { ctype: "idle" }
+    | { ctype: "loading", details: string }
+    | { ctype: "error", details: string };
+
 export type WalletAssociationProcessState
     = { ctype: "idle" }
     | { ctype: "loading", details: string }
