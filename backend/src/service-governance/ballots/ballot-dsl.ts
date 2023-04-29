@@ -1,4 +1,4 @@
-import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, registerBallotType, voteResponse } from "../models"
+import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, StoredUserBallot, MultipleUserBallots, registerBallotType, voteResponse } from "../models"
 import { Ballot, BallotVote } from "./ballots-db"
 
 export class Ballots {
@@ -31,7 +31,7 @@ export class Ballots {
     static async getMultiple(state?: BallotState): Promise<MultipleBallots> {
         try {
 
-            const ballots = state ? await Ballot.findAll({ where: { state } }) : await Ballot.findAll()
+            const ballots = await Ballot.findAll(state ? { where: { state } } : {})
             const storedBallots: { [ballotId: string]: StoredBallot } = {}
 
             for (const ballot of ballots) {
@@ -46,8 +46,30 @@ export class Ballots {
         }
     }
 
+    static async getUserBallots(userId: string, state?: BallotState): Promise<MultipleUserBallots> {
+        try{
+            const ballots = await Ballot.findAll(state ? { where: { state } } : {})
+            const StoredUserBallots:  { [ballotId: string]: StoredUserBallot } = {}
+            for (const ballot of ballots) { 
+                const options = ballot.optionsArray.map((option, index) => ({option, description: ballot.descriptionArray[index]}))
+                const exisitingVote = await Ballot.findOne({where: {ballotId: ballot.ballotId, userId}})
+                StoredUserBallots[ballot.ballotId] = {
+                    id: ballot.ballotId, 
+                    inquiry: ballot.inquiry, 
+                    descriptionOfInquiry: ballot.description, 
+                    options, 
+                    state: ballot.state, 
+                    voteRegistered: !!exisitingVote
+                }
+            }
+            return {ctype: "success", ballots: StoredUserBallots}
+        } catch (e: any){
+            return { ctype: "error", reason: e.message }
+        }
+         
+    }
+
     private static processSingleBallot(ballot: Ballot,votes: BallotVote[] ): StoredBallot {
-    
         const options = ballot.optionsArray.map((option, index) => {
             const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
             const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + vote.dragonGold, 0)

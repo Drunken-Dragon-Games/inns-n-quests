@@ -3,7 +3,7 @@ import { AssetManagementService, ClaimerInfo } from "../service-asset-management
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, SignOutResult, SubmitAssociationSignatureResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, SignOutResult, SubmitAssociationSignatureResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -150,6 +150,12 @@ export class AccountServiceDsl implements AccountService {
         const openBallotsResult = await this.governanceService.getBallots("open")
         if (openBallotsResult.ctype !== "success") return {status: "invalid", reason: openBallotsResult.reason}
         return {status: "ok", payload: openBallotsResult.ballots}
+    }
+
+    async getUserOpenBallots(userId: string): Promise<OpenUserBallotsResult> {
+        const openUserBallotsResult = await this.governanceService.getUserOpenBallots(userId)
+        if (openUserBallotsResult.ctype !== "success") return {status: "invalid", reason: openUserBallotsResult.reason}
+        return {status: "ok", payload: openUserBallotsResult.ballots}
     }
 
     async voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult> {

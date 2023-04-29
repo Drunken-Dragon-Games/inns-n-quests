@@ -11,6 +11,8 @@ export interface GovernanceService {
 
     getBallots(state?: models.BallotState):Promise<models.MultipleBallots>
 
+    getUserOpenBallots(userId: string): Promise<models.MultipleUserBallots>
+
     getBallot(ballotId: string):Promise<models.GetBallotResponse>
 
     closeBallot(ballotId: string): Promise<models.CloseBallotResponse>

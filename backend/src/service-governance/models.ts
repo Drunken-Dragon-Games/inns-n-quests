@@ -29,3 +29,9 @@ export type CloseBallotResponse =
 export type voteResponse = 
 {ctype: "success"} |
 {ctype: "error", reason: string}
+
+//type repeted in account service
+export type StoredUserBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string }[], voteRegistered: boolean, state: BallotState}
+export type MultipleUserBallots =
+  {ctype: "success", ballots: {[ballotId: string]: StoredUserBallot}}|
+  {ctype: "error", reason: string}

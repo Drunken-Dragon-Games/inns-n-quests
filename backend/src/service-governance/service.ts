@@ -70,6 +70,10 @@ export class GovernanceServiceDsl implements GovernanceService {
         return Ballots.getMultiple(state)
     }
 
+    async getUserOpenBallots(userId: string): Promise<models.MultipleUserBallots> {
+        return Ballots.getUserBallots(userId, "open")
+    }
+
     async getBallot(ballotId: string): Promise<models.GetBallotResponse> {
         return await Ballots.getSingle(ballotId)
     }

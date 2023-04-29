@@ -15,6 +15,7 @@ export interface AccountService {
     claimStatus(claimId: string): Promise<ClaimStatusResult>
     grantTest(userId: string): Promise<void>
     getOpenBallots(): Promise<OpenBallotsResult>
+    getUserOpenBallots(userId: string): Promise<OpenUserBallotsResult>
     voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult>
 }
 
@@ -74,6 +75,10 @@ export type OpenBallotsResult
     = { status: "ok", payload: {[ballotId: string]: StoredBallot}}
     | { status: "invalid", reason: string }
 
+export type OpenUserBallotsResult =
+    {status: "ok", payload: {[ballotId: string]: StoredUserBallot}}|
+    {status: "invalid", reason: string}
+
 export type VoteResult 
     = { status: "ok" }
     | { status: "invalid", reason: string }
@@ -81,3 +86,4 @@ export type VoteResult
 //types repeted from governance service
 type BallotState = "open"|"closed" | "archived"
 export type StoredBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
+export type StoredUserBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string }[], voteRegistered: boolean, state: BallotState}

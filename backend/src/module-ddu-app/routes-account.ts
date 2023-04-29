@@ -125,6 +125,12 @@ export const accountRoutes = (accountService: AccountService) => {
         return response.status(200).json(result)
     })
 
+    router.get("/governance/open-for-user", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await accountService.getUserOpenBallots(userId)
+        return response.status(200).json(result)
+    })
+
     router.post("/governance/vote", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const {ballotId, optionIndex} = request.body
