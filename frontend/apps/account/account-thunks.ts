@@ -211,12 +211,22 @@ export const AccountThunks = {
             dispatch(actions.setGovernanceBallots(response.payload))
     },
 
+    getUserGoverncanceBallots: (): AccountThunk => async (dispatch) => {
+        const response = await AccountBackend.getUserOpenBallots()
+        if (response.status !== "ok")
+            dispatch(actions.setGovernanceState({ ctype: "error", details: response.status }))
+        else 
+            dispatch(actions.setGovernanceBallots(response.payload))
+    },
+
     voteForGovernanceBallot: (ballotId: string, optionIndex: string): AccountThunk => async (dispatch) => {
         actions.setGovernanceState({ ctype: "loading", details: "submiting vote"})
         const response = await AccountBackend.votForBallot(ballotId, optionIndex)
         if (response.status !== "ok")
             dispatch(actions.setGovernanceState({ ctype: "error", details: response.status }))
         else 
+            //TODO: Update the GovernanceBallots ballot voteRegistered to true 
+            // so that the button disapears upon vote
             actions.setGovernanceState({ ctype: "idle"})
     }   
 }

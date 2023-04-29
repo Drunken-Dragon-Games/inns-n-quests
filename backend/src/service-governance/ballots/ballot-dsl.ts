@@ -52,7 +52,7 @@ export class Ballots {
             const StoredUserBallots:  { [ballotId: string]: StoredUserBallot } = {}
             for (const ballot of ballots) { 
                 const options = ballot.optionsArray.map((option, index) => ({option, description: ballot.descriptionArray[index]}))
-                const exisitingVote = await Ballot.findOne({where: {ballotId: ballot.ballotId, userId}})
+                const exisitingVote = await BallotVote.findOne({where: {ballotId: ballot.ballotId, userId}})
                 StoredUserBallots[ballot.ballotId] = {
                     id: ballot.ballotId, 
                     inquiry: ballot.inquiry, 
@@ -100,7 +100,7 @@ export class Ballots {
             const ballot = await Ballot.findByPk(ballotId)
             if (!ballot) return {ctype: "error", reason: "unknown Ballot ID"}
             if(ballot.state !== "open") return {ctype: "error", reason: "Ballot is no longer accepting votes"}
-            const exisitingVote = await Ballot.findOne({where: {ballotId, userId}})
+            const exisitingVote = await BallotVote.findOne({where: {ballotId, userId}})
             if (exisitingVote) return {ctype: "error", reason: "User already voted for this Ballot"}
             const vote = BallotVote.create({userId, ballotId, optionIndex, dragonGold})
             return {ctype: "success"}

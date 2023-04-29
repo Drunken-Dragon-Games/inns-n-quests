@@ -78,6 +78,11 @@ export const AccountBackend = {
         return result.data
     },
 
+    async getUserOpenBallots(): Promise<GetOpenBallotsResult>{
+        const result = await accountRequest("GET", "/governance/open-for-user")
+        return result.data
+    },
+
     async votForBallot(ballotId: string, optionIndex: string): Promise<VoteResult>{
         const result = await accountRequest("POST", "/governance/vote", {ballotId, optionIndex})
         return result.data

@@ -237,35 +237,39 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
     )
 }
 
-const GoverncanceVotingWidget = ({ userInfo }: { userInfo: UserInfo | undefined }) => {
+const GoverncanceVotingWidget = ({ userInfo }: { userInfo?: UserInfo }) => {
+    
     const { governanceState, governanceBallots } = useSelector((state: AccountState) => ({
         governanceState: state.governanceState,
         governanceBallots: state.governanceBallots,
     }))
     useEffect(() => {
-        AccountTransitions.getOpenBallots()
-    }, [])
+        userInfo ? AccountTransitions.getUserOpenBallots() : AccountTransitions.getOpenBallots()
+    }, [userInfo])
     const ballotArray = Object.entries(governanceBallots)
-
+    
     return (
         <>  <p>Current Voting Power: {userInfo ? userInfo.dragonSilver: <>0</>}</p>
-            {ballotArray.map(([ballotId, ballot]) => (
-                <div key={ballotId}>
-                    <hr />
-                    <h3>{ballot.inquiry}</h3>
-                    <p>{ballot.descriptionOfInquiry}</p>
-                    {ballot.options.map((option, index) => (
-                        <div key={index}>
-                            <p>Option: {option.option} Description: {option.description}</p>
-                            <button onClick={() => AccountTransitions.voteForBallot(ballot.id, index.toString())}>Vote!</button>
-                        </div>
-                    ))}
-                    <p>Ballot State: {ballot.state}</p>
-                </div>
-            ))}
+            {ballotArray.map(([ballotId, ballot]) => {
+                return (
+                    <div key={ballotId}>
+                        <hr />
+                        <h3>{ballot.inquiry}</h3>
+                        <p>{ballot.descriptionOfInquiry}</p>
+                        {ballot.options.map((option, index) => (
+                            <div key={index}>
+                                <p>Option: {option.option} Description: {option.description}</p>
+                                {userInfo && !ballot.voteRegistered ? <button onClick={() => AccountTransitions.voteForBallot(ballot.id, index.toString())}>Vote!</button> : <></>}
+                            </div>
+                        ))}
+                        <p>Ballot State: {ballot.state}</p>
+                    </div>
+                )
+            })}
         </>
     )
 }
+
 
 const DashboardCardContainer = styled.div`
     ${MessiriFontFamily}
@@ -353,7 +357,7 @@ const DashboardViewContent = () => {
             ) : null}
             <DashboardWideCardContainer>
                 <WideDashboardCard  key="governance-voting-widget" title="Governance">
-                <   GoverncanceVotingWidget userInfo={userInfo} />
+                    <GoverncanceVotingWidget userInfo={userInfo} />
                 </WideDashboardCard >
             </DashboardWideCardContainer>
         </>
