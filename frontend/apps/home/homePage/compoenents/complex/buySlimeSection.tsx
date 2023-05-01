@@ -76,7 +76,7 @@ const BuySlimeSection = (): JSX.Element => {
     return (
         <BuySlimeSectionContainer>
             <HeaderContainer>
-                <TextOswald fontsize={3.125} fontsizeMobile={7.5} color="#CAC6BE" textAlign="center">ADOP A SLIME</TextOswald>
+                <TextOswald fontsize={3.125} fontsizeMobile={7.5} color="#CAC6BE" textAlign="center">ADOPT A SLIME</TextOswald>
             </HeaderContainer>
 
             <SlimesImageWrapper>
