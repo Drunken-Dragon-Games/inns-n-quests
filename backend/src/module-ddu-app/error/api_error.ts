@@ -1,4 +1,3 @@
-//import { logger } from "../middleware/winston_middleware";
 import { logger } from "../base-logger"
 
 class ApiError extends Error {
