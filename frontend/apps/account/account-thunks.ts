@@ -225,8 +225,7 @@ export const AccountThunks = {
         if (response.status !== "ok")
             dispatch(actions.setGovernanceState({ ctype: "error", details: response.status }))
         else 
-            //TODO: Update the GovernanceBallots ballot voteRegistered to true 
-            // so that the button disapears upon vote
+            dispatch(actions.updateVoteRegistered(ballotId))
             actions.setGovernanceState({ ctype: "idle"})
     }   
 }

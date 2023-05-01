@@ -71,6 +71,13 @@ export const accountState = createSlice({
         setGovernanceState: (state, action: PayloadAction<GovernaceState>) => {
             state.governanceState = action.payload
         },
+
+        updateVoteRegistered: (state, action: PayloadAction<string>) => {
+            const ballotId = action.payload
+            const ballot = state.governanceBallots[ballotId]
+            if (!ballot) throw new Error(`Ballot with ID ${ballotId} not found`)
+            state.governanceBallots[ballotId].voteRegistered = true
+        },
     }
 })
 
