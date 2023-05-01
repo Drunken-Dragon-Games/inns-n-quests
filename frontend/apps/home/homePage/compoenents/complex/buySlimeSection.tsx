@@ -4,16 +4,9 @@ import { NoDragImage, pct, vw } from '../../../../common'
 import { TextOswald } from '../../../../utils/components/basic_components'
 import Image from "next/image"
 
-const HeaderContainer = styled.div`
-    margin-bottom: 2.083vw;
-    @media only screen and (max-width: 414px) {
-        margin-bottom: 8.083vw;
-    }
-`
-
 const BuySlimeSectionContainer = styled.div`
     position: relative;
-    padding: 5vw 10vw 2vw 11.8vw;
+    margin-bottom: 10vw;
 
     @media only screen and (max-width: 414px) {
         display: block;
@@ -26,12 +19,19 @@ const BuySlimeSectionContainer = styled.div`
     }
 `
 
+const HeaderContainer = styled.div`
+    margin-bottom: 2vw;
+    @media only screen and (max-width: 414px) {
+        margin-bottom: 8.083vw;
+    }
+`
+
 const SlimesImageWrapper = styled.div`
     width: 80%;
     margin: auto;
-    margin-bottom: 2.604vw;
     border-radius: 20px;
     overflow: hidden;
+    max-width: 500px;
 
     @media only screen and (max-width: 414px) {
         width: 95%;
