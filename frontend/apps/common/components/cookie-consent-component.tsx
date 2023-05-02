@@ -15,7 +15,7 @@ const CookieConsentBannerContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: calc(2vh);
+    font-size: 16px;
 `
 
 const ConsentMessage = styled.span`

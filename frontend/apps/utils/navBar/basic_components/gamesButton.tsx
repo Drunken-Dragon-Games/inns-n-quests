@@ -2,8 +2,8 @@ import styled from "styled-components"
 import Image from "next/image"
 import { LinkDisable, Tooltip, TextElMessiri } from "../../components/basic_components"
 import { useState } from "react"
-
-
+import Link from "next/link"
+import { gamesButtonSection } from "../../../../setting"
 
 const GamesButtonWrapper = styled.div`
     width: 3.246vw;
@@ -91,7 +91,7 @@ const GamesButton = ({game, url, external = false, toolTip} : GamesButton) : JSX
 
     const [hover, setHover] = useState<boolean>(false)
 
-    return (<>
+    return <>
         <GamesButtonWrapper onMouseOver = {() => setHover(true)}  onMouseLeave = {() => setHover(false)}>
 
             <LinkDisable openExternal={external} url ={url}>
@@ -105,8 +105,8 @@ const GamesButton = ({game, url, external = false, toolTip} : GamesButton) : JSX
         </GamesButtonWrapper>
 
         <GamesButtonWrapperMobile>
-            <LinkDisable openExternal={external} url ={url}>
-                <>
+            <Link href={gamesButtonSection.quests} legacyBehavior>
+                <a>
                     <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/game_icons/button_game_ornament.svg" alt = "game button drunken dragon entertainment" width = {170} height = {41} layout = "responsive"/>
                     <MobileIconAndTextWrapper>
                         <GameIconMobile>
@@ -121,12 +121,10 @@ const GamesButton = ({game, url, external = false, toolTip} : GamesButton) : JSX
                         </TextWrapper>
                     </MobileIconAndTextWrapper>
                     
-                </>
-            </LinkDisable>
+                </a>
+            </Link>
         </GamesButtonWrapperMobile>
-
-       
-    </>)
+    </>
 }
 
 export default GamesButton

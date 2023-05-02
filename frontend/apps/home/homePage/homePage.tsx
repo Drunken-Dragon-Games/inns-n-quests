@@ -6,6 +6,7 @@ import { GamesButton } from "../../utils/navBar/basic_components"
 import { gamesButtonSection } from "../../../setting"
 import CookieConsentBanner from "../../common/components/cookie-consent-component"
 import BuySlimeSection from "./compoenents/complex/buySlimeSection"
+import { colors } from "../../common"
 
 const HomePageComponent = styled.section`
     background-color: #0B1015;

@@ -11,6 +11,7 @@ import { AuthenticationMethodIcon, TokenDisplayer } from "./basic_components"
 import { ProfileInformation } from "./complex_components"
 import { claimDragonSilver } from "./features/claimSilverDragon"
 import { useErrorHandler, useGetUserData } from "./hooks"
+import { MessiriFontFamily, colors } from "../../common"
 
 const NavbarComponent = styled.nav`
     width: 100vw;
@@ -120,6 +121,15 @@ const ProfileInformationPictureMobile = styled.div`
     }
 `
 
+const TestnetBanner = styled.div`
+    ${MessiriFontFamily}
+    background-color: ${colors.dduGold};
+    color: white;
+    width: 100%;
+    padding: 10px 0px 10px 60px;
+    font-size: 14px;
+` 
+
 const Navbar = (): JSX.Element =>{
 
     const generalSelector = useGeneralSelector(selectGeneralReducer)
@@ -212,6 +222,7 @@ const Navbar = (): JSX.Element =>{
                                     : <></> */}
             </HeaderBarContainer>
 
+        <TestnetBanner>Testnet <b>preprod</b> open beta.</TestnetBanner>
         </NavbarComponent>
     )
 }

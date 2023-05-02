@@ -51,7 +51,7 @@ export const questBoardState = createSlice({
 
         toggleQuestBoard: (state, action: PayloadAction<{ open?: boolean }>) => {
             state.open = action.payload.open ?? !state.open
-        }
+        },
     }
 })
 

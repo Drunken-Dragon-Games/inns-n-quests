@@ -2,19 +2,17 @@ import { useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { PixelFontFamily } from "../common"
 
-const date = "10 March 2023"
+const date = "5 May 2023"
 
 const notes = [
     "'Q' to toggle the quest board.",
     "'B' to toggle the inventory.",
     "________",
-    "* Complex requirements implemented for staking quests.",
-    "* Current quests have some test requirements.",
-    "* Staking quests are now labeled as 'Idle Adventure'.",
-    "* Inventory scroll horizontally and preserves scroll height.",
-    "* UI and animation improvements.",
+    "Welcome to the open beta. You are given test assets to try the application and test its features.",
+    "The objective of this open beta is to identify critical issues. Please report them on Discord if you find any.",
+    "You will find some missing features or minor bugs. We will work on those after an initial mainnet release and after all critical issues have been solved.",
     "________",
-    "Thank you for testing Idle Adventures!",
+    "Thank you for testing Inns & Quests and the Idle Adventures!",
     "- Vledic"
 ]
 
@@ -89,7 +87,7 @@ const AlphaNotes = () => {
     return (
         <AlphaNotesContainer open={open}>
             <AlphaNotesHeader>
-                <AlphaNotesTitle>Alpha Notes</AlphaNotesTitle>
+                <AlphaNotesTitle>Beta Notes</AlphaNotesTitle>
                 <Push/>
                 <Close onClick={() => setOpen(false)}>X</Close>
             </AlphaNotesHeader>
