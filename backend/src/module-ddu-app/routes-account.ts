@@ -5,8 +5,7 @@ import { v4 } from "uuid"
 import { AccountService } from "../service-account"
 import { AuthenticationResult } from "../service-identity"
 import { COOKIE_EXPIRACY, SECRET_KEY } from "./settings"
-import { AuthRequest } from "./types"
-import { jwtMiddleware } from "./middleware/jwt_middleware"
+import { jwtMiddleware } from "./jwt_middleware"
 import { ClaimerInfo } from "../service-asset-management"
 
 export const accountRoutes = (accountService: AccountService) => {
