@@ -1,6 +1,6 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Character, Furniture } from "../../../common"
-import { SectorConfiguration } from "./overworld-dsl"
+import { PositionedObject, SectorConfiguration } from "./overworld-dsl"
 
 interface OverworldState {
     name?: string
@@ -23,20 +23,29 @@ export const overworldState = createSlice({
             state.innConfiguration = action.payload.innConfiguration
         },
 
-        setObjectLocation: (state, action: PayloadAction<{ obj: Character | Furniture, location: [number, number] }>) => { 
+        setObjectLocation: (state, action: PayloadAction<PositionedObject>) => { 
             const obj = action.payload.obj
             const location = action.payload.location
+            const flipped = action.payload.flipped
             const innConfiguration = state.innConfiguration
+            // Is there a future reason for differentiating between Character and Furniture here?
+            // The logic for both cases currenlty appears to be the same.
             if (!innConfiguration) {
-                if (obj.ctype == "character") state.innConfiguration = { [obj.entityId]: { obj, location } }
-                else if (obj.ctype == "furniture") state.innConfiguration = { [obj.entityId]: { obj, location } }
+                if (obj.ctype == "character") state.innConfiguration = { [obj.entityId]: action.payload }
+                else if (obj.ctype == "furniture") state.innConfiguration = { [obj.entityId]: action.payload }
             }
             else if (obj.ctype == "character") {
-                if (!innConfiguration[obj.entityId]) innConfiguration[obj.entityId] = { obj, location }
-                else innConfiguration[obj.entityId].location = location
+                if (!innConfiguration[obj.entityId]) innConfiguration[obj.entityId] = action.payload
+                else {
+                    innConfiguration[obj.entityId].location = location
+                    innConfiguration[obj.entityId].flipped = flipped
+                }
             } else if (obj.ctype == "furniture") {
-                if (!innConfiguration[obj.entityId]) innConfiguration[obj.entityId] = { obj, location }
-                else innConfiguration[obj.entityId].location = location
+                if (!innConfiguration[obj.entityId]) innConfiguration[obj.entityId] = action.payload
+                else {
+                    innConfiguration[obj.entityId].location = location
+                    innConfiguration[obj.entityId].flipped = flipped
+                }
             }
         },
 

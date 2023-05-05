@@ -11,6 +11,7 @@ import {
 } from "../common"
 import InventoryApi from "./modules/inventory/inventory-api"
 import { NotificationsApi } from "./modules/notifications"
+import { ObjectsLocations } from "./game-vm"
 
 const IdleQuestsApi = {
 
@@ -83,7 +84,7 @@ const IdleQuestsApi = {
         return response.data
     },
 
-    async setInnState(state: { name?: string, objectLocations?: Record<string, [number, number]>}): Promise<void> {
+    async setInnState(state: { name?: string, objectLocations?: ObjectsLocations}): Promise<void> {
         await IdleQuestsRequestWRefresh("post", "/set-inn-state", state)
     },
 }

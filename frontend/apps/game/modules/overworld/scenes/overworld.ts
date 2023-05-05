@@ -49,11 +49,11 @@ export class Overworld extends Phaser.Scene {
                 if (item.ctype === "character")
                     this.draggingItem = 
                         this.adventurers.filter(adventurer => adventurer.character.entityId === item.entityId)[0] ||
-                        OverworldCharacter.init(item, this, overworldPosition)
+                        OverworldCharacter.init(item, this, overworldPosition, false)
                 else if (item.ctype === "furniture")
                     this.draggingItem = 
                         this.furniture.filter(furniture => furniture.furniture.entityId === item.entityId)[0] ||
-                        OverworldFurniture.init(item, this, overworldPosition)
+                        OverworldFurniture.init(item, this, overworldPosition, false)
             }
         })
     }
@@ -73,11 +73,13 @@ export class Overworld extends Phaser.Scene {
         if (innConfiguration) {
             this.adventurers.forEach(adventurer => adventurer.destroy())
             this.furniture.forEach(furniture => furniture.destroy())
-            Object.values(innConfiguration).forEach(({ obj, location }) => {
+            Object.values(innConfiguration).forEach(({ obj, location, flipped }) => {
+                // It seems that the OverworldCharacter.init method already adds the entity to the respective array internally.
+                // Is there a reason for pushing the result to the adventurers array again here?
                 if (obj.ctype === "character")
-                    this.adventurers.push(OverworldCharacter.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))
+                    this.adventurers.push(OverworldCharacter.init(obj, this, new Phaser.Math.Vector2(location[0], location[1]), flipped))
                 else if (obj.ctype === "furniture")
-                    this.furniture.push(OverworldFurniture.init(obj, this, new Phaser.Math.Vector2(location[0], location[1])))
+                    this.furniture.push(OverworldFurniture.init(obj, this, new Phaser.Math.Vector2(location[0], location[1]), flipped))
             })
         }
         OverworldTransitions.trackOverworldState()
@@ -113,8 +115,9 @@ export class Overworld extends Phaser.Scene {
     create() {
         this.add.image(0, 0, "inn-bg").setOrigin(0, 0)
         const innOrigin: [number, number] = [350, 485]
-        innBuildingRenderMatrix[0].render(this, innOrigin)
-        this.walls = innBuildingRenderMatrix[1].render(this, innOrigin)
+        const [floor, walls] = innBuildingRenderMatrix
+        floor.render(this, innOrigin)
+        this.walls = walls.render(this, innOrigin)
 
         // @ts-ignore
         this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {

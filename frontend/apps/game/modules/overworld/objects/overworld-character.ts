@@ -2,6 +2,9 @@ import { Character } from "../../../../common";
 import OverworldTransitions from "../overworld-transitions";
 import { Overworld } from "../scenes/overworld";
 
+/**
+ * Handles the creation, positioning, and interaction of character sprites in the Overworld
+ */
 export default class OverworldCharacter {
 
     public lastClickTime: number = 0
@@ -12,8 +15,8 @@ export default class OverworldCharacter {
         private readonly overworld: Overworld
     ){}
 
-    static init (character: Character, overworld: Overworld, position: Phaser.Math.Vector2): OverworldCharacter {
-        const sprite = OverworldCharacter.createSprite(character, overworld, position)
+    static init (character: Character, overworld: Overworld, position: Phaser.Math.Vector2, flipped: boolean): OverworldCharacter {
+        const sprite = OverworldCharacter.createSprite(character, overworld, position, flipped)
         const owAdventurer = new OverworldCharacter(character, sprite, overworld)
         overworld.adventurers.push(owAdventurer)
         sprite.on("pointerup", OverworldCharacter.onPointerUp(overworld, owAdventurer))
@@ -23,7 +26,7 @@ export default class OverworldCharacter {
         return owAdventurer
     }
 
-    static createSprite (character: Character, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite {
+    static createSprite (character: Character, overworld: Overworld, position: Phaser.Math.Vector2, isFacingRight: boolean): Phaser.Physics.Arcade.Sprite {
         const i = parseInt(character.assetRef.match(/(\d+)/)![0])
         // Later check character collection and load from right sprite sheet
         const sheet = 
@@ -53,6 +56,8 @@ export default class OverworldCharacter {
         sprite.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
         overworld.input.setDraggable(sprite)
         overworld.physics.add.collider(sprite, overworld.walls)
+        //here we set the sprite direction
+        sprite.flipX = isFacingRight
         return sprite 
     }
 
@@ -68,7 +73,12 @@ export default class OverworldCharacter {
         character.lastClickTime = now
 
         if (isDoubleClick) return character.destroy()
-        if (pointer.getDuration() < 300) return character.sprite.flipX = !character.sprite.flipX
+        //if (isDoubleClick) return character.sprite.depth = 900
+        if (pointer.getDuration() < 300) {
+            character.sprite.flipX = !character.sprite.flipX
+            character.updateLocationState()
+            return
+        }
     }
 
     static onDragStart = (overworld: Overworld, character: OverworldCharacter) => () => {
@@ -101,7 +111,11 @@ export default class OverworldCharacter {
 
     set y(y: number) { this.sprite.y = y }
 
-    updateLocationState() { OverworldTransitions.setObjectLocation(this.character, [this.x, this.y]) }
+    get flip() {return this.sprite.flipX}
+
+    set flip(flipped: boolean) { this.sprite.flipX = flipped }
+
+    updateLocationState() { OverworldTransitions.setObjectLocation(this.character, [this.x, this.y], this.flip) }
 }
 
 const pixelTilesSpritesheetMap = (pxNum: number) => {

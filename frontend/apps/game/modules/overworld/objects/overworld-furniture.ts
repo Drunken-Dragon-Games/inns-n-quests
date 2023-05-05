@@ -12,8 +12,8 @@ export default class OverworldFurniture {
         private readonly overworld: Overworld,
     ){}
 
-    static init (furniture: Furniture, overworld: Overworld, position: Phaser.Math.Vector2): OverworldFurniture {
-        const sprite = OverworldFurniture.createSprite(furniture, overworld, position)
+    static init (furniture: Furniture, overworld: Overworld, position: Phaser.Math.Vector2, flipped: boolean): OverworldFurniture {
+        const sprite = OverworldFurniture.createSprite(furniture, overworld, position, flipped)
         const owFurniture = new OverworldFurniture(furniture, sprite, overworld)
         overworld.furniture.push(owFurniture)
         sprite.on("pointerup", OverworldFurniture.onPointerUp(overworld, owFurniture))
@@ -23,7 +23,7 @@ export default class OverworldFurniture {
         return owFurniture
     }
 
-    static createSprite (furniture: Furniture, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite {
+    static createSprite (furniture: Furniture, overworld: Overworld, position: Phaser.Math.Vector2, isFacingRight: boolean): Phaser.Physics.Arcade.Sprite {
         const i = parseInt(furniture.assetRef.match(/(\d+)/)![0])
         // Later check furniture collection and load from right sprite sheet
         const { sheet, index, size, offset } = pixelTilesSpritesheetMap(i)
@@ -34,7 +34,7 @@ export default class OverworldFurniture {
         overworld.input.setDraggable(sprite)
         overworld.physics.add.collider(sprite, overworld.walls)
 
-
+        sprite.flipX = isFacingRight
 
         return sprite 
     }
@@ -51,7 +51,11 @@ export default class OverworldFurniture {
         furniture.lastClickTime = now
 
         if (isDoubleClick) return furniture.destroy()
-        if (pointer.getDuration() < 300) return furniture.sprite.flipX = !furniture.sprite.flipX
+        if (pointer.getDuration() < 300) {
+            furniture.sprite.flipX = !furniture.sprite.flipX
+            furniture.updateLocationState()
+            return
+        }
     }
 
     static onDragStart = (overworld: Overworld, furniture: OverworldFurniture) => () => {
@@ -87,7 +91,11 @@ export default class OverworldFurniture {
 
     set y(y: number) { this.sprite.y = y }
 
-    updateLocationState() { OverworldTransitions.setObjectLocation(this.furniture, [this.x, this.y]) }
+    get flip() {return this.sprite.flipX}
+
+    set flip(flipped: boolean) { this.sprite.flipX = flipped }
+
+    updateLocationState() { OverworldTransitions.setObjectLocation(this.furniture, [this.x, this.y], this.flip) }
 }
 
 const pixelTilesSpritesheetMap = (pxNum: number): { sheet: string, index: number, size: [number, number], offset: [number, number] } => {

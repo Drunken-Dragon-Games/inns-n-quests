@@ -20,9 +20,9 @@ export class TileRenderMatrix<TileId extends string> {
         this.metadata.matrix.forEach((row, y) => {
             const flatRow = row.flat()
             flatRow.forEach((tile, x) => {
-                const t = this.metadata.tileSet.getTile(tile as TileId)
+                const tileData = this.metadata.tileSet.getTile(tile as TileId)
                 const position = [x * xCoordSize + xOrigin, y * yCoordSize + yOrigin]
-                if (tile !== "" && t.collision[0] === 0) {
+                if (tile !== "" && tileData.collision[0] === 0) {
                     const sprite = scene.add.sprite(
                         position[0], 
                         position[1], 
@@ -40,8 +40,8 @@ export class TileRenderMatrix<TileId extends string> {
                         this.metadata.tileSet.tileSpriteSheetLocation(tile as TileId)
                     )
                     sprite.depth = position[1] + sprite.height / 2
-                    sprite.setSize(t.collision[0], t.collision[1])
-                    sprite.setOffset(t.collision[2], yTileSize - t.collision[1] - t.collision[3]) 
+                    sprite.setSize(tileData.collision[0], tileData.collision[1])
+                    sprite.setOffset(tileData.collision[2], yTileSize - tileData.collision[1] - tileData.collision[3]) 
                     group.push(sprite)
                 }
             })
