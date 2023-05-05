@@ -31,22 +31,15 @@ export const overworldState = createSlice({
             // Is there a future reason for differentiating between Character and Furniture here?
             // The logic for both cases currenlty appears to be the same.
             if (!innConfiguration) {
-                if (obj.ctype == "character") state.innConfiguration = { [obj.entityId]: action.payload }
-                else if (obj.ctype == "furniture") state.innConfiguration = { [obj.entityId]: action.payload }
+                state.innConfiguration = { [obj.entityId]: action.payload }
             }
-            else if (obj.ctype == "character") {
+            else{
                 if (!innConfiguration[obj.entityId]) innConfiguration[obj.entityId] = action.payload
                 else {
                     innConfiguration[obj.entityId].location = location
                     innConfiguration[obj.entityId].flipped = flipped
                 }
-            } else if (obj.ctype == "furniture") {
-                if (!innConfiguration[obj.entityId]) innConfiguration[obj.entityId] = action.payload
-                else {
-                    innConfiguration[obj.entityId].location = location
-                    innConfiguration[obj.entityId].flipped = flipped
-                }
-            }
+            } 
         },
 
         removeObject: (state, action: PayloadAction<Character | Furniture>) => {

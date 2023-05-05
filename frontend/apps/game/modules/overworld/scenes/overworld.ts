@@ -77,9 +77,9 @@ export class Overworld extends Phaser.Scene {
                 // It seems that the OverworldCharacter.init method already adds the entity to the respective array internally.
                 // Is there a reason for pushing the result to the adventurers array again here?
                 if (obj.ctype === "character")
-                    this.adventurers.push(OverworldCharacter.init(obj, this, new Phaser.Math.Vector2(location[0], location[1]), flipped))
+                    OverworldCharacter.init(obj, this, new Phaser.Math.Vector2(location[0], location[1]), flipped)
                 else if (obj.ctype === "furniture")
-                    this.furniture.push(OverworldFurniture.init(obj, this, new Phaser.Math.Vector2(location[0], location[1]), flipped))
+                    OverworldFurniture.init(obj, this, new Phaser.Math.Vector2(location[0], location[1]), flipped)
             })
         }
         OverworldTransitions.trackOverworldState()
