@@ -38,8 +38,20 @@ export type UserFullInfo = {
     knownEmail: string
 }
 
-export type BallotState = "open"|"closed" | "archived"
-export type StoredBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string}[], voteRegistered: boolean, state: BallotState}
+export type BallotState = "open" | "closed" | "archived"
+
+export type StoredBallot = {
+    id: string, 
+    inquiry: string, 
+    descriptionOfInquiry: string, 
+    options: {
+        option: string, 
+        description: string
+    }[], 
+    voteRegistered: boolean, 
+    state: BallotState
+}
+
 export type GovernanceBallots
     = {[ballotId: string]: StoredBallot}
 

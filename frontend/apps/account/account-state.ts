@@ -16,11 +16,58 @@ export type AccountStoreState =
 export type AccountThunk<ReturnType = void> = 
     ThunkAction<ReturnType, AccountStoreState, unknown, Action<string>>
 
+const ballotsTestData: GovernanceBallots = {
+    "1": {
+        id: "1",
+        inquiry: "Should we add a new emoji to the Discord server?",
+        descriptionOfInquiry: "The new emoji would be a dragon.",
+        options: [
+            { option: "yes", description: "Add the dragon emoji" },
+            { option: "no", description: "Do not add the dragon emoji" }
+        ],
+        voteRegistered: false,
+        state: "open"
+    },
+    "2": {
+        id: "2",
+        inquiry: "Should we add a new emoji to the Discord server?",
+        descriptionOfInquiry: "The new emoji would be a dragon.",
+        options: [
+            { option: "yes", description: "Add the dragon emoji" },
+            { option: "no", description: "Do not add the dragon emoji" }
+        ],
+        voteRegistered: false,
+        state: "closed"
+    },
+    "3": {
+        id: "3",
+        inquiry: "Should we add a new emoji to the Discord server?",
+        descriptionOfInquiry: "The new emoji would be a dragon.",
+        options: [
+            { option: "yes", description: "Add the dragon emoji" },
+            { option: "no", description: "Do not add the dragon emoji" }
+        ],
+        voteRegistered: false,
+        state: "archived"
+    },
+    "4": {
+        id: "4",
+        inquiry: "Should we add a new emoji to the Discord server?",
+        descriptionOfInquiry: "The new emoji would be a dragon.",
+        options: [
+            { option: "yes", description: "Add the dragon emoji" },
+            { option: "no", description: "Do not add the dragon emoji" }
+        ],
+        voteRegistered: false,
+        state: "open"
+    },
+}
+
 const accountInitialState: AccountState = {
     claimProcessState: { ctype: "idle" },
     associateProcessState: { ctype: "idle" },
     dragonSilverClaims: [],
-    governanceBallots: {},
+    governanceBallots: ballotsTestData,
     governanceState: {ctype: "idle"}
 }
 
