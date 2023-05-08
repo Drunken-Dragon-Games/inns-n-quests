@@ -11,7 +11,11 @@ export class Preloader extends Phaser.Scene {
         //this.load.image("tiles", "maps/inn-building.png")
         //this.load.image("gmas1", "https://cdn.ddu.gg/gmas/sprite-sheets-front/spritesheet-gmas-front_1.png")
         //this.load.tilemapTiledJSON("base-inn", "maps/base-inn.json")
+
+        /*estas dos lineas*/
+        //this.load.spritesheet("inn-building", "maps/inn-building.png", {frameWidth: 32, frameHeight: 80})
         innBuildingTileSet.loadImage(this.load)
+        /*son lo mismo*/
         this.load.spritesheet("grandmaster-adventurers-front", "maps/adventurers/grandmaster-adventurers-front.png", {
             frameWidth: 52,
             frameHeight: 75,

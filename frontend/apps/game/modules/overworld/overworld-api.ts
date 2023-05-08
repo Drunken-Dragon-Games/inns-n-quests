@@ -16,13 +16,18 @@ const OverworldApi = {
         events.emit("cancel-dragging-item-from-inventory")
     },
 
+    /**
+     * Handles the translation between the backend inventory.innState: Sector type
+     * into the frontend innState: SectorConfiguration type
+     * @param inventory
+     */
     setInitialInnState: (inventory: IdleQuestsInventory) => {
         const innState = inventory.innState
         if (innState) {
             const innConfiguration: SectorConfiguration = {}
             Object.keys(innState.objectLocations).forEach(objectId => {
                 const obj: Character | Furniture = inventory.characters[objectId] || inventory.furniture[objectId]
-                innConfiguration[objectId] = { obj, location: innState.objectLocations[objectId] }
+                innConfiguration[objectId] = { obj, location: innState.objectLocations[objectId].cord, flipped: innState.objectLocations[objectId].flipped }
             })
             OverworldTransitions.setInitialInnState(innState.name, innConfiguration)
         }
