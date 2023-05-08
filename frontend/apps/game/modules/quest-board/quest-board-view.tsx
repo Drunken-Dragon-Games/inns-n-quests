@@ -18,17 +18,18 @@ const closeAnimation = keyframes`
     100% { opacity: 0; top: -100vh; }
 `
 
-const QuestBoardContainer = styled.div<{ open: boolean }>`
+const QuestBoardContainer = styled.div<{ open: boolean, mobile: boolean }>`
     height: 100%;
     width: 100%;
     background-color: rgba(20,20,20,0.3);
     backdrop-filter: blur(5px);
     ${props => props.open ? "top: 0;" : "top: -100vh;"};
     opacity: ${props => props.open ? "1" : "0"};
-    animation: ${props => props.open ? openAnimation : closeAnimation} 0.5s ease-in-out;
     display: flex;
     position: relative;
     overflow: hidden;
+    
+    animation: ${props => !props.mobile && (props.open ? openAnimation : closeAnimation)} 0.5s ease-in-out;
 `
 
 const AvailableQuestsWrapper = styled.div`
@@ -62,7 +63,7 @@ const QuestBoard = ({ className }: { className?: string }) => {
     const open = useQuestBoardSelector(state => state.open)
     const isMobile = useIsMobile()
     return (
-        <QuestBoardContainer className={className} open={open} onClick={() => QuestBoardTransitions.onToggleQuestBoard() }>
+        <QuestBoardContainer className={className} open={open} mobile={isMobile} onClick={() => QuestBoardTransitions.onToggleQuestBoard() }>
             <AvailableQuestsWrapper onClick={(e) => e.stopPropagation()}>
                 <QuestBoardBackground
                     src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/dashboard.webp"

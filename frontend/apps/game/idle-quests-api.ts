@@ -11,6 +11,7 @@ import {
 } from "../common"
 import InventoryApi from "./modules/inventory/inventory-api"
 import { NotificationsApi } from "./modules/notifications"
+import { ObjectsLocations } from "./game-vm"
 
 const IdleQuestsApi = {
 
@@ -83,7 +84,7 @@ const IdleQuestsApi = {
         return response.data
     },
 
-    async setInnState(state: { name?: string, objectLocations?: Record<string, [number, number]>}): Promise<void> {
+    async setInnState(state: { name?: string, objectLocations?: ObjectsLocations}): Promise<void> {
         await IdleQuestsRequestWRefresh("post", "/set-inn-state", state)
     },
 }
@@ -96,7 +97,7 @@ async function IdleQuestsRequestWRefresh<ReqData = any, ResData = any>(method: M
 
 async function IdleQuestsRequest<ReqData = any, ResData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
     const traceId = v4()
-    const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "quests/api")
+    const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "/api/quests")
     //if (baseURL.includes("acceptance.") || baseURL.includes("testnet.") || baseURL.includes("localhost")) 
         console.log(`${method}: ${endpoint}\ntrace-id: ${traceId}`)
     return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({

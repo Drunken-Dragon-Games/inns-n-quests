@@ -26,7 +26,7 @@ export class TileSet<TileId extends string> {
     }
 
     tileSpriteSheetLocation(tileId: TileId): number {
-        return this.metadata.set[tileId].index[0] * this.metadata.sheetSize[0] / this.metadata.tileSize[0]  + this.metadata.set[tileId].index[1]
+        return (this.metadata.set[tileId].index[0] * this.metadata.sheetSize[0] / this.metadata.tileSize[0] ) + this.metadata.set[tileId].index[1]
     }
 
     loadImage(load: Phaser.Loader.LoaderPlugin): void {

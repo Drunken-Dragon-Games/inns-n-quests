@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react"
 import { shallowEqual, useSelector } from "react-redux"
 import styled from "styled-components"
-import { OswaldFontFamily, px } from "../../../../../common"
+import { OswaldFontFamily, px, vh } from "../../../../../common"
 import * as vm from "../../../../game-vm"
 import { InventoryState } from "../../inventory-state"
 import InventoryBox from "../browser/inventory-box"
@@ -215,7 +215,7 @@ const CharacterInfoCard = ({ className }: CharacterInfoCardProps) => {
                 <MiniatureBox overflowHidden={true}>
                     <CharacterSprite
                         character={character}
-                        units={px(17)}
+                        units={vh(1.3)}
                     />
                 </MiniatureBox>
                 <HeaderInfo>

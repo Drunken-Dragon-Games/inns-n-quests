@@ -81,6 +81,7 @@ const ButtonPosition = styled.div`
         bottom: -60px;
     }
 `
+
 const BannerSection = (): JSX.Element => {
    
     return(<>
