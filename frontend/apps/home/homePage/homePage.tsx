@@ -32,7 +32,7 @@ const HomePage = (): JSX.Element => {
                 <CollectionsSection />
                 <DeadQueenSection />
             </HomePageComponent>
-            <CookieConsentBanner />
+            {/*<CookieConsentBanner />*/}
         </>
     )
 }

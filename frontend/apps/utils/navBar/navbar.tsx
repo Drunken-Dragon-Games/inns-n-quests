@@ -126,8 +126,13 @@ const TestnetBanner = styled.div`
     background-color: ${colors.dduGold};
     color: white;
     width: 100%;
-    padding: 10px 0px 10px 60px;
+    padding: 10px 0px 10px 200px;
     font-size: 14px;
+
+    @media only screen and (max-width: 414px) {
+        padding: 10px 0px 10px 10px;
+        font-size: 12px;
+    }
 ` 
 
 const Navbar = (): JSX.Element =>{

@@ -3,6 +3,7 @@ import Image from "next/image"
 import { LinkDisable, TextElMessiri } from "../components/basic_components"
 import { useState } from "react"
 import { socialMedia } from "../../../setting"
+import { MessiriFontFamily } from "../../common"
 
 const IconContainer = styled.div`
     width: 2vw;
@@ -227,6 +228,17 @@ const Center = styled.div`
     margin: auto;
 `
 
+const Legal = styled.div`
+    padding: 1vw;
+    text-align: center;
+    font-size: 12px;
+    ${MessiriFontFamily}
+    color: white;
+    & > a {
+        text-decoration: underline;
+    }
+`
+
 const FooterComponent = ():JSX.Element => {
     return (
             <Footer>
@@ -239,6 +251,11 @@ const FooterComponent = ():JSX.Element => {
                
                 <FooterBackgroundComponent/>
                 <FooterContentComponent/>
+
+                <Legal>
+                    <a href="https://app.termly.io/document/terms-of-service/3259c3d1-0941-4deb-9938-a66cabf5f9ae" target="_blank">Terms of Service</a> / 
+                    <a href="https://app.termly.io/document/privacy-policy/4d95b343-9684-44c3-94cb-88a038c68b01" target="_blank"> Privacy Policy</a> 
+                </Legal>
             </Footer>
     )
 }
