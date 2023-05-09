@@ -31,14 +31,14 @@ export default class OverworldCharacter {
         // Later check character collection and load from right sprite sheet
         const sheet = 
             character.collection === "grandmaster-adventurers" ? 
-                "grandmaster-adventurers-front" :
+                `grandmaster-adventurers-front-${Math.floor((i - 1) / 100) + 1}` :
             character.collection === "adventurers-of-thiolden" && (character.sprite.includes("dethiol") || character.sprite.includes("ilinmyr")) ?
                 "adventurers-of-thiolden-big-front" :
             character.collection === "adventurers-of-thiolden" ?
                 "adventurers-of-thiolden-front" :
             "pixel-tiles-adventurers-front"
         const index = 
-            character.collection === "grandmaster-adventurers" ? i-1 :
+            character.collection === "grandmaster-adventurers" ? (i - 1) % 100 :
             character.collection === "adventurers-of-thiolden" ? adventurerOfThioldenSpritesheetMap(character.sprite)
             : pixelTilesSpritesheetMap(i)
         const sprite = overworld.physics.add.sprite(position.x, position.y, sheet, index)
