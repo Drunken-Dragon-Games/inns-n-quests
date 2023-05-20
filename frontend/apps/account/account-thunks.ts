@@ -5,9 +5,12 @@ import { isEmpty } from "../common"
 import { AccountBackend, AuthenticationResult } from "./account-backend"
 import { ExtractWalletResult, SupportedWallet, minimalUtxoFromLucidUTxO } from "./account-dsl"
 import { AccountState, AccountThunk, accountState, accountStore } from "./account-state"
-import { Blockfrost, Lucid, C } from "lucid-cardano"
+import { Blockfrost, Lucid, C, Script } from "lucid-cardano"
+import * as cip68 from "./dragon-gold/cip68"
 
 const actions = accountState.actions
+
+let mintResult: cip68.MintResult | undefined
 
 export const AccountThunks = {
 
@@ -201,7 +204,43 @@ export const AccountThunks = {
     testGrant: (): AccountThunk => async (dispatch) => {
         await AccountBackend.granteTest()
         dispatch(AccountThunks.updateInventory())
+    },
+
+    dragonGoldMint: (): AccountThunk => async (dispatch) => {
+        const extractedResult = await AccountThunks.extractWalletApiAndStakeAddress("Eternl")
+        if (extractedResult.status !== "ok") throw new Error(extractedResult.details)
+        const { walletApi, stakeAddress } = extractedResult
+        const finalContract = await getFinalContract(walletApi)
+        mintResult = await cip68.mint(walletApi, finalContract)
+    },
+
+    dragonGoldLock: (): AccountThunk => async (dispatch) => {
+        const extractedResult = await AccountThunks.extractWalletApiAndStakeAddress("Eternl")
+        if (extractedResult.status !== "ok") throw new Error(extractedResult.details)
+        const { walletApi, stakeAddress } = extractedResult
+        const finalContract = await getFinalContract(walletApi)
+        if (!mintResult) throw new Error("mint first and wait")
+        if (mintResult.areTokensMinted == false) throw new Error("mint must succeed first")
+        await cip68.lock(walletApi, { script: finalContract.script, policyId: mintResult.policyId, referenceAssetName: mintResult.refereceName })
+    },
+}
+
+async function getFinalContract(walletApi: Lucid): Promise<Script> {
+    const storedContract = localStorage.getItem("dg-contract")
+    if (storedContract) {
+        console.log("GOT final contract from local storage")
+        return { type: "PlutusV2", script: storedContract }
     }
+    return await saveFinalContract(walletApi)
+}
+
+async function saveFinalContract(walletApi: Lucid): Promise<Script> {
+    const script = "5901240100003232323232323232323223223222533300b3370e900018050008a9998059919299980699b87480000044c94ccc038ccc8c888cc00cdd6198071808001240200026002002444a66602800429404c8c94ccc04ccdc78010018a5113330050050010033017003375c602a0046601460180089000004099911919299980919b87480080044c8c8cdc40008029bad3017001301000214a0602000266018601c66018601c00490002400066014601866014601800890002401c00c2940c02c0085281805800998039804800a40042930b09912999806a50149858c03cc024004dd68009bae00133001001480008888cccc01ccdc38008018059199980280299b8000448008c0340040080088c014dd5000918019baa0015734aae7555cf2ab9f5742ae89"
+    const originalContract: Script = { type: "PlutusV2", script }
+    const finalContract: Script = await cip68.parametrizeContract(walletApi, originalContract)
+    localStorage.setItem("dg-contract", finalContract.script)
+    console.log("SAVED final contract to local storage")
+    return finalContract
 }
 
 //local storage set

@@ -65,6 +65,22 @@ const WidgetRow = (props: {
         </> }
     </WidgetRowContainer>
 
+
+
+const DragonGoldWidgetContainer = styled.div`
+    width: 100%;
+`
+
+const DragonGoldWidget = () => {
+    return (
+        <DragonGoldWidgetContainer>
+            <button onClick={AccountTransitions.dragonGoldMint}>Mint</button>
+            <button onClick={AccountTransitions.dragonGoldLock}>Lock</button>
+        </DragonGoldWidgetContainer>
+    )
+}
+
+
 const WalletAssociationWidgetContainer = styled.div`
     width: 100%;
 `
@@ -294,6 +310,9 @@ const DashboardViewContent = () => {
             </DashboardCard>
             <DashboardCard key="wallet-authentication-widget" title="Associated Wallets">
                 <WalletAssociationWidget {...userInfo} />
+            </DashboardCard>
+            <DashboardCard key="dragon-gold" title="Dragon Gold Minting">
+                <DragonGoldWidget />
             </DashboardCard>
         </DashboardContainer>
     ): <></>

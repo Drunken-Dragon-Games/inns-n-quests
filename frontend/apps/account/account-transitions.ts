@@ -111,5 +111,13 @@ export const AccountTransitions = {
 
     grantTest: () => {
         dispatch(AccountThunks.testGrant())
-    }
+    },
+
+    dragonGoldMint: () => {
+        dispatch(AccountThunks.dragonGoldMint())
+    },
+
+    dragonGoldLock: () => {
+        dispatch(AccountThunks.dragonGoldLock())
+    },
 }

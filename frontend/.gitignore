@@ -54,3 +54,5 @@ backend/database.sqlite
 backend/src/database/del.sqlite
 sdk/node_modules
 backend/database.sqlite
+
+plutus.json
