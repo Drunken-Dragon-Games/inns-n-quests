@@ -354,7 +354,7 @@ const GoverncanceVotingWidget = ({ userInfo }: { userInfo?: UserInfo }) => {
         governanceBallots: state.governanceBallots,
     }))
     useEffect(() => {
-        //userInfo ? AccountTransitions.getUserOpenBallots() : AccountTransitions.getOpenBallots()
+        userInfo ? AccountTransitions.getUserOpenBallots() : AccountTransitions.getOpenBallots()
     }, [userInfo])
     const ballotArray = Object.values(governanceBallots)
 
@@ -445,6 +445,8 @@ const DashboardWideCardContainer = styled.div`
 const WideDashboardCardContainer = styled(DashboardCardContainer)`
     width: 90%;
     color: white;
+    box-shadow: none;
+    border: none;
     @media only screen and (max-width: 1400px) {
         width: 100%;
     }
@@ -470,7 +472,7 @@ const DashboardViewContent = () => {
                 </DashboardContainer>
             ) : null}
             <DashboardWideCardContainer>
-                <WideDashboardCard  key="governance-voting-widget" title="Governance">
+                <WideDashboardCard key="governance-voting-widget" title="Governance">
                     <GoverncanceVotingWidget userInfo={userInfo} />
                 </WideDashboardCard >
             </DashboardWideCardContainer>

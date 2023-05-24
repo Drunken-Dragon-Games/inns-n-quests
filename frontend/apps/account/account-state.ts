@@ -16,6 +16,7 @@ export type AccountStoreState =
 export type AccountThunk<ReturnType = void> = 
     ThunkAction<ReturnType, AccountStoreState, unknown, Action<string>>
 
+/*
 const ballotsTestData: GovernanceBallots = {
     "1": {
         id: "1",
@@ -62,12 +63,13 @@ const ballotsTestData: GovernanceBallots = {
         state: "open"
     },
 }
+*/
 
 const accountInitialState: AccountState = {
     claimProcessState: { ctype: "idle" },
     associateProcessState: { ctype: "idle" },
     dragonSilverClaims: [],
-    governanceBallots: ballotsTestData,
+    governanceBallots: {},//ballotsTestData,
     governanceState: {ctype: "idle"}
 }
 

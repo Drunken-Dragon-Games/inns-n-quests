@@ -213,6 +213,7 @@ export const AccountThunks = {
 
     getUserGoverncanceBallots: (): AccountThunk => async (dispatch) => {
         const response = await AccountBackend.getUserOpenBallots()
+        console.log(response)
         if (response.status !== "ok")
             dispatch(actions.setGovernanceState({ ctype: "error", details: response.status }))
         else 

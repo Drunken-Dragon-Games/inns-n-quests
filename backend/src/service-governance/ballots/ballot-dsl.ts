@@ -48,12 +48,12 @@ export class Ballots {
 
     static async getUserBallots(userId: string, state?: BallotState): Promise<MultipleUserBallots> {
         try{
-            const ballots = await Ballot.findAll(state ? { where: { state } } : {})
-            const StoredUserBallots:  { [ballotId: string]: StoredUserBallot } = {}
+            const ballots = await Ballot.findAll({ limit: 6, order: [["createdAt", "DESC"]], ...(state ? { where: { state } } : {})})
+            const storedUserBallots:  { [ballotId: string]: StoredUserBallot } = {}
             for (const ballot of ballots) { 
                 const options = ballot.optionsArray.map((option, index) => ({option, description: ballot.descriptionArray[index]}))
                 const exisitingVote = await BallotVote.findOne({where: {ballotId: ballot.ballotId, userId}})
-                StoredUserBallots[ballot.ballotId] = {
+                storedUserBallots[ballot.ballotId] = {
                     id: ballot.ballotId, 
                     inquiry: ballot.inquiry, 
                     descriptionOfInquiry: ballot.description, 
@@ -62,7 +62,7 @@ export class Ballots {
                     voteRegistered: !!exisitingVote
                 }
             }
-            return {ctype: "success", ballots: StoredUserBallots}
+            return {ctype: "success", ballots: storedUserBallots}
         } catch (e: any){
             return { ctype: "error", reason: e.message }
         }

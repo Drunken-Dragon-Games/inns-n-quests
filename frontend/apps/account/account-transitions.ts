@@ -121,7 +121,6 @@ export const AccountTransitions = {
         dispatch(AccountThunks.getUserGoverncanceBallots())
     },
 
-
     voteForBallot: (ballotId: string, optionIndex: string) => {
         dispatch(AccountThunks.voteForGovernanceBallot(ballotId, optionIndex))
     }

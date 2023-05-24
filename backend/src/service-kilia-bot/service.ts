@@ -256,6 +256,16 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             return await this.replyMessage(message, ballotDSL.formatStoredBallot(ballotResult.ballot))
 
         }
+        else if (subcommand == "close") {
+            const ballotId = messagesDSL.getArguments(message)
+            const ballotResult = await this.governanceService.closeBallot(ballotId)
+            if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, `Ballot ${ballotId} closed successfully. Winners:
+                \`\`\`json
+                ${JSON.stringify(ballotResult.winners, null, 4)}
+                \`\`\`
+            `)
+        }
         else if (subcommand == "help"){
             const helpMessage = ``
         }
