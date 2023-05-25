@@ -114,7 +114,7 @@ const FooterContentComponent = ():JSX.Element => {
             />
         </FooterImageContainer>
         <FooterTextContainer>
-            <TextElMessiri textAlign="center" fontsize={1} color="white" fontsizeMobile={2.5}>Drunken Dragon Entertainment (c) 2022 | All rights reserved</TextElMessiri>
+            <TextElMessiri textAlign="center" fontsize={1} color="white" fontsizeMobile={2.5}>Drunken Dragon Entertainment (c) 2023 | All rights reserved</TextElMessiri>
         </FooterTextContainer>
     </FooterContent>)
 }
