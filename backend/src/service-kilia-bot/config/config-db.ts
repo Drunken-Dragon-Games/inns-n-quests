@@ -1,15 +1,22 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
 
-export interface IConfigDB {
-    serverId: string
+type KiliaChannels = {
     questsNotificationChannelId?: string
     leaderboardNotificationChannelId?: string
+    governanceAdminChannelId?: string
+}
+
+export type KiliaChannelsNames = keyof KiliaChannels
+
+export interface IConfigDB extends KiliaChannels {
+    serverId: string
 }
 
 export class ConfigDB extends Model implements IConfigDB {
     declare serverId: string
     declare questsNotificationChannelId?: string
     declare leaderboardNotificationChannelId?: string
+    declare governanceAdminChannelId?: string
 }
 
 export const ConfigDBTableName = "kilia_bot_config"
@@ -24,6 +31,10 @@ export const ConfigDBTableAttributes = {
         allowNull: true
     },
     leaderboardNotificationChannelId: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    governanceAdminChannelId: {
         type: DataTypes.STRING,
         allowNull: true
     }

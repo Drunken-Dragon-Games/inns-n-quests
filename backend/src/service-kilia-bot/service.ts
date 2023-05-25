@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js"
+import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
 import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
 import { Character, TakenStakingQuest } from "../service-idle-quests"
@@ -10,11 +10,19 @@ import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
 import path from "path"
 import { IdentityService } from "../service-identity"
+import { GovernanceService } from "../service-governance/service-spec"
+
+//not sure how you would like me to manage this, mor info on the files themselves
+import * as messagesDSL from "./discord-messages-dsl"
+import * as ballotDSL from "./ballots/ballot-dsl"
+import { ConfirmMessagge, registerBallotType } from "./models"
+
 
 export type KiliaBotServiceDependencies = {
     database: Sequelize
     evenstatsService: EvenstatsService,
     identityService: IdentityService,
+    governanceService: GovernanceService
 }
 
 export type KiliaBotServiceConfig = {
@@ -23,8 +31,8 @@ export type KiliaBotServiceConfig = {
 
 type Command = RESTPostAPIChatInputApplicationCommandsJSONBody
 
-const commandsBuilder = (): Command[] => {
-    const config = new SlashCommandBuilder()
+const slashCommandsBuilder = (): Command[] => {
+    const kiliaConfig = new SlashCommandBuilder()
         .setName("kilia-config")
         .setDescription("Configure Kilia.")
         .addSubcommand(subcommand => subcommand
@@ -38,10 +46,19 @@ const commandsBuilder = (): Command[] => {
             .setDescription("Set the channel where the leaderboard updates will be sent.")
             .addChannelOption(option => option
                 .setName("channel")
-                .setDescription("The channel where notifications will be sent."))
-        ).toJSON()
-    return [ config ]
+                .setDescription("The channel where notifications will be sent.")))
+        .addSubcommand(subcommand => subcommand
+            .setName("governance-admin-channel")
+            .setDescription("Set the channel where governance questions will be posted.")
+            .addChannelOption(option => option
+                .setName("channel")
+                .setDescription("The channel where governance questions will be posted.")
+                .setRequired(true)))
+        .toJSON()
+
+    return [kiliaConfig];
 }
+
 
 export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
@@ -52,6 +69,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         private readonly database: Sequelize,
         private readonly client: Client,
         private readonly identityService: IdentityService,
+        private readonly governanceService: GovernanceService
     ){
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -66,12 +84,15 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     }
 
     static async loadFromConfig(config: KiliaBotServiceConfig, dependencies: KiliaBotServiceDependencies): Promise<KiliaBotServiceDsl> {
-        const client = new Client({ intents: GatewayIntentBits.Guilds })
+        //const client = new Client({ intents: GatewayIntentBits.Guilds })
+        const client = new Client({intents: ["Guilds", "GuildMessages", "MessageContent"]})
         const service = new KiliaBotServiceDsl(
             dependencies.database, 
             client,
             dependencies.identityService,
+            dependencies.governanceService
         )
+        //setting up DB and pre loading cache
         await service.loadDatabaseModels()
         dependencies.evenstatsService.subscribe(service, 
             "claimed-quest-event",
@@ -79,10 +100,11 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         )
         client.once(Events.ClientReady, async (client) => {
             if (!client.user) return
-            await client.application.commands.set(commandsBuilder())
+            await client.application.commands.set(slashCommandsBuilder())
             console.log(`${client.user.tag} is ready to listen and sing!`)
             console.log(`Invite link: https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot%20applications.commands`)
         })
+        
         client.login(config.token)
         client.on(Events.InteractionCreate, async (interaction) => {
             if (!interaction.isCommand()) return
@@ -92,7 +114,21 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true })
             }
         })
+
+        client.on("messageCreate", async (message) => {
+            if (message.author.bot || !message.content.startsWith("!")) return
+            try { service.onDiscordBangEvent(message) } 
+            catch (error) {
+                console.error(error)
+                await message.reply({ content: "There was an error while executing this command!"})
+            }
+        })
         return service
+    }
+    private onDiscordBangEvent(message: Message) {
+        switch (messagesDSL.getCommand(message)) {
+            case "ballot": return this.commandGovernance(message)
+        }
     }
 
     async loadDatabaseModels(): Promise<void> {
@@ -171,22 +207,123 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     async commandConfig(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) return
         const subcommand = interaction.options.getSubcommand()
+    
+        if (subcommand === "quests-channel") return await this.reply(interaction, await this.setChannel(interaction, "questsNotificationChannelId"))
+        else if (subcommand === "leaderboard-channel") return await this.reply(interaction, await this.setChannel(interaction, "leaderboardNotificationChannelId"))
+        else if (subcommand === "governance-admin-channel") return await this.reply(interaction, await this.setChannel(interaction, "governanceAdminChannelId"))
+        else return await this.reply(interaction, "Kilia-config command unknokwn")
+        
+    }
 
-        if (subcommand === "quests-channel") {
-            const channel = interaction.options.getChannel("channel")
-            if (!channel || !interaction.guildId) return
-            if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
-            this.configCache[interaction.guildId].questsNotificationChannelId = channel.id
-            await configDB.ConfigDB.upsert({ serverId: interaction.guildId, questsNotificationChannelId: channel.id, returning: true })
-            await interaction.reply(`Quests channel set to ${channel.name}`)
-        } else if (subcommand === "leaderboard-channel") {
-            const channel = interaction.options.getChannel("channel")
-            if (!channel || !interaction.guildId) return
-            if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
-            this.configCache[interaction.guildId].leaderboardNotificationChannelId = channel.id
-            await configDB.ConfigDB.upsert({ serverId: interaction.guildId, leaderboardNotificationChannelId: channel.id, returning: true })
-            await interaction.reply(`Leaderboard channel set to ${channel.name}`)
-        } else 
-            await interaction.reply("Pong!")
+    private async setChannel (interaction: CommandInteraction, channelIdKey: configDB.KiliaChannelsNames): Promise<string> {
+        if (!interaction.isChatInputCommand()) return "Interaction is not a chat input command"
+        const channel = interaction.options.getChannel("channel")
+        if (!channel || !interaction.guildId) return "Channel not found or not in a server."
+        if (!this.configCache[interaction.guildId]) this.configCache[interaction.guildId] = { serverId: interaction.guildId }
+        this.configCache[interaction.guildId][channelIdKey] = channel.id;
+        await configDB.ConfigDB.upsert({ serverId: interaction.guildId, [channelIdKey]: channel.id});
+
+        if (channelIdKey == "governanceAdminChannelId") return `${channel.name} set as Governance Admin channel`
+        else if (channelIdKey == "leaderboardNotificationChannelId") return `${channel.name} set as Leaderboard channel`
+        else if (channelIdKey == "questsNotificationChannelId") return `${channel.name} set as Quests channel`
+        else return "Unknown Kilia-config command"
+    }
+
+    async commandGovernance(message: Message): Promise<void> {
+        if (!this.verifyGovernanceChannel(message)) return await this.replyMessage(message, "The command could not be verified to have come from a registered governance channel or server.")
+        const subcommand = messagesDSL.getSubCommand(message)
+
+        if (subcommand === "add") {
+            const ballotInput = messagesDSL.getArguments(message)
+            const ballotResult = ballotDSL.parseBallotInput(ballotInput)
+            if (ballotResult.status !== "ok") return this.replyMessage(message, ballotResult.reason)
+            
+            await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
+
+            await this.waitForconfirmation(message, 60, 
+                {cancel: 'Ballot confirmation canceled. No changes were made.', 
+                timeout: 'Ballot confirmation timed out. No changes were made.' },
+                 async () => {
+                    const r = await this.governanceService.addBallot(ballotResult.payload)
+                    if (r.ctype !== "success") return r.reason
+                    return `Ballot confirmed and stored successfully under ID ${r.ballotId}`
+                 })
+
+        }
+        else if (subcommand === "get") {
+            const ballotResult = await this.governanceService.getBallot(messagesDSL.getArguments(message))
+            if (ballotResult.ctype !== "succes") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, ballotDSL.formatStoredBallot(ballotResult.ballot))
+
+        }
+        else if (subcommand == "close") {
+            const ballotId = messagesDSL.getArguments(message)
+            const ballotResult = await this.governanceService.closeBallot(ballotId)
+            if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, `Ballot ${ballotId} closed successfully. Winners:
+                \`\`\`json
+                ${JSON.stringify(ballotResult.winners, null, 4)}
+                \`\`\`
+            `)
+        }
+        else if (subcommand == "list") {
+            const ballotResult = await this.governanceService.getAdminBallotCollection()
+            if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, ballotDSL.formatList(ballotResult.ballots))
+        }
+        else if (subcommand == "help"){
+            const helpMessage = ``
+        }
+        else return await this.replyMessage(message, "unknown governance command")
+    }
+
+    //added this function just so could do a return void to the reply method, cuss i thinks it reads a million times nicer
+    private async reply(interaction: ChatInputCommandInteraction, messagge: string): Promise<void>{
+        await interaction.reply(messagge)
+        return
+    }
+
+    private async replyMessage(message: Message, content: string): Promise<void> {
+        await message.reply(content)
+      }
+
+    /**
+     * 
+     * @param message Discord message that requires confirmation
+     * @param TTL Time in seconds for confirmation to timeout
+     * @param mesages mesagges to send on confirm, cancel and timeout. if no confirm message is provided preloadedCallback string response is used
+     * @param preloadedCallback function to be called on confirmation
+     */
+    private async waitForconfirmation(message: Message, TTL: number, mesages: ConfirmMessagge, preloadedCallback: () => Promise<string | void>) {
+    const filterYesNo = (m: Message) => m.author.id === message.author.id && ['yes', 'no'].includes(m.content.toLowerCase())
+
+        const collector = new MessageCollector(message.channel, { filter: filterYesNo, time: TTL * 1000})
+
+        collector.on('collect', async (m: Message) => {
+            if (m.content.toLowerCase() === 'yes') {
+
+                const reponse = await preloadedCallback()
+                if (mesages.confirm) await this.replyMessage( message, mesages.confirm)
+                else if (reponse) await this.replyMessage( message, reponse)
+                else await this.replyMessage( message, "Message confirmed")
+            } 
+            else await this.replyMessage( message, mesages.cancel)
+            collector.stop()
+        })
+
+        collector.on('end', (collected, reason) => { if (reason === 'time') 
+            { this.replyMessage( message, mesages.timeout)}})
+    }
+
+    private verifyGovernanceChannel(message: Message): Boolean {
+        try{
+            if (message.channelId && message.guildId) return  this.configCache[message.guildId].governanceAdminChannelId === message.channelId
+            else return false
+        } catch (e: any){
+            console.log(`Error when trying to check governance channel ID ${e}`)
+            return false
+        }
+        
     }
 }
+

@@ -14,6 +14,7 @@ export type WellKnownPolicies =
     , dragonSilver: RegistryPolicy
     , ddeXjpgstore: RegistryPolicy
     , emojis: RegistryPolicy
+    , dragonGold: RegistryPolicy
     }
 
 export const onlyPolicies = (wellKnownPolicies: WellKnownPolicies): string[] =>
@@ -62,6 +63,13 @@ export const wellKnownPoliciesMainnet: WellKnownPolicies = {
         "description": "Vanity emoji sets for Drunken Dragon Inns",
         "tags": ["vanity"],
     },
+    dragonGold:
+    {
+        "policyId": "f5f8e854af532d828d00381df799ba6db22d825c9b140e1d5795cf85",
+        "name": "Dragon Gold",
+        "description": "Governance token of the Drunken Dragon Universe decentralized fantasy franchise",
+        "tags": ["governance"], 
+    }
 }
 
 export const loadWellKnownPoliciesFromEnv = (): WellKnownPolicies => ({
@@ -107,4 +115,11 @@ export const loadWellKnownPoliciesFromEnv = (): WellKnownPolicies => ({
         "description": "Vanity emoji sets for Drunken Dragon Inns",
         "tags": ["vanity"],
     },
+    dragonGold:
+    {
+        "policyId": config.stringOrError("POLICY_DRAGON_GOLD"),
+        "name": "Dragon Gold",
+        "description": "",
+        "tags": ["governance"],
+    }
 })

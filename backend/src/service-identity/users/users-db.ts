@@ -22,7 +22,7 @@ export class User extends Model implements IUser {
     declare discordRefreshToken: string;
 }
 
-export const UserTableName = "users"
+export const UserTableName = "identity_users"
 
 export interface IUserStakeAdress {
     id: string,
@@ -36,7 +36,7 @@ export class UserStakeAdress extends Model implements IUserStakeAdress {
     declare stakeAddress: string;
 }
 
-export const UserStakeAddressTableName = "user_stake_addresses"
+export const UserStakeAddressTableName = "identity_user_stake_addresses"
 
 export const UserStakeAdressTableAttributes = {
     id: {

@@ -38,6 +38,25 @@ export type UserFullInfo = {
     knownEmail: string
 }
 
+export type BallotState = "open" | "closed" | "archived"
+
+export type StoredBallot = {
+    id: string, 
+    inquiry: string, 
+    descriptionOfInquiry: string, 
+    options: {
+        option: string, 
+        description: string
+    }[], 
+    voteRegistered: boolean, 
+    state: BallotState
+}
+
+export type GovernaceState
+    = { ctype: "idle" }
+    | { ctype: "loading", details: string }
+    | { ctype: "error", details: string };
+
 export type WalletAssociationProcessState
     = { ctype: "idle" }
     | { ctype: "loading", details: string }
@@ -88,3 +107,25 @@ export const minimalUtxoFromLucidUTxO = (utxo: LucidUTxO[]): UTxOMinimal[] => ut
     assets: Object.keys(utxo.assets).reduce((acc, key) => ({ ...acc, [key]: utxo.assets[key].toString() }), {}),
     address: utxo.address,
 }))
+
+//types repeted form govenance
+type BaseOption = {title: string, description: string}
+type VotedOption = BaseOption & {isVotedByUser: boolean}
+type SensitiveOption = BaseOption & {lockedInDragonGold: string}
+type ClosedOption = SensitiveOption & {isWinner: boolean}
+type UserClosedOption = ClosedOption & {isVotedByUser: boolean}
+
+type BaseBallot = {status: BallotState, id: string,  inquiry: string, inquiryDescription: string}
+
+type OpenPublicBallot = BaseBallot & {status: "open", options: BaseOption[]}
+type ClosedPublicBallot = BaseBallot & {status: "closed", options: ClosedOption[]}
+
+type OpenUserBallot = BaseBallot & {status: "open", hasVoted: boolean, options: VotedOption[]}
+type ClosedUserBallot = BaseBallot & {status: "closed", hasVoted: boolean, options: UserClosedOption[]}
+
+export type PublicBallot = OpenPublicBallot | ClosedPublicBallot
+export type UserBallot = OpenUserBallot | ClosedUserBallot
+
+export type GovernanceBallots
+    = {[ballotId: string]: UserBallot}
+    | {[ballotId: string]: PublicBallot}

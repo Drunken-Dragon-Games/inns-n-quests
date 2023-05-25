@@ -21,6 +21,7 @@ import { KiliaBotServiceDsl } from "./service-kilia-bot"
 import { commonCalendar } from "./tools-utils/calendar"
 import { AccountServiceDsl } from "./service-account"
 import { cardanoNetworkFromString } from "./tools-cardano"
+import { GovernanceServiceDsl } from "./service-governance/service"
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -52,11 +53,12 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     })
     const evenstatsService = await EvenstatsServiceDsl.loadFromEnv({ database })
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
+    const governanceService = await GovernanceServiceDsl.loadFromEnv({database})
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
-    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, wellKnownPolicies })
+    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, governanceService,wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
-    const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService })
+    const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService })
     
     // Soon to be deprecated
     //await loadQuestModuleModels(database)

@@ -1,12 +1,15 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
+import { PublicBallotCollection } from "../service-governance/models"
+import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, getUserInventoryResult, SignOutResult, SubmitAssociationSignatureResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
+    governanceService: GovernanceService
     wellKnownPolicies: WellKnownPolicies
 }
 
@@ -15,6 +18,7 @@ export class AccountServiceDsl implements AccountService {
     constructor (
         private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
+        private readonly governanceService: GovernanceService,
         private readonly wellKnownPolicies: WellKnownPolicies,
     ){}
 
@@ -26,6 +30,7 @@ export class AccountServiceDsl implements AccountService {
         const service = new AccountServiceDsl(
             dependencies.identityService,
             dependencies.assetManagementService,
+            dependencies.governanceService,
             dependencies.wellKnownPolicies,
         )
         await service.loadDatabaseModels()
@@ -74,7 +79,7 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok", tokens, inventory: {dragonSilver, dragonSilverToClaim}, info: sessionResponse.info}
     }
 
-    async getUserInventory(userId: string): Promise<getUserInventoryResult> {
+    async getUserInventory(userId: string): Promise<GetUserInventoryResult> {
         const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId] })
         if (assetList.status != "ok") return {status: "unknown-user"}
         const inventory = assetList.inventory
@@ -140,6 +145,41 @@ export class AccountServiceDsl implements AccountService {
     async grantTest(userId: string): Promise<void>{
         if (process.env.NODE_ENV !== "development") return 
         this.assetManagementService.grant(userId, {policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: "10"})
+    }
+
+    async getOpenBallots(): Promise<OpenBallotsResult> {
+        const openBallotsResult = await this.governanceService.getBallots("open")
+        if (openBallotsResult.ctype !== "success") return {status: "invalid", reason: openBallotsResult.reason}
+        return {status: "ok", payload: openBallotsResult.ballots}
+    }
+
+    async getUserOpenBallots(userId: string): Promise<OpenUserBallotsResult> {
+        const openUserBallotsResult = await this.governanceService.getUserOpenBallots(userId)
+        if (openUserBallotsResult.ctype !== "success") return {status: "invalid", reason: openUserBallotsResult.reason}
+        return {status: "ok", payload: openUserBallotsResult.ballots}
+    }
+
+    async getPublicBallots(): Promise<PublicBallotResult> {
+        const openBallotsResult = await this.governanceService.getPublicBallotCollection()
+        if (openBallotsResult.ctype !== "success") return {status: "invalid", reason: openBallotsResult.reason}
+        return {status: "ok", payload: openBallotsResult.ballots}
+    }
+
+    async getUserBallots(userId: string):Promise<UserBallotResult> {
+        const openUserBallotsResult = await this.governanceService.getUserBallotCollection(userId)
+        if (openUserBallotsResult.ctype !== "success") return {status: "invalid", reason: openUserBallotsResult.reason}
+        return {status: "ok", payload: openUserBallotsResult.ballots}
+    }
+
+    async voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult> {
+        const dgPolicyId = this.wellKnownPolicies.dragonGold.policyId
+        const listResponse = await this.assetManagementService.list(userId, {chain: true,  policies: [ dgPolicyId ]})
+        if (listResponse.status !== "ok") return {status: "invalid", reason: listResponse.status}
+        const dragonGold = listResponse.inventory[dgPolicyId][0].quantity
+        //CHECKME: currenlty hanlding draonGold as number, is posible it will need to be changed to a bigInt
+        const voteResult = await this.governanceService.voteForBallot(ballotId, optionIndex, userId, dragonGold)
+        if (voteResult.ctype !== "success") return {status: "invalid", reason: voteResult.reason}
+        return {status: "ok"}
     }
 }
 

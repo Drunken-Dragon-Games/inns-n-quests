@@ -119,6 +119,35 @@ export const accountRoutes = (accountService: AccountService) => {
         return response.status(200).json({status: "ok"})
     }) */
 
+    router.get("/governance/open", async (request: Request, response: Response) => {
+        const result = await accountService.getOpenBallots()
+        return response.status(200).json(result)
+    })
+
+    router.get("/governance/open-for-user", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await accountService.getUserOpenBallots(userId)
+        return response.status(200).json(result)
+    })
+
+    router.get("/governance/public", async (request: Request, response: Response) => {
+        const result = await accountService.getPublicBallots()
+        return response.status(200).json(result)
+    })
+
+    router.get("/governance/user", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const result = await accountService.getUserBallots(userId)
+        return response.status(200).json(result)
+    })
+
+    router.post("/governance/vote", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const {ballotId, optionIndex} = request.body
+        const result = await accountService.voteForBallot(userId, ballotId, optionIndex)
+        return response.status(200).json(result)
+    })
+
     return router
 }
 

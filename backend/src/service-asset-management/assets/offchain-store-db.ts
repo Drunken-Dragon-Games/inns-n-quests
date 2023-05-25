@@ -16,7 +16,7 @@ export class OffChainStore extends Model implements IOffChainStore {
     declare quantity: string 
 }
 
-export const OffChainStoreTableName = "offchain_store"
+export const OffChainStoreTableName = "asset_management_offchain_store"
 
 export const OffChainStoreTableAttributes = {
     OffChainStoreId: {
