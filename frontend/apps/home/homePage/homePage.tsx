@@ -1,6 +1,12 @@
 import styled from "styled-components"
 import TavernSection from "./compoenents/complex/tavernSection"
 import { BannerSection, IdleQuestsSection, DeadQueenSection, CollectionsSection, SocialMediaSection, RoadMapSection } from "./compoenents/complex"
+import { AccountApi, DashboardView } from "../../account"
+import { GamesButton } from "../../utils/navBar/basic_components"
+import { gamesButtonSection } from "../../../setting"
+import CookieConsentBanner from "../../common/components/cookie-consent-component"
+import BuySlimeSection from "./compoenents/complex/buySlimeSection"
+import { colors } from "../../common"
 
 const HomePageComponent = styled.section`
     background-color: #0B1015;
@@ -11,18 +17,24 @@ const HomePageComponent = styled.section`
     }
 `
 
-const HomePage = ():JSX.Element => {
-    return (<>
+const HomePage = (): JSX.Element => {
+    const signedin = AccountApi.signed()
+    return (
+        <>
             <HomePageComponent>
-                <BannerSection/>
-                <SocialMediaSection/>
+                <DashboardView /> 
+                <BannerSection />
+                <SocialMediaSection />
                 {/* <RoadMapSection/> */}
-                <DeadQueenSection/>
-                <IdleQuestsSection/>
-                <CollectionsSection/>
-                <TavernSection/>
+                <TavernSection />
+                <IdleQuestsSection />
+                <BuySlimeSection />
+                <CollectionsSection />
+                <DeadQueenSection />
             </HomePageComponent>
-    </>)
+            {/*<CookieConsentBanner />*/}
+        </>
+    )
 }
 
 export default HomePage

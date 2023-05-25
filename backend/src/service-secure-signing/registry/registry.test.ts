@@ -5,7 +5,7 @@ import fs from "fs/promises"
 import { CardanoNetwork, Wallet, NFTMintOptions, cardano } from "../../tools-cardano"
 import Registry from "./registry"
 
-const network: CardanoNetwork = "testnet"
+const network: CardanoNetwork = "Preprod"
 
 const temporalScript = (signer: Wallet): NativeScript => {
     const sig = signer.hashNativeScript()
@@ -81,7 +81,7 @@ const stubPath = (filename: string): string =>
 const mintExample = async (registry: Registry, script: NativeScript): Promise<string> => {
     const signingWallet = Wallet
         .recover(network, await fs.readFile(stubPath("wallet1"), "utf8"), "password")
-    const stakeAddress = signingWallet.stakeAddress.to_address().to_bech32()
+    const stakeAddress = signingWallet.stakeAddress().to_address().to_bech32()
     const unsignedTx = await cardano.createNFTMintTransaction(stakeAddress, nftOptions(script), blockfrost)
     const witness1 = signingWallet.signTx(CardanoWasm.Transaction.from_hex(unsignedTx.to_hex()))
     const witness2 = registry.signWithPolicy(cardano.policyId(script), cardano.addWitnessesToTransaction(witness1, unsignedTx))!
@@ -108,7 +108,7 @@ test("Print policy scripts", async () => {
     const script = mintingWallet.hashNativeScript()
     const registry = new Registry(network, { salt: "{{ENCRYPTION_SALT}}", password: "password" })
     registry.addToCache(mintingWallet, script)
-    const response = await registry.policy(cardano.policyId(script))
+    const response = registry.policy(cardano.policyId(script))
     expect(response).toStrictEqual({ "ScriptPubkey": {"addr_keyhash": mintingWallet.paymentPubKey.hash().to_hex()} })
 })
 

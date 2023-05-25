@@ -23,13 +23,12 @@ const Center = styled.div`
 
 `
 
-const TavernSection = ():JSX.Element => {
-    return (<TavernSectionContainer>
+const TavernSection = () => 
+    <TavernSectionContainer>
         <Center>
-            <TavernHeader>OWN A TAVERN</TavernHeader>
+            <TavernHeader>OWN AN INN</TavernHeader>
             <TavernContent/>
         </Center>
-    </TavernSectionContainer>)
-}
+    </TavernSectionContainer>
 
 export default TavernSection

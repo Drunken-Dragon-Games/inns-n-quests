@@ -10,7 +10,7 @@ import { SecureSigningService } from "../../service-secure-signing"
 import { failure, Result, success } from "../../tools-utils"
 import { LoggingContext } from "../../tools-tracing"
 import { cardano, TokenMintOptions } from "../../tools-cardano"
-import { ClaimStatus } from "../models"
+import { ClaimStatus, ClaimerInfo } from "../models"
 
 export type AssetClaimDslConfig = {
 	feeAddress: string,
@@ -19,6 +19,8 @@ export type AssetClaimDslConfig = {
 }
 
 export type ClaimResult = Result<{ claimId: string, tx: string }, "unknown-policy" | "not-enough-assets">
+
+export type LucidClaimResult = Result<{ claimId: string, tx: string, signature: string }, "unknown-policy" | "not-enough-assets">
 
 export type SubmitClaimSignatureResult = Result<string, "unknown-claim" | "corrupted-tx" | "claim-timed-out" | "claim-already-completed">
  
@@ -29,10 +31,15 @@ export class AssetClaimDsl {
 		private readonly db: Sequelize,
 		private readonly blockfrost: BlockFrostAPI,
 		private readonly secureSigningService: SecureSigningService,
-		private readonly assetStore: AssetStoreDsl
+		private readonly assetStore: AssetStoreDsl,
+		//private readonly lucid: Lucid
 	){}
 
-	public async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string}, logger?: LoggingContext): Promise<ClaimResult> {
+	public async userClaims(userId: string, unit: string, page?: number, logger?: LoggingContext): Promise<AssetClaim[]> {
+		return AssetClaim.findAll({ where: { userId, unit }, limit: 5, offset: page && page * 5, order: [["createdAt", "DESC"]] })
+	}
+
+	public async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string}, claimerInfo?: ClaimerInfo, logger?: LoggingContext): Promise<ClaimResult> {
 		const policyResponse = await this.secureSigningService.policy(asset.policyId, logger)
 		if (policyResponse.status == "unknown-policy") 
 			return failure("unknown-policy")
@@ -47,11 +54,30 @@ export class AssetClaimDsl {
 
 		const buildTx = async (): Promise<string> => {
 			const script = NativeScript.from_json(JSON.stringify(policyResponse.policy))
-			const mintOptions = this.mintOptBuilder(asset.unit, script, quantityToClaim)
+			const mintOptions = this.mintOptBuilder(asset.unit, script, quantityToClaim, claimerInfo)
 			const tx = await cardano.createTokenMintTransaction(stakeAddress, mintOptions, this.blockfrost)
   			const hexTx = Buffer.from(tx.to_bytes()).toString("hex");	
 			return hexTx
 		}
+
+		/*
+		// This will be moved to an esm module after we figure out interop that type checks between esm and commonjs modules
+		const buildTxLucid = async (): Promise<string> => {
+			const rawScript = policyResponse.policy as LucidNativeScript
+			const script = this.lucid.utils.nativeScriptFromJson(rawScript)
+			const policyId = this.lucid.utils.mintingPolicyToId(script)
+			const unit = policyId + fromText(asset.unit)
+			const tx = await (this.lucid.selectWalletFrom({ address: stakeAddress })).newTx()
+				.mintAssets({ [unit]: BigInt(quantityToClaim) })
+				.payToAddress(this.config.feeAddress, { lovelace: BigInt(this.config.feeAmount) })
+				.payToAddress(stakeAddress, { [unit]: BigInt(quantityToClaim) })
+				.attachMetadata(133722, { "dd-tx-type": "asset-claim" })
+				.validTo(Date.now() + this.config.txTTL * 1000)
+				.attachMintingPolicy(script)
+				.complete()
+			return tx.toString()
+		}
+		*/
 
 		const updateAvailableAssets = async() => {
 			const newAvailableQuantity = (BigInt(availableAssets.quantity) - BigInt(quantityToClaim)).toString()
@@ -70,7 +96,8 @@ export class AssetClaimDsl {
 			).claimId
 		}
 
-		const tx = await buildTx()
+		const tx = await buildTx() //await buildTxLucid() 
+		//cardano.deserializeAndLogTransaction(tx)
 		const claimId = await createClaim(tx)
 		await updateAvailableAssets()
 		await transaction.commit()
@@ -97,6 +124,8 @@ export class AssetClaimDsl {
 		const witnessSet2 = TransactionWitnessSet.from_bytes(await cbor.decodeFirst(signResponse.witness))
 		const witnesses = this.combineWitnessSets(witnessSet1, witnessSet2)
 		const signedTx = cardano.addWitnessesToTransaction(witnesses, knownDecoded)
+		// TODO: this can fail if the tx is already submitted or the utxo is already spent
+		// we should handle the error and revert the whole claim
     	const txId = await this.blockfrost.txSubmit(signedTx.to_hex())
 		claim.txId = txId
 		claim.state = "submitted"
@@ -151,7 +180,7 @@ export class AssetClaimDsl {
 		return reverted
 	}
 
-	private mintOptBuilder(assetName: string, script: NativeScript, amount: string): TokenMintOptions {
+	private mintOptBuilder(assetName: string, script: NativeScript, amount: string, claimerInfo?: ClaimerInfo): TokenMintOptions {
 		return {
 			assetName,
 			fee: {
@@ -165,6 +194,16 @@ export class AssetClaimDsl {
 			script,
 			amount,
 			ttl: this.config.txTTL,
+			receivingAddress: claimerInfo?.receivingAddress,
+			utxos: claimerInfo && claimerInfo.utxos.map((utxo) => ({
+				tx_index: utxo.outputIndex,
+				tx_hash: utxo.txHash,
+				amount: Object.keys(utxo.assets).map((unit) => ({
+					unit,
+					quantity: utxo.assets[unit],
+				})),
+				block: "",
+			}))
 		}
 	}
 
@@ -177,3 +216,5 @@ export class AssetClaimDsl {
 		return y
 	}
 }
+
+

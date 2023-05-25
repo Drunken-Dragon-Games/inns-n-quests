@@ -2,16 +2,13 @@ import type { NextPage } from 'next'
 import AccountSettingsApp from '../apps/accountSettings/accountSettingsApp'
 import Head from 'next/head'
 
-const AccountSettings: NextPage = () => {
-  return (
+const AccountSettings: NextPage = () =>
     <>
         <Head>
-          <title>Account Setting | Drunken Dragon</title>
-          <meta name="Drunken dragon entreta" content="A drunken Dragon Game" />
+            <title>Account Settings InQ</title>
+            <meta name="Drunken Dragon Inns & Quests" content="A Drunken Dragon Universe Game" />
         </Head>
-        <AccountSettingsApp/>
+        <AccountSettingsApp />
     </>
-  )
-}
 
 export default AccountSettings

@@ -155,4 +155,45 @@ export class config {
             else throw new Error(`Bad environment variable data type for var '${varKey}', expected a boolean (true|t|1) but could not parse.`)
         }
     }
+
+    /**
+     * Checks if an environment variable is set and if is of the provided type. Returns the value
+     * if set, otherwise returns a default value. Also parses the data type and throws an
+     * Error in case it couldn't parse it.
+     * 
+     * @param varKey environment variable name to be checked
+     * @param orElse the default value to use in case the environment variable is not set
+     * @param verify the type guard to use to verify the data type
+     * @returns the value of the checked environment variable or the default value
+     */
+    static typeOrElse = <T>(varKey: string, orElse: T, verify: (obj: any) => obj is T): T => {
+        const varVal = process.env[varKey]
+        if (varVal === undefined)
+            return orElse
+        else {
+            const parsed = JSON.parse(varVal)
+            if (verify(parsed)) return parsed
+            else throw new Error(`Bad environment variable data type for var '${varKey}', expected a ${typeof orElse} but could not parse.`)
+        }
+    }
+
+    /**
+     * Checks if an environment variable is set and if is of the provided type. Returns the value
+     * if set, otherwise throws an Error. Also parses the data type and throws an
+     * Error in case it couldn't parse it.
+     * 
+     * @param varKey environment variable name to be checked
+     * @param verify the type guard to use to verify the data type
+     * @returns the value of the checked environment variable
+     */
+    static typeOrError = <T>(varKey: string, verify: (obj: any) => obj is T): T => {
+        const varVal = process.env[varKey]
+        if (varVal === undefined)
+            throw new Error(`While configuring application, expected environment variable '${varKey}' but was not set`)
+        else {
+            const parsed = JSON.parse(varVal)
+            if (verify(parsed)) return parsed
+            else throw new Error(`Bad environment variable data type for var '${varKey}', could not parse.`)
+        }
+    }
 }

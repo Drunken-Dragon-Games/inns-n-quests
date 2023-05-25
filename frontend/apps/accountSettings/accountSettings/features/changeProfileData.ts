@@ -2,13 +2,13 @@ import { axiosCustomInstance } from '../../../../axios/axiosApi';
 import { createSliceStatus, actionsGenerator } from '../../../utils/features/utils'
 import { setNameAndIdentifier } from "./accountData";
 import { combineReducers } from "redux";
-import { generalReducerThunk } from "../../../../features/generalReducer";
+import { GeneralReducerThunk } from "../../../../features/generalReducer";
 import { AxiosError } from "axios";
 import { fetchRefreshToken } from "../../../../features/refresh";
 
 
 //fetch para cambiar el nickname
-export const fetchPostNickName = (nickNAme: string): generalReducerThunk => async (dispatch) => {
+export const fetchPostNickName = (nickNAme: string): GeneralReducerThunk => async (dispatch) => {
 
     dispatch(setFetchPostNickNameStatusPending())
 

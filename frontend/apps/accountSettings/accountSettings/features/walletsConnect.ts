@@ -2,12 +2,12 @@ import { createSliceStatus, actionsGenerator } from '../../../utils/features/uti
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { combineReducers } from "redux";
 import { deserializeStakeAddress } from './authentication';
-import { generalReducerThunk } from '../../../../features/generalReducer';
-import { cardano_network } from '../../../../setting';
+import { GeneralReducerThunk } from '../../../../features/generalReducer';
+import { cardanoNetwork } from '../../../../setting';
 
 //esta funcion regresa la api dependendiendo de la wallet
 
-export const walletConnection =  (wallet: "nami" | "eternl"): generalReducerThunk => async (dispatch) => {
+export const walletConnection =  (wallet: "nami" | "eternl"): GeneralReducerThunk => async (dispatch) => {
   let api
 
 
@@ -39,20 +39,21 @@ export const walletConnection =  (wallet: "nami" | "eternl"): generalReducerThun
 
 // una conecion local para llamar a la cartera de nami 
 
-export const connectNami = (): generalReducerThunk => async (dispatch, getState) => {
+export const connectNami = (): GeneralReducerThunk => async (dispatch, getState) => {
 
   dispatch(setWalletStatusPending())
 
 
   try {
 
+    /*
     //realiza la coneccion con la cartera funcion que regresa la api requerida
     let api = getState().wallet.data.api
 
     //realiza un llamado para saber si la cartera esta en output Mainnet (1) o Testnet (0) 
     let net: 1 | 0 = await api.getNetworkId()
 
-    const currentNet: 1 | 0 = cardano_network()
+    const currentNet: 1 | 0 = cardanoNetwork()
 
     //revisa en que net esta actualmente
     if (net == currentNet) {
@@ -70,7 +71,7 @@ export const connectNami = (): generalReducerThunk => async (dispatch, getState)
       dispatch(setWalletStatusRejected(message))
 
     }
-
+    */
 
   }
   catch (err) {
@@ -88,9 +89,10 @@ export const connectNami = (): generalReducerThunk => async (dispatch, getState)
 
 // una conecion local para llamar a la cartera de eternl
 
-export const connectEternl = (): generalReducerThunk => async (dispatch, getState) => {
+export const connectEternl = (): GeneralReducerThunk => async (dispatch, getState) => {
 
 
+  /*
   dispatch(setWalletStatusPending())
 
 
@@ -107,7 +109,7 @@ export const connectEternl = (): generalReducerThunk => async (dispatch, getStat
     let net: 1 | 0 = await api.getNetworkId()
 
     
-    const currentNet: 1 | 0 = cardano_network()
+    const currentNet: 1 | 0 = cardanoNetwork()
 
     
     //revisa en que net esta actualmente el alpha es testnet 
@@ -141,7 +143,7 @@ export const connectEternl = (): generalReducerThunk => async (dispatch, getStat
 
     }
   }
-
+  */
 }
 
 // reducer para moniterear el estado de la llamada a las carteras

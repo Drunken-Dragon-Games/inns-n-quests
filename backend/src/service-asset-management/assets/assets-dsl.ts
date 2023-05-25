@@ -1,11 +1,10 @@
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import { OffChainStore } from "./offchain-store-db";
-import Registry from "../registry/registry";
 import { Transaction, WhereOptions } from "sequelize";
 import { Inventory } from "../models";
 import { cardano } from "../../tools-cardano";
 
-type Options = { count: number, page: number, chain?: boolean , policies?: string[] }
+type Options = { count: number, page: number, chain?: boolean , policies: string[] }
 
 export class AssetStoreDsl {
 	
@@ -13,7 +12,6 @@ export class AssetStoreDsl {
 
 	constructor (
         private blockfrost: BlockFrostAPI,
-        private registry: Registry,
     ) {}
 
 	public async list(userId: string, addresses: string[], options: Options): Promise<Inventory> {
@@ -60,7 +58,7 @@ export class AssetStoreDsl {
 			const inventories = await Promise
 				.all(addresses.map(async a => await this.fetchOnChainAssets(a, options)))
 			if (inventories.length == 0) return {}
-			else return inventories.reduce(this.shallowInventoryMerge)
+			else return inventories.reduce(this.deepInventoryMerge)
 		} catch {
 			return {}
 		}
@@ -103,14 +101,11 @@ export class AssetStoreDsl {
 	 * @returns 
 	 */
 	private filterBlockFrostAssets = (assets: { unit: string, quantity: string }[], inventory: Inventory, options: Options): Inventory => {
-		const allPolicies = this.registry.list()
-		const filterPolicies = options.policies ?? allPolicies.map(p => p.policyId)
-		const policies = allPolicies 
-			.map(p => { return {
-                policyId: p.policyId,
-                rx: new RegExp(p.policyId+"(.+)")
+		const policies = options.policies 
+			.map(policyId => { return {
+                policyId,
+                rx: new RegExp(policyId+"(.+)")
             }})
-			.filter(p => filterPolicies.includes(p.policyId))
 		assets.forEach(asset => 
 			policies.forEach(policy => {
 				const extraction = policy.rx.exec(asset.unit)
@@ -135,4 +130,19 @@ export class AssetStoreDsl {
         })
         return b
     }
+
+	private deepInventoryMerge = (a: Inventory, b: Inventory): Inventory => {
+		const merged = {...b}
+		Object.keys(a).forEach(k1 => {
+            if (merged[k1] == undefined) merged[k1] = a[k1]
+            else merged[k1] = merged[k1].concat(a[k1]).reduce((acc, currentValue) => {
+				const {unit, quantity, chain} = currentValue
+				const xs = acc.map((x,index) => ({x,index})).find(({x, index}) => x.unit == unit && x.chain == chain)
+				if (xs) acc[xs.index].quantity = (BigInt(acc[xs.index].quantity) + BigInt(quantity)).toString()
+				else acc.push(currentValue)
+				return acc
+			},[] as {unit: string, quantity: string, chain: boolean}[])
+        })
+        return merged
+	}
 }

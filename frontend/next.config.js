@@ -3,18 +3,22 @@
 const hostname = process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "https://acceptance.ddu.gg"
 
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   swcMinify: true,
   output: 'standalone',
-  webpackDevMiddleware: config => {
-    config.watchOptions = {
-      poll: 1000,
-      aggregateTimeout: 300,
-    }
-    return config
+  compiler: {
+    styledComponents: true
   },
   images : {
-    domains : ['d1f9hywwzs4bxo.cloudfront.net', 'cdn.ddu.gg']
+    domains : ['d1f9hywwzs4bxo.cloudfront.net', 'cdn.ddu.gg', 'www.drunkendragon.games']
+  },
+  webpack: function (config, options) {
+    return {
+      ...config, 
+      experiments: {
+        topLevelAwait: true
+      }
+    }
   },
   rewrites: async () =>
     [

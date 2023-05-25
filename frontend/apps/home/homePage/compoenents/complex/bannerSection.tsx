@@ -1,8 +1,7 @@
+import Link from "next/link"
 import styled from "styled-components"
-import { SimpleSlider } from "../../../../utils/components/basic_components"
+import { Button, LinkDisable, SimpleSlider } from "../../../../utils/components/basic_components"
 import { BannerCard, BannerCardMobile } from "../basic_components"
-import Image from "next/image"
-import { Button, LinkDisable, SimpleButton } from "../../../../utils/components/basic_components"
 
 const BannerSectionComponent = styled.section`
     width: 100vw;
@@ -29,9 +28,10 @@ const Banner = styled.div`
     max-width: 2048px;
     max-height: 727.04px;
     
-    border: 0.2vw solid #cbc7bf;
+    #border: 0.2vw solid #cbc7bf;
     padding: 0vw 0vw 0vw 0.08vw;
     position: relative;
+    filter: drop-shadow(0px 0px 0.5vw #000000);
 
     .slick-dots{
 
@@ -65,15 +65,6 @@ const BannerMobile = styled.div`
 `
 
 
-const CornerOrnament = styled.div`
-    position: absolute;
-    width: 2.2vw;
-    height: 2.2vw;
-    top:-0.7vw;
-    z-index: 1;
-    right: -0.7vw;
-`
-
 const ButtonPosition = styled.div`
     position: absolute;
     bottom: -2.3vw;
@@ -90,23 +81,20 @@ const ButtonPosition = styled.div`
         bottom: -60px;
     }
 `
+
 const BannerSection = (): JSX.Element => {
    
     return(<>
             <BannerSectionComponent>
                 <PositionRelative>
                 <Banner>  
-                    <CornerOrnament>
-                        <Image src ="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/home/banner_ornament.svg" alt = "drunken dragon ornament" width = {100} height = {100} layout ="responsive"/>
-                    </CornerOrnament>
-                    
                     <SimpleSlider>
                         <BannerCard src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/home/banner.png"/>
                     </SimpleSlider>
                 </Banner>
 
                 <BannerMobile>
-                    <BannerCardMobile/>
+                    <BannerCardMobile />
                 </BannerMobile>
 
                 <ButtonPosition>

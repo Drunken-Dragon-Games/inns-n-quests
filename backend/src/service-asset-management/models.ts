@@ -1,3 +1,4 @@
+import { MinimalUTxO } from "../tools-cardano"
 
 export type HealthStatus =
     { status: "ok" | "warning" | "faulty"
@@ -7,15 +8,14 @@ export type HealthStatus =
         }[]
     }
 
-export type RegistryPolicy =
-    { policyId: string
-    , name: string
-    , description: string
-    , tags: string[]
-    }
-
 export type Inventory = 
     { [policyId: string]: { unit: string, quantity: string, chain: boolean }[] }
+
+export type AssetUnit = {
+    unit: string,
+    policyId: string,
+    quantity: string,
+}
 
 export type DDUAsset =
     { unit: string
@@ -23,6 +23,22 @@ export type DDUAsset =
     , quantity: string 
     , chain: boolean
     }
+
+export interface AssetClaim {
+    claimId: string,
+    userId: string,
+    policyId: string,
+    unit: string,
+    quantity: string,
+    state: ClaimStatus,
+    txId?: string,
+    createdAt: string
+}
+
+export type ClaimerInfo = {
+    utxos: MinimalUTxO[],
+    receivingAddress: string,
+}
 
 export type ListResponse 
     = { status: "ok", inventory: Inventory }
@@ -33,6 +49,11 @@ export type ClaimStatus
     | "submitted"
     | "timed-out"
     | "confirmed"
+//    | "error"
+
+export type UserClaimsResponse
+    = { status: "ok", claims: AssetClaim[] }
+    | { status: "invalid", reason: string }
 
 export type GrantResponse
     = { status: "ok" }
@@ -48,4 +69,12 @@ export type SubmitClaimSignatureResponse
 
 export type ClaimStatusResponse
     = { status: "ok", claimStatus: ClaimStatus }
+    | { status: "invalid", reason: string }
+
+export type LucidClaimResponse
+    = { status: "ok", claimId: string, tx: string, dragonSilverWitness: string }
+    | { status: "invalid", reason: string }
+
+export type LucidReportSubmissionResponse 
+    = { status: "ok" }
     | { status: "invalid", reason: string }

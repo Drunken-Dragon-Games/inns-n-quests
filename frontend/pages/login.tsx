@@ -1,26 +1,18 @@
 import type { NextPage } from 'next'
 import Head from 'next/head';
 import LoginApp from "../apps/login/login"
-import { loginStore} from "../apps/login/features/appLogin"
+import { loginStore } from "../apps/login/features/appLogin"
 import { Provider } from "react-redux"
 
-
-const Login: NextPage = () => {
-
- 
-  return (
+const Login: NextPage = () =>
     <>
         <Head>
-            <title>Log In | Drunken Dragon</title>
-            <meta name="description" content="A drunken Dragon Game" />
+            <title>Signin InQ</title>
+            <meta name="Drunken Dragon Inns & Quests" content="A Drunken Dragon Universe Game" />
         </Head>
-
         <Provider store={loginStore}>
-            <LoginApp/>
+            <LoginApp />
         </Provider>
-
     </>
-  )
-}
 
 export default Login

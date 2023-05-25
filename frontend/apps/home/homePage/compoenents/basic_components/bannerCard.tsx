@@ -1,6 +1,7 @@
 import Image from "next/image"
+import Link from "next/link"
 import styled from "styled-components"
-import { SimpleButton, LinkDisable } from "../../../../utils/components/basic_components" 
+import { SimpleButton } from "../../../../utils/components/basic_components"
 
 
 const BannerCardComponent = styled.div`
@@ -36,13 +37,11 @@ const BannerCard = ( {src} : BannerCard): JSX.Element =>{
         <BannerCardComponent>
             <Image src ={src} alt=" drunken dragon image banner" width = {800} height = {281} layout = "responsive"/>
 
-            <BannerButton>
-
-                <LinkDisable url="/s2" openExternal = {false}>
-                    <SimpleButton action={() => null}>Explore Collection</SimpleButton>
-                </LinkDisable>
-                
-            </BannerButton>
+            <Link href="/s2" passHref>
+                <BannerButton>
+                    <SimpleButton>Explore Collection</SimpleButton>
+                </BannerButton>
+            </Link>
             
         </BannerCardComponent>
 

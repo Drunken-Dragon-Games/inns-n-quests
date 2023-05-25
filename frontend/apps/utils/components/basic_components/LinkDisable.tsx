@@ -1,35 +1,26 @@
 import Link from "next/link"
-import { ConditionalRender } from "./"
+import { ReactNode } from "react"
 
 interface LinkDisable {
-    children: JSX.Element | JSX.Element []
+    children?: ReactNode
     url: string
     disable?: boolean
     openExternal?: boolean
 }
 
-const LinkDisable = ({children, url, disable, openExternal}: LinkDisable): JSX.Element => {
-    
-    return(<>
+const External = ({ children, url }: { children?: ReactNode, url: string }) => 
+    <Link href={url} passHref>
+        <a target="_blank">{children}</a>
+    </Link>
 
-            <ConditionalRender condition = {disable == true}>
-                {children}
-            </ConditionalRender>
+const Internal = ({ children, url }: { children?: ReactNode, url: string }) => 
+    <Link href={url} passHref>{children}</Link>
 
-            <ConditionalRender condition = {disable != true}>
-                <Link href={url}>
-                        {openExternal
-                            ?
-                                <a target="_blank">
-                                    {children}
-                                </a>
-                            : 
-                                children
-                            }
-                    </Link>
-            </ConditionalRender>
-               
-    </>)
+const LinkDisable = ({children, url, disable, openExternal}: LinkDisable) => {
+    if (disable) return <>{children}</>
+    else if (openExternal) return <External url={url}>{children}</External>
+    //return external({children, url})
+    else return <Internal url={url}>{children}</Internal>
 }
 
 export default LinkDisable

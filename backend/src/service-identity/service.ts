@@ -14,7 +14,8 @@ import { config, HealthStatus } from "../tools-utils"
 import { 
     CreateNonceResult, Credentials, AuthenticationResult, RegistrationResult, AssociationResult, 
     RefreshResult, ListSessionsResult, SignOutResult, ResolveUserResult, ResolveSesionResult, 
-    UpdateUserResult 
+    UpdateUserResult, 
+    UserInfo
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -22,6 +23,7 @@ import * as sessionsDB from "./sessions/session-db"
 import * as usersDB from "./users/users-db"
 import path from "path"
 import { Umzug } from "umzug"
+import { NODE_ENV } from "../module-ddu-app/settings"
 
 export interface IdentityServiceConfig 
     { network: string
@@ -54,6 +56,7 @@ export class IdentityServiceDsl implements IdentityService {
             , discord:
                 { clientId: config.stringOrError("DISCORD_CLIENT_ID")
                 , clientSecret: config.stringOrError("DISCORD_CLIENT_SECRET")
+                , redirect: config.stringOrError("DISCORD_REDIRECT_URI")
                 , redirectValidate: config.stringOrError("DISCORD_REDIRECT_URI_VALIDATE")
                 , redirectAdd: config.stringOrError("DISCORD_REDIRECT_URI_ADD")
                 }
@@ -128,6 +131,10 @@ export class IdentityServiceDsl implements IdentityService {
                     return { status: "ok", tokens }
                 }
             }
+        } else if (credentials.ctype === "development" && NODE_ENV === "development") {
+            const userId = await Users.registerSimpleUser(credentials.nickname)
+            const tokens = await this.sessions.create(userId, "Development", credentials.deviceType)
+            return { status: "ok", tokens }
         } else {
             return <AuthenticationResult>{}
         }
@@ -180,6 +187,10 @@ export class IdentityServiceDsl implements IdentityService {
         const user = await Users.resolve(info)
         if (user.ctype == "failure") return { status: "unknown-user-id" }
         else return { status: "ok", info: user.result }
+    }
+
+    async resolveUsers(userIds: string[], logger?: LoggingContext): Promise<UserInfo[]> {
+        return await Users.resolveUsersNoStakeAddresses(userIds)
     }
 
     async resolveSession(sessionId: string, logger?: LoggingContext): Promise<ResolveSesionResult> {

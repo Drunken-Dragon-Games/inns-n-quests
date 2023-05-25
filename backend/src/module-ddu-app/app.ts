@@ -1,57 +1,38 @@
-import express, { Request, Response, Router } from "express";
-import cookieParser from "cookie-parser"
-import { corsOptions } from "./settings"
-import cors from "cors"
-import { loadAccountManagementRoutes, loadUserRoutes, loadAccountRegisterRoutes } from "./routes"
-import apiErrorHandler from "./error/api_error_handler"
-import dotenv from "dotenv"
-import { IdentityService } from "../service-identity";
-import { AssetManagementService } from "../service-asset-management";
-import helmet from "helmet"
-import { jwtMiddleware } from "../module-quests/app/middleware/jwt_middleware";
-import { getStakeAddressMiddleware } from "../module-quests/app/middleware/get-stakeaddress-middleware";
-import { validateAddressMiddleware } from "../module-quests/app/middleware/validate_address";
-import { registerAddressMidleware } from "../module-quests/app/middleware/register-address-middleware";
-import { loadPlayerRoutes } from "../module-quests/players/routes";
-import { loadAdventurerRoutes } from "../module-quests/adventurers/routes";
-import { loadQuestRoutes } from "../module-quests/quests/routes";
-import { Sequelize } from "sequelize";
 import compression from "compression"
+import cookieParser from "cookie-parser"
+import cors from "cors"
+import dotenv from "dotenv"
+import express from "express"
+import helmet from "helmet"
+import { AccountService } from "../service-account"
+import { IdleQuestsService } from "../service-idle-quests"
+import apiErrorHandler from "./error/api_error_handler"
+import { accountRoutes } from "./routes-account"
+import { idleQuestRoutes } from "./routes-idle-quests"
+import { corsOptions } from "./settings"
+import { jwtMiddleware } from "./jwt_middleware"
 
 dotenv.config()
-const questRootPath = "/quests/api"
 
-const buildApp = async (identityService: IdentityService, assetManagementService: AssetManagementService, database: Sequelize) => {
-    const app = express();
+const buildApp = async (
+    accountService: AccountService,
+    idleQuestsService: IdleQuestsService, 
+) => {
+    const app = express()
     
-    const healthEndpoint = Router()
-    healthEndpoint.get("/health", (req: Request, res: Response) => { res.status(200).json({ status: "ok" }) })
-    
+    // MIDDLEWARE
+    //app.use("/static", express.static(__dirname + "/static"))
     app.use(helmet({crossOriginResourcePolicy: false,}))
     app.disable('x-powered-by')
-
-    // MIDDLEWARE
-    app.use("/static", express.static(__dirname + "/static"));
     app.use(express.json())
     app.use(cookieParser())
     app.use(cors(corsOptions))
-    app.use(questRootPath, healthEndpoint)
     app.use(compression())
-    app.use(questRootPath, jwtMiddleware)
-    app.use(questRootPath, getStakeAddressMiddleware(identityService))
-    app.use(questRootPath, validateAddressMiddleware)
-    app.use(questRootPath, registerAddressMidleware)
-    
-    // ROUTES
-    app.use("/api", healthEndpoint)
-    app.use("/api", loadAccountManagementRoutes(identityService))
-    app.use("/api", loadUserRoutes(identityService, assetManagementService))
-    app.use("/api", loadAccountRegisterRoutes(identityService))
+
     
     // QUEST MODULE ROUTES
-    app.use(questRootPath, loadPlayerRoutes(identityService, assetManagementService))
-    app.use(questRootPath, (await loadAdventurerRoutes(database, assetManagementService)))
-    app.use(questRootPath, loadQuestRoutes(database, assetManagementService))
+    app.use("/api/quests", jwtMiddleware, idleQuestRoutes(idleQuestsService))
+    app.use("/api/account", accountRoutes(accountService))
     
     // Error handler middleware
     app.use(apiErrorHandler)
@@ -59,4 +40,5 @@ const buildApp = async (identityService: IdentityService, assetManagementService
 }
 
 
-export { buildApp };
+export { buildApp }
+

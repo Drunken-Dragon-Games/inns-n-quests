@@ -26,16 +26,9 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return status 
     }
 
-    async registry(logger?: LoggingContext): Promise<models.RegistryPolicy[]> {
+    async list(userId: string, options: { count?: number, page?: number, chain?: boolean , policies?: string[] }, logger?: LoggingContext): Promise<models.ListResponse> {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.log.info("fetching asset registry")
-        const response = await this.base.registry(serviceLogger)
-        return response
-    }
-
-    async list(userId: string, logger?: LoggingContext, options?: { count?: number, page?: number, chain?: boolean , policies?: string[] }): Promise<models.ListResponse> {
-        const serviceLogger = this.withComponent(logger)
-        const response = await this.base.list(userId, serviceLogger, options)
+        const response = await this.base.list(userId, options, serviceLogger)
         serviceLogger?.log.info(`listing assets for user ${userId}, result was ${response.status}`, options)
         return response
     }
@@ -51,10 +44,28 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return response
     }
 
-    async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<models.ClaimResponse> {
+    async grantMany(userId: string, asset: { unit: string, policyId: string, quantity: string }[], logger?: LoggingContext): Promise<models.GrantResponse> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.log.info(`granting assets to user ${userId}`, { asset })
+        const response = await this.base.grantMany(userId, asset, serviceLogger)
+        if (response.status == "invalid")
+            serviceLogger?.log.info(`invalid asset grant to user ${userId} reason:${response.reason}`)
+        else 
+            serviceLogger?.log.info(`grant successful`)
+        return response
+    }
+
+	async userClaims(userId: string, unit: string, page?: number, logger?: LoggingContext): Promise<models.UserClaimsResponse> {
+        const serviceLogger = this.withComponent(logger)
+        const response = await this.base.userClaims(userId, unit, page, serviceLogger)
+        serviceLogger?.log.info(`listing claims for user ${userId}, result was ${response.status}`)
+        return response
+    }
+
+    async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, claimerInfo?: models.ClaimerInfo, logger?: LoggingContext): Promise<models.ClaimResponse> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`claiming assets for user ${userId}`, { stakeAddress, asset })
-        const response = await this.base.claim(userId, stakeAddress, asset, serviceLogger)
+        const response = await this.base.claim(userId, stakeAddress, asset, claimerInfo, serviceLogger)
         if (response.status == "invalid")
             serviceLogger?.log.info(`invalid claim for user ${userId} reason:${response.reason}`)
         else 

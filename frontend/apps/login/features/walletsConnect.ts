@@ -3,7 +3,7 @@ import { LoginThunk } from './appLogin';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { combineReducers } from "redux";
 import { deserializeStakeAddress } from './authentication';
-import { cardano_network } from '../../../setting';
+import { cardanoNetwork } from '../../../setting';
 
 
 //esta funcion regresa la api dependendiendo de la wallet
@@ -48,13 +48,14 @@ export const connectNami = (): LoginThunk => async (dispatch, getState) => {
 
   try {
 
+    /*
     //realiza la coneccion con la cartera funcion que regresa la api requerida
     let api = getState().wallet.data.api
     
     //realiza un llamado para saber si la cartera esta en output Mainnet (1) o Testnet (0) 
     let net: 1 | 0 = await api.getNetworkId()
 
-    const currentNet: 1 | 0 = cardano_network()
+    const currentNet: 1 | 0 = cardanoNetwork()
 
     //revisa en que net esta actualmente
     if (net == currentNet) {
@@ -75,7 +76,7 @@ export const connectNami = (): LoginThunk => async (dispatch, getState) => {
     }
 
     dispatch(setWalletStatusFulfilled())
-
+*/
 
   }
   catch (err) {
@@ -102,6 +103,7 @@ export const connectEternl = (): LoginThunk => async (dispatch, getState) => {
 
   try {
 
+    /*
     //realiza la coneccion con la cartera funcion que regresa la api requerida
     let api = getState().wallet.data.api
     
@@ -109,7 +111,7 @@ export const connectEternl = (): LoginThunk => async (dispatch, getState) => {
     let net: 1 | 0 = await api.getNetworkId()
 
     
-    const currentNet: 1 | 0 = cardano_network()
+    const currentNet: 1 | 0 = cardanoNetwork()
 
     
     //revisa en que net esta actualmente el alpha es testnet 
@@ -134,7 +136,7 @@ export const connectEternl = (): LoginThunk => async (dispatch, getState) => {
     }
 
     dispatch(setWalletStatusFulfilled())
-
+    */
   }
   catch (err) {
 

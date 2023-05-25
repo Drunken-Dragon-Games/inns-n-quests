@@ -24,7 +24,7 @@ export class AssetClaim extends Model implements IAssetClaim {
     declare createdAt: string
 }
 
-export const AssetClaimTableName = "asset_claim"
+export const AssetClaimTableName = "asset_management_asset_claim"
 
 export const AssetClaimTableAttributes = {
     claimId: {

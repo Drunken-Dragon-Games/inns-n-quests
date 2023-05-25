@@ -2,7 +2,7 @@ import { discord_client_id, discord_response_type, discord_scope, discord_redire
 import { createSliceStatus, actionsGenerator } from "../../../utils/features/utils";
 import { combineReducers } from "redux";
 import { axiosCustomInstance } from "../../../../axios/axiosApi";
-import { generalReducerThunk } from "../../../../features/generalReducer";
+import { GeneralReducerThunk } from "../../../../features/generalReducer";
 import { AxiosError } from "axios";
 import { fetchRefreshToken } from "../../../../features/refresh";
 
@@ -38,7 +38,7 @@ export const handleDiscordAuthAddAccount = () => {
 }
 
 
-export const compareNonceAddDiscord = (state: string, code: string): generalReducerThunk => (dispatch) =>{
+export const compareNonceAddDiscord = (state: string, code: string): GeneralReducerThunk => (dispatch) =>{
 
     dispatch(setCompareNonceAddDiscordStatusPending())
     
@@ -66,7 +66,7 @@ const  compareNonceAddDiscordStatus  = createSliceStatus("compareNonceAddDiscord
 const [ setCompareNonceAddDiscordStatusIdle, setCompareNonceAddDiscordStatusPending, setCompareNonceAddDiscordStatusFulfilled, setCompareNonceAddDiscordStatusRejected ] = actionsGenerator(compareNonceAddDiscordStatus.actions)
 
 
-export const connectDiscord = (code: string): generalReducerThunk => async (dispatch) => {
+export const connectDiscord = (code: string): GeneralReducerThunk => async (dispatch) => {
     
     dispatch(setConnectDiscordStatusPending())
     try {

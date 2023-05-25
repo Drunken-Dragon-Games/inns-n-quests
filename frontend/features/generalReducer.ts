@@ -9,7 +9,6 @@ import { ProfileDataReducer } from "../apps/accountSettings/accountSettings/feat
 import { refreshReducer } from "./refresh";
 import { logoutReducer } from "../apps/accountSettings/accountSettings/features/logout";
 import { exploreOfThioldenReducer } from "../apps/explorerOfThiolden/explorerOfThioldenPage/features/explorerOfThiolden";
-import { idleQuest } from "../apps/idleQuest/idleQuest/features/idelQuest";
 
 export const generalReducer = combineReducers({
     userDataNavBar: userInfoReducer,
@@ -21,7 +20,6 @@ export const generalReducer = combineReducers({
     refresh: refreshReducer,
     logout: logoutReducer,
     exploreOfThioldenReducer: exploreOfThioldenReducer,
-    idleQuest: idleQuest
 })
 
 
@@ -30,16 +28,16 @@ export const generalStore = configureStore({
     middleware: (getDefaultMiddleware) => getDefaultMiddleware( {serializableCheck: false}),
 })
 
-export type generalReducerRootState = ReturnType<typeof generalStore.getState>
+export type GeneralReducerRootState = ReturnType<typeof generalStore.getState>
 
-export type generalReducerDispatch = typeof generalStore.dispatch
+export type GeneralReducerDispatch = typeof generalStore.dispatch
 
-export type generalReducerThunk<ReturnType = void> = ThunkAction<
+export type GeneralReducerThunk<ReturnType = void> = ThunkAction<
   ReturnType,
-  generalReducerRootState,
+  GeneralReducerRootState,
   unknown,
   Action<string>
 >
 
 
-export const selectGeneralReducer = (state: generalReducerRootState) => state
+export const selectGeneralReducer = (state: GeneralReducerRootState) => state

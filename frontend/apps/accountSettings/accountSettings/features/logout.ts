@@ -1,14 +1,14 @@
 import { axiosCustomInstance } from '../../../../axios/axiosApi';
 import { createSliceStatus, actionsGenerator } from '../../../utils/features/utils'
 import { combineReducers } from "redux";
-import { generalReducerThunk } from "../../../../features/generalReducer";
+import { GeneralReducerThunk } from "../../../../features/generalReducer";
 import { AxiosError } from "axios";
 import Router from 'next/router'
 
 
 
 //fetch para cambiar el nickname
-export const fetchLogout = (): generalReducerThunk => async (dispatch) => {
+export const fetchLogout = (): GeneralReducerThunk => async (dispatch) => {
 
 
     dispatch(setFetchFetchLogoutStatusPending())

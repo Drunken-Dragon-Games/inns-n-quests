@@ -9,7 +9,7 @@ import { AuthenticationTokens, UserInfo, UserFullInfo } from "./models";
 import { expectResponse } from "../tools-utils/api-expectations";
 import { connectToDB, DBConfig } from "../tools-database";
 
-let network: CardanoNetwork = "testnet"
+let network: CardanoNetwork = "Preprod"
 let service: IdentityService
 
 const databaseConfig: DBConfig = 
@@ -24,7 +24,7 @@ beforeEach(async () => {
     service = await IdentityServiceDsl.loadFromConfig(
         { network
         , discord:
-            { clientId: "" , clientSecret: "" , redirectValidate: "", redirectAdd: "" }
+            { clientId: "" , clientSecret: "" , redirectValidate: "", redirectAdd: "", redirect: "" }
         , sessions:
             { duration: 1000 }
         }
@@ -37,7 +37,7 @@ afterEach(async () => {
 
 const nonceOk = (account: Wallet): Promise<string> => 
     expectResponse(
-        service.createSigNonce(account.stakeAddress.to_address().to_bech32()),
+        service.createSigNonce(account.stakeAddress().to_address().to_bech32()),
         (response) => 
             response.status === "ok" ? 
             success(response.nonce) : 
@@ -122,7 +122,7 @@ test("authenticate discord: ok", async () => {
 test("associate wallet: ok", async () => {
     const tokens = await createDiscordAccount()
     const account = Wallet.generate(network, "password")
-    const stakeAddress = account.stakeAddress.to_address().to_bech32()
+    const stakeAddress = account.stakeAddress().to_address().to_bech32()
     const nonce: string = await expectResponse(
         service.createSigNonce(stakeAddress),
         (response) => 
@@ -143,7 +143,7 @@ test("associate wallet: wallet Used", async () => {
     const tokens = await createDiscordAccount()
     const accountObject = await createSigAccount()
     const account = accountObject.wallet
-    const stakeAddress = account.stakeAddress.to_address().to_bech32()
+    const stakeAddress = account.stakeAddress().to_address().to_bech32()
     const nonce: string = await expectResponse(
         service.createSigNonce(stakeAddress),
         (response) => 
@@ -226,7 +226,7 @@ test("authenticate sig: bad - bad address", async () => {
 
 test("authenticate sig: bad - bad nonce or bad signature", async () => {
     const account = Wallet.generate(network, "password")
-    const stakeAddress = account.stakeAddress.to_address().to_bech32()
+    const stakeAddress = account.stakeAddress().to_address().to_bech32()
     const nonce: string = await expectResponse(
         service.createSigNonce(stakeAddress),
         (response) => 

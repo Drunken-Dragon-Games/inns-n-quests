@@ -22,7 +22,7 @@ export class StoredSession extends Model implements IStoredSession {
     declare authType: AuthType
 }
 
-export const StoredSessionTableName = "stored_sessions"
+export const StoredSessionTableName = "identity_stored_sessions"
 
 export const StoredSessionTableAttributes = {
     sessionId: {

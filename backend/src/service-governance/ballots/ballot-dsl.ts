@@ -1,0 +1,150 @@
+import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, StoredUserBallot, MultipleUserBallots, registerBallotType, voteResponse, AllBallotData, BallotData, BallotOption } from "../models"
+import { Ballot, BallotVote } from "./ballots-db"
+
+export class Ballots {
+    static async register(ballot: registerBallotType): Promise<RegisterBallotResponse> {
+        try{
+            const optionTitles: string[] = []
+            const optionDescriptions: string[] = []
+
+            for (const option of ballot.options) {
+                optionTitles.push(option.title)
+                optionDescriptions.push(option.description)
+            }
+            return {ctype: "success", ballotId: (await Ballot.create({ inquiry: ballot.question.inquiry, description: ballot.question.description, state: 'open', options: JSON.stringify(optionTitles), descriptions: JSON.stringify(optionDescriptions) })).ballotId}
+        }   catch(e: any) {return {ctype: "error", reason: e.message}}
+    }
+
+    static async getSingle(ballotId: string): Promise<GetBallotResponse>{
+        try{
+            const unprossedBallot = await Ballot.findByPk(ballotId)
+            if (!unprossedBallot) return {ctype: "error", reason: "unknown Ballot ID"}
+            const votes = await BallotVote.findAll({where: { ballotId}})
+            const processedBallot = Ballots.processSingleBallot(unprossedBallot, votes)
+            return {ctype: "succes", ballot: processedBallot}
+        } catch(error: any){
+            return { ctype: "error", reason: error.message }
+        }
+        
+    }
+
+    static async getMultiple(state?: BallotState): Promise<MultipleBallots> {
+        try {
+
+            const ballots = await Ballot.findAll(state ? { where: { state } } : {})
+            const storedBallots: { [ballotId: string]: StoredBallot } = {}
+
+            for (const ballot of ballots) {
+            const votes = await BallotVote.findAll({where: { ballotId: ballot.ballotId }})
+            const processedBallot = Ballots.processSingleBallot(ballot, votes)
+            storedBallots[ballot.ballotId] = processedBallot
+            }
+            return {ctype: "success", ballots: storedBallots}
+
+        } catch (error: any) {
+            return { ctype: "error", reason: error.message }
+        }
+    }
+
+    static async getUserBallots(userId: string, state?: BallotState): Promise<MultipleUserBallots> {
+        try{
+            const ballots = await Ballot.findAll({ limit: 6, order: [["createdAt", "DESC"]], ...(state ? { where: { state } } : {})})
+            const storedUserBallots:  { [ballotId: string]: StoredUserBallot } = {}
+            for (const ballot of ballots) { 
+                const options = ballot.optionsArray.map((option, index) => ({option, description: ballot.descriptionArray[index]}))
+                const exisitingVote = await BallotVote.findOne({where: {ballotId: ballot.ballotId, userId}})
+                storedUserBallots[ballot.ballotId] = {
+                    id: ballot.ballotId, 
+                    inquiry: ballot.inquiry, 
+                    descriptionOfInquiry: ballot.description, 
+                    options, 
+                    state: ballot.state, 
+                    voteRegistered: !!exisitingVote
+                }
+            }
+            return {ctype: "success", ballots: storedUserBallots}
+        } catch (e: any){
+            return { ctype: "error", reason: e.message }
+        }
+         
+    }
+
+    static async getAllDetails(limit: number, state?: BallotState): Promise<AllBallotData> {
+        try{
+            const ballots = await Ballot.findAll({ limit, order: [["createdAt", "DESC"]], ...(state ? { where: { state } } : {})})
+            const ballotData: {[ballotId: string]: BallotData} = {}
+            for (const ballot of ballots) { 
+                const votes = await BallotVote.findAll({where: { ballotId: ballot.ballotId }})
+                const formatedBallot = Ballots.formatBallotData(ballot, votes)
+                ballotData[ballot.ballotId] = formatedBallot
+            }
+            return {ctype: "success", ballots: ballotData}
+        } catch (e: any){
+            return { ctype: "error", reason: e.message }
+        }
+    }
+
+    static async getVote(userId: string, ballotId: string): Promise<number | "none"> {
+        const vote = await BallotVote.findOne({where: {ballotId: ballotId, userId}})
+        if (!vote) return "none"
+        else return vote.optionIndex
+    }
+
+    private static formatBallotData(ballot: Ballot, votes: BallotVote[]): BallotData {
+        const options = ballot.optionsArray.map((option, index) => {
+            const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
+            const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + parseInt(vote.dragonGold), 0)
+            const description = ballot.descriptionArray[index]
+            return { title: option, description, lockedInDragonGold: dragonGoldSum.toString() }
+        })
+  
+        return { id: ballot.ballotId, status: ballot.state, inquiry: ballot.inquiry, inquiryDescription: ballot.description ,options}
+    }
+
+    private static processSingleBallot(ballot: Ballot,votes: BallotVote[] ): StoredBallot {
+        const options = ballot.optionsArray.map((option, index) => {
+            const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
+            const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + parseInt(vote.dragonGold), 0)
+            const description = ballot.descriptionArray[index]
+            return { option, description, dragonGold: dragonGoldSum.toString() }
+        })
+  
+        return { id: ballot.ballotId, inquiry: ballot.inquiry, descriptionOfInquiry: ballot.description ,options, state: ballot.state }
+    }
+
+    static getMaxDragonGold(options: BallotOption[]) {
+        return options.reduce((max, option) => BigInt(option.lockedInDragonGold) > BigInt(max) ? option.lockedInDragonGold : max, "0")
+    }
+
+    static async close(ballotId: string): Promise<CloseBallotResponse> {
+        const ballot = await Ballot.findByPk(ballotId)
+        if (!ballot) return {ctype: "error", reason: "unknown Ballot ID"}
+        ballot.state = "closed"
+        await ballot.save()
+        const votes = await BallotVote.findAll({where: { ballotId: ballot.ballotId }})
+
+        const proccedBallot = Ballots.processSingleBallot(ballot, votes)
+        
+        const maxDragonGold = proccedBallot.options.reduce((max, option) => BigInt(option.dragonGold) > BigInt(max)? option.dragonGold : max, "0")
+        const winners = proccedBallot.options.filter(option => option.dragonGold === maxDragonGold)
+
+        return { ctype: "success", inquiry: ballot.inquiry, winners }
+    }
+
+    static async vote(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<voteResponse>{
+        try {
+            const ballot = await Ballot.findByPk(ballotId)
+            if (!ballot) return {ctype: "error", reason: "unknown Ballot ID"}
+            if(ballot.state !== "open") return {ctype: "error", reason: "Ballot is no longer accepting votes"}
+            const exisitingVote = await BallotVote.findOne({where: {ballotId, userId}})
+            if (exisitingVote) return {ctype: "error", reason: "User already voted for this Ballot"}
+            const vote = BallotVote.create({userId, ballotId, optionIndex, dragonGold})
+            return {ctype: "success"}
+        }catch(error: any){
+            console.error(error)
+            return {ctype: "error", reason: error.message}
+        }
+        
+ 
+    }
+}

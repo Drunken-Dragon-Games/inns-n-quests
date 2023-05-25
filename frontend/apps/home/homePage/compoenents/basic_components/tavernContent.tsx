@@ -1,7 +1,8 @@
-import styled from "styled-components"
-import HomeButtonComponent from "../../../../utils/components/homeButton"
 import Image from "next/image"
-import { TextElMessiri, SimpleButton, LinkDisable } from "../../../../utils/components/basic_components"
+import Link from "next/link"
+import styled from "styled-components"
+import { gamesButtonSection } from "../../../../../setting"
+import { SimpleButton, TextElMessiri } from "../../../../utils/components/basic_components"
 
 const TavernContentContainer = styled.div`
     position: relative;
@@ -98,9 +99,10 @@ const TavernContent = ():JSX.Element => {
 
         <ButtonWrapper>
             <Center>
-                <LinkDisable url="https://drunken-dragon-games.itch.io/drunken-dragon-inns-n-quests" openExternal = {true}>
-                    <SimpleButton action={() => null}>Open your Inn</SimpleButton>
-                </LinkDisable>
+                {/*<LinkDisable url="https://drunken-dragon-games.itch.io/drunken-dragon-inns-n-quests" openExternal = {true}>*/}
+                <Link href={gamesButtonSection.quests} legacyBehavior>
+                    <a> <SimpleButton action={() => null}>Open your Inn</SimpleButton> </a>
+                </Link>
             </Center>   
         </ButtonWrapper>
        

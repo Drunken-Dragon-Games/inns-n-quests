@@ -1,8 +1,10 @@
-import ServiceTestDsl, { IdentityServiceMock, SecureSigningServiceMock } from "./service.test-dsl";
-import { AssetManagementService } from "./service-spec";
-import { AssetManagementServiceDsl } from "./service";
-import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
 import { connectToDB, DBConfig } from "../tools-database";
+import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock";
+import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock";
+import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock";
+import { AssetManagementServiceDsl } from "./service";
+import { AssetManagementService } from "./service-spec";
+import ServiceTestDsl from "./service.test-dsl";
 
 let dsl: ServiceTestDsl
 let service: AssetManagementService
@@ -16,22 +18,20 @@ const databaseConfig: DBConfig =
     }
 
 beforeEach(async () => {
-    const identityService = IdentityServiceMock.buildInterface()
-    const secureSigningService = SecureSigningServiceMock.buildInterface()
-    const blockfrost = new BlockFrostAPI({ projectId: "preprod00000000000000000000000000000000" })
+    const identityService = new IdentityServiceMock()
+    const secureSigningService = new SecureSigningServiceMock()
+    const blockfrost = new BlockFrostAPIMock()
     service = await AssetManagementServiceDsl.loadFromConfig(
-        { network: "testnet"
-        , environment: "local"
-        , claimsConfig: 
+        { claimsConfig: 
             { feeAddress: "addr_test1qr50mcpmrfavg9ca0pd7mq3gc9uvqhr7gm78f346e2cc07l7u3q390npuc24v47udvsrr7h0t4d4m26h4f6gjpvw393sfwrk9j"
             , feeAmount: "1000000"
             , txTTL: 60 * 2 
             }
         },
         { database: connectToDB(databaseConfig)
-        , blockfrost 
-        , identityService
-        , secureSigningService
+        , blockfrost: blockfrost.service
+        , identityService: identityService.service
+        , secureSigningService: secureSigningService.service
         }
     )
     dsl = new ServiceTestDsl(

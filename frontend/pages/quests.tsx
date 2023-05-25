@@ -1,17 +1,23 @@
-import type { NextPage } from 'next'
+import type { GetServerSidePropsContext, NextPage } from 'next'
 import Head from 'next/head'
-import IdleQuest from '../apps/idleQuest/idleQuests'
+import IdleQuestsView from '../apps/game'
+import { getIsSsrMobile } from '../apps/is-mobile'
 
-const Quests: NextPage = () => {
-  return (
-        <>
-          <Head>
-              <title>Idle Quest | Drunken Dragon</title>
-              <meta name="Drunken dragon entreta" content="A drunken Dragon Game" />
-          </Head>
-          <IdleQuest/>
-        </>
-  )
-}
+const Quests: NextPage = () =>
+    <>
+        <Head>
+            <title>Inns & Quests</title>
+            <meta name="Drunken Dragon Inns & Quests" content="A Drunken Dragon Universe Game" />
+        </Head>
+        <IdleQuestsView />
+    </>
 
 export default Quests
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+    return {
+        props: {
+            isSsrMobile: getIsSsrMobile(context)
+        }
+    }
+}

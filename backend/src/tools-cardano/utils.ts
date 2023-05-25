@@ -3,12 +3,14 @@ import { Address, AssetName, BaseAddress, BigNum, hash_transaction, Int, LinearF
 		 TransactionBuilder, TransactionBuilderConfigBuilder, TransactionHash, TransactionInput, TransactionOutput, TransactionOutputBuilder, 
 		 TransactionWitnessSet, Value, Vkeywitness, Vkeywitnesses } from "@emurgo/cardano-serialization-lib-nodejs"
 import { bech32 } from "bech32"
+import * as cbor from 'cbor';
+import { Network } from "lucid-cardano"
 
-export type CardanoNetwork = "mainnet" | "testnet"
+export type CardanoNetwork = Network
 
 export const cardanoNetworkFromString = (raw?: string): CardanoNetwork => {
-	if (raw == "mainnet" || raw == "testnet") return raw
-	else throw new Error(`${raw} is not equal to CardanoNetwork 'mainnet' | 'testnet'`)
+	if (raw == "Mainnet" || raw == "Preprod") return raw
+	else throw new Error(`${raw} is not equal to CardanoNetwork 'Mainnet' | 'Preprod'`)
 }
 
 export interface UtxoLike {
@@ -35,7 +37,9 @@ export type TokenMintOptions = {
 	metadata?: { key: string, data: object }, 
 	script: NativeScript, 
 	amount: string,
-	ttl?: number 
+	ttl?: number,
+	receivingAddress?: string,
+	utxos?: UtxoLike[],
 }
 
 export class cardano {
@@ -224,9 +228,13 @@ export class cardano {
 	}
 
 	static createTokenMintTransaction = async (sourceAddress: string, options: TokenMintOptions, blockfrost: BlockFrostAPI): Promise<Transaction> => {
-		const receivingAddresses = (await blockfrost.accountsAddresses(sourceAddress)).map(a => a.address)
+		const receivingAddresses = options.receivingAddress ? 
+			[options.receivingAddress] : 
+			(await blockfrost.accountsAddresses(sourceAddress)).map(a => a.address)
 		const currentSlot = (await blockfrost.blocksLatest()).slot
-		const utxos = (await Promise.all(receivingAddresses.map(address => blockfrost.addressesUtxosAll(address)))).flat()
+		const utxos = options.utxos ?
+			options.utxos :
+			(await Promise.all(receivingAddresses.map(address => blockfrost.addressesUtxosAll(address)))).flat()
 		const address = Address.from_bech32(receivingAddresses[0])
 		const txBuilder = cardano.makeTxBuilder()
 		if (options.fee !== undefined) {
@@ -255,4 +263,72 @@ export class cardano {
 		txBuilder.add_change_if_needed(address)
 		return txBuilder.build_tx()
 	}
+
+	static deserializeAndLogTransaction = async (cborHex: string): Promise<void> => {
+		const decodeCBOR = async (cborHex: string) => {
+			const cborBytes = Buffer.from(cborHex, 'hex')
+			return await cbor.decodeFirst(cborBytes)
+		}
+		  
+		const ensureArray = (cborObject: any): any[] => {
+			if (!Array.isArray(cborObject)) {
+				throw new Error('Failed to deserialize Cardano transactions: expected an array')
+			}
+			return cborObject
+		}
+		
+		const processInputs = (transaction: any) => {
+			const hasInputs = transaction.has(0)
+			return hasInputs ? transaction.get(0).map((input: any) => ({
+				txId: input[0].toString('hex'),
+				index: input[1],
+			})) : []
+		}
+		
+		const processOutputs = (transaction: any) => {
+			const hasOutputs = transaction.has(1)
+			return hasOutputs ? transaction.get(1).map((output: any) => ({
+				address: Buffer.isBuffer(output[0]) ? output[0].toString('hex') : output[0],
+				amount: Array.isArray(output[1]) ? output[1][0] : output[1],
+			})) : []
+		}
+		
+		const processMint = (transaction: any) => {
+			const hasMint = transaction.has(9)
+			return hasMint && {
+				policy: transaction.get(9).keys().next().value.toString('hex'),
+				assets: Object.fromEntries([...transaction.get(9).values().next().value.entries()].map(([k, v]) => [k.toString(), v])),
+			}
+		}
+		
+		const processTransaction = (transaction: any) => {
+			try {
+				if (typeof transaction.has !== 'function') {return}
+				const hash = transaction.has(7) ? transaction.get(7).toString('hex') : undefined
+				if (!hash) {return}
+				return {
+				hash,
+				inputs: processInputs(transaction),
+				outputs: processOutputs(transaction),
+				fee: transaction.has(2) ? transaction.get(2) : undefined,
+				validityIntervalStart: transaction.has(3) ? transaction.get(3) : undefined,
+				mint: processMint(transaction),
+				}
+			} catch (error: any) {
+				console.error(error)
+				return undefined
+			}
+		}
+		
+		const cborObject = await decodeCBOR(cborHex)
+		const transactionsArray = ensureArray(cborObject)
+		const transactions = transactionsArray.map(processTransaction).filter(Boolean)
+
+		console.log(transactions[0])
+				
+	}
 }
+
+  
+  
+  
