@@ -227,7 +227,7 @@ const Navbar = (): JSX.Element =>{
                                     : <></> */}
             </HeaderBarContainer>
 
-        <TestnetBanner>Testnet <b>preprod</b> open beta.</TestnetBanner>
+        <TestnetBanner>Mainnet release! 🎉</TestnetBanner>
         </NavbarComponent>
     )
 }
