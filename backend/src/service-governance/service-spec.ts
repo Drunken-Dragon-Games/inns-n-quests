@@ -9,6 +9,12 @@ export interface GovernanceService {
 
     addBallot(ballot: models.registerBallotType):Promise<models.RegisterBallotResponse>
 
+    getAdminBallotCollection(): Promise<models.AdminBallotCollection>
+
+    getPublicBallotCollection(): Promise<models.PublicBallotCollection>
+
+    getUserBallotCollection(userId: string): Promise<models.UserBallotCollection>
+
     getBallots(state?: models.BallotState):Promise<models.MultipleBallots>
 
     getUserOpenBallots(userId: string): Promise<models.MultipleUserBallots>
