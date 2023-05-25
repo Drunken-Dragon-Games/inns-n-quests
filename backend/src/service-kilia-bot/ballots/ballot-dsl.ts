@@ -1,4 +1,4 @@
-import { registerBallotType, BallotState, StoredBallot } from "../models"
+import { registerBallotType, BallotState, StoredBallot, AdminBallot } from "../models"
 
 export const isBallot = (obj: any): obj is registerBallotType => {
   return (
@@ -64,4 +64,8 @@ export const formatStoredBallot = (storedBallot: StoredBallot): string => {
   formattedString += `\n**State:** ${storedBallot.state}`;
 
   return formattedString;
+}
+
+export const formatList = (storedBallots: { [ballotId: string]: AdminBallot; }): string => {
+  return Object.values(storedBallots).map(value => `${value.id} - ${value.inquiry}`).join(`\n`)
 }

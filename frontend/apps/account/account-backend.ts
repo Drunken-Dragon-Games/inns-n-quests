@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
 import { SignedMessage } from "lucid-cardano"
-import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, UserFullInfo } from "./account-dsl"
+import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UserBallot, UserFullInfo } from "./account-dsl"
 
 export const AccountBackend = {
 
@@ -83,6 +83,16 @@ export const AccountBackend = {
         return result.data
     },
 
+    async getPublicBallots(): Promise<GovernancePublicBallots>{
+        const result = await accountRequest("GET", "/governance/public")
+        return result.data
+    },
+
+    async getUserBallots(): Promise<GovernanceUserBallotss>{
+        const result = await accountRequest("GET", "/governance/user")
+        return result.data
+    },
+
     async votForBallot(ballotId: string, optionIndex: string): Promise<VoteResult>{
         const result = await accountRequest("POST", "/governance/vote", {ballotId, optionIndex})
         return result.data
@@ -131,6 +141,14 @@ export type getUserInventoryResult
 export type GetOpenBallotsResult
     = { status: "ok", payload: GovernanceBallots}
     | { status: "invalid", reason: string }
+
+export type GovernancePublicBallots =
+    {status: "ok", payload: {[ballotId: string]: PublicBallot}}|
+    {status: "invalid", reason: string}
+  
+export type GovernanceUserBallotss =
+    {status: "ok", payload: {[ballotId: string]: UserBallot}}|
+    {status: "invalid", reason: string}
 
 export type VoteResult 
     = { status: "ok" }

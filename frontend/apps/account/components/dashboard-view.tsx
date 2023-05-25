@@ -2,7 +2,7 @@ import { MouseEventHandler, ReactNode, useEffect } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
 import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton, MobileHidden } from "../../common"
-import { ClaimInfo, ClaimProcessState, ClaimStatus, StoredBallot, UserInfo, WalletAssociationProcessState } from "../account-dsl"
+import { ClaimInfo, ClaimProcessState, ClaimStatus, PublicBallot, StoredBallot, UserBallot, UserInfo, WalletAssociationProcessState } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
 import { AccountThunks } from "../account-thunks"
@@ -330,21 +330,31 @@ const BallotsWrapper = styled.div`
     }
 `
 
-const BallotView = ({ userInfo, ballot }: { userInfo?: UserInfo, ballot: StoredBallot }) => 
+const BallotView = ({ userInfo, ballot }: { userInfo?: UserInfo, ballot: UserBallot | PublicBallot }) => 
     <BallotContainer> 
         <BallotTitleWrapper>
-            <BallotState state={ballot.state}>{ballot.state}</BallotState>
+            <BallotState state={ballot.status}>{ballot.status}</BallotState>
             <BallotTitle>{ballot.inquiry}</BallotTitle>
         </BallotTitleWrapper>
-        <BallotDescription>{ballot.descriptionOfInquiry}</BallotDescription>
+        <BallotDescription>{ballot.inquiryDescription}</BallotDescription>
         {ballot.options.map((option, index) => (
             <BallotOption key={index}>
-                { userInfo && !ballot.voteRegistered ?
-                    <VoteButton onClick={() => AccountTransitions.voteForBallot(ballot.id, index.toString())}>{option.option}</VoteButton> : 
-                    <VoteButton disabled>{option.option}</VoteButton> }
-                <BallotOptionText>{option.description}</BallotOptionText>
+                {userInfo ? 
+                    ballot.status == "open" ? 
+                        "hasVoted" in ballot && ballot.hasVoted ?
+                            <><VoteButton disabled>{option.title}</VoteButton> <>{"isVotedByUser" in option && option.isVotedByUser ? "voted for this" : <></>}</></>:
+                            <VoteButton onClick={() => AccountTransitions.voteForBallot(ballot.id, index.toString())}>{option.title}</VoteButton> :
+                        "isVotedByUser" in option && option.isVotedByUser ? 
+                            <><VoteButton>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? option.lockedInDragonGold : <></>}</></>:
+                            <><VoteButton disabled>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? option.lockedInDragonGold : <></>}</></>:
+                    ballot.status == "open"?
+                        <VoteButton>{option.title}</VoteButton>:
+                        <><VoteButton disabled>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? option.lockedInDragonGold : <></>}</></>
+                        }
+                 <BallotOptionText>{option.description}</BallotOptionText>              
             </BallotOption>
         ))}
+        
     </BallotContainer>
 
 const GoverncanceVotingWidget = ({ userInfo }: { userInfo?: UserInfo }) => {

@@ -93,7 +93,7 @@ export class Ballots {
     private static formatBallotData(ballot: Ballot, votes: BallotVote[]): BallotData {
         const options = ballot.optionsArray.map((option, index) => {
             const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
-            const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + vote.dragonGold, 0)
+            const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + parseInt(vote.dragonGold), 0)
             const description = ballot.descriptionArray[index]
             return { title: option, description, lockedInDragonGold: dragonGoldSum.toString() }
         })
@@ -104,7 +104,7 @@ export class Ballots {
     private static processSingleBallot(ballot: Ballot,votes: BallotVote[] ): StoredBallot {
         const options = ballot.optionsArray.map((option, index) => {
             const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
-            const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + vote.dragonGold, 0)
+            const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + parseInt(vote.dragonGold), 0)
             const description = ballot.descriptionArray[index]
             return { option, description, dragonGold: dragonGoldSum.toString() }
         })
@@ -131,7 +131,7 @@ export class Ballots {
         return { ctype: "success", inquiry: ballot.inquiry, winners }
     }
 
-    static async vote(ballotId: string, optionIndex: number, userId: string, dragonGold: number): Promise<voteResponse>{
+    static async vote(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<voteResponse>{
         try {
             const ballot = await Ballot.findByPk(ballotId)
             if (!ballot) return {ctype: "error", reason: "unknown Ballot ID"}

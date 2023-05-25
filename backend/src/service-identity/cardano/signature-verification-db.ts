@@ -11,7 +11,7 @@ export class SignatureVerificationState extends Model implements ISignatureVerif
     declare nonce: string
 }
 
-export const SignatureVerificationStateTableName = "signature_verification_states"
+export const SignatureVerificationStateTableName = "identity_signature_verification_states"
 
 export const SignatureVerificationStateTableAttributes = {
     address: {

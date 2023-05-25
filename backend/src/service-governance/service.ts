@@ -67,9 +67,9 @@ export class GovernanceServiceDsl implements GovernanceService {
         return await Ballots.register(ballot)
     }
 
-    async getAdminBallotCollection(): Promise<models.AdminBallotCollection> {
+    async getAdminBallotCollection(limit: number = 6): Promise<models.AdminBallotCollection> {
         try {
-            const ballotsDetails = await Ballots.getAllDetails(6)
+            const ballotsDetails = await Ballots.getAllDetails(limit)
             if (ballotsDetails.ctype === "error") throw new Error(ballotsDetails.reason)
             const adminBallots: { [ballotId: string]: models.AdminBallot } = {}
             for (const ballotId in ballotsDetails.ballots) {
@@ -77,6 +77,7 @@ export class GovernanceServiceDsl implements GovernanceService {
                 adminBallots[ballotId] = {
                     status: ballot.status,
                     id: ballot.id,
+                    inquiry: ballot.inquiry,
                     inquiryDescription: ballot.inquiryDescription,
                     options: ballot.options,
                 }
@@ -104,6 +105,7 @@ export class GovernanceServiceDsl implements GovernanceService {
                     publicBallots[ballotId] = {
                         status: "open",
                         id: ballotDetails.id,
+                        inquiry: ballotDetails.inquiry,
                         inquiryDescription: ballotDetails.inquiryDescription,
                         options
                     }
@@ -119,6 +121,7 @@ export class GovernanceServiceDsl implements GovernanceService {
                     publicBallots[ballotId] = {
                         status: "closed",
                         id: ballotDetails.id,
+                        inquiry: ballotDetails.inquiry,
                         inquiryDescription: ballotDetails.inquiryDescription,
                         options
                     }
@@ -150,6 +153,7 @@ export class GovernanceServiceDsl implements GovernanceService {
                         status: "open",
                         id: ballotDetails.id,
                         hasVoted: vote !== "none",
+                        inquiry: ballotDetails.inquiry,
                         inquiryDescription: ballotDetails.inquiryDescription,
                         options: options
                     }
@@ -165,6 +169,7 @@ export class GovernanceServiceDsl implements GovernanceService {
                     userBallots[ballotId] = {
                         status: "closed",
                         id: ballotDetails.id,
+                        inquiry: ballotDetails.inquiry,
                         hasVoted: vote !== "none",
                         inquiryDescription: ballotDetails.inquiryDescription,
                         options: options
@@ -197,7 +202,7 @@ export class GovernanceServiceDsl implements GovernanceService {
        return await Ballots.close(ballotId)
     }
 
-    async voteForBallot(ballotId: string, optionIndex: number, userId: string, dragonGold: number): Promise<models.voteResponse> {
+    async voteForBallot(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<models.voteResponse> {
         return await Ballots.vote(ballotId, optionIndex, userId, dragonGold)
     }
 

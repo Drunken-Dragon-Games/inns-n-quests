@@ -266,6 +266,11 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 \`\`\`
             `)
         }
+        else if (subcommand == "list") {
+            const ballotResult = await this.governanceService.getAdminBallotCollection()
+            if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, ballotDSL.formatList(ballotResult.ballots))
+        }
         else if (subcommand == "help"){
             const helpMessage = ``
         }

@@ -23,5 +23,5 @@ export interface GovernanceService {
 
     closeBallot(ballotId: string): Promise<models.CloseBallotResponse>
 
-    voteForBallot(ballotId: string, optionIndex: number, userId: string, dragonGold: number): Promise<models.voteResponse>
+    voteForBallot(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<models.voteResponse>
 }

@@ -1,7 +1,7 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
 import { BallotState } from "../models"
 
-export const BallotTableName = "ballots"
+export const BallotTableName = "governance_ballots"
 
 export class Ballot extends Model {
     declare ballotId: string
@@ -74,14 +74,14 @@ export const BallotTableAttributes = {
     
 }
 
-export const BallotVotesTableName = "ballot_votes"
+export const BallotVotesTableName = "governance_ballot_votes"
 //CHECKME: depending on the DragonGold 0's handling it may be best to hanlde as a string and we parse to BigInt on use
 export class BallotVote extends Model {
     declare voteId: string
     declare userId: string
     declare ballotId: string
     declare optionIndex: number
-    declare dragonGold: number
+    declare dragonGold: string
 }
 
 export const BallotVoteTableAttributes = {
@@ -118,7 +118,7 @@ export const BallotVoteTableAttributes = {
         allowNull: false,
     },
     dragonGold: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
     },
 }

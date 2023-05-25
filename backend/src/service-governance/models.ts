@@ -37,21 +37,22 @@ export type MultipleUserBallots =
 
 
 export type BallotState = "open"|"closed" | "archived"
-
+//type repeted in account service
+//type repeted in frontend
 export type BaseOption = {title: string, description: string}
 export type VotedOption = BaseOption & {isVotedByUser: boolean}
 export type SensitiveOption = BaseOption & {lockedInDragonGold: string}
 export type ClosedOption = SensitiveOption & {isWinner: boolean}
 export type UserClosedOption = ClosedOption & {isVotedByUser: boolean}
 
-export type BaseBallot = {status: BallotState, id: string, inquiryDescription: string}
+export type BaseBallot = {status: BallotState, id: string, inquiry: string ,inquiryDescription: string}
 
 export type OpenPublicBallot = BaseBallot & {status: "open", options: BaseOption[]}
 export type ClosedPublicBallot = BaseBallot & {status: "closed", options: ClosedOption[]}
 
 export type OpenUserBallot = BaseBallot & {status: "open", hasVoted: boolean, options: VotedOption[]}
-export type ClosedUserBallot = BaseBallot & {status: "closed", hasVoted: boolean, options: ClosedOption[]}
-
+export type ClosedUserBallot = BaseBallot & {status: "closed", hasVoted: boolean, options: UserClosedOption[]}
+//repeted in killia service
 export type AdminBallot = BaseBallot & {options: SensitiveOption[]}
 export type PublicBallot = OpenPublicBallot | ClosedPublicBallot
 export type UserBallot = OpenUserBallot | ClosedUserBallot

@@ -125,7 +125,9 @@ export const accountState = createSlice({
             const ballotId = action.payload
             const ballot = state.governanceBallots[ballotId]
             if (!ballot) throw new Error(`Ballot with ID ${ballotId} not found`)
-            state.governanceBallots[ballotId].voteRegistered = true
+            if ("hasVoted" in ballot) { // TypeScript type guard
+                ballot.hasVoted = true
+            }
         },
     }
 })
