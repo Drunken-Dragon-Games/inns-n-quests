@@ -304,6 +304,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @returns 
      */
     async getInventory(userId: string): Promise<GetInventoryResult> {
+        //fulll on chain and of chain inventory
         const inventoryResult = await this.assetManagementService.list(userId, { policies: onlyPolicies(this.wellKnownPolicies) })
         if (inventoryResult.status == "unknown-user") 
             return { status: "unknown-user" }

@@ -12,6 +12,13 @@ const actions = accountState.actions
 export const AccountThunks = {
 
     extractWalletApiAndStakeAddress: async (wallet: SupportedWallet ): Promise<ExtractWalletResult> => {
+        const networkId = 
+            wallet == "Nami" && window?.cardano?.nami ? await (await window?.cardano?.nami.enable()).getNetworkId() :
+            wallet == "Eternl" && window?.cardano?.eternl ? await (await window?.cardano?.eternl.enable()).getNetworkId() :
+            undefined
+
+        console.log(networkId)
+
         const lucid = await Lucid.new(
             new Blockfrost(blockfrostUri, blockfrostApiKey), cardanoNetwork,
           );
@@ -20,17 +27,20 @@ export const AccountThunks = {
             wallet == "Eternl" && window?.cardano?.eternl ?  lucid.selectWallet(await window.cardano.eternl.enable()) :
             undefined
         
+  
         if (isEmpty(walletApi)) {
           return {status: "error", details: `${wallet}'s browser extension not found.`}
         }
-      
-        if ( walletApi.network != cardanoNetwork) {
-          return {status: "error", details: `${wallet} has to be on ${cardanoNetwork} but is configured on ${walletApi.network}.`}
+        
+        const walletNetwork = networkId == 1 ? "Mainnet" : "Preprod"
+
+        if ( walletNetwork != cardanoNetwork) {
+          return {status: "error", details: `${wallet} has to be on ${cardanoNetwork} but is configured on ${walletNetwork}.`}
         }
         const stakeAddress = await walletApi.wallet.rewardAddress();
         if (isEmpty(stakeAddress))
             return {status: "error", details: `${wallet} does not have a reward address`}
-       
+
         return { status: "ok", walletApi, stakeAddress };
       },
       
