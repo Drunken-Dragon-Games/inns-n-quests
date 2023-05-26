@@ -27,6 +27,10 @@ export const cardanoNetwork: Network  =
     isNetwork(process.env["NEXT_PUBLIC_CARDANO_NETWORK"])?
     process.env["NEXT_PUBLIC_CARDANO_NETWORK"] : "Preprod"
 
+export const blockfrostApiKey: string = (() => {
+    if (process.env["NEXT_PUBLIC_BLOCKFROST_API_KEY"]) return process.env["NEXT_PUBLIC_BLOCKFROST_API_KEY"]!
+    else throw new Error("NEXT_PUBLIC_BLOCKFROST_API_KEY is not defined")
+})()
 
 export const networkName = (network: 0 | 1): string =>
     network == 0 ? "testnet" : "mainnet"
