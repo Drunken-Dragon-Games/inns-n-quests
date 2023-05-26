@@ -32,6 +32,13 @@ export const blockfrostApiKey: string = (() => {
     else throw new Error("NEXT_PUBLIC_BLOCKFROST_API_KEY is not defined")
 })()
 
+export const blockfrostUri: string = (() => {
+    if (cardanoNetwork == "Mainnet") return "https://cardano-mainnet.blockfrost.io/api/v0"
+    else if (cardanoNetwork == "Preview") return "https://cardano-preview.blockfrost.io/api/v0"
+    else if (cardanoNetwork == "Preprod") return "https://cardano-preprod.blockfrost.io/api/v0"
+    else throw new Error("cardanoNetwork is not defined")
+})()
+
 export const networkName = (network: 0 | 1): string =>
     network == 0 ? "testnet" : "mainnet"
 

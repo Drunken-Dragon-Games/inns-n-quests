@@ -1,6 +1,6 @@
 import { Action, ThunkDispatch } from "@reduxjs/toolkit"
 import { NextRouter } from "next/router"
-import { blockfrostApiKey, cardanoNetwork} from "../../setting"
+import { blockfrostApiKey, blockfrostUri, cardanoNetwork} from "../../setting"
 import { isEmpty } from "../common"
 import { AccountBackend, AuthenticationResult } from "./account-backend"
 import { ExtractWalletResult, SupportedWallet, minimalUtxoFromLucidUTxO } from "./account-dsl"
@@ -13,7 +13,7 @@ export const AccountThunks = {
 
     extractWalletApiAndStakeAddress: async (wallet: SupportedWallet ): Promise<ExtractWalletResult> => {
         const lucid = await Lucid.new(
-            new Blockfrost("https://cardano-preprod.blockfrost.io/api/v0", blockfrostApiKey), cardanoNetwork,
+            new Blockfrost(blockfrostUri, blockfrostApiKey), cardanoNetwork,
           );
         const walletApi = 
             wallet == "Nami" && window?.cardano?.nami ? lucid.selectWallet(await window.cardano.nami.enable()) :
