@@ -52,7 +52,7 @@ export class IdentityServiceDsl implements IdentityService {
     static async loadFromEnv(dependencies: IdentityServiceDependencies): Promise<IdentityService> {
         dotenv.config()
         return await IdentityServiceDsl.loadFromConfig(
-            { network: config.stringOrElse("CARDANO_NETWORK", "testnet")
+            { network: config.stringOrElse("CARDANO_NETWORK", "Preprod")
             , discord:
                 { clientId: config.stringOrError("DISCORD_CLIENT_ID")
                 , clientSecret: config.stringOrError("DISCORD_CLIENT_SECRET")
