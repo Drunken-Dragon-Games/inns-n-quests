@@ -182,14 +182,14 @@ export const AccountThunks = {
             if ( signature.status !== "ok")
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`)
             dispatch(actions.setClaimProcessState({ ctype: "loading", claimStatus: "submitted", details: "Tx submitted, waiting for confirmation..." }))
-            dispatch(AccountThunks.claimStatus(claimResponse.claimId, parseInt(dragonSilverToClaim)))
+            dispatch(AccountThunks.claimStatus(claimResponse.claimId, dragonSilverToClaim))
         }catch (error: any){
             console.error(error)
             return displayErrorAndHeal(error.info ?? error.message)
         }
     },
 
-    claimStatus: (claimId: string, dragonSilverToClaim: number): AccountThunk => async (dispatch) => {
+    claimStatus: (claimId: string, dragonSilverToClaim: string): AccountThunk => async (dispatch) => {
         setTimeout(async () => {
             const statusResult = await AccountBackend.claimStatus(claimId)
             if (statusResult.status !== "ok")
