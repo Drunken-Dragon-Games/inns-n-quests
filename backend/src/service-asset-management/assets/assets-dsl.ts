@@ -74,7 +74,7 @@ export class AssetStoreDsl {
 			else 
 				return this.filterBlockFrostAssets(assets, acc, options)
 		}
-		return recurse(0, {})
+		return recurse(1, {})
     }
 
 	/** If the first character of the input is a dollar sign, then it fetches an address of the wallet that 

@@ -7,8 +7,9 @@ export type UserInfo = {
     stakeAddresses: string[]
     profileUri: string
     email: string
-    dragonSilver: number
-    dragonSilverToClaim: number
+    dragonSilver: string
+    dragonSilverToClaim: string
+    dragonGold: string
 }
 
 export const SupportedWallets = [ "Nami", "Eternl" ] as const

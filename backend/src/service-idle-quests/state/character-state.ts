@@ -140,6 +140,8 @@ export class CharacterState {
      */
     async syncCharacters(userId: string, assetInventory: am.Inventory, transaction?: Transaction): Promise<Character[]> {
         
+        ///this takes in the full on chain and of chain inventory
+        //returns an array of {assetRef: unit, collection: vm.CharacterCollection, quantity}
         const pickInventoryCharacters = (): InventoryCharacter[] => {
             const pxs: InventoryCharacter[] = (assetInventory[this.objectBuilder.wellKnownPolicies.pixelTiles.policyId] ?? [])
                 .filter(pxt => 
@@ -150,10 +152,13 @@ export class CharacterState {
                     this.objectBuilder.metadataRegistry.pixelTilesMetadata[pxt.unit].name == "PixelTile #45 Recruit"
                 )
                 .map(pxt => ({ assetRef: pxt.unit, collection: "pixel-tiles", quantity: parseInt(pxt.quantity) }))
+
             const gmas: InventoryCharacter[] = (assetInventory[this.objectBuilder.wellKnownPolicies.grandMasterAdventurers.policyId] ?? [])
                 .map(gma => ({ assetRef: gma.unit, collection: "grandmaster-adventurers", quantity: parseInt(gma.quantity) }))
+
             const aots: InventoryCharacter[] = (assetInventory[this.objectBuilder.wellKnownPolicies.adventurersOfThiolden.policyId] ?? [])
                 .map(aot => ({ assetRef: aot.unit, collection: "adventurers-of-thiolden", quantity: parseInt(aot.quantity) }))
+
             return [...pxs, ...gmas, ...aots]
         }
 

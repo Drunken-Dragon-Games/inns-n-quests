@@ -74,19 +74,23 @@ export class AccountServiceDsl implements AccountService {
         if (assetList.status != "ok") return {status: "unknown-user"}
         const inventory = assetList.inventory
         const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
-        const dragonSilver = parseInt(invDragonSilver?.find(a => a.chain)?.quantity ?? "0")
-        const dragonSilverToClaim = parseInt(invDragonSilver?.find(a => !a.chain)?.quantity ?? "0")
-        return {status: "ok", tokens, inventory: {dragonSilver, dragonSilverToClaim}, info: sessionResponse.info}
+        const invDragonGold = inventory[this.wellKnownPolicies.dragonGold.policyId]
+        const dragonSilver = invDragonSilver?.find(a => a.chain)?.quantity ?? "0"
+        const dragonGold = invDragonGold?.find(a => a.chain)?.quantity ?? "0"
+        const dragonSilverToClaim = invDragonSilver?.find(a => !a.chain)?.quantity ?? "0"
+        return {status: "ok", tokens, inventory: {dragonSilver, dragonSilverToClaim, dragonGold}, info: sessionResponse.info}
     }
 
     async getUserInventory(userId: string): Promise<GetUserInventoryResult> {
-        const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId] })
+        const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId,this.wellKnownPolicies.dragonGold.policyId ] })
         if (assetList.status != "ok") return {status: "unknown-user"}
         const inventory = assetList.inventory
         const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
-        const dragonSilver = parseInt(invDragonSilver?.find(a => a.chain)?.quantity ?? "0")
-        const dragonSilverToClaim = parseInt(invDragonSilver?.find(a => !a.chain)?.quantity ?? "0")
-        return {status: "ok", dragonSilver, dragonSilverToClaim}
+        const invDragonGold = inventory[this.wellKnownPolicies.dragonGold.policyId]
+        const dragonSilver = invDragonSilver?.find(a => a.chain)?.quantity ?? "0"
+        const dragonGold = invDragonGold?.find(a => a.chain)?.quantity ?? "0"
+        const dragonSilverToClaim = invDragonSilver?.find(a => !a.chain)?.quantity ?? "0"
+        return {status: "ok", dragonSilver, dragonSilverToClaim, dragonGold}
     }
 
     async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {

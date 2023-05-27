@@ -35,7 +35,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
     const calendar = commonCalendar
     const metadataRegistry = await loadMetadataCache(loadMetadataLocationsFromEnv())
-    const wellKnownPolicies = process.env.CARDANO_NETWORK === "mainnet" ? wellKnownPoliciesMainnet : loadWellKnownPoliciesFromEnv()
+    const wellKnownPolicies = process.env.CARDANO_NETWORK === "Mainnet" ? wellKnownPoliciesMainnet : loadWellKnownPoliciesFromEnv()
     const questsRegistry = await loadQuestRegistry(
         config.stringOrElse("QUEST_REGISTRY_LOCATION", path.join(__dirname, "..", "stubs", "test-quest-registry.yaml")), 
         config.typeOrElse("QUEST_REGISTRY_FORMAT", "yaml", (obj: any): obj is "yaml" | "json" => obj === "yaml" || obj === "json"), 
