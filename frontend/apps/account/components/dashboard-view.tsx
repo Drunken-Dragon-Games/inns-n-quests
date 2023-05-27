@@ -179,18 +179,18 @@ const DragonSilverClaimRow = ({ claimInfo }: { claimInfo: ClaimInfo }) =>
         <TimeStamp>{claimInfo.createdAt}</TimeStamp>
     </WidgetRow>
 
-const claimRowMessage = (claimable: number, state: ClaimProcessState) =>
-    state.ctype == "idle" && claimable == 0 ? "Quest or stake to DND pool to earn Dragon Silver!" :
+const claimRowMessage = (claimable: string, state: ClaimProcessState) =>
+    state.ctype == "idle" && claimable == "0" ? "Quest or stake to DND pool to earn Dragon Silver!" :
     state.ctype == "idle" ? "Claimable" :
     state.ctype == "loading" ? state.details :
     state.ctype == "error" ? state.details :
     "" 
     
 const DragonSilverWidget = (userInfo: UserInfo) => {
-    const lastonChainAmount = useRememberLastValue(userInfo.dragonSilver, 0)
-    const lastClaimedAmount = useRememberLastValue(userInfo.dragonSilverToClaim, 0)
-    const renderedOnChain = useNumberAnimation(lastonChainAmount, userInfo.dragonSilver, true)
-    const renderedClaimable = useNumberAnimation(lastClaimedAmount, userInfo.dragonSilverToClaim, true)
+    const lastonChainAmount = useRememberLastValue(userInfo.dragonSilver, "0")
+    const lastClaimedAmount = useRememberLastValue(userInfo.dragonSilverToClaim, "0")
+    const renderedOnChain = useNumberAnimation(parseInt(lastonChainAmount), parseInt(userInfo.dragonSilver), true)
+    const renderedClaimable = useNumberAnimation(parseInt(lastClaimedAmount), parseInt(userInfo.dragonSilverToClaim), true)
     const { claimProcessState, dragonSilverClaims } = useSelector((state: AccountState) => ({
         claimProcessState: state.claimProcessState,
         dragonSilverClaims: state.dragonSilverClaims,
@@ -201,7 +201,7 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
     useEffect(() => {
         AccountTransitions.getDragonSilverClaims()
     }, [])
-    const claimButtonActions = claimProcessState.ctype == "idle" && userInfo.dragonSilverToClaim > 0 ? {
+    const claimButtonActions = claimProcessState.ctype == "idle" && parseInt(userInfo.dragonSilverToClaim) > 0 ? {
         "Nami": () => { AccountTransitions.claimDragonSilver("Nami") },
         "Eternl": () => { AccountTransitions.claimDragonSilver("Eternl") },
     } : undefined
@@ -369,7 +369,7 @@ const GoverncanceVotingWidget = ({ userInfo }: { userInfo?: UserInfo }) => {
     const ballotArray = Object.values(governanceBallots)
 
     return <>
-        <VotingPower>{userInfo ? userInfo.dragonSilver : <>0</>} Voting Power</VotingPower>
+        <VotingPower>{userInfo ? userInfo.dragonGold : <>0</>} $DG Voting Power</VotingPower>
         <BallotsWrapper>
             {ballotArray.map(ballot =>
                 <BallotView key={ballot.id} userInfo={userInfo} ballot={ballot} />

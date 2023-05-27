@@ -22,7 +22,7 @@ export interface AccountService {
 }
 
 export type AuthenticateResult
-    = { status: "ok", tokens: AuthenticationTokens, inventory: {dragonSilver: number, dragonSilverToClaim: number}, info: UserFullInfo }
+    = { status: "ok", tokens: AuthenticationTokens, inventory: {dragonSilver: string, dragonSilverToClaim: string, dragonGold: string}, info: UserFullInfo }
     | { status: "bad-credentials" }
     | { status: "unknown-user" }
 
@@ -70,7 +70,7 @@ export type ClaimStatusResult
     | { status: "invalid", reason: string }
 
 export type GetUserInventoryResult
-    = { status: "ok", dragonSilverToClaim: number, dragonSilver: number}
+    = { status: "ok", dragonSilverToClaim: string, dragonSilver: string, dragonGold: string}
     | { status: "unknown-user" }
 
 export type OpenBallotsResult
