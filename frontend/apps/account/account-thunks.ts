@@ -17,8 +17,6 @@ export const AccountThunks = {
             wallet == "Eternl" && window?.cardano?.eternl ? await (await window?.cardano?.eternl.enable()).getNetworkId() :
             undefined
 
-        console.log(networkId)
-
         const lucid = await Lucid.new(
             new Blockfrost(blockfrostUri, blockfrostApiKey), cardanoNetwork,
           );
@@ -39,7 +37,11 @@ export const AccountThunks = {
         }
         const stakeAddress = await walletApi.wallet.rewardAddress();
         if (isEmpty(stakeAddress))
-            return {status: "error", details: `${wallet} does not have a reward address`}
+            return {status: "error", details: `${wallet} does not have a reward address.`}
+        const utxos = await walletApi.wallet.getUtxos()
+
+        if (utxos.length <= 0) 
+            return {status: "error", details: `${wallet} must have at least one transaction.`}
 
         return { status: "ok", walletApi, stakeAddress };
       },
