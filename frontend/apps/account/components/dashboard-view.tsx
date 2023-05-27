@@ -329,7 +329,7 @@ const BallotsWrapper = styled.div`
         grid-template-columns: 1fr;
     }
 `
-
+const renderDragonGold = (DG: string): string => (BigInt(DG)/BigInt(1000000)).toString()
 const BallotView = ({ userInfo, ballot }: { userInfo?: UserInfo, ballot: UserBallot | PublicBallot }) => 
     <BallotContainer> 
         <BallotTitleWrapper>
@@ -345,11 +345,11 @@ const BallotView = ({ userInfo, ballot }: { userInfo?: UserInfo, ballot: UserBal
                             <><VoteButton disabled>{option.title}</VoteButton> <>{"isVotedByUser" in option && option.isVotedByUser ? "voted for this" : <></>}</></>:
                             <VoteButton onClick={() => AccountTransitions.voteForBallot(ballot.id, index.toString())}>{option.title}</VoteButton> :
                         "isVotedByUser" in option && option.isVotedByUser ? 
-                            <><VoteButton>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? option.lockedInDragonGold : <></>}</></>:
-                            <><VoteButton disabled>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? option.lockedInDragonGold : <></>}</></>:
+                            <><VoteButton>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? renderDragonGold(option.lockedInDragonGold) : <></>}</></>:
+                            <><VoteButton disabled>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? renderDragonGold(option.lockedInDragonGold) : <></>}</></>:
                     ballot.status == "open"?
                         <VoteButton>{option.title}</VoteButton>:
-                        <><VoteButton disabled>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? option.lockedInDragonGold : <></>}</></>
+                        <><VoteButton disabled>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? renderDragonGold(option.lockedInDragonGold) : <></>}</></>
                         }
                  <BallotOptionText>{option.description}</BallotOptionText>              
             </BallotOption>
@@ -369,7 +369,7 @@ const GoverncanceVotingWidget = ({ userInfo }: { userInfo?: UserInfo }) => {
     const ballotArray = Object.values(governanceBallots)
 
     return <>
-        <VotingPower>{userInfo ? userInfo.dragonGold : <>0</>} $DG Voting Power</VotingPower>
+        <VotingPower>{userInfo ? renderDragonGold(userInfo.dragonGold) : <>0</>} $DG Voting Power</VotingPower>
         <BallotsWrapper>
             {ballotArray.map(ballot =>
                 <BallotView key={ballot.id} userInfo={userInfo} ballot={ballot} />
