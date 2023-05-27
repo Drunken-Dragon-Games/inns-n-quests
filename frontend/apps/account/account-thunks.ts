@@ -12,6 +12,11 @@ const actions = accountState.actions
 export const AccountThunks = {
 
     extractWalletApiAndStakeAddress: async (wallet: SupportedWallet ): Promise<ExtractWalletResult> => {
+        const networkId = 
+            wallet == "Nami" && window?.cardano?.nami ? await (await window?.cardano?.nami.enable()).getNetworkId() :
+            wallet == "Eternl" && window?.cardano?.eternl ? await (await window?.cardano?.eternl.enable()).getNetworkId() :
+            undefined
+
         const lucid = await Lucid.new(
             new Blockfrost(blockfrostUri, blockfrostApiKey), cardanoNetwork,
           );
@@ -20,17 +25,24 @@ export const AccountThunks = {
             wallet == "Eternl" && window?.cardano?.eternl ?  lucid.selectWallet(await window.cardano.eternl.enable()) :
             undefined
         
+  
         if (isEmpty(walletApi)) {
           return {status: "error", details: `${wallet}'s browser extension not found.`}
         }
-      
-        if ( walletApi.network != cardanoNetwork) {
-          return {status: "error", details: `${wallet} has to be on ${cardanoNetwork} but is configured on ${walletApi.network}.`}
+        
+        const walletNetwork = networkId == 1 ? "Mainnet" : "Preprod"
+
+        if ( walletNetwork != cardanoNetwork) {
+          return {status: "error", details: `${wallet} has to be on ${cardanoNetwork} but is configured on ${walletNetwork}.`}
         }
         const stakeAddress = await walletApi.wallet.rewardAddress();
         if (isEmpty(stakeAddress))
-            return {status: "error", details: `${wallet} does not have a reward address`}
-       
+            return {status: "error", details: `${wallet} does not have a reward address.`}
+        const utxos = await walletApi.wallet.getUtxos()
+
+        if (utxos.length <= 0) 
+            return {status: "error", details: `${wallet} must have at least one transaction.`}
+
         return { status: "ok", walletApi, stakeAddress };
       },
       
@@ -110,9 +122,9 @@ export const AccountThunks = {
         const inventoryResult = await AccountBackend.getUserInventory()
         if (inventoryResult.status !== "ok")
             return dispatch(actions.setAssociateProcessState({ ctype: "error", details: inventoryResult.status }))
-        console.log(`update inventory got ${inventoryResult.dragonSilver} dragon silver`);
+       //console.log(`update inventory got ${inventoryResult.dragonSilver} dragon silver`);
         
-        dispatch(actions.updateUserInfo({dragonSilver: inventoryResult.dragonSilver , dragonSilverToClaim: inventoryResult.dragonSilverToClaim}))
+        dispatch(actions.updateUserInfo({dragonSilver: inventoryResult.dragonSilver , dragonSilverToClaim: inventoryResult.dragonSilverToClaim, dragonGold: inventoryResult.dragonGold}))
     },
 
     test: (): AccountThunk => async (dispatch) => {
@@ -136,7 +148,7 @@ export const AccountThunks = {
 
         try {
             const state = accountStore.getState()
-            if (!state.userInfo || state.userInfo.dragonSilverToClaim == 0)
+            if (!state.userInfo || state.userInfo.dragonSilverToClaim == "0")
                 return displayErrorAndHeal("Nothing to claim.")
 
             dispatch(actions.setClaimProcessState({ctype: "loading", claimStatus: "created", details: `Connecting ${wallet}...`}))
@@ -159,7 +171,7 @@ export const AccountThunks = {
             if (claimResponse.status !== "ok")
                 return displayErrorAndHeal(claimResponse.reason)
 
-            dispatch(actions.updateUserInfo({dragonSilverToClaim: claimResponse.remainingAmount}))
+            dispatch(actions.updateUserInfo({dragonSilverToClaim: `${claimResponse.remainingAmount}`}))
             dispatch(actions.setClaimProcessState({ctype: "loading", claimStatus: "created", details: "Waiting for wallet signature..."}))
 
             const transaction = C.Transaction.from_bytes(new Uint8Array(Buffer.from( claimResponse.tx, 'hex')))
@@ -170,7 +182,7 @@ export const AccountThunks = {
             if ( signature.status !== "ok")
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`)
             dispatch(actions.setClaimProcessState({ ctype: "loading", claimStatus: "submitted", details: "Tx submitted, waiting for confirmation..." }))
-            dispatch(AccountThunks.claimStatus(claimResponse.claimId, dragonSilverToClaim))
+            dispatch(AccountThunks.claimStatus(claimResponse.claimId, parseInt(dragonSilverToClaim)))
         }catch (error: any){
             console.error(error)
             return displayErrorAndHeal(error.info ?? error.message)
@@ -243,6 +255,7 @@ function signin(response: AuthenticationResult, dispatch: ThunkDispatch<AccountS
         email: response.info.knownEmail,
         dragonSilver: response.inventory.dragonSilver,
         dragonSilverToClaim: response.inventory.dragonSilverToClaim,
+        dragonGold: response.inventory.dragonGold
     }))
     const expirationDuration = response.tokens.session.expiration - Date.now() - 5000
     console.log("Refresh Token expiration duration: " + (expirationDuration / 1000) + "s.")
