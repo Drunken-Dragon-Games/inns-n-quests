@@ -1,9 +1,10 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
+import { AssetManagementService, ClaimerInfo, createAssociationTxResult } from "../service-asset-management"
 import { PublicBallotCollection } from "../service-governance/models"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
+import { MinimalUTxO } from "../tools-cardano"
 import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
@@ -102,6 +103,10 @@ export class AccountServiceDsl implements AccountService {
             {ctype: "sig", deviceType: "Browser", publicKey, nonce, signedNonce: signature })
         if (associateResponse.status == "discord-used") throw new Error("Discord accounts should not affect here.")
         return associateResponse
+    }
+
+    async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<createAssociationTxResult> {
+            return await this.assetManagementService.createAssociationTx(userId, stakeAddress, utxos)
     }
 
     async getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult> {

@@ -37,6 +37,11 @@ export const AccountBackend = {
         return result.data
     },
 
+    async getAssociationTx(stakeAddress: string, claimerInfo: ClaimerInfo): Promise<AssociationNonceResult>{
+        const result = await accountRequest("POST", "/association/tx", {stakeAddress, claimerInfo})
+        return result.data
+    },
+
     async test(): Promise<void> {
         const result = await accountRequest("POST", "/session/test")
         console.log(result)
@@ -125,6 +130,8 @@ export type SubmitAssociationSignatureResult
     = { status: "ok" }
     | { status: "bad-credentials" }
     | { status: "stake-address-used" }
+
+export type AssociationNonceResult = ClaimSignAndSubbmitResult
 
 export type ClaimSignAndSubbmitResult 
     = { status: "ok", txId: string }

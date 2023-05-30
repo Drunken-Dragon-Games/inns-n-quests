@@ -20,6 +20,7 @@ import {
 
 import * as offChainStoreDB from "./assets/offchain-store-db"
 import * as assetClaimDB from "./assets/asset-claim-db"
+import { MinimalUTxO } from "../tools-cardano"
 //import { Lucid } from "lucid-cardano"
 
 export interface AssetManagementServiceConfig 
@@ -123,6 +124,15 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         const result = await this.claims.claim(userId, stakeAddress, assets, claimerInfo, logger)
         if (result.ctype == "success") 
             return { status: "ok", claimId: result.result.claimId, tx: result.result.tx }
+        else {
+            return { status: "invalid", reason: result.error }        
+        }
+    }
+
+    async createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext | undefined): Promise<SubmitClaimSignatureResponse> {
+        const result = await this.claims.genAssoiateTx(stakeAddress, MinimalUTxOs, logger)
+        if (result.ctype == "success") 
+            return { status: "ok", txId: result.result.txId }
         else {
             return { status: "invalid", reason: result.error }        
         }

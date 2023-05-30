@@ -139,6 +139,51 @@ export const AccountThunks = {
             dispatch(actions.setDragonSilverClaims(response.claims))
     },
 
+    associateHardwareWallet: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
+        const displayErrorAndHeal = (details: string) => {
+            dispatch(actions.setAssociateProcessState({ ctype: "error", details }))
+            setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
+        }
+
+        try {
+            const state = accountStore.getState()
+            if (!state.userInfo || state.userInfo.dragonSilverToClaim == "0")
+                return displayErrorAndHeal("Please lg in using Discord First")
+
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: `Connecting ${wallet}...` }))
+
+            const extractedResult = await AccountThunks.extractWalletApiAndStakeAddress(wallet)
+            if (extractedResult.status !== "ok")
+                return displayErrorAndHeal(extractedResult.details)
+
+            const { walletApi, stakeAddress } = extractedResult
+        
+            const allUtxos = await walletApi.wallet.getUtxos()
+            const utxos = allUtxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("1000000"))
+
+            if (utxos.length == 0)
+                return displayErrorAndHeal("Not UTxO large enough to autenticate wallet")
+                
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Building Auth Tx" }))
+            const assoiationTxResponse =  await AccountBackend.getAssociationTx(stakeAddress, { utxos: minimalUtxoFromLucidUTxO(utxos), receivingAddress: utxos[0].address })
+
+            if (assoiationTxResponse.status !== "ok")
+                return displayErrorAndHeal(assoiationTxResponse.reason)
+
+            dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Waiting for wallet signature..."}))
+
+            const transaction = C.Transaction.from_bytes(new Uint8Array(Buffer.from( assoiationTxResponse.txId, 'hex')))
+            const witness = await walletApi.wallet.signTx(transaction)
+            const witnessHex = Buffer.from(witness.to_bytes()).toString("hex")
+
+            dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Submiting signature..."}))
+
+        }catch (error: any) {
+            console.error(error)
+            return displayErrorAndHeal(error.info ?? error.message)
+        }
+    },
+
     claim: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
 
         const displayErrorAndHeal = (details: string) => {

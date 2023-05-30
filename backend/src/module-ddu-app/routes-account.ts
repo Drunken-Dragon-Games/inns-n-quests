@@ -7,6 +7,7 @@ import { AuthenticationResult } from "../service-identity"
 import { COOKIE_EXPIRACY, SECRET_KEY } from "./settings"
 import { jwtMiddleware } from "./jwt_middleware"
 import { ClaimerInfo } from "../service-asset-management"
+import { MinimalUTxO } from "../tools-cardano"
 
 export const accountRoutes = (accountService: AccountService) => {
     const router = Router()    
@@ -77,6 +78,14 @@ export const accountRoutes = (accountService: AccountService) => {
     router.post("/association/nonce", async (request: Request, response: Response) => {
         const stakeAddress: string = request.body.stakeAddress
         const result = await accountService.getAssociationNonce(stakeAddress)
+        return response.status(200).json(result)
+    })
+
+    router.post("/association/tx", jwtMiddleware, async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const stakeAddress: string = request.body.stakeAddress
+        const utxos: MinimalUTxO[] = request.body.MinimalUTxOs
+        const result = await accountService.getAssociationTx(userId, stakeAddress, utxos)
         return response.status(200).json(result)
     })
 
