@@ -1,9 +1,9 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
-import { PublicBallotCollection } from "../service-governance/models"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
+import { LoggingContext } from "../tools-tracing"
 import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
@@ -43,34 +43,34 @@ export class AccountServiceDsl implements AccountService {
     async unloadDatabaseModels(): Promise<void> {
     }
 
-    async authenticateDevelopment(nickname: string): Promise<AuthenticateResult> {
+    async authenticateDevelopment(nickname: string, logger?: LoggingContext): Promise<AuthenticateResult> {
         const credentials: idenser.Credentials = {ctype: "development", deviceType: "Browser", nickname }
-        const authResponse = await this.identityService.authenticate(credentials)
+        const authResponse = await this.identityService.authenticate(credentials, logger)
         if (authResponse.status != "ok") return authResponse
         return await this.resolveSessionFromTokens(authResponse.tokens)
     }
 
-    async authenticateDiscord(code: string): Promise<AuthenticateResult> {
+    async authenticateDiscord(code: string, logger?: LoggingContext): Promise<AuthenticateResult> {
         const credentials: idenser.Credentials = {ctype: "discord", deviceType: "Browser", authCode: code }
-        const authResponse = await this.identityService.authenticate(credentials)
+        const authResponse = await this.identityService.authenticate(credentials, logger)
         if (authResponse.status != "ok") return authResponse
         return await this.resolveSessionFromTokens(authResponse.tokens)
     }
 
-    async signout(sessionId: string): Promise<SignOutResult> {
-        return this.identityService.signout(sessionId)
+    async signout(sessionId: string, logger?: LoggingContext): Promise<SignOutResult> {
+        return this.identityService.signout(sessionId, logger)
     }
 
-    async refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult> {
-        const refreshResult = await this.identityService.refresh(sessionId, refreshToken)
+    async refreshSession(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<AuthenticateResult> {
+        const refreshResult = await this.identityService.refresh(sessionId, refreshToken, logger)
         if (refreshResult.status != "ok") return { status: "bad-credentials" }
         return await this.resolveSessionFromTokens(refreshResult.tokens)
     }
 
-    private async resolveSessionFromTokens(tokens: AuthenticationTokens): Promise<AuthenticateResult> {
-        const sessionResponse = await this.identityService.resolveSession(tokens.session.sessionId)
+    private async resolveSessionFromTokens(tokens: AuthenticationTokens, logger?: LoggingContext): Promise<AuthenticateResult> {
+        const sessionResponse = await this.identityService.resolveSession(tokens.session.sessionId, logger)
         if (sessionResponse.status != "ok") return {status: "unknown-user"}
-        const assetList = await this.assetManagementService.list(tokens.session.userId, { policies: onlyPolicies(this.wellKnownPolicies) })
+        const assetList = await this.assetManagementService.list(tokens.session.userId, { policies: onlyPolicies(this.wellKnownPolicies) }, logger)
         if (assetList.status != "ok") return {status: "unknown-user"}
         const inventory = assetList.inventory
         const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
@@ -81,8 +81,8 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok", tokens, inventory: {dragonSilver, dragonSilverToClaim, dragonGold}, info: sessionResponse.info}
     }
 
-    async getUserInventory(userId: string): Promise<GetUserInventoryResult> {
-        const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId,this.wellKnownPolicies.dragonGold.policyId ] })
+    async getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult> {
+        const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId,this.wellKnownPolicies.dragonGold.policyId ] }, logger)
         if (assetList.status != "ok") return {status: "unknown-user"}
         const inventory = assetList.inventory
         const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
@@ -93,19 +93,19 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok", dragonSilver, dragonSilverToClaim, dragonGold}
     }
 
-    async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {
-        return await this.identityService.createSigNonce(stakeAddress)
+    async getAssociationNonce(stakeAddress: string, logger?: LoggingContext): Promise<GetAssociationNonceResult> {
+        return await this.identityService.createSigNonce(stakeAddress, logger)
     }
 
-    async submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string){
+    async submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string, logger?: LoggingContext): Promise<SubmitAssociationSignatureResult> {
         const associateResponse = await this.identityService.associate(userId, 
-            {ctype: "sig", deviceType: "Browser", publicKey, nonce, signedNonce: signature })
+            {ctype: "sig", deviceType: "Browser", publicKey, nonce, signedNonce: signature }, logger)
         if (associateResponse.status == "discord-used") throw new Error("Discord accounts should not affect here.")
         return associateResponse
     }
 
-    async getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult> {
-        const result = await this.assetManagementService.userClaims(userId, "DragonSilver", page)
+    async getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult> {
+        const result = await this.assetManagementService.userClaims(userId, "DragonSilver", page, logger)
         if (result.status == "ok")
             return { status: "ok", claims: result.claims.map(claim => ({
                 claimId: claim.claimId,
@@ -118,11 +118,11 @@ export class AccountServiceDsl implements AccountService {
             return result
     }
 
-    async claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>{
+    async claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo, logger?: LoggingContext): Promise<ClaimDragonSilverResult>{
         const dsPolicyId = this.wellKnownPolicies.dragonSilver.policyId
         //For now we just claim ALL OF IT
         //const { amount } = request.body
-        const assetList = await this.assetManagementService.list(userId, { policies: [ dsPolicyId ] })
+        const assetList = await this.assetManagementService.list(userId, { policies: [ dsPolicyId ] }, logger)
         if (assetList.status == "ok"){
             const inventory= assetList.inventory
             const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
@@ -131,51 +131,51 @@ export class AccountServiceDsl implements AccountService {
                 policyId: dsPolicyId,
                 quantity: dragonSilverToClaim
             }
-            const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, options, claimerInfo)
+            const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, options, claimerInfo, logger)
             if (claimResponse.status == "ok") return { ...claimResponse, remainingAmount: 0 }
             else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
         }
         else return { status: "invalid", reason: assetList.status}
     }
 
-    async claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
-        return this.assetManagementService.submitClaimSignature(claimId, tx, witness)
+    async claimSignAndSubbmit(witness: string, tx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
+        return this.assetManagementService.submitClaimSignature(claimId, tx, witness, logger)
     }
 
-    async claimStatus(claimId: string): Promise<ClaimStatusResult> {
-        return this.assetManagementService.claimStatus(claimId)
+    async claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult> {
+        return this.assetManagementService.claimStatus(claimId, logger)
     }
 
-    async grantTest(userId: string): Promise<void>{
+    async grantTest(userId: string, logger?: LoggingContext): Promise<void>{
         if (process.env.NODE_ENV !== "development") return 
-        this.assetManagementService.grant(userId, {policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: "10"})
+        this.assetManagementService.grant(userId, {policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: "10"}, logger)
     }
 
-    async getOpenBallots(): Promise<OpenBallotsResult> {
+    async getOpenBallots(logger?: LoggingContext): Promise<OpenBallotsResult> {
         const openBallotsResult = await this.governanceService.getBallots("open")
         if (openBallotsResult.ctype !== "success") return {status: "invalid", reason: openBallotsResult.reason}
         return {status: "ok", payload: openBallotsResult.ballots}
     }
 
-    async getUserOpenBallots(userId: string): Promise<OpenUserBallotsResult> {
+    async getUserOpenBallots(userId: string, logger?: LoggingContext): Promise<OpenUserBallotsResult> {
         const openUserBallotsResult = await this.governanceService.getUserOpenBallots(userId)
         if (openUserBallotsResult.ctype !== "success") return {status: "invalid", reason: openUserBallotsResult.reason}
         return {status: "ok", payload: openUserBallotsResult.ballots}
     }
 
-    async getPublicBallots(): Promise<PublicBallotResult> {
+    async getPublicBallots(logger?: LoggingContext): Promise<PublicBallotResult> {
         const openBallotsResult = await this.governanceService.getPublicBallotCollection()
         if (openBallotsResult.ctype !== "success") return {status: "invalid", reason: openBallotsResult.reason}
         return {status: "ok", payload: openBallotsResult.ballots}
     }
 
-    async getUserBallots(userId: string):Promise<UserBallotResult> {
+    async getUserBallots(userId: string, logger?: LoggingContext):Promise<UserBallotResult> {
         const openUserBallotsResult = await this.governanceService.getUserBallotCollection(userId)
         if (openUserBallotsResult.ctype !== "success") return {status: "invalid", reason: openUserBallotsResult.reason}
         return {status: "ok", payload: openUserBallotsResult.ballots}
     }
 
-    async voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult> {
+    async voteForBallot(userId: string, ballotId: string, optionIndex: number, logger?: LoggingContext): Promise<VoteResult> {
         const dgPolicyId = this.wellKnownPolicies.dragonGold.policyId
         const listResponse = await this.assetManagementService.list(userId, {chain: true,  policies: [ dgPolicyId ]})
         if (listResponse.status !== "ok") return {status: "invalid", reason: listResponse.status}

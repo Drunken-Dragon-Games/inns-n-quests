@@ -26,11 +26,13 @@ import { GovernanceServiceDsl } from "./service-governance/service"
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
     const amountReverted = await assetManagementService.revertStaledClaims(logger)
-    logger.info(`Reverted ${amountReverted} staled claims`)
+    if (amountReverted > 0)
+        logger.info(`Reverted ${amountReverted} staled claims`)
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
 
 (async () => {
+    console.log("Starting backend...")
     dotenv.config()
     const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
     const calendar = commonCalendar

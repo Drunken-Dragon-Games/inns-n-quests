@@ -161,7 +161,7 @@ async function getAllAdventurers(userId: string): Promise<Character[]> {
 
 async function getAvailableQuests(location: string): Promise<AvailableStakingQuest[]> {
     return await expectResponse(
-        service.getAvailableStakingQuests(location),
+        service.getAvailableStakingQuests(location, 20),
         response =>
             response.status === "ok" ?
             success(response.availableQuests) :
