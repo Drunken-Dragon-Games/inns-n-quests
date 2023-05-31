@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { QueryInterface, Sequelize } from "sequelize"
 import { validateStakeAddress } from "./cardano/address"
-import { generateNonce, verifySig } from "./cardano/signature-verification"
+import { createAuthTxState, generateNonce, verifySig } from "./cardano/signature-verification"
 import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./discord/code-verification"
 import { Users } from "./users/users"
 import { Sessions, SessionsConfig } from "./sessions/sessions";
@@ -15,7 +15,8 @@ import {
     CreateNonceResult, Credentials, AuthenticationResult, RegistrationResult, AssociationResult, 
     RefreshResult, ListSessionsResult, SignOutResult, ResolveUserResult, ResolveSesionResult, 
     UpdateUserResult, 
-    UserInfo
+    UserInfo,
+    CreateAuthStateResult
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -24,6 +25,7 @@ import * as usersDB from "./users/users-db"
 import path from "path"
 import { Umzug } from "umzug"
 import { NODE_ENV } from "../module-ddu-app/settings"
+import { createAssociationTxResult } from "../service-asset-management"
 
 export interface IdentityServiceConfig 
     { network: string
@@ -80,6 +82,7 @@ export class IdentityServiceDsl implements IdentityService {
     async loadDatabaseModels(): Promise<void> {
         usersDB.configureSequelizeModel(this.database)
         cardanoDB.configureSequelizeModel(this.database)
+        cardanoDB.configureSequelizeModelTransactionVerification(this.database)
         sessionsDB.configureSequelizeModel(this.database)
         await this.migrator.up()
     }
@@ -106,6 +109,18 @@ export class IdentityServiceDsl implements IdentityService {
             const nonce = await generateNonce(address)
             return { status: "ok", nonce }
         }
+    }
+
+    async createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext): Promise<CreateAuthStateResult> {
+        try{
+            if (!validateStakeAddress(stakeAddress, this.network)) return { status: "invalid", reason: "bad-address" }
+            const authStateId = await createAuthTxState(userId, stakeAddress, txId)
+            return {status:"ok", authStateId}
+        }catch(e: any){
+            return { status: "invalid", reason: "could not comunicate wiht DB" }
+        }
+        
+
     }
 
     async authenticate(credentials: Credentials, logger?: LoggingContext): Promise<AuthenticationResult> {

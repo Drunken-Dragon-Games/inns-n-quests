@@ -63,7 +63,9 @@ export type ClaimResponse
     = { status: "ok", claimId: string, tx: string }
     | { status: "invalid", reason: string }
 
-export type createAssociationTxResult = SubmitClaimSignatureResponse
+export type createAssociationTxResult
+    = { status: "ok", txId: string, authStateId: string }
+    | { status: "invalid", reason: string }
 
 export type SubmitClaimSignatureResponse
     = { status: "ok", txId: string }

@@ -106,7 +106,14 @@ export class AccountServiceDsl implements AccountService {
     }
 
     async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<createAssociationTxResult> {
-            return await this.assetManagementService.createAssociationTx(userId, stakeAddress, utxos)
+            const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, utxos)
+            if (txIdResult.status != "ok") return {status: "invalid", reason: txIdResult.reason}
+
+            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, txIdResult.txId)
+            if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
+
+            console.log(`the generated txId is ${txIdResult.txId}`)
+            return { status: "ok", txId: txIdResult.txId, authStateId: authState.authStateId }
     }
 
     async getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult> {

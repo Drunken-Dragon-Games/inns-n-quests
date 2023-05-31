@@ -26,10 +26,47 @@ export const SignatureVerificationStateTableAttributes = {
     }
 }
 
+export class TransactionVerificationState extends Model{
+    declare stateId: string
+    declare userId: string
+    declare stakeAddress: string
+    declare txId: string
+}
+
+export const TransactionVerificationStateTableName = "identity_transaction_verification_states"
+
+export const TransactionVerificationStateTableAttributes = {
+    stateId: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4
+    },
+    userId:{
+        type: DataTypes.UUID,
+        allowNull: false,
+    },
+    stakeAddress: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    txId: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+}
+
 export const configureSequelizeModel = (sequelize: Sequelize): void => {
     SignatureVerificationState.init(SignatureVerificationStateTableAttributes, {
         sequelize,
         modelName: "SignatureVerificationState",
         tableName: SignatureVerificationStateTableName
+    })
+}
+
+export const configureSequelizeModelTransactionVerification = (sequelize: Sequelize): void => {
+    TransactionVerificationState.init(TransactionVerificationStateTableAttributes, {
+        sequelize,
+        modelName: "TransactionVerificationState",
+        tableName: TransactionVerificationStateTableName
     })
 }

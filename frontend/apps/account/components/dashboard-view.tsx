@@ -82,7 +82,7 @@ const WalletAssociationWidget = (userInfo: UserInfo) => {
         <WalletAssociationWidgetContainer>
             <MobileHidden>
                 <WidgetRow status="no-tick" text={walletAssociationMessage(associateState)} actions={{
-                    "Nami": () => { AccountTransitions.associateWallet("Nami") },
+                    "Nami": () => { AccountTransitions.associateHardareWallet("Nami") },
                     "Eternl": () => { AccountTransitions.associateWallet("Eternl") },
                 }} />
             </MobileHidden>

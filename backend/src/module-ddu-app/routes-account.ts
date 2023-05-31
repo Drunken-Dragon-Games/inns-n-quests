@@ -84,7 +84,7 @@ export const accountRoutes = (accountService: AccountService) => {
     router.post("/association/tx", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
-        const utxos: MinimalUTxO[] = request.body.MinimalUTxOs
+        const utxos: MinimalUTxO[] = request.body.utxos
         const result = await accountService.getAssociationTx(userId, stakeAddress, utxos)
         return response.status(200).json(result)
     })

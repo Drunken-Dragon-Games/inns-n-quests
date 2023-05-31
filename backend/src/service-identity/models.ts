@@ -60,6 +60,10 @@ export type CreateNonceResult
     = { status: "ok", nonce: string }
     | { status: "bad-address" }
 
+export type CreateAuthStateResult
+    = { status: "ok", authStateId: string }
+    | { status: "invalid", reason: string }
+
 export type AuthenticationResult
     = { status: "ok", tokens: AuthenticationTokens }
     | { status: "bad-credentials" }

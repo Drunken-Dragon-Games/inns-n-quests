@@ -1,6 +1,6 @@
 import crypto from "crypto"
 
-import { SignatureVerificationState } from "./signature-verification-db"
+import { SignatureVerificationState, TransactionVerificationState } from "./signature-verification-db"
 import { Attempt, success, failed } from "../../tools-utils"
 import { Wallet } from "../../tools-cardano"
 
@@ -23,4 +23,9 @@ export const verifySig = async (signedNonce: string, nonce: string, key: string)
         return validation ? success(instance.address) : failed
     }
     else return failed
+}
+
+export const createAuthTxState = async (userId: string, stakeAddress: string, txId: string) => {
+    const authState = await TransactionVerificationState.create({userId, stakeAddress, txId})
+    return authState.stateId
 }

@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
 import { SignedMessage } from "lucid-cardano"
-import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UserBallot, UserFullInfo } from "./account-dsl"
+import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UTxOMinimal, UserBallot, UserFullInfo } from "./account-dsl"
 
 export const AccountBackend = {
 
@@ -37,8 +37,8 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getAssociationTx(stakeAddress: string, claimerInfo: ClaimerInfo): Promise<AssociationNonceResult>{
-        const result = await accountRequest("POST", "/association/tx", {stakeAddress, claimerInfo})
+    async getAssociationTx(stakeAddress: string, utxos: UTxOMinimal[]): Promise<createAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/tx", {stakeAddress, utxos})
         return result.data
     },
 
@@ -132,6 +132,10 @@ export type SubmitAssociationSignatureResult
     | { status: "stake-address-used" }
 
 export type AssociationNonceResult = ClaimSignAndSubbmitResult
+
+export type createAssociationTxResult
+    = { status: "ok", txId: string, authStateId: string }
+    | { status: "invalid", reason: string }
 
 export type ClaimSignAndSubbmitResult 
     = { status: "ok", txId: string }

@@ -34,6 +34,14 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
+    async createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext): Promise<models.CreateAuthStateResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info(`creating auth Tx for user ${userId} for stake address ${stakeAddress}`)
+        const response = await this.base.createAuthTxState(userId, stakeAddress, txId, logger)
+        serviceLogger?.info(`sig nonce status: ${response.status} for tx ${txId}`)
+        return response
+    }
+
     async authenticate(credentials: models.Credentials, logger?: LoggingContext): Promise<models.AuthenticationResult> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.info("authenticating user", { ctype: credentials.ctype, deviceType: credentials.deviceType })

@@ -11,6 +11,8 @@ export interface IdentityService {
 
     createSigNonce(address: string, logger?: LoggingContext): Promise<models.CreateNonceResult>
 
+    createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext):Promise<models.CreateAuthStateResult>
+
     authenticate(credentials: models.Credentials, logger?: LoggingContext): Promise<models.AuthenticationResult>
 
     register(credentials: models.Credentials, logger?: LoggingContext): Promise<models.RegistrationResult>

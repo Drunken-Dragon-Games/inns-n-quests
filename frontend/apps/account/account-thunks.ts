@@ -148,7 +148,7 @@ export const AccountThunks = {
         try {
             const state = accountStore.getState()
             if (!state.userInfo || state.userInfo.dragonSilverToClaim == "0")
-                return displayErrorAndHeal("Please lg in using Discord First")
+                return displayErrorAndHeal("Please log in using Discord First")
 
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: `Connecting ${wallet}...` }))
 
@@ -165,7 +165,7 @@ export const AccountThunks = {
                 return displayErrorAndHeal("Not UTxO large enough to autenticate wallet")
                 
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Building Auth Tx" }))
-            const assoiationTxResponse =  await AccountBackend.getAssociationTx(stakeAddress, { utxos: minimalUtxoFromLucidUTxO(utxos), receivingAddress: utxos[0].address })
+            const assoiationTxResponse =  await AccountBackend.getAssociationTx(stakeAddress, minimalUtxoFromLucidUTxO(utxos))
 
             if (assoiationTxResponse.status !== "ok")
                 return displayErrorAndHeal(assoiationTxResponse.reason)
