@@ -1,24 +1,25 @@
 import { ClaimerInfo } from "../service-asset-management"
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
+import { LoggingContext } from "../tools-tracing"
 
 export interface AccountService {
-    authenticateDevelopment(nickname: string): Promise<AuthenticateResult>
-    authenticateDiscord(code: string): Promise<AuthenticateResult>
-    signout(sessionId: string): Promise<SignOutResult>
-    refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult>
-    getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult>
-    submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult>
-    getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult>
-    claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>
-    claimSignAndSubbmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult>
-    getUserInventory(userId: string): Promise<GetUserInventoryResult>
-    claimStatus(claimId: string): Promise<ClaimStatusResult>
-    grantTest(userId: string): Promise<void>
-    getOpenBallots(): Promise<OpenBallotsResult>
-    getUserOpenBallots(userId: string): Promise<OpenUserBallotsResult>
-    voteForBallot(userId: string, ballotId: string, optionIndex: number): Promise<VoteResult>
-    getPublicBallots(): Promise<PublicBallotResult>
-    getUserBallots(userId: string):Promise<UserBallotResult>
+    authenticateDevelopment(nickname: string, logger?: LoggingContext): Promise<AuthenticateResult>
+    authenticateDiscord(code: string, logger?: LoggingContext): Promise<AuthenticateResult>
+    signout(sessionId: string, logger?: LoggingContext): Promise<SignOutResult>
+    refreshSession(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<AuthenticateResult>
+    getAssociationNonce(stakeAddress: string, logger?: LoggingContext): Promise<GetAssociationNonceResult>
+    submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string, logger?: LoggingContext): Promise<SubmitAssociationSignatureResult>
+    getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult>
+    claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
+    claimSignAndSubbmit(witness: string, tx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
+    getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult>
+    claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult>
+    grantTest(userId: string, logger?: LoggingContext): Promise<void>
+    getOpenBallots(logger?: LoggingContext): Promise<OpenBallotsResult>
+    getUserOpenBallots(userId: string, logger?: LoggingContext): Promise<OpenUserBallotsResult>
+    voteForBallot(userId: string, ballotId: string, optionIndex: number, logger?: LoggingContext): Promise<VoteResult>
+    getPublicBallots(logger?: LoggingContext): Promise<PublicBallotResult>
+    getUserBallots(userId: string, logger?: LoggingContext):Promise<UserBallotResult>
 }
 
 export type AuthenticateResult

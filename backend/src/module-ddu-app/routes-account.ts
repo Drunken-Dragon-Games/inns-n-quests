@@ -7,13 +7,16 @@ import { AuthenticationResult } from "../service-identity"
 import { COOKIE_EXPIRACY, SECRET_KEY } from "./settings"
 import { jwtMiddleware } from "./jwt_middleware"
 import { ClaimerInfo } from "../service-asset-management"
+import { LoggingContext } from "../tools-tracing"
 
 export const accountRoutes = (accountService: AccountService) => {
     const router = Router()    
+    const baseLogger = LoggingContext.create("account")
 
     router.post("/development/authenticate", async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const nickname: string = request.body.nickname
-        const result = await accountService.authenticateDevelopment(nickname)
+        const result = await accountService.authenticateDevelopment(nickname, logger)
         if (result.status == "ok") {
             return response.status(200).json(signJWTAndSetCookie(result, response))
         } else 
@@ -21,8 +24,9 @@ export const accountRoutes = (accountService: AccountService) => {
     })
 
     router.post("/discord/authenticate", async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const code: string = request.body.code
-        const result = await accountService.authenticateDiscord(code)
+        const result = await accountService.authenticateDiscord(code, logger)
         if (result.status == "ok") {
             return response.status(200).json(signJWTAndSetCookie(result, response))
         } else 
@@ -30,19 +34,21 @@ export const accountRoutes = (accountService: AccountService) => {
     })
 
     router.post("/session/signout", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const sessionId = request.auth!.sessionId
-        const result = await accountService.signout(sessionId)
+        const result = await accountService.signout(sessionId, logger)
         response.cookie("access", "", { maxAge: 0, sameSite: "none", secure: true })
         return response.status(200).json(result)
     })
 
     router.post("/session/refresh", async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const fullRefreshToken = request.body.refreshToken
         try {
             const refreshPayload = jwt.verify(fullRefreshToken, SECRET_KEY)
             if (typeof refreshPayload == "string") throw new Error()
             const { sessionId, refreshToken } = refreshPayload
-            const result = await accountService.refreshSession(sessionId, refreshToken)
+            const result = await accountService.refreshSession(sessionId, refreshToken, logger)
             if (result.status != "ok") throw new Error()
             return response.status(200).json(signJWTAndSetCookie(result, response))
         }catch{
@@ -52,16 +58,18 @@ export const accountRoutes = (accountService: AccountService) => {
     })
 
     router.post("/association/nonce", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const stakeAddress: string = request.body.stakeAddress
-        const result = await accountService.getAssociationNonce(stakeAddress)
+        const result = await accountService.getAssociationNonce(stakeAddress, logger)
         return response.status(200).json(result)
     })
 
     router.post("/association/signature", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const nonce = request.body.nonce
         const { key, signature } = request.body.signedMessage
-        const result = await accountService.submitAssociationSignature(userId, nonce, key, signature)
+        const result = await accountService.submitAssociationSignature(userId, nonce, key, signature, logger)
         return response.status(200).json(result)
     })
 
@@ -75,41 +83,47 @@ export const accountRoutes = (accountService: AccountService) => {
     })
 
     router.post("/association/nonce", async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const stakeAddress: string = request.body.stakeAddress
-        const result = await accountService.getAssociationNonce(stakeAddress)
+        const result = await accountService.getAssociationNonce(stakeAddress, logger)
         return response.status(200).json(result)
     })
 
     router.get("/assets/claim/dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const page: number | undefined = request.body.page
-        const result = await accountService.getDragonSilverClaims(userId, page)
+        const result = await accountService.getDragonSilverClaims(userId, page, logger)
         return response.status(200).json(result)
     })
 
     router.post("/assets/claim/dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
         const claimerInfo: ClaimerInfo = request.body.claimerInfo
-        const result = await accountService.claimDragonSilver(userId, stakeAddress, claimerInfo)
+        const result = await accountService.claimDragonSilver(userId, stakeAddress, claimerInfo, logger)
         return response.status(200).json(result)
     })
 
     router.post("/assets/claim/sign-and-submit", async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const {witness, tx, claimId} = request.body
-        const result = await accountService.claimSignAndSubbmit(witness, tx, claimId)
+        const result = await accountService.claimSignAndSubbmit(witness, tx, claimId, logger)
         return response.status(200).json(result)
     })
 
     router.post("/assets/claim/status", async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const {claimId} = request.body
-        const result = await accountService.claimStatus(claimId)
+        const result = await accountService.claimStatus(claimId, logger)
         return response.status(200).json(result)
     })
 
     router.get("/assets/inventory", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
-        const result = await accountService.getUserInventory(userId)
+        const result = await accountService.getUserInventory(userId, logger)
         return response.status(200).json(result)
     })
 
@@ -120,31 +134,36 @@ export const accountRoutes = (accountService: AccountService) => {
     }) */
 
     router.get("/governance/open", async (request: Request, response: Response) => {
-        const result = await accountService.getOpenBallots()
+        const logger = baseLogger.trace(request)
+        const result = await accountService.getOpenBallots(logger)
         return response.status(200).json(result)
     })
 
     router.get("/governance/open-for-user", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
-        const result = await accountService.getUserOpenBallots(userId)
+        const result = await accountService.getUserOpenBallots(userId, logger)
         return response.status(200).json(result)
     })
 
     router.get("/governance/public", async (request: Request, response: Response) => {
-        const result = await accountService.getPublicBallots()
+        const logger = baseLogger.trace(request)
+        const result = await accountService.getPublicBallots(logger)
         return response.status(200).json(result)
     })
 
     router.get("/governance/user", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
-        const result = await accountService.getUserBallots(userId)
+        const result = await accountService.getUserBallots(userId, logger)
         return response.status(200).json(result)
     })
 
     router.post("/governance/vote", jwtMiddleware, async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const {ballotId, optionIndex} = request.body
-        const result = await accountService.voteForBallot(userId, ballotId, optionIndex)
+        const result = await accountService.voteForBallot(userId, ballotId, optionIndex, logger)
         return response.status(200).json(result)
     })
 

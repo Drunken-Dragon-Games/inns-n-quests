@@ -1,6 +1,7 @@
 import { v4 } from "uuid"
 import winston from "winston"
 import WinstonCloudWatch from "winston-cloudwatch"
+import { Request } from "express"
 
 export type LoggerLevel = "error" | "warn" | "info" | "debug"
 
@@ -31,7 +32,7 @@ export class LoggingContext {
             const transports = environment != "local" ?
                 [ new WinstonCloudWatch({
                     logGroupName: options.environment,
-                    logStreamName: options.component,
+                    logStreamName: "backend",
                     awsRegion: "us-east-1",
                     jsonMessage: true
                   }) 
@@ -46,7 +47,7 @@ export class LoggingContext {
             this.log = winston.createLogger({
                 level: options.level,
                 format: winston.format.combine(
-                    //winston.format.timestamp(),
+                    winston.format.timestamp(),
                     winston.format.json(),
                 ),
                 defaultMeta: {
@@ -60,6 +61,24 @@ export class LoggingContext {
         } else {
             this.log = options.logger
         }
+    }
+
+    static create(component: string): LoggingContext {
+        if (process.env.NODE_ENV === "production") return LoggingContext.prod(component)
+        else if (process.env.TEST_CLOUDWATCH === "true") return LoggingContext.localTest(component)
+        else return LoggingContext.local(component)
+    }
+
+    static localTest(component: string): LoggingContext {
+        return new LoggingContext({ ctype: "params", level: "info", environment: "local-test", component })
+    }
+
+    static local(component: string): LoggingContext {
+        return new LoggingContext({ ctype: "params", level: "info", environment: "local", component })
+    }
+
+    static prod(component: string): LoggingContext {
+        return new LoggingContext({ ctype: "params", level: "info", environment: process.env.CARDANO_NETWORK, component })
     }
 
     info(message: string, context?: object): void {
@@ -78,7 +97,14 @@ export class LoggingContext {
         this.log.debug({ message, context })
     }
 
-    trace(): LoggingContext {
+    trace(request: Request): LoggingContext {
+        const traceId = request.header("Trace-ID") ?? v4()
+        return new LoggingContext({ ctype: "params",
+            level: this.level, environment: this.environment,
+            component: this.component, endpoint: request.path, traceId })
+    }
+
+    testTrace(): LoggingContext {
         return new LoggingContext({ ctype: "params",
             level: this.level, environment: this.environment, 
             component: this.component, endpoint: this.endpoint, traceId: v4() })
