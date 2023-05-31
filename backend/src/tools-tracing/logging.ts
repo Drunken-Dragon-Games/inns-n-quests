@@ -70,7 +70,7 @@ export class LoggingContext {
     }
 
     static localTest(component: string): LoggingContext {
-        return new LoggingContext({ ctype: "params", level: "info", environment: "local-test", component })
+        return new LoggingContext({ ctype: "params", level: "info", environment: "Preprod", component })
     }
 
     static local(component: string): LoggingContext {
@@ -82,19 +82,19 @@ export class LoggingContext {
     }
 
     info(message: string, context?: object): void {
-        this.log.info({ message, context })
+        this.log.info({ message, ...context })
     }
 
     warn(message: string, context?: object): void {
-        this.log.warn({ message, context })
+        this.log.warn({ message, ...context })
     }
 
     error(message: string, context?: object): void {
-        this.log.error({ message, context })
+        this.log.error({ message, ...context })
     }
 
     debug(message: string, context?: object): void {
-        this.log.debug({ message, context })
+        this.log.debug({ message, ...context })
     }
 
     trace(request: Request): LoggingContext {

@@ -1,4 +1,3 @@
-import { logger } from "../base-logger"
 
 class ApiError extends Error {
     readonly status: number;
@@ -12,12 +11,6 @@ class ApiError extends Error {
 
     static debug(msg: string) {
         console.error(msg);
-    }
-
-    static log(msg: string, isWarning: boolean){
-        if (isWarning) {
-            logger.log.error(msg);
-        }
     }
 }
 

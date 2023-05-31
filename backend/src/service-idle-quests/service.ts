@@ -112,11 +112,11 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
 
     /** Encounters */
 
-    async getAvailableEncounters(location: string): Promise<GetAvailableEncountersResult> {
+    async getAvailableEncounters(location: string, logger?: LoggingContext): Promise<GetAvailableEncountersResult> {
         return { status: "ok", availableEncounters: [testEncounter] }
     }
 
-    async acceptEncounter(userId: string, encounterId: string, adventurerIds: string[]): Promise<AcceptEncounterResult> {
+    async acceptEncounter(userId: string, encounterId: string, adventurerIds: string[], logger?: LoggingContext): Promise<AcceptEncounterResult> {
         /*
         if (this.questsRegistry[questId] === undefined) 
             return { status: "unknown-quest" }
@@ -132,12 +132,12 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         return { status: "ok", activeEncounter }
     }
 
-    async getActiveEncounters(userId: string): Promise<GetActiveEncountersResult> {
+    async getActiveEncounters(userId: string, logger?: LoggingContext): Promise<GetActiveEncountersResult> {
         const activeEncounters = await this.activeEncounterState.unclaimedActiveEncounters(userId)
         return { status: "ok", activeEncounters }
     }
 
-    async claimEncounter(userId: string, activeEncounterId: string): Promise<ClaimEncounterResult> {
+    async claimEncounter(userId: string, activeEncounterId: string, logger?: LoggingContext): Promise<ClaimEncounterResult> {
         const activeEncounter = await this.activeEncounterState.userActiveEncounter(userId, activeEncounterId)
         // Check encounter exists
         if (!activeEncounter) 
@@ -188,7 +188,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @param quantity
      * @returns 
      */
-    async getAvailableStakingQuests(location: string, quantity: number = 20): Promise<GetAvailableStakingQuestsResult> {
+    async getAvailableStakingQuests(location: string, quantity: number, logger?: LoggingContext): Promise<GetAvailableStakingQuestsResult> {
         return { 
             status: "ok", 
             availableQuests: await this.availbleStakingQuestState.getAvailableStakingQuests(location, quantity)
@@ -204,7 +204,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @param adventurerIds 
      * @returns 
      */
-    async acceptStakingQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptStakingQuestResult> {
+    async acceptStakingQuest(userId: string, questId: string, adventurerIds: string[], logger?: LoggingContext): Promise<AcceptStakingQuestResult> {
         const quest = this.questsRegistry[questId]
         if (!quest) 
             return { status: "unknown-quest" }
@@ -230,7 +230,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @param userId 
      * @returns 
      */
-    async getTakenStakingQuests(userId: string): Promise<GetTakenStakingQuestsResult> {
+    async getTakenStakingQuests(userId: string, logger?: LoggingContext): Promise<GetTakenStakingQuestsResult> {
         const takenQuests = await this.takenQuestState.unclaimedTakenQuests(userId)
         return { status: "ok", takenQuests }
     }
@@ -243,7 +243,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @param takenQuestId 
      * @returns 
      */
-    async claimStakingQuestResult(userId: string, takenQuestId: string): Promise<ClaimStakingQuestResult> {
+    async claimStakingQuestResult(userId: string, takenQuestId: string, logger?: LoggingContext): Promise<ClaimStakingQuestResult> {
         const takenQuest = await this.takenQuestState.userTakenQuest(userId, takenQuestId)
         // Check quest exists
         if (!takenQuest) 
@@ -303,7 +303,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @param userId 
      * @returns 
      */
-    async getInventory(userId: string): Promise<GetInventoryResult> {
+    async getInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult> {
         //fulll on chain and of chain inventory
         const inventoryResult = await this.assetManagementService.list(userId, { policies: onlyPolicies(this.wellKnownPolicies) })
         if (inventoryResult.status == "unknown-user") 
@@ -327,7 +327,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         }
     }
 
-    async grantTestInventory(userId: string): Promise<GetInventoryResult> {
+    async grantTestInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult> {
         if (process.env.NODE_ENV !== "development") return { status: "ok", inventory: { dragonSilver: 0, characters: {}, furniture: {} } }
 
         const pickAdventurer = (collection: vm.CharacterCollection, amount: number): AssetUnit[] => {
@@ -392,7 +392,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         return await this.getInventory(userId)
     }
 
-    async setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations): Promise<void> {
+    async setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void> {
         if (!name && !objectLocations) return
         await SectorState.setPlayerInnState(userId, name, objectLocations)
     }

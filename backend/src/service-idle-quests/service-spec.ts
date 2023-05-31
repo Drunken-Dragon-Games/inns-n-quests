@@ -12,31 +12,31 @@ export interface IdleQuestsService {
 
     /** Encounters */
 
-    getAvailableEncounters(location: string): Promise<GetAvailableEncountersResult>
+    getAvailableEncounters(location: string, logger?: LoggingContext): Promise<GetAvailableEncountersResult>
 
-    acceptEncounter(userId: string, encounterId: string, adventurerIds: string[]): Promise<AcceptEncounterResult>
+    acceptEncounter(userId: string, encounterId: string, adventurerIds: string[], logger?: LoggingContext): Promise<AcceptEncounterResult>
 
-    getActiveEncounters(userId: string): Promise<GetActiveEncountersResult>
+    getActiveEncounters(userId: string, logger?: LoggingContext): Promise<GetActiveEncountersResult>
 
-    claimEncounter(userId: string, activeEncounterId: string): Promise<ClaimEncounterResult>
+    claimEncounter(userId: string, activeEncounterId: string, logger?: LoggingContext): Promise<ClaimEncounterResult>
 
     /** Staking Quests */
 
-    getAvailableStakingQuests(location: string): Promise<GetAvailableStakingQuestsResult>
+    getAvailableStakingQuests(location: string, quantity: number, logger?: LoggingContext): Promise<GetAvailableStakingQuestsResult>
 
-    acceptStakingQuest(userId: string, questId: string, adventurerIds: string[]): Promise<AcceptStakingQuestResult>
+    acceptStakingQuest(userId: string, questId: string, adventurerIds: string[], logger?: LoggingContext): Promise<AcceptStakingQuestResult>
 
-    getTakenStakingQuests(userId: string): Promise<GetTakenStakingQuestsResult>
+    getTakenStakingQuests(userId: string, logger?: LoggingContext): Promise<GetTakenStakingQuestsResult>
 
-    claimStakingQuestResult(userId: string, takenQuestId: string): Promise<ClaimStakingQuestResult>
+    claimStakingQuestResult(userId: string, takenQuestId: string, logger?: LoggingContext): Promise<ClaimStakingQuestResult>
 
     /** Player State */
 
-    getInventory(userId: string): Promise<GetInventoryResult>
+    getInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult>
 
-    grantTestInventory(userId: string): Promise<GetInventoryResult>
+    grantTestInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult>
 
-    setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations): Promise<void>
+    setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void>
 }
 
 export type HealthStatus =
