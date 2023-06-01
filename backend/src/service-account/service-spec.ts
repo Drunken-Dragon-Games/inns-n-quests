@@ -8,7 +8,8 @@ export interface AccountService {
     signout(sessionId: string): Promise<SignOutResult>
     refreshSession(sessionId: string, refreshToken: string): Promise<AuthenticateResult>
     getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult>
-    getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<AssociationNonceResult>
+    getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<createAssociationTxResult>
+    submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult>
     getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult>
     claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>
@@ -50,6 +51,10 @@ export type GetDragonSilverClaimsResult
             txId?: string,
             createdAt: string
         }[] }
+    | { status: "invalid", reason: string }
+
+export type createAssociationTxResult
+    = { status: "ok", txId: string, authStateId: string }
     | { status: "invalid", reason: string }
 
 export type AssociationNonceResult = ClaimSignAndSubbmitResult

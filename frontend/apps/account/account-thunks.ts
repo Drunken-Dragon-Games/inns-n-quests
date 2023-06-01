@@ -140,6 +140,8 @@ export const AccountThunks = {
     },
 
     associateHardwareWallet: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
+        //fran yo se pero si se te ocurre otra solucion jalo
+        let authStateId: string | undefined
         const displayErrorAndHeal = (details: string) => {
             dispatch(actions.setAssociateProcessState({ ctype: "error", details }))
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
@@ -147,7 +149,7 @@ export const AccountThunks = {
 
         try {
             const state = accountStore.getState()
-            if (!state.userInfo || state.userInfo.dragonSilverToClaim == "0")
+            if (!state.userInfo)
                 return displayErrorAndHeal("Please log in using Discord First")
 
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: `Connecting ${wallet}...` }))
@@ -169,14 +171,23 @@ export const AccountThunks = {
 
             if (assoiationTxResponse.status !== "ok")
                 return displayErrorAndHeal(assoiationTxResponse.reason)
-
+            
+            authStateId = assoiationTxResponse.authStateId
             dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Waiting for wallet signature..."}))
-
+            
             const transaction = C.Transaction.from_bytes(new Uint8Array(Buffer.from( assoiationTxResponse.txId, 'hex')))
             const witness = await walletApi.wallet.signTx(transaction)
             const witnessHex = Buffer.from(witness.to_bytes()).toString("hex")
 
             dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Submiting signature..."}))
+            const signature = await AccountBackend.submitAuthTx(witnessHex, assoiationTxResponse.txId, assoiationTxResponse.authStateId)
+
+            if ( signature.status !== "ok")
+                return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`)
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Updating inventory..." }))
+            dispatch(actions.addStakeAddress(stakeAddress))
+            dispatch(AccountThunks.updateInventory())
+            setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
 
         }catch (error: any) {
             console.error(error)

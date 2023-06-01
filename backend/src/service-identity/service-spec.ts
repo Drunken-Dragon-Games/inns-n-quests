@@ -13,6 +13,8 @@ export interface IdentityService {
 
     createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext):Promise<models.CreateAuthStateResult>
 
+    verifyAuthState(authStateId: string, tx: string, userId: string, logger?: LoggingContext): Promise<models.VerifyAuthStateResult>
+
     authenticate(credentials: models.Credentials, logger?: LoggingContext): Promise<models.AuthenticationResult>
 
     register(credentials: models.Credentials, logger?: LoggingContext): Promise<models.RegistrationResult>

@@ -29,3 +29,17 @@ export const createAuthTxState = async (userId: string, stakeAddress: string, tx
     const authState = await TransactionVerificationState.create({userId, stakeAddress, txId})
     return authState.stateId
 }
+
+export const validateAuthState = async (authStateId: string, tx: string, userId: string): Promise<{isValid: true, stakeAddress: string} | {isValid:false, reason: string}> => {
+    try {
+        const instance = await TransactionVerificationState.findByPk(authStateId)
+        if (!instance) throw new Error("No State found with provided Id")
+        await instance.destroy()
+        if (instance.txId !== tx) throw new Error("State transactions do not match")
+        if (instance.userId !== userId) throw new Error("State does not belong to user")
+        return{isValid: true, stakeAddress: instance.stakeAddress}
+    }catch(e: any){
+        return {isValid: false, reason: e.message}
+    }
+    
+}

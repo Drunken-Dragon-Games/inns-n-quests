@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { QueryInterface, Sequelize } from "sequelize"
 import { validateStakeAddress } from "./cardano/address"
-import { createAuthTxState, generateNonce, verifySig } from "./cardano/signature-verification"
+import { createAuthTxState, generateNonce, validateAuthState, verifySig } from "./cardano/signature-verification"
 import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./discord/code-verification"
 import { Users } from "./users/users"
 import { Sessions, SessionsConfig } from "./sessions/sessions";
@@ -16,7 +16,8 @@ import {
     RefreshResult, ListSessionsResult, SignOutResult, ResolveUserResult, ResolveSesionResult, 
     UpdateUserResult, 
     UserInfo,
-    CreateAuthStateResult
+    CreateAuthStateResult,
+    VerifyAuthStateResult
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -117,10 +118,19 @@ export class IdentityServiceDsl implements IdentityService {
             const authStateId = await createAuthTxState(userId, stakeAddress, txId)
             return {status:"ok", authStateId}
         }catch(e: any){
+            console.log(e)
             return { status: "invalid", reason: "could not comunicate wiht DB" }
         }
-        
+    }
 
+    async verifyAuthState(authStateId: string, tx: string, userId: string, logger?: LoggingContext | undefined): Promise<VerifyAuthStateResult> {
+        try{
+            const validationResult = await validateAuthState(authStateId, tx, userId)
+            if (!validationResult.isValid) return { status: "invalid", reason: validationResult.reason || "could not comunicate wiht DB" }
+            return {status:"ok", stakeAddress: validationResult.stakeAddress}
+        }catch(e: any){
+            return { status: "invalid", reason: "could not comunicate wiht DB" }
+        }
     }
 
     async authenticate(credentials: Credentials, logger?: LoggingContext): Promise<AuthenticationResult> {
@@ -176,7 +186,12 @@ export class IdentityServiceDsl implements IdentityService {
                 if (asosiatedUser.ctype == "failure") return { status: "bad-credentials" }
                 else return { status: asosiatedUser.result }
             }
-        } else {
+        } else if (credentials.ctype == "tx"){
+            const asosiatedUser = await Users.associateWithStakingAddress(userId, credentials.stakekeAddres)
+            if (asosiatedUser.ctype == "failure") return { status: "bad-credentials" }
+            else return { status: asosiatedUser.result }
+        }
+         else {
             return <AssociationResult>{}
         }
     }

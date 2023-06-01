@@ -52,6 +52,22 @@ export class AssetClaimDsl {
 		
 	}
 
+	public async submitAssoiateTx(witness: string, tx: string):Promise<Result<string, string>>{
+		try{
+			const knownDecoded = Transaction.from_bytes(Buffer.from(tx, "hex"))
+			const witnessSet = TransactionWitnessSet.from_bytes(Buffer.from(witness, "hex"))
+			const signedTx = cardano.addWitnessesToTransaction(witnessSet, knownDecoded)
+			// TODO: this can fail if the tx is already submitted or the utxo is already spent
+			// we should handle the error and revert the whole claim
+			const txId = await this.blockfrost.txSubmit(signedTx.to_hex())
+			return success(txId)
+		}catch(e: any){
+			return failure(e.message)
+		}
+		
+		
+	}
+
 	public async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string}, claimerInfo?: ClaimerInfo, logger?: LoggingContext): Promise<ClaimResult> {
 		const policyResponse = await this.secureSigningService.policy(asset.policyId, logger)
 		if (policyResponse.status == "unknown-policy") 

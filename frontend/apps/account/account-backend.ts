@@ -42,6 +42,11 @@ export const AccountBackend = {
         return result.data
     },
 
+    async submitAuthTx(witnessHex: string, txId: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>{
+        const result = await accountRequest("POST", "/association/submit-tx", {witnessHex, txId, authStateId})
+        return result.data
+    },
+
     async test(): Promise<void> {
         const result = await accountRequest("POST", "/session/test")
         console.log(result)

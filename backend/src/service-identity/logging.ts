@@ -38,7 +38,15 @@ export class IdentityServiceLogging implements IdentityService {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.info(`creating auth Tx for user ${userId} for stake address ${stakeAddress}`)
         const response = await this.base.createAuthTxState(userId, stakeAddress, txId, logger)
-        serviceLogger?.info(`sig nonce status: ${response.status} for tx ${txId}`)
+        serviceLogger?.info(`creating auth Tx status: ${response.status} for tx ${txId}`)
+        return response
+    }
+
+    async verifyAuthState(authStateId: string, tx: string, userId: string, logger?: LoggingContext | undefined): Promise<models.VerifyAuthStateResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info(`verifying auth attempt ${authStateId} with tx`)
+        const response = await this.base.verifyAuthState(authStateId, tx, userId, logger)
+        serviceLogger?.info(`verifying authState in db status: ${response.status} for user ${userId}`)
         return response
     }
 

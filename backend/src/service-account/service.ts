@@ -112,8 +112,27 @@ export class AccountServiceDsl implements AccountService {
             const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, txIdResult.txId)
             if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
 
-            console.log(`the generated txId is ${txIdResult.txId}`)
             return { status: "ok", txId: txIdResult.txId, authStateId: authState.authStateId }
+    }
+
+    async submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string): Promise<ClaimSignAndSubbmitResult> {
+        try {
+            const stateValidateResult = await this.identityService.verifyAuthState(authStateId, tx, userId)
+            if (stateValidateResult.status !== "ok") throw new Error(stateValidateResult.reason)
+            const txvalidateResult = await this.assetManagementService.submitAuthTransaction(witness, tx)
+        
+            if (txvalidateResult.status != "ok") throw new Error(txvalidateResult.reason)
+
+            const associateResponse = await this.identityService.associate(userId, 
+                {ctype: "tx", deviceType: "Browser", stakekeAddres: stateValidateResult.stakeAddress})
+
+            if(associateResponse.status != "ok") throw new Error(associateResponse.status)
+            return{status: "ok", txId: txvalidateResult.txId }
+        }catch(e: any){
+            console.log(e)
+            return {status: "invalid", reason: e.message}
+        }
+        
     }
 
     async getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult> {

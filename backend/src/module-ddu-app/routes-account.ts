@@ -89,6 +89,13 @@ export const accountRoutes = (accountService: AccountService) => {
         return response.status(200).json(result)
     })
 
+    router.post("/association/submit-tx", jwtMiddleware,async (request: Request, response: Response) => {
+        const userId: string = request.auth!.userId
+        const {witnessHex, txId, authStateId} = request.body
+        const result = await accountService.submitAssociationTx(userId, witnessHex, txId, authStateId)
+        return response.status(200).json(result)
+    })
+
     router.get("/assets/claim/dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const page: number | undefined = request.body.page
