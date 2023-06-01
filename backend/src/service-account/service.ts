@@ -105,26 +105,26 @@ export class AccountServiceDsl implements AccountService {
         return associateResponse
     }
 
-    async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<CreateAssociationTxResult> {
-            const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, utxos)
+    async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[], logger?: LoggingContext): Promise<CreateAssociationTxResult> {
+            const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, utxos, logger)
             if (txIdResult.status != "ok") return {status: "invalid", reason: txIdResult.reason}
 
-            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, txIdResult.txId)
+            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, txIdResult.txId, logger)
             if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
 
             return { status: "ok", txId: txIdResult.txId, authStateId: authState.authStateId }
     }
 
-    async submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string): Promise<ClaimSignAndSubbmitResult> {
+    async submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
         try {
-            const stateValidateResult = await this.identityService.verifyAuthState(authStateId, tx, userId)
+            const stateValidateResult = await this.identityService.verifyAuthState(authStateId, tx, userId, logger)
             if (stateValidateResult.status !== "ok") throw new Error(stateValidateResult.reason)
-            const txvalidateResult = await this.assetManagementService.submitAuthTransaction(witness, tx)
+            const txvalidateResult = await this.assetManagementService.submitAuthTransaction(witness, tx, logger)
         
             if (txvalidateResult.status != "ok") throw new Error(txvalidateResult.reason)
             
             const associateResponse = await this.identityService.associate(userId, 
-                {ctype: "tx", deviceType: "Browser", stakekeAddres: stateValidateResult.stakeAddress})
+                {ctype: "tx", deviceType: "Browser", stakekeAddres: stateValidateResult.stakeAddress}, logger)
 
             if(associateResponse.status != "ok") throw new Error(associateResponse.status)
             return{status: "ok", txId: txvalidateResult.txId }
@@ -135,8 +135,8 @@ export class AccountServiceDsl implements AccountService {
         
     }
 
-    async cleanAssociationState(userId: string, authStateId: string): Promise<CleanAssociationTxResult> {
-        return this.identityService.cleanAssociationTx(authStateId, userId)
+    async cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
+        return this.identityService.cleanAssociationTx(authStateId, userId, logger)
     }
 
     async getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult> {

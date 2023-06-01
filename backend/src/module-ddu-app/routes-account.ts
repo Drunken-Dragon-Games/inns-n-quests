@@ -91,29 +91,30 @@ export const accountRoutes = (accountService: AccountService) => {
         response.status(200).json(result)
     }))
 
-    router.post("/association/tx", jwtMiddleware, async (request: Request, response: Response) => {
+    router.post("/association/tx", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
         const utxos: MinimalUTxO[] = request.body.utxos
-        const result = await accountService.getAssociationTx(userId, stakeAddress, utxos)
-        return response.status(200).json(result)
-    })
+        const result = await accountService.getAssociationTx(userId, stakeAddress, utxos, logger)
+        response.status(200).json(result)
+    }))
 
-    router.post("/association/submit-tx", jwtMiddleware,async (request: Request, response: Response) => {
+    router.post("/association/submit-tx", jwtMiddleware,requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const {witnessHex, txId, authStateId} = request.body
-        const result = await accountService.submitAssociationTx(userId, witnessHex, txId, authStateId)
-        return response.status(200).json(result)
-    })
+        const result = await accountService.submitAssociationTx(userId, witnessHex, txId, authStateId, logger)
+        response.status(200).json(result)
+    }))
 
-    router.post("/association/clean-assosiate-tx-state", jwtMiddleware,async (request: Request, response: Response) => {
-        console.log(`got reqeust to clean up`)
+    router.post("/association/clean-assosiate-tx-state", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const {authStateId} = request.body
-        console.log(authStateId)
-        const result = await accountService.cleanAssociationState(userId, authStateId)
-        return response.status(200).json(result)
-    })
+        const result = await accountService.cleanAssociationState(userId, authStateId, logger)
+        response.status(200).json(result)
+    }))
 
     router.get("/assets/claim/dragon-silver", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)

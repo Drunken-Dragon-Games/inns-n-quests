@@ -21,9 +21,9 @@ export interface AccountService {
     voteForBallot(userId: string, ballotId: string, optionIndex: number, logger?: LoggingContext): Promise<VoteResult>
     getPublicBallots(logger?: LoggingContext): Promise<PublicBallotResult>
     getUserBallots(userId: string, logger?: LoggingContext):Promise<UserBallotResult>
-    getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<CreateAssociationTxResult>
-    submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>
-    cleanAssociationState(userId: string, authStateId: string): Promise<CleanAssociationTxResult>
+    getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[], logger?: LoggingContext): Promise<CreateAssociationTxResult>
+    submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
+    cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
 }
 
 export type CleanAssociationTxResult 

@@ -87,7 +87,7 @@ export class AssetManagementServiceLogging implements AssetManagementService {
 
     async submitAuthTransaction(witness: string, tx: string, logger?: LoggingContext | undefined): Promise<models.SubmitAuthTransactionResult> {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.log.info(`submiting tx ${tx}`)
+        serviceLogger?.log.info(`submiting auth tx`)
         const response = await this.base.submitAuthTransaction(witness, tx, serviceLogger)
         serviceLogger?.log.info(`submiting auth Tx result was ${response.status}`)
         return response

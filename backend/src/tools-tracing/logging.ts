@@ -1,7 +1,7 @@
 import { v4 } from "uuid"
 import winston from "winston"
 import WinstonCloudWatch from "winston-cloudwatch"
-import { Request } from "express"
+import { Request } from "express-jwt"
 
 export type LoggerLevel = "error" | "warn" | "info" | "debug"
 
@@ -14,6 +14,7 @@ export type LoggingContextOptions
         component?: string,
         endpoint?: string,
         traceId?: string,
+        userId?: string,
     }
 
 export class LoggingContext {
@@ -23,6 +24,7 @@ export class LoggingContext {
     public readonly component?: string
     public readonly endpoint?: string
     public readonly traceId?: string
+    public readonly userId?: string
 
     public readonly log: winston.Logger
 
@@ -44,6 +46,7 @@ export class LoggingContext {
             this.component = options.component
             this.endpoint = options.endpoint
             this.traceId = options.traceId
+            this.userId = options.userId
             this.log = winston.createLogger({
                 level: options.level,
                 format: winston.format.combine(
@@ -52,9 +55,10 @@ export class LoggingContext {
                 ),
                 defaultMeta: {
                     //environment, 
-                    //component: options.component, 
+                    component: options.component, 
                     endpoint: options.endpoint, 
-                    traceId: options.traceId
+                    traceId: options.traceId,
+                    userId: options.userId
                 },
                 transports
             })
@@ -63,22 +67,22 @@ export class LoggingContext {
         }
     }
 
-    static create(component: string): LoggingContext {
-        if (process.env.NODE_ENV === "production") return LoggingContext.prod(component)
-        else if (process.env.TEST_CLOUDWATCH === "true") return LoggingContext.localTest(component)
-        else return LoggingContext.local(component)
+    static create(component: string, userId?: string): LoggingContext {
+        if (process.env.NODE_ENV === "production") return LoggingContext.prod(component, userId)
+        else if (process.env.TEST_CLOUDWATCH === "true") return LoggingContext.localTest(component, userId)
+        else return LoggingContext.local(component, userId)
     }
 
-    static localTest(component: string): LoggingContext {
-        return new LoggingContext({ ctype: "params", level: "info", environment: "Preprod", component })
+    static localTest(component: string, userId?: string): LoggingContext {
+        return new LoggingContext({ ctype: "params", level: "info", environment: "Preprod", component, userId})
     }
 
-    static local(component: string): LoggingContext {
-        return new LoggingContext({ ctype: "params", level: "info", environment: "local", component })
+    static local(component: string, userId?: string): LoggingContext {
+        return new LoggingContext({ ctype: "params", level: "info", environment: "local", component, userId })
     }
 
-    static prod(component: string): LoggingContext {
-        return new LoggingContext({ ctype: "params", level: "info", environment: process.env.CARDANO_NETWORK, component })
+    static prod(component: string, userId?: string): LoggingContext {
+        return new LoggingContext({ ctype: "params", level: "info", environment: process.env.CARDANO_NETWORK, component, userId })
     }
 
     info(message: string, context?: object): void {
@@ -98,32 +102,33 @@ export class LoggingContext {
     }
 
     trace(request: Request): LoggingContext {
+        const userId = request.auth?.userId
         const traceId = request.header("Trace-ID") ?? v4()
-        return new LoggingContext({ ctype: "params",
+        return new LoggingContext({ ctype: "params", userId: userId ?? this.userId,
             level: this.level, environment: this.environment,
             component: this.component, endpoint: request.path, traceId })
     }
 
     testTrace(): LoggingContext {
-        return new LoggingContext({ ctype: "params",
+        return new LoggingContext({ ctype: "params", userId: this.userId,
             level: this.level, environment: this.environment, 
             component: this.component, endpoint: this.endpoint, traceId: v4() })
     }
 
     withComponent(component: string | undefined): LoggingContext {
-        return new LoggingContext({ ctype: "params",
+        return new LoggingContext({ ctype: "params", userId: this.userId,
             level: this.level, environment: this.environment, 
             component: component, endpoint: this.endpoint, traceId: this.traceId })
     }
 
     withEndpoint(endpoint: string | undefined): LoggingContext {
-        return new LoggingContext({ ctype: "params",
+        return new LoggingContext({ ctype: "params", userId: this.userId,
             level: this.level, environment: this.environment, 
             component: this.component, endpoint: endpoint, traceId: this.traceId })
     }
 
     withTraceId(traceId: string | undefined): LoggingContext {
-        return new LoggingContext({ ctype: "params",
+        return new LoggingContext({ ctype: "params", userId: this.userId,
             level: this.level, environment: this.environment, 
             component: this.component, endpoint: this.endpoint, traceId: traceId })
     }
