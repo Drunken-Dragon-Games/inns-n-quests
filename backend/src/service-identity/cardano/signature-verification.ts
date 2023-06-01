@@ -1,6 +1,6 @@
 import crypto from "crypto"
 
-import { SignatureVerificationState } from "./signature-verification-db"
+import { SignatureVerificationState, TransactionVerificationState } from "./signature-verification-db"
 import { Attempt, success, failed } from "../../tools-utils"
 import { Wallet } from "../../tools-cardano"
 
@@ -23,4 +23,36 @@ export const verifySig = async (signedNonce: string, nonce: string, key: string)
         return validation ? success(instance.address) : failed
     }
     else return failed
+}
+
+export const createAuthTxState = async (userId: string, stakeAddress: string, txId: string) => {
+    const authState = await TransactionVerificationState.create({userId, stakeAddress, txId})
+    return authState.stateId
+}
+
+export const validateAuthState = async (authStateId: string, tx: string, userId: string): Promise<{isValid: true, stakeAddress: string} | {isValid:false, reason: string}> => {
+    try {
+        const instance = await TransactionVerificationState.findByPk(authStateId)
+        if (!instance) throw new Error("No State found with provided Id")
+        await instance.destroy()
+        if (instance.txId !== tx) throw new Error("State transactions do not match")
+        if (instance.userId !== userId) throw new Error("State does not belong to user")
+        return{isValid: true, stakeAddress: instance.stakeAddress}
+    }catch(e: any){
+        return {isValid: false, reason: e.message}
+    }
+    
+}
+
+export const removeState = async (authStateId: string, userId: string): Promise<{status: "ok"} | {status: "invalid", reason: string}> => {
+    try {
+        const instance = await TransactionVerificationState.findByPk(authStateId)
+        if (!instance) throw new Error("No State found with provided Id")
+        await instance.destroy()
+        return {status: "ok"}
+    }catch(e: any){
+        console.log(e)
+        return {status: "invalid", reason: e.message}
+    }
+    
 }

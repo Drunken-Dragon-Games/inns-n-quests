@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
 import { SignedMessage } from "lucid-cardano"
-import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UserBallot, UserFullInfo } from "./account-dsl"
+import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UTxOMinimal, UserBallot, UserFullInfo } from "./account-dsl"
 
 export const AccountBackend = {
 
@@ -34,6 +34,21 @@ export const AccountBackend = {
 
     async submitAssociationSignature(nonce: string, signedMessage: SignedMessage, traceId?: string): Promise<SubmitAssociationSignatureResult> {
         const result = await accountRequest("POST", "/association/signature", {nonce, signedMessage}, traceId)
+        return result.data
+    },
+
+    async getAssociationTx(stakeAddress: string, utxos: UTxOMinimal[]): Promise<CreateAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/tx", {stakeAddress, utxos})
+        return result.data
+    },
+
+    async submitAuthTx(witnessHex: string, txId: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>{
+        const result = await accountRequest("POST", "/association/submit-tx", {witnessHex, txId, authStateId})
+        return result.data
+    },
+
+    async cleanAssociationState(authStateId: string): Promise<CleanAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId})
         return result.data
     },
 
@@ -98,6 +113,9 @@ export const AccountBackend = {
         return result.data
     }
 }
+export type CleanAssociationTxResult 
+    = {status: "ok"}
+    | {status: "invalid", reason: string}
 
 export type AuthenticationResult
     = { status: "ok", tokens: AuthenticationTokens, inventory: { dragonSilver: string, dragonSilverToClaim: string, dragonGold: string }, info: UserFullInfo }
@@ -125,6 +143,12 @@ export type SubmitAssociationSignatureResult
     = { status: "ok" }
     | { status: "bad-credentials" }
     | { status: "stake-address-used" }
+
+export type AssociationNonceResult = ClaimSignAndSubbmitResult
+
+export type CreateAssociationTxResult
+    = { status: "ok", txId: string, authStateId: string }
+    | { status: "invalid", reason: string }
 
 export type ClaimSignAndSubbmitResult 
     = { status: "ok", txId: string }
@@ -173,7 +197,7 @@ async function accountRequest<ResData = any, ReqData = any>(method: Method, endp
             accept: "application/json",
             "Trace-ID": finalTraceId
         },
-        timeout: 5000,
+        timeout: 10000,
         withCredentials: true,
     })
 }

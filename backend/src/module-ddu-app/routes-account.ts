@@ -7,6 +7,7 @@ import { AuthenticationResult } from "../service-identity"
 import { COOKIE_EXPIRACY, SECRET_KEY } from "./settings"
 import { jwtMiddleware } from "./jwt_middleware"
 import { ClaimerInfo } from "../service-asset-management"
+import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
 import { requestCatchError } from "./error/catch-error"
 
@@ -87,6 +88,31 @@ export const accountRoutes = (accountService: AccountService) => {
         const logger = baseLogger.trace(request)
         const stakeAddress: string = request.body.stakeAddress
         const result = await accountService.getAssociationNonce(stakeAddress, logger)
+        response.status(200).json(result)
+    }))
+
+    router.post("/association/tx", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const stakeAddress: string = request.body.stakeAddress
+        const utxos: MinimalUTxO[] = request.body.utxos
+        const result = await accountService.getAssociationTx(userId, stakeAddress, utxos, logger)
+        response.status(200).json(result)
+    }))
+
+    router.post("/association/submit-tx", jwtMiddleware,requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const {witnessHex, txId, authStateId} = request.body
+        const result = await accountService.submitAssociationTx(userId, witnessHex, txId, authStateId, logger)
+        response.status(200).json(result)
+    }))
+
+    router.post("/association/clean-assosiate-tx-state", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const {authStateId} = request.body
+        const result = await accountService.cleanAssociationState(userId, authStateId, logger)
         response.status(200).json(result)
     }))
 

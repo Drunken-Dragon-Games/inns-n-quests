@@ -15,11 +15,12 @@ import { AssetManagementServiceLogging } from "./logging"
 
 import { 
     ClaimResponse, ClaimStatusResponse, ClaimerInfo, GrantResponse, HealthStatus, 
-    ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitClaimSignatureResponse, UserClaimsResponse 
+    ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitAuthTransactionResult, SubmitClaimSignatureResponse, UserClaimsResponse 
 } from "./models"
 
 import * as offChainStoreDB from "./assets/offchain-store-db"
 import * as assetClaimDB from "./assets/asset-claim-db"
+import { MinimalUTxO } from "../tools-cardano"
 //import { Lucid } from "lucid-cardano"
 
 export interface AssetManagementServiceConfig 
@@ -126,6 +127,22 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         else {
             return { status: "invalid", reason: result.error }        
         }
+    }
+
+    async createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext | undefined): Promise<SubmitClaimSignatureResponse> {
+        const result = await this.claims.genAssoiateTx(stakeAddress, MinimalUTxOs, logger)
+        if (result.ctype == "success") 
+            return { status: "ok", txId: result.result.txId }
+        else {
+            return { status: "invalid", reason: result.error }        
+        }
+    }
+
+    async submitAuthTransaction(witness: string, tx: string, logger?: LoggingContext | undefined): Promise<SubmitAuthTransactionResult> {
+        const result = await this.claims.submitAssoiateTx(witness, tx)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
+        return {status: "ok", txId: result.result}
+
     }
 
     async submitClaimSignature(claimId: string, tx: string, witness: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResponse> {

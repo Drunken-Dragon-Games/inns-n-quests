@@ -60,7 +60,7 @@ export type GovernaceState
 
 export type WalletAssociationProcessState
     = { ctype: "idle" }
-    | { ctype: "loading", details: string }
+    | { ctype: "loading", claimStatus?: ClaimStatus, details: string }
     | { ctype: "error", details: string };
 
 export type ClaimProcessState

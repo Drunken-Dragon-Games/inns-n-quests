@@ -18,6 +18,7 @@ export type Address
 export type Credentials
     = { ctype: "email-pass", deviceType: DeviceType, email: string, password: string }
     | { ctype: "sig", deviceType: DeviceType, publicKey: string, nonce: string, signedNonce: string }
+    | { ctype: "tx", deviceType: DeviceType, stakekeAddres: string}
     | { ctype: "discord", deviceType: DeviceType, authCode: string }
     | { ctype: "development", deviceType: DeviceType, nickname: string }
 
@@ -60,6 +61,14 @@ export type CreateNonceResult
     = { status: "ok", nonce: string }
     | { status: "bad-address" }
 
+export type CreateAuthStateResult
+    = { status: "ok", authStateId: string }
+    | { status: "invalid", reason: string }
+
+export type VerifyAuthStateResult
+    = { status: "ok", stakeAddress: string }
+    | { status: "invalid", reason: string }
+
 export type AuthenticationResult
     = { status: "ok", tokens: AuthenticationTokens }
     | { status: "bad-credentials" }
@@ -73,6 +82,10 @@ export type RegistrationResult
     = { status: "ok", tokens: AuthenticationTokens }
     | { status: "bad-signature" }
     | { status: "bad-discord-code" }
+
+export type CleanAssociationTxResult
+    = {status:"ok"}
+    | {status: "invalid", reason: string}
 
 export type AssociationResult
     = { status: "ok" }

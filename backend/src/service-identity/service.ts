@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { QueryInterface, Sequelize } from "sequelize"
 import { validateStakeAddress } from "./cardano/address"
-import { generateNonce, verifySig } from "./cardano/signature-verification"
+import { createAuthTxState, generateNonce, removeState, validateAuthState, verifySig } from "./cardano/signature-verification"
 import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./discord/code-verification"
 import { Users } from "./users/users"
 import { Sessions, SessionsConfig } from "./sessions/sessions";
@@ -15,7 +15,10 @@ import {
     CreateNonceResult, Credentials, AuthenticationResult, RegistrationResult, AssociationResult, 
     RefreshResult, ListSessionsResult, SignOutResult, ResolveUserResult, ResolveSesionResult, 
     UpdateUserResult, 
-    UserInfo
+    UserInfo,
+    CreateAuthStateResult,
+    VerifyAuthStateResult,
+    CleanAssociationTxResult
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -24,6 +27,7 @@ import * as usersDB from "./users/users-db"
 import path from "path"
 import { Umzug } from "umzug"
 import { NODE_ENV } from "../module-ddu-app/settings"
+import { CreateAssociationTxResult } from "../service-asset-management"
 
 export interface IdentityServiceConfig 
     { network: string
@@ -80,6 +84,7 @@ export class IdentityServiceDsl implements IdentityService {
     async loadDatabaseModels(): Promise<void> {
         usersDB.configureSequelizeModel(this.database)
         cardanoDB.configureSequelizeModel(this.database)
+        cardanoDB.configureSequelizeModelTransactionVerification(this.database)
         sessionsDB.configureSequelizeModel(this.database)
         await this.migrator.up()
     }
@@ -105,6 +110,27 @@ export class IdentityServiceDsl implements IdentityService {
         else {
             const nonce = await generateNonce(address)
             return { status: "ok", nonce }
+        }
+    }
+
+    async createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext): Promise<CreateAuthStateResult> {
+        try{
+            if (!validateStakeAddress(stakeAddress, this.network)) return { status: "invalid", reason: "bad-address" }
+            const authStateId = await createAuthTxState(userId, stakeAddress, txId)
+            return {status:"ok", authStateId}
+        }catch(e: any){
+            console.log(e)
+            return { status: "invalid", reason: "could not comunicate wiht DB" }
+        }
+    }
+
+    async verifyAuthState(authStateId: string, tx: string, userId: string, logger?: LoggingContext | undefined): Promise<VerifyAuthStateResult> {
+        try{
+            const validationResult = await validateAuthState(authStateId, tx, userId)
+            if (!validationResult.isValid) return { status: "invalid", reason: validationResult.reason || "could not comunicate wiht DB" }
+            return {status:"ok", stakeAddress: validationResult.stakeAddress}
+        }catch(e: any){
+            return { status: "invalid", reason: "could not comunicate wiht DB" }
         }
     }
 
@@ -161,9 +187,25 @@ export class IdentityServiceDsl implements IdentityService {
                 if (asosiatedUser.ctype == "failure") return { status: "bad-credentials" }
                 else return { status: asosiatedUser.result }
             }
-        } else {
+        } else if (credentials.ctype == "tx"){
+            const asosiatedUser = await Users.associateWithStakingAddress(userId, credentials.stakekeAddres)
+            if (asosiatedUser.ctype == "failure") return { status: "bad-credentials" }
+            else return { status: asosiatedUser.result }
+        }
+         else {
             return <AssociationResult>{}
         }
+    }
+
+    async cleanAssociationTx(userId: string, authStateId: string, logger: LoggingContext): Promise<CleanAssociationTxResult> {
+        try{
+            const result = await removeState(authStateId,userId)
+            if (result.status != "ok") logger.error(`error when tring to remove auth state ${authStateId}`)
+            return result
+        }catch(e: any){
+            return { status: "invalid", reason: "could not comunicate wiht DB" }
+        }
+
     }
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<RefreshResult> {
