@@ -144,6 +144,7 @@ export const AccountThunks = {
         let authStateId: string | undefined
         const displayErrorAndHeal = (details: string) => {
             dispatch(actions.setAssociateProcessState({ ctype: "error", details }))
+            if (authStateId) AccountBackend.cleanAssociationState(authStateId)
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
         }
 

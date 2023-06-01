@@ -43,3 +43,16 @@ export const validateAuthState = async (authStateId: string, tx: string, userId:
     }
     
 }
+
+export const removeState = async (authStateId: string, userId: string): Promise<{status: "ok"} | {status: "invalid", reason: string}> => {
+    try {
+        const instance = await TransactionVerificationState.findByPk(authStateId)
+        if (!instance) throw new Error("No State found with provided Id")
+        await instance.destroy()
+        return {status: "ok"}
+    }catch(e: any){
+        console.log(e)
+        return {status: "invalid", reason: e.message}
+    }
+    
+}

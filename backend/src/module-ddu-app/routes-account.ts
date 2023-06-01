@@ -96,6 +96,15 @@ export const accountRoutes = (accountService: AccountService) => {
         return response.status(200).json(result)
     })
 
+    router.post("/association/clean-assosiate-tx-state", jwtMiddleware,async (request: Request, response: Response) => {
+        console.log(`got reqeust to clean up`)
+        const userId: string = request.auth!.userId
+        const {authStateId} = request.body
+        console.log(authStateId)
+        const result = await accountService.cleanAssociationState(userId, authStateId)
+        return response.status(200).json(result)
+    })
+
     router.get("/assets/claim/dragon-silver", jwtMiddleware, async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const page: number | undefined = request.body.page

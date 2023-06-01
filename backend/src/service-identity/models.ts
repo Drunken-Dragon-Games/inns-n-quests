@@ -83,6 +83,10 @@ export type RegistrationResult
     | { status: "bad-signature" }
     | { status: "bad-discord-code" }
 
+export type CleanAssociationTxResult
+    = {status:"ok"}
+    | {status: "invalid", reason: string}
+
 export type AssociationResult
     = { status: "ok" }
     | { status: "bad-credentials" }

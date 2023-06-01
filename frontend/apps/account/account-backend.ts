@@ -47,6 +47,11 @@ export const AccountBackend = {
         return result.data
     },
 
+    async cleanAssociationState(authStateId: string): Promise<CleanAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId})
+        return result.data
+    },
+
     async test(): Promise<void> {
         const result = await accountRequest("POST", "/session/test")
         console.log(result)
@@ -108,6 +113,9 @@ export const AccountBackend = {
         return result.data
     }
 }
+export type CleanAssociationTxResult 
+    = {status: "ok"}
+    | {status: "invalid", reason: string}
 
 export type AuthenticationResult
     = { status: "ok", tokens: AuthenticationTokens, inventory: { dragonSilver: string, dragonSilverToClaim: string, dragonGold: string }, info: UserFullInfo }

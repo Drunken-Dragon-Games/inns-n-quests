@@ -10,6 +10,7 @@ export interface AccountService {
     getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult>
     getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<createAssociationTxResult>
     submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>
+    cleanAssociationState(userId: string, authStateId: string): Promise<CleanAssociationTxResult>
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string): Promise<SubmitAssociationSignatureResult>
     getDragonSilverClaims(userId: string, page?: number): Promise<GetDragonSilverClaimsResult>
     claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimDragonSilverResult>
@@ -23,6 +24,10 @@ export interface AccountService {
     getPublicBallots(): Promise<PublicBallotResult>
     getUserBallots(userId: string):Promise<UserBallotResult>
 }
+
+export type CleanAssociationTxResult 
+    = {status: "ok"}
+    | {status: "invalid", reason: string}
 
 export type AuthenticateResult
     = { status: "ok", tokens: AuthenticationTokens, inventory: {dragonSilver: string, dragonSilverToClaim: string, dragonGold: string}, info: UserFullInfo }
