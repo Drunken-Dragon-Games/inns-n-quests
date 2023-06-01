@@ -17,6 +17,8 @@ export default class AssetManagementServiceMock {
             submitClaimSignature: jest.fn(),
             claimStatus: jest.fn(),
             revertStaledClaims: jest.fn(),
+            createAssociationTx: jest.fn(),
+            submitAuthTransaction: jest.fn(),
         }
     }
     

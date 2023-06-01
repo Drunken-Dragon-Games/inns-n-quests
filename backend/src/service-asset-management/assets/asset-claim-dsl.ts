@@ -9,7 +9,7 @@ import { AssetStoreDsl } from "./assets-dsl"
 import { SecureSigningService } from "../../service-secure-signing"
 import { failure, Result, success } from "../../tools-utils"
 import { LoggingContext } from "../../tools-tracing"
-import { cardano, TokenMintOptions } from "../../tools-cardano"
+import { cardano, MinimalUTxO, TokenMintOptions } from "../../tools-cardano"
 import { ClaimStatus, ClaimerInfo } from "../models"
 
 export type AssetClaimDslConfig = {
@@ -17,6 +17,8 @@ export type AssetClaimDslConfig = {
 	feeAmount: string,
 	txTTL: number
 }
+
+export type GenAssosiateTxResult = Result<{txId: string}, "blockfrost-error">
 
 export type ClaimResult = Result<{ claimId: string, tx: string }, "unknown-policy" | "not-enough-assets">
 
@@ -37,6 +39,33 @@ export class AssetClaimDsl {
 
 	public async userClaims(userId: string, unit: string, page?: number, logger?: LoggingContext): Promise<AssetClaim[]> {
 		return AssetClaim.findAll({ where: { userId, unit }, limit: 5, offset: page && page * 5, order: [["createdAt", "DESC"]] })
+	}
+
+	public async genAssoiateTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext ): Promise<GenAssosiateTxResult>{
+		try{
+			const tx = await cardano.createAuthTransaction(stakeAddress, MinimalUTxOs, this.blockfrost)
+			const txId = Buffer.from(tx.to_bytes()).toString("hex")	
+			return success({ txId})
+		}catch(e: any){
+			return failure("blockfrost-error")
+		}
+		
+	}
+
+	public async submitAssoiateTx(witness: string, tx: string):Promise<Result<string, string>>{
+		try{
+			const knownDecoded = Transaction.from_bytes(Buffer.from(tx, "hex"))
+			const witnessSet = TransactionWitnessSet.from_bytes(Buffer.from(witness, "hex"))
+			const signedTx = cardano.addWitnessesToTransaction(witnessSet, knownDecoded)
+			// TODO: this can fail if the tx is already submitted or the utxo is already spent
+			// we should handle the error and revert the whole claim
+			const txId = await this.blockfrost.txSubmit(signedTx.to_hex())
+			return success(txId)
+		}catch(e: any){
+			return failure(e.message)
+		}
+		
+		
 	}
 
 	public async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string}, claimerInfo?: ClaimerInfo, logger?: LoggingContext): Promise<ClaimResult> {

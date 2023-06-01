@@ -96,6 +96,10 @@ export const AccountTransitions = {
         dispatch(AccountThunks.associateWallet(wallet))
     },
 
+    associateHardareWallet(wallet: SupportedWallet): void {
+        dispatch(AccountThunks.associateHardwareWallet(wallet))
+    },
+
     test: () => {
         console.log("get cookies", getCookies({ path: "/api/account/session/test", domain: "localhost:5000" }))
         dispatch(AccountThunks.test())

@@ -110,7 +110,7 @@ async function IdleQuestsRequest<ReqData = any, ResData = any>(method: Method, e
             accept: "application/json",
             "Trace-ID": traceId
         },
-        timeout: 5000,
+        timeout: 10000,
         withCredentials: true,
     })
 }

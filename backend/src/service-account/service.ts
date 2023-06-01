@@ -1,10 +1,11 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
+import { AssetManagementService, ClaimerInfo, CreateAssociationTxResult } from "../service-asset-management"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
+import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -102,6 +103,40 @@ export class AccountServiceDsl implements AccountService {
             {ctype: "sig", deviceType: "Browser", publicKey, nonce, signedNonce: signature }, logger)
         if (associateResponse.status == "discord-used") throw new Error("Discord accounts should not affect here.")
         return associateResponse
+    }
+
+    async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[], logger?: LoggingContext): Promise<CreateAssociationTxResult> {
+            const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, utxos, logger)
+            if (txIdResult.status != "ok") return {status: "invalid", reason: txIdResult.reason}
+
+            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, txIdResult.txId, logger)
+            if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
+
+            return { status: "ok", txId: txIdResult.txId, authStateId: authState.authStateId }
+    }
+
+    async submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
+        try {
+            const stateValidateResult = await this.identityService.verifyAuthState(authStateId, tx, userId, logger)
+            if (stateValidateResult.status !== "ok") throw new Error(stateValidateResult.reason)
+            const txvalidateResult = await this.assetManagementService.submitAuthTransaction(witness, tx, logger)
+        
+            if (txvalidateResult.status != "ok") throw new Error(txvalidateResult.reason)
+            
+            const associateResponse = await this.identityService.associate(userId, 
+                {ctype: "tx", deviceType: "Browser", stakekeAddres: stateValidateResult.stakeAddress}, logger)
+
+            if(associateResponse.status != "ok") throw new Error(associateResponse.status)
+            return{status: "ok", txId: txvalidateResult.txId }
+        }catch(e: any){
+            console.log(e)
+            return {status: "invalid", reason: e.message}
+        }
+        
+    }
+
+    async cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
+        return this.identityService.cleanAssociationTx(authStateId, userId, logger)
     }
 
     async getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult> {

@@ -34,6 +34,29 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
+    async createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext): Promise<models.CreateAuthStateResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info(`creating auth Tx for user ${userId} for stake address ${stakeAddress}`)
+        const response = await this.base.createAuthTxState(userId, stakeAddress, txId, logger)
+        serviceLogger?.info(`creating auth Tx status: ${response.status} for tx ${txId}`)
+        return response
+    }
+
+    async verifyAuthState(authStateId: string, tx: string, userId: string, logger?: LoggingContext | undefined): Promise<models.VerifyAuthStateResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info(`verifying auth attempt ${authStateId} with tx`)
+        const response = await this.base.verifyAuthState(authStateId, tx, userId, logger)
+        serviceLogger?.info(`verifying authState in db status: ${response.status} for user ${userId}`)
+        return response
+    }
+
+    async cleanAssociationTx(userId: string, authStateId: string, logger?: LoggingContext | undefined): Promise<models.CleanAssociationTxResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info(`cleaning up authState ${authStateId}`)
+        const response = await this.base.cleanAssociationTx(authStateId, userId, logger)
+        return response
+    }
+
     async authenticate(credentials: models.Credentials, logger?: LoggingContext): Promise<models.AuthenticationResult> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.info("authenticating user", { ctype: credentials.ctype, deviceType: credentials.deviceType })

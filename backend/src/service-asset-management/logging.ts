@@ -1,3 +1,4 @@
+import { MinimalUTxO } from "../tools-cardano";
 import { LoggingContext } from "../tools-tracing";
 import * as models from "./models"
 import { AssetManagementService } from "./service-spec"
@@ -70,6 +71,25 @@ export class AssetManagementServiceLogging implements AssetManagementService {
             serviceLogger?.log.info(`invalid claim for user ${userId} reason:${response.reason}`)
         else 
             serviceLogger?.log.info(`claim successful`)
+        return response
+    }
+
+    async createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext | undefined): Promise<models.SubmitClaimSignatureResponse> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.log.info(`Creating Auth Tx for stake address`, { stakeAddress})
+        const response = await this.base.createAssociationTx(stakeAddress, MinimalUTxOs, serviceLogger)
+        if (response.status == "invalid")
+            serviceLogger?.log.info(`invalid auth tx for for stake address ${stakeAddress} reason:${response.reason}`)
+        else 
+            serviceLogger?.log.info(`Auth Tx created succesfully successful`)
+        return response
+    }
+
+    async submitAuthTransaction(witness: string, tx: string, logger?: LoggingContext | undefined): Promise<models.SubmitAuthTransactionResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.log.info(`submiting auth tx`)
+        const response = await this.base.submitAuthTransaction(witness, tx, serviceLogger)
+        serviceLogger?.log.info(`submiting auth Tx result was ${response.status}`)
         return response
     }
 
