@@ -1,5 +1,5 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService, ClaimerInfo, createAssociationTxResult } from "../service-asset-management"
+import { AssetManagementService, ClaimerInfo, CreateAssociationTxResult } from "../service-asset-management"
 import { PublicBallotCollection } from "../service-governance/models"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
@@ -105,7 +105,7 @@ export class AccountServiceDsl implements AccountService {
         return associateResponse
     }
 
-    async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<createAssociationTxResult> {
+    async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[]): Promise<CreateAssociationTxResult> {
             const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, utxos)
             if (txIdResult.status != "ok") return {status: "invalid", reason: txIdResult.reason}
 
@@ -122,7 +122,7 @@ export class AccountServiceDsl implements AccountService {
             const txvalidateResult = await this.assetManagementService.submitAuthTransaction(witness, tx)
         
             if (txvalidateResult.status != "ok") throw new Error(txvalidateResult.reason)
-
+            
             const associateResponse = await this.identityService.associate(userId, 
                 {ctype: "tx", deviceType: "Browser", stakekeAddres: stateValidateResult.stakeAddress})
 

@@ -27,7 +27,7 @@ import * as usersDB from "./users/users-db"
 import path from "path"
 import { Umzug } from "umzug"
 import { NODE_ENV } from "../module-ddu-app/settings"
-import { createAssociationTxResult } from "../service-asset-management"
+import { CreateAssociationTxResult } from "../service-asset-management"
 
 export interface IdentityServiceConfig 
     { network: string

@@ -37,7 +37,7 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getAssociationTx(stakeAddress: string, utxos: UTxOMinimal[]): Promise<createAssociationTxResult>{
+    async getAssociationTx(stakeAddress: string, utxos: UTxOMinimal[]): Promise<CreateAssociationTxResult>{
         const result = await accountRequest("POST", "/association/tx", {stakeAddress, utxos})
         return result.data
     },
@@ -146,7 +146,7 @@ export type SubmitAssociationSignatureResult
 
 export type AssociationNonceResult = ClaimSignAndSubbmitResult
 
-export type createAssociationTxResult
+export type CreateAssociationTxResult
     = { status: "ok", txId: string, authStateId: string }
     | { status: "invalid", reason: string }
 
@@ -197,7 +197,7 @@ async function accountRequest<ResData = any, ReqData = any>(method: Method, endp
             accept: "application/json",
             "Trace-ID": traceId
         },
-        timeout: 5000,
+        timeout: 10000,
         withCredentials: true,
     })
 }
