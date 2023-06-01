@@ -1,7 +1,7 @@
-import { Response, Request, NextFunction } from "express"
+import { Response, Request, NextFunction, ErrorRequestHandler } from "express"
 import ApiError from "./api_error"
 
-const apiErrorHandler = (err: Error, request: Request, response: Response, next: NextFunction) => {
+const apiErrorHandler: ErrorRequestHandler = (err: Error, request: Request, response: Response, next: NextFunction) => {
     console.error(err)
     if (err instanceof ApiError) {
         return response.status(err.status).json({
@@ -15,7 +15,7 @@ const apiErrorHandler = (err: Error, request: Request, response: Response, next:
           code: "invalid_token"
         });
       }
-    return response.status(500).json({
+    else return response.status(500).json({
         message: "Something went wrong",
         code: "server_error"
     });

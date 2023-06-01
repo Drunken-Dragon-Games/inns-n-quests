@@ -7,33 +7,33 @@ import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBa
 
 export const AccountBackend = {
 
-    async authenticateDevelopment(nickname: string): Promise<AuthenticationResult> {
-        const result = await accountRequest<AuthenticationResult>("POST", "/development/authenticate", {nickname})
+    async authenticateDevelopment(nickname: string, traceId?: string): Promise<AuthenticationResult> {
+        const result = await accountRequest<AuthenticationResult>("POST", "/development/authenticate", {nickname}, traceId)
         return result.data
     },
 
-    async authenticateDiscord(code: string): Promise<AuthenticationResult> {
-        const result = await accountRequest<AuthenticationResult>("POST", "/discord/authenticate", {code})
+    async authenticateDiscord(code: string, traceId?: string): Promise<AuthenticationResult> {
+        const result = await accountRequest<AuthenticationResult>("POST", "/discord/authenticate", {code}, traceId)
         return result.data
     },
 
-    async signout(): Promise<SignOutResult> {
-        const result = await accountRequest<SignOutResult>("POST", "/session/signout")
+    async signout(traceId?: string): Promise<SignOutResult> {
+        const result = await accountRequest<SignOutResult>("POST", "/session/signout", traceId)
         return result.data
     },
 
-    async refreshSession(refreshToken: string): Promise<AuthenticationResult> {
-        const result = await accountRequest<AuthenticationResult>("POST", "/session/refresh", {refreshToken})
+    async refreshSession(refreshToken: string, traceId?: string): Promise<AuthenticationResult> {
+        const result = await accountRequest<AuthenticationResult>("POST", "/session/refresh", {refreshToken}, traceId)
         return result.data
     },
 
-    async getAssociationNonce(stakeAddress: string): Promise<GetAssociationNonceResult> {
-        const result = await accountRequest("POST", "/association/nonce", {stakeAddress})
+    async getAssociationNonce(stakeAddress: string, traceId?: string): Promise<GetAssociationNonceResult> {
+        const result = await accountRequest("POST", "/association/nonce", {stakeAddress}, traceId)
         return result.data
     },
 
-    async submitAssociationSignature(nonce: string, signedMessage: SignedMessage): Promise<SubmitAssociationSignatureResult> {
-        const result = await accountRequest("POST", "/association/signature", {nonce, signedMessage})
+    async submitAssociationSignature(nonce: string, signedMessage: SignedMessage, traceId?: string): Promise<SubmitAssociationSignatureResult> {
+        const result = await accountRequest("POST", "/association/signature", {nonce, signedMessage}, traceId)
         return result.data
     },
 
@@ -58,28 +58,28 @@ export const AccountBackend = {
         console.log(result.headers)
     },
 
-    async getDragonSilverClaims(page?: number): Promise<GetDragonSilverClaimsResult> {
-        const result = await accountRequest("GET", "/assets/claim/dragon-silver", {page})
+    async getDragonSilverClaims(page?: number, traceId?: string): Promise<GetDragonSilverClaimsResult> {
+        const result = await accountRequest("GET", "/assets/claim/dragon-silver", {page}, traceId)
         return result.data
     },
 
-    async claim(stakeAddress: string, claimerInfo: ClaimerInfo): Promise<ClaimAssetResult> {
-        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress, claimerInfo})
+    async claim(stakeAddress: string, claimerInfo: ClaimerInfo, traceId?: string): Promise<ClaimAssetResult> {
+        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress, claimerInfo}, traceId)
         return result.data
     },
 
-    async claimSignAndSubmit(witness: string, tx: string, claimId: string): Promise<ClaimSignAndSubbmitResult> {
-        const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {witness, tx, claimId})
+    async claimSignAndSubmit(witness: string, tx: string, claimId: string, traceId?: string): Promise<ClaimSignAndSubbmitResult> {
+        const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {witness, tx, claimId}, traceId)
         return result.data
     },
 
-    async claimStatus(claimId: string): Promise<ClaimStatusResult>{
-        const result = await accountRequest("POST", "/assets/claim/status", {claimId})
+    async claimStatus(claimId: string, traceId?: string): Promise<ClaimStatusResult>{
+        const result = await accountRequest("POST", "/assets/claim/status", {claimId}, traceId)
         return result.data
     },
 
-    async getUserInventory(): Promise<getUserInventoryResult>{
-        const result = await accountRequest("GET", "/assets/inventory")
+    async getUserInventory(traceId?: string): Promise<getUserInventoryResult>{
+        const result = await accountRequest("GET", "/assets/inventory", traceId)
         return result.data
     },
 
@@ -88,28 +88,28 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getOpenBallots(): Promise<GetOpenBallotsResult>{
-        const result = await accountRequest("GET", "/governance/open")
+    async getOpenBallots(traceId?: string): Promise<GetOpenBallotsResult>{
+        const result = await accountRequest("GET", "/governance/open", traceId)
         return result.data
     },
 
-    async getUserOpenBallots(): Promise<GetOpenBallotsResult>{
-        const result = await accountRequest("GET", "/governance/open-for-user")
+    async getUserOpenBallots(traceId?: string): Promise<GetOpenBallotsResult>{
+        const result = await accountRequest("GET", "/governance/open-for-user", traceId)
         return result.data
     },
 
-    async getPublicBallots(): Promise<GovernancePublicBallots>{
-        const result = await accountRequest("GET", "/governance/public")
+    async getPublicBallots(traceId?: string): Promise<GovernancePublicBallots>{
+        const result = await accountRequest("GET", "/governance/public", traceId)
         return result.data
     },
 
-    async getUserBallots(): Promise<GovernanceUserBallotss>{
-        const result = await accountRequest("GET", "/governance/user")
+    async getUserBallots(traceId?: string): Promise<GovernanceUserBallotss>{
+        const result = await accountRequest("GET", "/governance/user", traceId)
         return result.data
     },
 
-    async votForBallot(ballotId: string, optionIndex: string): Promise<VoteResult>{
-        const result = await accountRequest("POST", "/governance/vote", {ballotId, optionIndex})
+    async votForBallot(ballotId: string, optionIndex: string, traceId?: string): Promise<VoteResult>{
+        const result = await accountRequest("POST", "/governance/vote", {ballotId, optionIndex}, traceId)
         return result.data
     }
 }
@@ -182,11 +182,11 @@ async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Meth
     return await withTokenRefresh(() => accountRequest(method, endpoint, data))
 }
 
-async function accountRequest<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
-    const traceId = v4()
+async function accountRequest<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {
+    const finalTraceId = traceId ?? v4()
     const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "api/account")
     //if (baseURL.includes("acceptance.") || baseURL.includes("testnet.") || baseURL.includes("localhost")) 
-        console.log(`${method}: ${endpoint}\ntrace-id: ${traceId}`)
+        console.log(`${method}: ${endpoint}\ntrace-id: ${finalTraceId}`)
     return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
         method,
         baseURL,
@@ -195,7 +195,7 @@ async function accountRequest<ResData = any, ReqData = any>(method: Method, endp
         headers: {
             "Content-Type": "application/json",
             accept: "application/json",
-            "Trace-ID": traceId
+            "Trace-ID": finalTraceId
         },
         timeout: 10000,
         withCredentials: true,

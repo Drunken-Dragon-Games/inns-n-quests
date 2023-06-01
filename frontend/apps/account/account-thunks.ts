@@ -1,3 +1,4 @@
+import { v4 } from "uuid"
 import { Action, ThunkDispatch } from "@reduxjs/toolkit"
 import { NextRouter } from "next/router"
 import { blockfrostApiKey, blockfrostUri, cardanoNetwork} from "../../setting"
@@ -85,6 +86,7 @@ export const AccountThunks = {
         }
 
         try {
+            const traceId = v4()
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: `Connecting ${wallet}...` }))
 
             const extractedResult = await AccountThunks.extractWalletApiAndStakeAddress(wallet)
@@ -95,7 +97,7 @@ export const AccountThunks = {
 
             // Request nonce
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Generating nonce..." }))
-            const nonceResponse = await AccountBackend.getAssociationNonce(stakeAddress)
+            const nonceResponse = await AccountBackend.getAssociationNonce(stakeAddress, traceId)
             if (nonceResponse.status != "ok")
                 return displayErrorAndHeal(nonceResponse.status)
             const nonce = nonceResponse.nonce
@@ -105,7 +107,7 @@ export const AccountThunks = {
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Waiting for wallet signature..." }))
             const signedMessage = await walletApi.wallet.signMessage(stakeAddress, hex(`${nonce}`))
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Submitting signature..." }))
-            const signatureResponse = await AccountBackend.submitAssociationSignature(nonce, signedMessage)
+            const signatureResponse = await AccountBackend.submitAssociationSignature(nonce, signedMessage, traceId)
             if (signatureResponse.status != "ok")
                 return displayErrorAndHeal(signatureResponse.status)
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Updating inventory..." }))
@@ -204,6 +206,7 @@ export const AccountThunks = {
         }
 
         try {
+            const traceId = v4()
             const state = accountStore.getState()
             if (!state.userInfo || state.userInfo.dragonSilverToClaim == "0")
                 return displayErrorAndHeal("Nothing to claim.")
@@ -223,7 +226,7 @@ export const AccountThunks = {
        
             dispatch(actions.setClaimProcessState({ctype: "loading", claimStatus: "created", details: "Building transaction..."}))
             const dragonSilverToClaim = state.userInfo.dragonSilverToClaim
-            const claimResponse =  await AccountBackend.claim(stakeAddress, { utxos: minimalUtxoFromLucidUTxO(utxos), receivingAddress: utxos[0].address })
+            const claimResponse =  await AccountBackend.claim(stakeAddress, { utxos: minimalUtxoFromLucidUTxO(utxos), receivingAddress: utxos[0].address }, traceId)
             
             if (claimResponse.status !== "ok")
                 return displayErrorAndHeal(claimResponse.reason)
@@ -235,24 +238,24 @@ export const AccountThunks = {
             const witness = await walletApi.wallet.signTx(transaction)
             const witnessHex = Buffer.from(witness.to_bytes()).toString("hex")
             dispatch(actions.setClaimProcessState({ctype: "loading", claimStatus: "created", details: "Submiting signature..."}))
-            const signature = await AccountBackend.claimSignAndSubmit(witnessHex, claimResponse.tx, claimResponse.claimId )
+            const signature = await AccountBackend.claimSignAndSubmit(witnessHex, claimResponse.tx, claimResponse.claimId, traceId)
             if ( signature.status !== "ok")
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`)
             dispatch(actions.setClaimProcessState({ ctype: "loading", claimStatus: "submitted", details: "Tx submitted, waiting for confirmation..." }))
-            dispatch(AccountThunks.claimStatus(claimResponse.claimId, dragonSilverToClaim))
+            dispatch(AccountThunks.claimStatus(claimResponse.claimId, dragonSilverToClaim, traceId))
         }catch (error: any){
             console.error(error)
             return displayErrorAndHeal(error.info ?? error.message)
         }
     },
 
-    claimStatus: (claimId: string, dragonSilverToClaim: string): AccountThunk => async (dispatch) => {
+    claimStatus: (claimId: string, dragonSilverToClaim: string, traceId: string): AccountThunk => async (dispatch) => {
         setTimeout(async () => {
             const statusResult = await AccountBackend.claimStatus(claimId)
             if (statusResult.status !== "ok")
                 return dispatch(actions.setClaimProcessState({ ctype: "error", details: "could not retrive bloqchain transaction status"}))
             if (statusResult.claimStatus == "created" || statusResult.claimStatus == "submitted"){
-                return dispatch(AccountThunks.claimStatus(claimId, dragonSilverToClaim))
+                return dispatch(AccountThunks.claimStatus(claimId, dragonSilverToClaim, traceId))
             }
             if (statusResult.claimStatus == "timed-out")
                 return dispatch(actions.setClaimProcessState({ ctype: "loading", claimStatus: "timed-out", details: "Transaction timed out"}))
