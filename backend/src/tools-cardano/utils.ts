@@ -229,33 +229,38 @@ export class cardano {
 		return txBuilder.build_tx()
 	}
 
-	static createAuthTransaction = async (sourceAddress: string, MinimalUTxOs: MinimalUTxO[], blockfrost: BlockFrostAPI ): Promise<Transaction> => {
-		const txBuilder = cardano.makeTxBuilder()
+	static createAuthTransaction = async (sourceAddress: string, MinimalUTxOs: MinimalUTxO[], blockfrost: BlockFrostAPI ): Promise<{status: "ok", tx: Transaction} | {status: "invalid", reason:string}> => {
+		try{
+			const txBuilder = cardano.makeTxBuilder()
 
-		const receivingAddresses = (await blockfrost.accountsAddresses(sourceAddress)).map(a => a.address)
-		const address = Address.from_bech32(receivingAddresses[0])
-		const authTxAmmount = Value.new(BigNum.from_str("1000000"))
+			const receivingAddresses = (await blockfrost.accountsAddresses(sourceAddress)).map(a => a.address)
+			const address = Address.from_bech32(receivingAddresses[0])
+			const authTxAmmount = Value.new(BigNum.from_str("1000000"))
 
-		txBuilder.add_output(TransactionOutput.new(address, authTxAmmount))
+			txBuilder.add_output(TransactionOutput.new(address, authTxAmmount))
 
-		const utxos =  MinimalUTxOs.map((utxo) => (
-			{tx_index: utxo.outputIndex,
-			 tx_hash: utxo.txHash,
-			 amount: Object.keys(utxo.assets).map((unit) => ({unit, quantity: utxo.assets[unit]})),
-			 block: ""}
-			))
-		const lovelaceOutput = BigInt(txBuilder.get_explicit_output().coin().to_str())
+			const utxos =  MinimalUTxOs.map((utxo) => (
+				{tx_index: utxo.outputIndex,
+				tx_hash: utxo.txHash,
+				amount: Object.keys(utxo.assets).map((unit) => ({unit, quantity: utxo.assets[unit]})),
+				block: ""}
+				))
+			const lovelaceOutput = BigInt(txBuilder.get_explicit_output().coin().to_str())
 
-		const inputs = cardano.addSimpleTxInputsFor(lovelaceOutput, utxos)
-		const privKeyHash = BaseAddress.from_address(address)!.payment_cred().to_keyhash()
+			const inputs = cardano.addSimpleTxInputsFor(lovelaceOutput, utxos)
+			const privKeyHash = BaseAddress.from_address(address)!.payment_cred().to_keyhash()
 
-		inputs.forEach(i => txBuilder.add_key_input(privKeyHash!, i.input, i.value))
+			inputs.forEach(i => txBuilder.add_key_input(privKeyHash!, i.input, i.value))
 
-		const currentSlot = (await blockfrost.blocksLatest()).slot
-		const txTtl: number = currentSlot! + 120
-		txBuilder.set_ttl(txTtl);
-		txBuilder.add_change_if_needed(address)
-		return txBuilder.build_tx()
+			const currentSlot = (await blockfrost.blocksLatest()).slot
+			const txTtl: number = currentSlot! + 120
+			txBuilder.set_ttl(txTtl);
+			txBuilder.add_change_if_needed(address)
+			return {status: "ok", tx: txBuilder.build_tx()}
+		}catch(e:any){
+			return {status: "invalid", reason: e.message}
+		}
+		
 		
 	}
 

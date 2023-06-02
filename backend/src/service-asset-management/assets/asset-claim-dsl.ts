@@ -18,7 +18,7 @@ export type AssetClaimDslConfig = {
 	txTTL: number
 }
 
-export type GenAssosiateTxResult = Result<{txId: string}, "blockfrost-error">
+export type GenAssosiateTxResult = Result<{txId: string}, string>
 
 export type ClaimResult = Result<{ claimId: string, tx: string }, "unknown-policy" | "not-enough-assets">
 
@@ -43,11 +43,12 @@ export class AssetClaimDsl {
 
 	public async genAssoiateTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext ): Promise<GenAssosiateTxResult>{
 		try{
-			const tx = await cardano.createAuthTransaction(stakeAddress, MinimalUTxOs, this.blockfrost)
-			const txId = Buffer.from(tx.to_bytes()).toString("hex")	
+			const txResult = await cardano.createAuthTransaction(stakeAddress, MinimalUTxOs, this.blockfrost)
+			if (txResult.status != "ok") return failure(txResult.reason)
+			const txId = Buffer.from(txResult.tx.to_bytes()).toString("hex")	
 			return success({ txId})
 		}catch(e: any){
-			return failure("blockfrost-error")
+			return failure(e.message)
 		}
 		
 	}
