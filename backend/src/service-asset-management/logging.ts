@@ -78,10 +78,13 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`Creating Auth Tx for stake address`, { stakeAddress})
         const response = await this.base.createAssociationTx(stakeAddress, MinimalUTxOs, serviceLogger)
-        if (response.status == "invalid")
-            serviceLogger?.log.info(`invalid auth tx for for stake address ${stakeAddress} reason:${response.reason}`)
-        else 
-            serviceLogger?.log.info(`Auth Tx created succesfully successful`)
+        if (response.status == "invalid"){
+            //cambio el error real por un user facing error mas apropiado
+            serviceLogger?.log.error(`invalid auth tx for for stake address ${stakeAddress} reason:${response.reason}`)
+            //agrego el trace ID al userfacing error para facilitar debugging
+            return {status:"invalid", reason: `blockfrost-error. error: ${logger?.traceId}`}
+        }
+        serviceLogger?.log.info(`Auth Tx created succesfully successful`)
         return response
     }
 
@@ -89,7 +92,13 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`submiting auth tx`)
         const response = await this.base.submitAuthTransaction(witness, tx, serviceLogger)
-        serviceLogger?.log.info(`submiting auth Tx result was ${response.status}`)
+        if (response.status !== "ok"){
+            //cambio el error real por un user facing error mas apropiado
+            serviceLogger?.log.error(`failed to submit Assosiation tx reason: ${response.reason}`)
+            //agrego el trace ID al userfacing error para facilitar debugging
+            return {status:"invalid", reason: `Could not submit Transaction. error: ${logger?.traceId}`}
+        }
+        serviceLogger?.log.info(`succesfully submited Assosiation tx`)
         return response
     }
 
