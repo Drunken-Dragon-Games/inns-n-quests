@@ -136,7 +136,7 @@ export class AccountServiceDsl implements AccountService {
     }
 
     async cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
-        return this.identityService.cleanAssociationTx(authStateId, userId, logger)
+        return this.identityService.cleanAssociationTx(userId, authStateId, logger)
     }
 
     async getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult> {

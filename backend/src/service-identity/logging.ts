@@ -52,8 +52,8 @@ export class IdentityServiceLogging implements IdentityService {
 
     async cleanAssociationTx(userId: string, authStateId: string, logger?: LoggingContext | undefined): Promise<models.CleanAssociationTxResult> {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.info(`cleaning up authState ${authStateId}`)
-        const response = await this.base.cleanAssociationTx(authStateId, userId, logger)
+        serviceLogger?.info(`cleaning up authState ${authStateId} for user ${userId}`)
+        const response = await this.base.cleanAssociationTx(userId, authStateId, logger)
         return response
     }
 
