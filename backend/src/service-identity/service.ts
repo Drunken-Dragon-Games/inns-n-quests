@@ -200,7 +200,7 @@ export class IdentityServiceDsl implements IdentityService {
     async cleanAssociationTx(userId: string, authStateId: string, logger: LoggingContext): Promise<CleanAssociationTxResult> {
         try{
             const result = await removeState(authStateId,userId)
-            if (result.status != "ok") logger.error(`error when tring to remove auth state ${authStateId}`)
+            if (result.status != "ok") logger.error(`error when tring to remove auth state ${authStateId}, reason: ${result.reason}`)
             return result
         }catch(e: any){
             return { status: "invalid", reason: "could not comunicate wiht DB" }
