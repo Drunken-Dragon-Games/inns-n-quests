@@ -43,12 +43,12 @@ export class AssetClaimDsl {
 
 	public async genAssoiateTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext ): Promise<GenAssosiateTxResult>{
 		try{
-			const txResult = await cardano.createAuthTransaction(stakeAddress, MinimalUTxOs, this.blockfrost)
+			const txResult = await cardano.createAuthTransaction(stakeAddress, MinimalUTxOs, this.blockfrost, logger)
 			if (txResult.status != "ok") return failure(txResult.reason)
 			const txId = Buffer.from(txResult.tx.to_bytes()).toString("hex")	
 			return success({ txId})
 		}catch(e: any){
-			return failure(e.message)
+			return failure(e.message ?? e)
 		}
 		
 	}
