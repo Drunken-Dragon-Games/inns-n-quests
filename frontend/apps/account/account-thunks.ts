@@ -167,7 +167,9 @@ export const AccountThunks = {
             const receivingAddress = await walletApi.wallet.address()
             const tx = await walletApi.newTx().payToAddress(receivingAddress, {lovelace: BigInt(1000000)}).complete()
             const signedTx = await tx.sign().complete()
-            await signedTx.submit()
+            const txHash = await signedTx.submit();
+
+            console.log(`yeah i mean that worked check it ${txHash}`)
             /*end of Test */
         
             /* const allUtxos = await walletApi.wallet.getUtxos()
