@@ -7,6 +7,7 @@ import * as cbor from 'cbor';
 import { Network } from "lucid-cardano"
 import { ClaimerInfo } from "../service-asset-management";
 import { MinimalUTxO } from "./cardano-types";
+import { LoggingContext } from "../tools-tracing";
 
 export type CardanoNetwork = Network
 
@@ -229,11 +230,12 @@ export class cardano {
 		return txBuilder.build_tx()
 	}
 
-	static createAuthTransaction = async (sourceAddress: string, MinimalUTxOs: MinimalUTxO[], blockfrost: BlockFrostAPI ): Promise<{status: "ok", tx: Transaction} | {status: "invalid", reason:string}> => {
+	static createAuthTransaction = async (sourceAddress: string, MinimalUTxOs: MinimalUTxO[], blockfrost: BlockFrostAPI, logger?: LoggingContext  ): Promise<{status: "ok", tx: Transaction} | {status: "invalid", reason:string}> => {
 		try{
 			const txBuilder = cardano.makeTxBuilder()
 
 			const receivingAddresses = (await blockfrost.accountsAddresses(sourceAddress)).map(a => a.address)
+			
 			const address = Address.from_bech32(receivingAddresses[0])
 			const authTxAmmount = Value.new(BigNum.from_str("1000000"))
 
@@ -256,9 +258,10 @@ export class cardano {
 			const txTtl: number = currentSlot! + 120
 			txBuilder.set_ttl(txTtl);
 			txBuilder.add_change_if_needed(address)
+	
 			return {status: "ok", tx: txBuilder.build_tx()}
 		}catch(e:any){
-			return {status: "invalid", reason: e.message}
+			return {status: "invalid", reason: e.message ?? e}
 		}
 		
 		
