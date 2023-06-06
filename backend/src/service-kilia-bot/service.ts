@@ -27,6 +27,7 @@ export type KiliaBotServiceDependencies = {
 
 export type KiliaBotServiceConfig = {
     token: string,
+    serverId: string
 }
 
 type Command = RESTPostAPIChatInputApplicationCommandsJSONBody
@@ -76,7 +77,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         private readonly database: Sequelize,
         private readonly client: Client,
         private readonly identityService: IdentityService,
-        private readonly governanceService: GovernanceService
+        private readonly governanceService: GovernanceService,
+        private readonly serverId: string
     ){
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -84,9 +86,11 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
     static async loadFromEnv(dependencies: KiliaBotServiceDependencies): Promise<KiliaBotServiceDsl | undefined> {
         const token = config.stringOrElse("KILIA_BOT_TOKEN", "unset")
+        const serverId = config.stringOrError("KILIA_SERVER_ID")
         if (token === "unset") return undefined
         return await KiliaBotServiceDsl.loadFromConfig({
             token,
+            serverId
         }, dependencies)
     }
 
@@ -97,7 +101,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             dependencies.database, 
             client,
             dependencies.identityService,
-            dependencies.governanceService
+            dependencies.governanceService,
+            config.serverId
         )
         //setting up DB and pre loading cache
         await service.loadDatabaseModels()
@@ -324,6 +329,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             const totalUsers = await this.identityService.getTotalUsers()
             return await this.replyMessage(message, totalUsers.toString())
         }
+        else if (subcommand == "get-serverId") {
+            return await this.replyMessage(message, (this.configCache[message.guildId!]).serverId)
+        }
         else if (subcommand == "help"){
             const helpMessage = `
         **Available Development Commands**
@@ -404,7 +412,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     private verifyAdminChannel(message: Message, Chanelkey: configDB.KiliaChannelsNames): Boolean {
         try {
             if (message.channelId && message.guildId) {
-                return this.configCache[message.guildId][Chanelkey] === message.channelId;
+                //return this.serverId === message.guildId && this.configCache[message.guildId][Chanelkey] === message.channelId
+                return this.configCache[message.guildId][Chanelkey] === message.channelId
             } else {
                 return false;
             }
