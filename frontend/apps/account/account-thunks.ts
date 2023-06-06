@@ -162,17 +162,8 @@ export const AccountThunks = {
                 return displayErrorAndHeal(extractedResult.details)
 
             const { walletApi, stakeAddress } = extractedResult
-            
-            /*Test */
-            const receivingAddress = await walletApi.wallet.address()
-            const tx = await walletApi.newTx().payToAddress(receivingAddress, {lovelace: BigInt(1000000)}).complete()
-            const signedTx = await tx.sign().complete()
-            const txHash = await signedTx.submit();
-
-            console.log(`yeah i mean that worked check it ${txHash}`)
-            /*end of Test */
-        
-            /* const allUtxos = await walletApi.wallet.getUtxos()
+             
+            const allUtxos = await walletApi.wallet.getUtxos()
             const utxos = allUtxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("1000000"))
 
             if (utxos.length == 0)
@@ -197,7 +188,7 @@ export const AccountThunks = {
             if ( signature.status !== "ok")
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`) 
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Updating inventory..." }))
-            dispatch(actions.addStakeAddress(stakeAddress))*/
+            dispatch(actions.addStakeAddress(stakeAddress))
 
             dispatch(AccountThunks.updateInventory())
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
