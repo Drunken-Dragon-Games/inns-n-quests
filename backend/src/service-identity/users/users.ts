@@ -78,11 +78,12 @@ export class Users {
             const userId = info.userId
             user = await User.findOne({ where: { userId } })
         } else {
-            const [nickname, nameIdentifier] = info.nickname.split("#")
+            /* const [nickname, nameIdentifier] = info.nickname.split("#")
             if (!nameIdentifier) 
                 user = await User.findOne({ where: { nickname } })
             else
-                user = await User.findOne({ where: { nickname, nameIdentifier } })
+                user = await User.findOne({ where: { nickname, nameIdentifier } }) */
+                user = await User.findOne({where: {nickname: info.nickname}})
         }
         if (user == null) return failed
         else {

@@ -10,7 +10,7 @@ export class requestErrorHanlder {
                 await handler(request, response)
             } catch (error: any) {
                 if (this.kilia){
-                    this.kilia.sendErrorMessage(error)
+                    this.kilia.sendErrorMessage(error, request.originalUrl, request.method)
                 } 
                 next(error)
             }

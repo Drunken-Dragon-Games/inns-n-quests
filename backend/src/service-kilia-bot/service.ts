@@ -135,7 +135,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     private onDiscordBangEvent(message: Message) {
         switch (messagesDSL.getCommand(message)) {
             case "ballot": return this.commandGovernance(message)
-            case "dev": return this.commandGovernance(message)
+            case "dev": return this.commandDevelopment(message)
         }
     }
 
@@ -290,31 +290,21 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     async commandDevelopment(message: Message): Promise<void> {
         if (!this.verifyAdminChannel(message, "devAdminChannelId")) return await this.replyMessage(message, "The command could not be verified to have come from a registered development channel or server.")
         const subcommand = messagesDSL.getSubCommand(message)
-
-        if (subcommand === "add") {
-            const ballotInput = messagesDSL.getArguments(message)
-            const ballotResult = ballotDSL.parseBallotInput(ballotInput)
-            if (ballotResult.status !== "ok") return this.replyMessage(message, ballotResult.reason)
-            
-            await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
-
-            await this.waitForconfirmation(message, 60, 
-                {cancel: 'Ballot confirmation canceled. No changes were made.', 
-                timeout: 'Ballot confirmation timed out. No changes were made.' },
-                 async () => {
-                    const r = await this.governanceService.addBallot(ballotResult.payload)
-                    if (r.ctype !== "success") return r.reason
-                    return `Ballot confirmed and stored successfully under ID ${r.ballotId}`
-                 })
+        if (subcommand === "user-id") {
+            const discordName = messagesDSL.getArguments(message)
+            console.log(discordName)
+            const user = await this.identityService.resolveUser({ctype: "nickname", nickname: discordName})
+            if (user.status !== "ok") return await this.replyMessage(message, "could not find disocrd Name")
+            return await this.replyMessage(message, `UserId ${user.info.userId}`)
+        }
+        else if (subcommand === "user-info") {
+            const userId = messagesDSL.getArguments(message)
+            const user = await this.identityService.resolveUser({ctype: "user-id", userId})
+            if (user.status !== "ok") return await this.replyMessage(message, "could not find user ID")
+            return await this.replyMessage(message, `UserId ${JSON.stringify(user.info, null, 4)}`)
 
         }
-        else if (subcommand === "get") {
-            const ballotResult = await this.governanceService.getBallot(messagesDSL.getArguments(message))
-            if (ballotResult.ctype !== "succes") return await this.replyMessage(message, ballotResult.reason)
-            return await this.replyMessage(message, ballotDSL.formatStoredBallot(ballotResult.ballot))
-
-        }
-        else if (subcommand == "close") {
+        else if (subcommand == "total-users") {
             const ballotId = messagesDSL.getArguments(message)
             const ballotResult = await this.governanceService.closeBallot(ballotId)
             if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
@@ -332,17 +322,19 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else if (subcommand == "help"){
             const helpMessage = ``
         }
-        else return await this.replyMessage(message, "unknown governance command")
+        else return await this.replyMessage(message, "unknown development command")
     }
 
-    sendErrorMessage(error: Error){
+    sendErrorMessage(error: Error, route: string, method: string){
         const servers = Object.values(this.configCache)
         const embed = new EmbedBuilder()
             .setColor(0xFF0000)
-            .setTitle(`The backend server has restarted due to an error.`)
+            .setTitle(`The backend server encountered an error`)
             .setDescription(error.message ? "The error provided the following message:" : "However, the error did not include a specific message. Here is the full error detail:")
             .addFields(
-                { name: "Error:", value: error.message ? error.message : JSON.stringify(error, null, 2) },
+                { name: "Error:", value: error.message ? error.message : JSON.stringify(error, null, 4) },
+                { name: "Request Method", value: method},
+                { name: "Route:", value: route }
             )
         for (const server of servers) {
             if (!server.devAdminChannelId) continue
@@ -398,7 +390,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 return false;
             }
         } catch (e: any) {
-            console.log(`Error when trying to check ${Chanelkey} ${JSON.stringify(e, null, 2)}`);
+            console.log(`Error when trying to check ${Chanelkey} ${JSON.stringify(e, null, 4)}`);
             return false;
         }
     }
