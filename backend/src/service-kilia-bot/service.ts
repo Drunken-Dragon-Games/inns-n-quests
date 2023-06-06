@@ -364,6 +364,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 { name: "User Id", value: userId ?? "No User Id supplied"},
             )
         for (const server of servers) {
+            if (server.serverId !== this.serverId) continue
             if (!server.devAdminChannelId) continue
             const channel = this.client.channels.resolve(server.devAdminChannelId)
             if (!channel || !channel.isTextBased()) continue
