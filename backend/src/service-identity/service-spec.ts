@@ -21,6 +21,8 @@ export interface IdentityService {
 
     associate(userId: string, credentials: models.Credentials, logger?: LoggingContext): Promise<models.AssociationResult>
 
+    getTotalUsers(logger?: LoggingContext): Promise<number>
+
     cleanAssociationTx(userId: string, authStateId: string, logger?: LoggingContext): Promise<models.CleanAssociationTxResult>
 
     refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<models.RefreshResult>

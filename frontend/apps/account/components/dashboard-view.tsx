@@ -345,7 +345,7 @@ const BallotView = ({ userInfo, ballot }: { userInfo?: UserInfo, ballot: UserBal
                     ballot.status == "open" ? 
                         "hasVoted" in ballot && ballot.hasVoted ?
                             <><VoteButton disabled>{option.title}</VoteButton> <>{"isVotedByUser" in option && option.isVotedByUser ? "voted for this" : <></>}</></>:
-                            <VoteButton onClick={() => AccountTransitions.voteForBallot(ballot.id, index.toString())}>{option.title}</VoteButton> :
+                            <>{userInfo.dragonGold != "0" ? <VoteButton onClick={() => AccountTransitions.voteForBallot(ballot.id, index.toString())}>{option.title}</VoteButton> : <VoteButton>{option.title}</VoteButton>}</> :
                         "isVotedByUser" in option && option.isVotedByUser ? 
                             <><VoteButton>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? renderDragonGold(option.lockedInDragonGold) : <></>}</></>:
                             <><VoteButton disabled>{option.title}</VoteButton><>{"isWinner" in option && option.isWinner? "this option won with " : <></>}</><>{"lockedInDragonGold" in option ? renderDragonGold(option.lockedInDragonGold) : <></>}</></>:

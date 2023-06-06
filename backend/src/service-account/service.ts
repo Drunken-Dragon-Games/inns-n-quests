@@ -214,7 +214,7 @@ export class AccountServiceDsl implements AccountService {
         const dgPolicyId = this.wellKnownPolicies.dragonGold.policyId
         const listResponse = await this.assetManagementService.list(userId, {chain: true,  policies: [ dgPolicyId ]})
         if (listResponse.status !== "ok") return {status: "invalid", reason: listResponse.status}
-        const dragonGold = listResponse.inventory[dgPolicyId][0].quantity
+        const dragonGold = listResponse.inventory[dgPolicyId] ? listResponse.inventory[dgPolicyId][0].quantity : "0"
         //CHECKME: currenlty hanlding draonGold as number, is posible it will need to be changed to a bigInt
         const voteResult = await this.governanceService.voteForBallot(ballotId, optionIndex, userId, dragonGold)
         if (voteResult.ctype !== "success") return {status: "invalid", reason: voteResult.reason}

@@ -52,18 +52,20 @@ export const isBallotState = (state?: string): state is BallotState => {
 }
 
 export const formatStoredBallot = (storedBallot: StoredBallot): string => {
-  let formattedString = `**Inquiry:** ${storedBallot.inquiry}\n**Description of Inquiry:** ${storedBallot.descriptionOfInquiry}\n\n**Options:**\n`;
+  let formattedString = `**Inquiry:** ${storedBallot.inquiry}\n**Description of Inquiry:** ${storedBallot.descriptionOfInquiry}\n\n**Options:**\n`
 
 
   storedBallot.options.forEach((option, index) => {
-    formattedString += `\n${index + 1}. **Option:** ${option.option}\n`;
-    formattedString += `**Description:** ${option.description}\n`;
-    formattedString += `**Dragon Gold:** ${option.dragonGold}\n`;
+    formattedString += `\n${index + 1}. **Option:** ${option.option}\n`
+    formattedString += `**Description:** ${option.description}\n`
+    // format Dragon Gold
+    const dragonGold = parseInt(option.dragonGold, 10) / 1_000_000;
+    formattedString += `**Dragon Gold:** ${dragonGold.toFixed(6)}\n`
   });
 
-  formattedString += `\n**State:** ${storedBallot.state}`;
+  formattedString += `\n**State:** ${storedBallot.state}`
 
-  return formattedString;
+  return formattedString
 }
 
 export const formatList = (storedBallots: { [ballotId: string]: AdminBallot; }): string => {

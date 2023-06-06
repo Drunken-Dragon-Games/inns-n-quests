@@ -9,9 +9,10 @@ import { jwtMiddleware } from "./jwt_middleware"
 import { ClaimerInfo } from "../service-asset-management"
 import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
+import { KiliaBotServiceDsl } from "../service-kilia-bot"
 import { requestCatchError } from "./error/catch-error"
 
-export const accountRoutes = (accountService: AccountService) => {
+export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotServiceDsl) => {
     const router = Router()    
     const baseLogger = LoggingContext.create("account")
 
@@ -196,6 +197,7 @@ export const accountRoutes = (accountService: AccountService) => {
 
     router.use((err: any, request: Request, response: Response, next: any) => {
         const logger = baseLogger.trace(request)
+        kilia?.sendErrorMessage(err, request.originalUrl, request.method, logger.traceId, logger.userId)
         logger.error(err.message, { stack: err.stack })
         response.status(500).send("Internal server error.")
     })

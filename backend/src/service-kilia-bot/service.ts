@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector } from "discord.js"
+import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector, TextChannel } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
 import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
 import { Character, TakenStakingQuest } from "../service-idle-quests"
@@ -53,6 +53,13 @@ const slashCommandsBuilder = (): Command[] => {
             .addChannelOption(option => option
                 .setName("channel")
                 .setDescription("The channel where governance questions will be posted.")
+                .setRequired(true)))
+        .addSubcommand(subcommand => subcommand
+            .setName("development-admin-channel")
+            .setDescription("Set the channel where developer reports will be posted.")
+            .addChannelOption(option => option
+                .setName("channel")
+                .setDescription("The channel where developer reports will be posted.")
                 .setRequired(true)))
         .toJSON()
 
@@ -128,6 +135,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     private onDiscordBangEvent(message: Message) {
         switch (messagesDSL.getCommand(message)) {
             case "ballot": return this.commandGovernance(message)
+            case "dev": return this.commandDevelopment(message)
         }
     }
 
@@ -211,7 +219,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         if (subcommand === "quests-channel") return await this.reply(interaction, await this.setChannel(interaction, "questsNotificationChannelId"))
         else if (subcommand === "leaderboard-channel") return await this.reply(interaction, await this.setChannel(interaction, "leaderboardNotificationChannelId"))
         else if (subcommand === "governance-admin-channel") return await this.reply(interaction, await this.setChannel(interaction, "governanceAdminChannelId"))
-        else return await this.reply(interaction, "Kilia-config command unknokwn")
+        else if (subcommand === "development-admin-channel") return await this.reply(interaction, await this.setChannel(interaction, "devAdminChannelId"))
+        else return await this.reply(interaction, "Kilia-config unknokwn command")
         
     }
 
@@ -226,11 +235,12 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         if (channelIdKey == "governanceAdminChannelId") return `${channel.name} set as Governance Admin channel`
         else if (channelIdKey == "leaderboardNotificationChannelId") return `${channel.name} set as Leaderboard channel`
         else if (channelIdKey == "questsNotificationChannelId") return `${channel.name} set as Quests channel`
+        else if (channelIdKey == "devAdminChannelId") return `${channel.name} set as Development Admin channel`
         else return "Unknown Kilia-config command"
     }
 
     async commandGovernance(message: Message): Promise<void> {
-        if (!this.verifyGovernanceChannel(message)) return await this.replyMessage(message, "The command could not be verified to have come from a registered governance channel or server.")
+        if (!this.verifyAdminChannel(message, "governanceAdminChannelId")) return await this.replyMessage(message, "The command could not be verified to have come from a registered governance channel or server.")
         const subcommand = messagesDSL.getSubCommand(message)
 
         if (subcommand === "add") {
@@ -272,10 +282,86 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             return await this.replyMessage(message, ballotDSL.formatList(ballotResult.ballots))
         }
         else if (subcommand == "help"){
-            const helpMessage = ``
+            const helpMessage = `
+        **Available Governance Commands**
+        
+        *add <ballotInput>* : Adds a new ballot with the given input.
+        
+        *get <ballotId>* : Retrieves detailed information for the specified ballot ID.
+        
+        *close <ballotId>* : Closes the specified ballot and announces the winners.
+        
+        *list* : Lists all the current ballots in the system.
+        
+        *help* : Provides a list of available commands and a description of their function.
+        
+        To use these commands, prefix the command with a '!ballot '.`
+            return await this.replyMessage(message, helpMessage)
         }
+        
         else return await this.replyMessage(message, "unknown governance command")
     }
+
+    async commandDevelopment(message: Message): Promise<void> {
+        if (!this.verifyAdminChannel(message, "devAdminChannelId")) return await this.replyMessage(message, "The command could not be verified to have come from a registered development channel or server.")
+        const subcommand = messagesDSL.getSubCommand(message)
+        if (subcommand === "user-id") {
+            const discordName = messagesDSL.getArguments(message)
+            console.log(discordName)
+            const user = await this.identityService.resolveUser({ctype: "nickname", nickname: discordName})
+            if (user.status !== "ok") return await this.replyMessage(message, "could not find disocrd Name")
+            return await this.replyMessage(message, `UserId ${user.info.userId}`)
+        }
+        else if (subcommand === "user-info") {
+            const userId = messagesDSL.getArguments(message)
+            const user = await this.identityService.resolveUser({ctype: "user-id", userId})
+            if (user.status !== "ok") return await this.replyMessage(message, "could not find user ID")
+            return await this.replyMessage(message, `UserId ${JSON.stringify(user.info, null, 4)}`)
+
+        }
+        else if (subcommand == "total-users") {
+            //I migth a bit more info to this later but righ now i just whant access to this info
+            const totalUsers = await this.identityService.getTotalUsers()
+            return await this.replyMessage(message, totalUsers.toString())
+        }
+        else if (subcommand == "help"){
+            const helpMessage = `
+        **Available Development Commands**
+        
+        *user-id <discordName>* : Returns the user ID of the given Discord name.
+        
+        *user-info <userId>* : Returns detailed information for the given user ID.
+        
+        *total-users* : Returns the total number of users in the system.
+        
+        *help* : Provides a list of available commands and a description of their function.
+        
+        To use these commands, prefix the command with a '!dev '.`
+            return await this.replyMessage(message, helpMessage)
+        }
+        else return await this.replyMessage(message, "unknown development command")
+    }
+
+    sendErrorMessage(error: Error, route: string, method: string, traceId?: string, userId?: string){
+        const servers = Object.values(this.configCache)
+        const embed = new EmbedBuilder()
+            .setColor(0xFF0000)
+            .setTitle(`The backend server encountered an error`)
+            .setDescription(error.message ? "The error provided the following message:" : "However, the error did not include a specific message. Here is the full error detail:")
+            .addFields(
+                { name: "Error:", value: error.message ? error.message : JSON.stringify(error, null, 4) },
+                { name: "Request Method", value: method},
+                { name: "Route:", value: route },
+                { name: "Trace Id", value: traceId ?? "No Trace Id supplied"},
+                { name: "User Id", value: userId ?? "No User Id supplied"},
+            )
+        for (const server of servers) {
+            if (!server.devAdminChannelId) continue
+            const channel = this.client.channels.resolve(server.devAdminChannelId)
+            if (!channel || !channel.isTextBased()) continue
+            channel.send({ embeds: [ embed ] })
+        }
+     }
 
     //added this function just so could do a return void to the reply method, cuss i thinks it reads a million times nicer
     private async reply(interaction: ChatInputCommandInteraction, messagge: string): Promise<void>{
@@ -315,15 +401,20 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             { this.replyMessage( message, mesages.timeout)}})
     }
 
-    private verifyGovernanceChannel(message: Message): Boolean {
-        try{
-            if (message.channelId && message.guildId) return  this.configCache[message.guildId].governanceAdminChannelId === message.channelId
-            else return false
-        } catch (e: any){
-            console.log(`Error when trying to check governance channel ID ${e}`)
-            return false
+    private verifyAdminChannel(message: Message, Chanelkey: configDB.KiliaChannelsNames): Boolean {
+        try {
+            if (message.channelId && message.guildId) {
+                return this.configCache[message.guildId][Chanelkey] === message.channelId;
+            } else {
+                return false;
+            }
+        } catch (e: any) {
+            console.log(`Error when trying to check ${Chanelkey} ${JSON.stringify(e, null, 4)}`);
+            return false;
         }
-        
     }
+    
+
+    
 }
 
