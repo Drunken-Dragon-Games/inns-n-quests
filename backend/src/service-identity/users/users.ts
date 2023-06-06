@@ -78,11 +78,12 @@ export class Users {
             const userId = info.userId
             user = await User.findOne({ where: { userId } })
         } else {
-            const [nickname, nameIdentifier] = info.nickname.split("#")
+            /* const [nickname, nameIdentifier] = info.nickname.split("#")
             if (!nameIdentifier) 
                 user = await User.findOne({ where: { nickname } })
             else
-                user = await User.findOne({ where: { nickname, nameIdentifier } })
+                user = await User.findOne({ where: { nickname, nameIdentifier } }) */
+                user = await User.findOne({where: {nickname: info.nickname}})
         }
         if (user == null) return failed
         else {
@@ -129,5 +130,9 @@ export class Users {
         const affected = await User.update({ nickname: info.nickname, nameIdentifier }, { where: { userId } })
         if (affected[0] == 1) return succeeded(unit)
         else return failed
+    }
+
+    static total = async () => {
+        return await User.count()
     }
 }

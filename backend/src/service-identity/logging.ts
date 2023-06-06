@@ -81,6 +81,12 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
+    async getTotalUsers(logger?: LoggingContext ): Promise<number> {
+        const serviceLogger = this.withComponent(logger)
+        const response = await this.base.getTotalUsers()
+        return response
+    }
+
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<models.RefreshResult> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.info("refreshing user token", { sessionId })
