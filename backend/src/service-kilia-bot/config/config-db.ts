@@ -4,6 +4,7 @@ type KiliaChannels = {
     questsNotificationChannelId?: string
     leaderboardNotificationChannelId?: string
     governanceAdminChannelId?: string
+    devAdminChannelId? :string
 }
 
 export type KiliaChannelsNames = keyof KiliaChannels
@@ -35,6 +36,10 @@ export const ConfigDBTableAttributes = {
         allowNull: true
     },
     governanceAdminChannelId: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    devAdminChannelId: {
         type: DataTypes.STRING,
         allowNull: true
     }

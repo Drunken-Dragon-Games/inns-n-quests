@@ -54,6 +54,13 @@ const slashCommandsBuilder = (): Command[] => {
                 .setName("channel")
                 .setDescription("The channel where governance questions will be posted.")
                 .setRequired(true)))
+        .addSubcommand(subcommand => subcommand
+            .setName("development-admin-channel")
+            .setDescription("Set the channel where developer reports will be posted.")
+            .addChannelOption(option => option
+                .setName("channel")
+                .setDescription("The channel where developer reports will be posted.")
+                .setRequired(true)))
         .toJSON()
 
     return [kiliaConfig];
@@ -128,6 +135,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     private onDiscordBangEvent(message: Message) {
         switch (messagesDSL.getCommand(message)) {
             case "ballot": return this.commandGovernance(message)
+            case "dev": return this.commandGovernance(message)
         }
     }
 
@@ -211,7 +219,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         if (subcommand === "quests-channel") return await this.reply(interaction, await this.setChannel(interaction, "questsNotificationChannelId"))
         else if (subcommand === "leaderboard-channel") return await this.reply(interaction, await this.setChannel(interaction, "leaderboardNotificationChannelId"))
         else if (subcommand === "governance-admin-channel") return await this.reply(interaction, await this.setChannel(interaction, "governanceAdminChannelId"))
-        else return await this.reply(interaction, "Kilia-config command unknokwn")
+        else if (subcommand === "development-admin-channel") return await this.reply(interaction, await this.setChannel(interaction, "devAdminChannelId"))
+        else return await this.reply(interaction, "Kilia-config unknokwn command")
         
     }
 
@@ -226,11 +235,12 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         if (channelIdKey == "governanceAdminChannelId") return `${channel.name} set as Governance Admin channel`
         else if (channelIdKey == "leaderboardNotificationChannelId") return `${channel.name} set as Leaderboard channel`
         else if (channelIdKey == "questsNotificationChannelId") return `${channel.name} set as Quests channel`
+        else if (channelIdKey == "devAdminChannelId") return `${channel.name} set as Development Admin channel`
         else return "Unknown Kilia-config command"
     }
 
     async commandGovernance(message: Message): Promise<void> {
-        if (!this.verifyGovernanceChannel(message)) return await this.replyMessage(message, "The command could not be verified to have come from a registered governance channel or server.")
+        if (!this.verifyAdminChannel(message, "governanceAdminChannelId")) return await this.replyMessage(message, "The command could not be verified to have come from a registered governance channel or server.")
         const subcommand = messagesDSL.getSubCommand(message)
 
         if (subcommand === "add") {
@@ -277,7 +287,55 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else return await this.replyMessage(message, "unknown governance command")
     }
 
-    sendErrorMessage(error: any){
+    async commandDevelopment(message: Message): Promise<void> {
+        if (!this.verifyAdminChannel(message, "devAdminChannelId")) return await this.replyMessage(message, "The command could not be verified to have come from a registered development channel or server.")
+        const subcommand = messagesDSL.getSubCommand(message)
+
+        if (subcommand === "add") {
+            const ballotInput = messagesDSL.getArguments(message)
+            const ballotResult = ballotDSL.parseBallotInput(ballotInput)
+            if (ballotResult.status !== "ok") return this.replyMessage(message, ballotResult.reason)
+            
+            await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
+
+            await this.waitForconfirmation(message, 60, 
+                {cancel: 'Ballot confirmation canceled. No changes were made.', 
+                timeout: 'Ballot confirmation timed out. No changes were made.' },
+                 async () => {
+                    const r = await this.governanceService.addBallot(ballotResult.payload)
+                    if (r.ctype !== "success") return r.reason
+                    return `Ballot confirmed and stored successfully under ID ${r.ballotId}`
+                 })
+
+        }
+        else if (subcommand === "get") {
+            const ballotResult = await this.governanceService.getBallot(messagesDSL.getArguments(message))
+            if (ballotResult.ctype !== "succes") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, ballotDSL.formatStoredBallot(ballotResult.ballot))
+
+        }
+        else if (subcommand == "close") {
+            const ballotId = messagesDSL.getArguments(message)
+            const ballotResult = await this.governanceService.closeBallot(ballotId)
+            if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, `Ballot ${ballotId} closed successfully. Winners:
+                \`\`\`json
+                ${JSON.stringify(ballotResult.winners, null, 4)}
+                \`\`\`
+            `)
+        }
+        else if (subcommand == "list") {
+            const ballotResult = await this.governanceService.getAdminBallotCollection()
+            if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
+            return await this.replyMessage(message, ballotDSL.formatList(ballotResult.ballots))
+        }
+        else if (subcommand == "help"){
+            const helpMessage = ``
+        }
+        else return await this.replyMessage(message, "unknown governance command")
+    }
+
+    sendErrorMessage(error: Error){
         const servers = Object.values(this.configCache)
         const embed = new EmbedBuilder()
             .setColor(0xFF0000)
@@ -287,8 +345,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 { name: "Error:", value: error.message ? error.message : JSON.stringify(error, null, 2) },
             )
         for (const server of servers) {
-            if (!server.governanceAdminChannelId) continue
-            const channel = this.client.channels.resolve(server.governanceAdminChannelId)
+            if (!server.devAdminChannelId) continue
+            const channel = this.client.channels.resolve(server.devAdminChannelId)
             if (!channel || !channel.isTextBased()) continue
             channel.send({ embeds: [ embed ] })
         }
@@ -332,16 +390,19 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             { this.replyMessage( message, mesages.timeout)}})
     }
 
-    private verifyGovernanceChannel(message: Message): Boolean {
-        try{
-            if (message.channelId && message.guildId) return  this.configCache[message.guildId].governanceAdminChannelId === message.channelId
-            else return false
-        } catch (e: any){
-            console.log(`Error when trying to check governance channel ID ${e}`)
-            return false
+    private verifyAdminChannel(message: Message, Chanelkey: configDB.KiliaChannelsNames): Boolean {
+        try {
+            if (message.channelId && message.guildId) {
+                return this.configCache[message.guildId][Chanelkey] === message.channelId;
+            } else {
+                return false;
+            }
+        } catch (e: any) {
+            console.log(`Error when trying to check ${Chanelkey} ${JSON.stringify(e, null, 2)}`);
+            return false;
         }
-        
     }
+    
 
     
 }
