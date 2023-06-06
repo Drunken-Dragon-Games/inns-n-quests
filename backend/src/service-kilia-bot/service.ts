@@ -282,8 +282,23 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             return await this.replyMessage(message, ballotDSL.formatList(ballotResult.ballots))
         }
         else if (subcommand == "help"){
-            const helpMessage = ``
+            const helpMessage = `
+        **Available Governance Commands**
+        
+        *add <ballotInput>* : Adds a new ballot with the given input.
+        
+        *get <ballotId>* : Retrieves detailed information for the specified ballot ID.
+        
+        *close <ballotId>* : Closes the specified ballot and announces the winners.
+        
+        *list* : Lists all the current ballots in the system.
+        
+        *help* : Provides a list of available commands and a description of their function.
+        
+        To use these commands, prefix the command with a '!ballot '.`
+            return await this.replyMessage(message, helpMessage)
         }
+        
         else return await this.replyMessage(message, "unknown governance command")
     }
 
@@ -305,22 +320,24 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
         }
         else if (subcommand == "total-users") {
-            const ballotId = messagesDSL.getArguments(message)
-            const ballotResult = await this.governanceService.closeBallot(ballotId)
-            if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
-            return await this.replyMessage(message, `Ballot ${ballotId} closed successfully. Winners:
-                \`\`\`json
-                ${JSON.stringify(ballotResult.winners, null, 4)}
-                \`\`\`
-            `)
-        }
-        else if (subcommand == "list") {
-            const ballotResult = await this.governanceService.getAdminBallotCollection()
-            if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
-            return await this.replyMessage(message, ballotDSL.formatList(ballotResult.ballots))
+            //I migth a bit more info to this later but righ now i just whant access to this info
+            const totalUsers = await this.identityService.getTotalUsers()
+            return await this.replyMessage(message, totalUsers.toString())
         }
         else if (subcommand == "help"){
-            const helpMessage = ``
+            const helpMessage = `
+        **Available Development Commands**
+        
+        *user-id <discordName>* : Returns the user ID of the given Discord name.
+        
+        *user-info <userId>* : Returns detailed information for the given user ID.
+        
+        *total-users* : Returns the total number of users in the system.
+        
+        *help* : Provides a list of available commands and a description of their function.
+        
+        To use these commands, prefix the command with a '!dev '.`
+            return await this.replyMessage(message, helpMessage)
         }
         else return await this.replyMessage(message, "unknown development command")
     }

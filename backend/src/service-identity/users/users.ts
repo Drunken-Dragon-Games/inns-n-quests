@@ -131,4 +131,8 @@ export class Users {
         if (affected[0] == 1) return succeeded(unit)
         else return failed
     }
+
+    static total = async () => {
+        return await User.count()
+    }
 }

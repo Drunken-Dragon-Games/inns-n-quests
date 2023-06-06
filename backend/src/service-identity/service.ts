@@ -28,6 +28,7 @@ import path from "path"
 import { Umzug } from "umzug"
 import { NODE_ENV } from "../module-ddu-app/settings"
 import { CreateAssociationTxResult } from "../service-asset-management"
+import { User } from "discord.js"
 
 export interface IdentityServiceConfig 
     { network: string
@@ -195,6 +196,10 @@ export class IdentityServiceDsl implements IdentityService {
          else {
             return <AssociationResult>{}
         }
+    }
+
+    async getTotalUsers(): Promise<number> {
+        return await Users.total()
     }
 
     async cleanAssociationTx(userId: string, authStateId: string, logger: LoggingContext): Promise<CleanAssociationTxResult> {
