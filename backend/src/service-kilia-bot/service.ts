@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector } from "discord.js"
+import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector, TextChannel } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
 import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
 import { Character, TakenStakingQuest } from "../service-idle-quests"
@@ -277,6 +277,23 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else return await this.replyMessage(message, "unknown governance command")
     }
 
+    sendErrorMessage(error: any){
+        const servers = Object.values(this.configCache)
+        const embed = new EmbedBuilder()
+            .setColor(0xFF0000)
+            .setTitle(`The backend server has restarted due to an error.`)
+            .setDescription(error.message ? "The error provided the following message:" : "However, the error did not include a specific message. Here is the full error detail:")
+            .addFields(
+                { name: "Error:", value: error.message ? error.message : JSON.stringify(error, null, 2) },
+            )
+        for (const server of servers) {
+            if (!server.governanceAdminChannelId) continue
+            const channel = this.client.channels.resolve(server.governanceAdminChannelId)
+            if (!channel || !channel.isTextBased()) continue
+            channel.send({ embeds: [ embed ] })
+        }
+     }
+
     //added this function just so could do a return void to the reply method, cuss i thinks it reads a million times nicer
     private async reply(interaction: ChatInputCommandInteraction, messagge: string): Promise<void>{
         await interaction.reply(messagge)
@@ -325,5 +342,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         }
         
     }
+
+    
 }
 
