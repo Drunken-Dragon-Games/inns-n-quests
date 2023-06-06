@@ -5,8 +5,9 @@ import { IdleQuestsService } from "../service-idle-quests"
 import { isObjectLocations } from "../service-idle-quests/game-vm/sectors/sector-validation"
 import { LoggingContext } from "../tools-tracing"
 import { requestCatchError } from "./error/catch-error"
+import { KiliaBotServiceDsl } from "../service-kilia-bot"
 
-export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
+export const idleQuestRoutes = (idleQuestsService: IdleQuestsService, kilia?: KiliaBotServiceDsl) => {
     const router = Router()    
     const baseLogger = LoggingContext.create("idle-quests")
 
@@ -92,6 +93,7 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService) => {
 
     router.use((err: any, request: Request, response: Response, next: any) => {
         const logger = baseLogger.trace(request)
+        kilia?.sendErrorMessage(err, request.originalUrl, request.method, logger.traceId, logger.userId)
         logger.error(err.message, { stack: err.stack })
         response.status(500).send("Internal server error.")
     })

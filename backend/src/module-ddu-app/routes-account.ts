@@ -9,14 +9,14 @@ import { jwtMiddleware } from "./jwt_middleware"
 import { ClaimerInfo } from "../service-asset-management"
 import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
-import { requestErrorHanlder } from "./error/catch-error"
-//import { requestCatchError } from "./error/catch-error"
+import { KiliaBotServiceDsl } from "../service-kilia-bot"
+import { requestCatchError } from "./error/catch-error"
 
-export const accountRoutes = (accountService: AccountService, errorHanlder: requestErrorHanlder) => {
+export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotServiceDsl) => {
     const router = Router()    
     const baseLogger = LoggingContext.create("account")
 
-    router.post("/development/authenticate", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/development/authenticate", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const nickname: string = request.body.nickname
         const result = await accountService.authenticateDevelopment(nickname, logger)
@@ -26,7 +26,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
             response.status(401).json(result)
     }))
 
-    router.post("/discord/authenticate", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/discord/authenticate", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const code: string = request.body.code
         const result = await accountService.authenticateDiscord(code, logger)
@@ -36,7 +36,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
             response.status(401).json(result)
     }))
 
-    router.post("/session/signout", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/session/signout", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const sessionId = request.auth!.sessionId
         const result = await accountService.signout(sessionId, logger)
@@ -44,7 +44,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         response.status(200).json(result)
     }))
 
-    router.post("/session/refresh", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/session/refresh", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const fullRefreshToken = request.body.refreshToken
         try {
@@ -60,14 +60,14 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         }
     }))
 
-    router.post("/association/nonce", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/association/nonce", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const stakeAddress: string = request.body.stakeAddress
         const result = await accountService.getAssociationNonce(stakeAddress, logger)
         response.status(200).json(result)
     }))
 
-    router.post("/association/signature", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/association/signature", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const nonce = request.body.nonce
@@ -76,7 +76,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         response.status(200).json(result)
     }))
 
-    router.post("/session/test", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/session/test", requestCatchError(async (request: Request, response: Response) => {
         console.log("REQUEST")
         console.log(request.headers)
         response.cookie("test", v4(), { maxAge: COOKIE_EXPIRACY, sameSite: "none", secure: true })
@@ -85,14 +85,14 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         response.sendStatus(200)
     }))
 
-    router.post("/association/nonce", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/association/nonce", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const stakeAddress: string = request.body.stakeAddress
         const result = await accountService.getAssociationNonce(stakeAddress, logger)
         response.status(200).json(result)
     }))
 
-    router.post("/association/tx", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/association/tx", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
@@ -101,7 +101,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         response.status(200).json(result)
     }))
 
-    router.post("/association/submit-tx", jwtMiddleware,errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/association/submit-tx", jwtMiddleware,requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const {witnessHex, txId, authStateId} = request.body
@@ -109,7 +109,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         response.status(200).json(result)
     }))
 
-    router.post("/association/clean-assosiate-tx-state", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/association/clean-assosiate-tx-state", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const {authStateId} = request.body
@@ -117,7 +117,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         response.status(200).json(result)
     }))
 
-    router.get("/assets/claim/dragon-silver", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.get("/assets/claim/dragon-silver", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const page: number | undefined = request.body.page
@@ -125,7 +125,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         response.status(200).json(result)
     }))
 
-    router.post("/assets/claim/dragon-silver", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/assets/claim/dragon-silver", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
@@ -134,60 +134,60 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
         response.status(200).json(result)
     }))
 
-    router.post("/assets/claim/sign-and-submit", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/assets/claim/sign-and-submit", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const {witness, tx, claimId} = request.body
         const result = await accountService.claimSignAndSubbmit(witness, tx, claimId, logger)
         response.status(200).json(result)
     }))
 
-    router.post("/assets/claim/status", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/assets/claim/status", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const {claimId} = request.body
         const result = await accountService.claimStatus(claimId, logger)
         response.status(200).json(result)
     }))
 
-    router.get("/assets/inventory", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.get("/assets/inventory", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const result = await accountService.getUserInventory(userId, logger)
         response.status(200).json(result)
     }))
 
-    /* router.get("/assets/test/grant", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    /* router.get("/assets/test/grant", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const result = await accountService.grantTest(userId)
         response.status(200).json({status: "ok"})
     }) )*/
 
-    router.get("/governance/open", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.get("/governance/open", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const result = await accountService.getOpenBallots(logger)
         response.status(200).json(result)
     }))
 
-    router.get("/governance/open-for-user", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.get("/governance/open-for-user", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const result = await accountService.getUserOpenBallots(userId, logger)
         response.status(200).json(result)
     }))
 
-    router.get("/governance/public", errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.get("/governance/public", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const result = await accountService.getPublicBallots(logger)
         response.status(200).json(result)
     }))
 
-    router.get("/governance/user", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.get("/governance/user", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const result = await accountService.getUserBallots(userId, logger)
         response.status(200).json(result)
     }))
 
-    router.post("/governance/vote", jwtMiddleware, errorHanlder.catchErrors(async (request: Request, response: Response) => {
+    router.post("/governance/vote", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const {ballotId, optionIndex} = request.body
@@ -197,6 +197,7 @@ export const accountRoutes = (accountService: AccountService, errorHanlder: requ
 
     router.use((err: any, request: Request, response: Response, next: any) => {
         const logger = baseLogger.trace(request)
+        kilia?.sendErrorMessage(err, request.originalUrl, request.method, logger.traceId, logger.userId)
         logger.error(err.message, { stack: err.stack })
         response.status(500).send("Internal server error.")
     })

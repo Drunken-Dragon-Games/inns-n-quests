@@ -12,7 +12,6 @@ import { idleQuestRoutes } from "./routes-idle-quests"
 import { corsOptions } from "./settings"
 import { jwtMiddleware } from "./jwt_middleware"
 import { KiliaBotServiceDsl } from "../service-kilia-bot"
-import { requestErrorHanlder } from "./error/catch-error"
 
 dotenv.config()
 
@@ -22,8 +21,6 @@ const buildApp = async (
     kiliaBotService? : KiliaBotServiceDsl
 ) => {
     const app = express()
-
-    const errorHanlder = new requestErrorHanlder(kiliaBotService)
     
     // MIDDLEWARE
     //app.use("/static", express.static(__dirname + "/static"))
@@ -36,8 +33,8 @@ const buildApp = async (
 
     
     // QUEST MODULE ROUTES
-    app.use("/api/quests", jwtMiddleware, idleQuestRoutes(idleQuestsService))
-    app.use("/api/account", accountRoutes(accountService, errorHanlder))
+    app.use("/api/quests", jwtMiddleware, idleQuestRoutes(idleQuestsService, kiliaBotService))
+    app.use("/api/account", accountRoutes(accountService, kiliaBotService))
     
     // Error handler middleware
     app.use(apiErrorHandler)

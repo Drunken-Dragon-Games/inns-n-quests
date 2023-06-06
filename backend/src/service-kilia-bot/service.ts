@@ -342,7 +342,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else return await this.replyMessage(message, "unknown development command")
     }
 
-    sendErrorMessage(error: Error, route: string, method: string){
+    sendErrorMessage(error: Error, route: string, method: string, traceId?: string, userId?: string){
         const servers = Object.values(this.configCache)
         const embed = new EmbedBuilder()
             .setColor(0xFF0000)
@@ -351,7 +351,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             .addFields(
                 { name: "Error:", value: error.message ? error.message : JSON.stringify(error, null, 4) },
                 { name: "Request Method", value: method},
-                { name: "Route:", value: route }
+                { name: "Route:", value: route },
+                { name: "Trace Id", value: traceId ?? "No Trace Id supplied"},
+                { name: "User Id", value: userId ?? "No User Id supplied"},
             )
         for (const server of servers) {
             if (!server.devAdminChannelId) continue
