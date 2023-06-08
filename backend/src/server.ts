@@ -32,7 +32,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
 }
 
 (async () => {
-    console.log("Starting Backend...")
+    console.log("Starting backend...")
     dotenv.config()
     const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
     const calendar = commonCalendar
