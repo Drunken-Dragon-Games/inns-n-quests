@@ -413,8 +413,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     private verifyAdminChannel(message: Message, Chanelkey: configDB.KiliaChannelsNames): Boolean {
         try {
             if (message.channelId && message.guildId) {
-                //return this.serverId === message.guildId && this.configCache[message.guildId][Chanelkey] === message.channelId
-                return this.configCache[message.guildId][Chanelkey] === message.channelId
+                return this.serverId === message.guildId && this.configCache[message.guildId][Chanelkey] === message.channelId
             } else {
                 return false;
             }
