@@ -329,7 +329,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             const totalUsers = await this.identityService.getTotalUsers()
             return await this.replyMessage(message, totalUsers.toString())
         }
-        else if (subcommand == "get-serverId") {
+        else if (subcommand == "get-server-id") {
             return await this.replyMessage(message, (this.configCache[message.guildId!]).serverId)
         }
         else if (subcommand == "help"){
