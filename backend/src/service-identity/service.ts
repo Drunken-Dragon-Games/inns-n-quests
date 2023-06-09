@@ -2,7 +2,7 @@ import dotenv from "dotenv"
 import { QueryInterface, Sequelize } from "sequelize"
 import { validateStakeAddress } from "./cardano/address"
 import { createAuthTxState, generateNonce, removeState, validateAuthState, verifySig } from "./cardano/signature-verification"
-import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./discord/code-verification"
+import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession, genDiscordTokens } from "./discord/code-verification"
 import { Users } from "./users/users"
 import { Sessions, SessionsConfig } from "./sessions/sessions";
 import { IdentityService } from "./service-spec"
@@ -120,7 +120,7 @@ export class IdentityServiceDsl implements IdentityService {
             const authStateId = await createAuthTxState(userId, stakeAddress, txId)
             return {status:"ok", authStateId}
         }catch(e: any){
-            console.log(e)
+            logger?.log.error(e.message ?? e)
             return { status: "invalid", reason: "could not comunicate wiht DB" }
         }
     }
@@ -150,7 +150,7 @@ export class IdentityServiceDsl implements IdentityService {
             if (discordTokens.ctype == "failure")
                 return { status: "bad-credentials" }
             else {
-                const userId = await Users.registerWithDiscordTokens(discordTokens.result)
+                const userId = await Users.registerWithDiscordTokens(discordTokens.result, logger)
                 if (userId.ctype == "failure"){
                     return { status: "bad-credentials" }
                 }else{
@@ -184,7 +184,7 @@ export class IdentityServiceDsl implements IdentityService {
             const discordTokens = await verifyDiscordAuthCode(credentials.authCode, this.discordConfig, "add")
             if (discordTokens.ctype == "failure") return { status: "bad-credentials" }
             else {
-                const asosiatedUser = await Users.associateWithDiscord(userId, discordTokens.result)
+                const asosiatedUser = await Users.associateWithDiscord(userId, discordTokens.result, logger)
                 if (asosiatedUser.ctype == "failure") return { status: "bad-credentials" }
                 else return { status: asosiatedUser.result }
             }
@@ -204,7 +204,7 @@ export class IdentityServiceDsl implements IdentityService {
 
     async cleanAssociationTx(userId: string, authStateId: string, logger: LoggingContext): Promise<CleanAssociationTxResult> {
         try{
-            const result = await removeState(authStateId,userId)
+            const result = await removeState(authStateId, logger)
             if (result.status != "ok") logger.error(`error when tring to remove auth state ${authStateId}, reason: ${result.reason}`)
             return result
         }catch(e: any){
@@ -244,8 +244,9 @@ export class IdentityServiceDsl implements IdentityService {
         const session = await this.sessions.resolve(sessionId)
         if (session.ctype == "failure") return { status: "unknown-session-id" }
         if (session.result.authType == "Discord"){
-            const discordSession = await validateDiscordSession(session.result, this.discordConfig)
-            if (discordSession.ctype == "failure") return { status: "invalid-discord-token" }
+            const discordBearerToken = await validateDiscordSession(session.result, this.discordConfig)
+            if (discordBearerToken.ctype == "failure") return { status: "invalid-discord-token" }
+            Users.saveDiscordUserIdIfNotExists(session.result.userId, discordBearerToken.result)
         }
         const user = await Users.getinfo(session.result.userId)
         if (user.ctype == "failure") return { status: "unknown-user-id" }

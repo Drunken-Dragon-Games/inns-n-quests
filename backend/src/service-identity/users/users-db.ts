@@ -3,6 +3,7 @@ import { DataTypes, Model, Sequelize } from "sequelize"
 export interface IUser {
     userId: string,
     discordUserName: string,
+    discordUserId: string,
     email: string,
     claimableDragonSilver: number,
     imageLink: string,
@@ -13,6 +14,7 @@ export interface IUser {
 
 export class User extends Model implements IUser {
     declare userId: string
+    declare discordUserId: string
     declare discordUserName: string
     declare email: string
     declare claimableDragonSilver: number;
@@ -67,6 +69,11 @@ export const UserTableAttributes = {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
+    },
+    discordUserId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true
     },
     discordUserName: {
         type: DataTypes.STRING,

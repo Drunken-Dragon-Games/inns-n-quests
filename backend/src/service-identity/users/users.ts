@@ -3,6 +3,7 @@ import { generateIdentenfier, generateRandomNickname } from "./utils";
 import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
 import { UserInfo, UserFullInfo } from "../models";
 import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
+import { LoggingContext } from "../../tools-tracing";
 
 export class Users {
 
@@ -36,30 +37,61 @@ export class Users {
         } else return failed
     }
 
-    static registerWithDiscordTokens = async (discordTokens: DiscordTokens): Promise<Attempt<string>> => {
-        const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken)
+    static registerWithDiscordTokens = async (discordTokens: DiscordTokens, logger?: LoggingContext): Promise<Attempt<string>> => {
+        const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken, logger)
         if (discordUserInfo.ctype == "failure") return failed
-        const existingUser = await User.findOne({ where: { discordUserName: discordUserInfo.result.discordName, email: discordUserInfo.result.email } });
+        const existingUser = 
+            (await User.findOne({ where: { discordUserId: discordUserInfo.result.discordUserId } })) ??
+            (await User.findOne({ where: { email: discordUserInfo.result.email } }))
         if (existingUser) {
+            if(!existingUser.discordUserId) { existingUser.discordUserId = discordUserInfo.result.discordUserId }
+            const discordGlobalName = discordUserInfo.result.discordGlobalName
+            if (discordGlobalName && discordGlobalName !== existingUser.discordUserName) {
+                existingUser.discordUserName = discordGlobalName
+                existingUser.nickname = discordGlobalName
+            }
             existingUser.discordRefreshToken = discordTokens.refreshtoken
             await existingUser.save()
             return succeeded(existingUser.userId)
         }
         else {
-            const nickname = discordUserInfo.result.discordName
+            const discordUserId = discordUserInfo.result.discordUserId
+            const nickname = discordUserInfo.result.discordGlobalName ?? discordUserInfo.result.discordName
             const nameIdentifier = await generateIdentenfier(nickname)
-            const discordUserName = discordUserInfo.result.discordName
+            const discordUserName = discordUserInfo.result.discordGlobalName ?? discordUserInfo.result.discordName
             const email = discordUserInfo.result.email
             const discordRefreshToken = discordTokens.refreshtoken
-            const user = await User.create({ discordUserName, email, nickname, nameIdentifier, discordRefreshToken })
+            const user = await User.create({ discordUserId, discordUserName, email, nickname, nameIdentifier, discordRefreshToken })
             return succeeded(user.userId)
         }
     }
 
-    static associateWithDiscord = async (userId: string, discordTokens: DiscordTokens): Promise<Attempt<"ok" | "discord-used">> => {
+    static saveDiscordUserIdIfNotExists = async (userId: string, bearerToken: string, logger?: LoggingContext): Promise<void> => {
+        try{
+            const existingUser = await User.findOne({ where: { userId } });
+            if (existingUser) {
+                if(!existingUser.discordUserId) {
+                    const discordUserInfo = await getUserInfoFromBearerToken(bearerToken, logger)
+                    if (discordUserInfo.ctype == "failure") {
+                        logger?.log.error(`When trying yo save discord user Id could not get info with the bearer Token`)
+                        return
+                    }
+                    existingUser.discordUserId = discordUserInfo.result.discordUserId
+                    await existingUser.save()
+                }
+                return
+            } 
+            else return
+        }
+        catch(e: any){
+            logger?.log.error(`When trying yo save discord user Id catched error: ${e.message ?? e}`)
+        }
+    }
+
+    static associateWithDiscord = async (userId: string, discordTokens: DiscordTokens, logger?: LoggingContext): Promise<Attempt<"ok" | "discord-used">> => {
         const existingUser = await User.findOne({ where: { userId } });
         if (existingUser) {
-            const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken)
+            const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken, logger)
             if (discordUserInfo.ctype == "failure") return failed
             //porfavor no me peges fran yo se que esta feo pero funciona
             if (await User.count( {where: { discordUserName: discordUserInfo.result.discordName }}) > 0) return succeeded("discord-used")
