@@ -1,5 +1,6 @@
 import { Attempt, failed, succeeded } from "../../tools-utils";
 import { AuthType, DeviceType, AuthenticationTokens, SessionInfo } from "../models";
+import { Users } from "../users/users";
 import { StoredSession } from "./session-db";
 
 export type SessionsConfig = {
@@ -31,6 +32,7 @@ export class Sessions {
         if (existingSession.refreshToken != refreshToken) return failed
         await existingSession.destroy()
         const newSession = await this.create(existingSession.userId, existingSession.authType, existingSession.deviceType)
+        Users.saveDiscordUserIdIfNotExists(existingSession.userId)
         return succeeded(newSession)
     }
 

@@ -39,13 +39,15 @@ export class Users {
     static registerWithDiscordTokens = async (discordTokens: DiscordTokens): Promise<Attempt<string>> => {
         const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken)
         if (discordUserInfo.ctype == "failure") return failed
-        const existingUser = await User.findOne({ where: { email: discordUserInfo.result.email } })
+        const existingUser = 
+            (await User.findOne({ where: { discordUserId: discordUserInfo.result.discordUserId } })) ??
+            (await User.findOne({ where: { email: discordUserInfo.result.email } }))
         if (existingUser) {
-            if(!existingUser.discordUserId) {existingUser.discordUserId = discordUserInfo.result.discordUserId}
+            if(!existingUser.discordUserId) { existingUser.discordUserId = discordUserInfo.result.discordUserId }
             const discordGlobalName = discordUserInfo.result.discordGlobalName
             if (discordGlobalName && discordGlobalName !== existingUser.discordUserName) {
-                existingUser.discordUserName = discordGlobalName;
-                existingUser.nickname = discordGlobalName;
+                existingUser.discordUserName = discordGlobalName
+                existingUser.nickname = discordGlobalName
             }
             existingUser.discordRefreshToken = discordTokens.refreshtoken
             await existingUser.save()
@@ -61,6 +63,20 @@ export class Users {
             const user = await User.create({ discordUserId, discordUserName, email, nickname, nameIdentifier, discordRefreshToken })
             return succeeded(user.userId)
         }
+    }
+
+    static saveDiscordUserIdIfNotExists = async (userId: string): Promise<Attempt<Unit>> => {
+        const existingUser = await User.findOne({ where: { userId } });
+        if (existingUser) {
+            if(!existingUser.discordUserId) {
+                const discordUserInfo = await getUserInfoFromBearerToken(existingUser.discordRefreshToken)
+                if (discordUserInfo.ctype == "failure") return failed
+                existingUser.discordUserId = discordUserInfo.result.discordUserId
+                existingUser.discordRefreshToken = discordUserInfo.result.discordRefreshToken
+                await existingUser.save()
+            }
+            return succeeded(unit)
+        } else return failed
     }
 
     static associateWithDiscord = async (userId: string, discordTokens: DiscordTokens): Promise<Attempt<"ok" | "discord-used">> => {
