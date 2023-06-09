@@ -3,9 +3,9 @@ import { Server } from "http"
 import { AddressInfo } from "net"
 import child_process from "child_process"
 
-import { config } from "./config"
-import { WithDatabase } from "./utypes"
-import { retryBoolSync } from "./concurrency"
+import { config } from "./config.js"
+import { WithDatabase } from "./utypes.js"
+import { retryBoolSync } from "./concurrency.js"
 import path from "path"
 
 type RunningApp<A> = { 

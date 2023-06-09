@@ -1,2 +1,2 @@
-export * from "./service-spec"
-export * from "./service"
+export * from "./service-spec.js"
+export * from "./service.js"

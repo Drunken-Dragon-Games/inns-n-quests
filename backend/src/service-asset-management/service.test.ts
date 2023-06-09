@@ -1,10 +1,10 @@
-import { connectToDB, DBConfig } from "../tools-database";
-import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock";
-import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock";
-import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock";
-import { AssetManagementServiceDsl } from "./service";
-import { AssetManagementService } from "./service-spec";
-import ServiceTestDsl from "./service.test-dsl";
+import { connectToDB, DBConfig } from "../tools-database.js";
+import BlockFrostAPIMock from "../tools-utils/mocks/blockfrost-api-mock.js";
+import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock.js";
+import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock.js";
+import { AssetManagementServiceDsl } from "./service.js";
+import { AssetManagementService } from "./service-spec.js";
+import ServiceTestDsl from "./service.test-dsl.js";
 
 let dsl: ServiceTestDsl
 let service: AssetManagementService

@@ -1,5 +1,5 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
-import { BallotState } from "../models"
+import { BallotState } from "../models.js"
 
 export const BallotTableName = "governance_ballots"
 

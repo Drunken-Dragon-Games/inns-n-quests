@@ -1,10 +1,10 @@
 import { Sequelize } from "sequelize"
-import { TakenStakingQuest } from "../service-idle-quests"
-import { noEncounterReward } from "../service-idle-quests/game-vm"
-import { connectToDB } from "../tools-database"
-import { EvenstatsEvent, EvenstatsSubscriber, QuestSucceededEntry } from "./models"
-import { EvenstatsServiceDsl } from "./service"
-import { EvenstatsService } from "./service-spec"
+import { TakenStakingQuest } from "../service-idle-quests.js"
+import { noEncounterReward } from "../service-idle-quests/game-vm.js"
+import { connectToDB } from "../tools-database.js"
+import { EvenstatsEvent, EvenstatsSubscriber, QuestSucceededEntry } from "./models.js"
+import { EvenstatsServiceDsl } from "./service.js"
+import { EvenstatsService } from "./service-spec.js"
 
 class EventAccumulator implements EvenstatsSubscriber {
     events: EvenstatsEvent[] = []

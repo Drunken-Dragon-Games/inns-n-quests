@@ -1,4 +1,4 @@
-import { AssetManagementService, ListResponse } from "../../service-asset-management";
+import { AssetManagementService, ListResponse } from "../../service-asset-management.js";
 
 export default class AssetManagementServiceMock {
 

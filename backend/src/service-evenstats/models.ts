@@ -1,4 +1,4 @@
-import { Character, TakenStakingQuest } from "../service-idle-quests"
+import { Character, TakenStakingQuest } from "../service-idle-quests.js"
 
 export interface EvenstatsSubscriber {
     onEvenstatsEvent: (event: EvenstatsEvent) => Promise<void>

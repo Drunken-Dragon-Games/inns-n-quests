@@ -1,4 +1,4 @@
-import { ObjectsLocations } from "./sector";
+import { ObjectsLocations } from "./sector.js";
 
 export function isObjectLocations(locations: any): locations is ObjectsLocations {
     return locations !== null && 

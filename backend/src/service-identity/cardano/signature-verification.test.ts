@@ -1,7 +1,7 @@
-import { Wallet } from "../../tools-cardano"
-import { success } from "../../tools-utils"
-import { verifySig } from "./signature-verification"
-import { SignatureVerificationState } from "./signature-verification-db"
+import { Wallet } from "../../tools-cardano.js"
+import { success } from "../../tools-utils.js"
+import { verifySig } from "./signature-verification.js"
+import { SignatureVerificationState } from "./signature-verification-db.js"
 
 test("Verify sig", async () => {
     const nonce = "nonce"

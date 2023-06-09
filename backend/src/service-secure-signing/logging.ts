@@ -1,7 +1,7 @@
-import { LoggingContext } from "../tools-tracing"
-import { HealthStatus } from "../tools-utils"
-import * as models from "./models"
-import { SecureSigningService } from "./service-spec"
+import { LoggingContext } from "../tools-tracing.js"
+import { HealthStatus } from "../tools-utils.js"
+import * as models from "./models.js"
+import { SecureSigningService } from "./service-spec.js"
 import { C as LucidCore, TxComplete } from "lucid-cardano"
 
 export class SecureSigningServiceLogging implements SecureSigningService {

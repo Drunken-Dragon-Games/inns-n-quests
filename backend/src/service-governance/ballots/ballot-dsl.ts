@@ -1,5 +1,5 @@
-import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, StoredUserBallot, MultipleUserBallots, registerBallotType, voteResponse, AllBallotData, BallotData, BallotOption } from "../models"
-import { Ballot, BallotVote } from "./ballots-db"
+import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, StoredUserBallot, MultipleUserBallots, registerBallotType, voteResponse, AllBallotData, BallotData, BallotOption } from "../models.js"
+import { Ballot, BallotVote } from "./ballots-db.js"
 
 export class Ballots {
     static async register(ballot: registerBallotType): Promise<RegisterBallotResponse> {

@@ -1,10 +1,10 @@
 import { v4 } from "uuid"
-import { AdventurerClass, AdventurerClasses, APS, CharacterCollection, CharacterEntity, CharacterType, CrafterClass, Race, zeroAPS } from "./character-entity"
-import { FurnitureCollection } from "./furniture-entity"
-import { newIQEntity } from "./iq-entity"
-import { MetadataRegistry, WellKnownPolicies } from "./iq-metadata"
-import IQRandom from "./iq-random"
-import { IQRuleset } from "./iq-ruleset"
+import { AdventurerClass, AdventurerClasses, APS, CharacterCollection, CharacterEntity, CharacterType, CrafterClass, Race, zeroAPS } from "./character-entity.js"
+import { FurnitureCollection } from "./furniture-entity.js"
+import { newIQEntity } from "./iq-entity.js"
+import { MetadataRegistry, WellKnownPolicies } from "./iq-metadata.js"
+import IQRandom from "./iq-random.js"
+import { IQRuleset } from "./iq-ruleset.js"
 
 export class IQMeatadataObjectBuilder {
 

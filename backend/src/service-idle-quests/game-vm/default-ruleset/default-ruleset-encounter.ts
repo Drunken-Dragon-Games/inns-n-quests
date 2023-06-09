@@ -1,10 +1,10 @@
-import { CharacterEntity } from "../character-entity";
-import { Challenge, DamageType, EncounterOutcome, GeneralDamageType, magicDamageTypes, noEncounterReward, SkillInfo, Strategy, willDamageTypes } from "../encounter";
-import { ChallengeConfiguration, CombatConfiguration, ConfigurationCharacter, ConfigurationContributor, StrategyConfiguration } from "../encounter/encounter-configuration";
-import { WithEV } from "../iq-entity";
-import { EncounterRuleset } from "../iq-ruleset";
-import { SkillName, Skills } from "../skills";
-import { notEmpty, percentage } from "../utils";
+import { CharacterEntity } from "../character-entity.js";
+import { Challenge, DamageType, EncounterOutcome, GeneralDamageType, magicDamageTypes, noEncounterReward, SkillInfo, Strategy, willDamageTypes } from "../encounter.js";
+import { ChallengeConfiguration, CombatConfiguration, ConfigurationCharacter, ConfigurationContributor, StrategyConfiguration } from "../encounter/encounter-configuration.js";
+import { WithEV } from "../iq-entity.js";
+import { EncounterRuleset } from "../iq-ruleset.js";
+import { SkillName, Skills } from "../skills.js";
+import { notEmpty, percentage } from "../utils.js";
 
 export default class DefaultEncounterRuleset implements EncounterRuleset {
 

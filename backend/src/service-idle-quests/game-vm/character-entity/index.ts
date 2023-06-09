@@ -1,3 +1,3 @@
-export * from "./aps"
-export * from "./character-entity"
-export * from "./character-entity-validation"
+export * from "./aps.js"
+export * from "./character-entity.js"
+export * from "./character-entity-validation.js"

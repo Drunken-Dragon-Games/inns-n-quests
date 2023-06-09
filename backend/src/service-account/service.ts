@@ -1,11 +1,11 @@
-import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService, ClaimerInfo, CreateAssociationTxResult } from "../service-asset-management"
-import { GovernanceService } from "../service-governance/service-spec"
-import * as idenser from "../service-identity"
-import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { MinimalUTxO } from "../tools-cardano"
-import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
+import { onlyPolicies, WellKnownPolicies } from "../registry-policies.js"
+import { AssetManagementService, ClaimerInfo, CreateAssociationTxResult } from "../service-asset-management.js"
+import { GovernanceService } from "../service-governance/service-spec.js"
+import * as idenser from "../service-identity.js"
+import { AuthenticationTokens, IdentityService } from "../service-identity.js"
+import { MinimalUTxO } from "../tools-cardano.js"
+import { LoggingContext } from "../tools-tracing.js"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec.js"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService

@@ -1,4 +1,4 @@
-import { registerBallotType, BallotState, StoredBallot, AdminBallot } from "../models"
+import { registerBallotType, BallotState, StoredBallot, AdminBallot } from "../models.js"
 
 export const isBallot = (obj: any): obj is registerBallotType => {
   return (

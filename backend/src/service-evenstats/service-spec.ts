@@ -1,4 +1,4 @@
-import { EvenstatsEvent, EvenstatsSubscriber } from "./models"
+import { EvenstatsEvent, EvenstatsSubscriber } from "./models.js"
 
 export interface EvenstatsService {
 

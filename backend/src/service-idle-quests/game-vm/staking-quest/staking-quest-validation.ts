@@ -1,6 +1,6 @@
-import { AdventurerClasses, CharacterCollections, CrafterClasses } from "../character-entity"
-import { StakingQuest, StakingReward } from "./staking-quest"
-import { AndRequirement, APSRequirement, AssetRefRequirement, RewardBonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirementDSL, SuccessBonusRequirement, CollectionRequirement } from "./staking-quest-requirements"
+import { AdventurerClasses, CharacterCollections, CrafterClasses } from "../character-entity.js"
+import { StakingQuest, StakingReward } from "./staking-quest.js"
+import { AndRequirement, APSRequirement, AssetRefRequirement, RewardBonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirementDSL, SuccessBonusRequirement, CollectionRequirement } from "./staking-quest-requirements.js"
 
 export function isStakingQuestRequirementDSL(obj: any): obj is StakingQuestRequirementDSL {
 

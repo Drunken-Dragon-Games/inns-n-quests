@@ -1,6 +1,6 @@
-import { zeroAPS } from "../character-entity";
-import { Encounter } from "../encounter/encounter";
-import { WithTag } from "../iq-entity";
+import { zeroAPS } from "../character-entity.js";
+import { Encounter } from "../encounter/encounter.js";
+import { WithTag } from "../iq-entity.js";
 
 export const testEncounter: Encounter & WithTag<"available-encounter"> = {
     ctype: "available-encounter",

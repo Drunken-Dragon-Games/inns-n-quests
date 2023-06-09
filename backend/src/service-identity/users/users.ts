@@ -1,8 +1,8 @@
-import { User, UserStakeAdress } from "./users-db";
-import { generateIdentenfier, generateRandomNickname } from "./utils";
-import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
-import { UserInfo, UserFullInfo } from "../models";
-import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
+import { User, UserStakeAdress } from "./users-db.js";
+import { generateIdentenfier, generateRandomNickname } from "./utils.js";
+import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification.js"
+import { UserInfo, UserFullInfo } from "../models.js";
+import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils.js";
 
 export class Users {
 

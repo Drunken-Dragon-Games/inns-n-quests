@@ -5,9 +5,9 @@ import { Address, AssetName, BaseAddress, BigNum, hash_transaction, Int, LinearF
 import { bech32 } from "bech32"
 import * as cbor from 'cbor';
 import { Network } from "lucid-cardano"
-import { ClaimerInfo } from "../service-asset-management";
-import { MinimalUTxO } from "./cardano-types";
-import { LoggingContext } from "../tools-tracing";
+import { ClaimerInfo } from "../service-asset-management.js";
+import { MinimalUTxO } from "./cardano-types.js";
+import { LoggingContext } from "../tools-tracing.js";
 
 export type CardanoNetwork = Network
 

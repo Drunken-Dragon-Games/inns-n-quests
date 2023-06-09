@@ -1,2 +1,2 @@
-export * from "./sector"
-export * from "./sector-validation"
+export * from "./sector.js"
+export * from "./sector-validation.js"

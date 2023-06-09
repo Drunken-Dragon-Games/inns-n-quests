@@ -1,4 +1,4 @@
-import { IdentityService, ResolveUserResult } from "../../service-identity"
+import { IdentityService, ResolveUserResult } from "../../service-identity.js"
 
 export default class IdentityServiceMock {
 

@@ -1,1 +1,1 @@
-export * from "./t1-quests"
+export * from "./t1-quests.js"
