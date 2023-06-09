@@ -1,5 +1,6 @@
 import { Attempt, failed, succeeded } from "../../tools-utils";
 import { AuthType, DeviceType, AuthenticationTokens, SessionInfo } from "../models";
+import { Users } from "../users/users";
 import { StoredSession } from "./session-db";
 
 export type SessionsConfig = {

@@ -3,6 +3,7 @@ import crypto from "crypto"
 import { SignatureVerificationState, TransactionVerificationState } from "./signature-verification-db"
 import { Attempt, success, failed } from "../../tools-utils"
 import { Wallet } from "../../tools-cardano"
+import { LoggingContext } from "../../tools-tracing"
 
 export const generateNonce = async (address: string): Promise<string> => {
     const nonce = crypto.randomBytes(20).toString('hex');
@@ -44,14 +45,14 @@ export const validateAuthState = async (authStateId: string, tx: string, userId:
     
 }
 
-export const removeState = async (authStateId: string, userId: string): Promise<{status: "ok"} | {status: "invalid", reason: string}> => {
+export const removeState = async (authStateId: string, logger?: LoggingContext): Promise<{status: "ok"} | {status: "invalid", reason: string}> => {
     try {
         const instance = await TransactionVerificationState.findByPk(authStateId)
         if (!instance) throw new Error("No State found with provided Id")
         await instance.destroy()
         return {status: "ok"}
     }catch(e: any){
-        console.log(e)
+        logger?.log.error(e.message ?? e)
         return {status: "invalid", reason: e.message}
     }
     

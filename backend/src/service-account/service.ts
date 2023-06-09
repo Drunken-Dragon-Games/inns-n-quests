@@ -55,7 +55,7 @@ export class AccountServiceDsl implements AccountService {
         const credentials: idenser.Credentials = {ctype: "discord", deviceType: "Browser", authCode: code }
         const authResponse = await this.identityService.authenticate(credentials, logger)
         if (authResponse.status != "ok") return authResponse
-        return await this.resolveSessionFromTokens(authResponse.tokens)
+        return await this.resolveSessionFromTokens(authResponse.tokens, logger)
     }
 
     async signout(sessionId: string, logger?: LoggingContext): Promise<SignOutResult> {
@@ -65,7 +65,7 @@ export class AccountServiceDsl implements AccountService {
     async refreshSession(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<AuthenticateResult> {
         const refreshResult = await this.identityService.refresh(sessionId, refreshToken, logger)
         if (refreshResult.status != "ok") return { status: "bad-credentials" }
-        return await this.resolveSessionFromTokens(refreshResult.tokens)
+        return await this.resolveSessionFromTokens(refreshResult.tokens, logger)
     }
 
     private async resolveSessionFromTokens(tokens: AuthenticationTokens, logger?: LoggingContext): Promise<AuthenticateResult> {
@@ -129,7 +129,7 @@ export class AccountServiceDsl implements AccountService {
             if(associateResponse.status != "ok") throw new Error(associateResponse.status)
             return{status: "ok", txId: txvalidateResult.txId }
         }catch(e: any){
-            console.log(e)
+            logger?.log.error(e.message ?? e)
             return {status: "invalid", reason: e.message}
         }
         
