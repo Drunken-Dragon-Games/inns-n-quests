@@ -214,7 +214,7 @@ export class IdentityServiceDsl implements IdentityService {
     }
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<RefreshResult> {
-        const newSession = await this.sessions.renew(sessionId, refreshToken, this.discordConfig)
+        const newSession = await this.sessions.renew(sessionId, refreshToken)
         if (newSession.ctype == "failure") return { status: "bad-refresh-token" }
         else return { status: "ok", tokens: newSession.result }
     }
@@ -246,6 +246,7 @@ export class IdentityServiceDsl implements IdentityService {
         if (session.result.authType == "Discord"){
             const discordBearerToken = await validateDiscordSession(session.result, this.discordConfig)
             if (discordBearerToken.ctype == "failure") return { status: "invalid-discord-token" }
+            Users.saveDiscordUserIdIfNotExists(session.result.userId, discordBearerToken.result)
         }
         const user = await Users.getinfo(session.result.userId)
         if (user.ctype == "failure") return { status: "unknown-user-id" }

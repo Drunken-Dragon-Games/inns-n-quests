@@ -1,9 +1,9 @@
 import { User, UserStakeAdress } from "./users-db";
 import { generateIdentenfier, generateRandomNickname } from "./utils";
-import { DiscordTokens, checkValidDiscordRefresh, genDiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
+import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
 import { UserInfo, UserFullInfo } from "../models";
 import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
-import { DiscordConfig } from "../discord/code-verification";
+import { LoggingContext } from "../../tools-tracing";
 
 export class Users {
 
@@ -66,21 +66,26 @@ export class Users {
         }
     }
 
-    static saveDiscordUserIdIfNotExists = async (userId: string, DiscordConfig: DiscordConfig): Promise<Attempt<Unit>> => {
-        const existingUser = await User.findOne({ where: { userId } });
-        if (existingUser) {
-            if(!existingUser.discordUserId) {
-                const discordAccesResponse = await checkValidDiscordRefresh(existingUser.discordRefreshToken, DiscordConfig)
-                if (discordAccesResponse.ctype !== "success") return failed
-                const discordTokens = genDiscordTokens(discordAccesResponse.result)
-                const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken)
-                if (discordUserInfo.ctype == "failure") return failed
-                existingUser.discordUserId = discordUserInfo.result.discordUserId
-                existingUser.discordRefreshToken = discordTokens.refreshtoken
-                await existingUser.save()
-            }
-            return succeeded(unit)
-        } else return failed
+    static saveDiscordUserIdIfNotExists = async (userId: string, bearerToken: string, logger?: LoggingContext): Promise<void> => {
+        try{
+            const existingUser = await User.findOne({ where: { userId } });
+            if (existingUser) {
+                if(!existingUser.discordUserId) {
+                    const discordUserInfo = await getUserInfoFromBearerToken(bearerToken)
+                    if (discordUserInfo.ctype == "failure") {
+                        logger?.log.error(`When trying yo save discord user Id could not get info with the bearer Token`)
+                        return
+                    }
+                    existingUser.discordUserId = discordUserInfo.result.discordUserId
+                    await existingUser.save()
+                }
+                return
+            } 
+            else return
+        }
+        catch(e: any){
+            logger?.log.error(`When trying yo save discord user Id catched error: ${e.message ?? e}`)
+        }
     }
 
     static associateWithDiscord = async (userId: string, discordTokens: DiscordTokens): Promise<Attempt<"ok" | "discord-used">> => {
