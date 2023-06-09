@@ -37,8 +37,8 @@ export class Users {
         } else return failed
     }
 
-    static registerWithDiscordTokens = async (discordTokens: DiscordTokens): Promise<Attempt<string>> => {
-        const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken)
+    static registerWithDiscordTokens = async (discordTokens: DiscordTokens, logger?: LoggingContext): Promise<Attempt<string>> => {
+        const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken, logger)
         if (discordUserInfo.ctype == "failure") return failed
         const existingUser = 
             (await User.findOne({ where: { discordUserId: discordUserInfo.result.discordUserId } })) ??
@@ -71,7 +71,7 @@ export class Users {
             const existingUser = await User.findOne({ where: { userId } });
             if (existingUser) {
                 if(!existingUser.discordUserId) {
-                    const discordUserInfo = await getUserInfoFromBearerToken(bearerToken)
+                    const discordUserInfo = await getUserInfoFromBearerToken(bearerToken, logger)
                     if (discordUserInfo.ctype == "failure") {
                         logger?.log.error(`When trying yo save discord user Id could not get info with the bearer Token`)
                         return
@@ -88,10 +88,10 @@ export class Users {
         }
     }
 
-    static associateWithDiscord = async (userId: string, discordTokens: DiscordTokens): Promise<Attempt<"ok" | "discord-used">> => {
+    static associateWithDiscord = async (userId: string, discordTokens: DiscordTokens, logger?: LoggingContext): Promise<Attempt<"ok" | "discord-used">> => {
         const existingUser = await User.findOne({ where: { userId } });
         if (existingUser) {
-            const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken)
+            const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken, logger)
             if (discordUserInfo.ctype == "failure") return failed
             //porfavor no me peges fran yo se que esta feo pero funciona
             if (await User.count( {where: { discordUserName: discordUserInfo.result.discordName }}) > 0) return succeeded("discord-used")

@@ -91,7 +91,8 @@ const createDiscordAccount = async (username: string = ""): Promise<Authenticati
             data: {
                 username: username == "" ? crypto.randomBytes(20).toString('hex') : username,
                 discriminator: "1234",
-                email: crypto.randomBytes(20).toString('hex')
+                email: crypto.randomBytes(20).toString('hex'),
+                id: crypto.randomBytes(20).toString('hex')
             }
         }
     });
@@ -190,7 +191,8 @@ test("associate discord: ok", async () => {
             data: {
                 username: "santiago",
                 discriminator: "1234",
-                email: "santiago1234@mail.com"
+                email: "santiago1234@mail.com",
+                id: crypto.randomBytes(20).toString('hex')
             }
         }
     });

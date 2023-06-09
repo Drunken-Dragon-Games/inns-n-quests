@@ -16,6 +16,7 @@ import { GovernanceService } from "../service-governance/service-spec"
 import * as messagesDSL from "./discord-messages-dsl"
 import * as ballotDSL from "./ballots/ballot-dsl"
 import { ConfirmMessagge, registerBallotType } from "./models"
+import { LoggingContext } from "../tools-tracing"
 
 
 export type KiliaBotServiceDependencies = {
@@ -72,13 +73,14 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
     private readonly migrator: Umzug<QueryInterface>
     private readonly configCache: { [ key: string ]: configDB.IConfigDB } = {}
+    private readonly logger = LoggingContext.create("kilia")
 
     constructor(
         private readonly database: Sequelize,
         private readonly client: Client,
         private readonly identityService: IdentityService,
         private readonly governanceService: GovernanceService,
-        private readonly serverId: string
+        private readonly serverId: string,
     ){
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -312,7 +314,6 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         const subcommand = messagesDSL.getSubCommand(message)
         if (subcommand === "user-id") {
             const discordName = messagesDSL.getArguments(message)
-            console.log(discordName)
             const user = await this.identityService.resolveUser({ctype: "nickname", nickname: discordName})
             if (user.status !== "ok") return await this.replyMessage(message, "could not find disocrd Name")
             return await this.replyMessage(message, `UserId ${user.info.userId}`)
@@ -418,7 +419,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 return false;
             }
         } catch (e: any) {
-            console.log(`Error when trying to check ${Chanelkey} ${JSON.stringify(e, null, 4)}`);
+            this.logger.log.error(`Error when trying to check ${Chanelkey} ${JSON.stringify(e, null, 4)}`);
             return false;
         }
     }

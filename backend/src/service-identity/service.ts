@@ -120,7 +120,7 @@ export class IdentityServiceDsl implements IdentityService {
             const authStateId = await createAuthTxState(userId, stakeAddress, txId)
             return {status:"ok", authStateId}
         }catch(e: any){
-            console.log(e)
+            logger?.log.error(e.message ?? e)
             return { status: "invalid", reason: "could not comunicate wiht DB" }
         }
     }
@@ -150,7 +150,7 @@ export class IdentityServiceDsl implements IdentityService {
             if (discordTokens.ctype == "failure")
                 return { status: "bad-credentials" }
             else {
-                const userId = await Users.registerWithDiscordTokens(discordTokens.result)
+                const userId = await Users.registerWithDiscordTokens(discordTokens.result, logger)
                 if (userId.ctype == "failure"){
                     return { status: "bad-credentials" }
                 }else{
@@ -184,7 +184,7 @@ export class IdentityServiceDsl implements IdentityService {
             const discordTokens = await verifyDiscordAuthCode(credentials.authCode, this.discordConfig, "add")
             if (discordTokens.ctype == "failure") return { status: "bad-credentials" }
             else {
-                const asosiatedUser = await Users.associateWithDiscord(userId, discordTokens.result)
+                const asosiatedUser = await Users.associateWithDiscord(userId, discordTokens.result, logger)
                 if (asosiatedUser.ctype == "failure") return { status: "bad-credentials" }
                 else return { status: asosiatedUser.result }
             }
@@ -204,7 +204,7 @@ export class IdentityServiceDsl implements IdentityService {
 
     async cleanAssociationTx(userId: string, authStateId: string, logger: LoggingContext): Promise<CleanAssociationTxResult> {
         try{
-            const result = await removeState(authStateId,userId)
+            const result = await removeState(authStateId, logger)
             if (result.status != "ok") logger.error(`error when tring to remove auth state ${authStateId}, reason: ${result.reason}`)
             return result
         }catch(e: any){

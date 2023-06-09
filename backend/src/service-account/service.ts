@@ -129,7 +129,7 @@ export class AccountServiceDsl implements AccountService {
             if(associateResponse.status != "ok") throw new Error(associateResponse.status)
             return{status: "ok", txId: txvalidateResult.txId }
         }catch(e: any){
-            console.log(e)
+            logger?.log.error(e.message ?? e)
             return {status: "invalid", reason: e.message}
         }
         

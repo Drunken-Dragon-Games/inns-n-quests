@@ -2,6 +2,7 @@ import axios from "axios"
 import { User } from "../users/users-db"
 import { StoredSession } from "../sessions/session-db"
 import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
+import { LoggingContext } from "../../tools-tracing";
 
 const discordAPI = "https://discord.com/api/v10/oauth2/token";
 
@@ -54,9 +55,8 @@ export const verifyDiscordAuthCode = async (code: string, config: DiscordConfig,
     }
 }
 
-export const getUserInfoFromBearerToken = async (Authorization: string): Promise<Attempt<DiscordUserInfo>> => {
+export const getUserInfoFromBearerToken = async (Authorization: string, logger?: LoggingContext): Promise<Attempt<DiscordUserInfo>> => {
     try {
-        console.log(`getting info with token ${Authorization}`)
         let playerInfo = await axios.get('https://discord.com/api/users/@me', { headers: { Authorization } })
         return succeeded({
             discordUserId: playerInfo.data.id,
@@ -64,14 +64,13 @@ export const getUserInfoFromBearerToken = async (Authorization: string): Promise
             discordGlobalName: playerInfo.data.global_name,
             email: playerInfo.data.email
         })
-    } catch (error) {
-        console.log(error);
+    } catch (error: any) {
+        logger?.log.error(error.message ?? error)
         return failed
     }
 }
 
 export const checkValidDiscordRefresh = async (refresh_token: string, config: DiscordConfig): Promise<Attempt<DiscordAccesResponse>> => {
-    console.log(`verifieng refresh token ${refresh_token}`)
     let authValues: DiscordAccesResponse
     try {
         const params = new URLSearchParams({
