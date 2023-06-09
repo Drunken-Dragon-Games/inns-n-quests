@@ -1,11 +1,11 @@
 
 import { Response, Router } from "express"
 import { Request } from "express-jwt"
-import { IdleQuestsService } from "../service-idle-quests.js"
+import { IdleQuestsService } from "../service-idle-quests"
 import { isObjectLocations } from "../service-idle-quests/game-vm/sectors/sector-validation.js"
-import { LoggingContext } from "../tools-tracing.js"
+import { LoggingContext } from "../tools-tracing"
 import { requestCatchError } from "./error/catch-error.js"
-import { KiliaBotServiceDsl } from "../service-kilia-bot.js"
+import { KiliaBotServiceDsl } from "../service-kilia-bot"
 
 export const idleQuestRoutes = (idleQuestsService: IdleQuestsService, kilia?: KiliaBotServiceDsl) => {
     const router = Router()    

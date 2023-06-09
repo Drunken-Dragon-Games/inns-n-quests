@@ -2,7 +2,7 @@ import { User, UserStakeAdress } from "./users-db.js";
 import { generateIdentenfier, generateRandomNickname } from "./utils.js";
 import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification.js"
 import { UserInfo, UserFullInfo } from "../models.js";
-import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils.js";
+import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
 
 export class Users {
 

@@ -1,5 +1,5 @@
-import { MinimalUTxO } from "../tools-cardano.js"
-import { LoggingContext } from "../tools-tracing.js"
+import { MinimalUTxO } from "../tools-cardano"
+import { LoggingContext } from "../tools-tracing"
 import * as models from "./models.js"
 
 export interface AssetManagementService {

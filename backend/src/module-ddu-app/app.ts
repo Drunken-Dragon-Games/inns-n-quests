@@ -4,14 +4,14 @@ import cors from "cors"
 import dotenv from "dotenv"
 import express from "express"
 import helmet from "helmet"
-import { AccountService } from "../service-account.js"
-import { IdleQuestsService } from "../service-idle-quests.js"
+import { AccountService } from "../service-account"
+import { IdleQuestsService } from "../service-idle-quests"
 import apiErrorHandler from "./error/api_error_handler.js"
 import { accountRoutes } from "./routes-account.js"
 import { idleQuestRoutes } from "./routes-idle-quests.js"
 import { corsOptions } from "./settings.js"
 import { jwtMiddleware } from "./jwt_middleware.js"
-import { KiliaBotServiceDsl } from "../service-kilia-bot.js"
+import { KiliaBotServiceDsl } from "../service-kilia-bot"
 
 dotenv.config()
 

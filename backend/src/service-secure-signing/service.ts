@@ -5,9 +5,9 @@ import { SecureSigningService } from "./service-spec.js"
 import * as models from "./models.js"
 import { Transaction } from "@emurgo/cardano-serialization-lib-nodejs"
 import Registry from "./registry/registry.js"
-import { LoggingContext } from "../tools-tracing.js"
-import { CardanoNetwork, cardanoNetworkFromString } from "../tools-cardano.js"
-import { config, HealthStatus } from "../tools-utils.js"
+import { LoggingContext } from "../tools-tracing"
+import { CardanoNetwork, cardanoNetworkFromString } from "../tools-cardano"
+import { config, HealthStatus } from "../tools-utils"
 import { Lucid, C as LucidCore, TxComplete } from "lucid-cardano"
 
 export interface SecureSigningServiceConfig

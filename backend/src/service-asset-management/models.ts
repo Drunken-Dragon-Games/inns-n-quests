@@ -1,4 +1,4 @@
-import { MinimalUTxO } from "../tools-cardano.js"
+import { MinimalUTxO } from "../tools-cardano"
 
 export type HealthStatus =
     { status: "ok" | "warning" | "faulty"

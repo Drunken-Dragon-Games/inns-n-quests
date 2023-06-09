@@ -1,4 +1,4 @@
-import { IQMeatadataObjectBuilder } from "../game-vm.js";
+import { IQMeatadataObjectBuilder } from "../game-vm";
 import { AvailableStakingQuest } from "../models.js";
 import { pickRandomQuestsByLocation, StakingQuestRegistry } from "./staking-quests-registry.js";
 

@@ -1,7 +1,7 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
 import { Furniture } from "../models.js"
-import * as am from "../../service-asset-management.js"
-import * as vm from "../game-vm.js"
+import * as am from "../../service-asset-management"
+import * as vm from "../game-vm"
 import { syncData } from "./sync-util.js"
 
 export type IFurnitureDB = Omit<

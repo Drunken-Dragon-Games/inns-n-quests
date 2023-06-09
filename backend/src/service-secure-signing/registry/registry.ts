@@ -1,4 +1,4 @@
-import { CardanoNetwork, AES256, Wallet, cardano } from "../../tools-cardano.js"
+import { CardanoNetwork, AES256, Wallet, cardano } from "../../tools-cardano"
 import cbor from "cbor"
 import { NativeScript, Transaction, TransactionWitnessSet } from "@emurgo/cardano-serialization-lib-nodejs"
 import { Lucid, C as LucidCore, Provider as LucidProvider, TransactionWitnesses, TxComplete } from "lucid-cardano"

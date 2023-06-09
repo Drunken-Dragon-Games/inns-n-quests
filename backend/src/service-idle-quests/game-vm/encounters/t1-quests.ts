@@ -1,4 +1,4 @@
-import { zeroAPS } from "../character-entity.js";
+import { zeroAPS } from "../character-entity";
 import { Encounter } from "../encounter/encounter.js";
 import { WithTag } from "../iq-entity.js";
 

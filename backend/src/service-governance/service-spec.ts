@@ -1,5 +1,5 @@
 import * as models from "./models.js"
-import { HealthStatus } from "../tools-utils.js"
+import { HealthStatus } from "../tools-utils"
 export interface GovernanceService {
     loadDatabaseModels(): Promise<void>
 

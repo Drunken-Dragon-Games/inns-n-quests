@@ -2,9 +2,9 @@ import dotenv from "dotenv"
 import path from "path"
 import { QueryInterface, Sequelize } from "sequelize"
 import { Umzug } from "umzug"
-import { buildMigrator } from "../tools-database.js"
-import { LoggingContext } from "../tools-tracing.js"
-import { HealthStatus } from "../tools-utils.js"
+import { buildMigrator } from "../tools-database"
+import { LoggingContext } from "../tools-tracing"
+import { HealthStatus } from "../tools-utils"
 import { AcceptEncounterResult, AcceptStakingQuestResult, ClaimEncounterResult, ClaimStakingQuestResult, GetActiveEncountersResult, GetAvailableEncountersResult, GetAvailableStakingQuestsResult, GetInventoryResult, GetTakenStakingQuestsResult, IdleQuestsService } from "./service-spec.js"
 
 import { CharacterDBInfo, CharacterState } from "./state/character-state.js"
@@ -15,13 +15,13 @@ import { TakenStakingQuestDBInfo, TakenStakingQuestState } from "./state/taken-s
 
 import { MetadataRegistry } from "../registry-metadata.js"
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies.js"
-import { AssetManagementService, AssetUnit } from "../service-asset-management.js"
-import { EvenstatsService } from "../service-evenstats.js"
+import { AssetManagementService, AssetUnit } from "../service-asset-management"
+import { EvenstatsService } from "../service-evenstats"
 import { Calendar } from "../tools-utils/calendar.js"
 import { StakingQuestRegistry } from "./state/staking-quests-registry.js"
 
-import * as vm from "./game-vm.js"
-import { testEncounter } from "./game-vm.js"
+import * as vm from "./game-vm"
+import { testEncounter } from "./game-vm"
 import { AvailableStakingQuestState } from "./state/available-staking-quests-state.js"
 
 export interface IdleQuestServiceDependencies 

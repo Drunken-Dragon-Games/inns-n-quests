@@ -1,7 +1,7 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
 import { StakingQuestRegistry } from "./staking-quests-registry.js"
 import { TakenStakingQuest } from "../models.js"
-import * as vm from "../game-vm.js"
+import * as vm from "../game-vm"
 
 export interface ITakenStakingQuestDB {
     takenQuestId: string

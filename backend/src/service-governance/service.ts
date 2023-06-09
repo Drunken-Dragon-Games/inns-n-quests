@@ -1,14 +1,14 @@
 import path from "path"
 import { QueryInterface, Sequelize } from "sequelize"
 import { Umzug } from "umzug"
-import { buildMigrator } from "../tools-database.js"
+import { buildMigrator } from "../tools-database"
 import { GovernanceService } from "./service-spec.js"
 import dotenv from "dotenv"
 
 import * as models from "./models.js"
 import * as ballotDB from "./ballots/ballots-db.js"
 
-import { config, HealthStatus } from "../tools-utils.js"
+import { config, HealthStatus } from "../tools-utils"
 
 import { Ballots } from "./ballots/ballot-dsl.js"
 import { title } from "process"

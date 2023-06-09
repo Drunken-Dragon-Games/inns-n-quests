@@ -1,7 +1,7 @@
-import { ClaimerInfo } from "../service-asset-management.js"
-import { AuthenticationTokens, UserFullInfo } from "../service-identity.js"
-import { LoggingContext } from "../tools-tracing.js"
-import { MinimalUTxO } from "../tools-cardano.js"
+import { ClaimerInfo } from "../service-asset-management"
+import { AuthenticationTokens, UserFullInfo } from "../service-identity"
+import { LoggingContext } from "../tools-tracing"
+import { MinimalUTxO } from "../tools-cardano"
 
 export interface AccountService {
     authenticateDevelopment(nickname: string, logger?: LoggingContext): Promise<AuthenticateResult>

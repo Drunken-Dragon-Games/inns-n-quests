@@ -1,4 +1,4 @@
-import { AdventurerClasses, CharacterCollections, CrafterClasses } from "../character-entity.js"
+import { AdventurerClasses, CharacterCollections, CrafterClasses } from "../character-entity"
 import { StakingQuest, StakingReward } from "./staking-quest.js"
 import { AndRequirement, APSRequirement, AssetRefRequirement, RewardBonusRequirement, ClassRequirement, EmptyRequirement, OrRequirement, StakingQuestRequirementDSL, SuccessBonusRequirement, CollectionRequirement } from "./staking-quest-requirements.js"
 

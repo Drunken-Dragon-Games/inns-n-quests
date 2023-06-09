@@ -1,4 +1,4 @@
-import * as vm from "./game-vm.js"
+import * as vm from "./game-vm"
 
 export type Character 
     = vm.CharacterEntity

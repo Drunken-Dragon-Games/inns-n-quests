@@ -1,5 +1,5 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
-import * as vm from "../game-vm.js"
+import * as vm from "../game-vm"
 import { IdleQuestsInventory } from "../models.js"
 
 export type ISectorDB = {

@@ -1,6 +1,6 @@
 import { DiscordConfig, verifyDiscordAuthCode } from "./code-verification.js"
 import axios from 'axios';
-import { success } from "../../tools-utils.js";
+import { success } from "../../tools-utils";
 
 const stubDiscordConfig: DiscordConfig = {
     clientId: "",

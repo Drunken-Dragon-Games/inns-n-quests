@@ -1,5 +1,5 @@
-import { LoggingContext } from "../tools-tracing.js"
-import { HealthStatus } from "../tools-utils.js"
+import { LoggingContext } from "../tools-tracing"
+import { HealthStatus } from "../tools-utils"
 import * as models from "./models.js"
 import { C as LucidCore, TxComplete } from "lucid-cardano"
 

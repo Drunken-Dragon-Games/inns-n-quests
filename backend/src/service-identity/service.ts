@@ -6,10 +6,10 @@ import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./
 import { Users } from "./users/users.js"
 import { Sessions, SessionsConfig } from "./sessions/sessions.js";
 import { IdentityService } from "./service-spec.js"
-import { LoggingContext } from "../tools-tracing.js"
-import { connectToDB, DBConfig, buildMigrator } from "../tools-database.js"
+import { LoggingContext } from "../tools-tracing"
+import { connectToDB, DBConfig, buildMigrator } from "../tools-database"
 import { IdentityServiceLogging } from "./logging.js"
-import { config, HealthStatus } from "../tools-utils.js"
+import { config, HealthStatus } from "../tools-utils"
 
 import { 
     CreateNonceResult, Credentials, AuthenticationResult, RegistrationResult, AssociationResult, 
@@ -27,8 +27,6 @@ import * as usersDB from "./users/users-db.js"
 import path from "path"
 import { Umzug } from "umzug"
 import { NODE_ENV } from "../module-ddu-app/settings.js"
-import { CreateAssociationTxResult } from "../service-asset-management.js"
-import { User } from "discord.js"
 
 export interface IdentityServiceConfig 
     { network: string

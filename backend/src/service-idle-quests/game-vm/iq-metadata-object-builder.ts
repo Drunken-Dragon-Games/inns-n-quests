@@ -1,5 +1,5 @@
 import { v4 } from "uuid"
-import { AdventurerClass, AdventurerClasses, APS, CharacterCollection, CharacterEntity, CharacterType, CrafterClass, Race, zeroAPS } from "./character-entity.js"
+import { AdventurerClass, AdventurerClasses, APS, CharacterCollection, CharacterEntity, CharacterType, CrafterClass, Race, zeroAPS } from "./character-entity"
 import { FurnitureCollection } from "./furniture-entity.js"
 import { newIQEntity } from "./iq-entity.js"
 import { MetadataRegistry, WellKnownPolicies } from "./iq-metadata.js"

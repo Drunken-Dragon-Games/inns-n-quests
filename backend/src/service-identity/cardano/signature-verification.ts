@@ -1,8 +1,8 @@
 import crypto from "crypto"
 
 import { SignatureVerificationState, TransactionVerificationState } from "./signature-verification-db.js"
-import { Attempt, success, failed } from "../../tools-utils.js"
-import { Wallet } from "../../tools-cardano.js"
+import { Attempt, success, failed } from "../../tools-utils"
+import { Wallet } from "../../tools-cardano"
 
 export const generateNonce = async (address: string): Promise<string> => {
     const nonce = crypto.randomBytes(20).toString('hex');

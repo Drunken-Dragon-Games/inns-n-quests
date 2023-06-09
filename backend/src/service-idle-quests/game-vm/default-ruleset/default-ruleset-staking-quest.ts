@@ -1,7 +1,7 @@
-import { addAPS, AdventurerClasses, APS, apsSum, CharacterCollections, CharacterEntity, CrafterClasses, newAPS, zeroAPS } from "../character-entity.js"
+import { addAPS, AdventurerClasses, APS, apsSum, CharacterCollections, CharacterEntity, CrafterClasses, newAPS, zeroAPS } from "../character-entity"
 import IQRandom from "../iq-random.js"
 import { CharacterEntityRuleset, StakingQuestRuleset } from "../iq-ruleset.js"
-import { addStakingReward, StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementConfiguration, StakingQuestRequirementInfo, StakingQuestRequirementSatisfactionPercentage, StakingQuestSatisfactionInfo, StakingReward } from "../staking-quest.js"
+import { addStakingReward, StakingQuest, StakingQuestConfiguration, StakingQuestOutcome, StakingQuestRequirement, StakingQuestRequirementConfiguration, StakingQuestRequirementInfo, StakingQuestRequirementSatisfactionPercentage, StakingQuestSatisfactionInfo, StakingReward } from "../staking-quest"
 import { notEmpty } from "../utils.js"
 
 export default class DefaultQuestRuleset implements StakingQuestRuleset {

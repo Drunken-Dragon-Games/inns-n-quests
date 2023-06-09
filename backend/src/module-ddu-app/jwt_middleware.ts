@@ -3,7 +3,7 @@ import { SECRET_KEY } from "./settings.js"
 
 import { expressjwt } from "express-jwt"
 import { Jwt } from "jsonwebtoken"
-import { Session } from "../service-identity.js"
+import { Session } from "../service-identity"
 
 const getToken = async (request: Request) => 
     request.cookies.access

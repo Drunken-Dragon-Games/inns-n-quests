@@ -1,15 +1,15 @@
 import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector, TextChannel } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
-import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats.js"
-import { Character, TakenStakingQuest } from "../service-idle-quests.js"
-import { config } from "../tools-utils.js"
+import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
+import { Character, TakenStakingQuest } from "../service-idle-quests"
+import { config } from "../tools-utils"
 import { QueryInterface, Sequelize } from "sequelize"
 
 import * as configDB from "./config/config-db.js"
 import { Umzug } from "umzug"
-import { buildMigrator } from "../tools-database.js"
+import { buildMigrator } from "../tools-database"
 import path from "path"
-import { IdentityService } from "../service-identity.js"
+import { IdentityService } from "../service-identity"
 import { GovernanceService } from "../service-governance/service-spec.js"
 
 //not sure how you would like me to manage this, mor info on the files themselves
