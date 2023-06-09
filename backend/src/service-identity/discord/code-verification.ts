@@ -24,7 +24,9 @@ interface DiscordAccesResponse {
 }
 
 interface DiscordUserInfo {
+    discordUserId: string
     discordName: string
+    discordGlobalName?: string
     email: string
 }
 
@@ -56,7 +58,9 @@ export const getUserInfoFromBearerToken = async (Authorization: string): Promise
     try {
         let playerInfo = await axios.get('https://discord.com/api/users/@me', { headers: { Authorization } })
         return succeeded({
+            discordUserId: playerInfo.data.id,
             discordName: playerInfo.data.username + "#" + playerInfo.data.discriminator,
+            discordGlobalName: playerInfo.data.global_name,
             email: playerInfo.data.email
         })
     } catch (error) {

@@ -39,19 +39,26 @@ export class Users {
     static registerWithDiscordTokens = async (discordTokens: DiscordTokens): Promise<Attempt<string>> => {
         const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken)
         if (discordUserInfo.ctype == "failure") return failed
-        const existingUser = await User.findOne({ where: { discordUserName: discordUserInfo.result.discordName, email: discordUserInfo.result.email } });
+        const existingUser = await User.findOne({ where: { email: discordUserInfo.result.email } })
         if (existingUser) {
+            if(!existingUser.discordUserId) {existingUser.discordUserId = discordUserInfo.result.discordUserId}
+            const discordGlobalName = discordUserInfo.result.discordGlobalName
+            if (discordGlobalName && discordGlobalName !== existingUser.discordUserName) {
+                existingUser.discordUserName = discordGlobalName;
+                existingUser.nickname = discordGlobalName;
+            }
             existingUser.discordRefreshToken = discordTokens.refreshtoken
             await existingUser.save()
             return succeeded(existingUser.userId)
         }
         else {
-            const nickname = discordUserInfo.result.discordName
+            const discordUserId = discordUserInfo.result.discordUserId
+            const nickname = discordUserInfo.result.discordGlobalName ?? discordUserInfo.result.discordName
             const nameIdentifier = await generateIdentenfier(nickname)
-            const discordUserName = discordUserInfo.result.discordName
+            const discordUserName = discordUserInfo.result.discordGlobalName ?? discordUserInfo.result.discordName
             const email = discordUserInfo.result.email
             const discordRefreshToken = discordTokens.refreshtoken
-            const user = await User.create({ discordUserName, email, nickname, nameIdentifier, discordRefreshToken })
+            const user = await User.create({ discordUserId, discordUserName, email, nickname, nameIdentifier, discordRefreshToken })
             return succeeded(user.userId)
         }
     }
