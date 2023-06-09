@@ -2,7 +2,7 @@ import dotenv from "dotenv"
 import { QueryInterface, Sequelize } from "sequelize"
 import { validateStakeAddress } from "./cardano/address"
 import { createAuthTxState, generateNonce, removeState, validateAuthState, verifySig } from "./cardano/signature-verification"
-import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession } from "./discord/code-verification"
+import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession, genDiscordTokens } from "./discord/code-verification"
 import { Users } from "./users/users"
 import { Sessions, SessionsConfig } from "./sessions/sessions";
 import { IdentityService } from "./service-spec"
@@ -214,7 +214,7 @@ export class IdentityServiceDsl implements IdentityService {
     }
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<RefreshResult> {
-        const newSession = await this.sessions.renew(sessionId, refreshToken)
+        const newSession = await this.sessions.renew(sessionId, refreshToken, this.discordConfig)
         if (newSession.ctype == "failure") return { status: "bad-refresh-token" }
         else return { status: "ok", tokens: newSession.result }
     }
@@ -244,8 +244,8 @@ export class IdentityServiceDsl implements IdentityService {
         const session = await this.sessions.resolve(sessionId)
         if (session.ctype == "failure") return { status: "unknown-session-id" }
         if (session.result.authType == "Discord"){
-            const discordSession = await validateDiscordSession(session.result, this.discordConfig)
-            if (discordSession.ctype == "failure") return { status: "invalid-discord-token" }
+            const discordBearerToken = await validateDiscordSession(session.result, this.discordConfig)
+            if (discordBearerToken.ctype == "failure") return { status: "invalid-discord-token" }
         }
         const user = await Users.getinfo(session.result.userId)
         if (user.ctype == "failure") return { status: "unknown-user-id" }

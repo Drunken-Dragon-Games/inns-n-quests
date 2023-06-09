@@ -3,6 +3,14 @@ import { AuthType, DeviceType, AuthenticationTokens, SessionInfo } from "../mode
 import { Users } from "../users/users";
 import { StoredSession } from "./session-db";
 
+export type DiscordConfig = {
+    clientId: string,
+    clientSecret: string,
+    redirect: string,
+    redirectValidate: string,
+    redirectAdd: string,
+}
+
 export type SessionsConfig = {
     duration: number
 }
@@ -26,13 +34,18 @@ export class Sessions {
         }
     }
 
-    renew = async (sessionId: string, refreshToken: string): Promise<Attempt<AuthenticationTokens>> => {
+    /**
+     * As part of our migration from using discordUsernames to Discord User IDs,
+     * we've added functionality to store User IDs within our session renew function.
+     * This ensures our database operations stay consistent with the new user identification method.
+     */
+    renew = async (sessionId: string, refreshToken: string, DiscordConfig: DiscordConfig): Promise<Attempt<AuthenticationTokens>> => {
         const existingSession = await StoredSession.findOne({ where: { sessionId }})
         if (existingSession == null) return failed
         if (existingSession.refreshToken != refreshToken) return failed
         await existingSession.destroy()
         const newSession = await this.create(existingSession.userId, existingSession.authType, existingSession.deviceType)
-        Users.saveDiscordUserIdIfNotExists(existingSession.userId)
+        Users.saveDiscordUserIdIfNotExists(existingSession.userId, DiscordConfig)
         return succeeded(newSession)
     }
 

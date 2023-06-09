@@ -1,8 +1,9 @@
 import { User, UserStakeAdress } from "./users-db";
 import { generateIdentenfier, generateRandomNickname } from "./utils";
-import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
+import { DiscordTokens, checkValidDiscordRefresh, genDiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
 import { UserInfo, UserFullInfo } from "../models";
 import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
+import { DiscordConfig } from "../discord/code-verification";
 
 export class Users {
 
@@ -65,14 +66,17 @@ export class Users {
         }
     }
 
-    static saveDiscordUserIdIfNotExists = async (userId: string): Promise<Attempt<Unit>> => {
+    static saveDiscordUserIdIfNotExists = async (userId: string, DiscordConfig: DiscordConfig): Promise<Attempt<Unit>> => {
         const existingUser = await User.findOne({ where: { userId } });
         if (existingUser) {
             if(!existingUser.discordUserId) {
-                const discordUserInfo = await getUserInfoFromBearerToken(existingUser.discordRefreshToken)
+                const discordAccesResponse = await checkValidDiscordRefresh(existingUser.discordRefreshToken, DiscordConfig)
+                if (discordAccesResponse.ctype !== "success") return failed
+                const discordTokens = genDiscordTokens(discordAccesResponse.result)
+                const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken)
                 if (discordUserInfo.ctype == "failure") return failed
                 existingUser.discordUserId = discordUserInfo.result.discordUserId
-                existingUser.discordRefreshToken = discordUserInfo.result.discordRefreshToken
+                existingUser.discordRefreshToken = discordTokens.refreshtoken
                 await existingUser.save()
             }
             return succeeded(unit)

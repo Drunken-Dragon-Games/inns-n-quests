@@ -69,7 +69,7 @@ export const getUserInfoFromBearerToken = async (Authorization: string): Promise
     }
 }
 
-export const checkValidDiscordRefresh = async (refresh_token: string, config: DiscordConfig): Promise<Attempt<string>> => {
+export const checkValidDiscordRefresh = async (refresh_token: string, config: DiscordConfig): Promise<Attempt<DiscordAccesResponse>> => {
     let authValues: DiscordAccesResponse
     try {
         const params = new URLSearchParams({
@@ -80,21 +80,22 @@ export const checkValidDiscordRefresh = async (refresh_token: string, config: Di
         }).toString();
         let r = await axios.post( discordAPI, params,{headers:{ 'Content-Type': 'application/x-www-form-urlencoded' }});
         authValues = r.data;
-        return succeeded(authValues.refresh_token);
+        return succeeded(authValues);
     } catch (_) {
         return failed
     }
 }
 
 
-export const validateDiscordSession =async (SessionInstance: StoredSession, config: DiscordConfig): Promise<Attempt<Unit>> => {
+export const validateDiscordSession =async (SessionInstance: StoredSession, config: DiscordConfig): Promise<Attempt<string>> => {
     const UserIntance = await User.findOne({ where: { userId: SessionInstance.userId } });
     if (UserIntance == null) return failed
-    const newRefresh = await checkValidDiscordRefresh(UserIntance.discordRefreshToken, config)
-    if (newRefresh.ctype == "failure") return failed
+    const tokens = await checkValidDiscordRefresh(UserIntance.discordRefreshToken, config)
+    if (tokens.ctype == "failure") return failed
     else {
-        UserIntance.discordRefreshToken = newRefresh.result
+        const cleanTokens = genDiscordTokens(tokens.result)
+        UserIntance.discordRefreshToken = cleanTokens.refreshtoken
         await UserIntance.save()
-        return succeeded(unit)
+        return succeeded(cleanTokens.discordBearerToken)
     }
 }
