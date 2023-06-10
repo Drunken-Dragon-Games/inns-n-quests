@@ -1,7 +1,7 @@
 import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector, TextChannel } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
 import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
-import { Character, TakenStakingQuest } from "../service-idle-quests"
+import { Character, IdleQuestsService, TakenStakingQuest } from "../service-idle-quests"
 import { config } from "../tools-utils"
 import { QueryInterface, Sequelize } from "sequelize"
 
@@ -23,7 +23,8 @@ export type KiliaBotServiceDependencies = {
     database: Sequelize
     evenstatsService: EvenstatsService,
     identityService: IdentityService,
-    governanceService: GovernanceService
+    governanceService: GovernanceService,
+    idleQuestsService: IdleQuestsService,
 }
 
 export type KiliaBotServiceConfig = {
@@ -80,6 +81,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         private readonly client: Client,
         private readonly identityService: IdentityService,
         private readonly governanceService: GovernanceService,
+        private readonly idleQuestService: IdleQuestsService,
         private readonly serverId: string,
     ){
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
@@ -104,7 +106,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             client,
             dependencies.identityService,
             dependencies.governanceService,
-            config.serverId
+            dependencies.idleQuestsService,
+            config.serverId,
         )
         //setting up DB and pre loading cache
         await service.loadDatabaseModels()
@@ -333,6 +336,15 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else if (subcommand == "get-server-id") {
             return await this.replyMessage(message, (this.configCache[message.guildId!]).serverId)
         }
+        else if (subcommand == "normalize-single-asset") {
+            const [userId, assetRef] = messagesDSL.getArguments(message).split(" ")
+
+            if (!userId || !assetRef ) return this.replyMessage(message, "could not get all parameters")
+
+            const result = await this.idleQuestService.normalizeSingleAssetStatus(userId, assetRef)
+            return this.replyMessage(message,  JSON.stringify(result, null, 4))
+
+        }
         else if (subcommand == "help"){
             const helpMessage = `
         **Available Development Commands**
@@ -342,6 +354,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         *user-info <userId>* : Returns detailed information for the given user ID.
         
         *total-users* : Returns the total number of users in the system.
+
+        *normalize-single-asset <userId> <assetRef> * : Checks whether the specified asset for a user is in a quest. 
+            If not, it resets the asset's activity status to false.
         
         *help* : Provides a list of available commands and a description of their function.
         

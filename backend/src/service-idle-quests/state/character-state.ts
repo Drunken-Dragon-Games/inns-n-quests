@@ -1,9 +1,10 @@
-import { DataTypes, Model, Op, Sequelize, Transaction } from "sequelize"
+import { DataTypes, Model, Op, QueryTypes, Sequelize, Transaction } from "sequelize"
 import * as am from "../../service-asset-management"
 import * as vm from "../game-vm"
 import { newAPS } from "../game-vm"
 import { Character } from "../models"
 import { syncData } from "./sync-util"
+import { TakenStakingQuestDB } from "./taken-staking-quest-state"
 
 export type ICharacterDB = Omit<
     vm.CharacterEntity & 
@@ -204,6 +205,48 @@ export class CharacterState {
             { where: { userId, entityId: entityIds }, returning: true, transaction })
         return adventurers.map(makeCharacter(this.objectBuilder))
     }
+
+    /**
+     * For admin use through kilia Dev
+     * Forces state on Asset if userId owns exaclty one matching AsssetRef, 
+     * this is ment to help with interaction from the outside world
+     * this was implemented in repsonse to: https://github.com/Drunken-Dragon-Games/inns-n-quests/issues/68
+     * 
+     * @param userId 
+     * @param assetRef 
+     * @param act 
+     * @returns 
+     */
+    async normalizeAssetStatus(userId: string, assetRef: string, database: Sequelize): Promise<{status: "ok"} | {status: "failed", reason: string}> { 
+        try {
+            // fetch the matching assets
+            const matchingAssets = await CharacterDB.findAll({ where: { userId, assetRef } });
+    
+            // only update if there's exactly one matching asset
+            if (matchingAssets.length === 1) {
+                const entityId= matchingAssets[0].entityId
+                const [results, metadata] = await database.query(
+                    'SELECT * FROM "idle_quests_staking_taken_quests" WHERE "partyIds" @> ARRAY[:entityId]::uuid[]',
+                    { replacements: { entityId }, type: QueryTypes.SELECT })
+                  
+                  if (results) {
+                    return {status: "failed", reason: "Character is in a least one staking quest"}
+                  } else {
+                    await CharacterDB.update({ inActivity: false }, { where: { userId, assetRef } });
+                    return { status: 'ok' }
+                  }
+            } else if (matchingAssets.length < 1) {
+                return { status: 'failed', reason: 'No matching assets found.' };
+            } else {
+                return { status: 'failed', reason: 'More than one matching asset found.' };
+            }
+        } catch (error) {
+            // handle the error as you see fit
+            console.error(error);
+            return { status: 'failed', reason: 'An error occurred during the operation.' };
+        }
+    }
+    
 
     async setXP(characters: { entityId: string, xpAPS: vm.APS }[], transaction?: Transaction): Promise<void> {
         await CharacterDB.bulkCreate(characters, { updateOnDuplicate: ["xpAPS"], transaction })
