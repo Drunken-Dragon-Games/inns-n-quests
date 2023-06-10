@@ -396,4 +396,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         if (!name && !objectLocations) return
         await SectorState.setPlayerInnState(userId, name, objectLocations)
     }
+
+    async setSingleAssetActivity(userId: string, assetRef: string, activity: boolean, logger?: LoggingContext | undefined): Promise<{status: "ok"} | {status: "failed", reason: string}> {
+        return this.characterState.updateSingleAssetActivityStatus(userId, assetRef, activity)
+    }
 }

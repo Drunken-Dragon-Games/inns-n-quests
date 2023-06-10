@@ -205,6 +205,39 @@ export class CharacterState {
         return adventurers.map(makeCharacter(this.objectBuilder))
     }
 
+    /**
+     * For admin use through kilia Dev
+     * Forces state on Asset if userId owns exaclty one matching AsssetRef, 
+     * this is ment to help with interaction from the outside world
+     * this was implemented in repsonse to: https://github.com/Drunken-Dragon-Games/inns-n-quests/issues/68
+     * 
+     * @param userId 
+     * @param assetRef 
+     * @param act 
+     * @returns 
+     */
+    async updateSingleAssetActivityStatus(userId: string, assetRef: string, act: boolean): Promise<{status: "ok"} | {status: "failed", reason: string}> { 
+        try {
+            // fetch the matching assets
+            const matchingAssets = await CharacterDB.findAll({ where: { userId, assetRef } });
+    
+            // only update if there's exactly one matching asset
+            if (matchingAssets.length === 1) {
+                await CharacterDB.update({ inActivity: act }, { where: { userId, assetRef } });
+                return { status: 'ok' };
+            } else if (matchingAssets.length < 1) {
+                return { status: 'failed', reason: 'No matching assets found.' };
+            } else {
+                return { status: 'failed', reason: 'More than one matching asset found.' };
+            }
+        } catch (error) {
+            // handle the error as you see fit
+            console.error(error);
+            return { status: 'failed', reason: 'An error occurred during the operation.' };
+        }
+    }
+    
+
     async setXP(characters: { entityId: string, xpAPS: vm.APS }[], transaction?: Transaction): Promise<void> {
         await CharacterDB.bulkCreate(characters, { updateOnDuplicate: ["xpAPS"], transaction })
     }
