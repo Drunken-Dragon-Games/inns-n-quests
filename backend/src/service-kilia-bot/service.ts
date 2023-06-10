@@ -336,20 +336,13 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else if (subcommand == "get-server-id") {
             return await this.replyMessage(message, (this.configCache[message.guildId!]).serverId)
         }
-        else if (subcommand == "set-asset-activity") {
-            const [userId, assetRef, activityString] = messagesDSL.getArguments(message).split(" ")
+        else if (subcommand == "normalize-single-asset") {
+            const [userId, assetRef] = messagesDSL.getArguments(message).split(" ")
 
-            const activity = (activityString.toLowerCase() === 'true') ? true : 
-                            (activityString.toLowerCase() === 'false') ? false : 
-                            null
+            if (!userId || !assetRef ) return this.replyMessage(message, "could not get all parameters")
 
-            // Check if activity could be mapped to a boolean
-            if (activity === null) {
-            this.replyMessage(message, "Activity must be either 'true' or 'false'.")
-            } else {
-            const result = await this.idleQuestService.setSingleAssetActivity(userId, assetRef, activity)
+            const result = await this.idleQuestService.normalizeSingleAssetStatus(userId, assetRef)
             return this.replyMessage(message,  JSON.stringify(result, null, 4))
-            }
 
         }
         else if (subcommand == "help"){
@@ -362,8 +355,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         
         *total-users* : Returns the total number of users in the system.
 
-        *set-asset-activity <userId> <assetRef> <activity>* : Sets the activity status of a specific asset for a user. 
-        Activity should be either 'true' or 'false'.
+        *normalize-single-asset <userId> <assetRef> * : Checks whether the specified asset for a user is in a quest. 
+            If not, it resets the asset's activity status to false.
         
         *help* : Provides a list of available commands and a description of their function.
         
