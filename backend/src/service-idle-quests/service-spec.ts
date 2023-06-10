@@ -35,6 +35,8 @@ export interface IdleQuestsService {
     getInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult>
 
     grantTestInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult>
+    
+    setSingleAssetActivity(userId: string, assetRef: string, activity: boolean, logger?: LoggingContext): Promise<{status: "ok"} | {status: "failed", reason: string}>
 
     setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void>
 }

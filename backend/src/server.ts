@@ -60,7 +60,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService })
     const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, governanceService,wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
-    const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService })
+    const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService, idleQuestsService })
     
     // Soon to be deprecated
     //await loadQuestModuleModels(database)
