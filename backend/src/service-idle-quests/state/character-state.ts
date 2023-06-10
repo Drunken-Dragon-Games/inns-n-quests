@@ -1,9 +1,10 @@
-import { DataTypes, Model, Op, Sequelize, Transaction } from "sequelize"
+import { DataTypes, Model, Op, QueryTypes, Sequelize, Transaction } from "sequelize"
 import * as am from "../../service-asset-management"
 import * as vm from "../game-vm"
 import { newAPS } from "../game-vm"
 import { Character } from "../models"
 import { syncData } from "./sync-util"
+import { TakenStakingQuestDB } from "./taken-staking-quest-state"
 
 export type ICharacterDB = Omit<
     vm.CharacterEntity & 
@@ -216,15 +217,24 @@ export class CharacterState {
      * @param act 
      * @returns 
      */
-    async updateSingleAssetActivityStatus(userId: string, assetRef: string, act: boolean): Promise<{status: "ok"} | {status: "failed", reason: string}> { 
+    async normalizeAssetStatus(userId: string, assetRef: string, database: Sequelize): Promise<{status: "ok"} | {status: "failed", reason: string}> { 
         try {
             // fetch the matching assets
             const matchingAssets = await CharacterDB.findAll({ where: { userId, assetRef } });
     
             // only update if there's exactly one matching asset
             if (matchingAssets.length === 1) {
-                await CharacterDB.update({ inActivity: act }, { where: { userId, assetRef } });
-                return { status: 'ok' };
+                const entityId= matchingAssets[0].entityId
+                const [results, metadata] = await database.query(
+                    'SELECT * FROM "idle_quests_staking_taken_quests" WHERE "partyIds" @> ARRAY[:entityId]::uuid[]',
+                    { replacements: { entityId }, type: QueryTypes.SELECT })
+                  
+                  if (results) {
+                    return {status: "failed", reason: "Character is in a least one staking quest"}
+                  } else {
+                    await CharacterDB.update({ inActivity: false }, { where: { userId, assetRef } });
+                    return { status: 'ok' }
+                  }
             } else if (matchingAssets.length < 1) {
                 return { status: 'failed', reason: 'No matching assets found.' };
             } else {
