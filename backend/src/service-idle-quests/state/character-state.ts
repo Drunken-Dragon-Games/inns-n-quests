@@ -206,6 +206,20 @@ export class CharacterState {
         return adventurers.map(makeCharacter(this.objectBuilder))
     }
 
+    private async updateIfNotOnMission(entityId: string, userId: string, asset: {ctype: "ref", assetRef: string} | {ctype: "id", assetId: string}, database: Sequelize): Promise<{status: "ok"} | {status: "failed", reason: string}> {
+        const [results, metadata] = await database.query(
+            'SELECT * FROM "idle_quests_staking_taken_quests" WHERE "partyIds" @> ARRAY[:entityId]::uuid[]',
+            { replacements: { entityId }, type: QueryTypes.SELECT })
+    
+        if (results) {
+            return {status: "failed", reason: `Character is in staking quest ${JSON.stringify(results, null, 4)}`}
+        } else {
+            let whereClause = asset.ctype === "ref" ? { userId, assetRef: asset.assetRef } : { userId, entityId}
+            await CharacterDB.update({ inActivity: false }, { where: whereClause })
+            return { status: 'ok' }
+        }
+    }
+    
     /**
      * For admin use through kilia Dev
      * Forces state on Asset if userId owns exaclty one matching AsssetRef, 
@@ -217,35 +231,62 @@ export class CharacterState {
      * @param act 
      * @returns 
      */
-    async normalizeAssetStatus(userId: string, assetRef: string, database: Sequelize): Promise<{status: "ok"} | {status: "failed", reason: string}> { 
+    async normalizeAssetStatus(userId: string, asset:{ctype: "ref", assetRef: string} | {ctype: "id", assetId: string}, database: Sequelize): Promise<{status: "ok"} | {status: "failed", reason: string}> { 
         try {
-            // fetch the matching assets
-            const matchingAssets = await CharacterDB.findAll({ where: { userId, assetRef } });
+            if (asset.ctype === "ref") {
+                const matchingAssets = await CharacterDB.findAll({ where: { userId, assetRef: asset.assetRef } })
     
-            // only update if there's exactly one matching asset
-            if (matchingAssets.length === 1) {
-                const entityId= matchingAssets[0].entityId
-                const [results, metadata] = await database.query(
-                    'SELECT * FROM "idle_quests_staking_taken_quests" WHERE "partyIds" @> ARRAY[:entityId]::uuid[]',
-                    { replacements: { entityId }, type: QueryTypes.SELECT })
-                  
-                  if (results) {
-                    return {status: "failed", reason: "Character is in a least one staking quest"}
-                  } else {
-                    await CharacterDB.update({ inActivity: false }, { where: { userId, assetRef } });
-                    return { status: 'ok' }
-                  }
-            } else if (matchingAssets.length < 1) {
-                return { status: 'failed', reason: 'No matching assets found.' };
+                if (matchingAssets.length === 1) {
+                    return await this.updateIfNotOnMission(matchingAssets[0].entityId, userId, asset, database)
+                } else if (matchingAssets.length < 1) {
+                    return { status: 'failed', reason: 'No matching assets found.' }
+                } else {
+                    return { status: 'failed', reason: 'More than one matching asset found.' }
+                }
             } else {
-                return { status: 'failed', reason: 'More than one matching asset found.' };
+                const matchingAsset = await CharacterDB.findByPk(asset.assetId)
+    
+                if (!matchingAsset) {
+                    return { status: 'failed', reason: 'No matching assets found.' }
+                } else {
+                    return await this.updateIfNotOnMission(matchingAsset.entityId, userId, asset, database)
+                }
             }
         } catch (error) {
-            // handle the error as you see fit
-            console.error(error);
-            return { status: 'failed', reason: 'An error occurred during the operation.' };
+            return { status: 'failed', reason: `An error occurred during the operation. ${JSON.stringify(error, null, 4)}` }
         }
     }
+    
+
+    async removeQuest(userId: string, takenQuestId: string, transaction: Transaction): Promise<{status: "ok", missionParty: string[] ,orphanCharacters: string[]} | {status: "failed", reason: string}>{
+        const badQuest = await TakenStakingQuestDB.findByPk(takenQuestId)
+        if (!badQuest) return {status: "failed", reason: "could not find takenQuestId"}
+        if(badQuest.userId !== userId) return {status: "failed", reason: "Quest does not belog to user"}
+        const partyIds = badQuest.partyIds
+        const orphanCharacters: string[] = []
+        try {
+            await Promise.all(partyIds.map(async (characterId) => {
+                const character = await CharacterDB.findByPk(characterId)
+                if(character) {
+                    character.inActivity = false
+                    await character.save({ transaction })
+                }
+                else {
+                    orphanCharacters.push(characterId)
+                }
+            }))
+
+            await badQuest.destroy({transaction})
+            await transaction.commit()
+
+            return {status: "ok", missionParty:partyIds ,orphanCharacters}
+
+        }catch (error) {
+            await transaction.rollback()
+            return {status: "failed", reason: JSON.stringify(error)}
+        }
+    }
+
     
 
     async setXP(characters: { entityId: string, xpAPS: vm.APS }[], transaction?: Transaction): Promise<void> {
