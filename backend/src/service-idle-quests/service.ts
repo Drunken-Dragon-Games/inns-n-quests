@@ -397,7 +397,12 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         await SectorState.setPlayerInnState(userId, name, objectLocations)
     }
 
-    async normalizeSingleAssetStatus(userId: string, assetRef: string, logger?: LoggingContext | undefined): Promise<{status: "ok"} | {status: "failed", reason: string}> {
-        return this.characterState.normalizeAssetStatus(userId, assetRef, this.database)
+    async normalizeSingleAssetStatus(userId: string, asset:{ctype: "ref", assetRef: string} | {ctype: "id", assetId: string}, logger?: LoggingContext | undefined): Promise<{status: "ok"} | {status: "failed", reason: string}> {
+        return this.characterState.normalizeAssetStatus(userId, asset, this.database)
+    }
+
+    async deleteStakingQuest(userId: string, takenQuestId: string): Promise<{ status: "ok"; missionParty: string[]; orphanCharacters: string[]; } | { status: "failed"; reason: string; }> {
+        const transaction = await this.database.transaction()
+        return this.characterState.removeQuest(userId, takenQuestId, transaction)
     }
 }
