@@ -336,14 +336,33 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else if (subcommand == "get-server-id") {
             return await this.replyMessage(message, (this.configCache[message.guildId!]).serverId)
         }
-        else if (subcommand == "normalize-single-asset") {
+        else if (subcommand == "normalize-single-asset-by-ref") {
             const [userId, assetRef] = messagesDSL.getArguments(message).split(" ")
 
             if (!userId || !assetRef ) return this.replyMessage(message, "could not get all parameters")
 
-            const result = await this.idleQuestService.normalizeSingleAssetStatus(userId, assetRef)
-            return this.replyMessage(message,  JSON.stringify(result, null, 4))
+            const result = await this.idleQuestService.normalizeSingleAssetStatus(userId, {ctype: "ref", assetRef})
+            return this.replyMessage(message,  result.status == "ok" ? "Status succesfully updated" : `Could not update ${result.reason}`)
 
+        }
+        else if (subcommand == "normalize-single-asset-by-id") {
+            const [userId, assetId] = messagesDSL.getArguments(message).split(" ")
+
+            if (!userId || !assetId ) return this.replyMessage(message, "could not get all parameters")
+
+            const result = await this.idleQuestService.normalizeSingleAssetStatus(userId, {ctype: "id", assetId})
+            return this.replyMessage(message,  result.status == "ok" ? "Status succesfully updated" : `Could not update ${result.reason}`)
+
+        }
+        else if (subcommand == "delete-quest"){
+            const [userId, takenQuestId] = messagesDSL.getArguments(message).split(" ")
+            if (!userId || !takenQuestId ) return this.replyMessage(message, "could not get all parameters")
+            const result = await this.idleQuestService.deleteStakingQuest(userId, takenQuestId)
+            return this.replyMessage(message,  result.status == "ok" ? 
+            `Succesfully deleted quest that had a party of 
+            ${JSON.stringify(result.missionParty)}
+            leaving ${result.orphanCharacters.length > 0 ? JSON.stringify(result.orphanCharacters) : "0"} assets in need of normalization` : 
+            `Could not update ${result.reason}`)
         }
         else if (subcommand == "help"){
             const helpMessage = `
@@ -355,8 +374,14 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         
         *total-users* : Returns the total number of users in the system.
 
-        *normalize-single-asset <userId> <assetRef> * : Checks whether the specified asset for a user is in a quest. 
+        *normalize-single-asset-by-ref <userId> <assetRef> * : Checks whether the specified asset for a user is in a quest. 
             If not, it resets the asset's activity status to false.
+
+        *normalize-single-asset-by-id <userId> <entityId> * : Checks whether the specified asset for a user is in a quest. 
+            If not, it resets the asset's activity status to false.
+        
+        *delete-quest <userId> <takenQuestId> * : removes a Quest from the DB seting the party memebers activity to false, returns an array of entityId.
+            If needed also retuns array of orphaned entitiesIds that could not be found on the Database
         
         *help* : Provides a list of available commands and a description of their function.
         

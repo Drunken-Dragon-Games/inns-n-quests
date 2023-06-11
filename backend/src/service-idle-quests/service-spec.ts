@@ -36,7 +36,9 @@ export interface IdleQuestsService {
 
     grantTestInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult>
     
-    normalizeSingleAssetStatus(userId: string, assetRef: string, logger?: LoggingContext): Promise<{status: "ok"} | {status: "failed", reason: string}>
+    normalizeSingleAssetStatus(userId: string, asset:{ctype: "ref", assetRef: string} | {ctype: "id", assetId: string}, logger?: LoggingContext): Promise<{status: "ok"} | {status: "failed", reason: string}>
+
+    deleteStakingQuest(userId: string, takenQuestId: string): Promise<{status: "ok", missionParty: string[] ,orphanCharacters: string[]} | {status: "failed", reason: string}>
 
     setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void>
 }
