@@ -208,7 +208,7 @@ export class CharacterState {
 
     private async updateIfNotOnMission(entityId: string, userId: string, asset: {ctype: "ref", assetRef: string} | {ctype: "id", assetId: string}, database: Sequelize): Promise<{status: "ok"} | {status: "failed", reason: string}> {
         const [results, metadata] = await database.query(
-            'SELECT * FROM "idle_quests_staking_taken_quests" WHERE "partyIds" @> ARRAY[:entityId]::uuid[]',
+            'SELECT * FROM "idle_quests_staking_taken_quests" WHERE "partyIds" @> ARRAY[:entityId]::uuid[] AND "claimedAt" IS NULL AND "outcome" IS NULL',
             { replacements: { entityId }, type: QueryTypes.SELECT })
     
         if (results) {
