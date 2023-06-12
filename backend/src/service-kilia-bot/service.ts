@@ -354,14 +354,13 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             return this.replyMessage(message,  result.status == "ok" ? "Status succesfully updated" : `Could not update ${result.reason}`)
 
         }
-        else if (subcommand == "delete-quest"){
+        else if (subcommand == "fail-quest"){
             const [userId, takenQuestId] = messagesDSL.getArguments(message).split(" ")
             if (!userId || !takenQuestId ) return this.replyMessage(message, "could not get all parameters")
-            const result = await this.idleQuestService.deleteStakingQuest(userId, takenQuestId)
+            const result = await this.idleQuestService.failStakingQuest(userId, takenQuestId)
             return this.replyMessage(message,  result.status == "ok" ? 
-            `Succesfully deleted quest that had a party of 
-            ${JSON.stringify(result.missionParty)}
-            leaving ${result.orphanCharacters.length > 0 ? JSON.stringify(result.orphanCharacters) : "0"} assets in need of normalization` : 
+            `Succesfully failed quest that had a party of 
+            ${JSON.stringify(result.missionParty)}` : 
             `Could not update ${result.reason}`)
         }
         else if (subcommand == "help"){
@@ -380,8 +379,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         *normalize-single-asset-by-id <userId> <entityId> * : Checks whether the specified asset for a user is in a quest. 
             If not, it resets the asset's activity status to false.
         
-        *delete-quest <userId> <takenQuestId> * : removes a Quest from the DB seting the party memebers activity to false, returns an array of entityId.
-            If needed also retuns array of orphaned entitiesIds that could not be found on the Database
+        *fail-quest <userId> <takenQuestId> * : Sets a Quest outcome to failed and sets the party memebers activity to false, returns an array of the party entityIds.
+            If needed also retuns array of orphaned entitiesIds that could not be found on the Database.
         
         *help* : Provides a list of available commands and a description of their function.
         

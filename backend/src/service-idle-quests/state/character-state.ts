@@ -208,7 +208,7 @@ export class CharacterState {
 
     private async updateIfNotOnMission(entityId: string, userId: string, asset: {ctype: "ref", assetRef: string} | {ctype: "id", assetId: string}, database: Sequelize): Promise<{status: "ok"} | {status: "failed", reason: string}> {
         const [results, metadata] = await database.query(
-            'SELECT * FROM "idle_quests_staking_taken_quests" WHERE "partyIds" @> ARRAY[:entityId]::uuid[]',
+            'SELECT * FROM "idle_quests_staking_taken_quests" WHERE "partyIds" @> ARRAY[:entityId]::uuid[] AND "claimedAt" IS NULL AND "outcome" IS NULL',
             { replacements: { entityId }, type: QueryTypes.SELECT })
     
         if (results) {
@@ -257,38 +257,6 @@ export class CharacterState {
         }
     }
     
-
-    async removeQuest(userId: string, takenQuestId: string, transaction: Transaction): Promise<{status: "ok", missionParty: string[] ,orphanCharacters: string[]} | {status: "failed", reason: string}>{
-        const badQuest = await TakenStakingQuestDB.findByPk(takenQuestId)
-        if (!badQuest) return {status: "failed", reason: "could not find takenQuestId"}
-        if(badQuest.userId !== userId) return {status: "failed", reason: "Quest does not belog to user"}
-        const partyIds = badQuest.partyIds
-        const orphanCharacters: string[] = []
-        try {
-            await Promise.all(partyIds.map(async (characterId) => {
-                const character = await CharacterDB.findByPk(characterId)
-                if(character) {
-                    character.inActivity = false
-                    await character.save({ transaction })
-                }
-                else {
-                    orphanCharacters.push(characterId)
-                }
-            }))
-
-            await badQuest.destroy({transaction})
-            await transaction.commit()
-
-            return {status: "ok", missionParty:partyIds ,orphanCharacters}
-
-        }catch (error) {
-            await transaction.rollback()
-            return {status: "failed", reason: JSON.stringify(error)}
-        }
-    }
-
-    
-
     async setXP(characters: { entityId: string, xpAPS: vm.APS }[], transaction?: Transaction): Promise<void> {
         await CharacterDB.bulkCreate(characters, { updateOnDuplicate: ["xpAPS"], transaction })
     }
