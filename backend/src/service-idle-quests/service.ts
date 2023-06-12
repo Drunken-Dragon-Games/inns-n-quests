@@ -256,9 +256,9 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         const missing = adventurers.map(a => a.entityId).filter(item => takenQuest.partyIds.indexOf(item) < 0)
         // Check all adventurers are still in the inventory
         if (missing.length > 0) {
-            await transaction.rollback()
+            await this.takenQuestState.claimQuest(takenQuest.takenQuestId, this.calendar.now(), {ctype: "failure-outcome"}, transaction)
+            await transaction.commit()
             return { status: "missing-adventurers", missing }
-            //TODO: if adventures were transferd then the quest will never be finshed, we need immediately fail the quest
         }
         const configuration = this.rules.stakingQuest.questConfiguration(takenQuest.availableQuest, adventurers)
         const duration = configuration.configurations[configuration.bestIndex].satisfactionInfo.requirementInfo.duration
