@@ -258,6 +258,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         if (missing.length > 0) {
             await transaction.rollback()
             return { status: "missing-adventurers", missing }
+            //TODO: if adventures were transferd then the quest will never be finshed, we need immediately fail the quest
         }
         const configuration = this.rules.stakingQuest.questConfiguration(takenQuest.availableQuest, adventurers)
         const duration = configuration.configurations[configuration.bestIndex].satisfactionInfo.requirementInfo.duration
@@ -401,8 +402,25 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         return this.characterState.normalizeAssetStatus(userId, asset, this.database)
     }
 
-    async failStakingQuest(userId: string, takenQuestId: string): Promise<{ status: "ok"; missionParty: string[]; orphanCharacters: string[]; } | { status: "failed"; reason: string; }> {
+    async failStakingQuest(userId: string, takenQuestId: string): Promise<{ status: "ok", missionParty: string[]} | { status: "failed", reason: string; }> {
+        const takenQuest = await this.takenQuestState.userTakenQuest(userId, takenQuestId)
+
+        if (!takenQuest) return { status: "failed", reason:"unknown-quest" }
+        if (takenQuest.claimedAt) return { status: "failed", reason: "quest-already-claimed" }
+
         const transaction = await this.database.transaction()
-        return this.characterState.failQuest(userId, takenQuestId, transaction)
+        try{
+            const adventurers = await this.characterState.unsetInChallenge(userId, takenQuest.partyIds, transaction)
+
+            await this.takenQuestState.claimQuest(takenQuest.takenQuestId, this.calendar.now(), {ctype: "failure-outcome"}, transaction)
+
+            await transaction.commit()
+
+            return {status: "ok", missionParty: adventurers.map((adventurer) => adventurer.entityId)}
+        }catch (e:any){
+            await transaction.rollback()
+            return {status: "failed", reason: e.message ?? JSON.stringify(e, null, 4)}
+        }
+        
     }
 }
