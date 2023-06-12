@@ -8,6 +8,7 @@
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
     "dev:mod": "nodemon --exec ts-node -- --experimental-specifier-resolution=node --esm src/server.ts",
+    "start:mod": "node  --experimental-specifier-resolution=node dist/server.js",
     "gen:test-registry": "ts-node src/gen-test-registry.ts",
     "db:start": "docker run -d -e POSTGRES_DB=service_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -p 5432:5432 --health-cmd pg_isready --health-interval 1s --health-timeout 5s --health-retries 30 postgres:14.5",
     "ls": "ls",
