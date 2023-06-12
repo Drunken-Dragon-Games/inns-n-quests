@@ -401,8 +401,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         return this.characterState.normalizeAssetStatus(userId, asset, this.database)
     }
 
-    async deleteStakingQuest(userId: string, takenQuestId: string): Promise<{ status: "ok"; missionParty: string[]; orphanCharacters: string[]; } | { status: "failed"; reason: string; }> {
+    async failStakingQuest(userId: string, takenQuestId: string): Promise<{ status: "ok"; missionParty: string[]; orphanCharacters: string[]; } | { status: "failed"; reason: string; }> {
         const transaction = await this.database.transaction()
-        return this.characterState.removeQuest(userId, takenQuestId, transaction)
+        return this.characterState.failQuest(userId, takenQuestId, transaction)
     }
 }

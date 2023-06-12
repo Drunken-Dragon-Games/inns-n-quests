@@ -258,7 +258,7 @@ export class CharacterState {
     }
     
 
-    async removeQuest(userId: string, takenQuestId: string, transaction: Transaction): Promise<{status: "ok", missionParty: string[] ,orphanCharacters: string[]} | {status: "failed", reason: string}>{
+    async failQuest(userId: string, takenQuestId: string, transaction: Transaction): Promise<{status: "ok", missionParty: string[] ,orphanCharacters: string[]} | {status: "failed", reason: string}>{
         const badQuest = await TakenStakingQuestDB.findByPk(takenQuestId)
         if (!badQuest) return {status: "failed", reason: "could not find takenQuestId"}
         if(badQuest.userId !== userId) return {status: "failed", reason: "Quest does not belog to user"}
@@ -275,8 +275,11 @@ export class CharacterState {
                     orphanCharacters.push(characterId)
                 }
             }))
+            
+            badQuest.outcome = {"ctype": "failure-outcome"}
+            badQuest.claimedAt = new Date()
 
-            await badQuest.destroy({transaction})
+            await badQuest.save({transaction})
             await transaction.commit()
 
             return {status: "ok", missionParty:partyIds ,orphanCharacters}
