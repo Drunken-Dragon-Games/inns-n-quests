@@ -360,8 +360,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             const result = await this.idleQuestService.failStakingQuest(userId, takenQuestId)
             return this.replyMessage(message,  result.status == "ok" ? 
             `Succesfully failed quest that had a party of 
-            ${JSON.stringify(result.missionParty)}
-            leaving ${result.orphanCharacters.length > 0 ? JSON.stringify(result.orphanCharacters) : "0"} assets in need of normalization` : 
+            ${JSON.stringify(result.missionParty)}` : 
             `Could not update ${result.reason}`)
         }
         else if (subcommand == "help"){

@@ -38,7 +38,7 @@ export interface IdleQuestsService {
     
     normalizeSingleAssetStatus(userId: string, asset:{ctype: "ref", assetRef: string} | {ctype: "id", assetId: string}, logger?: LoggingContext): Promise<{status: "ok"} | {status: "failed", reason: string}>
 
-    failStakingQuest(userId: string, takenQuestId: string): Promise<{status: "ok", missionParty: string[] ,orphanCharacters: string[]} | {status: "failed", reason: string}>
+    failStakingQuest(userId: string, takenQuestId: string): Promise<{ status: "ok", missionParty: string[]} | { status: "failed", reason: string; }>
 
     setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void>
 }
