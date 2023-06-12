@@ -224,6 +224,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
     async commandConfig(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) return
+        if(!interaction.memberPermissions?.has("Administrator")) return
+
         const subcommand = interaction.options.getSubcommand()
     
         if (subcommand === "quests-channel") return await this.reply(interaction, await this.setChannel(interaction, "questsNotificationChannelId"))
