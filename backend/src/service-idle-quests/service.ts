@@ -20,6 +20,12 @@ import { EvenstatsService } from "../service-evenstats"
 import { Calendar } from "../tools-utils/calendar.js"
 import { StakingQuestRegistry } from "./state/staking-quests-registry.js"
 
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+// Get the directory of the current module.
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 import * as vm from "./game-vm"
 import { testEncounter } from "./game-vm"
 import { AvailableStakingQuestState } from "./state/available-staking-quests-state.js"

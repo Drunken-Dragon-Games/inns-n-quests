@@ -17,6 +17,12 @@ import * as messagesDSL from "./discord-messages-dsl.js"
 import * as ballotDSL from "./ballots/ballot-dsl.js"
 import { ConfirmMessagge, registerBallotType } from "./models.js"
 
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+// Get the directory of the current module.
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 
 export type KiliaBotServiceDependencies = {
     database: Sequelize

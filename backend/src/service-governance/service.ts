@@ -5,6 +5,12 @@ import { buildMigrator } from "../tools-database"
 import { GovernanceService } from "./service-spec.js"
 import dotenv from "dotenv"
 
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+// Get the directory of the current module.
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 import * as models from "./models.js"
 import * as ballotDB from "./ballots/ballots-db.js"
 

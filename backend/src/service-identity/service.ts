@@ -11,6 +11,12 @@ import { connectToDB, DBConfig, buildMigrator } from "../tools-database"
 import { IdentityServiceLogging } from "./logging.js"
 import { config, HealthStatus } from "../tools-utils"
 
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+// Get the directory of the current module.
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 import { 
     CreateNonceResult, Credentials, AuthenticationResult, RegistrationResult, AssociationResult, 
     RefreshResult, ListSessionsResult, SignOutResult, ResolveUserResult, ResolveSesionResult, 

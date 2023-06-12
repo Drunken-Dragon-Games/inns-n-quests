@@ -13,6 +13,12 @@ import path from "path"
 import { Umzug } from "umzug"
 import { AssetManagementServiceLogging } from "./logging.js"
 
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+// Get the directory of the current module.
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 import { 
     ClaimResponse, ClaimStatusResponse, ClaimerInfo, GrantResponse, HealthStatus, 
     ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitAuthTransactionResult, SubmitClaimSignatureResponse, UserClaimsResponse 
