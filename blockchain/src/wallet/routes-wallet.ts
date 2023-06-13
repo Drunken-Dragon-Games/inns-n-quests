@@ -15,7 +15,9 @@ export const walletRoutes = () => {
         generateHttpResponse(result, response)
     }))
 
+    // deno-lint-ignore no-explicit-any
     router.use((err: any, request: Request, response: Response, _next: NextFunction) => {
+        console.error(err, request.originalUrl, request.method)
         console.error(err.message, { stack: err.stack })
         response.status(500).send("Internal server error.")
     })
@@ -23,13 +25,11 @@ export const walletRoutes = () => {
     return router
 }
 
-const generateHttpResponse = (resolution: Resolution<unknown, unknown>, response: Response) => {
-    if (resolution.status === 'failed') {
-        const logMessage = `Request failed: ${resolution.reason || 'Unknown reason'}`
-        console.error(logMessage)
-        const statusCode = resolution.code || (resolution.reason ? 409 : 500)
-        response.status(statusCode).json(resolution)
+const generateHttpResponse = (result: Resolution<unknown, unknown>, response: Response) => {
+    if (result.status === 'failed') {
+        console.error(`Request failed: ${result.reason || 'Unknown reason'}`)
+        response.status(result.code || 409).json(result)
     } else {
-        response.json(resolution)
+        response.status(200).json(result)
     }
 }
