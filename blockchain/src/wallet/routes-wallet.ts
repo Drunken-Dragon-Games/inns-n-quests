@@ -2,17 +2,16 @@ import {Router, Response, NextFunction} from "npm:express@4.18.2";
 import { Request } from "npm:express-jwt@8.4.1"
 import { requestCatchError } from "../catch-error.ts";
 
-import * as lucidDsl from "./lucid-dsl.ts"
-import { Lucid } from "https://deno.land/x/lucid@0.10.6/mod.ts";
+import {CardanoDsl} from "./lucid-dsl.ts"
 import { Resolution } from "../utypes.ts";
 
-export const walletRoutes = () => {
+export const walletRoutes = (cardanoDSL: CardanoDsl) => {
     const router = Router() 
 
     router.post("/selfTx", requestCatchError(async (request: Request, response: Response) => {
-        const lucidInstance: Lucid = request.body.lucidInstance
-        const result = await lucidDsl.buildSelfTx(lucidInstance)
-        generateHttpResponse(result, response)
+        const {stakeAddress} = request.body
+        const txHash = await cardanoDSL.buildSelfTx(stakeAddress)
+        generateHttpResponse(txHash, response)
     }))
 
     // deno-lint-ignore no-explicit-any
