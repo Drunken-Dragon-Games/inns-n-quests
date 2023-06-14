@@ -42,8 +42,8 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getAssociationTxHash(stakeAddress: string): Promise<{status: "succeded", value: string} | {status: "failed", reason: string}>{
-        const result = await blockChainRequest("POST", "/selfTx", {stakeAddress})
+    async getAssociationTxHash(address: string): Promise<{status: "succeded", value: string} | {status: "failed", reason: string}>{
+        const result = await blockChainRequest("POST", "/selfTx", {address})
         return result.data
     },
 

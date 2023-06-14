@@ -9,8 +9,8 @@ export const walletRoutes = (cardanoDSL: CardanoDsl) => {
     const router = Router() 
 
     router.post("/selfTx", requestCatchError(async (request: Request, response: Response) => {
-        const {stakeAddress} = request.body
-        const txHash = await cardanoDSL.buildSelfTx(stakeAddress)
+        const {address} = request.body
+        const txHash = await cardanoDSL.buildSelfTx(address)
         generateHttpResponse(txHash, response)
     }))
 

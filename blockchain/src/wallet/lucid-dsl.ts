@@ -13,13 +13,19 @@ export class CardanoDsl {
         return new CardanoDsl(lucid)
     }
 
-    buildSelfTx = async (stakeAddress: string): Promise<Resolution<string>> => {
+    buildSelfTx = async (address: string): Promise<Resolution<string>> => {
         try{
-            this.lucidInstance.selectWalletFrom({ address: stakeAddress })
-            const txHash = await this.lucidInstance.newTx().payToAddress(stakeAddress, {lovelace: BigInt(1000000)}).complete()
+            this.lucidInstance.selectWalletFrom({ address })
+            console.log(`coudl initiate lucid`)
+            const tx = this.lucidInstance.newTx().payToAddress(address, {lovelace: BigInt(1000000)})
+            console.log(`generated tx`)
+            const completTx = await tx.complete()
+            console.log(`completed tx`)
+            const txHash = completTx.toString()
+            /* const txHash = await tx.toString() */
             console.log("backend geenratred this tx hash")
-            console.log(txHash.toString())
-            return succed(txHash.toString())
+            console.log(txHash)
+            return succed(txHash)
         }
         catch(e){
             return fail(e.message ?? JSON.stringify(e, null, 4))

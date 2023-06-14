@@ -1,5 +1,5 @@
 {
     "tasks": {
-        "dev": "deno run -A ./src/server.ts"
+        "dev": "denon run -A ./src/server.ts"
     }
 }

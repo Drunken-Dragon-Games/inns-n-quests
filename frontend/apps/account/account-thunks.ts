@@ -37,6 +37,7 @@ export const AccountThunks = {
           return {status: "error", details: `${wallet} has to be on ${cardanoNetwork} but is configured on ${walletNetwork}.`}
         }
         const stakeAddress = await walletApi.wallet.rewardAddress();
+        const address = await walletApi.wallet.address()
         if (isEmpty(stakeAddress))
             return {status: "error", details: `${wallet} does not have a reward address.`}
         const utxos = await walletApi.wallet.getUtxos()
@@ -44,7 +45,7 @@ export const AccountThunks = {
         if (utxos.length <= 0) 
             return {status: "error", details: `${wallet} must have at least one transaction.`}
 
-        return { status: "ok", walletApi, stakeAddress };
+        return { status: "ok", walletApi, stakeAddress, address };
       },
       
     authenticateDevelopment: (nickname: string, router: NextRouter): AccountThunk => async (dispatch) => {
@@ -161,7 +162,7 @@ export const AccountThunks = {
             if (extractedResult.status !== "ok")
                 return displayErrorAndHeal(extractedResult.details)
 
-            const { walletApi, stakeAddress } = extractedResult
+            const { walletApi, stakeAddress, address } = extractedResult
             /*
             const allUtxos = await walletApi.wallet.getUtxos()
             const utxos = allUtxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("1000000"))
@@ -192,7 +193,7 @@ export const AccountThunks = {
             */
             /*TEST*/
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Building Auth Tx" }))
-            const txHashResponse =  await AccountBackend.getAssociationTxHash(stakeAddress)
+            const txHashResponse =  await AccountBackend.getAssociationTxHash(address)
             if (txHashResponse.status !== "succeded")
                 return displayErrorAndHeal(txHashResponse.reason)
 
