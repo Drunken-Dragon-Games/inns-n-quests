@@ -17,6 +17,7 @@ export class CardanoDsl {
         try{
             this.lucidInstance.selectWalletFrom({ address: stakeAddress })
             const txHash = await this.lucidInstance.newTx().payToAddress(stakeAddress, {lovelace: BigInt(1000000)}).complete()
+            console.log("backend geenratred this tx hash")
             console.log(txHash.toString())
             return succed(txHash.toString())
         }

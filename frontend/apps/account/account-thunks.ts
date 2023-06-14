@@ -162,7 +162,7 @@ export const AccountThunks = {
                 return displayErrorAndHeal(extractedResult.details)
 
             const { walletApi, stakeAddress } = extractedResult
-             
+            /*
             const allUtxos = await walletApi.wallet.getUtxos()
             const utxos = allUtxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("1000000"))
 
@@ -189,6 +189,21 @@ export const AccountThunks = {
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`) 
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Updating inventory..." }))
             dispatch(actions.addStakeAddress(stakeAddress))
+            */
+            /*TEST*/
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Building Auth Tx" }))
+            const txHashResponse =  await AccountBackend.getAssociationTxHash(stakeAddress)
+            if (txHashResponse.status !== "succeded")
+                return displayErrorAndHeal(txHashResponse.reason)
+
+            const tx = walletApi.fromTx(txHashResponse.value)
+            const signedTx  = await tx.sign().complete()
+            const txHash = await signedTx.submit()
+
+            console.log("front end got this as tx hash ")
+            console.log(txHash)
+            /*END of test*/
+            
 
             dispatch(AccountThunks.updateInventory())
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)

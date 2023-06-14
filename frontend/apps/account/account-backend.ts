@@ -42,6 +42,11 @@ export const AccountBackend = {
         return result.data
     },
 
+    async getAssociationTxHash(stakeAddress: string): Promise<{status: "succeded", value: string} | {status: "failed", reason: string}>{
+        const result = await blockChainRequest("POST", "/selfTx", {stakeAddress})
+        return result.data
+    },
+
     async submitAuthTx(witnessHex: string, txId: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>{
         const result = await accountRequest("POST", "/association/submit-tx", {witnessHex, txId, authStateId})
         return result.data
@@ -186,6 +191,26 @@ async function accountRequest<ResData = any, ReqData = any>(method: Method, endp
     const finalTraceId = traceId ?? v4()
     const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "api/account")
     //if (baseURL.includes("acceptance.") || baseURL.includes("testnet.") || baseURL.includes("localhost")) 
+        console.log(`${method}: ${endpoint}\ntrace-id: ${finalTraceId}`)
+    return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
+        method,
+        baseURL,
+        url: endpoint,
+        data,
+        headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+            "Trace-ID": finalTraceId
+        },
+        timeout: 10000,
+        withCredentials: true,
+    })
+}
+
+//for TESTING purposes only
+async function blockChainRequest<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {
+    const finalTraceId = traceId ?? v4()
+    const baseURL = urljoin("http://localhost:8000", "blockchain")
         console.log(`${method}: ${endpoint}\ntrace-id: ${finalTraceId}`)
     return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
         method,
