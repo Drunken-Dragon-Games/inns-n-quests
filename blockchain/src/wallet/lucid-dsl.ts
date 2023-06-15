@@ -23,8 +23,12 @@ export class CardanoDsl {
             const validTo = now + validityRange
 
             const currentSlot = this.lucidInstance.utils.unixTimeToSlot(now)
-
-            const validFromSlot = currentSlot - (validityRange / 10000)
+            
+            //you might be wondering
+            //were did the 540 come from
+            //so do i
+            //but every tx ive tested has come with an actual invalid_before slot that is off by 540
+            const validFromSlot = currentSlot - (validityRange / 10000) - 540
             const validToSlot = currentSlot + (validityRange/ 1000)
             const tx = await this.lucidInstance.newTx()
                 .payToAddress(address, {lovelace: BigInt(1000000)})
