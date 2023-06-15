@@ -2,6 +2,8 @@ import { Lucid, Blockfrost } from "https://deno.land/x/lucid@0.10.6/mod.ts"
 import { Resolution, succed, fail, Network } from "../utypes.ts"
 import { stringOrError } from "../utils.ts";
 
+const validityRange = 1000 * 60 * 10
+
 export class CardanoDsl {
     constructor(public lucidInstance: Lucid){}
 
@@ -16,15 +18,24 @@ export class CardanoDsl {
     buildSelfTx = async (address: string): Promise<Resolution<string>> => {
         try{
             this.lucidInstance.selectWalletFrom({ address })
-            console.log(`coudl initiate lucid`)
-            const tx = this.lucidInstance.newTx().payToAddress(address, {lovelace: BigInt(1000000)})
-            console.log(`generated tx`)
-            const completTx = await tx.complete()
-            console.log(`completed tx`)
-            const txHash = completTx.toString()
-            /* const txHash = await tx.toString() */
-            console.log("backend geenratred this tx hash")
-            console.log(txHash)
+            const now = Date.now()
+            const validFrom = now - validityRange
+            const validTo = now + validityRange
+
+            const currentSlot = this.lucidInstance.utils.unixTimeToSlot(now)
+
+            const validFromSlot = currentSlot - (validityRange / 10000)
+            const validToSlot = currentSlot + (validityRange/ 1000)
+            const tx = await this.lucidInstance.newTx()
+                .payToAddress(address, {lovelace: BigInt(1000000)})
+                .validFrom(validFrom)
+                .validTo(validTo)
+                .complete()
+            const txHash = tx.toString()
+
+            console.log({validFrom, validTo})
+            console.log({validFromSlot, validToSlot})
+
             return succed(txHash)
         }
         catch(e){
