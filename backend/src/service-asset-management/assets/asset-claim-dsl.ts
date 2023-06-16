@@ -41,6 +41,7 @@ export class AssetClaimDsl {
 		return AssetClaim.findAll({ where: { userId, unit }, limit: 5, offset: page && page * 5, order: [["createdAt", "DESC"]] })
 	}
 
+	//DEPRECATED
 	public async genAssoiateTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext ): Promise<GenAssosiateTxResult>{
 		try{
 			const txResult = await cardano.createAuthTransaction(stakeAddress, MinimalUTxOs, this.blockfrost, logger)
@@ -53,6 +54,7 @@ export class AssetClaimDsl {
 		
 	}
 
+	//DEPRECATED
 	public async submitAssoiateTx(witness: string, tx: string):Promise<Result<string, string>>{
 		try{
 			const knownDecoded = Transaction.from_bytes(Buffer.from(tx, "hex"))

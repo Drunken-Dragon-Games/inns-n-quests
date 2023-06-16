@@ -129,6 +129,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         }
     }
 
+    //DEPRECATED
     async createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext | undefined): Promise<SubmitClaimSignatureResponse> {
         const result = await this.claims.genAssoiateTx(stakeAddress, MinimalUTxOs, logger)
         if (result.ctype == "success") 
@@ -138,6 +139,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         }
     }
 
+    //DEPRECATED
     async submitAuthTransaction(witness: string, tx: string, logger?: LoggingContext | undefined): Promise<SubmitAuthTransactionResult> {
         const result = await this.claims.submitAssoiateTx(witness, tx)
         if (result.ctype !== "success") return {status: "invalid", reason: result.error}

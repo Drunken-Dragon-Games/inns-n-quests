@@ -105,14 +105,16 @@ export class AccountServiceDsl implements AccountService {
         return associateResponse
     }
 
-    async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[], logger?: LoggingContext): Promise<CreateAssociationTxResult> {
-            const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, utxos, logger)
-            if (txIdResult.status != "ok") return {status: "invalid", reason: txIdResult.reason}
+    async getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult> {
 
-            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, txIdResult.txId, logger)
+            //TODO: use the blockchain service
+            /* const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, address, logger)
+            if (txIdResult.status != "ok") return {status: "invalid", reason: txIdResult.reason} */
+
+            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, "txIdResult.txId", logger)
             if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
 
-            return { status: "ok", txId: txIdResult.txId, authStateId: authState.authStateId }
+            return { status: "ok", txId: "txIdResult.txId", authStateId: authState.authStateId }
     }
 
     async submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {

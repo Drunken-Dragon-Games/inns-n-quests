@@ -20,6 +20,7 @@ export interface AssetManagementService {
 
     claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, claimerInfo?: models.ClaimerInfo, logger?: LoggingContext): Promise<models.ClaimResponse>
 
+    //DEPRECATED
     createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse>
 
     submitAuthTransaction(witness: string, tx: string, logger?: LoggingContext): Promise<models.SubmitAuthTransactionResult>
