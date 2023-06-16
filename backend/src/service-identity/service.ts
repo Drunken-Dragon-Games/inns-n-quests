@@ -114,11 +114,12 @@ export class IdentityServiceDsl implements IdentityService {
         }
     }
 
-    async createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext): Promise<CreateAuthStateResult> {
+    async createAuthTxState(userId: string, stakeAddress: string, rawTransaction: string, validFromSlot: string, validToSlot: string, transferedAmmount: string, logger?: LoggingContext): Promise<CreateAuthStateResult> {
         try{
             if (!validateStakeAddress(stakeAddress, this.network)) return { status: "invalid", reason: "bad-address" }
-            const authStateId = await createAuthTxState(userId, stakeAddress, txId)
-            return {status:"ok", authStateId}
+            const authState = await createAuthTxState(userId, stakeAddress, rawTransaction, validFromSlot, validToSlot, transferedAmmount)
+            if (authState.status !== "ok") return { status: "invalid", reason: "could not comunicate wiht DB" }
+            return {status:"ok", authStateId: authState.authStateId}
         }catch(e: any){
             logger?.log.error(e.message ?? e)
             return { status: "invalid", reason: "could not comunicate wiht DB" }

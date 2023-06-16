@@ -34,11 +34,12 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
-    async createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext): Promise<models.CreateAuthStateResult> {
+    async createAuthTxState(userId: string, stakeAddress: string, rawTransaction: string, validFromSlot: string, validToSlot: string, transferedAmmount: string, logger?: LoggingContext): Promise<models.CreateAuthStateResult> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.info(`creating auth Tx for user ${userId} for stake address ${stakeAddress}`)
-        const response = await this.base.createAuthTxState(userId, stakeAddress, txId, logger)
-        serviceLogger?.info(`creating auth Tx status: ${response.status} for tx ${txId}`)
+        const response = await this.base.createAuthTxState(userId, stakeAddress, rawTransaction, validFromSlot, validToSlot, transferedAmmount, logger)
+        if (response.status !== "ok") serviceLogger?.error(`could not create authTx state reason: ${response.reason}`)
+        else serviceLogger?.info(`succesfully created Auth tx with id ${response.authStateId}`)
         return response
     }
 

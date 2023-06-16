@@ -64,7 +64,7 @@ export type ClaimResponse
     | { status: "invalid", reason: string }
 
 export type CreateAssociationTxResult
-    = { status: "ok", txId: string, authStateId: string }
+    = { status: "ok", rawTx: string, txInfoId: string }
     | { status: "invalid", reason: string }
 
 export type SubmitClaimSignatureResponse

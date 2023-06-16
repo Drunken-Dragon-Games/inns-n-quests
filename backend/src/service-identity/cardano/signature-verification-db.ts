@@ -30,7 +30,10 @@ export class TransactionVerificationState extends Model{
     declare stateId: string
     declare userId: string
     declare stakeAddress: string
-    declare txId: string
+    declare rawTransaction: string
+    declare validFromSlot: string
+    declare validToSlot: string
+    declare transferedAmmount: string
 }
 
 export const TransactionVerificationStateTableName = "identity_transaction_verification_states"
@@ -49,10 +52,22 @@ export const TransactionVerificationStateTableAttributes = {
         type: DataTypes.STRING,
         allowNull: false
     },
-    txId: {
+    rawTransaction: {
         type: DataTypes.TEXT,
-        allowNull: true
+        allowNull: false
     },
+    validFromSlot: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    validToSlot: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    transferedAmmount: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
 }
 
 export const configureSequelizeModel = (sequelize: Sequelize): void => {

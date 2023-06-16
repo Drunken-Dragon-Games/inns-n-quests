@@ -45,6 +45,7 @@
   "npm": {
     "specifiers": {
       "@types/express@4.17.15": "@types/express@4.17.15",
+      "cookie-parser@1.4.6": "cookie-parser@1.4.6",
       "cors@2.8.5": "cors@2.8.5",
       "express-jwt@8.4.1": "express-jwt@8.4.1",
       "express@4.18.2": "express@4.18.2"
@@ -174,8 +175,19 @@
         "integrity": "sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==",
         "dependencies": {}
       },
+      "cookie-parser@1.4.6": {
+        "integrity": "sha512-z3IzaNjdwUC2olLIB5/ITd0/setiaFMLYiZJle7xg5Fe9KWAceil7xszYfHHBtDFYLSgJduS2Ty0P1uJdPDJeA==",
+        "dependencies": {
+          "cookie": "cookie@0.4.1",
+          "cookie-signature": "cookie-signature@1.0.6"
+        }
+      },
       "cookie-signature@1.0.6": {
         "integrity": "sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==",
+        "dependencies": {}
+      },
+      "cookie@0.4.1": {
+        "integrity": "sha512-ZwrFkGJxUR3EIoXtO+yVE69Eb7KlixbaeAWfBQB9vVsNn/o+Yw69gBWSSDK825hQNdN+wF8zELf3dFNl/kxkUA==",
         "dependencies": {}
       },
       "cookie@0.5.0": {

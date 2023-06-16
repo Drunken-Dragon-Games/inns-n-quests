@@ -1,4 +1,4 @@
-import { BlockchainService, blockchainEnpoints, prefix } from "./service-spec"
+import { BlockchainService, blockchainEnpoints, servicePrefix } from "./service-spec"
 import { config } from "../tools-utils"
 import { AssosiationTxResponse, Endpoint, HealthStatus } from "./models"
 import axios, { AxiosResponse } from "axios"
@@ -29,17 +29,17 @@ export class BlockchainServiceDsl implements BlockchainService {
     }
 
     async getWalletAuthenticationSelfTx(address: string): Promise<AssosiationTxResponse> {
+        //TODO: test if error codes trigger an error and handle
         const response = await this.callImplementation(blockchainEnpoints.getWalletAuthenticationSelfTx, {address})
         return response.data as AssosiationTxResponse
     }
 
     private async callImplementation<ResData = any, ReqData = any>(endpoint: Endpoint, data?: ReqData): Promise<AxiosResponse<ResData>> {
-        const baseURL = new URL(`deno/${prefix}`, this.baseURL).href
-
+        const baseURL = new URL(`deno`, this.baseURL).href
         return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
             method: endpoint.method,
             baseURL,
-            url: endpoint.path,
+            url: `${servicePrefix}${endpoint.path}`,
             data,
             headers: {
                 "Content-Type": "application/json",

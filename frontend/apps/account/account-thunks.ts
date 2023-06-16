@@ -193,16 +193,17 @@ export const AccountThunks = {
             */
             /*TEST*/
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Building Auth Tx" }))
-            const txHashResponse =  await AccountBackend.getAssociationTxHash(address)
-            if (txHashResponse.status !== "succeded")
-                return displayErrorAndHeal(txHashResponse.reason)
+            const txResponse =  await AccountBackend.getRawAssociationTx(stakeAddress, address)
+            if (txResponse.status !== "ok")
+                return displayErrorAndHeal(txResponse.reason)
 
-            const tx = walletApi.fromTx(txHashResponse.value)
+            const tx = walletApi.fromTx(txResponse.rawTx)
             const signedTx  = await tx.sign().complete()
             const txHash = await signedTx.submit()
 
             console.log("front end got this as tx hash ")
             console.log(txHash)
+            console.log(txResponse.txInfoId)
             /*END of test*/
             
 

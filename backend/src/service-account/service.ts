@@ -1,5 +1,6 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
 import { AssetManagementService, ClaimerInfo, CreateAssociationTxResult } from "../service-asset-management"
+import { BlockchainService } from "../service-blockchain/service-spec"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
@@ -10,6 +11,7 @@ import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignA
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
+    blockchainService: BlockchainService
     governanceService: GovernanceService
     wellKnownPolicies: WellKnownPolicies
 }
@@ -19,6 +21,7 @@ export class AccountServiceDsl implements AccountService {
     constructor (
         private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
+        private readonly blockchainService: BlockchainService,
         private readonly governanceService: GovernanceService,
         private readonly wellKnownPolicies: WellKnownPolicies,
     ){}
@@ -31,6 +34,7 @@ export class AccountServiceDsl implements AccountService {
         const service = new AccountServiceDsl(
             dependencies.identityService,
             dependencies.assetManagementService,
+            dependencies.blockchainService,
             dependencies.governanceService,
             dependencies.wellKnownPolicies,
         )
@@ -107,14 +111,15 @@ export class AccountServiceDsl implements AccountService {
 
     async getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult> {
 
-            //TODO: use the blockchain service
-            /* const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, address, logger)
-            if (txIdResult.status != "ok") return {status: "invalid", reason: txIdResult.reason} */
+            const transactionInfoResponse = await this.blockchainService.getWalletAuthenticationSelfTx(address)
+            if (transactionInfoResponse.status !== "ok") return {status: "invalid", reason: transactionInfoResponse.reason}
 
-            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, "txIdResult.txId", logger)
+            const transactionInfo = transactionInfoResponse.value
+
+            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, transactionInfo.rawTransaction, transactionInfo.validFromSlot, transactionInfo.validToSlot, transactionInfo.amountTransferred, logger)
             if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
 
-            return { status: "ok", txId: "txIdResult.txId", authStateId: authState.authStateId }
+            return { status: "ok", rawTx: transactionInfo.rawTransaction, txInfoId: authState.authStateId}
     }
 
     async submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {

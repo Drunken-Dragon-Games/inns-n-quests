@@ -2,11 +2,11 @@
 // Ensure that both files are kept in sync manually to maintain equality.
 import * as models from "./models"
 
-export const prefix = "blockchain"
+export const servicePrefix = "blockchain"
 
 export const blockchainEnpoints: models.Endpoints = {
     "health": {path:"/health", method: "get"},
-    "getWalletAuthenticationSelfTx": {path:"get-assosiation-tx", method: "post"},
+    "getWalletAuthenticationSelfTx": {path:"/get-assosiation-tx", method: "POST"},
 }
 
 export interface BlockchainService {

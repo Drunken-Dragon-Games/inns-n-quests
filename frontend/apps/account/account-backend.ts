@@ -37,13 +37,9 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getAssociationTx(stakeAddress: string, utxos: UTxOMinimal[]): Promise<CreateAssociationTxResult>{
-        const result = await accountRequest("POST", "/association/tx", {stakeAddress, utxos})
-        return result.data
-    },
-
-    async getAssociationTxHash(address: string): Promise<{status: "succeded", value: string} | {status: "failed", reason: string}>{
-        const result = await blockChainRequest("POST", "/selfTx", {address})
+    async getRawAssociationTx(stakeAddress: string, address: string): Promise<CreateAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/tx", {stakeAddress, address})
+        //const result = await blockChainRequest("POST", "/association/tx", {stakeAddress, address})
         return result.data
     },
 
@@ -152,7 +148,7 @@ export type SubmitAssociationSignatureResult
 export type AssociationNonceResult = ClaimSignAndSubbmitResult
 
 export type CreateAssociationTxResult
-    = { status: "ok", txId: string, authStateId: string }
+    = { status: "ok", rawTx: string, txInfoId: string }
     | { status: "invalid", reason: string }
 
 export type ClaimSignAndSubbmitResult 
@@ -211,7 +207,7 @@ async function accountRequest<ResData = any, ReqData = any>(method: Method, endp
 async function blockChainRequest<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {
     const finalTraceId = traceId ?? v4()
     const baseURL = urljoin("http://localhost:8000", "blockchain")
-        console.log(`${method}: ${endpoint}\ntrace-id: ${finalTraceId}`)
+        console.log(baseURL)
     return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
         method,
         baseURL,

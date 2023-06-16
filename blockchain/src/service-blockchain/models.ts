@@ -1,4 +1,4 @@
-import { Resolution } from "../utypes.ts"
+import { Prettify, Resolution } from "../utypes.ts"
 
 export type Method =
   | 'get' | 'GET'

@@ -7,6 +7,9 @@ import { Lucid } from "https://deno.land/x/lucid@0.10.6/mod.ts";
 import { Blockfrost } from "https://deno.land/x/lucid@0.10.6/mod.ts";
 import { BlockchainServiceDsl } from "./service-blockchain/service.ts";
 import { blockchainRoutes } from "./service-blockchain/routes-blockchain.ts";
+import { servicePrefix } from "./service-blockchain/service-spec.ts";
+import cookieParser from "npm:cookie-parser@1.4.6"
+import { corsOptions } from "../config.ts";
 
 const projectId = stringOrError("BLOCKFROST_API_KEY")
 const network: Network = <Network>stringOrError("CARDANO_NETWORK")
@@ -21,9 +24,12 @@ app.use((req, res, next) => {
   console.log(`Received ${req.method} request for ${req.url}`)
   next()
 })
+app.disable('x-powered-by')
 app.use(express.json())
-app.use(cors({origin: "http://localhost:5000",credentials: true}));
-app.use("/blockchain", blockchainRoutes(blockchainService))
+app.use(cookieParser())
+//app.use(cors({origin: "http://localhost:5000",credentials: true}));
+app.use(cors(corsOptions))
+app.use(`/deno/${servicePrefix}`, blockchainRoutes(blockchainService))
 
 
 
