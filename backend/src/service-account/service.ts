@@ -1,12 +1,12 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService, ClaimerInfo, CreateAssociationTxResult } from "../service-asset-management"
+import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
 import { BlockchainService } from "../service-blockchain/service-spec"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -116,27 +116,30 @@ export class AccountServiceDsl implements AccountService {
 
             const transactionInfo = transactionInfoResponse.value
 
-            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, transactionInfo.rawTransaction, transactionInfo.validFromSlot, transactionInfo.validToSlot, transactionInfo.amountTransferred, logger)
+            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, transactionInfo.txHash, logger)
             if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
 
-            return { status: "ok", rawTx: transactionInfo.rawTransaction, txInfoId: authState.authStateId}
+            return { status: "ok", rawTx: transactionInfo.rawTransaction, authStateId: authState.authStateId}
     }
 
-    async submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
+    async submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
         try {
-            const stateValidateResult = await this.identityService.verifyAuthState(authStateId, tx, userId, logger)
+            const txHashResponse = await this.blockchainService.getTxHashFromTransaction(serializedSignedTx)
+            if(txHashResponse.status !== "ok") return {status: "invalid", reason: `could not hash Transaction: ${txHashResponse.reason}`}
+            const stateValidateResult = await this.identityService.verifyAuthState(authStateId, userId, txHashResponse.value, logger)
             if (stateValidateResult.status !== "ok") throw new Error(stateValidateResult.reason)
-            const txvalidateResult = await this.assetManagementService.submitAuthTransaction(witness, tx, logger)
-        
-            if (txvalidateResult.status != "ok") throw new Error(txvalidateResult.reason)
-            
+            const txSubmitResult = await this.blockchainService.submitTransaction(serializedSignedTx)
+            if (txSubmitResult.status != "ok") throw new Error(txSubmitResult.reason)
+            if(txSubmitResult.value !== txHashResponse.value) throw new Error(`Could not match Submited and signed Transactions`)
             const associateResponse = await this.identityService.associate(userId, 
                 {ctype: "tx", deviceType: "Browser", stakekeAddres: stateValidateResult.stakeAddress}, logger)
 
             if(associateResponse.status != "ok") throw new Error(associateResponse.status)
-            return{status: "ok", txId: txvalidateResult.txId }
+            await this.identityService.completeAuthState(authStateId, {ctype: "succeded"})
+            return{status: "ok", txId: txSubmitResult.value }
         }catch(e: any){
             logger?.log.error(e.message ?? e)
+            await this.identityService.completeAuthState(authStateId, {ctype: "failed", reason: e.message})
             return {status: "invalid", reason: e.message}
         }
         

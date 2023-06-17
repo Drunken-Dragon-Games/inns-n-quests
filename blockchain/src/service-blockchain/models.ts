@@ -18,11 +18,13 @@ export type Endpoints = Record<string, Endpoint>
 
 export type CardanoTransactionInfo = {
   rawTransaction: string
-  validFromSlot: string
-  validToSlot: string
-  amountTransferred: string
+  txHash: string
 }
 
 export type HealthStatus = Resolution<"">
 
 export type AssosiationTxResponse = Resolution<CardanoTransactionInfo>
+
+export type TransactionHashReponse = Resolution<string>
+
+export type SubmitTransactionReponse = Resolution<string>

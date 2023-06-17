@@ -199,11 +199,18 @@ export const AccountThunks = {
 
             const tx = walletApi.fromTx(txResponse.rawTx)
             const signedTx  = await tx.sign().complete()
-            const txHash = await signedTx.submit()
+            const serializedSignedTx = signedTx.toString()
 
-            console.log("front end got this as tx hash ")
-            console.log(txHash)
-            console.log(txResponse.txInfoId)
+            dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Submiting signature..."}))
+            const signature = await AccountBackend.submitAuthTx(serializedSignedTx, txResponse.authStateId)
+
+            if ( signature.status !== "ok")
+                return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`) 
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Updating inventory..." }))
+            dispatch(actions.addStakeAddress(stakeAddress))
+
+            
+
             /*END of test*/
             
 

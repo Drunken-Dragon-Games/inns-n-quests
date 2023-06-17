@@ -1,6 +1,6 @@
 import { Lucid } from "https://deno.land/x/lucid@0.10.6/mod.ts";
 import { LucidDsl } from "./lucid-dsl/dsl.ts";
-import { AssosiationTxResponse, HealthStatus } from "./models.ts";
+import { AssosiationTxResponse, HealthStatus, TransactionHashReponse, SubmitTransactionReponse } from "./models.ts";
 import { BlockchainService } from "./service-spec.ts";
 
 export type BlockchainServiceConfig = {
@@ -21,6 +21,14 @@ export class BlockchainServiceDsl implements BlockchainService {
 
     async getWalletAuthenticationSelfTx(address: string): Promise<AssosiationTxResponse> {
         return await this.lucidDSL.buildSelfTx(address)
+    }
+
+    async getTxHashFromTransaction(serilizedTransaction: string): Promise<TransactionHashReponse> {
+        return this.lucidDSL.hashSerializedTransaction(serilizedTransaction)
+    }
+
+    async submitTransaction(serilizedTransaction: string): Promise<SubmitTransactionReponse> {
+        return await this.lucidDSL.submitSerializedTransaction(serilizedTransaction)
     }
 
 }

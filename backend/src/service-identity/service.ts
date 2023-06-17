@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { QueryInterface, Sequelize } from "sequelize"
 import { validateStakeAddress } from "./cardano/address"
-import { createAuthTxState, generateNonce, removeState, validateAuthState, verifySig } from "./cardano/signature-verification"
+import { createAuthTxState, generateNonce, removeState, updateAuthState, validateAuthState, verifySig } from "./cardano/signature-verification"
 import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession, genDiscordTokens } from "./discord/code-verification"
 import { Users } from "./users/users"
 import { Sessions, SessionsConfig } from "./sessions/sessions";
@@ -18,7 +18,9 @@ import {
     UserInfo,
     CreateAuthStateResult,
     VerifyAuthStateResult,
-    CleanAssociationTxResult
+    CleanAssociationTxResult,
+    AssosiationOutcome,
+    CompleteAuthStateResult
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -114,10 +116,10 @@ export class IdentityServiceDsl implements IdentityService {
         }
     }
 
-    async createAuthTxState(userId: string, stakeAddress: string, rawTransaction: string, validFromSlot: string, validToSlot: string, transferedAmmount: string, logger?: LoggingContext): Promise<CreateAuthStateResult> {
+    async createAuthTxState(userId: string, stakeAddress: string, txHash: string, logger?: LoggingContext): Promise<CreateAuthStateResult> {
         try{
             if (!validateStakeAddress(stakeAddress, this.network)) return { status: "invalid", reason: "bad-address" }
-            const authState = await createAuthTxState(userId, stakeAddress, rawTransaction, validFromSlot, validToSlot, transferedAmmount)
+            const authState = await createAuthTxState(userId, stakeAddress, txHash)
             if (authState.status !== "ok") return { status: "invalid", reason: "could not comunicate wiht DB" }
             return {status:"ok", authStateId: authState.authStateId}
         }catch(e: any){
@@ -126,14 +128,23 @@ export class IdentityServiceDsl implements IdentityService {
         }
     }
 
-    async verifyAuthState(authStateId: string, tx: string, userId: string, logger?: LoggingContext | undefined): Promise<VerifyAuthStateResult> {
+    async verifyAuthState(authStateId: string, userId: string, txHash: string, logger?: LoggingContext): Promise<VerifyAuthStateResult> {
         try{
-            const validationResult = await validateAuthState(authStateId, tx, userId)
+            const validationResult = await validateAuthState(authStateId, userId, txHash)
             if (!validationResult.isValid) return { status: "invalid", reason: validationResult.reason || "could not comunicate wiht DB" }
             return {status:"ok", stakeAddress: validationResult.stakeAddress}
         }catch(e: any){
             return { status: "invalid", reason: "could not comunicate wiht DB" }
         }
+    }
+
+    async completeAuthState(authStateId: string, status: AssosiationOutcome, logger?: LoggingContext | undefined): Promise<CompleteAuthStateResult> {
+        const completedResult = await updateAuthState(authStateId, status)
+        if (completedResult.status !== "ok"){
+            logger?.log.error(`could not update auth State ${authStateId} reason: ${completedResult.reason}`)
+            completedResult.reason = `could not update auth State ${logger?.traceId}`
+        }
+        return completedResult
     }
 
     async authenticate(credentials: Credentials, logger?: LoggingContext): Promise<AuthenticationResult> {

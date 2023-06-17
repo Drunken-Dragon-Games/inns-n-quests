@@ -103,8 +103,8 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
     router.post("/association/submit-tx", jwtMiddleware,requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
-        const {witnessHex, txId, authStateId} = request.body
-        const result = await accountService.submitAssociationTx(userId, witnessHex, txId, authStateId, logger)
+        const {serializedSignedTx, authStateId} = request.body
+        const result = await accountService.submitAssociationTx(userId, serializedSignedTx, authStateId, logger)
         response.status(200).json(result)
     }))
 

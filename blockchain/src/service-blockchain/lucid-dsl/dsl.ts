@@ -1,42 +1,49 @@
-import { Lucid} from "https://deno.land/x/lucid@0.10.6/mod.ts"
+import { Lucid, Transaction} from "https://deno.land/x/lucid@0.10.6/mod.ts"
 import { Resolution, succed, fail } from "../../utypes.ts"
-import { CardanoTransactionInfo } from "../models.ts"
+import { CardanoTransactionInfo, TransactionHashReponse, SubmitTransactionReponse } from "../models.ts"
 
 const validityRange = 1000 * 60 * 10
 
 export class LucidDsl {
     constructor(public lucidInstance: Lucid){}
-    //TODO: clean this up hehe
-    buildSelfTx = async (address: string): Promise<Resolution<CardanoTransactionInfo>> => {
+
+    async buildSelfTx (address: string): Promise<Resolution<CardanoTransactionInfo>> {
         try{
             this.lucidInstance.selectWalletFrom({ address })
-            const now = Date.now()
-            const validFrom = now - validityRange
-            const validTo = now + validityRange
-
-            const currentSlot = this.lucidInstance.utils.unixTimeToSlot(now)
-            
-            //you might be wondering
-            //were did the 540 come from
-            //so do i
-            //but every tx ive tested has come with an actual invalid_before slot that is off by 540
-            const validFromSlot = `${currentSlot - (validityRange / 10000) - 540}`
-            const validToSlot = `${currentSlot + (validityRange/ 1000)}`
-            const amountTransferred = "3200000"
             const tx = await this.lucidInstance.newTx()
-                .payToAddress(address, {lovelace: BigInt(amountTransferred)})
-                .validFrom(validFrom)
-                .validTo(validTo)
+                .payToAddress(address, {lovelace: BigInt("1000000")})
                 .complete()
             const rawTransaction = tx.toString()
+            const txHash = tx.toHash()
 
-            console.log({validFrom, validTo})
-            console.log({validFromSlot, validToSlot})
-
-            return succed({rawTransaction, validFromSlot, validToSlot, amountTransferred})
+            return succed({rawTransaction, txHash})
         }
         catch(e){
             return fail(e.message ?? JSON.stringify(e, null, 4))
         }
-        } 
+    }
+
+    hashSerializedTransaction (serializedTrasnaction: Transaction): TransactionHashReponse {
+        try{
+            const tx = this.lucidInstance.fromTx(serializedTrasnaction)
+            const txHash = tx.toHash()
+            return {status: "ok", value: txHash}
+        }catch(e){
+            console.log(e)
+            return {status: "invalid", reason: e.message ?? JSON.stringify(e, null, 4)}
+        }
+    }
+
+    async submitSerializedTransaction (serializedTrasnaction: Transaction): Promise<SubmitTransactionReponse> {
+        try{
+            const tx = this.lucidInstance.fromTx(serializedTrasnaction)
+            const signedTx = await tx.complete()
+            const txHash = await signedTx.submit()
+            
+            return {status: "ok", value: txHash}
+        }catch(e){
+            console.log(e)
+            return {status: "invalid", reason: e.message ?? JSON.stringify(e, null, 4)}
+        }
+    }
 }   

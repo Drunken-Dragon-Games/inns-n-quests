@@ -22,7 +22,7 @@ export interface AccountService {
     getPublicBallots(logger?: LoggingContext): Promise<PublicBallotResult>
     getUserBallots(userId: string, logger?: LoggingContext):Promise<UserBallotResult>
     getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult>
-    submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
+    submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string,  logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
 }
 
@@ -60,7 +60,7 @@ export type GetDragonSilverClaimsResult
     | { status: "invalid", reason: string }
 
 export type CreateAssociationTxResult
-    = { status: "ok", rawTx: string, txInfoId: string }
+    = { status: "ok", rawTx: string, authStateId: string }
     | { status: "invalid", reason: string }
 
 export type AssociationNonceResult = ClaimSignAndSubbmitResult

@@ -16,7 +16,19 @@ export const blockchainRoutes = (blockchainService: BlockchainService) => {
 
     router.post(blockchainEnpoints.getWalletAuthenticationSelfTx.path, requestCatchError(async (request: Request, response: Response) => {
         const {address} = request.body
-        const txHash = await blockchainService.getWalletAuthenticationSelfTx(address)
+        const txInfo = await blockchainService.getWalletAuthenticationSelfTx(address)
+        generateHttpResponse(txInfo, response)
+    }))
+
+    router.post(blockchainEnpoints.getTxHashFromTransaction.path, requestCatchError(async (request: Request, response: Response) => {
+        const {serilizedTransaction} = request.body
+        const txHash = await blockchainService.getTxHashFromTransaction(serilizedTransaction)
+        generateHttpResponse(txHash, response)
+    }))
+
+    router.post(blockchainEnpoints.submitTransaction.path, requestCatchError(async (request: Request, response: Response) => {
+        const {serilizedSignedTransaction} = request.body
+        const txHash = await blockchainService.submitTransaction(serilizedSignedTransaction)
         generateHttpResponse(txHash, response)
     }))
 

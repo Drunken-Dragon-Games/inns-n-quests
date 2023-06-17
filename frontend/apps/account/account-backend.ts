@@ -43,8 +43,8 @@ export const AccountBackend = {
         return result.data
     },
 
-    async submitAuthTx(witnessHex: string, txId: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>{
-        const result = await accountRequest("POST", "/association/submit-tx", {witnessHex, txId, authStateId})
+    async submitAuthTx(serializedSignedTx: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>{
+        const result = await accountRequest("POST", "/association/submit-tx", {serializedSignedTx, authStateId})
         return result.data
     },
 
@@ -148,7 +148,7 @@ export type SubmitAssociationSignatureResult
 export type AssociationNonceResult = ClaimSignAndSubbmitResult
 
 export type CreateAssociationTxResult
-    = { status: "ok", rawTx: string, txInfoId: string }
+    = { status: "ok", rawTx: string, authStateId: string }
     | { status: "invalid", reason: string }
 
 export type ClaimSignAndSubbmitResult 

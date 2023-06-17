@@ -6,13 +6,19 @@ export type Endpoints = Record<string, Endpoint>
 
 export type CardanoTransactionInfo = {
   rawTransaction: string
-  validFromSlot: string
-  validToSlot: string
-  amountTransferred: string
+  txHash: string
 }
 
 export type AssosiationTxResponse
   = {status: "ok", value: CardanoTransactionInfo}
+  | {status: "invalid", reason: string}
+
+export type TransactionHashReponse
+  = {status: "ok", value: string}
+  | {status: "invalid", reason: string}
+
+export type SubmitTransactionReponse
+  = {status: "ok", value: string}
   | {status: "invalid", reason: string}
 
 export type HealthStatus 
