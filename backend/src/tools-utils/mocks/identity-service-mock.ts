@@ -24,6 +24,7 @@ export default class IdentityServiceMock {
             verifyAuthState: jest.fn(),
             cleanAssociationTx: jest.fn(),
             getTotalUsers: jest.fn(),
+            completeAuthState: jest.fn(),
         }
     }
 

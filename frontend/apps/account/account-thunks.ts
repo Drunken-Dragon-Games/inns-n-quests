@@ -163,35 +163,7 @@ export const AccountThunks = {
                 return displayErrorAndHeal(extractedResult.details)
 
             const { walletApi, stakeAddress, address } = extractedResult
-            /*
-            const allUtxos = await walletApi.wallet.getUtxos()
-            const utxos = allUtxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("1000000"))
-
-            if (utxos.length == 0)
-                return displayErrorAndHeal("Not UTxO large enough to autenticate wallet")
-                
-            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Building Auth Tx" }))
-            const assoiationTxResponse =  await AccountBackend.getAssociationTx(stakeAddress, minimalUtxoFromLucidUTxO(utxos))
-
-            if (assoiationTxResponse.status !== "ok")
-                return displayErrorAndHeal(assoiationTxResponse.reason)
             
-            authStateId = assoiationTxResponse.authStateId
-            dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Waiting for wallet signature..."}))
-            
-            const transaction = C.Transaction.from_bytes(new Uint8Array(Buffer.from( assoiationTxResponse.txId, 'hex')))
-            const witness = await walletApi.wallet.signTx(transaction)
-            const witnessHex = Buffer.from(witness.to_bytes()).toString("hex")
-
-            dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Submiting signature..."}))
-            const signature = await AccountBackend.submitAuthTx(witnessHex, assoiationTxResponse.txId, assoiationTxResponse.authStateId)
-
-            if ( signature.status !== "ok")
-                return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`) 
-            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Updating inventory..." }))
-            dispatch(actions.addStakeAddress(stakeAddress))
-            */
-            /*TEST*/
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Building Auth Tx" }))
             const txResponse =  await AccountBackend.getRawAssociationTx(stakeAddress, address)
             if (txResponse.status !== "ok")
@@ -208,12 +180,6 @@ export const AccountThunks = {
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`) 
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Updating inventory..." }))
             dispatch(actions.addStakeAddress(stakeAddress))
-
-            
-
-            /*END of test*/
-            
-
             dispatch(AccountThunks.updateInventory())
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
 

@@ -133,7 +133,6 @@ export class AccountServiceDsl implements AccountService {
             if(txSubmitResult.value !== txHashResponse.value) throw new Error(`Could not match Submited and signed Transactions`)
             const associateResponse = await this.identityService.associate(userId, 
                 {ctype: "tx", deviceType: "Browser", stakekeAddres: stateValidateResult.stakeAddress}, logger)
-
             if(associateResponse.status != "ok") throw new Error(associateResponse.status)
             await this.identityService.completeAuthState(authStateId, {ctype: "succeded"})
             return{status: "ok", txId: txSubmitResult.value }
