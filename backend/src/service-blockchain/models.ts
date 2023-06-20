@@ -9,7 +9,7 @@ export type CardanoTransactionInfo = {
   txHash: string
 }
 
-export type AssosiationTxResponse
+export type BuildTxResponse
   = {status: "ok", value: CardanoTransactionInfo}
   | {status: "invalid", reason: string}
 
@@ -24,3 +24,11 @@ export type SubmitTransactionReponse
 export type HealthStatus 
   = {status: "ok", value: ""}
   | {status: "invalid", reason: string}
+
+export type LucidNativeScript = {
+    type: "sig" | "all" | "any" | "before" | "atLeast" | "after"
+    keyHash?: string
+    required?: number
+    slot?: number
+    scripts?: LucidNativeScript[]
+  }

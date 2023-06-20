@@ -162,28 +162,27 @@ export class AccountServiceDsl implements AccountService {
             return result
     }
 
-    async claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo, logger?: LoggingContext): Promise<ClaimDragonSilverResult>{
+    async claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>{
         const dsPolicyId = this.wellKnownPolicies.dragonSilver.policyId
         //For now we just claim ALL OF IT
         //const { amount } = request.body
         const assetList = await this.assetManagementService.list(userId, { policies: [ dsPolicyId ] }, logger)
-        if (assetList.status == "ok"){
-            const inventory= assetList.inventory
-            const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
-            const options = {
-                unit: "DragonSilver",
-                policyId: dsPolicyId,
-                quantity: dragonSilverToClaim
-            }
-            const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, options, claimerInfo, logger)
-            if (claimResponse.status == "ok") return { ...claimResponse, remainingAmount: 0 }
-            else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
+        if (assetList.status !== "ok") return { status: "invalid", reason: assetList.status}
+        const inventory= assetList.inventory
+        const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
+        const options = {
+            unit: "DragonSilver",
+            policyId: dsPolicyId,
+            quantity: dragonSilverToClaim
         }
-        else return { status: "invalid", reason: assetList.status}
+        const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, address, options, logger)
+        if (claimResponse.status == "ok") return { ...claimResponse, remainingAmount: 0 }
+        else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
+        
     }
 
-    async claimSignAndSubbmit(witness: string, tx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
-        return this.assetManagementService.submitClaimSignature(claimId, tx, witness, logger)
+    async claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
+        return this.assetManagementService.submitClaimSignature(claimId, serializedSignedTx, logger)
     }
 
     async claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult> {

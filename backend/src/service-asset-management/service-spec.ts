@@ -18,14 +18,14 @@ export interface AssetManagementService {
 
 	userClaims(userId: string, unit: string, page?: number, logger?: LoggingContext): Promise<models.UserClaimsResponse> 
 
-    claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, claimerInfo?: models.ClaimerInfo, logger?: LoggingContext): Promise<models.ClaimResponse>
+    claim(userId: string, stakeAddress: string, address: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<models.ClaimResponse>
 
     //DEPRECATED
     createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse>
 
     submitAuthTransaction(witness: string, tx: string, logger?: LoggingContext): Promise<models.SubmitAuthTransactionResult>
     
-    submitClaimSignature(claimId: string, tx: string, witness: string, logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse>
+    submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse>
 
     claimStatus(claimId: string, logger?: LoggingContext): Promise<models.ClaimStatusResponse>
 

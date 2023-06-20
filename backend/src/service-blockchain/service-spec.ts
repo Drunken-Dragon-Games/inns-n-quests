@@ -8,14 +8,17 @@ export const blockchainEnpoints: models.Endpoints = {
     "health": {path:"/health", method: "get"},
     "getWalletAuthenticationSelfTx": {path:"/get-assosiation-tx", method: "POST"},
     "getTxHashFromTransaction": {path: "/get-tx-hash", method: "POST"},
-    "submitTransaction": {path: "/submit-tx", method: "POST"}
+    "submitTransaction": {path: "/submit-tx", method: "POST"},
+    "buildMintTx": {path: "get-mint-tx", method: "POST"}
 }
 
 export interface BlockchainService {
 
     health(): Promise<models.HealthStatus>
 
-    getWalletAuthenticationSelfTx(address: string):Promise<models.AssosiationTxResponse>
+    getWalletAuthenticationSelfTx(address: string):Promise<models.BuildTxResponse>
+
+    buildMintTx(address: string, policy: models.LucidNativeScript, unit: string, quantityToMint: string, feeInfo?: {feeAddress: string, feeAmount: string}):Promise<models.BuildTxResponse>
 
     getTxHashFromTransaction(serilizedTransaction: string): Promise<models.TransactionHashReponse>
 

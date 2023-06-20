@@ -128,15 +128,15 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
-        const claimerInfo: ClaimerInfo = request.body.claimerInfo
-        const result = await accountService.claimDragonSilver(userId, stakeAddress, claimerInfo, logger)
+        const address: string = request.body.address
+        const result = await accountService.claimDragonSilver(userId, stakeAddress, address, logger)
         response.status(200).json(result)
     }))
 
     router.post("/assets/claim/sign-and-submit", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
-        const {witness, tx, claimId} = request.body
-        const result = await accountService.claimSignAndSubbmit(witness, tx, claimId, logger)
+        const {serializedSignedTx, claimId} = request.body
+        const result = await accountService.claimSignAndSubbmit(serializedSignedTx, claimId, logger)
         response.status(200).json(result)
     }))
 

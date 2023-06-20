@@ -1,6 +1,6 @@
 import { BlockchainService, blockchainEnpoints, servicePrefix } from "./service-spec"
 import { config } from "../tools-utils"
-import { AssosiationTxResponse, Endpoint, HealthStatus, SubmitTransactionReponse, TransactionHashReponse } from "./models"
+import { BuildTxResponse, Endpoint, HealthStatus, LucidNativeScript, SubmitTransactionReponse, TransactionHashReponse } from "./models"
 import axios, { AxiosResponse } from "axios"
 import dotenv from "dotenv"
 
@@ -28,15 +28,20 @@ export class BlockchainServiceDsl implements BlockchainService {
         return response.data as HealthStatus
     }
 
-    async getWalletAuthenticationSelfTx(address: string): Promise<AssosiationTxResponse> {
+    async getWalletAuthenticationSelfTx(address: string): Promise<BuildTxResponse> {
         //TODO: test if error codes trigger an error and handle
         const response = await this.callImplementation(blockchainEnpoints.getWalletAuthenticationSelfTx, {address})
-        return response.data as AssosiationTxResponse
+        return response.data as BuildTxResponse
     }
 
     async getTxHashFromTransaction(serilizedTransaction: string): Promise<TransactionHashReponse> {
         const response = await this.callImplementation(blockchainEnpoints.getTxHashFromTransaction, {serilizedTransaction})
         return response.data as TransactionHashReponse
+    }
+
+    async buildMintTx(address: string, policy: LucidNativeScript, unit: string, quantityToMint: string, feeInfo?: { feeAddress: string; feeAmount: string; } | undefined): Promise<BuildTxResponse> {
+        const response = await this.callImplementation(blockchainEnpoints.buildMintTx, {address, policy, unit, quantityToMint, feeInfo})
+        return response.data as BuildTxResponse
     }
 
     async submitTransaction(serilizedTransaction: string): Promise<SubmitTransactionReponse> {

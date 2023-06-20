@@ -64,13 +64,13 @@ export const AccountBackend = {
         return result.data
     },
 
-    async claim(stakeAddress: string, claimerInfo: ClaimerInfo, traceId?: string): Promise<ClaimAssetResult> {
-        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress, claimerInfo}, traceId)
+    async claim(stakeAddress: string, address: string, traceId?: string): Promise<ClaimAssetResult> {
+        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress, address}, traceId)
         return result.data
     },
 
-    async claimSignAndSubmit(witness: string, tx: string, claimId: string, traceId?: string): Promise<ClaimSignAndSubbmitResult> {
-        const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {witness, tx, claimId}, traceId)
+    async claimSignAndSubmit(serializedSignedTx: string, claimId: string, traceId?: string): Promise<ClaimSignAndSubbmitResult> {
+        const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {serializedSignedTx, claimId}, traceId)
         return result.data
     },
 
