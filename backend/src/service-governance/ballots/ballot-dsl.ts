@@ -1,18 +1,25 @@
-import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, StoredUserBallot, MultipleUserBallots, registerBallotType, voteResponse, AllBallotData, BallotData, BallotOption } from "../models"
+import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, StoredUserBallot, MultipleUserBallots, BallotRegistration, VoteResponse, AllBallotData, BallotData, BallotOption } from "../models"
 import { Ballot, BallotVote } from "./ballots-db"
 
 export class Ballots {
-    static async register(ballot: registerBallotType): Promise<RegisterBallotResponse> {
-        try{
-            const optionTitles: string[] = []
-            const optionDescriptions: string[] = []
 
-            for (const option of ballot.options) {
-                optionTitles.push(option.title)
-                optionDescriptions.push(option.description)
+    static async register(ballot: BallotRegistration): Promise<RegisterBallotResponse> {
+        const optionTitles = ballot.options.map(option => option.title)
+        const optionDescriptions = ballot.options.map(option => option.description)
+        try {
+            return {
+                ctype: "success", ballotId: (await Ballot.create({
+                    inquiry: ballot.question.inquiry,
+                    description: ballot.question.description,
+                    state: 'open',
+                    options: JSON.stringify(optionTitles),
+                    descriptions: JSON.stringify(optionDescriptions),
+                    url: ballot.url
+                })).ballotId
             }
-            return {ctype: "success", ballotId: (await Ballot.create({ inquiry: ballot.question.inquiry, description: ballot.question.description, state: 'open', options: JSON.stringify(optionTitles), descriptions: JSON.stringify(optionDescriptions) })).ballotId}
-        }   catch(e: any) {return {ctype: "error", reason: e.message}}
+        } catch (e: any) {
+            return { ctype: "error", reason: e.message }
+        }
     }
 
     static async getSingle(ballotId: string): Promise<GetBallotResponse>{
@@ -35,11 +42,11 @@ export class Ballots {
             const storedBallots: { [ballotId: string]: StoredBallot } = {}
 
             for (const ballot of ballots) {
-            const votes = await BallotVote.findAll({where: { ballotId: ballot.ballotId }})
-            const processedBallot = Ballots.processSingleBallot(ballot, votes)
-            storedBallots[ballot.ballotId] = processedBallot
+                const votes = await BallotVote.findAll({ where: { ballotId: ballot.ballotId } })
+                const processedBallot = Ballots.processSingleBallot(ballot, votes)
+                storedBallots[ballot.ballotId] = processedBallot
             }
-            return {ctype: "success", ballots: storedBallots}
+            return { ctype: "success", ballots: storedBallots }
 
         } catch (error: any) {
             return { ctype: "error", reason: error.message }
@@ -98,10 +105,10 @@ export class Ballots {
             return { title: option, description, lockedInDragonGold: dragonGoldSum.toString() }
         })
   
-        return { id: ballot.ballotId, status: ballot.state, inquiry: ballot.inquiry, inquiryDescription: ballot.description ,options}
+        return { id: ballot.ballotId, status: ballot.state, inquiry: ballot.inquiry, inquiryDescription: ballot.description, url: ballot.url, options}
     }
 
-    private static processSingleBallot(ballot: Ballot,votes: BallotVote[] ): StoredBallot {
+    private static processSingleBallot(ballot: Ballot, votes: BallotVote[]): StoredBallot {
         const options = ballot.optionsArray.map((option, index) => {
             const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
             const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + parseInt(vote.dragonGold), 0)
@@ -109,7 +116,7 @@ export class Ballots {
             return { option, description, dragonGold: dragonGoldSum.toString() }
         })
   
-        return { id: ballot.ballotId, inquiry: ballot.inquiry, descriptionOfInquiry: ballot.description ,options, state: ballot.state }
+        return { id: ballot.ballotId, inquiry: ballot.inquiry, descriptionOfInquiry: ballot.description ,options, state: ballot.state, url: ballot.url }
     }
 
     static getMaxDragonGold(options: BallotOption[]) {
@@ -131,7 +138,7 @@ export class Ballots {
         return { ctype: "success", inquiry: ballot.inquiry, winners }
     }
 
-    static async vote(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<voteResponse>{
+    static async vote(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<VoteResponse>{
         try {
             const ballot = await Ballot.findByPk(ballotId)
             if (!ballot) return {ctype: "error", reason: "unknown Ballot ID"}

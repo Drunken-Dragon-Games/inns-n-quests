@@ -105,6 +105,7 @@ export const AccountBackend = {
 
     async getUserBallots(traceId?: string): Promise<GovernanceUserBallotss>{
         const result = await accountRequest("GET", "/governance/user", traceId)
+        console.log(result.data)
         return result.data
     },
 
