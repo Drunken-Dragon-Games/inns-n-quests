@@ -29,28 +29,31 @@ export class TransactionDSL {
         }
     }
 
-    async buildMintTx(address: string, policy: NativeScript, assetUnit: string, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<Resolution<CardanoTransactionInfo>> {
+    async buildMintTx(address: string, asset: {policyId: string, unit:string}, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<Resolution<CardanoTransactionInfo>> {
+        const policyResponse = this.secureSigningService.policy(asset.policyId)
+        if (policyResponse.status !== "ok") return {status: "invalid", reason: `Could not build Tx because: ${policyResponse.reason}`}
+        
         const lucidInstance = await this.lucidFactory()
         lucidInstance.selectWalletFrom({ address })
-        const mintingPolicy = lucidInstance.utils.nativeScriptFromJson(policy)
-        const policyId = lucidInstance.utils.mintingPolicyToId(mintingPolicy)
-        const unit = policyId + fromText(assetUnit)
+
+        const unit = asset.policyId + fromText(asset.unit)
         const tx = lucidInstance.newTx()
             .mintAssets({ [unit]: BigInt(quantityToClaim) })
             .payToAddress(address, { [unit]: BigInt(quantityToClaim) })
-            .attachMetadata(133722, { "dd-tx-type": "asset-claim" })
             .validTo(Date.now() + validityRange)
-            .attachMintingPolicy(mintingPolicy)
-
+            .attachMetadata(133722, { "dd-tx-type": "asset-claim" })
+            .attachMintingPolicy(policyResponse.value)
+    
         if (feeInfo) tx.payToAddress(feeInfo.feeAddress, { lovelace: BigInt(feeInfo.feeAmount) })
-        
-        const completeTx = await tx.complete()
-        const rawTransaction = completeTx.toString()
-        const policiAprovedRawTrasnaction = await this.secureSigningService.signWithPolicy(policyId, rawTransaction)
-        if (policiAprovedRawTrasnaction.status !== "ok") return {status: "invalid", reason: `could not sign Mint Tx: ${policiAprovedRawTrasnaction.reason}`}
-        const txHash = completeTx.toHash()
 
-        return succeed({rawTransaction: policiAprovedRawTrasnaction.value, txHash})
+        const completeUnsignedTx = await tx.complete()
+
+        const signedTransaction = await this.secureSigningService.signWithPolicy(asset.policyId, completeUnsignedTx.toString())
+        if (signedTransaction.status !== "ok") return {status: "invalid", reason: `Could not build mint Tx because: ${signedTransaction.reason}`}
+        
+        const txHash = completeUnsignedTx.toHash()
+
+        return succeed({rawTransaction: signedTransaction.value, txHash})
     }
 
     async hashSerializedTransaction (serializedTrasnaction: Transaction): Promise<TransactionHashReponse> {

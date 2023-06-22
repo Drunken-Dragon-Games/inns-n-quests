@@ -10,3 +10,5 @@ export const corsOptions = {
     allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With", "Trace-ID"],
     credentials: true 
 }
+
+export const encryptionKey = "9d8a1876f66da8b25753ef4b82cab693"

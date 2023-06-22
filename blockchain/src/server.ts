@@ -9,16 +9,19 @@ import { BlockchainServiceDsl } from "./service-blockchain/service.ts";
 import { blockchainRoutes } from "./service-blockchain/routes-blockchain.ts";
 import { servicePrefix } from "./service-blockchain/service-spec.ts";
 import cookieParser from "npm:cookie-parser@1.4.6"
-import { corsOptions } from "../config.ts";
 import { TransactionDSL } from "./service-blockchain/lucid-dsl/dsl.ts";
 import { SecureSigningServiceDsl } from "./service-secure-signing/service.ts";
-import Registry from "./service-secure-signing/registry/registry.ts";
+import {AES256} from "./service-secure-signing/registry/aes256.ts"
+import {encryptionKey} from "./config.ts"
 
 const projectId = await stringOrError("BLOCKFROST_API_KEY")
 const network: Network = await stringOrError("CARDANO_NETWORK")
 const blockfrostAPILink = network == "Mainnet" ? "https://cardano-mainnet.blockfrost.io/api/v0" : "https://cardano-preprod.blockfrost.io/api/v0"
 const lucidFactory = async () => await Lucid.new(new Blockfrost(blockfrostAPILink, projectId), network)
-const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}", lucidFactory)
+
+const aes256 = await AES256.load(encryptionKey)
+
+const secureSigningService = await SecureSigningServiceDsl.loadFromEnv(aes256, lucidFactory)
 const transactionDSL: TransactionDSL = new TransactionDSL(lucidFactory, secureSigningService)
 
 const blockchainService = new BlockchainServiceDsl(transactionDSL)

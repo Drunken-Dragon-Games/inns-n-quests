@@ -19,7 +19,7 @@ export interface BlockchainService {
 
     getWalletAuthenticationSelfTx(address: string):Promise<models.BuildTxResponse>
 
-    buildMintTx(address: string, policy: NativeScript, unit: string, quantityToMint: string, feeInfo?: {feeAddress: string, feeAmount: string}):Promise<models.BuildTxResponse>
+    buildMintTx(address: string, asset: {policyId: string, unit:string}, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}):Promise<models.BuildTxResponse>
 
     getTxHashFromTransaction(serilizedTransaction: string): Promise<models.TransactionHashReponse>
 

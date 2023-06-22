@@ -4,7 +4,7 @@ import { requestCatchError } from "../catch-error.ts"
 import { Resolution } from "../utypes.ts"
 import { BlockchainService, blockchainEnpoints } from "./service-spec.ts"
 
-// IMPORTANT: Maintain a 1-to-1 relationship between service methods and exposed routes.
+// IMPORTANT: Maintain a 1-to-1 relationship between blockchain service methods and the exposed routes.
 // Ensure that each service method corresponds to a specific exposed route as this relationship is enforced manually.
 export const blockchainRoutes = (blockchainService: BlockchainService) => {
     const router = Router()
@@ -21,8 +21,8 @@ export const blockchainRoutes = (blockchainService: BlockchainService) => {
     }))
 
     router.post(blockchainEnpoints.buildMintTx.path, requestCatchError(async (request: Request, response: Response) => {
-        const {address, policy, unit, quantityToMint, feeInfo} = request.body
-        const txInfo = await blockchainService.buildMintTx(address, policy, unit, quantityToMint, feeInfo)
+        const {address, unit, quantityToMint, feeInfo} = request.body
+        const txInfo = await blockchainService.buildMintTx(address, unit, quantityToMint, feeInfo)
         generateHttpResponse(txInfo, response)
     }))
 

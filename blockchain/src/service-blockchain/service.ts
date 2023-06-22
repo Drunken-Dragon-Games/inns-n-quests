@@ -19,8 +19,8 @@ export class BlockchainServiceDsl implements BlockchainService {
         return await this.transactionDSL.buildSelfTx(address)
     }
 
-    async buildMintTx(address: string, policy: NativeScript, unit: string, quantityToMint: string, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<BuildTxResponse> {
-        return await this.transactionDSL.buildMintTx(address, policy, unit, quantityToMint, feeInfo)
+    async buildMintTx(address: string, asset: {policyId: string, unit:string}, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<BuildTxResponse> {
+        return await this.transactionDSL.buildMintTx(address, asset, quantityToClaim, feeInfo)
     }
 
     async getTxHashFromTransaction(serilizedTransaction: string): Promise<TransactionHashReponse> {

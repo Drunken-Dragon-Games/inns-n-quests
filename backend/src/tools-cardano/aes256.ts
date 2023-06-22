@@ -6,6 +6,7 @@ export class AES256 {
 
 	constructor(options: { salt: crypto.BinaryLike, password: crypto.BinaryLike }) {
 		this.key = crypto.scryptSync(options.password, options.salt, 32)
+		console.log(this.key.toString('hex'))
 	}
 
 	encrypt(text: string): string {
@@ -20,7 +21,7 @@ export class AES256 {
 		const ivd = JSON.parse(text) as { iv: string, d: string }
 		const iv = Buffer.from(ivd.iv, 'hex')
 		const encryptedText = Buffer.from(ivd.d, 'hex')
-		const decipher = crypto.createDecipheriv('aes-256-cbc', this.key, iv)
+		const decipher = crypto.createDecipheriv("aes-256-cbc", this.key, iv)
 		let decrypted = decipher.update(encryptedText)
 		decrypted = Buffer.concat([decrypted, decipher.final()])
 		return decrypted.toString()
