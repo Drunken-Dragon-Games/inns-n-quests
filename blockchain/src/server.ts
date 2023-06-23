@@ -39,5 +39,8 @@ app.use(cookieParser())
 app.use(`/deno/${servicePrefix}`, blockchainRoutes(blockchainService))
 
 
+const port = 8000
 
-app.listen(8000)
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Server running on port ${port}...`)
+})
