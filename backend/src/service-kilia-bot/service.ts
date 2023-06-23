@@ -15,7 +15,7 @@ import { GovernanceService } from "../service-governance/service-spec"
 //not sure how you would like me to manage this, mor info on the files themselves
 import * as messagesDSL from "./discord-messages-dsl"
 import * as ballotDSL from "./ballots/ballot-dsl"
-import { ConfirmMessagge, registerBallotType } from "./models"
+import { ConfirmMessage } from "./models"
 import { LoggingContext } from "../tools-tracing"
 
 
@@ -121,7 +121,6 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             console.log(`${client.user.tag} is ready to listen and sing!`)
             console.log(`Invite link: https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot%20applications.commands`)
         })
-        
         client.login(config.token)
         client.on(Events.InteractionCreate, async (interaction) => {
             if (!interaction.isCommand()) return
@@ -131,7 +130,6 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true })
             }
         })
-
         client.on("messageCreate", async (message) => {
             if (message.author.bot || !message.content.startsWith("!")) return
             try { service.onDiscordBangEvent(message) } 
@@ -142,6 +140,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         })
         return service
     }
+
     private onDiscordBangEvent(message: Message) {
         switch (messagesDSL.getCommand(message)) {
             case "ballot": return this.commandGovernance(message)
@@ -262,14 +261,16 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             
             await this.replyMessage(message, ballotDSL.genBallotPreview(ballotResult.payload))
 
-            await this.waitForconfirmation(message, 60, 
-                {cancel: 'Ballot confirmation canceled. No changes were made.', 
-                timeout: 'Ballot confirmation timed out. No changes were made.' },
-                 async () => {
+            await this.waitForConfirmation(message, 60,
+                {
+                    cancel: 'Ballot confirmation canceled. No changes were made.',
+                    timeout: 'Ballot confirmation timed out. No changes were made.'
+                },
+                async () => {
                     const r = await this.governanceService.addBallot(ballotResult.payload)
                     if (r.ctype !== "success") return r.reason
                     return `Ballot confirmed and stored successfully under ID ${r.ballotId}`
-                 })
+                })
 
         }
         else if (subcommand === "get") {
@@ -293,7 +294,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             if (ballotResult.ctype !== "success") return await this.replyMessage(message, ballotResult.reason)
             return await this.replyMessage(message, ballotDSL.formatList(ballotResult.ballots))
         }
-        else if (subcommand == "help"){
+        else if (subcommand == "help") {
             const helpMessage = `
         **Available Governance Commands**
         
@@ -310,14 +311,17 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         To use these commands, prefix the command with a '!ballot '.`
             return await this.replyMessage(message, helpMessage)
         }
-        
+
         else return await this.replyMessage(message, "unknown governance command")
     }
 
     async commandDevelopment(message: Message): Promise<void> {
-        if (!this.verifyAdminChannel(message, "devAdminChannelId")) return await this.replyMessage(message, "The command could not be verified to have come from a registered development channel or server.")
         const subcommand = messagesDSL.getSubCommand(message)
-        if (subcommand === "user-id") {
+        if (subcommand == "get-server-id") 
+            return await this.replyMessage(message, (this.configCache[message.guildId!]).serverId)
+        else if (!this.verifyAdminChannel(message, "devAdminChannelId")) 
+            return await this.replyMessage(message, "The command could not be verified to have come from a registered development channel or server.")
+        else if (subcommand === "user-id") {
             const discordName = messagesDSL.getArguments(message)
             const user = await this.identityService.resolveUser({ctype: "nickname", nickname: discordName})
             if (user.status !== "ok") return await this.replyMessage(message, "could not find disocrd Name")
@@ -334,9 +338,6 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             //I migth a bit more info to this later but righ now i just whant access to this info
             const totalUsers = await this.identityService.getTotalUsers()
             return await this.replyMessage(message, totalUsers.toString())
-        }
-        else if (subcommand == "get-server-id") {
-            return await this.replyMessage(message, (this.configCache[message.guildId!]).serverId)
         }
         else if (subcommand == "normalize-single-asset-by-ref") {
             const [userId, assetRef] = messagesDSL.getArguments(message).split(" ")
@@ -431,7 +432,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
      * @param mesages mesagges to send on confirm, cancel and timeout. if no confirm message is provided preloadedCallback string response is used
      * @param preloadedCallback function to be called on confirmation
      */
-    private async waitForconfirmation(message: Message, TTL: number, mesages: ConfirmMessagge, preloadedCallback: () => Promise<string | void>) {
+    private async waitForConfirmation(message: Message, TTL: number, mesages: ConfirmMessage, preloadedCallback: () => Promise<string | void>) {
     const filterYesNo = (m: Message) => m.author.id === message.author.id && ['yes', 'no'].includes(m.content.toLowerCase())
 
         const collector = new MessageCollector(message.channel, { filter: filterYesNo, time: TTL * 1000})
@@ -464,8 +465,5 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             return false;
         }
     }
-    
-
-    
 }
 

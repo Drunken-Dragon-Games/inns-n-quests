@@ -110,23 +110,23 @@ export const minimalUtxoFromLucidUTxO = (utxo: LucidUTxO[]): UTxOMinimal[] => ut
 }))
 
 //types repeted form govenance
-type BaseOption = {title: string, description: string}
-type VotedOption = BaseOption & {isVotedByUser: boolean}
-type SensitiveOption = BaseOption & {lockedInDragonGold: string}
-type ClosedOption = SensitiveOption & {isWinner: boolean}
-type UserClosedOption = ClosedOption & {isVotedByUser: boolean}
+type BaseOption = { title: string, description: string }
+type VotedOption = BaseOption & { isVotedByUser: boolean }
+type SensitiveOption = BaseOption & { lockedInDragonGold: string }
+type ClosedOption = SensitiveOption & { isWinner: boolean }
+type UserClosedOption = ClosedOption & { isVotedByUser: boolean }
 
-type BaseBallot = {status: BallotState, id: string,  inquiry: string, inquiryDescription: string}
+type BaseBallot = { status: BallotState, id: string, inquiry: string, inquiryDescription: string, url?: string }
 
-type OpenPublicBallot = BaseBallot & {status: "open", options: BaseOption[]}
-type ClosedPublicBallot = BaseBallot & {status: "closed", options: ClosedOption[]}
+type OpenPublicBallot = BaseBallot & { status: "open", options: BaseOption[] }
+type ClosedPublicBallot = BaseBallot & { status: "closed", options: ClosedOption[] }
 
-type OpenUserBallot = BaseBallot & {status: "open", hasVoted: boolean, options: VotedOption[]}
-type ClosedUserBallot = BaseBallot & {status: "closed", hasVoted: boolean, options: UserClosedOption[]}
+type OpenUserBallot = BaseBallot & { status: "open", hasVoted: boolean, options: VotedOption[] }
+type ClosedUserBallot = BaseBallot & { status: "closed", hasVoted: boolean, options: UserClosedOption[] }
 
 export type PublicBallot = OpenPublicBallot | ClosedPublicBallot
 export type UserBallot = OpenUserBallot | ClosedUserBallot
 
 export type GovernanceBallots
-    = {[ballotId: string]: UserBallot}
-    | {[ballotId: string]: PublicBallot}
+    = { [ballotId: string]: UserBallot }
+    | { [ballotId: string]: PublicBallot }

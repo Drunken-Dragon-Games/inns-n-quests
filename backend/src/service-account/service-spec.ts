@@ -2,6 +2,7 @@ import { ClaimerInfo } from "../service-asset-management"
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
 import { LoggingContext } from "../tools-tracing"
 import { MinimalUTxO } from "../tools-cardano"
+import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
 
 export interface AccountService {
     authenticateDevelopment(nickname: string, logger?: LoggingContext): Promise<AuthenticateResult>
@@ -99,30 +100,6 @@ export type OpenUserBallotsResult =
 export type VoteResult 
     = { status: "ok" }
     | { status: "invalid", reason: string }
-
-//types repeted from governance service
-type BallotState = "open"|"closed" | "archived"
-export type StoredBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
-export type StoredUserBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string }[], voteRegistered: boolean, state: BallotState}
-
-//types repeted from govenance service
-//types repeted on frontedn accound dsl
-type BaseOption = {title: string, description: string}
-type VotedOption = BaseOption & {isVotedByUser: boolean}
-type SensitiveOption = BaseOption & {lockedInDragonGold: string}
-type ClosedOption = SensitiveOption & {isWinner: boolean}
-type UserClosedOption = ClosedOption & {isVotedByUser: boolean}
-
-type BaseBallot = {status: BallotState, id: string,  inquiry: string , inquiryDescription: string}
-
-type OpenPublicBallot = BaseBallot & {status: "open", options: BaseOption[]}
-type ClosedPublicBallot = BaseBallot & {status: "closed", options: ClosedOption[]}
-
-type OpenUserBallot = BaseBallot & {status: "open", hasVoted: boolean, options: VotedOption[]}
-type ClosedUserBallot = BaseBallot & {status: "closed", hasVoted: boolean, options: UserClosedOption[]}
-
-type PublicBallot = OpenPublicBallot | ClosedPublicBallot
-type UserBallot = OpenUserBallot | ClosedUserBallot
 
 export type PublicBallotResult =
   {status: "ok", payload: {[ballotId: string]: PublicBallot}}|
