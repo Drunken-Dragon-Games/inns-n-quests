@@ -1,17 +1,16 @@
+import dotenv from "dotenv"
 import path from "path"
 import { QueryInterface, Sequelize } from "sequelize"
 import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
 import { GovernanceService } from "./service-spec"
-import dotenv from "dotenv"
 
-import * as models from "./models"
 import * as ballotDB from "./ballots/ballots-db"
+import * as models from "./models"
 
-import { config, HealthStatus } from "../tools-utils"
+import { HealthStatus } from "../tools-utils"
 
 import { Ballots } from "./ballots/ballot-dsl"
-import { title } from "process"
 
 export type GovernanceServiceDependencies = {
     database: Sequelize
@@ -63,7 +62,7 @@ export class GovernanceServiceDsl implements GovernanceService {
         }
     }
 
-    async addBallot(ballot: models.registerBallotType):Promise<models.RegisterBallotResponse>{
+    async addBallot(ballot: models.BallotRegistration):Promise<models.RegisterBallotResponse>{
         return await Ballots.register(ballot)
     }
 
@@ -80,6 +79,7 @@ export class GovernanceServiceDsl implements GovernanceService {
                     inquiry: ballot.inquiry,
                     inquiryDescription: ballot.inquiryDescription,
                     options: ballot.options,
+                    url: ballot.url
                 }
             }
 
@@ -107,7 +107,8 @@ export class GovernanceServiceDsl implements GovernanceService {
                         id: ballotDetails.id,
                         inquiry: ballotDetails.inquiry,
                         inquiryDescription: ballotDetails.inquiryDescription,
-                        options
+                        options,
+                        url: ballotDetails.url
                     }
                 } else {
                     //TODO: this is ignoring the archived ctype as it not yet implemented
@@ -123,7 +124,8 @@ export class GovernanceServiceDsl implements GovernanceService {
                         id: ballotDetails.id,
                         inquiry: ballotDetails.inquiry,
                         inquiryDescription: ballotDetails.inquiryDescription,
-                        options
+                        options,
+                        url: ballotDetails.url
                     }
                 }
             }
@@ -155,7 +157,8 @@ export class GovernanceServiceDsl implements GovernanceService {
                         hasVoted: vote !== "none",
                         inquiry: ballotDetails.inquiry,
                         inquiryDescription: ballotDetails.inquiryDescription,
-                        options: options
+                        options: options,
+                        url: ballotDetails.url
                     }
                 } else {
                     const maxDragonGoldInBallot = Ballots.getMaxDragonGold(ballotDetails.options)
@@ -172,7 +175,8 @@ export class GovernanceServiceDsl implements GovernanceService {
                         inquiry: ballotDetails.inquiry,
                         hasVoted: vote !== "none",
                         inquiryDescription: ballotDetails.inquiryDescription,
-                        options: options
+                        options: options,
+                        url: ballotDetails.url
                     }
                 }
             }
@@ -202,7 +206,7 @@ export class GovernanceServiceDsl implements GovernanceService {
        return await Ballots.close(ballotId)
     }
 
-    async voteForBallot(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<models.voteResponse> {
+    async voteForBallot(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<models.VoteResponse> {
         return await Ballots.vote(ballotId, optionIndex, userId, dragonGold)
     }
 

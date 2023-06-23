@@ -8,6 +8,7 @@ export class Ballot extends Model {
     declare inquiry: string
     declare description: string
     declare state: BallotState
+    declare url?: string
 
     /**
      * `optionsArray` is a workaround to store arrays of strings since Sequelize
@@ -70,8 +71,11 @@ export const BallotTableAttributes = {
             type: DataTypes.TEXT,
             allowNull: false,
         }
+    },
+    url: {
+        type: DataTypes.STRING,
+        allowNull: true,
     }
-    
 }
 
 export const BallotVotesTableName = "governance_ballot_votes"
