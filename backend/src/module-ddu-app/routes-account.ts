@@ -154,11 +154,11 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         response.status(200).json(result)
     }))
 
-    /* router.get("/assets/test/grant", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+    router.get("/assets/test/grant", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const userId: string = request.auth!.userId
         const result = await accountService.grantTest(userId)
         response.status(200).json({status: "ok"})
-    }) )*/
+    }) )
 
     router.get("/governance/open", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)

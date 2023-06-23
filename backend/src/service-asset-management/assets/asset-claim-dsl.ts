@@ -74,9 +74,6 @@ export class AssetClaimDsl {
 	}
 
 	public async claim(userId: string, stakeAddress: string, address: string, asset: { unit: string, policyId: string, quantity?: string}, logger?: LoggingContext): Promise<ClaimResult> {
-		const policyResponse = await this.secureSigningService.policy(asset.policyId, logger)
-		if (policyResponse.status == "unknown-policy") 
-			return failure("unknown-policy")
 		const transaction = await this.db.transaction()
 		const availableAssets = await OffChainStore.findOne({ where: { userId, policyId: asset.policyId, unit: asset.unit }, transaction })
 		const quantityToClaim = (asset.quantity ?? availableAssets?.quantity) ?? "0"
@@ -102,14 +99,22 @@ export class AssetClaimDsl {
 				userId, quantity: quantityToClaim, policyId: asset.policyId, unit: asset.unit, txHash }, { transaction })
 			).claimId
 		}
-
-		const builtTxResponse = await this.blockchainService.buildMintTx(address, policyResponse.policy as LucidNativeScript, asset.unit, quantityToClaim, {feeAddress: this.config.feeAddress, feeAmount: this.config.feeAmount})
-		if (builtTxResponse.status !== "ok") return failure(builtTxResponse.reason) 
-		const claimId = await createClaim(builtTxResponse.value.txHash)
-		await updateAvailableAssets()
-		await transaction.commit()
-		logger?.log.info({ message: "AssetClaimDsl.claimStatus:created", claimId, policyId: asset.policyId, unit: asset.unit, quantity: asset.quantity })
-		return success({ claimId, tx: builtTxResponse.value.rawTransaction })
+		try{
+			const builtTxResponse = await this.blockchainService.buildMintTx(address, {policyId: asset.policyId, unit: asset.unit}, quantityToClaim, {feeAddress: this.config.feeAddress, feeAmount: this.config.feeAmount})
+			if (builtTxResponse.status !== "ok"){
+				await transaction.rollback()
+				return failure(builtTxResponse.reason)
+			}  
+			const claimId = await createClaim(builtTxResponse.value.txHash)
+			await updateAvailableAssets()
+			await transaction.commit()
+			logger?.log.info({ message: "AssetClaimDsl.claimStatus:created", claimId, policyId: asset.policyId, unit: asset.unit, quantity: asset.quantity })
+			return success({ claimId, tx: builtTxResponse.value.rawTransaction })
+		}catch(e: any){
+			await transaction.rollback()
+			return failure(e.message)
+		}
+		
 	}
 
     async submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResult> {

@@ -10,7 +10,7 @@ export const blockchainEnpoints: models.Endpoints = {
     "getWalletAuthenticationSelfTx": {path:"/get-assosiation-tx", method: "POST"},
     "getTxHashFromTransaction": {path: "/get-tx-hash", method: "POST"},
     "submitTransaction": {path: "/submit-tx", method: "POST"},
-    "buildMintTx": {path: "get-mint-tx", method: "POST"}
+    "buildMintTx": {path: "/get-mint-tx", method: "POST"}
 }
 
 export interface BlockchainService {

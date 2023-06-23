@@ -21,8 +21,8 @@ export const blockchainRoutes = (blockchainService: BlockchainService) => {
     }))
 
     router.post(blockchainEnpoints.buildMintTx.path, requestCatchError(async (request: Request, response: Response) => {
-        const {address, unit, quantityToMint, feeInfo} = request.body
-        const txInfo = await blockchainService.buildMintTx(address, unit, quantityToMint, feeInfo)
+        const {address, asset, quantityToClaim, feeInfo} = request.body
+        const txInfo = await blockchainService.buildMintTx(address, asset, quantityToClaim, feeInfo)
         generateHttpResponse(txInfo, response)
     }))
 

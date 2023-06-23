@@ -39,13 +39,13 @@ export class BlockchainServiceDsl implements BlockchainService {
         return response.data as TransactionHashReponse
     }
 
-    async buildMintTx(address: string, policy: LucidNativeScript, unit: string, quantityToMint: string, feeInfo?: { feeAddress: string; feeAmount: string; } | undefined): Promise<BuildTxResponse> {
-        const response = await this.callImplementation(blockchainEnpoints.buildMintTx, {address, policy, unit, quantityToMint, feeInfo})
+    async buildMintTx(address: string, asset: {policyId: string, unit:string}, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<BuildTxResponse> {
+        const response = await this.callImplementation(blockchainEnpoints.buildMintTx, {address, asset, quantityToClaim, feeInfo})
         return response.data as BuildTxResponse
     }
 
-    async submitTransaction(serilizedTransaction: string): Promise<SubmitTransactionReponse> {
-        const response = await this.callImplementation(blockchainEnpoints.getTxHashFromTransaction, {serilizedTransaction})
+    async submitTransaction(serilizedSignedTransaction: string): Promise<SubmitTransactionReponse> {
+        const response = await this.callImplementation(blockchainEnpoints.submitTransaction, {serilizedSignedTransaction})
         return response.data as SubmitTransactionReponse
     }
 

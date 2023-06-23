@@ -6,7 +6,6 @@ export class AES256 {
 
 	constructor(options: { salt: crypto.BinaryLike, password: crypto.BinaryLike }) {
 		this.key = crypto.scryptSync(options.password, options.salt, 32)
-		console.log(this.key.toString('hex'))
 	}
 
 	encrypt(text: string): string {
