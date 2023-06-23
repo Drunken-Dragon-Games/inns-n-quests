@@ -7,7 +7,7 @@ export interface GovernanceService {
 
     health(): Promise<HealthStatus>
 
-    addBallot(ballot: models.registerBallotType):Promise<models.RegisterBallotResponse>
+    addBallot(ballot: models.BallotRegistration): Promise<models.RegisterBallotResponse>
 
     getAdminBallotCollection(): Promise<models.AdminBallotCollection>
 
@@ -23,5 +23,5 @@ export interface GovernanceService {
 
     closeBallot(ballotId: string): Promise<models.CloseBallotResponse>
 
-    voteForBallot(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<models.voteResponse>
+    voteForBallot(ballotId: string, optionIndex: number, userId: string, dragonGold: string): Promise<models.VoteResponse>
 }
