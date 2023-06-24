@@ -1,5 +1,6 @@
 {
     "tasks": {
-        "dev": "deno run --allow-net --allow-read --allow-env ./src/server.ts"
+        "dev": "deno run --allow-net --allow-read --allow-env ./src/server.ts",
+        "secrets:replace": "deno run --allow-read --allow-write --allow-env ./secret-replace.ts"
     }
 }
