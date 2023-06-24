@@ -100,7 +100,7 @@ test("Retrieve combined assets", async () => {
     ])
 })
 
-/*
+/* TODO: THESE NEED TO BE REWRITTEN ACCOUNTING FOR THE NEW CLAIMS MODEL
 test("Claim assets: ok", async () => {
     const user = await dsl.createUser()
     await dsl.grantTestToken(user, "200")
