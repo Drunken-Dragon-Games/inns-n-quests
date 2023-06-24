@@ -1,4 +1,4 @@
-import { Lucid } from "../../../deps.ts"
+import { Lucid } from "../../deps.ts"
 import { SecureSigningService } from "../../service-secure-signing/service-spec.ts"
 import { Resolution, fail, succeed } from "../../utypes.ts"
 import { CardanoTransactionInfo, SubmitTransactionReponse, TransactionHashReponse } from "../models.ts"

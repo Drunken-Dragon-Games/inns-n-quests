@@ -1,4 +1,4 @@
-import { Lucid } from "../../deps.ts"
+import { Lucid } from "../deps.ts"
 import { Resolution } from "../utypes.ts"
 
 export interface SecureSigningService {

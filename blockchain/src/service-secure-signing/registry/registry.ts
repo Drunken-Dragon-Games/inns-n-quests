@@ -1,4 +1,4 @@
-import { Lucid, cbor } from "../../../deps.ts"
+import { Lucid, cbor } from "../../deps.ts"
 import { Resolution } from "../../utypes.ts"
 import { AES256 } from "./aes256.ts"
 

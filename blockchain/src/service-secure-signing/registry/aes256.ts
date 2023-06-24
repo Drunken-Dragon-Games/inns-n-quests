@@ -1,4 +1,4 @@
-import { hex } from "../../../deps.ts"
+import { hex } from "../../deps.ts"
 
 const strToUint8=(s:string)=>new TextEncoder().encode(s)
 const uint8ToStr=(d:Uint8Array)=>new TextDecoder().decode(d)

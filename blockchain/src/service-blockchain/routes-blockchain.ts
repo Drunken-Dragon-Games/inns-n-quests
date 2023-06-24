@@ -1,4 +1,4 @@
-import { Router, Response, NextFunction, Request } from "../../deps.ts"
+import { Router, Response, NextFunction, Request } from "../deps.ts"
 import { requestCatchError } from "../catch-error.ts"
 import { Resolution } from "../utypes.ts"
 import { BlockchainService, blockchainEnpoints } from "./service-spec.ts"

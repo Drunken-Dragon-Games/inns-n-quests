@@ -1,4 +1,4 @@
-import { Lucid, cookieParser, express, compression } from "../deps.ts"
+import { Lucid, cookieParser, express, compression } from "./deps.ts"
 import { TransactionDSL } from "./service-blockchain/lucid-dsl/dsl.ts"
 import { blockchainRoutes } from "./service-blockchain/routes-blockchain.ts"
 import { servicePrefix } from "./service-blockchain/service-spec.ts"
@@ -32,6 +32,8 @@ export const app = async () => {
   app.use(`/deno/${servicePrefix}`, blockchainRoutes(blockchainService))
 
   app.listen(port, "0.0.0.0", () => {
-    console.log(`Server running on port ${port}...`)
+    console.log(`Blockchain TX Service running on port ${port}...`)
   })
 }
+
+await app()

@@ -1,4 +1,4 @@
-import { Lucid } from "../../deps.ts"
+import { Lucid } from "../deps.ts"
 import { stringOrError } from "../utils.ts"
 import { Resolution } from "../utypes.ts"
 import { AES256 } from "./registry/aes256.ts"
