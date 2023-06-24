@@ -82,6 +82,7 @@ jobs:
         REGISTRY: registry.digitalocean.com/ddu-cr
         REPOSITORY: ddu-blockchain
         IMAGE_TAG: preprod # a-${{ steps.date.outputs.date }}-${{ github.sha }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY_PREPROD }}
       run: |
         echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
         deno task secrets:replace
