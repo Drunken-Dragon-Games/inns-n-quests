@@ -7,6 +7,8 @@ export type HealthStatus = {
     }[]
 }
 
+export type AssosiationOutcome = { ctype: "succeded"} | {ctype: "pending"} | {ctype: "failed", reason: string}
+
 export type DeviceType = "Browser" | "Desktop" | "Mobile"
 
 export type AuthType = "Sig" | "Discord" | "Email" | "Development"
@@ -67,6 +69,10 @@ export type CreateAuthStateResult
 
 export type VerifyAuthStateResult
     = { status: "ok", stakeAddress: string }
+    | { status: "invalid", reason: string }
+
+export type CompleteAuthStateResult
+    = { status: "ok"}
     | { status: "invalid", reason: string }
 
 export type AuthenticationResult

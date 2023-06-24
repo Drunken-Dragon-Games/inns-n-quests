@@ -34,11 +34,12 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
-    async createAuthTxState(userId: string, stakeAddress: string, txId: string, logger?: LoggingContext): Promise<models.CreateAuthStateResult> {
+    async createAuthTxState(userId: string, stakeAddress: string, txHash: string, logger?: LoggingContext): Promise<models.CreateAuthStateResult> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.info(`creating auth Tx for user ${userId} for stake address ${stakeAddress}`)
-        const response = await this.base.createAuthTxState(userId, stakeAddress, txId, logger)
-        serviceLogger?.info(`creating auth Tx status: ${response.status} for tx ${txId}`)
+        const response = await this.base.createAuthTxState(userId, stakeAddress, txHash, logger)
+        if (response.status !== "ok") serviceLogger?.error(`could not create authTx state reason: ${response.reason}`)
+        else serviceLogger?.info(`succesfully created Auth tx with id ${response.authStateId}`)
         return response
     }
 
@@ -47,6 +48,14 @@ export class IdentityServiceLogging implements IdentityService {
         serviceLogger?.info(`verifying auth attempt ${authStateId} with tx`)
         const response = await this.base.verifyAuthState(authStateId, tx, userId, logger)
         serviceLogger?.info(`verifying authState in db status: ${response.status} for user ${userId}`)
+        return response
+    }
+
+    async completeAuthState(authStateId: string, status: models.AssosiationOutcome, logger?: LoggingContext | undefined): Promise<models.CompleteAuthStateResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info(`updatting ${authStateId}`)
+        const response = await this.base.completeAuthState(authStateId, status, logger)
+        serviceLogger?.info(`updating authState in db status: ${response.status}`)
         return response
     }
 

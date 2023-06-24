@@ -12,8 +12,8 @@ export interface AccountService {
     getAssociationNonce(stakeAddress: string, logger?: LoggingContext): Promise<GetAssociationNonceResult>
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string, logger?: LoggingContext): Promise<SubmitAssociationSignatureResult>
     getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult>
-    claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
-    claimSignAndSubbmit(witness: string, tx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
+    claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
+    claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult>
     claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult>
     grantTest(userId: string, logger?: LoggingContext): Promise<void>
@@ -22,8 +22,8 @@ export interface AccountService {
     voteForBallot(userId: string, ballotId: string, optionIndex: number, logger?: LoggingContext): Promise<VoteResult>
     getPublicBallots(logger?: LoggingContext): Promise<PublicBallotResult>
     getUserBallots(userId: string, logger?: LoggingContext):Promise<UserBallotResult>
-    getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[], logger?: LoggingContext): Promise<CreateAssociationTxResult>
-    submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
+    getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult>
+    submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string,  logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
 }
 
@@ -61,7 +61,7 @@ export type GetDragonSilverClaimsResult
     | { status: "invalid", reason: string }
 
 export type CreateAssociationTxResult
-    = { status: "ok", txId: string, authStateId: string }
+    = { status: "ok", rawTx: string, authStateId: string }
     | { status: "invalid", reason: string }
 
 export type AssociationNonceResult = ClaimSignAndSubbmitResult

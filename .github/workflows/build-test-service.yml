@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
+        deno-version: [1.34.x]
 
     services:
       postgres:
@@ -52,6 +53,16 @@ jobs:
         npm ci
         npm run build
         npm test
+
+    - name: Setup Deno ${{ matrix.deno-version }}
+      uses: denoland/setup-deno@v1.1.2
+      with:
+        deno-version: ${{ matrix.deno-version }}
+    
+    - name: Blockchain - build and test
+      working-directory: blockchain
+      run: |
+        deno lint src --rules-exclude=no-unused-vars,require-await
 
   #  - name: Frontend - build and test
   #    working-directory: frontend

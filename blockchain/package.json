@@ -1,0 +1,8 @@
+{
+  "name": "ddu-blockchain",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "The Adventurers of Drunken Dragon Entertainment",
+  "description": "DDU off-chain component that streamlines the process of managing Cardano interactions",
+  "repository": "https://github.com/Drunken-Dragon-Games/inns-n-quests"
+}
