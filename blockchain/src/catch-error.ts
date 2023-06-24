@@ -1,5 +1,4 @@
-import { NextFunction, Response } from "npm:express@4.18.2"
-import { Request } from "npm:express-jwt@8.4.1"
+import { NextFunction, Request, Response } from "../deps.ts"
 
 export const requestCatchError = (handler: (request: Request, response: Response) => Promise<void>) => async (request: Request, response: Response, next: NextFunction): Promise<void> => {
     try {

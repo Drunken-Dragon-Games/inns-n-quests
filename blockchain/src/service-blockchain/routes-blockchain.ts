@@ -1,5 +1,4 @@
-import {Router, Response, NextFunction} from "npm:express@4.18.2"
-import { Request } from "npm:express-jwt@8.4.1"
+import { Router, Response, NextFunction, Request } from "../../deps.ts"
 import { requestCatchError } from "../catch-error.ts"
 import { Resolution } from "../utypes.ts"
 import { BlockchainService, blockchainEnpoints } from "./service-spec.ts"

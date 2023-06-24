@@ -1,16 +1,15 @@
-import { Lucid, NativeScript, Transaction, fromText} from "https://deno.land/x/lucid@0.10.6/mod.ts"
-import { Resolution, succeed, fail } from "../../utypes.ts"
-import { CardanoTransactionInfo, TransactionHashReponse, SubmitTransactionReponse } from "../models.ts"
+import { Lucid } from "../../../deps.ts"
 import { SecureSigningService } from "../../service-secure-signing/service-spec.ts"
+import { Resolution, fail, succeed } from "../../utypes.ts"
+import { CardanoTransactionInfo, SubmitTransactionReponse, TransactionHashReponse } from "../models.ts"
 
 const validityRange = 1000 * 60 * 10
 
 export class TransactionDSL {
 
-    constructor(private lucidFactory: () => Promise<Lucid>,
+    constructor(private lucidFactory: () => Promise<Lucid.Lucid>,
                 private secureSigningService: SecureSigningService
     ){}
-    
 
     async buildSelfTx (address: string): Promise<Resolution<CardanoTransactionInfo>> {
         try{
@@ -36,7 +35,7 @@ export class TransactionDSL {
         const lucidInstance = await this.lucidFactory()
         lucidInstance.selectWalletFrom({ address })
 
-        const unit = asset.policyId + fromText(asset.unit)
+        const unit = asset.policyId + Lucid.fromText(asset.unit)
         const tx = lucidInstance.newTx()
             .mintAssets({ [unit]: BigInt(quantityToClaim) })
             .payToAddress(address, { [unit]: BigInt(quantityToClaim) })
@@ -56,7 +55,7 @@ export class TransactionDSL {
         return succeed({rawTransaction: signedTransaction.value, txHash})
     }
 
-    async hashSerializedTransaction (serializedTrasnaction: Transaction): Promise<TransactionHashReponse> {
+    async hashSerializedTransaction (serializedTrasnaction: Lucid.Transaction): Promise<TransactionHashReponse> {
         try{
             const lucidInstance = await this.lucidFactory()
             const tx = lucidInstance.fromTx(serializedTrasnaction)
@@ -68,7 +67,7 @@ export class TransactionDSL {
         }
     }
 
-    async submitSerializedTransaction (serializedTrasnaction: Transaction): Promise<SubmitTransactionReponse> {
+    async submitSerializedTransaction (serializedTrasnaction: Lucid.Transaction): Promise<SubmitTransactionReponse> {
         try{
             const lucidInstance = await this.lucidFactory()
             const tx = lucidInstance.fromTx(serializedTrasnaction)

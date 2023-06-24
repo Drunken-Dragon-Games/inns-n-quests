@@ -1,7 +1,7 @@
-import { Script, Transaction } from "https://deno.land/x/lucid@0.10.6/mod.ts";
-import { Resolution } from "../utypes.ts";
+import { Lucid } from "../../deps.ts"
+import { Resolution } from "../utypes.ts"
 
 export interface SecureSigningService {
-    policy(policyId: string): Resolution<Script>
-    signWithPolicy(policyId: string, transaction: Transaction): Promise<Resolution<string>> 
+    policy(policyId: string): Resolution<Lucid.Script>
+    signWithPolicy(policyId: string, transaction: Lucid.Transaction): Promise<Resolution<string>> 
 }

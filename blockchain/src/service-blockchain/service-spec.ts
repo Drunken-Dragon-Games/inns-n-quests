@@ -1,6 +1,5 @@
 // IMPORTANT: This file has a corresponding twin in the backend.
 // Ensure that both files are kept in sync manually to maintain equality.
-import { NativeScript } from "https://deno.land/x/lucid@0.10.6/mod.ts"
 import * as models from "./models.ts"
 
 export const servicePrefix = "blockchain"

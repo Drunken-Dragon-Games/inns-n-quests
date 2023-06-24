@@ -1,13 +1,13 @@
-import { Lucid, Script, Transaction } from "https://deno.land/x/lucid@0.10.6/mod.ts"
+import { Lucid } from "../../deps.ts"
+import { stringOrError } from "../utils.ts"
+import { Resolution } from "../utypes.ts"
+import { AES256 } from "./registry/aes256.ts"
 import Registry from "./registry/registry.ts"
 import { SecureSigningService } from "./service-spec.ts"
-import { stringOrError } from "../utils.ts"
-import { Resolution } from "../utypes.ts";
-import { AES256 } from "./registry/aes256.ts";
 
 export type SecureSigningServiceConfig = { 
     initialRegistry: string,
-    lucidFactory: () => Promise<Lucid>
+    lucidFactory: () => Promise<Lucid.Lucid>
 }
 
 
@@ -26,7 +26,7 @@ export class SecureSigningServiceDsl implements SecureSigningService {
         return new SecureSigningServiceDsl(registry)
     }
 
-    static async loadFromEnv(aes256: AES256, lucidFactory: () => Promise<Lucid>): Promise<SecureSigningService> {
+    static async loadFromEnv(aes256: AES256, lucidFactory: () => Promise<Lucid.Lucid>): Promise<SecureSigningService> {
         return SecureSigningServiceDsl.loadFromConfig(aes256,
             { 
                 initialRegistry: await stringOrError("ENCRYPTED_REGISTRY"),
@@ -34,11 +34,11 @@ export class SecureSigningServiceDsl implements SecureSigningService {
             })
     }
 
-    policy(policyId: string): Resolution<Script> {
+    policy(policyId: string): Resolution<Lucid.Script> {
         return this.registry.policy(policyId)
     }
 
-    async signWithPolicy(policyId: string, transaction: Transaction): Promise<Resolution<string>> {
+    async signWithPolicy(policyId: string, transaction: Lucid.Transaction): Promise<Resolution<string>> {
         try {
             const response = await this.registry.signWithPolicy(policyId, transaction)
             if (response.status !== "ok") return {status: "invalid", reason: `could not sign with policy reason: ${response.reason}`}

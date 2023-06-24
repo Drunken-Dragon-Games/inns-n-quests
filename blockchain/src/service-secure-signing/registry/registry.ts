@@ -1,16 +1,14 @@
-import { Lucid, Script, Transaction } from "https://deno.land/x/lucid@0.10.6/mod.ts"
-
-import cbor from "npm:cbor@8.1.0"
-import { AES256 } from "./aes256.ts"
+import { Lucid, cbor } from "../../../deps.ts"
 import { Resolution } from "../../utypes.ts"
+import { AES256 } from "./aes256.ts"
 
 type PrivateKeyBech32 = string
-export type RegistryCache = {[policyId: string]: {privateKey: PrivateKeyBech32, mintingPolicy: Script}}
+export type RegistryCache = {[policyId: string]: {privateKey: PrivateKeyBech32, mintingPolicy: Lucid.Script}}
 
 export default class Registry {
     private cache: RegistryCache = {}
 
-    constructor( private lucidFactory: () => Promise<Lucid>, private aes256: AES256){}
+    constructor( private lucidFactory: () => Promise<Lucid.Lucid>, private aes256: AES256){}
 
     public getCache(): RegistryCache {
         return this.cache
@@ -24,7 +22,7 @@ export default class Registry {
         }
     }
 
-    public async signWithPolicy(policyId: string, transaction: Transaction): Promise<Resolution<string>>{
+    public async signWithPolicy(policyId: string, transaction: Lucid.Transaction): Promise<Resolution<string>>{
         const info = this.cache[policyId]
         if (info == undefined) return {status: "invalid", reason: "could not find policy in registry"}
         const lucidInstance = await this.lucidFactory()
@@ -34,7 +32,7 @@ export default class Registry {
         return {status:"ok", value: signedTx.toString()}
     }
 
-    public policy(policyId: string): Resolution<Script> {
+    public policy(policyId: string): Resolution<Lucid.Script> {
         const info = this.cache[policyId]
         if (info == undefined) return {status: "invalid", reason: "could not find policy in registry"}
         return {status: "ok", value: info.mintingPolicy}

@@ -1,6 +1,5 @@
-import { Lucid, NativeScript } from "https://deno.land/x/lucid@0.10.6/mod.ts";
 import { TransactionDSL } from "./lucid-dsl/dsl.ts";
-import { BuildTxResponse, HealthStatus, TransactionHashReponse, SubmitTransactionReponse } from "./models.ts";
+import { BuildTxResponse, HealthStatus, SubmitTransactionReponse, TransactionHashReponse } from "./models.ts";
 import { BlockchainService } from "./service-spec.ts";
 
 export type BlockchainServiceConfig = {
@@ -30,8 +29,4 @@ export class BlockchainServiceDsl implements BlockchainService {
     async submitTransaction(serilizedTransaction: string): Promise<SubmitTransactionReponse> {
         return await this.transactionDSL.submitSerializedTransaction(serilizedTransaction)
     }
-
-
-
 }
-
