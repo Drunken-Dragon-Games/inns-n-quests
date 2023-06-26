@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { QueryInterface, Sequelize } from "sequelize"
 import { validateStakeAddress } from "./cardano/address"
-import { createAuthTxState, generateNonce, removeState, updateAuthState, validateAuthState, verifySig } from "./cardano/signature-verification"
+import { createAuthTxState, generateNonce, updateAuthState, validateAuthState, verifySig } from "./cardano/signature-verification"
 import { verifyDiscordAuthCode, DiscordConfig, validateDiscordSession, genDiscordTokens } from "./discord/code-verification"
 import { Users } from "./users/users"
 import { Sessions, SessionsConfig } from "./sessions/sessions";
@@ -212,17 +212,6 @@ export class IdentityServiceDsl implements IdentityService {
 
     async getTotalUsers(): Promise<number> {
         return await Users.total()
-    }
-
-    async cleanAssociationTx(userId: string, authStateId: string, logger: LoggingContext): Promise<CleanAssociationTxResult> {
-        try{
-            const result = await removeState(authStateId, logger)
-            if (result.status != "ok") logger.error(`error when tring to remove auth state ${authStateId}, reason: ${result.reason}`)
-            return result
-        }catch(e: any){
-            return { status: "invalid", reason: "could not comunicate wiht DB" }
-        }
-
     }
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<RefreshResult> {

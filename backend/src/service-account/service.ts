@@ -144,8 +144,8 @@ export class AccountServiceDsl implements AccountService {
         
     }
 
-    async cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
-        return this.identityService.cleanAssociationTx(userId, authStateId, logger)
+    async cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
+        return await this.identityService.completeAuthState(authStateId, {ctype: "failed", reason: `frontend exeption: ${error}`})
     }
 
     async getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult> {

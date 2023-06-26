@@ -48,8 +48,8 @@ export const AccountBackend = {
         return result.data
     },
 
-    async cleanAssociationState(authStateId: string): Promise<CleanAssociationTxResult>{
-        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId})
+    async cleanAssociationState(authStateId: string, error: string): Promise<CleanAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId, error})
         return result.data
     },
 

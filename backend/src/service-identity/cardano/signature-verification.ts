@@ -62,16 +62,3 @@ export const updateAuthState = async (authStateId: string, status: AssosiationOu
         return {status: "invalid", reason: e.message}
     }
 }
-
-export const removeState = async (authStateId: string, logger?: LoggingContext): Promise<{status: "ok"} | {status: "invalid", reason: string}> => {
-    try {
-        const instance = await TransactionVerificationState.findByPk(authStateId)
-        if (!instance) throw new Error("No State found with provided Id")
-        await instance.destroy()
-        return {status: "ok"}
-    }catch(e: any){
-        logger?.log.error(e.message ?? e)
-        return {status: "invalid", reason: e.message}
-    }
-    
-}
