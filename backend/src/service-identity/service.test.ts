@@ -4,8 +4,8 @@ import { User } from "./users/users-db"
 import { IdentityServiceDsl } from "./service"
 import { IdentityService } from "./service-spec";
 import { CardanoNetwork, Wallet } from "../tools-cardano";
-import { success, failure, unit } from "../tools-utils";
-import { AuthenticationTokens, UserInfo, UserFullInfo } from "./models";
+import { ssuccess, sfailure, unit, success } from "../tools-utils";
+import { AuthenticationTokens, UserInfo, UserFullInfo, AuthenticationResult } from "./models";
 import { expectResponse } from "../tools-utils/api-expectations";
 import { connectToDB, DBConfig } from "../tools-database";
 
@@ -35,13 +35,15 @@ afterEach(async () => {
     await service.unloadDatabaseModels()
 })
 
-const nonceOk = (account: Wallet): Promise<string> => 
-    expectResponse(
+const nonceOk = async (account: Wallet): Promise<string> => {
+    const nonce: string = await expectResponse(
         service.createSigNonce(account.stakeAddress().to_address().to_bech32()),
         (response) => 
             response.status === "ok" ? 
-            success(response.nonce) : 
-            failure(`Expected 'ok' from createSigNonce but got ${JSON.stringify(response)}`))
+            ssuccess(response.nonce) : 
+            sfailure(`Expected 'ok' from createSigNonce but got ${JSON.stringify(response)}`))
+    return nonce
+}
 
 const authenticateSigOk = (account: Wallet, nonce: string): Promise<AuthenticationTokens> => {
     const { signature, key } = account.signData(nonce)
@@ -49,8 +51,8 @@ const authenticateSigOk = (account: Wallet, nonce: string): Promise<Authenticati
         service.authenticate({ ctype: "sig", signedNonce: signature, nonce, publicKey: key, deviceType: "Browser" }),
         (response) => 
             response.status === "ok" ? 
-            success(response.tokens) : 
-            failure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess(response.tokens) : 
+            sfailure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
 }
 
 const createSigAccount = async (): Promise<{ wallet: Wallet, tokens: AuthenticationTokens }> => {
@@ -96,12 +98,12 @@ const createDiscordAccount = async (username: string = ""): Promise<Authenticati
             }
         }
     });
-    const tokens = await expectResponse(
+    const tokens: AuthenticationTokens = await expectResponse(
         service.authenticate({ ctype: "discord", authCode: discordAuthCode, deviceType: "Browser"}),
         (response) => 
             response.status === "ok" ? 
-            success(response.tokens) : 
-            failure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess(response.tokens) : 
+            sfailure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
     return tokens 
 }
 
@@ -128,15 +130,15 @@ test("associate wallet: ok", async () => {
         service.createSigNonce(stakeAddress),
         (response) => 
             response.status === "ok" ? 
-            success(response.nonce) : 
-            failure(`Expected 'ok' from createSigNonce but got ${JSON.stringify(response)}`))
+            ssuccess(response.nonce) : 
+            sfailure(`Expected 'ok' from createSigNonce but got ${JSON.stringify(response)}`))
     const { signature, key } = account.signData(nonce)
     await expectResponse(
         service.associate( tokens.session.userId, { ctype: "sig", signedNonce: signature, nonce, publicKey: key, deviceType: "Browser" } ),
         (response) => 
             response.status === "ok" ? 
-            success({}) : 
-            failure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess({}) : 
+            sfailure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
 })
 
 
@@ -149,15 +151,15 @@ test("associate wallet: wallet Used", async () => {
         service.createSigNonce(stakeAddress),
         (response) => 
             response.status === "ok" ? 
-            success(response.nonce) : 
-            failure(`Expected 'ok' from createSigNonce but got ${JSON.stringify(response)}`))
+            ssuccess(response.nonce) : 
+            sfailure(`Expected 'ok' from createSigNonce but got ${JSON.stringify(response)}`))
     const { signature, key } = account.signData(nonce)
     await expectResponse(
         service.associate( tokens.session.userId, { ctype: "sig", signedNonce: signature, nonce, publicKey: key, deviceType: "Browser" } ),
         (response) => 
             response.status === "stake-address-used"? 
-            success({}) : 
-            failure(`Expected 'stake-address-used' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess({}) : 
+            sfailure(`Expected 'stake-address-used' from expectTokens ${JSON.stringify(response)}`))
 })
 
 test("associate discord: ok", async () => {
@@ -201,8 +203,8 @@ test("associate discord: ok", async () => {
         service.associate( account.tokens.session.userId, { ctype: "discord",  authCode: discordAuthCode, deviceType: "Browser" } ),
         (response) => 
             response.status === "ok" ? 
-            success({}) : 
-            failure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess({}) : 
+            sfailure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
 })
 
 test("associate discord: discord used", async () => {
@@ -213,8 +215,8 @@ test("associate discord: discord used", async () => {
         service.associate( account.tokens.session.userId, { ctype: "discord",  authCode: discordAuthCode, deviceType: "Browser" } ),
         (response) => 
             response.status === "discord-used" ? 
-            success({}) : 
-            failure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess({}) : 
+            sfailure(`Expected 'ok' from expectTokens ${JSON.stringify(response)}`))
 })
 
 test("authenticate sig: bad - bad address", async () => {
@@ -222,8 +224,8 @@ test("authenticate sig: bad - bad address", async () => {
         service.createSigNonce("whatever"),
         (response) => 
             response.status === "bad-address" ? 
-            success(unit) : 
-            failure(`Expected 'bad-address' from createSigNonce but got ${JSON.stringify(response)}`))
+            ssuccess(unit) : 
+            sfailure(`Expected 'bad-address' from createSigNonce but got ${JSON.stringify(response)}`))
 })
 
 test("authenticate sig: bad - bad nonce or bad signature", async () => {
@@ -233,30 +235,30 @@ test("authenticate sig: bad - bad nonce or bad signature", async () => {
         service.createSigNonce(stakeAddress),
         (response) => 
             response.status === "ok" ? 
-            success(response.nonce) : 
-            failure(`Expected 'ok' from createSigNonce but got ${JSON.stringify(response)}`))
+            ssuccess(response.nonce) : 
+            sfailure(`Expected 'ok' from createSigNonce but got ${JSON.stringify(response)}`))
     const sig1 = account.signData(nonce)
     await expectResponse(
         service.authenticate({ ctype: "sig", signedNonce: sig1.signature, nonce: "whatever", publicKey: sig1.key, deviceType: "Browser" }),
         (response) => 
             response.status === "bad-credentials" ? 
-            success(unit) : 
-            failure(`Expected 'bad-credentials' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess(unit) : 
+            sfailure(`Expected 'bad-credentials' from expectTokens ${JSON.stringify(response)}`))
     const sig2 = account.signData("whatever")
     await expectResponse(
         service.authenticate({ ctype: "sig", signedNonce: sig2.signature, nonce, publicKey: sig2.key, deviceType: "Browser" }),
         (response) => 
             response.status === "bad-credentials" ? 
-            success(unit) : 
-            failure(`Expected 'bad-credentials' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess(unit) : 
+            sfailure(`Expected 'bad-credentials' from expectTokens ${JSON.stringify(response)}`))
     const account2 = Wallet.generate(network, "password")
     const sig3 = account2.signData(nonce)
     await expectResponse(
         service.authenticate({ ctype: "sig", signedNonce: sig3.signature, nonce, publicKey: sig3.key, deviceType: "Browser" }),
         (response) => 
             response.status === "bad-credentials" ? 
-            success(unit) : 
-            failure(`Expected 'bad-credentials' from expectTokens ${JSON.stringify(response)}`))
+            ssuccess(unit) : 
+            sfailure(`Expected 'bad-credentials' from expectTokens ${JSON.stringify(response)}`))
 })
 
 test("sessions: ok", async () => {
@@ -268,8 +270,8 @@ test("sessions: ok", async () => {
         service.refresh(account.tokens.session.sessionId, account.tokens.refreshToken),
         (response) =>
             response.status === "ok" ?
-            success(response.tokens) :
-            failure(`Expected 'ok' from refresh but got ${response}`))
+            ssuccess(response.tokens) :
+            sfailure(`Expected 'ok' from refresh but got ${response}`))
     expect(account.tokens.session.sessionId).not.toBe(newSession.session.sessionId)
     expect(account.tokens.refreshToken).not.toBe(newSession.refreshToken)
     const newSessionsInfo = await service.listSessions(account.tokens.session.userId)
@@ -282,8 +284,8 @@ test("signout: ok", async () => {
         service.signout(account.tokens.session.sessionId),
         (response) =>
             response.status === "ok" ?
-            success(unit) :
-            failure(`Expected 'ok' from signout but got ${response}`))
+            ssuccess(unit) :
+            sfailure(`Expected 'ok' from signout but got ${response}`))
     const newSessionsInfo = await service.listSessions(account.tokens.session.userId)
     expect(newSessionsInfo.sessions.map(s => s.sessionId)).not.toContain(account.tokens.session.sessionId)
 })
@@ -294,15 +296,15 @@ test("resolve user: ok", async () => {
         service.resolveUser({ ctype: "user-id", userId: account.tokens.session.userId}),
         (response) =>
             response.status === "ok" ?
-            success(response.info) :
-            failure(`Expected 'ok' from resolveUser but got ${response}`))
+            ssuccess(response.info) :
+            sfailure(`Expected 'ok' from resolveUser but got ${response}`))
     expect(userInfo.userId).toBe(account.tokens.session.userId)
     const userInfo2: UserInfo = await expectResponse(
         service.resolveUser({ ctype: "nickname", nickname: userInfo.nickname }),
         (response) =>
             response.status === "ok" ?
-            success(response.info) :
-            failure(`Expected 'ok' from resolveUser but got ${response}`))
+            ssuccess(response.info) :
+            sfailure(`Expected 'ok' from resolveUser but got ${response}`))
     expect(userInfo.nickname).toBe(userInfo2.nickname)
     expect(userInfo.userId).toBe(userInfo2.userId)
 })
@@ -316,8 +318,8 @@ test("resolve discord session: ok", async () => {
         service.resolveSession(tokens.session.sessionId),
         (response) =>
             response.status === "ok" ?
-            success(response.info) :
-            failure(`Expected 'ok' from resolveUser but got ${response}`))
+            ssuccess(response.info) :
+            sfailure(`Expected 'ok' from resolveUser but got ${response}`))
     expect(tokens.session.userId).toBe(userInfo.userId)
     const updatedUser = await User.findOne({where: {userId: tokens.session.userId}})
     expect(updatedUser?.discordRefreshToken).toBeDefined()
@@ -333,8 +335,8 @@ test("resolve wallet session: ok", async () => {
         service.resolveSession(account.tokens.session.sessionId),
         (response) =>
             response.status === "ok" ?
-            success(response.info) :
-            failure(`Expected 'ok' from resolveUser but got ${response}`))
+            ssuccess(response.info) :
+            sfailure(`Expected 'ok' from resolveUser but got ${response}`))
     expect(account.tokens.session.userId).toBe(userInfo.userId)
     const updatedUser = await User.findOne({where: {userId: account.tokens.session.userId}})
     expect(updatedUser?.discordRefreshToken).toBeDefined()
@@ -347,20 +349,20 @@ test("update user: ok", async () => {
         service.resolveUser({ ctype: "user-id", userId: account.tokens.session.userId}),
         (response) =>
             response.status === "ok" ?
-            success(response.info) :
-            failure(`Expected 'ok' from resolveUser but got ${response}`))
+            ssuccess(response.info) :
+            sfailure(`Expected 'ok' from resolveUser but got ${response}`))
     await expectResponse(
         service.updateUser(account.tokens.session.userId, { nickname: "Vledic" }),
         (response) =>
             response.status === "ok" ?
-            success(unit) :
-            failure(`Expected 'ok' from updateUser but got ${response}`))
+            ssuccess(unit) :
+            sfailure(`Expected 'ok' from updateUser but got ${response}`))
     const userInfo2: UserInfo = await expectResponse(
         service.resolveUser({ ctype: "user-id", userId: account.tokens.session.userId }),
         (response) =>
             response.status === "ok" ?
-            success(response.info) :
-            failure(`Expected 'ok' from resolveUser but got ${response}`))
+            ssuccess(response.info) :
+            sfailure(`Expected 'ok' from resolveUser but got ${response}`))
     expect(userInfo2.nickname).toContain("Vledic")
     expect(userInfo.userId).toBe(userInfo2.userId)
 })

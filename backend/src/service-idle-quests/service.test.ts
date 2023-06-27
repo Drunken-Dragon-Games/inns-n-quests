@@ -4,7 +4,7 @@ import { v4 } from "uuid"
 import { wellKnownPoliciesMainnet } from "../registry-policies"
 import { Inventory } from "../service-asset-management"
 import { connectToDB } from "../tools-database"
-import { failure, success } from "../tools-utils"
+import { sfailure, success } from "../tools-utils"
 import { expectResponse } from "../tools-utils/api-expectations"
 import { MutableCalendar } from "../tools-utils/calendar"
 import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-service-mock"
@@ -154,7 +154,7 @@ async function getAllAdventurers(userId: string): Promise<Character[]> {
         response =>
             response.status === "ok" ?
             success(Object.values(response.inventory.characters)) :
-            failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
+            sfailure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )
 }
@@ -165,7 +165,7 @@ async function getAvailableQuests(location: string): Promise<AvailableStakingQue
         response =>
             response.status === "ok" ?
             success(response.availableQuests) :
-            failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
+            sfailure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )
 }
@@ -176,7 +176,7 @@ async function acceptQuest(userId: string, questId: string, adventurerIds: strin
         response =>
             response.status === "ok" ?
             success(response.takenQuest) :
-            failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
+            sfailure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )
 }
@@ -187,7 +187,7 @@ async function getTakenQuests(userId: string): Promise<TakenStakingQuest[]> {
         response =>
             response.status === "ok" ?
             success(response.takenQuests) :
-            failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
+            sfailure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )
 }
@@ -198,7 +198,7 @@ async function claimQuestResult(userId: string, takenQuestId: string): Promise<E
         response =>
             response.status === "ok" ?
             success(response.outcome) :
-            failure(`Expected 'ok' but got ${JSON.stringify(response)}`)
+            sfailure(`Expected 'ok' but got ${JSON.stringify(response)}`)
 
     )
 }

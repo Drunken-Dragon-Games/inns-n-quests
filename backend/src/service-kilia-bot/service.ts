@@ -366,6 +366,27 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             ${JSON.stringify(result.missionParty)}` : 
             `Could not update ${result.reason}`)
         }
+        else if (subcommand == "get-ballot-votes"){
+            const ballotId = messagesDSL.getArguments(message)
+            const ballotOptions = await this.governanceService.getBallotVotes(ballotId)
+        
+            ballotOptions.forEach(async (option) => {
+                const stakeVotes = await Promise.all(option.votes.map(async (vote) => {
+                        const voteUser = await this.identityService.resolveUser({ ctype: "user-id", userId: vote.userId })
+                        const dragonGold = parseInt(vote.dragonGold, 10) / 1_000_000
+                        if (voteUser.status !== "ok") return ""
+                        return `userId: ${voteUser.info.userId}, stakeAddresses: ${voteUser.info.knownStakeAddresses.join(", ")}, dragonGold: ${dragonGold.toFixed(6)}`
+                }))
+                this.replyMessage(message, 
+                    `Option ${option.option} has a total of ${option.votes.length} votes:
+                    
+                    ${stakeVotes.join(`
+                    `)}
+                    `
+                    )
+            })
+
+        }
         else if (subcommand == "help"){
             const helpMessage = `
         **Available Development Commands**
@@ -384,6 +405,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         
         *fail-quest <userId> <takenQuestId> * : Sets a Quest outcome to failed and sets the party memebers activity to false, returns an array of the party entityIds.
             If needed also retuns array of orphaned entitiesIds that could not be found on the Database.
+        
+        *get-ballot-votes <ballotId> *: Returns the votes for a ballot, separated by option
         
         *help* : Provides a list of available commands and a description of their function.
         

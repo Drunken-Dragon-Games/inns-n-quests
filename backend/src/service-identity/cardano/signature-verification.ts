@@ -1,10 +1,9 @@
 import crypto from "crypto"
 
-import { SignatureVerificationState, TransactionVerificationState } from "./signature-verification-db"
-import { Attempt, success, failed } from "../../tools-utils"
 import { Wallet } from "../../tools-cardano"
-import { LoggingContext } from "../../tools-tracing"
+import { Attempt, failed, succeeded } from "../../tools-utils"
 import { AssosiationOutcome, CompleteAuthStateResult } from "../models"
+import { SignatureVerificationState, TransactionVerificationState } from "./signature-verification-db"
 
 export const generateNonce = async (address: string): Promise<string> => {
     const nonce = crypto.randomBytes(20).toString('hex');
@@ -22,7 +21,7 @@ export const verifySig = async (signedNonce: string, nonce: string, key: string)
     if (instance) {
         const validation = Wallet.verifySignature(signedNonce, key, nonce, instance.address)
         await instance.destroy()
-        return validation ? success(instance.address) : failed
+        return validation ? succeeded(instance.address) : failed
     }
     else return failed
 }
