@@ -1,4 +1,4 @@
-import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, StoredUserBallot, MultipleUserBallots, BallotRegistration, VoteResponse, AllBallotData, BallotData, BallotOption } from "../models"
+import { BallotState, CloseBallotResponse, GetBallotResponse, MultipleBallots, RegisterBallotResponse, StoredBallot, StoredUserBallot, MultipleUserBallots, BallotRegistration, VoteResponse, AllBallotData, BallotData, BallotOption, BallotVotesResponse } from "../models"
 import { Ballot, BallotVote } from "./ballots-db"
 
 export class Ballots {
@@ -22,13 +22,12 @@ export class Ballots {
         }
     }
 
-    static async getSingle(ballotId: string): Promise<GetBallotResponse>{
+    static async getSingle(ballotId: string): Promise<{ctype: "succes", ballot: Ballot ,votes: BallotVote[]} | {ctype: "error", reason: string}>{
         try{
             const unprossedBallot = await Ballot.findByPk(ballotId)
             if (!unprossedBallot) return {ctype: "error", reason: "unknown Ballot ID"}
             const votes = await BallotVote.findAll({where: { ballotId}})
-            const processedBallot = Ballots.processSingleBallot(unprossedBallot, votes)
-            return {ctype: "succes", ballot: processedBallot}
+            return {ctype: "succes", ballot: unprossedBallot, votes}
         } catch(error: any){
             return { ctype: "error", reason: error.message }
         }
@@ -97,7 +96,7 @@ export class Ballots {
         else return vote.optionIndex
     }
 
-    private static formatBallotData(ballot: Ballot, votes: BallotVote[]): BallotData {
+    static formatBallotData(ballot: Ballot, votes: BallotVote[]): BallotData {
         const options = ballot.optionsArray.map((option, index) => {
             const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
             const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + parseInt(vote.dragonGold), 0)
@@ -108,7 +107,7 @@ export class Ballots {
         return { id: ballot.ballotId, status: ballot.state, inquiry: ballot.inquiry, inquiryDescription: ballot.description, url: ballot.url, options}
     }
 
-    private static processSingleBallot(ballot: Ballot, votes: BallotVote[]): StoredBallot {
+    static processSingleBallot(ballot: Ballot, votes: BallotVote[]): StoredBallot {
         const options = ballot.optionsArray.map((option, index) => {
             const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
             const dragonGoldSum = votesForThisOption.reduce((sum, vote) => sum + parseInt(vote.dragonGold), 0)
@@ -151,7 +150,19 @@ export class Ballots {
             console.error(error)
             return {ctype: "error", reason: error.message}
         }
-        
- 
+    }
+
+    static formatVotes(ballot: Ballot, votes: BallotVote[]): BallotVotesResponse {
+        const options = ballot.optionsArray.map((option, index) => {
+            const votesForThisOption = votes.filter(vote => vote.optionIndex === index)
+            votesForThisOption.sort((a: BallotVote, b: BallotVote) => {
+                const dragonGoldA = parseFloat(a.dragonGold)
+                const dragonGoldB = parseFloat(b.dragonGold)
+                return dragonGoldB - dragonGoldA
+              })
+            const relevantVoteInfo = votesForThisOption.map((vote) => {return {userId: vote.userId, dragonGold: vote.dragonGold}})
+            return { option, votes: relevantVoteInfo }
+        })
+        return options
     }
 }
