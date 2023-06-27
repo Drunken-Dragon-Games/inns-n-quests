@@ -99,7 +99,7 @@ export declare type Unit = string
 export declare type Assets = Record<Unit | "lovelace", string>
 
 export type ExtractWalletResult
-    = { status: "ok", walletApi: Lucid, stakeAddress: string, }
+    = { status: "ok", walletApi: Lucid, stakeAddress: string, address: string}
     | { status: "error", details: string }
 
 export const minimalUtxoFromLucidUTxO = (utxo: LucidUTxO[]): UTxOMinimal[] => utxo.map(utxo => ({

@@ -89,10 +89,11 @@ export default class ServiceTestDsl {
             this.stubPath("policy-signer-stake.skey"))
         const policy = testTokenPolicySigner.hashNativeScript().to_js_value()
         const stakeAddr = user.wallet.stakeAddress().to_address().to_bech32()
+        const addr = user.wallet.paymentAddress()
         this.secureSigningService.policyReturns({ status: "ok", policy })
         this.setClaimBlockfrostMocks()
         return await expectResponse(
-            this.service.claim(user.info.userId, stakeAddr, 
+            this.service.claim(user.info.userId, stakeAddr, addr, 
                 { unit: "TestToken", policyId: this.testTokenPolicyId, quantity}),
             response =>
                 response.status == "ok" ?
@@ -104,11 +105,11 @@ export default class ServiceTestDsl {
     async signClaimAndSubmit(user: User, claim: TestClaim): Promise<string> {
         const policy = claim.policySigner.hashNativeScript()
         const transaction = Transaction.from_bytes(await cbor.decodeFirst(claim.tx))
-        const claimerWitness = cbor.encode(user.wallet.signTx(transaction).to_bytes()).toString("hex")
+        //const claimerWitness = cbor.encode(user.wallet.signTx(transaction).to_bytes()).toString("hex")
         const policyWitness = cbor.encode(claim.policySigner.signWithPolicy(transaction, policy).to_bytes()).toString("hex")
         this.secureSigningService.signWithPolicyReturns({ status: "ok", witness: policyWitness })
         return await expectResponse(
-            this.service.submitClaimSignature(claim.claimId, claim.tx, claimerWitness),
+            this.service.submitClaimSignature(claim.claimId, claim.tx),
             response =>
                 response.status == "ok" ?
                 success(response.txId) :

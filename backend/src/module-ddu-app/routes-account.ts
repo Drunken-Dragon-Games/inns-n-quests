@@ -95,25 +95,23 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
     router.post("/association/tx", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
-        const stakeAddress: string = request.body.stakeAddress
-        const utxos: MinimalUTxO[] = request.body.utxos
-        const result = await accountService.getAssociationTx(userId, stakeAddress, utxos, logger)
+        const {stakeAddress, address} = request.body
+        const result = await accountService.getAssociationTx(userId, stakeAddress, address, logger)
         response.status(200).json(result)
     }))
 
     router.post("/association/submit-tx", jwtMiddleware,requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
-        const {witnessHex, txId, authStateId} = request.body
-        const result = await accountService.submitAssociationTx(userId, witnessHex, txId, authStateId, logger)
+        const {serializedSignedTx, authStateId} = request.body
+        const result = await accountService.submitAssociationTx(userId, serializedSignedTx, authStateId, logger)
         response.status(200).json(result)
     }))
 
-    router.post("/association/clean-assosiate-tx-state", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+    router.post("/association/clean-assosiate-tx-state", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
-        const userId: string = request.auth!.userId
-        const {authStateId} = request.body
-        const result = await accountService.cleanAssociationState(userId, authStateId, logger)
+        const {authStateId, error} = request.body
+        const result = await accountService.cleanAssociationState(authStateId, error, logger)
         response.status(200).json(result)
     }))
 
@@ -129,15 +127,15 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const stakeAddress: string = request.body.stakeAddress
-        const claimerInfo: ClaimerInfo = request.body.claimerInfo
-        const result = await accountService.claimDragonSilver(userId, stakeAddress, claimerInfo, logger)
+        const address: string = request.body.address
+        const result = await accountService.claimDragonSilver(userId, stakeAddress, address, logger)
         response.status(200).json(result)
     }))
 
     router.post("/assets/claim/sign-and-submit", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
-        const {witness, tx, claimId} = request.body
-        const result = await accountService.claimSignAndSubbmit(witness, tx, claimId, logger)
+        const {serializedSignedTx, claimId} = request.body
+        const result = await accountService.claimSignAndSubbmit(serializedSignedTx, claimId, logger)
         response.status(200).json(result)
     }))
 
@@ -159,7 +157,7 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         const userId: string = request.auth!.userId
         const result = await accountService.grantTest(userId)
         response.status(200).json({status: "ok"})
-    }) )*/
+    }) ) */
 
     router.get("/governance/open", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
