@@ -39,7 +39,6 @@ export const AccountBackend = {
 
     async getRawAssociationTx(stakeAddress: string, address: string): Promise<CreateAssociationTxResult>{
         const result = await accountRequest("POST", "/association/tx", {stakeAddress, address})
-        //const result = await blockChainRequest("POST", "/association/tx", {stakeAddress, address})
         return result.data
     },
 

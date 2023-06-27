@@ -29,7 +29,6 @@ export class BlockchainServiceDsl implements BlockchainService {
     }
 
     async getWalletAuthenticationSelfTx(address: string): Promise<BuildTxResponse> {
-        //TODO: test if error codes trigger an error and handle
         const response = await this.callImplementation(blockchainEnpoints.getWalletAuthenticationSelfTx, {address})
         return response.data as BuildTxResponse
     }

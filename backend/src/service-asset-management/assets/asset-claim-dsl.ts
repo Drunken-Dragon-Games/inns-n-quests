@@ -133,7 +133,7 @@ export class AssetClaimDsl {
 		
     	const txIdResponse = await this.blockchainService.submitTransaction(serializedSignedTx)
 		//TODO: revert whole claim if this fails
-		if (txIdResponse.status !== "ok") return failure("could not submit TX")
+		if (txIdResponse.status !== "ok") return failure(`TX not submitted: ${txIdResponse.reason} `)
 		claim.txId = txIdResponse.value
 		claim.state = "submitted"
 		await claim.save()
