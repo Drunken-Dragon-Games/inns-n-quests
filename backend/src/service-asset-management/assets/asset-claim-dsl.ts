@@ -1,18 +1,15 @@
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js"
 import { NativeScript, Transaction, TransactionWitnessSet } from "@emurgo/cardano-serialization-lib-nodejs"
 import { Sequelize } from "sequelize"
-import { AssetClaim } from "./asset-claim-db"
-import { OffChainStore } from "./offchain-store-db"
-import cbor from "cbor"
-import crypto from "crypto"
-import { AssetStoreDsl } from "./assets-dsl"
-import { SecureSigningService } from "../../service-secure-signing"
-import { failure, Result, SResult, success } from "../../tools-utils"
-import { LoggingContext } from "../../tools-tracing"
-import { cardano, MinimalUTxO, TokenMintOptions } from "../../tools-cardano"
-import { ClaimStatus, ClaimerInfo } from "../models"
 import { BlockchainService } from "../../service-blockchain/service-spec"
-import { LucidNativeScript } from "../../service-blockchain/models"
+import { SecureSigningService } from "../../service-secure-signing"
+import { MinimalUTxO, TokenMintOptions, cardano } from "../../tools-cardano"
+import { LoggingContext } from "../../tools-tracing"
+import { SResult, sfailure, success } from "../../tools-utils"
+import { ClaimStatus, ClaimerInfo } from "../models"
+import { AssetClaim } from "./asset-claim-db"
+import { AssetStoreDsl } from "./assets-dsl"
+import { OffChainStore } from "./offchain-store-db"
 
 export type AssetClaimDslConfig = {
 	feeAddress: string,
@@ -20,13 +17,13 @@ export type AssetClaimDslConfig = {
 	txTTL: number
 }
 
-export type GenAssosiateTxResult = Result<{txId: string}, string>
+export type GenAssosiateTxResult = SResult<{ txId: string }>
 
-export type ClaimResult = Result<{ claimId: string, tx: string }, "unknown-policy" | "not-enough-assets" | string>
+export type ClaimResult = SResult<{ claimId: string, tx: string }>
 
-export type LucidClaimResult = Result<{ claimId: string, tx: string, signature: string }, "unknown-policy" | "not-enough-assets">
+export type LucidClaimResult = SResult<{ claimId: string, tx: string, signature: string }>
 
-export type SubmitClaimSignatureResult = Result<string, "unknown-claim" | "corrupted-tx" | "claim-timed-out" | "claim-already-completed" | string>
+export type SubmitClaimSignatureResult = SResult<{ txId: string }>
  
 export class AssetClaimDsl {
 
@@ -47,11 +44,11 @@ export class AssetClaimDsl {
 	public async genAssoiateTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext ): Promise<GenAssosiateTxResult>{
 		try{
 			const txResult = await cardano.createAuthTransaction(stakeAddress, MinimalUTxOs, this.blockfrost, logger)
-			if (txResult.status != "ok") return failure(txResult.reason)
+			if (txResult.status != "ok") return sfailure(txResult.reason)
 			const txId = Buffer.from(txResult.tx.to_bytes()).toString("hex")	
 			return success({ txId})
 		}catch(e: any){
-			return failure(e.message ?? e)
+			return sfailure(e.message ?? e)
 		}
 		
 	}
@@ -65,9 +62,9 @@ export class AssetClaimDsl {
 			// TODO: this can fail if the tx is already submitted or the utxo is already spent
 			// we should handle the error and revert the whole claim
 			const txId = await this.blockfrost.txSubmit(signedTx.to_hex())
-			return success(txId)
+			return success({txId})
 		}catch(e: any){
-			return failure(e.message)
+			return sfailure(e.message)
 		}
 		
 		
@@ -80,7 +77,7 @@ export class AssetClaimDsl {
 
 		if (availableAssets == null || BigInt(availableAssets.quantity) < BigInt(quantityToClaim)) {
 			await transaction.commit()
-			return failure("not-enough-assets")
+			return sfailure("not-enough-assets")
 		}
 
 		const updateAvailableAssets = async() => {
@@ -103,7 +100,7 @@ export class AssetClaimDsl {
 			const builtTxResponse = await this.blockchainService.buildMintTx(address, {policyId: asset.policyId, unit: asset.unit}, quantityToClaim, {feeAddress: this.config.feeAddress, feeAmount: this.config.feeAmount})
 			if (builtTxResponse.status !== "ok"){
 				await transaction.rollback()
-				return failure(builtTxResponse.reason)
+				return sfailure(builtTxResponse.reason)
 			}  
 			const claimId = await createClaim(builtTxResponse.value.txHash)
 			await updateAvailableAssets()
@@ -112,7 +109,7 @@ export class AssetClaimDsl {
 			return success({ claimId, tx: builtTxResponse.value.rawTransaction })
 		}catch(e: any){
 			await transaction.rollback()
-			return failure(e.message)
+			return sfailure(e.message)
 		}
 		
 	}
@@ -120,25 +117,25 @@ export class AssetClaimDsl {
     async submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResult> {
 		const claim = await AssetClaim.findOne({ where: { claimId }})
 		if (claim == null) 
-			return failure("unknown-claim")
+			return sfailure("unknown-claim")
 		if (claim.state == "timed-out") 
-			return failure("claim-timed-out")
+			return sfailure("claim-timed-out")
 		if (claim.state == "submitted" || claim.state == "confirmed") 
-			return failure("claim-already-completed")
+			return sfailure("claim-already-completed")
 
 
 		const txHash = await this.blockchainService.getTxHashFromTransaction(serializedSignedTx)
-		if(txHash.status !== "ok") return failure(`could not verify TxHash: ${txHash.reason}`)
-		if (txHash.value != claim.txHash) return failure("corrupted-tx")
+		if(txHash.status !== "ok") return sfailure(`could not verify TxHash: ${txHash.reason}`)
+		if (txHash.value != claim.txHash) return sfailure("corrupted-tx")
 		
     	const txIdResponse = await this.blockchainService.submitTransaction(serializedSignedTx)
 		//TODO: revert whole claim if this fails
-		if (txIdResponse.status !== "ok") return failure(`TX not submitted: ${txIdResponse.reason} `)
+		if (txIdResponse.status !== "ok") return sfailure(`TX not submitted: ${txIdResponse.reason} `)
 		claim.txId = txIdResponse.value
 		claim.state = "submitted"
 		await claim.save()
 		logger?.log.info({ message: "AssetClaimDsl.claimStatus:submitted", claimId: claim.claimId, policyId: claim.policyId, unit: claim.unit, quantity: claim.quantity })
-		return success(txIdResponse.value)
+		return success({ txId: txIdResponse.value })
     }
 
 	private async revertClaim(claim: AssetClaim): Promise<void> {
@@ -149,10 +146,10 @@ export class AssetClaimDsl {
 		await transaction.commit()
 	}
 
-    async claimStatus(claimId: string, logger?: LoggingContext): Promise<Result<ClaimStatus, "unknown-claim">> {
+    async claimStatus(claimId: string, logger?: LoggingContext): Promise<SResult<{ status: ClaimStatus }>> {
 		const claim = await AssetClaim.findOne({ where: { claimId }})
 		if (claim == null) 
-			return failure("unknown-claim")
+			return sfailure("unknown-claim")
 		if (claim.state == "submitted") {
 			const timePassed = (Date.now() - Date.parse(claim.createdAt))
 			if (timePassed > this.config.txTTL*1000) {
@@ -170,7 +167,7 @@ export class AssetClaimDsl {
 				}
 			}
 		}
-        return success(claim.state)
+        return success({ status: claim.state })
     }
 
 	async revertStaledClaims(logger?: LoggingContext): Promise<number> {

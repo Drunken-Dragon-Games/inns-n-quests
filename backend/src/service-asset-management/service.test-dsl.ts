@@ -6,7 +6,7 @@ import { AssetManagementService, ClaimStatus, Inventory } from "../service-asset
 import path from "path"
 import { Transaction } from "@emurgo/cardano-serialization-lib-nodejs"
 import { Wallet, cardano } from "../tools-cardano"
-import { failure, success, unit } from "../tools-utils"
+import { sfailure, ssuccess, unit } from "../tools-utils"
 import { expectResponse } from "../tools-utils/api-expectations"
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock"
 import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock"
@@ -54,8 +54,8 @@ export default class ServiceTestDsl {
                 { unit: "TestToken", policyId: this.testTokenPolicyId, quantity }),
             response =>
                 response.status == "ok" ?
-                success(unit) :
-                failure(`Expected 'ok' from grant but got ${response}`)
+                ssuccess(unit) :
+                sfailure(`Expected 'ok' from grant but got ${response}`)
         )
     }
 
@@ -78,8 +78,8 @@ export default class ServiceTestDsl {
             this.service.list(user.info.userId, { policies: [this.testTokenPolicyId] }),
             response =>
                 response.status == "ok" ?
-                success(response.inventory) :
-                failure(`Expected 'ok' from list but got ${response}`)
+                ssuccess(response.inventory) :
+                sfailure(`Expected 'ok' from list but got ${response}`)
         )
     }
 
@@ -97,8 +97,8 @@ export default class ServiceTestDsl {
                 { unit: "TestToken", policyId: this.testTokenPolicyId, quantity}),
             response =>
                 response.status == "ok" ?
-                success({ claimId: response.claimId, tx: response.tx, policySigner: testTokenPolicySigner }) :
-                failure(`Expected 'ok' from claim but got ${response}`)
+                ssuccess({ claimId: response.claimId, tx: response.tx, policySigner: testTokenPolicySigner }) :
+                sfailure(`Expected 'ok' from claim but got ${response}`)
         )
     }
 
@@ -112,8 +112,8 @@ export default class ServiceTestDsl {
             this.service.submitClaimSignature(claim.claimId, claim.tx),
             response =>
                 response.status == "ok" ?
-                success(response.txId) :
-                failure(`Expected 'ok' from claim but got ${JSON.stringify(response)}`)
+                ssuccess(response.txId) :
+                sfailure(`Expected 'ok' from claim but got ${JSON.stringify(response)}`)
         )
     }
 
@@ -122,8 +122,8 @@ export default class ServiceTestDsl {
             this.service.claimStatus(claim.claimId),
             response =>
                 response.status == "ok" ?
-                success(response.claimStatus) :
-                failure(`Expected 'ok' from claimStatus but got ${response}`)
+                ssuccess(response.claimStatus) :
+                sfailure(`Expected 'ok' from claimStatus but got ${response}`)
         )
     }
 

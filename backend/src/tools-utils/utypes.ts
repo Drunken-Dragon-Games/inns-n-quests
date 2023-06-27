@@ -33,14 +33,20 @@ export type Result<A extends object, B extends object> =
 export type SResult<A extends object> = Result<A, {error: string}>
 
 export const success = <A extends object>(result: A): Result<A, any> => {
-    return { ctype: "success", result }}
+    return { ctype: "success", ...result }}
 
 export const failure = <B extends object>(error: B): Result<any, B> => {
-    return { ctype: "failure", error }}
+    return { ctype: "failure", ...error }}
 
-export type Attempt<A extends object> = Result<A, Unit>
+export const ssuccess = <A>(result: A): SResult<{ result: A }> =>
+    success({ result })
 
-export const succeeded = <A extends object>(result: A): Attempt<A> => 
-    success(result)
+export const sfailure = (error: string): SResult<any> => 
+    failure({ error })
+
+export type Attempt<A> = Result<{ result: A }, Unit>
+
+export const succeeded = <A>(result: A): Attempt<A> => 
+    success({ result: result })
 
 export const failed = failure({})
