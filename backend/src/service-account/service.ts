@@ -112,8 +112,7 @@ export class AccountServiceDsl implements AccountService {
     async getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult> {
 
             const transactionInfoResponse = await this.blockchainService.getWalletAuthenticationSelfTx(address)
-            console.log({transactionInfoResponse})
-            if (transactionInfoResponse.status !== "ok") return {status: "invalid", reason: `WHile building TX: ${transactionInfoResponse.reason}`}
+            if (transactionInfoResponse.status !== "ok") return {status: "invalid", reason: `While building TX: ${transactionInfoResponse.reason}`}
 
             const transactionInfo = transactionInfoResponse.value
 

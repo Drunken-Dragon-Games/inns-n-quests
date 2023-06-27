@@ -18,7 +18,6 @@ export class BlockchainServiceDsl implements BlockchainService {
     }
 
     static loadFromConfig(servConfig: BlockchainServiceConfig): BlockchainService {
-        //TODO: implmeent a class logger
         const service = new BlockchainServiceDsl(servConfig.baseURL)
         return service
     }
