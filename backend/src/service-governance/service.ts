@@ -199,7 +199,10 @@ export class GovernanceServiceDsl implements GovernanceService {
     }
 
     async getBallot(ballotId: string): Promise<models.GetBallotResponse> {
-        return await Ballots.getSingle(ballotId)
+        const ballotData = await Ballots.getSingle(ballotId)
+        if (ballotData.ctype !== "succes") return ballotData
+        const processedBallot = Ballots.processSingleBallot(ballotData.ballot, ballotData.votes)
+        return {ctype: "succes", ballot: processedBallot}
     }
 
     async closeBallot(ballotId: string): Promise<models.CloseBallotResponse> {
@@ -210,5 +213,10 @@ export class GovernanceServiceDsl implements GovernanceService {
         return await Ballots.vote(ballotId, optionIndex, userId, dragonGold)
     }
 
+    async getBallotVotes(ballotId: string): Promise<models.BallotVotesResponse> {
+        const ballotData = await Ballots.getSingle(ballotId)
+        if (ballotData.ctype !== "succes") return []
+        return Ballots.formatVotes(ballotData.ballot, ballotData.votes)
+    }
 }
 

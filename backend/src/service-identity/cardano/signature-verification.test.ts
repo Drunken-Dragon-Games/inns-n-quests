@@ -1,5 +1,5 @@
 import { Wallet } from "../../tools-cardano"
-import { success } from "../../tools-utils"
+import { ssuccess } from "../../tools-utils"
 import { verifySig } from "./signature-verification"
 import { SignatureVerificationState } from "./signature-verification-db"
 
@@ -16,5 +16,5 @@ test("Verify sig", async () => {
     })
     const { signature, key } = wallet.signData(nonce)
     const result = await verifySig(signature, nonce, key)
-    expect(result).toStrictEqual(success(stakeAddress))
+    expect(result).toStrictEqual(ssuccess(stakeAddress))
 })

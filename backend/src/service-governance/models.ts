@@ -37,6 +37,9 @@ export type VoteResponse =
     { ctype: "success" } |
     { ctype: "error", reason: string }
 
+export type BallotVotesResponse =
+    {option: string, votes: {userId:string, dragonGold: string}[]}[]
+
 export type StoredUserBallot = {
     id: string, inquiry: string,
     descriptionOfInquiry: string,
