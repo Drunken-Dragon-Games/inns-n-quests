@@ -7,7 +7,7 @@ import cbor from "cbor"
 import crypto from "crypto"
 import { AssetStoreDsl } from "./assets-dsl"
 import { SecureSigningService } from "../../service-secure-signing"
-import { failure, Result, success } from "../../tools-utils"
+import { failure, Result, SResult, success } from "../../tools-utils"
 import { LoggingContext } from "../../tools-tracing"
 import { cardano, MinimalUTxO, TokenMintOptions } from "../../tools-cardano"
 import { ClaimStatus, ClaimerInfo } from "../models"
@@ -57,7 +57,7 @@ export class AssetClaimDsl {
 	}
 
 	//DEPRECATED
-	public async submitAssoiateTx(witness: string, tx: string):Promise<Result<string, string>>{
+	public async submitAssoiateTx(witness: string, tx: string):Promise<SResult<{txId: string}>>{
 		try{
 			const knownDecoded = Transaction.from_bytes(Buffer.from(tx, "hex"))
 			const witnessSet = TransactionWitnessSet.from_bytes(Buffer.from(witness, "hex"))

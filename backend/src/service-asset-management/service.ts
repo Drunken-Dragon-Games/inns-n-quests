@@ -134,7 +134,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
     }
 
     //DEPRECATED
-    async createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext | undefined): Promise<SubmitClaimSignatureResponse> {
+   /*  async createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext | undefined): Promise<SubmitClaimSignatureResponse> {
         const result = await this.claims.genAssoiateTx(stakeAddress, MinimalUTxOs, logger)
         if (result.ctype == "success") 
             return { status: "ok", txId: result.result.txId }
@@ -149,7 +149,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         if (result.ctype !== "success") return {status: "invalid", reason: result.error}
         return {status: "ok", txId: result.result}
 
-    }
+    } */
 
     async submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResponse> {
         const result = await this.claims.submitClaimSignature(claimId, serializedSignedTx, logger)

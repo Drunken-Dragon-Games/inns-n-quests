@@ -22,6 +22,7 @@ export class Ballots {
         }
     }
 
+    //{ctype: "succes", ballot: Ballot ,votes: BallotVote[]} | {ctype: "error", reason: string}
     static async getSingle(ballotId: string): Promise<{ctype: "succes", ballot: Ballot ,votes: BallotVote[]} | {ctype: "error", reason: string}>{
         try{
             const unprossedBallot = await Ballot.findByPk(ballotId)
