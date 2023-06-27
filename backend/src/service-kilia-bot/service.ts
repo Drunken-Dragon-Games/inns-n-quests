@@ -373,8 +373,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             ballotOptions.forEach(async (option) => {
                 const stakeVotes = await Promise.all(option.votes.map(async (vote) => {
                         const voteUser = await this.identityService.resolveUser({ ctype: "user-id", userId: vote.userId })
+                        const dragonGold = parseInt(vote.dragonGold, 10) / 1_000_000
                         if (voteUser.status !== "ok") return ""
-                        return `userId: ${voteUser.info.userId}, stakeAddresses: ${voteUser.info.knownStakeAddresses.join(", ")}, dragonGold: ${vote.dragonGold}`
+                        return `userId: ${voteUser.info.userId}, stakeAddresses: ${voteUser.info.knownStakeAddresses.join(", ")}, dragonGold: ${dragonGold.toFixed(6)}`
                 }))
                 this.replyMessage(message, 
                     `Option ${option.option} has a total of ${option.votes.length} votes:
