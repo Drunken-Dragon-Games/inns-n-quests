@@ -233,9 +233,9 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 <DragonSilverClaimRow key={index} claimInfo={claimInfo} /> 
             )}
 
-            {/* <ButtonContainer>
+            {/* {<ButtonContainer>
                 <button onClick = {AccountTransitions.grantTest}>Grant</button>
-            </ButtonContainer> */}
+            </ButtonContainer>} */}
         </DragonSilverWidgetContainer>
     )
 }
@@ -284,6 +284,16 @@ const BallotDescription = styled.p`
     font-size: 14px;
     color: ${colors.textBeige};
     padding: 10px 0px 10px 0px;
+`
+
+const BallotUrl = styled.a`
+    font-size: 14px;
+    color: white;
+    padding: 5px 0px 10px 0px;
+    text-decoration: underline;
+    &:hover {
+        color: ${colors.textBeige};
+    }
 `
 
 const BallotOption = styled.div`
@@ -339,6 +349,9 @@ const BallotView = ({ userInfo, ballot }: { userInfo?: UserInfo, ballot: UserBal
             <BallotTitle>{ballot.inquiry}</BallotTitle>
         </BallotTitleWrapper>
         <BallotDescription>{ballot.inquiryDescription}</BallotDescription>
+        { ballot.url &&
+            <BallotUrl href={ballot.url} target="_blank">Read full description...</BallotUrl>
+        }
         {ballot.options.map((option, index) => (
             <BallotOption key={index}>
                 {userInfo ? 

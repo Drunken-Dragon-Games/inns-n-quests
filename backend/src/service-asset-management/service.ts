@@ -21,6 +21,7 @@ import {
 import * as offChainStoreDB from "./assets/offchain-store-db"
 import * as assetClaimDB from "./assets/asset-claim-db"
 import { MinimalUTxO } from "../tools-cardano"
+import { BlockchainService } from "../service-blockchain/service-spec"
 //import { Lucid } from "lucid-cardano"
 
 export interface AssetManagementServiceConfig 
@@ -32,6 +33,7 @@ export interface AssetManagemenetServiceDependencies
     , blockfrost: BlockFrostAPI
     , identityService: IdentityService
     , secureSigningService: SecureSigningService
+    , blockchainService: BlockchainService
     }
 
 export class AssetManagementServiceDsl implements AssetManagementService {
@@ -46,9 +48,10 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         blockfrost: BlockFrostAPI,
         private readonly identityService: IdentityService,
         secureSigningService: SecureSigningService,
+        private readonly blockchainService: BlockchainService,
     ) {
         this.assets = new AssetStoreDsl(blockfrost)
-        this.claims = new AssetClaimDsl(assetClaimConfig, database, blockfrost, secureSigningService, this.assets)//, lucid)
+        this.claims = new AssetClaimDsl(assetClaimConfig, database, blockfrost, secureSigningService, this.assets, this.blockchainService)//, lucid)
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
     }
@@ -71,6 +74,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
             dependencies.blockfrost,
             dependencies.identityService,
             dependencies.secureSigningService,
+            dependencies.blockchainService
         ))
         await service.loadDatabaseModels()
         return service
@@ -120,35 +124,37 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         return { status: "ok", claims: result }
     }
 
-    async claim(userId: string, stakeAddress: string, assets: { unit: string, policyId: string, quantity?: string }, claimerInfo?: ClaimerInfo, logger?: LoggingContext): Promise<ClaimResponse> {
-        const result = await this.claims.claim(userId, stakeAddress, assets, claimerInfo, logger)
+    async claim(userId: string, stakeAddress: string, address: string, assets: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<ClaimResponse> {
+        const result = await this.claims.claim(userId, stakeAddress,address, assets, logger)
         if (result.ctype == "success") 
-            return { status: "ok", claimId: result.result.claimId, tx: result.result.tx }
+            return { status: "ok", claimId: result.claimId, tx: result.tx }
         else {
             return { status: "invalid", reason: result.error }        
         }
     }
 
+    //DEPRECATED
     async createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext | undefined): Promise<SubmitClaimSignatureResponse> {
         const result = await this.claims.genAssoiateTx(stakeAddress, MinimalUTxOs, logger)
-        if (result.ctype == "success") 
-            return { status: "ok", txId: result.result.txId }
+        if (result.ctype == "success")
+            return { status: "ok", txId: result.txId }
         else {
-            return { status: "invalid", reason: result.error }        
+            return { status: "invalid", reason: result.error }
         }
     }
 
+    //DEPRECATED
     async submitAuthTransaction(witness: string, tx: string, logger?: LoggingContext | undefined): Promise<SubmitAuthTransactionResult> {
         const result = await this.claims.submitAssoiateTx(witness, tx)
-        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
-        return {status: "ok", txId: result.result}
+        if (result.ctype !== "success") return { status: "invalid", reason: result.error }
+        return { status: "ok", txId: result.txId }
 
-    }
+    } 
 
-    async submitClaimSignature(claimId: string, tx: string, witness: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResponse> {
-        const result = await this.claims.submitClaimSignature(claimId, tx, witness, logger)
+    async submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResponse> {
+        const result = await this.claims.submitClaimSignature(claimId, serializedSignedTx, logger)
         if (result.ctype == "success") 
-            return { status: "ok", txId: result.result }
+            return { status: "ok", txId: result.txId }
         else 
             return { status: "invalid", reason: result.error }
     }
@@ -156,7 +162,7 @@ export class AssetManagementServiceDsl implements AssetManagementService {
     async claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResponse> {
         const result = await this.claims.claimStatus(claimId, logger)
         if (result.ctype == "success") 
-            return { status: "ok", claimStatus: result.result }
+            return { status: "ok", claimStatus: result.status }
         else 
             return { status: "invalid", reason: result.error }
     }

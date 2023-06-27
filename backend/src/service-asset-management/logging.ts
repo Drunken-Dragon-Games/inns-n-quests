@@ -63,10 +63,10 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return response
     }
 
-    async claim(userId: string, stakeAddress: string, asset: { unit: string, policyId: string, quantity?: string }, claimerInfo?: models.ClaimerInfo, logger?: LoggingContext): Promise<models.ClaimResponse> {
+    async claim(userId: string, stakeAddress: string, address: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<models.ClaimResponse> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`claiming assets for user ${userId}`, { stakeAddress, asset })
-        const response = await this.base.claim(userId, stakeAddress, asset, claimerInfo, serviceLogger)
+        const response = await this.base.claim(userId, stakeAddress, address, asset, serviceLogger)
         if (response.status == "invalid")
             serviceLogger?.log.info(`invalid claim for user ${userId} reason:${response.reason}`)
         else 
@@ -102,10 +102,10 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return response
     }
 
-    async submitClaimSignature(claimId: string, tx: string, witness: string, logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse> {
+    async submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`Submitting claim signature for claim ${claimId}`)
-        const response = await this.base.submitClaimSignature(claimId, tx, witness, serviceLogger)
+        const response = await this.base.submitClaimSignature(claimId, serializedSignedTx, serviceLogger)
         if (response.status == "invalid")
             serviceLogger?.log.info(`Claim signature invalid for claim ${claimId} reason:${response.reason}`)
         else 

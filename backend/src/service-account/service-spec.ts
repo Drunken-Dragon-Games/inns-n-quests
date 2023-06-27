@@ -2,6 +2,7 @@ import { ClaimerInfo } from "../service-asset-management"
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
 import { LoggingContext } from "../tools-tracing"
 import { MinimalUTxO } from "../tools-cardano"
+import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
 
 export interface AccountService {
     authenticateDevelopment(nickname: string, logger?: LoggingContext): Promise<AuthenticateResult>
@@ -11,8 +12,8 @@ export interface AccountService {
     getAssociationNonce(stakeAddress: string, logger?: LoggingContext): Promise<GetAssociationNonceResult>
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string, logger?: LoggingContext): Promise<SubmitAssociationSignatureResult>
     getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult>
-    claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
-    claimSignAndSubbmit(witness: string, tx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
+    claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
+    claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult>
     claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult>
     grantTest(userId: string, logger?: LoggingContext): Promise<void>
@@ -21,9 +22,9 @@ export interface AccountService {
     voteForBallot(userId: string, ballotId: string, optionIndex: number, logger?: LoggingContext): Promise<VoteResult>
     getPublicBallots(logger?: LoggingContext): Promise<PublicBallotResult>
     getUserBallots(userId: string, logger?: LoggingContext):Promise<UserBallotResult>
-    getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[], logger?: LoggingContext): Promise<CreateAssociationTxResult>
-    submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
-    cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
+    getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult>
+    submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string,  logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
+    cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
 }
 
 export type CleanAssociationTxResult 
@@ -60,7 +61,7 @@ export type GetDragonSilverClaimsResult
     | { status: "invalid", reason: string }
 
 export type CreateAssociationTxResult
-    = { status: "ok", txId: string, authStateId: string }
+    = { status: "ok", rawTx: string, authStateId: string }
     | { status: "invalid", reason: string }
 
 export type AssociationNonceResult = ClaimSignAndSubbmitResult
@@ -99,30 +100,6 @@ export type OpenUserBallotsResult =
 export type VoteResult 
     = { status: "ok" }
     | { status: "invalid", reason: string }
-
-//types repeted from governance service
-type BallotState = "open"|"closed" | "archived"
-export type StoredBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string ,dragonGold: string}[], state: BallotState}
-export type StoredUserBallot = {id: string, inquiry: string, descriptionOfInquiry: string, options: {option: string, description: string }[], voteRegistered: boolean, state: BallotState}
-
-//types repeted from govenance service
-//types repeted on frontedn accound dsl
-type BaseOption = {title: string, description: string}
-type VotedOption = BaseOption & {isVotedByUser: boolean}
-type SensitiveOption = BaseOption & {lockedInDragonGold: string}
-type ClosedOption = SensitiveOption & {isWinner: boolean}
-type UserClosedOption = ClosedOption & {isVotedByUser: boolean}
-
-type BaseBallot = {status: BallotState, id: string,  inquiry: string , inquiryDescription: string}
-
-type OpenPublicBallot = BaseBallot & {status: "open", options: BaseOption[]}
-type ClosedPublicBallot = BaseBallot & {status: "closed", options: ClosedOption[]}
-
-type OpenUserBallot = BaseBallot & {status: "open", hasVoted: boolean, options: VotedOption[]}
-type ClosedUserBallot = BaseBallot & {status: "closed", hasVoted: boolean, options: UserClosedOption[]}
-
-type PublicBallot = OpenPublicBallot | ClosedPublicBallot
-type UserBallot = OpenUserBallot | ClosedUserBallot
 
 export type PublicBallotResult =
   {status: "ok", payload: {[ballotId: string]: PublicBallot}}|

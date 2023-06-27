@@ -10,6 +10,8 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
+        deno-version: [1.34.x]
+
     steps:
 
     - uses: actions/checkout@v3
@@ -61,5 +63,28 @@ jobs:
         echo -e "NEXT_PUBLIC_BLOCKFROST_API_KEY=${{ secrets.BLOCKFROST_API_KEY_MAINNET }}" >> .env.local 
         echo -e "NEXT_PUBLIC_DISCORD_CLIENT_ID='1017194651008106516'" >> .env.local 
         echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI=https%3A%2F%2Fddu.gg" >> .env.local 
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+    - name: Setup Deno ${{ matrix.deno-version }}
+      uses: denoland/setup-deno@v1.1.2
+      with:
+        deno-version: ${{ matrix.deno-version }}
+    
+    - name: Blockchain - build and test
+      working-directory: blockchain
+      run: |
+        deno lint src --rules-exclude=no-unused-vars,require-await
+    
+    - name: Blockchain - Build, tag, and push
+      working-directory: blockchain
+      env:
+        REGISTRY: registry.digitalocean.com/ddu-cr
+        REPOSITORY: ddu-blockchain
+        IMAGE_TAG: mainnet # a-${{ steps.date.outputs.date }}-${{ github.sha }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY_MAINNET }}
+      run: |
+        echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+        deno task secrets:replace
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
