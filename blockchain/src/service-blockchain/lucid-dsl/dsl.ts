@@ -3,6 +3,7 @@ import { SecureSigningService } from "../../service-secure-signing/service-spec.
 import { Resolution, fail, succeed } from "../../utypes.ts"
 import { CardanoTransactionInfo, SubmitTransactionReponse, TransactionHashReponse } from "../models.ts"
 
+//TODO: hanlde this as an env variable
 const validityRange = 1000 * 60 * 10
 
 export class TransactionDSL {
@@ -17,6 +18,7 @@ export class TransactionDSL {
             lucidInstance.selectWalletFrom({ address })
             const tx = await lucidInstance.newTx()
                 .payToAddress(address, {lovelace: BigInt("1000000")})
+                .validTo(Date.now() + validityRange)
                 .complete()
             const rawTransaction = tx.toString()
             const txHash = tx.toHash()

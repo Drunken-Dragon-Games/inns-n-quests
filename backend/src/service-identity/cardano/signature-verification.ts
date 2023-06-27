@@ -32,7 +32,6 @@ export const createAuthTxState = async (userId: string, stakeAddress: string, tx
         const authState = await TransactionVerificationState.create({userId, stakeAddress, txHash, state:{ctype: "pending"}})
         return {status: "ok", authStateId:authState.stateId}
     }catch(e: any){
-        console.log(e)
         return {status: "failed", reason: e.message}
     }
     
