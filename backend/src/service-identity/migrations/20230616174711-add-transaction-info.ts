@@ -8,7 +8,9 @@ export const up: MigrationFun = async ({ context: query }) => {
     await query.removeColumn(TransactionVerificationStateTableName, 'txId')
     await query.addColumn(TransactionVerificationStateTableName, 'txHash', TransactionVerificationStateTableAttributes.txHash)
     await query.addColumn(TransactionVerificationStateTableName, 'state', TransactionVerificationStateTableAttributes.state)
-  } catch (_) {}
+  } catch (e: any) {
+    console.error(e)
+  }
 }
 
 export const down: MigrationFun = async ({ context: query }) => {

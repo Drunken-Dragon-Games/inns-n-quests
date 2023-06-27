@@ -168,6 +168,7 @@ export const AccountThunks = {
             if (txResponse.status !== "ok")
                 return displayErrorAndHeal(txResponse.reason)
 
+            authStateId = txResponse.authStateId
             const tx = walletApi.fromTx(txResponse.rawTx)
             const signedTx  = await tx.sign().complete()
             const serializedSignedTx = signedTx.toString()

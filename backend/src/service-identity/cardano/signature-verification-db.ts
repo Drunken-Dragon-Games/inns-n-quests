@@ -53,11 +53,13 @@ export const TransactionVerificationStateTableAttributes = {
     },
     txHash: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        defaultValue: "0"
     },
     state: {
         type: DataTypes.JSONB,
-        allowNull: false
+        allowNull: false,
+        defaultValue: {ctype: "failed", reason: "front end exception"}
     }
 }
 
