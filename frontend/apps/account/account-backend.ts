@@ -39,7 +39,6 @@ export const AccountBackend = {
 
     async getRawAssociationTx(stakeAddress: string, address: string): Promise<CreateAssociationTxResult>{
         const result = await accountRequest("POST", "/association/tx", {stakeAddress, address})
-        //const result = await blockChainRequest("POST", "/association/tx", {stakeAddress, address})
         return result.data
     },
 
@@ -48,8 +47,8 @@ export const AccountBackend = {
         return result.data
     },
 
-    async cleanAssociationState(authStateId: string): Promise<CleanAssociationTxResult>{
-        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId})
+    async cleanAssociationState(authStateId: string, error: string): Promise<CleanAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId, error})
         return result.data
     },
 

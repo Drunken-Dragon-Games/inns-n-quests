@@ -233,9 +233,9 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 <DragonSilverClaimRow key={index} claimInfo={claimInfo} /> 
             )}
 
-            {<ButtonContainer>
+            {/* {<ButtonContainer>
                 <button onClick = {AccountTransitions.grantTest}>Grant</button>
-            </ButtonContainer>}
+            </ButtonContainer>} */}
         </DragonSilverWidgetContainer>
     )
 }

@@ -143,11 +143,10 @@ export const AccountThunks = {
     },
 
     associateHardwareWallet: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
-        //fran yo se pero si se te ocurre otra solucion jalo
         let authStateId: string | undefined
         const displayErrorAndHeal = (details: string) => {
             dispatch(actions.setAssociateProcessState({ ctype: "error", details }))
-            if (authStateId) AccountBackend.cleanAssociationState(authStateId)
+            if (authStateId) AccountBackend.cleanAssociationState(authStateId, details)
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
         }
 

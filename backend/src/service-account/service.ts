@@ -112,12 +112,13 @@ export class AccountServiceDsl implements AccountService {
     async getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult> {
 
             const transactionInfoResponse = await this.blockchainService.getWalletAuthenticationSelfTx(address)
-            if (transactionInfoResponse.status !== "ok") return {status: "invalid", reason: transactionInfoResponse.reason}
+            console.log({transactionInfoResponse})
+            if (transactionInfoResponse.status !== "ok") return {status: "invalid", reason: `WHile building TX: ${transactionInfoResponse.reason}`}
 
             const transactionInfo = transactionInfoResponse.value
 
             const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, transactionInfo.txHash, logger)
-            if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
+            if (authState.status != "ok") return {status: "invalid", reason: `While creating auth State ${authState.reason}`}
 
             return { status: "ok", rawTx: transactionInfo.rawTransaction, authStateId: authState.authStateId}
     }
@@ -144,8 +145,8 @@ export class AccountServiceDsl implements AccountService {
         
     }
 
-    async cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
-        return this.identityService.cleanAssociationTx(userId, authStateId, logger)
+    async cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
+        return await this.identityService.completeAuthState(authStateId, {ctype: "failed", reason: `frontend exeption: ${error}`})
     }
 
     async getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult> {
