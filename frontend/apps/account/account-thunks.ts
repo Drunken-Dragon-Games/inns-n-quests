@@ -255,7 +255,7 @@ export const AccountThunks = {
     },
 
     testGrant: (): AccountThunk => async (dispatch) => {
-        if (process.env.NODE_ENV === "development"){
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] === "development"){
             await AccountBackend.granteTest()
             dispatch(AccountThunks.updateInventory())
         }

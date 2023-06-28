@@ -79,7 +79,7 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
 
     requirementInfo(requirement: StakingQuestRequirement): StakingQuestRequirementInfo {
         //const duration = 60 * 60 * 24 * 1
-        const duration = process.env.NODE_ENV === "development" ? 30 : 60 * 60 * 24 * 2.5
+        const duration = process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ? 30 : 60 * 60 * 24 * 2.5
         const currency = (
             Math.round(Math.max(1, apsSum(requirement.aps) / 10)) * 2 +
             (requirement.collection?.length ? (CharacterCollections.length - requirement.collection.length) : 0)  +
