@@ -235,7 +235,7 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
 
             { process.env.NODE_ENV === "development" ? 
                 <ButtonContainer>
-                    <button onClick = {AccountTransitions.grantTest}>{process.env.NODE_ENV}</button>
+                    <button onClick = {AccountTransitions.grantTest}>Grant</button>
                 </ButtonContainer>
                 : 
                 <></>
