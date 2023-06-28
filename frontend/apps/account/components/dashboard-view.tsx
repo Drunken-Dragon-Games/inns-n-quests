@@ -233,9 +233,13 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 <DragonSilverClaimRow key={index} claimInfo={claimInfo} /> 
             )}
 
-            {/* {<ButtonContainer>
-                <button onClick = {AccountTransitions.grantTest}>Grant</button>
-            </ButtonContainer>} */}
+            { process.env.NODE_ENV === "development" ? 
+                <ButtonContainer>
+                    <button onClick = {AccountTransitions.grantTest}>{process.env.NODE_ENV}</button>
+                </ButtonContainer>
+                : 
+                <></>
+            }
         </DragonSilverWidgetContainer>
     )
 }

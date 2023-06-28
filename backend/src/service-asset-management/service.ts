@@ -109,7 +109,8 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         return { status: "ok", inventory }
     }
 
-    async grant(userId: string, assets: { unit: string, policyId: string, quantity: string }, logger: LoggingContext): Promise<GrantResponse> {
+    async grant(userId: string, assets: { unit: string, policyId: string, quantity: string }, logger?: LoggingContext): Promise<GrantResponse> {
+        logger?.log.info(`Granting ${assets.quantity} of ${assets.unit} for ${userId}`)
         await this.assets.grant(userId, assets.unit, assets.policyId, assets.quantity)
         return { status: "ok" }
     }

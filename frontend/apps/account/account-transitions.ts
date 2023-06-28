@@ -114,7 +114,8 @@ export const AccountTransitions = {
     },
 
     grantTest: () => {
-        dispatch(AccountThunks.testGrant())
+        if (process.env.NODE_ENV === "development")
+            dispatch(AccountThunks.testGrant())
     },
 
     getOpenBallots: () => {
