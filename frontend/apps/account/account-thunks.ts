@@ -255,8 +255,10 @@ export const AccountThunks = {
     },
 
     testGrant: (): AccountThunk => async (dispatch) => {
-        await AccountBackend.granteTest()
-        dispatch(AccountThunks.updateInventory())
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] === "development"){
+            await AccountBackend.granteTest()
+            dispatch(AccountThunks.updateInventory())
+        }
     },
 
     getGoverncanceBallots: (): AccountThunk => async (dispatch) => {
