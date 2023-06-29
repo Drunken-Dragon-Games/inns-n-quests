@@ -23,6 +23,8 @@ export interface IdentityService {
 
     associate(userId: string, credentials: models.Credentials, logger?: LoggingContext): Promise<models.AssociationResult>
 
+    deassociateWallet(userId: string, stakeAddress: string, logger?: LoggingContext): Promise<models.DeassociationResult>
+
     getTotalUsers(logger?: LoggingContext): Promise<number>
 
     refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<models.RefreshResult>

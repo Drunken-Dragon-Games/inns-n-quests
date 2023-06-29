@@ -1,3 +1,4 @@
+import { SResult } from "../tools-utils"
 
 export type HealthStatus = { 
     status: "ok" | "warning" | "faulty", 
@@ -98,6 +99,10 @@ export type AssociationResult
     | { status: "bad-credentials" }
     | { status: "stake-address-used" }
     | { status: "discord-used" }
+
+export type DeassociationResult
+    = SResult<{}>
+
 
 export type ListSessionsResult
     = { status: "ok", sessions: SessionInfo[] }

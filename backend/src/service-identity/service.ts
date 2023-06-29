@@ -20,7 +20,8 @@ import {
     VerifyAuthStateResult,
     CleanAssociationTxResult,
     AssosiationOutcome,
-    CompleteAuthStateResult
+    CompleteAuthStateResult,
+    DeassociationResult
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -208,6 +209,10 @@ export class IdentityServiceDsl implements IdentityService {
          else {
             return <AssociationResult>{}
         }
+    }
+
+    async deassociateWallet(userId: string, stakeAddress: string, logger?: LoggingContext | undefined): Promise<DeassociationResult> {
+        return await Users.deassociateStakingAddress(userId, stakeAddress)
     }
 
     async getTotalUsers(): Promise<number> {
