@@ -50,7 +50,7 @@ const IdleQuestsView = () => {
             <NotificationsModule />
             <QuestBoardModule />
             <InventoryModule /> 
-            <AlphaNotes />
+            {/* <AlphaNotes /> */}
         </IdleQuestsContainer>
     )
 }
