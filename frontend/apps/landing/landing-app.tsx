@@ -12,46 +12,90 @@ const LandingAppContainer = styled.div`
     }
 `
 
-const HeaderContainer = styled.header`
+const HeaderContainer = styled.section`
     width: 100vw;
+    position: fixed;
+    padding: 20px;
+    z-index: 10;
+`
+
+const HeaderContent = styled.div`
+    width: calc(100% - 20px);
+    border-radius: 10px;
+    height: 100%;
     padding: 10px 0px;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: rgba(202,198,190, 0.8);
+    filter: drop-shadow(5px 0px 5px black);
 `
 
 const Header = () =>
     <HeaderContainer>
-        <Image src="/landing/logo-universe-s.png" alt="Drunken Dragon Universe Logo" width="185" height="62" />
+        <HeaderContent>
+            <Image src="/landing/logo-universe-s.png" alt="Drunken Dragon Universe Logo" width="185" height="62" />
+        </HeaderContent>
     </HeaderContainer>
 
 const BannerContainer = styled.section`
-    background-color: #0B1015;
+    background-color: ${colors.dduBackground};
     width: 100vw;
-    padding: 50px 0px;
+    height: 1044px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+`
+
+const BannerVideo = styled.div`
+    width: 2400px;
+    height: 1044px;
+    position: absolute;
+    overflow: hidden;
+    z-index: 0;
+    filter: blur(5px);
+
+    video {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+`
+
+const BannerContent = styled.div`
+    width: 100vw;
+    height: 1044px;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 2;
 `
 
 const BannerText = styled.div`
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
 
     h1 {
         ${OswaldFontFamily}
-        color: ${colors.dduGold};
         color: white;
         font-size: 60px;
         margin-top: 100px;
         margin-bottom: 30px;
+        font-weight: bold;
+        text-shadow: 0px 0px 10px black;
     }
     p {
         width: 100%;
-        max-width: 450px;
-        ${MessiriFontFamily}
-        color: white;
-        font-size: 18px;
+        max-width: 600px;
+        #${MessiriFontFamily}
+        ${OswaldFontFamily}
+        #color: ${colors.dduGold};
+        color: #ebdec2;
+        font-size: 30px;
+        font-weight: bold;
+        padding: 10px;
+        text-shadow: 2px 0px 20px black;
     }
 `
 
@@ -63,11 +107,19 @@ const BannerWhiteSpace = styled.div`
 
 const Banner = () =>
     <BannerContainer>
-        <BannerText>
-            <h1>Unleashing Creativity Into An Epic Universe, Together</h1>
-            <p>The Drunken Dragon Universe is a decentralized fantasy franchise for indie creators, passionate fans, and visionaries, built with the tools and technologies required to revolutionize the entertainment industry and finally bring freedom to creativity and storytelling.</p>
-        </BannerText>
-        <BannerWhiteSpace/>
+        <BannerVideo>
+            <video autoPlay muted loop>
+                <source src="/landing/banner.mp4" type="video/mp4" />
+            </video>
+        </BannerVideo>
+        <BannerContent>
+            <BannerText>
+                <h1>Unleashing Creativity Into An Epic Universe, Together</h1>
+                <p>The Drunken Dragon Universe is a decentralized fantasy franchise for indie creators, passionate fans, and visionaries, built with the tools and technologies required to revolutionize the entertainment industry and finally bring freedom to creativity and storytelling.</p>
+            </BannerText>
+            <BannerWhiteSpace/>
+        </BannerContent>
+        <ProductsSection />
     </BannerContainer>
 
 const ProductButtonContainer = styled.div`
@@ -122,7 +174,6 @@ const ProductButton = (props: { title: string, ptype: string, src: string, alt: 
     </ProductButtonContainer>
 
 const ProductsSectionContainer = styled.section`
-    background-color: #eee;
     width: 100vw;
     padding: 20px 0px;
     display: flex;
@@ -151,7 +202,7 @@ const ProductsSection = () =>
     </ProductsSectionContainer>
 
 const SectionContainer = styled.section`
-    background-color: #eee;
+    background-color: ${colors.dduBackground};
     width: 100vw;
     height: 500px;
     display: flex;
@@ -249,7 +300,6 @@ const LandingApp = () =>
     <LandingAppContainer>
         <Header />
         <Banner />
-        <ProductsSection />
         <LeftLeaningSection {...s1} />
         <RightLeaningSection {...s2} />
         <LeftLeaningSection {...s3} />
