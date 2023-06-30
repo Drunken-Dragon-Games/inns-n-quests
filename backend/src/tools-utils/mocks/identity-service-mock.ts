@@ -13,6 +13,7 @@ export default class IdentityServiceMock {
             authenticate: jest.fn(),
             register: jest.fn(),
             associate: jest.fn(),
+            deassociateWallet: jest.fn(),
             refresh: jest.fn(),
             listSessions: jest.fn(),
             signout: jest.fn(),
