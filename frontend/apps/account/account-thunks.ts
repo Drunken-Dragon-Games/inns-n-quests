@@ -123,16 +123,19 @@ export const AccountThunks = {
 
     deassociateWallet: (stakeAddress: string): AccountThunk => async (dispatch) => {
         const displayErrorAndHeal = (details: string) => {
-            //TODO make and use the correct state
             dispatch(actions.setAssociateProcessState({ ctype: "error", details }))
             dispatch(AccountThunks.updateInventory())
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
         }
         try{
             const traceId = v4()
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: `DeAssosiating Stake address from DB.` }))
             const response = await AccountBackend.deassociateWallet(stakeAddress, traceId)
             if (response.ctype !== "success") return displayErrorAndHeal(response.error)
+            dispatch(actions.removeStakeAddress(stakeAddress))
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Success! Updating inventory..." }))
             dispatch(AccountThunks.updateInventory())
+            setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
         } catch (error: any){
             console.error(error)
             return displayErrorAndHeal(error.info ?? error.message)
