@@ -3,6 +3,7 @@ import { AuthenticationTokens, UserFullInfo } from "../service-identity"
 import { LoggingContext } from "../tools-tracing"
 import { MinimalUTxO } from "../tools-cardano"
 import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
+import { SResult } from "../tools-utils"
 
 export interface AccountService {
     authenticateDevelopment(nickname: string, logger?: LoggingContext): Promise<AuthenticateResult>
@@ -11,6 +12,7 @@ export interface AccountService {
     refreshSession(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<AuthenticateResult>
     getAssociationNonce(stakeAddress: string, logger?: LoggingContext): Promise<GetAssociationNonceResult>
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string, logger?: LoggingContext): Promise<SubmitAssociationSignatureResult>
+    deassociateWallet(userId: string, stakeAddress: string, logger?: LoggingContext): Promise<DeassociationResult>
     getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult>
     claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
@@ -48,6 +50,9 @@ export type SubmitAssociationSignatureResult
     = { status: "ok" }
     | { status: "bad-credentials" }
     | { status: "stake-address-used" }
+
+export type DeassociationResult
+    = SResult<{}>
 
 export type GetDragonSilverClaimsResult
     = { status: "ok", 
