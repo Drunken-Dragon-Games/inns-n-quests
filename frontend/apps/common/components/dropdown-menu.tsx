@@ -17,7 +17,7 @@ const DropdownMunuContainer = styled.div`
     }
 `
 
-const DropdownButton = styled.button`
+export const DropdownButton = styled.button`
     border: none;
     background-color: transparent;
     color: ${colors.textBeige};

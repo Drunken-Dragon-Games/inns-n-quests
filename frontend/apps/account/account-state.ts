@@ -96,6 +96,14 @@ export const accountState = createSlice({
             state.userInfo.stakeAddresses.push(action.payload)
         },
 
+        removeStakeAddress: (state, action: PayloadAction<string>) => {
+            if (state.userInfo == null) throw new Error("Cannot remove stake address when user info is not set")
+            const index = state.userInfo.stakeAddresses.indexOf(action.payload)
+            if (index > -1) {
+                state.userInfo.stakeAddresses.splice(index, 1);
+             }
+        },
+
         setAssociateProcessState: (state, action: PayloadAction<WalletAssociationProcessState>) => {
             state.associateProcessState = action.payload
         },
