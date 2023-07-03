@@ -1,6 +1,7 @@
 import styled from "styled-components"
 import { colors, OswaldFontFamily, MessiriFontFamily } from "../../common"
 import { LandingPageSection } from "./common"
+import LandingButton from "./landing-button"
 
 const SectionContainer = styled(LandingPageSection)`
     background-color: ${colors.dduBackground};
@@ -56,22 +57,44 @@ const RightLeaningInfoContainer = styled(LeaningSection)`
     text-align: left;
 `
 
-export const LeftLeaningSection = (props: { title: string, content: string[], image: string, borderColor: string }) =>
+const BttnWrapper = styled.div`
+    width: 100%;
+    text-align: center;
+`
+
+const Bttn = styled(LandingButton)`
+    width: 150px;
+`
+
+type SectionProps = {
+    title: string, 
+    content: string[], 
+    image: string, 
+    borderColor: string, 
+    link?: { 
+        href: string, 
+        text: string 
+    }
+}
+
+export const LeftLeaningSection = (props: SectionProps) =>
     <SectionContainer>
         <SectionBackground image={props.image} borderColor={props.borderColor}>
             <LeftLeaningInfoContainer>
                 <h2>{props.title}</h2>
                 { props.content.map((c, i) => <p key={i}>{c}</p>) }
+                { props.link && <BttnWrapper><Bttn href={props.link.href} target="_blank">{props.link.text}</Bttn></BttnWrapper> }
             </LeftLeaningInfoContainer>
         </SectionBackground>
     </SectionContainer>
 
-export const RightLeaningSection = (props: { title: string, content: string[], image: string, borderColor: string }) =>
+export const RightLeaningSection = (props: SectionProps) =>
     <SectionContainer>
         <SectionBackground image={props.image} borderColor={props.borderColor}>
             <RightLeaningInfoContainer>
                 <h2>{props.title}</h2>
                 { props.content.map((c, i) => <p key={i}>{c}</p>) }
+                { props.link && <BttnWrapper><Bttn href={props.link.href} target="_blank">{props.link.text}</Bttn></BttnWrapper> }
             </RightLeaningInfoContainer>
         </SectionBackground>
     </SectionContainer>

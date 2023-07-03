@@ -3,6 +3,7 @@ import styled from "styled-components"
 import { LandingPageSection } from "./common"
 import { MessiriFontFamily, OswaldFontFamily } from "../../common"
 import { useState } from "react"
+import LandingButton from "./landing-button"
 
 const ComicSectionContainer = styled(LandingPageSection)`
     padding: 50px 0px;
@@ -100,32 +101,12 @@ const TitleWrapper = styled.div`
     }
 `
 
-const Button = styled.div`
-    ${OswaldFontFamily}
-    border: 1px solid #ea3012;
-    background: rgba(159,22,0,.6);
-    user-select: none;
-    cursor: pointer;
-    color: #f7b10a;
-    text-transform: uppercase;
-    font-size: 20px;
-    font-weight: 400;
-    padding: 12px 30px;
-    border-radius: 2px;
-    text-align: center;
-
-    &:hover {
-        background: rgba(159,22,0,.8);
-    }
-`
-
-
 const ComicSection = () => {
     const [page, setPage] = useState(0)
     return <ComicSectionContainer>
         <TitleWrapper>
             <h2>Explore The Adventures Of The Dead Queen</h2>
-            <a href="" target="_blank"><Button>Buy Comic</Button></a>
+            <LandingButton href="" target="_blank">Buy Comic</LandingButton>
             <p>Tap to turn pages...</p>
         </TitleWrapper>
         <PagesWrapper onClick={() => setPage((page + 1) % 3)}>

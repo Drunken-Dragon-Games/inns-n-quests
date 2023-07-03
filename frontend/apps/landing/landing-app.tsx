@@ -39,6 +39,19 @@ const s3 = {
     borderColor: "#353535"
 }
 
+const gameSection = {
+    title: "Open An Inn For Your Adventurers And Go On a Quest",
+    content: [
+        ""
+    ],
+    image: "/landing/section-game.png",
+    borderColor: "#ffc500",
+    link: {
+        href: "",
+        text: "Play Now"
+    }
+}
+
 const LandingAppContainer = styled.div`
     background-color: ${colors.dduBackground};
     width: 100vw;
@@ -61,6 +74,7 @@ const LandingApp = () =>
         <RightLeaningSection {...s2} />
         <LeftLeaningSection {...s3} />
         <FollowSection />
+        <RightLeaningSection {...gameSection} />
         <CardsSection />
         <ComicSection />
     </LandingAppContainer>

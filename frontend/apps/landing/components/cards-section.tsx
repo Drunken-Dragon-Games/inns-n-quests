@@ -3,6 +3,7 @@ import styled, { css, keyframes } from "styled-components"
 import { LandingPageSection } from "./common"
 import { useState } from "react"
 import { OswaldFontFamily, colors } from "../../common"
+import LandingButton from "./landing-button"
 
 const hoverAnimation = keyframes`
     0% {
@@ -137,40 +138,22 @@ const TitleWrapper = styled.div`
         ${OswaldFontFamily}
         font-size: 40px;
         color: white;
-    }
-`
-
-const Button = styled.div`
-    ${OswaldFontFamily}
-    border: 1px solid #ea3012;
-    background: rgba(159,22,0,.6);
-    user-select: none;
-    cursor: pointer;
-    color: #f7b10a;
-    text-transform: uppercase;
-    font-size: 20px;
-    font-weight: 400;
-    padding: 12px 30px;
-    border-radius: 2px;
-    text-align: center;
-
-    &:hover {
-        background: rgba(159,22,0,.8);
+        text-align: right;
     }
 `
 
 const CardsSection = () =>
     <CardsSectionContainer>
-        <TitleWrapper>
-            <h2>Collect Digital Cards And Build Your Party</h2>
-            <a href="" target="_blank"><Button>Buy Cards</Button></a>
-        </TitleWrapper>
         <CardWrapper>
             <Card card="gadrull_23_0" />
             <Card card="mili_29_0" />
             <Card card="filgrald_20_0" />
             <Card card="dethiol_30_0" />
         </CardWrapper>
+        <TitleWrapper>
+            <h2>Collect Digital Cards And Build Your Party</h2>
+            <LandingButton href="" target="_blank">Buy Cards</LandingButton>
+        </TitleWrapper>
     </CardsSectionContainer>
 
 export default CardsSection
