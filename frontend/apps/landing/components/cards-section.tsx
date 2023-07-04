@@ -4,6 +4,7 @@ import { LandingPageSection } from "./common"
 import { useState } from "react"
 import { OswaldFontFamily, colors } from "../../common"
 import LandingButton from "./landing-button"
+import { useWindowWidth } from "@react-hook/window-size"
 
 const hoverAnimation = keyframes`
     0% {
@@ -73,7 +74,6 @@ const CardFace = css`
 const CardBack = styled.div`
     ${CardFace}
     transform: rotateY(0.5turn);
-
 `
 
 const CardFront = styled.div`
@@ -116,6 +116,16 @@ const CardsSectionContainer = styled(LandingPageSection)`
     background-image: url(/landing/section-cards.png);
     background-size: cover;
     background-position: center;
+
+    @media (max-width: 1024px) {
+        flex-direction: column;
+        height: auto;
+        padding: 30px 0px;
+    }
+
+    @media (max-width: 820px) {
+        background-position: top right 70%;
+    }
 `
 
 const CardWrapper = styled.div`
@@ -139,21 +149,33 @@ const TitleWrapper = styled.div`
         font-size: 40px;
         color: white;
         text-align: right;
+
+        @media (max-width: 1024px) {
+            text-align: center;
+        }
     }
 `
 
-const CardsSection = () =>
-    <CardsSectionContainer>
+const CardsSection = () => {
+    const windowWidth = useWindowWidth()
+    const mobile = windowWidth <= 820
+    return <CardsSectionContainer>
         <CardWrapper>
-            <Card card="gadrull_23_0" />
-            <Card card="mili_29_0" />
-            <Card card="filgrald_20_0" />
-            <Card card="dethiol_30_0" />
+            { mobile ? <>
+                <Card card="gadrull_23_0" />
+                <Card card="mili_29_0" />
+                <Card card="filgrald_20_0" />
+            </> : <>
+                <Card card="gadrull_23_0" />
+                <Card card="mili_29_0" />
+                <Card card="filgrald_20_0" />
+                <Card card="dethiol_30_0" />
+            </>}
         </CardWrapper>
         <TitleWrapper>
             <h2>Collect Digital Cards And Build Your Party</h2>
             <LandingButton href="" target="_blank">Buy Cards</LandingButton>
         </TitleWrapper>
     </CardsSectionContainer>
-
+}
 export default CardsSection

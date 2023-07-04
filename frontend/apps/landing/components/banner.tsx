@@ -11,6 +11,11 @@ const BannerContainer = styled(LandingPageSection)`
     justify-content: center;
     border: 1px solid black;
     overflow: hidden;
+    
+    @media (max-width: 1024px) {
+        height: auto;
+        justify-content: normal;
+    }
 `
 
 const ProductButtonContainer = styled.div<{ bg: string }>`
@@ -65,6 +70,13 @@ const ProductsSectionContainer = styled(LandingPageSection)`
     gap: 30px;
     padding: 50px 0px;
     z-index: 2;
+
+    @media (max-width: 820px) {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 50px;
+        padding: 50px 0 0 0;
+    }
 `
 
 const ProductsSection = () => 
@@ -107,11 +119,25 @@ const BannerContent = styled.div`
     justify-content: center;
     align-items: center;
     z-index: 2;
+
+    @media (max-width: 1024px) {
+        height: auto;
+        margin-top: 150px;
+    }
+
+    @media (max-width: 820px) {
+        margin-top: 100px;
+    }
 `
 
 const BannerText = styled.div`
     width: 100%;
     max-width: 700px;
+
+    @media (max-width: 1024px) {
+        margin-top: 0px;
+        max-width: 100%;
+    }
 
     h1 {
         ${OswaldFontFamily}
@@ -121,19 +147,36 @@ const BannerText = styled.div`
         margin-bottom: 30px;
         font-weight: bold;
         text-shadow: 0px 0px 10px black;
+
+        @media (max-width: 1024px) {
+            margin-top: 0px;
+            font-size: 40px;
+            padding-left: 20px;
+        }
+
+        @media (max-width: 820px) {
+            font-size: 30px;
+        }
     }
     p {
         width: 100%;
         max-width: 600px;
-        #${MessiriFontFamily}
         ${OswaldFontFamily}
-        #color: ${colors.dduGold};
         color: #ebdec2;
         font-size: 26px;
         font-weight: bold;
         padding: 10px;
         text-shadow: 2px 0px 20px black;
         filter: drop-shadow(0 0 10px black);
+
+        @media (max-width: 1024px) {
+            font-size: 24px;
+            padding-left: 20px;
+        }
+
+        @media (max-width: 820px) {
+            font-size: 20px;
+        }
     }
 `
 
@@ -141,6 +184,14 @@ const BannerWhiteSpace = styled.div`
     width: 100%;
     max-width: 500px;
     height: 100%;
+
+    @media (max-width: 1024px) {
+        max-width: 200px; 
+    }
+    
+    @media (max-width: 820px) {
+        max-width: 50px;
+    }
 `
 
 const Banner = (props: { title: string, subtext: string }) =>

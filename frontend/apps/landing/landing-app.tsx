@@ -18,7 +18,7 @@ const s1 = {
         "We champion indie creators. All Drunken Dragon Universe general IP is under creative commons. All characters, storylines, and places can be used without asking for permission. And individual products can still be protected.",
     ],
     image: "/landing/section-1.png",
-    borderColor: "#be8d5b"
+    borderColor: "#2f0d15"
 }
 
 const s2 = {
@@ -27,7 +27,7 @@ const s2 = {
         "We are establishing a system that allows fans and creators to vote on crucial aspects, such as deciding which products become official, allocating shared resources, and determining the future direction of the franchise. No single party should have control over it, that is why we chose Cardano blockchain technology to develop governance that serves us all."
     ],
     image: "/landing/section-2.png",
-    borderColor: "#b3cafe"
+    borderColor: "#252350"
 }
 
 const s3 = {
@@ -42,10 +42,9 @@ const s3 = {
 const gameSection = {
     title: "Open An Inn For Your Adventurers And Go On a Quest",
     content: [
-        ""
     ],
     image: "/landing/section-game.png",
-    borderColor: "#ffc500",
+    borderColor: "#633d17",
     link: {
         href: "",
         text: "Play Now"
@@ -61,10 +60,6 @@ const LandingAppContainer = styled.div`
     align-items: center;
     overflow-x: hidden;
     gap: 3px;
-
-    @media only screen and (max-width: 414px) {
-        padding-top: 16vh;
-    }
 `
 const LandingApp = () => 
     <LandingAppContainer>
