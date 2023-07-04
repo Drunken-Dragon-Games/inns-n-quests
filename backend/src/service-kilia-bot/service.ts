@@ -387,6 +387,25 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             })
 
         }
+        else if (subcommand == "get-leaderboard"){
+            const days = messagesDSL.getArguments(message)
+            if (!days || days == ""){
+                //we default to the first of the current month
+                const startDate = new Date()
+                startDate.setDate(1)
+                const leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
+                return this.replyMessage(message, JSON.stringify(leaderboardObject, null, 4))
+            }
+            else{
+                const daysToCheck = parseInt(days)
+                if (isNaN(daysToCheck) || daysToCheck <= 0) {return this.replyMessage(message, "Invalid input for days.")}
+                const currentDate = new Date()
+                //const startDate = new Date(currentDate.getTime() - daysToCheck * 24 * 60 * 60 * 1000)
+                const startDate = new Date(currentDate.getTime() - daysToCheck * 60 * 60 * 1000)
+                const leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
+                return this.replyMessage(message, JSON.stringify(leaderboardObject, null, 4))
+            }
+        }
         else if (subcommand == "help"){
             const helpMessage = `
         **Available Development Commands**
@@ -407,6 +426,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             If needed also retuns array of orphaned entitiesIds that could not be found on the Database.
         
         *get-ballot-votes <ballotId> *: Returns the votes for a ballot, separated by option
+
+        *get-leaderboard*
         
         *help* : Provides a list of available commands and a description of their function.
         

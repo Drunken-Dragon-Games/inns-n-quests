@@ -96,10 +96,10 @@ export class TakenStakingQuestState {
         await TakenStakingQuestDB.update({ claimedAt, outcome }, { where: { takenQuestId }, transaction })
     }
 
-    async getLeaderboard(size: number, start: Date, end: Date = new Date()): Promise<{[userId: string]: {succeededQuests: number}}> {
+    async getLeaderboard(size: number, start: Date, end: Date): Promise<{[userId: string]: {succeededQuests: number}}> {
         const leaderboardArray = await TakenStakingQuestDB.findAll({
             where: {
-                createdAt: {
+                claimedAt: {
                     [Op.gte]: start,
                     [Op.lte]: end,
                 },
@@ -107,19 +107,23 @@ export class TakenStakingQuestState {
                     [Op.and]: [literal(`outcome->>'ctype' = 'success-outcome'`)],
                 },
             },
-            attributes: ['userId', [fn('count', col('userId')), 'succeededQuests']],
-            group: ['userId'],
-            order: [[literal('succeededQuests'), 'DESC']],
             limit: size,
         })
 
         const leaderboardObject: {[userId: string]: {succeededQuests: number}} = {};
 
         for (const entry of leaderboardArray) {
-            leaderboardObject[entry.userId] = {succeededQuests: entry.succeededQuests};
+            if (!leaderboardObject[entry.userId])
+                leaderboardObject[entry.userId] = {succeededQuests: 1}
+            else
+                leaderboardObject[entry.userId].succeededQuests += 1
         }
 
-        return leaderboardObject
+        const sortedLeaderboard = Object.entries(leaderboardObject)
+            .sort((a, b) => b[1].succeededQuests - a[1].succeededQuests)
+            .slice(0, size)
+
+        return Object.fromEntries(sortedLeaderboard)
     }
 
 }
