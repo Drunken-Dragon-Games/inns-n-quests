@@ -1,15 +1,17 @@
 import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService, ClaimerInfo, CreateAssociationTxResult } from "../service-asset-management"
+import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
+import { BlockchainService } from "../service-blockchain/service-spec"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
+    blockchainService: BlockchainService
     governanceService: GovernanceService
     wellKnownPolicies: WellKnownPolicies
 }
@@ -19,6 +21,7 @@ export class AccountServiceDsl implements AccountService {
     constructor (
         private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
+        private readonly blockchainService: BlockchainService,
         private readonly governanceService: GovernanceService,
         private readonly wellKnownPolicies: WellKnownPolicies,
     ){}
@@ -31,6 +34,7 @@ export class AccountServiceDsl implements AccountService {
         const service = new AccountServiceDsl(
             dependencies.identityService,
             dependencies.assetManagementService,
+            dependencies.blockchainService,
             dependencies.governanceService,
             dependencies.wellKnownPolicies,
         )
@@ -105,38 +109,47 @@ export class AccountServiceDsl implements AccountService {
         return associateResponse
     }
 
-    async getAssociationTx(userId: string, stakeAddress: string, utxos: MinimalUTxO[], logger?: LoggingContext): Promise<CreateAssociationTxResult> {
-            const txIdResult =  await this.assetManagementService.createAssociationTx(stakeAddress, utxos, logger)
-            if (txIdResult.status != "ok") return {status: "invalid", reason: txIdResult.reason}
+    async getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult> {
 
-            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, txIdResult.txId, logger)
-            if (authState.status != "ok") return {status: "invalid", reason: authState.reason}
+            const transactionInfoResponse = await this.blockchainService.getWalletAuthenticationSelfTx(address)
+            if (transactionInfoResponse.status !== "ok") return {status: "invalid", reason: `While building TX: ${transactionInfoResponse.reason}`}
 
-            return { status: "ok", txId: txIdResult.txId, authStateId: authState.authStateId }
+            const transactionInfo = transactionInfoResponse.value
+
+            const authState =  await this.identityService.createAuthTxState(userId, stakeAddress, transactionInfo.txHash, logger)
+            if (authState.status != "ok") return {status: "invalid", reason: `While creating auth State ${authState.reason}`}
+
+            return { status: "ok", rawTx: transactionInfo.rawTransaction, authStateId: authState.authStateId}
     }
 
-    async submitAssociationTx(userId: string, witness: string, tx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
+    async submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
         try {
-            const stateValidateResult = await this.identityService.verifyAuthState(authStateId, tx, userId, logger)
+            const txHashResponse = await this.blockchainService.getTxHashFromTransaction(serializedSignedTx)
+            if(txHashResponse.status !== "ok") return {status: "invalid", reason: `could not hash Transaction: ${txHashResponse.reason}`}
+            const stateValidateResult = await this.identityService.verifyAuthState(authStateId, userId, txHashResponse.value, logger)
             if (stateValidateResult.status !== "ok") throw new Error(stateValidateResult.reason)
-            const txvalidateResult = await this.assetManagementService.submitAuthTransaction(witness, tx, logger)
-        
-            if (txvalidateResult.status != "ok") throw new Error(txvalidateResult.reason)
-            
+            const txSubmitResult = await this.blockchainService.submitTransaction(serializedSignedTx)
+            if (txSubmitResult.status != "ok") throw new Error(txSubmitResult.reason)
+            if(txSubmitResult.value !== txHashResponse.value) throw new Error(`Could not match Submited and signed Transactions`)
             const associateResponse = await this.identityService.associate(userId, 
                 {ctype: "tx", deviceType: "Browser", stakekeAddres: stateValidateResult.stakeAddress}, logger)
-
             if(associateResponse.status != "ok") throw new Error(associateResponse.status)
-            return{status: "ok", txId: txvalidateResult.txId }
+            await this.identityService.completeAuthState(authStateId, {ctype: "succeded"})
+            return{status: "ok", txId: txSubmitResult.value }
         }catch(e: any){
             logger?.log.error(e.message ?? e)
+            await this.identityService.completeAuthState(authStateId, {ctype: "failed", reason: e.message})
             return {status: "invalid", reason: e.message}
         }
         
     }
 
-    async cleanAssociationState(userId: string, authStateId: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
-        return this.identityService.cleanAssociationTx(userId, authStateId, logger)
+    async cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult> {
+        return await this.identityService.completeAuthState(authStateId, {ctype: "failed", reason: `frontend exception: ${error}`})
+    }
+
+    async deassociateWallet(userId: string, stakeAddress: string, logger?: LoggingContext | undefined): Promise<DeassociationResult> {
+        return await this.identityService.deassociateWallet(userId, stakeAddress, logger)
     }
 
     async getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult> {
@@ -153,28 +166,27 @@ export class AccountServiceDsl implements AccountService {
             return result
     }
 
-    async claimDragonSilver(userId: string, stakeAddress: string, claimerInfo: ClaimerInfo, logger?: LoggingContext): Promise<ClaimDragonSilverResult>{
+    async claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>{
         const dsPolicyId = this.wellKnownPolicies.dragonSilver.policyId
         //For now we just claim ALL OF IT
         //const { amount } = request.body
         const assetList = await this.assetManagementService.list(userId, { policies: [ dsPolicyId ] }, logger)
-        if (assetList.status == "ok"){
-            const inventory= assetList.inventory
-            const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
-            const options = {
-                unit: "DragonSilver",
-                policyId: dsPolicyId,
-                quantity: dragonSilverToClaim
-            }
-            const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, options, claimerInfo, logger)
-            if (claimResponse.status == "ok") return { ...claimResponse, remainingAmount: 0 }
-            else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
+        if (assetList.status !== "ok") return { status: "invalid", reason: assetList.status}
+        const inventory= assetList.inventory
+        const dragonSilverToClaim = inventory[dsPolicyId!].find(i => i.chain === false)?.quantity ?? "0"
+        const options = {
+            unit: "DragonSilver",
+            policyId: dsPolicyId,
+            quantity: dragonSilverToClaim
         }
-        else return { status: "invalid", reason: assetList.status}
+        const claimResponse = await this.assetManagementService.claim(userId, stakeAddress, address, options, logger)
+        if (claimResponse.status == "ok") return { ...claimResponse, remainingAmount: 0 }
+        else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
+        
     }
 
-    async claimSignAndSubbmit(witness: string, tx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
-        return this.assetManagementService.submitClaimSignature(claimId, tx, witness, logger)
+    async claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
+        return this.assetManagementService.submitClaimSignature(claimId, serializedSignedTx, logger)
     }
 
     async claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult> {

@@ -37,6 +37,7 @@ export const AccountThunks = {
           return {status: "error", details: `${wallet} has to be on ${cardanoNetwork} but is configured on ${walletNetwork}.`}
         }
         const stakeAddress = await walletApi.wallet.rewardAddress();
+        const address = await walletApi.wallet.address()
         if (isEmpty(stakeAddress))
             return {status: "error", details: `${wallet} does not have a reward address.`}
         const utxos = await walletApi.wallet.getUtxos()
@@ -44,7 +45,7 @@ export const AccountThunks = {
         if (utxos.length <= 0) 
             return {status: "error", details: `${wallet} must have at least one transaction.`}
 
-        return { status: "ok", walletApi, stakeAddress };
+        return { status: "ok", walletApi, stakeAddress, address };
       },
       
     authenticateDevelopment: (nickname: string, router: NextRouter): AccountThunk => async (dispatch) => {
@@ -120,6 +121,27 @@ export const AccountThunks = {
         }
     },
 
+    deassociateWallet: (stakeAddress: string): AccountThunk => async (dispatch) => {
+        const displayErrorAndHeal = (details: string) => {
+            dispatch(actions.setAssociateProcessState({ ctype: "error", details }))
+            dispatch(AccountThunks.updateInventory())
+            setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
+        }
+        try{
+            const traceId = v4()
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: `DeAssosiating Stake address from DB.` }))
+            const response = await AccountBackend.deassociateWallet(stakeAddress, traceId)
+            if (response.ctype !== "success") return displayErrorAndHeal(response.error)
+            dispatch(actions.removeStakeAddress(stakeAddress))
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Success! Updating inventory..." }))
+            dispatch(AccountThunks.updateInventory())
+            setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
+        } catch (error: any){
+            console.error(error)
+            return displayErrorAndHeal(error.info ?? error.message)
+        }
+    },
+
     updateInventory: (): AccountThunk => async (dispatch) => {
         const inventoryResult = await AccountBackend.getUserInventory()
         if (inventoryResult.status !== "ok")
@@ -142,11 +164,10 @@ export const AccountThunks = {
     },
 
     associateHardwareWallet: (wallet: SupportedWallet): AccountThunk => async (dispatch) => {
-        //fran yo se pero si se te ocurre otra solucion jalo
         let authStateId: string | undefined
         const displayErrorAndHeal = (details: string) => {
             dispatch(actions.setAssociateProcessState({ ctype: "error", details }))
-            if (authStateId) AccountBackend.cleanAssociationState(authStateId)
+            if (authStateId) AccountBackend.cleanAssociationState(authStateId, details)
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
         }
 
@@ -161,35 +182,25 @@ export const AccountThunks = {
             if (extractedResult.status !== "ok")
                 return displayErrorAndHeal(extractedResult.details)
 
-            const { walletApi, stakeAddress } = extractedResult
-             
-            const allUtxos = await walletApi.wallet.getUtxos()
-            const utxos = allUtxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("1000000"))
-
-            if (utxos.length == 0)
-                return displayErrorAndHeal("Not UTxO large enough to autenticate wallet")
-                
+            const { walletApi, stakeAddress, address } = extractedResult
+            
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Building Auth Tx" }))
-            const assoiationTxResponse =  await AccountBackend.getAssociationTx(stakeAddress, minimalUtxoFromLucidUTxO(utxos))
+            const txResponse =  await AccountBackend.getRawAssociationTx(stakeAddress, address)
+            if (txResponse.status !== "ok")
+                return displayErrorAndHeal(txResponse.reason)
 
-            if (assoiationTxResponse.status !== "ok")
-                return displayErrorAndHeal(assoiationTxResponse.reason)
-            
-            authStateId = assoiationTxResponse.authStateId
-            dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Waiting for wallet signature..."}))
-            
-            const transaction = C.Transaction.from_bytes(new Uint8Array(Buffer.from( assoiationTxResponse.txId, 'hex')))
-            const witness = await walletApi.wallet.signTx(transaction)
-            const witnessHex = Buffer.from(witness.to_bytes()).toString("hex")
+            authStateId = txResponse.authStateId
+            const tx = walletApi.fromTx(txResponse.rawTx)
+            const signedTx  = await tx.sign().complete()
+            const serializedSignedTx = signedTx.toString()
 
             dispatch(actions.setAssociateProcessState({ctype: "loading", claimStatus: "created", details: "Submiting signature..."}))
-            const signature = await AccountBackend.submitAuthTx(witnessHex, assoiationTxResponse.txId, assoiationTxResponse.authStateId)
+            const signature = await AccountBackend.submitAuthTx(serializedSignedTx, txResponse.authStateId)
 
             if ( signature.status !== "ok")
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`) 
             dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Updating inventory..." }))
             dispatch(actions.addStakeAddress(stakeAddress))
-
             dispatch(AccountThunks.updateInventory())
             setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
 
@@ -217,17 +228,11 @@ export const AccountThunks = {
             if (extractedResult.status !== "ok")
                 return displayErrorAndHeal(extractedResult.details)
         
-            const { walletApi, stakeAddress } = extractedResult
-            
-            const allUtxos = await walletApi.wallet.getUtxos()
-            const utxos = allUtxos.filter(utxo => utxo.assets["lovelace"] >= BigInt("2000000"))
-
-            if (utxos.length == 0)
-                return displayErrorAndHeal("Not enough ADA or transaction ongoing")
+            const { walletApi, stakeAddress, address } = extractedResult
        
             dispatch(actions.setClaimProcessState({ctype: "loading", claimStatus: "created", details: "Building transaction..."}))
             const dragonSilverToClaim = state.userInfo.dragonSilverToClaim
-            const claimResponse =  await AccountBackend.claim(stakeAddress, { utxos: minimalUtxoFromLucidUTxO(utxos), receivingAddress: utxos[0].address }, traceId)
+            const claimResponse =  await AccountBackend.claim(stakeAddress, address, traceId)
             
             if (claimResponse.status !== "ok")
                 return displayErrorAndHeal(claimResponse.reason)
@@ -235,11 +240,12 @@ export const AccountThunks = {
             dispatch(actions.updateUserInfo({dragonSilverToClaim: `${claimResponse.remainingAmount}`}))
             dispatch(actions.setClaimProcessState({ctype: "loading", claimStatus: "created", details: "Waiting for wallet signature..."}))
 
-            const transaction = C.Transaction.from_bytes(new Uint8Array(Buffer.from( claimResponse.tx, 'hex')))
-            const witness = await walletApi.wallet.signTx(transaction)
-            const witnessHex = Buffer.from(witness.to_bytes()).toString("hex")
+            const tx = walletApi.fromTx(claimResponse.tx)
+            const signedTx  = await tx.sign().complete()
+            const serializedSignedTx = signedTx.toString()
+
             dispatch(actions.setClaimProcessState({ctype: "loading", claimStatus: "created", details: "Submiting signature..."}))
-            const signature = await AccountBackend.claimSignAndSubmit(witnessHex, claimResponse.tx, claimResponse.claimId, traceId)
+            const signature = await AccountBackend.claimSignAndSubmit(serializedSignedTx, claimResponse.claimId, traceId)
             if ( signature.status !== "ok")
                 return displayErrorAndHeal(`Somethig went wrong: ${signature.reason}`)
             dispatch(actions.setClaimProcessState({ ctype: "loading", claimStatus: "submitted", details: "Tx submitted, waiting for confirmation..." }))
@@ -270,8 +276,10 @@ export const AccountThunks = {
     },
 
     testGrant: (): AccountThunk => async (dispatch) => {
-        await AccountBackend.granteTest()
-        dispatch(AccountThunks.updateInventory())
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] === "development"){
+            await AccountBackend.granteTest()
+            dispatch(AccountThunks.updateInventory())
+        }
     },
 
     getGoverncanceBallots: (): AccountThunk => async (dispatch) => {

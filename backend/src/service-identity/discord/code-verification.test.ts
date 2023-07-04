@@ -1,6 +1,6 @@
-import { DiscordConfig, verifyDiscordAuthCode } from "./code-verification"
 import axios from 'axios';
-import { success } from "../../tools-utils";
+import { succeeded } from "../../tools-utils";
+import { DiscordConfig, verifyDiscordAuthCode } from "./code-verification";
 
 const stubDiscordConfig: DiscordConfig = {
     clientId: "",
@@ -37,6 +37,6 @@ test("discord code verification", async () => {
         }
     });
     const result = await verifyDiscordAuthCode(discordAuthCode, stubDiscordConfig, "validate")
-    const correctResult = success({ discordBearerToken: "Bearer validToken", refreshtoken: "validRefresh" })
+    const correctResult = succeeded({ discordBearerToken: "Bearer validToken", refreshtoken: "validRefresh" })
     expect(result).toStrictEqual(correctResult)
 })

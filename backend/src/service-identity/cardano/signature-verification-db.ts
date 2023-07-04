@@ -1,5 +1,6 @@
 
 import { DataTypes, Model, Sequelize } from "sequelize"
+import { AssosiationOutcome } from "../models"
 
 export interface ISignatureVerificationState {
     address: string,
@@ -30,7 +31,8 @@ export class TransactionVerificationState extends Model{
     declare stateId: string
     declare userId: string
     declare stakeAddress: string
-    declare txId: string
+    declare txHash: string
+    declare state: AssosiationOutcome
 }
 
 export const TransactionVerificationStateTableName = "identity_transaction_verification_states"
@@ -49,10 +51,16 @@ export const TransactionVerificationStateTableAttributes = {
         type: DataTypes.STRING,
         allowNull: false
     },
-    txId: {
-        type: DataTypes.TEXT,
-        allowNull: true
+    txHash: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "0"
     },
+    state: {
+        type: DataTypes.JSONB,
+        allowNull: false,
+        defaultValue: {ctype: "failed", reason: "front end exception"}
+    }
 }
 
 export const configureSequelizeModel = (sequelize: Sequelize): void => {

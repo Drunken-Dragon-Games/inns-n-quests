@@ -37,18 +37,23 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getAssociationTx(stakeAddress: string, utxos: UTxOMinimal[]): Promise<CreateAssociationTxResult>{
-        const result = await accountRequest("POST", "/association/tx", {stakeAddress, utxos})
+    async getRawAssociationTx(stakeAddress: string, address: string, traceId?: string): Promise<CreateAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/tx", {stakeAddress, address}, traceId)
         return result.data
     },
 
-    async submitAuthTx(witnessHex: string, txId: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>{
-        const result = await accountRequest("POST", "/association/submit-tx", {witnessHex, txId, authStateId})
+    async submitAuthTx(serializedSignedTx: string, authStateId: string, traceId?: string): Promise<ClaimSignAndSubbmitResult>{
+        const result = await accountRequest("POST", "/association/submit-tx", {serializedSignedTx, authStateId}, traceId)
         return result.data
     },
 
-    async cleanAssociationState(authStateId: string): Promise<CleanAssociationTxResult>{
-        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId})
+    async cleanAssociationState(authStateId: string, error: string, traceId?: string): Promise<CleanAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId, error}, traceId)
+        return result.data
+    },
+
+    async deassociateWallet(stakeAddress: string, traceId?: string): Promise<DeassociationResult>{
+        const result = await accountRequest("POST", "/association/deassociate-wallet", {stakeAddress}, traceId)
         return result.data
     },
 
@@ -63,13 +68,13 @@ export const AccountBackend = {
         return result.data
     },
 
-    async claim(stakeAddress: string, claimerInfo: ClaimerInfo, traceId?: string): Promise<ClaimAssetResult> {
-        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress, claimerInfo}, traceId)
+    async claim(stakeAddress: string, address: string, traceId?: string): Promise<ClaimAssetResult> {
+        const result = await accountRequest("POST", "/assets/claim/dragon-silver", {stakeAddress, address}, traceId)
         return result.data
     },
 
-    async claimSignAndSubmit(witness: string, tx: string, claimId: string, traceId?: string): Promise<ClaimSignAndSubbmitResult> {
-        const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {witness, tx, claimId}, traceId)
+    async claimSignAndSubmit(serializedSignedTx: string, claimId: string, traceId?: string): Promise<ClaimSignAndSubbmitResult> {
+        const result = await accountRequest("POST", "/assets/claim/sign-and-submit", {serializedSignedTx, claimId}, traceId)
         return result.data
     },
 
@@ -114,6 +119,11 @@ export const AccountBackend = {
         return result.data
     }
 }
+
+export type DeassociationResult 
+    = { ctype: "success"}
+    | { ctype: "failure", error: string}
+
 export type CleanAssociationTxResult 
     = {status: "ok"}
     | {status: "invalid", reason: string}
@@ -148,7 +158,7 @@ export type SubmitAssociationSignatureResult
 export type AssociationNonceResult = ClaimSignAndSubbmitResult
 
 export type CreateAssociationTxResult
-    = { status: "ok", txId: string, authStateId: string }
+    = { status: "ok", rawTx: string, authStateId: string }
     | { status: "invalid", reason: string }
 
 export type ClaimSignAndSubbmitResult 
@@ -188,6 +198,26 @@ async function accountRequest<ResData = any, ReqData = any>(method: Method, endp
     const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "api/account")
     //if (baseURL.includes("acceptance.") || baseURL.includes("testnet.") || baseURL.includes("localhost")) 
         console.log(`${method}: ${endpoint}\ntrace-id: ${finalTraceId}`)
+    return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
+        method,
+        baseURL,
+        url: endpoint,
+        data,
+        headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+            "Trace-ID": finalTraceId
+        },
+        timeout: 10000,
+        withCredentials: true,
+    })
+}
+
+//for TESTING purposes only
+async function blockChainRequest<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {
+    const finalTraceId = traceId ?? v4()
+    const baseURL = urljoin("http://localhost:8000", "blockchain")
+        console.log(baseURL)
     return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
         method,
         baseURL,

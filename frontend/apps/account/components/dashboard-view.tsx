@@ -1,7 +1,7 @@
 import { MouseEventHandler, ReactNode, useEffect } from "react"
 import { Provider, useSelector } from "react-redux"
 import styled from "styled-components"
-import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton, MobileHidden } from "../../common"
+import { colors, DropdownMenu, MessiriFontFamily, NoDragImage, OswaldFontFamily, Push, px1, useNumberAnimation, useRememberLastValue, TokenDisplayer, ClaimButton, MobileHidden, DropdownButton } from "../../common"
 import { ClaimInfo, ClaimProcessState, ClaimStatus, PublicBallot, StoredBallot, UserBallot, UserInfo, WalletAssociationProcessState } from "../account-dsl"
 import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
@@ -89,7 +89,7 @@ const WalletAssociationWidget = (userInfo: UserInfo) => {
                 }} />
             </MobileHidden>
                 {userInfo.stakeAddresses.map((stakeAddress, index) =>
-                    <WidgetRow key={index} status="tick" text={stakeAddress} />
+                    <><WidgetRow key={index} status="tick" text={stakeAddress}/> <DropdownButton key={index} onClick={() => { AccountTransitions.deassociateWallet(stakeAddress) }}>Remove</DropdownButton> </>
                 )}
         </WalletAssociationWidgetContainer>
     )
@@ -233,9 +233,13 @@ const DragonSilverWidget = (userInfo: UserInfo) => {
                 <DragonSilverClaimRow key={index} claimInfo={claimInfo} /> 
             )}
 
-            {/* <ButtonContainer>
-                <button onClick = {AccountTransitions.grantTest}>Grant</button>
-            </ButtonContainer> */}
+            { process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ? 
+                <ButtonContainer>
+                    <button onClick = {AccountTransitions.grantTest}>Grant</button>
+                </ButtonContainer>
+                : 
+                <></>
+            }
         </DragonSilverWidgetContainer>
     )
 }

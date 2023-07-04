@@ -13,6 +13,7 @@ export default class IdentityServiceMock {
             authenticate: jest.fn(),
             register: jest.fn(),
             associate: jest.fn(),
+            deassociateWallet: jest.fn(),
             refresh: jest.fn(),
             listSessions: jest.fn(),
             signout: jest.fn(),
@@ -22,8 +23,8 @@ export default class IdentityServiceMock {
             updateUser: jest.fn(),
             createAuthTxState: jest.fn(),
             verifyAuthState: jest.fn(),
-            cleanAssociationTx: jest.fn(),
             getTotalUsers: jest.fn(),
+            completeAuthState: jest.fn(),
         }
     }
 

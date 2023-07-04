@@ -12,7 +12,7 @@ export default class DefaultRuleset implements IQRuleset {
     readonly encounter: EncounterRuleset
 
     constructor(
-       public readonly rand: IQRandom 
+       public readonly rand: IQRandom
     ){
         this.character = new DefaultCharacterRuleset()
         this.stakingQuest = new DefaultQuestRuleset(this.character, rand)

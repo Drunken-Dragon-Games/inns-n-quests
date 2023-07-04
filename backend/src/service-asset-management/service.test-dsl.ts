@@ -6,7 +6,7 @@ import { AssetManagementService, ClaimStatus, Inventory } from "../service-asset
 import path from "path"
 import { Transaction } from "@emurgo/cardano-serialization-lib-nodejs"
 import { Wallet, cardano } from "../tools-cardano"
-import { failure, success, unit } from "../tools-utils"
+import { sfailure, ssuccess, unit } from "../tools-utils"
 import { expectResponse } from "../tools-utils/api-expectations"
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock"
 import SecureSigningServiceMock from "../tools-utils/mocks/secure-signing-service-mock"
@@ -54,8 +54,8 @@ export default class ServiceTestDsl {
                 { unit: "TestToken", policyId: this.testTokenPolicyId, quantity }),
             response =>
                 response.status == "ok" ?
-                success(unit) :
-                failure(`Expected 'ok' from grant but got ${response}`)
+                ssuccess(unit) :
+                sfailure(`Expected 'ok' from grant but got ${response}`)
         )
     }
 
@@ -78,8 +78,8 @@ export default class ServiceTestDsl {
             this.service.list(user.info.userId, { policies: [this.testTokenPolicyId] }),
             response =>
                 response.status == "ok" ?
-                success(response.inventory) :
-                failure(`Expected 'ok' from list but got ${response}`)
+                ssuccess(response.inventory) :
+                sfailure(`Expected 'ok' from list but got ${response}`)
         )
     }
 
@@ -89,30 +89,31 @@ export default class ServiceTestDsl {
             this.stubPath("policy-signer-stake.skey"))
         const policy = testTokenPolicySigner.hashNativeScript().to_js_value()
         const stakeAddr = user.wallet.stakeAddress().to_address().to_bech32()
+        const addr = user.wallet.paymentAddress()
         this.secureSigningService.policyReturns({ status: "ok", policy })
         this.setClaimBlockfrostMocks()
         return await expectResponse(
-            this.service.claim(user.info.userId, stakeAddr, 
+            this.service.claim(user.info.userId, stakeAddr, addr, 
                 { unit: "TestToken", policyId: this.testTokenPolicyId, quantity}),
             response =>
                 response.status == "ok" ?
-                success({ claimId: response.claimId, tx: response.tx, policySigner: testTokenPolicySigner }) :
-                failure(`Expected 'ok' from claim but got ${response}`)
+                ssuccess({ claimId: response.claimId, tx: response.tx, policySigner: testTokenPolicySigner }) :
+                sfailure(`Expected 'ok' from claim but got ${response}`)
         )
     }
 
     async signClaimAndSubmit(user: User, claim: TestClaim): Promise<string> {
         const policy = claim.policySigner.hashNativeScript()
         const transaction = Transaction.from_bytes(await cbor.decodeFirst(claim.tx))
-        const claimerWitness = cbor.encode(user.wallet.signTx(transaction).to_bytes()).toString("hex")
+        //const claimerWitness = cbor.encode(user.wallet.signTx(transaction).to_bytes()).toString("hex")
         const policyWitness = cbor.encode(claim.policySigner.signWithPolicy(transaction, policy).to_bytes()).toString("hex")
         this.secureSigningService.signWithPolicyReturns({ status: "ok", witness: policyWitness })
         return await expectResponse(
-            this.service.submitClaimSignature(claim.claimId, claim.tx, claimerWitness),
+            this.service.submitClaimSignature(claim.claimId, claim.tx),
             response =>
                 response.status == "ok" ?
-                success(response.txId) :
-                failure(`Expected 'ok' from claim but got ${JSON.stringify(response)}`)
+                ssuccess(response.txId) :
+                sfailure(`Expected 'ok' from claim but got ${JSON.stringify(response)}`)
         )
     }
 
@@ -121,8 +122,8 @@ export default class ServiceTestDsl {
             this.service.claimStatus(claim.claimId),
             response =>
                 response.status == "ok" ?
-                success(response.claimStatus) :
-                failure(`Expected 'ok' from claimStatus but got ${response}`)
+                ssuccess(response.claimStatus) :
+                sfailure(`Expected 'ok' from claimStatus but got ${response}`)
         )
     }
 

@@ -1,3 +1,4 @@
+import { SResult } from "../tools-utils"
 
 export type HealthStatus = { 
     status: "ok" | "warning" | "faulty", 
@@ -6,6 +7,8 @@ export type HealthStatus = {
         status: "ok" | "warning" | "faulty"
     }[]
 }
+
+export type AssosiationOutcome = { ctype: "succeded"} | {ctype: "pending"} | {ctype: "failed", reason: string}
 
 export type DeviceType = "Browser" | "Desktop" | "Mobile"
 
@@ -69,6 +72,10 @@ export type VerifyAuthStateResult
     = { status: "ok", stakeAddress: string }
     | { status: "invalid", reason: string }
 
+export type CompleteAuthStateResult
+    = { status: "ok"}
+    | { status: "invalid", reason: string }
+
 export type AuthenticationResult
     = { status: "ok", tokens: AuthenticationTokens }
     | { status: "bad-credentials" }
@@ -92,6 +99,10 @@ export type AssociationResult
     | { status: "bad-credentials" }
     | { status: "stake-address-used" }
     | { status: "discord-used" }
+
+export type DeassociationResult
+    = SResult<{}>
+
 
 export type ListSessionsResult
     = { status: "ok", sessions: SessionInfo[] }

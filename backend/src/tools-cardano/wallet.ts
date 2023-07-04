@@ -97,6 +97,10 @@ export class Wallet {
             StakeCredential.from_keyhash(this.stakePubKey.hash()),
         )
     }
+
+    public paymentAddress(): string {
+        return this.baseAddress().to_address().to_bech32()
+    }
     
     public buildPaymentWitness = (transaction: Transaction): Vkeywitness =>
         make_vkey_witness(cardano.hashTx(transaction), this.paymentPvtKey)
