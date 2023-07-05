@@ -51,13 +51,13 @@ export const AccountThunks = {
     authenticateDevelopment: (nickname: string, router: NextRouter): AccountThunk => async (dispatch) => {
         const response = await AccountBackend.authenticateDevelopment(nickname)
         signin(response, dispatch)
-        setTimeout(() => router.push("/"), 100)
+        setTimeout(() => router.push("/inq"), 100)
     },
 
     authenticateDiscord: (code: string, router: NextRouter): AccountThunk => async (dispatch) => {
         const response = await AccountBackend.authenticateDiscord(code)
         signin(response, dispatch)
-        setTimeout(() => router.push("/"), 100)
+        setTimeout(() => router.push("/inq"), 100)
     },
 
     signout: (router: NextRouter): AccountThunk => async (dispatch) => {
@@ -65,7 +65,7 @@ export const AccountThunks = {
         if (response.status != "ok") return
         localStorage.removeItem("refresh")
         dispatch(actions.signout())
-        router.push("/")
+        router.push("/inq")
     },
 
     /**

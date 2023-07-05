@@ -11,7 +11,8 @@ import { AuthenticationMethodIcon, TokenDisplayer } from "./basic_components"
 import { ProfileInformation } from "./complex_components"
 import { claimDragonSilver } from "./features/claimSilverDragon"
 import { useErrorHandler, useGetUserData } from "./hooks"
-import { MessiriFontFamily, colors } from "../../common"
+import { MessiriFontFamily, OswaldFontFamily, colors } from "../../common"
+import { cardanoNetwork } from "../../../setting"
 
 const NavbarComponent = styled.nav`
     width: 100vw;
@@ -122,15 +123,18 @@ const ProfileInformationPictureMobile = styled.div`
 `
 
 const TestnetBanner = styled.div`
-    ${MessiriFontFamily}
-    background-color: ${colors.dduGold};
+    ${OswaldFontFamily}
+    background-color: ${colors.dduBrackground2};
     color: white;
     width: 100%;
-    padding: 10px 0px 10px 200px;
+    padding: 5px 50px 5px 50px;
     font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: right;
 
     @media only screen and (max-width: 414px) {
-        padding: 10px 0px 10px 10px;
+        padding: 5px 20px 5px 20px;
         font-size: 12px;
     }
 ` 
@@ -161,6 +165,7 @@ const Navbar = (): JSX.Element =>{
 
     return (
         <NavbarComponent>
+            { cardanoNetwork != "Mainnet" ? <TestnetBanner>{cardanoNetwork}</TestnetBanner> : <></>}
             <HeaderBarContainer>
                 <EmptyDiv />
                 {/*<GamesButton game="inns" url={gamesButtonSection.quests} toolTip="Inns" />*/}
@@ -227,7 +232,6 @@ const Navbar = (): JSX.Element =>{
                                     : <></> */}
             </HeaderBarContainer>
 
-        <TestnetBanner>Mainnet release! 🎉</TestnetBanner>
         </NavbarComponent>
     )
 }

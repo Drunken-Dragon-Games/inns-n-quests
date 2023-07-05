@@ -10,10 +10,12 @@ export const discord_redirect_uri =
         process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI"]! : 
         "http%3A%2F%2Flocalhost%3A3000%2F" //discordValidate"
 
+/*
 export const discord_redirect_uri_add_to_account = 
     typeof process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT"] == "string" ? 
         process.env["NEXT_PUBLIC_DISCORD_REDIRECT_URI_ADD_TO_ACCOUNT"]! : 
         "http%3A%2F%2Flocalhost%3A3000%2FdiscordAdd"
+*/
 
 export const discord_response_type = "code"
 
@@ -51,7 +53,7 @@ interface appsToShow {
 
 export const appsToShow: appsToShow[] = [
     {
-        url: "/",
+        url: "/inq",
         name: "Home",
         icon: "home",
         disable: false
