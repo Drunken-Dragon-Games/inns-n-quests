@@ -97,7 +97,7 @@ const LeftLeaningInfoContainer = styled(LeaningSection)`
     @media (max-width: 1024px) {
         left: 40%;
     }
-    @media (max-width: 1024px) {
+    @media (max-width: 820px) {
         left: 0;
         text-align: center;
     }
@@ -109,7 +109,7 @@ const RightLeaningInfoContainer = styled(LeaningSection)`
     @media (max-width: 1024px) {
         right: 40%;
     }
-    @media (max-width: 1024px) {
+    @media (max-width: 820px) {
         left: 0;
         right: auto;
         text-align: center;
