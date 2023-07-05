@@ -163,8 +163,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         switch (event.ctype) {
             case "claimed-quest-event": 
                 return this.notifyQuestClaimed(event.quest, event.adventurers)
-            case "quests-succeeded-leaderboard-changed-event": 
-                return this.notifyQuestsSucceededLeaderboardChanged(event.leaderboard)
+            /* case "quests-succeeded-leaderboard-changed-event": 
+                return this.notifyQuestsSucceededLeaderboardChanged(event.leaderboard) */
         }
     }
 
@@ -197,8 +197,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         }
     }
 
+    //DEPRECATED
     async notifyQuestsSucceededLeaderboardChanged(leaderboard: QuestSucceededEntry[]): Promise<void> {
-        const servers = Object.values(this.configCache)
+        /* const servers = Object.values(this.configCache)
 
         const players = await this.identityService.resolveUsers(leaderboard.map((position) => position.userId))
 
@@ -218,7 +219,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             const channel = this.client.channels.resolve(server.leaderboardNotificationChannelId)
             if (!channel || !channel.isTextBased()) continue
             await channel.send({ embeds: [ embed ] })
-        }
+        } */
     }
 
     async commandConfig(interaction: CommandInteraction): Promise<void> {
@@ -400,8 +401,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 const daysToCheck = parseInt(days)
                 if (isNaN(daysToCheck) || daysToCheck <= 0) {return this.replyMessage(message, "Invalid input for days.")}
                 const currentDate = new Date()
-                //const startDate = new Date(currentDate.getTime() - daysToCheck * 24 * 60 * 60 * 1000)
-                const startDate = new Date(currentDate.getTime() - daysToCheck * 60 * 60 * 1000)
+                const startDate = new Date(currentDate.getTime() - daysToCheck * 24 * 60 * 60 * 1000)
                 leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
             }
 
@@ -466,7 +466,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         
         *get-ballot-votes <ballotId> *: Returns the votes for a ballot, separated by option
 
-        *get-leaderboard*
+        *get-leaderboard <days?>*: Retrieves the leaderboard information for the specified number of days. if no day is provided it defaults to the first of the current month
+            it promts for confirmation to publish leaderboard to the public channel
         
         *help* : Provides a list of available commands and a description of their function.
         
