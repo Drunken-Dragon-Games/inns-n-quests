@@ -65,8 +65,16 @@ const slashCommandsBuilder = (): Command[] => {
                 .setDescription("The channel where developer reports will be posted.")
                 .setRequired(true)))
         .toJSON()
+    
+    const kilia = new SlashCommandBuilder()
+        .setName("kilia")
+        .setDescription("Request Kilia for information, legends or songs...")
+        .addSubcommand(subcommand => subcommand
+            .setName("leaderboard")
+            .setDescription("Ask about this month's most successfull Inns."))
+        .toJSON()
 
-    return [kiliaConfig];
+    return [kiliaConfig, kilia]
 }
 
 
@@ -171,6 +179,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     async onDiscordBotEvent(interaction: CommandInteraction): Promise<void> {
         switch (interaction.commandName) {
             case "kilia-config": return this.commandConfig(interaction)
+            case "kilia": return this.publicCommand(interaction)
         }
     }
 
@@ -249,6 +258,38 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else if (channelIdKey == "questsNotificationChannelId") return `${channel.name} set as Quests channel`
         else if (channelIdKey == "devAdminChannelId") return `${channel.name} set as Development Admin channel`
         else return "Unknown Kilia-config command"
+    }
+
+    async publicCommand(interaction: CommandInteraction): Promise<void> {
+        if (!interaction.isChatInputCommand()) return
+
+        const subcommand = interaction.options.getSubcommand()
+    
+        if (subcommand === "leaderboard") {
+            const startDate = new Date()
+            startDate.setDate(1)
+            const leaderboard = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
+            const embedFields = await Promise.all(leaderboard.map(async (entry, index) => {
+                const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
+                return {
+                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : user.info.knownDiscord!}`,
+                    value: `${entry.succeededQuests} quests succeeded`
+                }
+              }))
+            const descriptionArray = ["Between you and me, these are the best...",
+             `Here they are. I'm rooting for ${embedFields[Math.floor(Math.random() * embedFields.length)].name}!`,
+            "Between you and me, these are the most extraordinary adventures of our land!",
+            "Behold, the crème de la crème..."]
+            const embed = new EmbedBuilder()
+            .setColor(0x1999B3)
+            .setTitle(`Leaderboard for ${startDate.toLocaleString('default', { month: 'long' })}`)
+            .setDescription(descriptionArray[Math.floor(Math.random() * descriptionArray.length )])
+            .addFields(embedFields)
+            await interaction.reply({ embeds: [ embed ] })
+            return
+        }
+        else return await this.reply(interaction, "Kilia unknokwn command")
+        
     }
 
     async commandGovernance(message: Message): Promise<void> {
@@ -391,10 +432,11 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         else if (subcommand == "get-leaderboard"){
             const days = messagesDSL.getArguments(message)
             let leaderboard: Leaderboard = []
+            let startDate: Date 
             if (!days || days == ""){
                 //we default to the first of the previus month
                 const currentDate = new Date()
-                const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+                startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
                 const  endDate =  new Date(currentDate.getFullYear(), currentDate.getMonth(), 0)
                 leaderboard = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate, endDate)   
             }
@@ -402,18 +444,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 const daysToCheck = parseInt(days)
                 if (isNaN(daysToCheck) || daysToCheck <= 0) {return this.replyMessage(message, "Invalid input for days.")}
                 const currentDate = new Date()
-                const startDate = new Date(currentDate.getTime() - daysToCheck * 24 * 60 * 60 * 1000)
+                startDate = new Date(currentDate.getTime() - daysToCheck * 24 * 60 * 60 * 1000)
                 leaderboard = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
             }
-
-            /* const modifiedLeaderboard = await Promise.all (Object.entries(leaderboardObject).map(async ([userId, data]) => {
-                const user = await this.identityService.resolveUser({ ctype: "user-id", userId });
-                if (user.status !== "ok") {
-                  this.replyMessage(message, `could not find user under id ${userId}`);
-                  return { name: 'Anon', data: { succeededQuests: data.succeededQuests } };
-                }
-                return { name: user.info.knownDiscord, data: { succeededQuests: data.succeededQuests } };
-              })) */
               
               const embedFields = await Promise.all(leaderboard.map(async (entry, index) => {
                 const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
@@ -437,8 +470,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                     const servers = Object.values(this.configCache)
                     const embed = new EmbedBuilder()
                     .setColor(0x1999B3)
-                    .setTitle(`Leaderboard Published!`)
-                    .setDescription("The most successful Character Inn Keepers of Thiolden.")
+                    .setTitle(`Leaderboard for ${startDate.toLocaleString('default', { month: 'long' })} Published!`)
+                    .setDescription("The most successful Inn Keepers of Thiolden.")
                     .addFields(embedFields)
 
                     for (const server of servers) {

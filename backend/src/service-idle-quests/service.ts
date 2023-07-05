@@ -426,8 +426,6 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async getStakingQuestLeaderboard(size: number, start: Date, end: Date = new Date()): Promise<Leaderboard>{
-        const result = await this.takenQuestState.getLeaderboard(size, start, end)
-        console.log(result)
-        return result
+        return this.takenQuestState.getLeaderboard(size, start, end)
     }
 }
