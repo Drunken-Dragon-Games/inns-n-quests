@@ -200,10 +200,10 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
     async notifyQuestsSucceededLeaderboardChanged(leaderboard: QuestSucceededEntry[]): Promise<void> {
         const servers = Object.values(this.configCache)
 
-        const players = await this.identityService.resolveUsers(
-            leaderboard.map((position) => position.userId))
-        const withPlayers = leaderboard.map((position, index) =>
-            ({ player: players[index], count: position.count }))
+        const players = await this.identityService.resolveUsers(leaderboard.map((position) => position.userId))
+
+        const withPlayers = leaderboard.map((position, index) => ({ player: players[index], count: position.count }))
+
         const embedFields = withPlayers.map((position, index) => 
             ({ name: `${index+1}. ${position.player.nickname}`, value: `${position.count} quests succeeded` }))
 
@@ -389,12 +389,12 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         }
         else if (subcommand == "get-leaderboard"){
             const days = messagesDSL.getArguments(message)
+            let leaderboardObject: {[userId: string]: {succeededQuests: number}} = {}
             if (!days || days == ""){
                 //we default to the first of the current month
                 const startDate = new Date()
                 startDate.setDate(1)
-                const leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
-                return this.replyMessage(message, JSON.stringify(leaderboardObject, null, 4))
+                leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)   
             }
             else{
                 const daysToCheck = parseInt(days)
@@ -402,9 +402,48 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 const currentDate = new Date()
                 //const startDate = new Date(currentDate.getTime() - daysToCheck * 24 * 60 * 60 * 1000)
                 const startDate = new Date(currentDate.getTime() - daysToCheck * 60 * 60 * 1000)
-                const leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
-                return this.replyMessage(message, JSON.stringify(leaderboardObject, null, 4))
+                leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
             }
+
+            const modifiedLeaderboard = await Promise.all (Object.entries(leaderboardObject).map(async ([userId, data]) => {
+                const user = await this.identityService.resolveUser({ ctype: "user-id", userId });
+                if (user.status !== "ok") {
+                  this.replyMessage(message, `could not find user under id ${userId}`);
+                  return { name: 'Anon', data: { succeededQuests: data.succeededQuests } };
+                }
+                return { name: user.info.knownDiscord, data: { succeededQuests: data.succeededQuests } };
+              }))
+              
+              const embedFields = modifiedLeaderboard.map((entry, index) => ({
+                name: `${index + 1}. ${entry.name}`,
+                value: `${entry.data.succeededQuests} quests succeeded`
+              }))
+              
+              this.replyMessage(message, `Leadeboard status is ${JSON.stringify(embedFields, null, 4)}
+              \nDo you whant to publish this to the public channel? \nPlease confirm by replying with **yes**. If you wish to cancel, reply with **no** or wait for 60 seconds for this request to time out.`)
+
+
+            await this.waitForConfirmation(message, 60,
+                {
+                    cancel: 'Leaderboard Publish confirmation canceled.',
+                    timeout: 'Leaderboard Publish confirmation timed out.'
+                },
+                async () => {
+                    const servers = Object.values(this.configCache)
+                    const embed = new EmbedBuilder()
+                    .setColor(0x1999B3)
+                    .setTitle(`Leaderboard Published!`)
+                    .setDescription("The most successful Character Inn Keepers of Thiolden.")
+                    .addFields(embedFields)
+
+                    for (const server of servers) {
+                        if (!server.leaderboardNotificationChannelId) continue
+                        const channel = this.client.channels.resolve(server.leaderboardNotificationChannelId)
+                        if (!channel || !channel.isTextBased()) continue
+                        await channel.send({ embeds: [ embed ] })
+                    }
+                    return `Leaderboard Published on the leaderboard Notification Channel `
+                })
         }
         else if (subcommand == "help"){
             const helpMessage = `
