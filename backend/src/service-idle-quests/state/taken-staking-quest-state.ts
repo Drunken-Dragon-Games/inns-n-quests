@@ -1,8 +1,9 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
 import { Op, literal, fn, col } from 'sequelize'
 import { StakingQuestRegistry } from "./staking-quests-registry"
-import { TakenStakingQuest } from "../models"
+import { Leaderboard, TakenStakingQuest } from "../models"
 import * as vm from "../game-vm"
+import { succeeded } from "../../tools-utils"
 
 export interface ITakenStakingQuestDB {
     takenQuestId: string
@@ -96,7 +97,7 @@ export class TakenStakingQuestState {
         await TakenStakingQuestDB.update({ claimedAt, outcome }, { where: { takenQuestId }, transaction })
     }
 
-    async getLeaderboard(size: number, start: Date, end: Date): Promise<{[userId: string]: {succeededQuests: number}}> {
+    async getLeaderboard(size: number, start: Date, end: Date): Promise<Leaderboard> {
         const leaderboardArray = await TakenStakingQuestDB.findAll({
             where: {
                 claimedAt: {
@@ -106,24 +107,18 @@ export class TakenStakingQuestState {
                 outcome: {
                     [Op.and]: [literal(`outcome->>'ctype' = 'success-outcome'`)],
                 },
-            },
-            limit: size,
+            }
         })
 
-        const leaderboardObject: {[userId: string]: {succeededQuests: number}} = {};
+        const leaderboardObject = leaderboardArray.reduce((acc, entry) => {
+            if (!acc[entry.userId]) return {...acc, [entry.userId]: 1}
+            else return {...acc, [entry.userId]: acc[entry.userId] + 1}
+        }, {} as {[userId: string]: number})
 
-        for (const entry of leaderboardArray) {
-            if (!leaderboardObject[entry.userId])
-                leaderboardObject[entry.userId] = {succeededQuests: 1}
-            else
-                leaderboardObject[entry.userId].succeededQuests += 1
-        }
-
-        const sortedLeaderboard = Object.entries(leaderboardObject)
-            .sort((a, b) => b[1].succeededQuests - a[1].succeededQuests)
+        return Object.entries(leaderboardObject)
+            .sort((a, b) => b[1] - a[1])
             .slice(0, size)
-
-        return Object.fromEntries(sortedLeaderboard)
+            .map(([userId, succeededQuests]) => ({userId, succeededQuests}))
     }
 
 }

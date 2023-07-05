@@ -44,3 +44,5 @@ export type IdleQuestsInventory = {
     furniture: Record<string, Furniture>
     innState?: Sector
 }
+
+export type Leaderboard = {userId: string, succeededQuests: number}[]
