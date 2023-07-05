@@ -106,18 +106,20 @@ const ComicSection = () => {
     return <ComicSectionContainer>
         <TitleWrapper>
             <h2>Explore The Adventures Of The Dead Queen</h2>
-            <LandingButton href="" target="_blank">Buy Comic</LandingButton>
+            <LandingButton 
+                href="https://www.amazon.com/Drunken-Dragon-Universe-Queen-Lockbox-ebook/dp/B0C6FSFLMT/ref=sr_1_1?crid=2JE2TKN03ZPK4&keywords=drunken+dragon+the+dead+queen&qid=1688516012&sprefix=%2Caps%2C131&sr=8-1" 
+                target="_blank">Buy Comic</LandingButton>
             <p>Tap to turn pages...</p>
         </TitleWrapper>
         <PagesWrapper onClick={() => setPage((page + 1) % 3)}>
             <Page1 page={page}>
-                <Image src="/landing/book_7.jpg" alt="Drunken Dragon Universe Comic Page 1" width="1050" height="1575" layout="responsive" />
+                <Image src="https://cdn.ddu.gg/modules/landing/book_7.jpg" alt="Drunken Dragon Universe Comic Page 1" width="1050" height="1575" layout="responsive" />
             </Page1>
             <Page2 page={page}>
-                <Image src="/landing/book_8.jpg" alt="Drunken Dragon Universe Comic Page 1" width="1050" height="1575" layout="responsive" />
+                <Image src="https://cdn.ddu.gg/modules/landing/book_8.jpg" alt="Drunken Dragon Universe Comic Page 1" width="1050" height="1575" layout="responsive" />
             </Page2>
             <Page3 page={page}>
-                <Image src="/landing/book_9.jpg" alt="Drunken Dragon Universe Comic Page 1" width="1050" height="1575" layout="responsive" />
+                <Image src="https://cdn.ddu.gg/modules/landing/book_9.jpg" alt="Drunken Dragon Universe Comic Page 1" width="1050" height="1575" layout="responsive" />
             </Page3>
         </PagesWrapper>
     </ComicSectionContainer>

@@ -9,7 +9,7 @@ import ComicSection from "./components/comic-section"
 
 const bannerInfo = {
     title: "Unleashing Creativity Into An Epic Universe, Together",
-    subtext: "The Drunken Dragon Universe is a decentralized fantasy franchise for indie creators, passionate fans, and visionaries, built with the tools and technologies required to revolutionize the entertainment industry and finally bring freedom to creativity, collaboration and storytelling."
+    subtext: "The Drunken Dragon Universe is a decentralized fantasy franchise for indie creators, fantasy fans, and visionaries, built with the tools and technologies required to revolutionize the entertainment industry and finally bring freedom to creativity, collaboration and storytelling."
 }
 
 const s1 = {
@@ -17,7 +17,7 @@ const s1 = {
     content: [
         "We champion indie creators. All Drunken Dragon Universe general IP is under creative commons. All characters, storylines, and places can be used without asking for permission. And individual products can still be protected.",
     ],
-    image: "/landing/section-1.png",
+    image: "https://cdn.ddu.gg/modules/landing/section-1.png",
     borderColor: "#2f0d15"
 }
 
@@ -26,7 +26,7 @@ const s2 = {
     content: [
         "We are establishing a system that allows fans and creators to vote on crucial aspects, such as deciding which products become official, allocating shared resources, and determining the future direction of the franchise. No single party should have control over it, that is why we chose Cardano blockchain technology to develop governance that serves us all."
     ],
-    image: "/landing/section-2.png",
+    image: "https://cdn.ddu.gg/modules/landing/section-2.png",
     borderColor: "#252350"
 }
 
@@ -35,7 +35,7 @@ const s3 = {
     content: [
         "We aim to construct a decentralized marketplace where official products approved by the community, such as comics, art, games, and more, can be sold in a single location for fans to discover. Then, the marketplace commissions finance new projects voted by the community, creating new opportunities in an ever-growing epic fantasy universe."
     ],
-    image: "/landing/section-3.png",
+    image: "https://cdn.ddu.gg/modules/landing/section-3.png",
     borderColor: "#353535"
 }
 
@@ -43,10 +43,10 @@ const gameSection = {
     title: "Open An Inn For Your Adventurers And Go On a Quest",
     content: [
     ],
-    image: "/landing/section-game.png",
+    image: "https://cdn.ddu.gg/modules/landing/section-game.png",
     borderColor: "#633d17",
     link: {
-        href: "",
+        href: "https://ddu.gg/inq",
         text: "Play Now"
     }
 }

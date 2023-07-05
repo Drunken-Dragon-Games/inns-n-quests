@@ -1,14 +1,14 @@
 import Image from "next/image"
 import styled from "styled-components"
+import { MessiriFontFamily, colors } from "../../common"
 import { LandingPageSection } from "./common"
-import { MessiriFontFamily, OswaldFontFamily, colors } from "../../common"
 
 const FollowSectionContainer = styled(LandingPageSection)`
     height: 100px;
 `
 
 const Background = styled.div`
-    background-image: url(/landing/section-follow.png);
+    background-image: url(https://cdn.ddu.gg/modules/landing/section-follow.png);
     background-size: cover;
     background-position: center;
     width: 100%;

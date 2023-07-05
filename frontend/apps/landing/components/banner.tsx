@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { OswaldFontFamily, MessiriFontFamily, colors, Push } from "../../common"
+import { OswaldFontFamily, Push, colors } from "../../common"
 import { LandingPageSection } from "./common"
 
 const BannerContainer = styled(LandingPageSection)`
@@ -18,8 +18,9 @@ const BannerContainer = styled(LandingPageSection)`
     }
 `
 
-const ProductButtonContainer = styled.div<{ bg: string }>`
+const ProductButtonContainer = styled.a<{ bg: string }>`
     position: relative;
+    display: block;
     filter: drop-shadow(0px 0px 5px black);
     width: 375px;
     height: 210px;
@@ -55,8 +56,8 @@ const ProductInfoWrapper = styled.div`
     };
 `
 
-const ProductButton = (props: { title: string, image: string, alt: string }) => 
-    <ProductButtonContainer bg={props.image}>
+const ProductButton = (props: { title: string, image: string, href: string, alt: string }) => 
+    <ProductButtonContainer bg={props.image} href={props.href} target="_blank">
         <ProductInfoWrapper>
             <Push />
             <h2>{props.title}</h2>
@@ -82,16 +83,19 @@ const ProductsSectionContainer = styled(LandingPageSection)`
 const ProductsSection = () => 
     <ProductsSectionContainer>
         <ProductButton 
+            href="https://ddu.gg/s2"
             title="Start Collecting"
-            image="/landing/product-aot.png" 
+            image="https://cdn.ddu.gg/modules/landing/product-aot.png" 
             alt="Adventurers of Thiolden Collection Product" />
         <ProductButton 
+            href="https://www.amazon.com/Drunken-Dragon-Universe-Queen-Lockbox-ebook/dp/B0C6FSFLMT/ref=sr_1_1?crid=2JE2TKN03ZPK4&keywords=drunken+dragon+the+dead+queen&qid=1688516012&sprefix=%2Caps%2C131&sr=8-1"
             title="Start Reading"
-            image="/landing/product-comic.png" 
+            image="https://cdn.ddu.gg/modules/landing/product-comic.png" 
             alt="The Dead Queen Comic Product" />
         <ProductButton 
+            href="https://ddu.gg/inq"
             title="Start Playing"
-            image="/landing/product-inq.png" 
+            image="https://cdn.ddu.gg/modules/landing/product-inq.png" 
             alt="Inns & Quests Game Product" />
     </ProductsSectionContainer>
 
@@ -198,7 +202,7 @@ const Banner = (props: { title: string, subtext: string }) =>
     <BannerContainer>
         <BannerVideo>
             <video autoPlay muted loop>
-                <source src="/landing/banner.mp4" type="video/mp4" />
+                <source src="https://cdn.ddu.gg/modules/landing/banner.mp4" type="video/mp4" />
             </video>
         </BannerVideo>
         <BannerContent>

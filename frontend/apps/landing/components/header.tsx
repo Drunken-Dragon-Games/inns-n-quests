@@ -1,7 +1,6 @@
 import Image from "next/image"
 import styled from "styled-components"
-import { LandingPageSection } from "./common"
-import { useWindowWidth } from "@react-hook/window-size"
+import { LandingPageSection, useIsMobile  } from "./common"
 
 const HeaderContainer = styled(LandingPageSection)`
     width: 100vw;
@@ -37,12 +36,12 @@ const HeaderContent = styled.div`
 `
 
 const Header = () => {
-    const windowWidth = useWindowWidth()
-    const logoWidth = windowWidth > 1024 ? 185 : 185 * 0.7
-    const logoHeight = windowWidth > 1024 ? 62 : 62 * 0.7
+    const mobile = useIsMobile()
+    const logoWidth = mobile ? 185*0.7 : 185
+    const logoHeight = mobile ? 62*0.7 : 62
     return <HeaderContainer>
         <HeaderContent>
-            <Image src="/landing/logo-universe-s.png" alt="Drunken Dragon Universe Logo" width={logoWidth} height={logoHeight} />
+            <Image src="https://cdn.ddu.gg/modules/landing/logo-universe-s.png" alt="Drunken Dragon Universe Logo" width={logoWidth} height={logoHeight} />
         </HeaderContent>
     </HeaderContainer>
 }

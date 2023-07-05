@@ -1,10 +1,9 @@
 import Image from "next/image"
-import styled, { css, keyframes } from "styled-components"
-import { LandingPageSection } from "./common"
 import { useState } from "react"
+import styled, { css, keyframes } from "styled-components"
 import { OswaldFontFamily, colors } from "../../common"
+import { LandingPageSection, useIsMobile } from "./common"
 import LandingButton from "./landing-button"
-import { useWindowWidth } from "@react-hook/window-size"
 
 const hoverAnimation = keyframes`
     0% {
@@ -113,7 +112,7 @@ const CardsSectionContainer = styled(LandingPageSection)`
     align-items: center;
     gap: 50px;
     border: 1px solid #243444;
-    background-image: url(/landing/section-cards.png);
+    background-image: url(https://cdn.ddu.gg/modules/landing/section-cards.png);
     background-size: cover;
     background-position: center;
 
@@ -157,8 +156,7 @@ const TitleWrapper = styled.div`
 `
 
 const CardsSection = () => {
-    const windowWidth = useWindowWidth()
-    const mobile = windowWidth <= 820
+    const mobile = useIsMobile()
     return <CardsSectionContainer>
         <CardWrapper>
             { mobile ? <>
@@ -174,7 +172,7 @@ const CardsSection = () => {
         </CardWrapper>
         <TitleWrapper>
             <h2>Collect Digital Cards And Build Your Party</h2>
-            <LandingButton href="" target="_blank">Buy Cards</LandingButton>
+            <LandingButton href="https://ddu.gg/s2" target="_blank">Buy Cards</LandingButton>
         </TitleWrapper>
     </CardsSectionContainer>
 }
