@@ -1,4 +1,4 @@
-import { discord_client_id, discord_response_type, discord_scope, discord_redirect_uri_add_to_account  } from "../../../../setting";
+import { discord_client_id, discord_response_type, discord_scope } from "../../../../setting";
 import { createSliceStatus, actionsGenerator } from "../../../utils/features/utils";
 import { combineReducers } from "redux";
 import { axiosCustomInstance } from "../../../../axios/axiosApi";
@@ -22,7 +22,7 @@ const makeNonce = (length: number) => {
     return result;
 }
 
-
+/*
 export const handleDiscordAuthAddAccount = () => {
     
     //genera un nonce
@@ -36,7 +36,7 @@ export const handleDiscordAuthAddAccount = () => {
     
     return discordLink
 }
-
+*/
 
 export const compareNonceAddDiscord = (state: string, code: string): GeneralReducerThunk => (dispatch) =>{
 
