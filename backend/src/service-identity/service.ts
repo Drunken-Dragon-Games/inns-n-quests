@@ -65,8 +65,6 @@ export class IdentityServiceDsl implements IdentityService {
                 { clientId: config.stringOrError("DISCORD_CLIENT_ID")
                 , clientSecret: config.stringOrError("DISCORD_CLIENT_SECRET")
                 , redirect: config.stringOrError("DISCORD_REDIRECT_URI")
-                , redirectValidate: config.stringOrError("DISCORD_REDIRECT_URI_VALIDATE")
-                , redirectAdd: config.stringOrError("DISCORD_REDIRECT_URI_ADD")
                 }
             , sessions:
                 { duration: config.intOrElse("IDENTITY_SERVICE_SESSIONS_DURATION", 1000 * 60 * 60 * 24)

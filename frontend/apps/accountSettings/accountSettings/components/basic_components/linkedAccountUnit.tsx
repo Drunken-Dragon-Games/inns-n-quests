@@ -4,7 +4,6 @@ import { TextElMessiri, InteractButton, ConditionalRender } from "../../../../ut
 import { Select, SelectCard } from "./"
 import { useState, useRef } from "react"
 import { useClickOutside } from "../../../../utils/hooks"
-import { handleDiscordAuthAddAccount } from "../../features/addDiscord"
 import { useRedirect } from "../../../../utils/hooks"
 import { connectNami, connectEternl, walletConnection } from "../../features/walletsConnect"
 import { useGeneralDispatch } from "../../../../../features/hooks"
@@ -121,7 +120,7 @@ const LinkedAccountUnit = ({is_linked, children, defaultTitle} : linkedAccountUn
                             <Select>
 
                                 <ConditionalRender condition = {defaultTitle == "Discord"}>
-                                    <SelectCard action = {() => redirectUrl(handleDiscordAuthAddAccount())}>Discord</SelectCard>
+                                    {/*<SelectCard action = {() => redirectUrl(handleDiscordAuthAddAccount())}>Discord</SelectCard>*/}
                                 </ConditionalRender>
 
                                 <ConditionalRender condition = {defaultTitle == "Stake Address"}>

@@ -487,28 +487,19 @@ const WideDashboardCard = (props: { children?: ReactNode, title: string }) => (
     </WideDashboardCardContainer>
 )
 
-const DashboardViewContent = () => {
-    const userInfo = useSelector((state: AccountState) => state.userInfo)
-    return <>
-        {userInfo ? (
-                <DashboardContainer>
-                    <DashboardCard key="dragon-silver-widget" title="Dragon Silver">
-                        <DragonSilverWidget {...userInfo} />
-                    </DashboardCard>
-                    <DashboardCard key="wallet-authentication-widget" title="Associated Wallets">
-                        <WalletAssociationWidget {...userInfo} />
-                    </DashboardCard>
-                </DashboardContainer>
-            ) : null}
-            <DashboardWideCardContainer>
-                <WideDashboardCard key="governance-voting-widget" title="Governance">
-                    <GoverncanceVotingWidget userInfo={userInfo} />
-                </WideDashboardCard >
-            </DashboardWideCardContainer>
-        </>
-}
-
-export const DashboardView = () => 
-    <Provider store={accountStore}>
-        <DashboardViewContent />
-    </Provider>
+export const DashboardView = ({ userInfo }: { userInfo: UserInfo }) => 
+    <>
+        <DashboardContainer>
+            <DashboardCard key="dragon-silver-widget" title="Dragon Silver">
+                <DragonSilverWidget {...userInfo} />
+            </DashboardCard>
+            <DashboardCard key="wallet-authentication-widget" title="Associated Wallets">
+                <WalletAssociationWidget {...userInfo} />
+            </DashboardCard>
+        </DashboardContainer>
+        <DashboardWideCardContainer>
+            <WideDashboardCard key="governance-voting-widget" title="Governance">
+                <GoverncanceVotingWidget userInfo={userInfo} />
+            </WideDashboardCard >
+        </DashboardWideCardContainer>
+    </>
