@@ -1,7 +1,7 @@
 import { Client, Events, GatewayIntentBits, CommandInteraction, SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message, MessageCollector, TextChannel } from "discord.js"
 import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v9"
-import { EvenstatsEvent, Leaderboard, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
-import { Character, IdleQuestsService, TakenStakingQuest } from "../service-idle-quests"
+import { EvenstatsEvent, EvenstatsService, EvenstatsSubscriber, QuestSucceededEntry } from "../service-evenstats"
+import { Character, IdleQuestsService, TakenStakingQuest, Leaderboard } from "../service-idle-quests"
 import { config } from "../tools-utils"
 import { QueryInterface, Sequelize } from "sequelize"
 
@@ -390,33 +390,38 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         }
         else if (subcommand == "get-leaderboard"){
             const days = messagesDSL.getArguments(message)
-            let leaderboardObject: {[userId: string]: {succeededQuests: number}} = {}
+            let leaderboard: Leaderboard = []
             if (!days || days == ""){
-                //we default to the first of the current month
-                const startDate = new Date()
-                startDate.setDate(1)
-                leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)   
+                //we default to the first of the previus month
+                const currentDate = new Date()
+                const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+                const  endDate =  new Date(currentDate.getFullYear(), currentDate.getMonth(), 0)
+                leaderboard = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate, endDate)   
             }
             else{
                 const daysToCheck = parseInt(days)
                 if (isNaN(daysToCheck) || daysToCheck <= 0) {return this.replyMessage(message, "Invalid input for days.")}
                 const currentDate = new Date()
                 const startDate = new Date(currentDate.getTime() - daysToCheck * 24 * 60 * 60 * 1000)
-                leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
+                leaderboard = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
             }
 
-            const modifiedLeaderboard = await Promise.all (Object.entries(leaderboardObject).map(async ([userId, data]) => {
+            /* const modifiedLeaderboard = await Promise.all (Object.entries(leaderboardObject).map(async ([userId, data]) => {
                 const user = await this.identityService.resolveUser({ ctype: "user-id", userId });
                 if (user.status !== "ok") {
                   this.replyMessage(message, `could not find user under id ${userId}`);
                   return { name: 'Anon', data: { succeededQuests: data.succeededQuests } };
                 }
                 return { name: user.info.knownDiscord, data: { succeededQuests: data.succeededQuests } };
-              }))
+              })) */
               
-              const embedFields = modifiedLeaderboard.map((entry, index) => ({
-                name: `${index + 1}. ${entry.name}`,
-                value: `${entry.data.succeededQuests} quests succeeded`
+              const embedFields = await Promise.all(leaderboard.map(async (entry, index) => {
+                const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
+                if (user.status !== "ok") this.replyMessage(message, `could not find user under id ${entry.userId}`)
+                return {
+                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : user.info.knownDiscord!}`,
+                    value: `${entry.succeededQuests} quests succeeded`
+                }
               }))
               
               this.replyMessage(message, `Leadeboard status is ${JSON.stringify(embedFields, null, 4)}

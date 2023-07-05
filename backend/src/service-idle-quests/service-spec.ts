@@ -42,7 +42,7 @@ export interface IdleQuestsService {
 
     setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void>
 
-    getStakingQuestLeaderboard(size: number, start: Date, end?: Date): Promise<{[userId: string]: {succeededQuests: number}}>
+    getStakingQuestLeaderboard(size: number, start: Date, end?: Date): Promise<models.Leaderboard>
 }
 
 export type HealthStatus =
