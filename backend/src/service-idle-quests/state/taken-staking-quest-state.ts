@@ -1,7 +1,9 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
+import { Op, literal, fn, col } from 'sequelize'
 import { StakingQuestRegistry } from "./staking-quests-registry"
-import { TakenStakingQuest } from "../models"
+import { Leaderboard, TakenStakingQuest } from "../models"
 import * as vm from "../game-vm"
+import { succeeded } from "../../tools-utils"
 
 export interface ITakenStakingQuestDB {
     takenQuestId: string
@@ -93,6 +95,30 @@ export class TakenStakingQuestState {
 
     async claimQuest(takenQuestId: string, claimedAt: Date, outcome: vm.StakingQuestOutcome, transaction?: Transaction): Promise<void> {
         await TakenStakingQuestDB.update({ claimedAt, outcome }, { where: { takenQuestId }, transaction })
+    }
+
+    async getLeaderboard(size: number, start: Date, end: Date): Promise<Leaderboard> {
+        const leaderboardArray = await TakenStakingQuestDB.findAll({
+            where: {
+                claimedAt: {
+                    [Op.gte]: start,
+                    [Op.lte]: end,
+                },
+                outcome: {
+                    [Op.and]: [literal(`outcome->>'ctype' = 'success-outcome'`)],
+                },
+            }
+        })
+
+        const leaderboardObject = leaderboardArray.reduce((acc, entry) => {
+            if (!acc[entry.userId]) return {...acc, [entry.userId]: 1}
+            else return {...acc, [entry.userId]: acc[entry.userId] + 1}
+        }, {} as {[userId: string]: number})
+
+        return Object.entries(leaderboardObject)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, size)
+            .map(([userId, succeededQuests]) => ({userId, succeededQuests}))
     }
 
 }

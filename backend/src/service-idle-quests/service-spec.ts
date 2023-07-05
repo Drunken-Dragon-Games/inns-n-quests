@@ -41,6 +41,8 @@ export interface IdleQuestsService {
     failStakingQuest(userId: string, takenQuestId: string): Promise<{ status: "ok", missionParty: string[]} | { status: "failed", reason: string; }>
 
     setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void>
+
+    getStakingQuestLeaderboard(size: number, start: Date, end?: Date): Promise<models.Leaderboard>
 }
 
 export type HealthStatus =
