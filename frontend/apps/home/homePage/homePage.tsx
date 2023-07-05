@@ -7,6 +7,8 @@ import { gamesButtonSection } from "../../../setting"
 import CookieConsentBanner from "../../common/components/cookie-consent-component"
 import BuySlimeSection from "./compoenents/complex/buySlimeSection"
 import { colors } from "../../common"
+import { Provider, useSelector } from "react-redux"
+import { AccountState, accountStore } from "../../account/account-state"
 
 const HomePageComponent = styled.section`
     background-color: #0B1015;
@@ -17,24 +19,34 @@ const HomePageComponent = styled.section`
     }
 `
 
-const HomePage = (): JSX.Element => {
-    const signedin = AccountApi.signed()
+const HomeContent = (): JSX.Element => {
+    const userInfo = useSelector((state: AccountState) => state.userInfo)
     return (
         <>
             <HomePageComponent>
-                <DashboardView /> 
-                <BannerSection />
-                <SocialMediaSection />
-                {/* <RoadMapSection/> */}
-                <TavernSection />
-                <IdleQuestsSection />
-                <BuySlimeSection />
-                <CollectionsSection />
-                <DeadQueenSection />
+                {userInfo ? <>
+                    <DashboardView userInfo={userInfo} /> 
+                    <BuySlimeSection />
+                </> : <>
+                    <BannerSection />
+                    <SocialMediaSection />
+                    {/* <RoadMapSection/> */}
+                    <TavernSection />
+                    <IdleQuestsSection />
+                    <BuySlimeSection />
+                    <CollectionsSection />
+                    <DeadQueenSection />
+                </> }
             </HomePageComponent>
             {/*<CookieConsentBanner />*/}
         </>
     )
 }
+
+const HomePage = () => 
+    <Provider store={accountStore}>
+        <HomeContent />
+    </Provider>
+
 
 export default HomePage

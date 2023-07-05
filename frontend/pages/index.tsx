@@ -1,21 +1,14 @@
 import type { NextPage } from 'next'
-import HomeApp from '../apps/home/homeApp'
+import LandingApp from '../apps/landing/landing-app'
 import Head from 'next/head'
 
-const Home: NextPage = () =>
+const Landing: NextPage = () =>
     <>
         <Head>
-            <title>Drunken Dragon: Inns & Quests</title>
-            <meta name="Drunken Dragon Inns & Quests" content="A Drunken Dragon Universe Game" />
-            <script
-                defer
-                type="text/javascript"
-                src="https://app.termly.io/embed.min.js"
-                data-auto-block="on"
-                data-website-uuid="b299da00-76b5-4d81-bd28-c2515a54c1df"
-            ></script>
+            <title>Drunken Dragon Universe</title>
+            <meta name="Drunken Dragon Universe" content="A decentralised fantasy franchise for creators and fans." />
         </Head>
-        <HomeApp />
+        <LandingApp />
     </>
 
-export default Home
+export default Landing 

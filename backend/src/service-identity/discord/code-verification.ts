@@ -10,8 +10,6 @@ export type DiscordConfig = {
     clientId: string,
     clientSecret: string,
     redirect: string,
-    redirectValidate: string,
-    redirectAdd: string,
 }
 
 export type DiscordTokens = { discordBearerToken: string, refreshtoken: string }

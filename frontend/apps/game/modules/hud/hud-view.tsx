@@ -38,8 +38,8 @@ const HudView = ({ className }: { className?: string }) => {
         <HudContainer>
             <HudButtons className={className}>
             <HudButton
-                    onMouseUp={() => {window.location.href = '/'}}
-                    src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar/sections/home.svg"
+                    onMouseUp={() => {window.location.href = '/inq'}}
+                    src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar/sections/home_hover.svg"
                     width={80}
                     height={68}
                     units={px(0.6)}
