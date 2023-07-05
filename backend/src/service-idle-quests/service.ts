@@ -23,6 +23,7 @@ import { StakingQuestRegistry } from "./state/staking-quests-registry"
 import * as vm from "./game-vm"
 import { testEncounter } from "./game-vm"
 import { AvailableStakingQuestState } from "./state/available-staking-quests-state"
+import { Leaderboard } from "./models"
 
 export interface IdleQuestServiceDependencies 
     { randomSeed: string
@@ -422,5 +423,9 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             return {status: "failed", reason: e.message ?? JSON.stringify(e, null, 4)}
         }
         
+    }
+
+    async getStakingQuestLeaderboard(size: number, start: Date, end: Date = new Date()): Promise<Leaderboard>{
+        return this.takenQuestState.getLeaderboard(size, start, end)
     }
 }
