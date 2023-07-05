@@ -1,7 +1,7 @@
 import { User, UserStakeAdress } from "./users-db";
 import { generateIdentenfier, generateRandomNickname } from "./utils";
 import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
-import { UserInfo, UserFullInfo } from "../models";
+import { UserInfo, UserFullInfo, DeassociationResult } from "../models";
 import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
 import { LoggingContext } from "../../tools-tracing";
 
@@ -35,6 +35,14 @@ export class Users {
             await UserStakeAdress.create({ stakeAddress, userId: existingUser.userId })
             return succeeded("ok")
         } else return failed
+    }
+
+    static deassociateStakingAddress = async (userId: string, stakeAddress: string): Promise<DeassociationResult> => {
+        const addressInstance = await UserStakeAdress.findOne({where: {stakeAddress}})
+        if (!addressInstance) return {ctype: "failure", error: "Stake Address not registered."}
+        if (addressInstance.userId !== userId) return {ctype: "failure", error: "Stake Address does not belong to user."}
+        await addressInstance.destroy()
+        return {ctype: "success"}
     }
 
     static registerWithDiscordTokens = async (discordTokens: DiscordTokens, logger?: LoggingContext): Promise<Attempt<string>> => {

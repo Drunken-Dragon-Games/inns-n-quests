@@ -83,6 +83,15 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
+    async deassociateWallet(userId: string, stakeAddress: string, logger?: LoggingContext | undefined): Promise<models.DeassociationResult> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info(`Deassosiating stake address ${stakeAddress}`)
+        const response = await this.base.deassociateWallet(userId, stakeAddress, serviceLogger)
+        if (response.ctype !== "success") logger?.log.error(`error ${response.error}`)
+        else logger?.log.info(`succesfully deasociated`)
+        return response
+    }
+
     async getTotalUsers(logger?: LoggingContext ): Promise<number> {
         const serviceLogger = this.withComponent(logger)
         const response = await this.base.getTotalUsers()

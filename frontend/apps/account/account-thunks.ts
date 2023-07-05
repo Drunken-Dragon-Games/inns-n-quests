@@ -121,6 +121,27 @@ export const AccountThunks = {
         }
     },
 
+    deassociateWallet: (stakeAddress: string): AccountThunk => async (dispatch) => {
+        const displayErrorAndHeal = (details: string) => {
+            dispatch(actions.setAssociateProcessState({ ctype: "error", details }))
+            dispatch(AccountThunks.updateInventory())
+            setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
+        }
+        try{
+            const traceId = v4()
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: `DeAssosiating Stake address from DB.` }))
+            const response = await AccountBackend.deassociateWallet(stakeAddress, traceId)
+            if (response.ctype !== "success") return displayErrorAndHeal(response.error)
+            dispatch(actions.removeStakeAddress(stakeAddress))
+            dispatch(actions.setAssociateProcessState({ ctype: "loading", details: "Success! Updating inventory..." }))
+            dispatch(AccountThunks.updateInventory())
+            setTimeout(() => dispatch(actions.setAssociateProcessState({ ctype: "idle" })), 3000)
+        } catch (error: any){
+            console.error(error)
+            return displayErrorAndHeal(error.info ?? error.message)
+        }
+    },
+
     updateInventory: (): AccountThunk => async (dispatch) => {
         const inventoryResult = await AccountBackend.getUserInventory()
         if (inventoryResult.status !== "ok")
@@ -255,8 +276,10 @@ export const AccountThunks = {
     },
 
     testGrant: (): AccountThunk => async (dispatch) => {
-        await AccountBackend.granteTest()
-        dispatch(AccountThunks.updateInventory())
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] === "development"){
+            await AccountBackend.granteTest()
+            dispatch(AccountThunks.updateInventory())
+        }
     },
 
     getGoverncanceBallots: (): AccountThunk => async (dispatch) => {

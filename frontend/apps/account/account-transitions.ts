@@ -100,6 +100,10 @@ export const AccountTransitions = {
         dispatch(AccountThunks.associateHardwareWallet(wallet))
     },
 
+    deassociateWallet(stakeAddress: string): void {
+        dispatch(AccountThunks.deassociateWallet(stakeAddress))
+    },
+
     test: () => {
         console.log("get cookies", getCookies({ path: "/api/account/session/test", domain: "localhost:5000" }))
         dispatch(AccountThunks.test())
@@ -114,7 +118,8 @@ export const AccountTransitions = {
     },
 
     grantTest: () => {
-        dispatch(AccountThunks.testGrant())
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] === "development")
+            dispatch(AccountThunks.testGrant())
     },
 
     getOpenBallots: () => {

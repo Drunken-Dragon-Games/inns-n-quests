@@ -115,6 +115,14 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         response.status(200).json(result)
     }))
 
+    router.post("/association/deassociate-wallet", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const {stakeAddress} = request.body
+        const result = await accountService.deassociateWallet(userId, stakeAddress, logger)
+        response.status(200).json(result)
+    }))
+
     router.get("/assets/claim/dragon-silver", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
@@ -153,11 +161,15 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         response.status(200).json(result)
     }))
 
-    /* router.get("/assets/test/grant", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
-        const userId: string = request.auth!.userId
-        const result = await accountService.grantTest(userId)
-        response.status(200).json({status: "ok"})
-    }) ) */
+    router.get("/assets/test/grant", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        if (process.env.NODE_ENV !== "development") {response.status(401).json({status: "Not allowed"})}
+        else {
+            const logger = baseLogger.trace(request)
+            const userId: string = request.auth!.userId
+            const result = await accountService.grantTest(userId, logger)
+            response.status(200).json({status: "ok"})
+        }
+    }) )
 
     router.get("/governance/open", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)

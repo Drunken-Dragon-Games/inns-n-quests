@@ -37,18 +37,23 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getRawAssociationTx(stakeAddress: string, address: string): Promise<CreateAssociationTxResult>{
-        const result = await accountRequest("POST", "/association/tx", {stakeAddress, address})
+    async getRawAssociationTx(stakeAddress: string, address: string, traceId?: string): Promise<CreateAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/tx", {stakeAddress, address}, traceId)
         return result.data
     },
 
-    async submitAuthTx(serializedSignedTx: string, authStateId: string): Promise<ClaimSignAndSubbmitResult>{
-        const result = await accountRequest("POST", "/association/submit-tx", {serializedSignedTx, authStateId})
+    async submitAuthTx(serializedSignedTx: string, authStateId: string, traceId?: string): Promise<ClaimSignAndSubbmitResult>{
+        const result = await accountRequest("POST", "/association/submit-tx", {serializedSignedTx, authStateId}, traceId)
         return result.data
     },
 
-    async cleanAssociationState(authStateId: string, error: string): Promise<CleanAssociationTxResult>{
-        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId, error})
+    async cleanAssociationState(authStateId: string, error: string, traceId?: string): Promise<CleanAssociationTxResult>{
+        const result = await accountRequest("POST", "/association/clean-assosiate-tx-state", {authStateId, error}, traceId)
+        return result.data
+    },
+
+    async deassociateWallet(stakeAddress: string, traceId?: string): Promise<DeassociationResult>{
+        const result = await accountRequest("POST", "/association/deassociate-wallet", {stakeAddress}, traceId)
         return result.data
     },
 
@@ -114,6 +119,11 @@ export const AccountBackend = {
         return result.data
     }
 }
+
+export type DeassociationResult 
+    = { ctype: "success"}
+    | { ctype: "failure", error: string}
+
 export type CleanAssociationTxResult 
     = {status: "ok"}
     | {status: "invalid", reason: string}

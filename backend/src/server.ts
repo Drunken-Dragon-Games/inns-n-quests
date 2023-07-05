@@ -68,6 +68,6 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     //await loadQuestModuleModels(database)
     const app = await buildApp( accountService, idleQuestsService, kiliaBotService)
 
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}...`))
+    app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
 })()
