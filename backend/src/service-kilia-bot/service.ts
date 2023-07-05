@@ -163,8 +163,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         switch (event.ctype) {
             case "claimed-quest-event": 
                 return this.notifyQuestClaimed(event.quest, event.adventurers)
-            case "quests-succeeded-leaderboard-changed-event": 
-                return this.notifyQuestsSucceededLeaderboardChanged(event.leaderboard)
+            /* case "quests-succeeded-leaderboard-changed-event": 
+                return this.notifyQuestsSucceededLeaderboardChanged(event.leaderboard) */
         }
     }
 
@@ -197,13 +197,14 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         }
     }
 
+    //DEPRECATED
     async notifyQuestsSucceededLeaderboardChanged(leaderboard: QuestSucceededEntry[]): Promise<void> {
-        const servers = Object.values(this.configCache)
+        /* const servers = Object.values(this.configCache)
 
-        const players = await this.identityService.resolveUsers(
-            leaderboard.map((position) => position.userId))
-        const withPlayers = leaderboard.map((position, index) =>
-            ({ player: players[index], count: position.count }))
+        const players = await this.identityService.resolveUsers(leaderboard.map((position) => position.userId))
+
+        const withPlayers = leaderboard.map((position, index) => ({ player: players[index], count: position.count }))
+
         const embedFields = withPlayers.map((position, index) => 
             ({ name: `${index+1}. ${position.player.nickname}`, value: `${position.count} quests succeeded` }))
 
@@ -218,7 +219,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             const channel = this.client.channels.resolve(server.leaderboardNotificationChannelId)
             if (!channel || !channel.isTextBased()) continue
             await channel.send({ embeds: [ embed ] })
-        }
+        } */
     }
 
     async commandConfig(interaction: CommandInteraction): Promise<void> {
@@ -387,6 +388,63 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             })
 
         }
+        else if (subcommand == "get-leaderboard"){
+            const days = messagesDSL.getArguments(message)
+            let leaderboardObject: {[userId: string]: {succeededQuests: number}} = {}
+            if (!days || days == ""){
+                //we default to the first of the current month
+                const startDate = new Date()
+                startDate.setDate(1)
+                leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)   
+            }
+            else{
+                const daysToCheck = parseInt(days)
+                if (isNaN(daysToCheck) || daysToCheck <= 0) {return this.replyMessage(message, "Invalid input for days.")}
+                const currentDate = new Date()
+                const startDate = new Date(currentDate.getTime() - daysToCheck * 24 * 60 * 60 * 1000)
+                leaderboardObject = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
+            }
+
+            const modifiedLeaderboard = await Promise.all (Object.entries(leaderboardObject).map(async ([userId, data]) => {
+                const user = await this.identityService.resolveUser({ ctype: "user-id", userId });
+                if (user.status !== "ok") {
+                  this.replyMessage(message, `could not find user under id ${userId}`);
+                  return { name: 'Anon', data: { succeededQuests: data.succeededQuests } };
+                }
+                return { name: user.info.knownDiscord, data: { succeededQuests: data.succeededQuests } };
+              }))
+              
+              const embedFields = modifiedLeaderboard.map((entry, index) => ({
+                name: `${index + 1}. ${entry.name}`,
+                value: `${entry.data.succeededQuests} quests succeeded`
+              }))
+              
+              this.replyMessage(message, `Leadeboard status is ${JSON.stringify(embedFields, null, 4)}
+              \nDo you whant to publish this to the public channel? \nPlease confirm by replying with **yes**. If you wish to cancel, reply with **no** or wait for 60 seconds for this request to time out.`)
+
+
+            await this.waitForConfirmation(message, 60,
+                {
+                    cancel: 'Leaderboard Publish confirmation canceled.',
+                    timeout: 'Leaderboard Publish confirmation timed out.'
+                },
+                async () => {
+                    const servers = Object.values(this.configCache)
+                    const embed = new EmbedBuilder()
+                    .setColor(0x1999B3)
+                    .setTitle(`Leaderboard Published!`)
+                    .setDescription("The most successful Character Inn Keepers of Thiolden.")
+                    .addFields(embedFields)
+
+                    for (const server of servers) {
+                        if (!server.leaderboardNotificationChannelId) continue
+                        const channel = this.client.channels.resolve(server.leaderboardNotificationChannelId)
+                        if (!channel || !channel.isTextBased()) continue
+                        await channel.send({ embeds: [ embed ] })
+                    }
+                    return `Leaderboard Published on the leaderboard Notification Channel `
+                })
+        }
         else if (subcommand == "help"){
             const helpMessage = `
         **Available Development Commands**
@@ -407,6 +465,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             If needed also retuns array of orphaned entitiesIds that could not be found on the Database.
         
         *get-ballot-votes <ballotId> *: Returns the votes for a ballot, separated by option
+
+        *get-leaderboard <days?>*: Retrieves the leaderboard information for the specified number of days. if no day is provided it defaults to the first of the current month
+            it promts for confirmation to publish leaderboard to the public channel
         
         *help* : Provides a list of available commands and a description of their function.
         

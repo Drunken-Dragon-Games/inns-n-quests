@@ -1,4 +1,5 @@
 import { DataTypes, Model, Sequelize, Transaction } from "sequelize"
+import { Op, literal, fn, col } from 'sequelize'
 import { StakingQuestRegistry } from "./staking-quests-registry"
 import { TakenStakingQuest } from "../models"
 import * as vm from "../game-vm"
@@ -93,6 +94,36 @@ export class TakenStakingQuestState {
 
     async claimQuest(takenQuestId: string, claimedAt: Date, outcome: vm.StakingQuestOutcome, transaction?: Transaction): Promise<void> {
         await TakenStakingQuestDB.update({ claimedAt, outcome }, { where: { takenQuestId }, transaction })
+    }
+
+    async getLeaderboard(size: number, start: Date, end: Date): Promise<{[userId: string]: {succeededQuests: number}}> {
+        const leaderboardArray = await TakenStakingQuestDB.findAll({
+            where: {
+                claimedAt: {
+                    [Op.gte]: start,
+                    [Op.lte]: end,
+                },
+                outcome: {
+                    [Op.and]: [literal(`outcome->>'ctype' = 'success-outcome'`)],
+                },
+            },
+            limit: size,
+        })
+
+        const leaderboardObject: {[userId: string]: {succeededQuests: number}} = {};
+
+        for (const entry of leaderboardArray) {
+            if (!leaderboardObject[entry.userId])
+                leaderboardObject[entry.userId] = {succeededQuests: 1}
+            else
+                leaderboardObject[entry.userId].succeededQuests += 1
+        }
+
+        const sortedLeaderboard = Object.entries(leaderboardObject)
+            .sort((a, b) => b[1].succeededQuests - a[1].succeededQuests)
+            .slice(0, size)
+
+        return Object.fromEntries(sortedLeaderboard)
     }
 
 }
