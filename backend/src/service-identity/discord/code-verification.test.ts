@@ -5,8 +5,6 @@ import { DiscordConfig, verifyDiscordAuthCode } from "./code-verification";
 const stubDiscordConfig: DiscordConfig = {
     clientId: "",
     clientSecret: "",
-    redirectValidate: "",
-    redirectAdd: "",
     redirect: "",
 }
 

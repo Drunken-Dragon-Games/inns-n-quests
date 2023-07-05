@@ -24,7 +24,7 @@ beforeEach(async () => {
     service = await IdentityServiceDsl.loadFromConfig(
         { network
         , discord:
-            { clientId: "" , clientSecret: "" , redirectValidate: "", redirectAdd: "", redirect: "" }
+            { clientId: "" , clientSecret: "" , redirect: "" }
         , sessions:
             { duration: 1000 }
         }
