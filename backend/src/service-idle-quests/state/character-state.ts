@@ -140,7 +140,6 @@ export class CharacterState {
      * @returns 
      */
     async syncCharacters(userId: string, assetInventory: am.Inventory, transaction?: Transaction): Promise<Character[]> {
-        
         ///this takes in the full on chain and of chain inventory
         //returns an array of {assetRef: unit, collection: vm.CharacterCollection, quantity}
         const pickInventoryCharacters = (): InventoryCharacter[] => {
