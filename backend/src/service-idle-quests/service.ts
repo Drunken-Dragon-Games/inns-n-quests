@@ -315,8 +315,8 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             this.furnitureState.syncFurniture(userId, inventoryResult.inventory),
         ]))
 
-        if (process.env.NODE_ENV === "development" && characters.length == 0)
-            return await this.grantTestInventory(userId)
+        /* if (process.env.NODE_ENV === "development" && characters.length == 0)
+            return await this.grantTestInventory(userId) */
 
         const dragonSilver = parseInt(inventoryResult.inventory[this.wellKnownPolicies.dragonSilver.policyId]?.find(a => a.unit == "DragonSilver")?.quantity ?? "0")
         return { 
