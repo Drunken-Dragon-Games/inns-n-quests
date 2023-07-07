@@ -62,8 +62,10 @@ const IdleQuestsApi = {
                 .filter(takenQuest => takenQuest.ctype === "missing-adventurers")
             const takenQuests = hydratedTakenQuests
                 .filter(takenQuest => takenQuest.ctype === "valid-quest").map(q => q.quest)
-            questsWithMissingAdventurers.forEach(takenQuest => 
-                NotificationsApi.notify(`Quest failed because adventurers were transfered early: ${takenQuest.quest.availableQuest.name}`, "info"))
+            questsWithMissingAdventurers.forEach(async takenQuest => {
+                    NotificationsApi.notify(`Quest failed because adventurers were transfered early: ${takenQuest.quest.availableQuest.name}`, "info")
+                    await IdleQuestsRequestWRefresh("post", "/staking-quest/claim", {takenQuestId: takenQuest.quest.takenQuestId})
+                })
             return { status: "ok", takenQuests: takenQuests }
         } else
             return response.data

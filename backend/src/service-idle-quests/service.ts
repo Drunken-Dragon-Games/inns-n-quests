@@ -254,7 +254,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             return { status: "quest-already-claimed" }
         const transaction = await this.database.transaction()
         const adventurers = await this.characterState.unsetInChallenge(userId, takenQuest.partyIds, transaction)
-        const missing = adventurers.map(a => a.entityId).filter(item => takenQuest.partyIds.indexOf(item) < 0)
+        const missing = takenQuest.partyIds.filter(adventurerId => adventurers.map(a => a.entityId).indexOf(adventurerId) < 0)
         // Check all adventurers are still in the inventory
         if (missing.length > 0) {
             await this.takenQuestState.claimQuest(takenQuest.takenQuestId, this.calendar.now(), {ctype: "failure-outcome"}, transaction)
