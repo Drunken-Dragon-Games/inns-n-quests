@@ -1,8 +1,8 @@
-import { ClaimerInfo } from "../service-asset-management"
+import { ClaimStatus } from "../service-asset-management"
+import { CollectionFilter, GetCollectionResult } from "../service-collection"
+import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
 import { LoggingContext } from "../tools-tracing"
-import { MinimalUTxO } from "../tools-cardano"
-import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
 import { SResult } from "../tools-utils"
 
 export interface AccountService {
@@ -17,7 +17,7 @@ export interface AccountService {
     claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult>
-    getUserCollection(userId: string, filter?: Filter, logger?: LoggingContext): Promise<UserCollectionResult>
+    getUserCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult>
     claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult>
     grantTest(userId: string, logger?: LoggingContext): Promise<void>
     getOpenBallots(logger?: LoggingContext): Promise<OpenBallotsResult>
@@ -81,30 +81,13 @@ export type ClaimSignAndSubbmitResult
     = { status: "ok", txId: string }
     | { status: "invalid", reason: string }
 
-type ClaimStatus 
-    = "created"
-    | "submitted"
-    | "timed-out"
-    | "confirmed"
-
 export type ClaimStatusResult
     = { status: "ok", claimStatus: ClaimStatus }
     | { status: "invalid", reason: string }
 
-export type CollectionPolicyNames = "adventurersOfThiolden" | "grandMasterAdventurers" | "pixelTiles"
-
-export type Filter 
-    = { policy: CollectionPolicyNames, page: number, keyWords?: string[]}
-
 export type GetUserInventoryResult
     = { status: "ok", dragonSilverToClaim: string, dragonSilver: string, dragonGold: string}
     | { status: "unknown-user" }
-
-export type Collection = {[policyId: string]: {unit: string, quantity: string, type: "Character" | "Furniture"}[]}
-
-export type UserCollectionResult
-    = {status: "ok", collection: Collection}
-    | {status: "invalid", reason: string}
 
 export type OpenBallotsResult
     = { status: "ok", payload: {[ballotId: string]: StoredBallot}}
@@ -114,7 +97,7 @@ export type OpenUserBallotsResult =
     {status: "ok", payload: {[ballotId: string]: StoredUserBallot}}|
     {status: "invalid", reason: string}
 
-export type VoteResult 
+export type VoteResult
     = { status: "ok" }
     | { status: "invalid", reason: string }
 
