@@ -17,6 +17,7 @@ export interface AccountService {
     claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult>
+    getUserCollection(userId: string, filter?: Filter, logger?: LoggingContext): Promise<UserCollectionResult>
     claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult>
     grantTest(userId: string, logger?: LoggingContext): Promise<void>
     getOpenBallots(logger?: LoggingContext): Promise<OpenBallotsResult>
@@ -90,9 +91,20 @@ export type ClaimStatusResult
     = { status: "ok", claimStatus: ClaimStatus }
     | { status: "invalid", reason: string }
 
+export type CollectionPolicyNames = "adventurersOfThiolden" | "grandMasterAdventurers" | "pixelTiles"
+
+export type Filter 
+    = { policy: CollectionPolicyNames, page: number, keyWords?: string[]}
+
 export type GetUserInventoryResult
     = { status: "ok", dragonSilverToClaim: string, dragonSilver: string, dragonGold: string}
     | { status: "unknown-user" }
+
+export type Collection = {[policyId: string]: {unit: string, quantity: string, type: "Character" | "Furniture"}[]}
+
+export type UserCollectionResult
+    = {status: "ok", collection: Collection}
+    | {status: "invalid", reason: string}
 
 export type OpenBallotsResult
     = { status: "ok", payload: {[ballotId: string]: StoredBallot}}

@@ -1,7 +1,7 @@
 import path from "path"
 import { Sequelize } from "sequelize"
 import { v4 } from "uuid"
-import { wellKnownPoliciesMainnet } from "../registry-policies"
+import { wellKnownPoliciesMainnet } from "../tools-assets/registry-policies"
 import { Inventory } from "../service-asset-management"
 import { connectToDB } from "../tools-database"
 import { sfailure, success } from "../tools-utils"

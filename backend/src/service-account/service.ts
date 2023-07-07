@@ -1,4 +1,4 @@
-import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
+import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
 import { BlockchainService } from "../service-blockchain/service-spec"
 import { GovernanceService } from "../service-governance/service-spec"
@@ -6,7 +6,7 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, Collection, CreateAssociationTxResult, DeassociationResult, Filter, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, UserCollectionResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -96,6 +96,40 @@ export class AccountServiceDsl implements AccountService {
         const dragonGold = invDragonGold?.find(a => a.chain)?.quantity ?? "0"
         const dragonSilverToClaim = invDragonSilver?.find(a => !a.chain)?.quantity ?? "0"
         return {status: "ok", dragonSilver, dragonSilverToClaim, dragonGold}
+    }
+
+    /**
+     * Gets a collection of On-Chain Assets for an user
+     * @param userId 
+     * @param filter 
+     * @param logger 
+     * @returns 
+     */
+    async getUserCollection(userId: string, filter?: Filter | undefined, logger?: LoggingContext | undefined): Promise<UserCollectionResult> {
+        const { policy, page } = filter || { policy: undefined, page: undefined }
+        const options = {
+            page,
+            policies: policy ? [this.wellKnownPolicies[policy].policyId] : 
+                [
+                    this.wellKnownPolicies.adventurersOfThiolden.policyId,
+                    this.wellKnownPolicies.grandMasterAdventurers.policyId,
+                    this.wellKnownPolicies.pixelTiles.policyId
+                ]
+        }
+        const assetList = await this.assetManagementService.list(userId, {chain: true, ...options}, logger)
+
+        if (assetList.status !== "ok") return {status: "invalid", reason:assetList.status }
+        const collection: Collection = {}
+
+        Object.entries(assetList.inventory).forEach(([policyId, assets]) => {
+            collection[policyId]= assets.map(({ unit, quantity }) => {
+
+                 return {unit, quantity, type: "Furniture"} 
+            })
+        })
+
+          return {status: "ok", collection}
+
     }
 
     async getAssociationNonce(stakeAddress: string, logger?: LoggingContext): Promise<GetAssociationNonceResult> {
