@@ -163,11 +163,8 @@ export class CharacterState {
         }
 
         const preSyncedAdventurers: ICharacterDB[] = (await CharacterDB.findAll({ where: { userId } })).map(makeCharacter(this.objectBuilder))
-        //console.log(preSyncedAdventurers)
         const assetInventoryAdventurers = pickInventoryCharacters()
-        //console.log(assetInventoryAdventurers)
         const { toCreate, toDelete, surviving } = syncData(preSyncedAdventurers, assetInventoryAdventurers)
-        //console.log(toDelete)
         const createdAdventurers = await this.bulkCreate(userId, toCreate, transaction)
         await this.bulkDelete(toDelete.map(c => c.entityId), transaction)
         return createdAdventurers.concat(surviving.map(makeCharacter(this.objectBuilder)))

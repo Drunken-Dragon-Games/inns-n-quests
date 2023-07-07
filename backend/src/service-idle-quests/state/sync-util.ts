@@ -22,7 +22,6 @@ export const syncData = <DbAsset extends PreSynced, InvAsset extends InventoryAs
         else
             inventoryRecord[asset.assetRef] = asset
     })
-    //console.log(inventoryRecord)
     const preSyncedRecord: { [assetRef: string]: DbAsset[] } = {}
     preSynced.forEach(asset => {
         if (preSyncedRecord[asset.assetRef])
@@ -30,9 +29,6 @@ export const syncData = <DbAsset extends PreSynced, InvAsset extends InventoryAs
         else
             preSyncedRecord[asset.assetRef] = [asset]
     })
-
-    //console.log(preSyncedRecord)
-
     const empty: { toCreate: InvAsset[], toDelete: DbAsset[], surviving: DbAsset[] } = 
         { toCreate: [], toDelete: [], surviving: [] }
 
