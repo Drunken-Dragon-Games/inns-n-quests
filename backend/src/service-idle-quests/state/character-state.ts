@@ -140,7 +140,6 @@ export class CharacterState {
      * @returns 
      */
     async syncCharacters(userId: string, assetInventory: am.Inventory, transaction?: Transaction): Promise<Character[]> {
-        
         ///this takes in the full on chain and of chain inventory
         //returns an array of {assetRef: unit, collection: vm.CharacterCollection, quantity}
         const pickInventoryCharacters = (): InventoryCharacter[] => {
@@ -164,8 +163,11 @@ export class CharacterState {
         }
 
         const preSyncedAdventurers: ICharacterDB[] = (await CharacterDB.findAll({ where: { userId } })).map(makeCharacter(this.objectBuilder))
+        //console.log(preSyncedAdventurers)
         const assetInventoryAdventurers = pickInventoryCharacters()
+        //console.log(assetInventoryAdventurers)
         const { toCreate, toDelete, surviving } = syncData(preSyncedAdventurers, assetInventoryAdventurers)
+        //console.log(toDelete)
         const createdAdventurers = await this.bulkCreate(userId, toCreate, transaction)
         await this.bulkDelete(toDelete.map(c => c.entityId), transaction)
         return createdAdventurers.concat(surviving.map(makeCharacter(this.objectBuilder)))
