@@ -20,7 +20,7 @@ export type CollectibleMetadata = {
 }
 
 export type Collection<A extends object> = { 
-    pixelTiles: Collectible & A[],
-    adventurersOfThiolden: Collectible & A[],
-    grandmasterAdventurers: Collectible & A[],
+    pixelTiles: (Collectible & A)[],
+    adventurersOfThiolden: (Collectible & A)[],
+    grandmasterAdventurers: (Collectible & A)[],
 }

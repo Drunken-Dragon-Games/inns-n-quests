@@ -17,7 +17,6 @@ export interface AccountService {
     claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult>
-    getUserCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult>
     claimStatus(claimId: string, logger?: LoggingContext): Promise<ClaimStatusResult>
     grantTest(userId: string, logger?: LoggingContext): Promise<void>
     getOpenBallots(logger?: LoggingContext): Promise<OpenBallotsResult>

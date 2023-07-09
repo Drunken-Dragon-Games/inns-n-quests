@@ -6,10 +6,16 @@ import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
-import { CollectionFilter, CollectibleStakingInfo, CollectibleMetadata } from "./models"
+import { CollectionFilter, CollectibleStakingInfo, CollectibleMetadata, CollectionPolicyNames } from "./models"
+import { AssetManagementService } from "../service-asset-management"
+import { MetadataRegistry, WellKnownPolicies } from "../tools-assets"
+import {Collection} from "./models"
 
 export type CollectionServiceDependencies = {
-    database: Sequelize,
+    database: Sequelize
+    assetManagementService: AssetManagementService
+    wellKnownPolicies: WellKnownPolicies
+    metadataRegistry: MetadataRegistry
 }
 
 export type CollectionServiceConfig = {
@@ -21,6 +27,9 @@ export class CollectionServiceDsl implements CollectionService {
 
     constructor(
         private readonly database: Sequelize,
+        private readonly assetManagementService: AssetManagementService,
+        private readonly wellKnownPolicies: WellKnownPolicies,
+        private readonly metadataRegistry: MetadataRegistry,
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -32,7 +41,10 @@ export class CollectionServiceDsl implements CollectionService {
 
     static async loadFromConfig(config: CollectionServiceConfig, dependencies: CollectionServiceDependencies): Promise<CollectionServiceDsl> {
         const service = new CollectionServiceDsl(
-            dependencies.database, 
+            dependencies.database,
+            dependencies.assetManagementService,
+            dependencies.wellKnownPolicies,
+            dependencies.metadataRegistry
         )
         await service.loadDatabaseModels()
         return service
@@ -51,8 +63,47 @@ export class CollectionServiceDsl implements CollectionService {
      * Returns the collection with each asset's quantity and no extra information.
      * Intended to be used on other services like the idle-quests-service.
      */
-    getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>> {
-        throw new Error("Method not implemented.")
+    async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>> {
+        const relevantPolicies = ["pixelTiles", "adventurersOfThiolden", "grandMasterAdventurers"] as const
+        const policyIndexMapper: Record<CollectionPolicyNames, typeof relevantPolicies[number]> = {
+                "pixel-tiles": "pixelTiles",
+                "adventurers-of-thiolden": "adventurersOfThiolden",
+                "grandmaster-adventurers": "grandMasterAdventurers"
+            }
+            
+        const { policy, page } = filter || {}
+        const options = {
+            page,
+            policies: policy ? [this.wellKnownPolicies[policyIndexMapper[policy]].policyId] : relevantPolicies.map(policy => this.wellKnownPolicies[policy].policyId)
+        }
+
+        const assetList = await this.assetManagementService.list(userId, {chain: true, ...options}, logger)
+
+        if (assetList.status !== "ok") return {ctype: "failure", error:assetList.status }
+        
+        const getCollectionType = (policyId: string, assetUnit: string) => {
+            if(policyId === this.wellKnownPolicies.pixelTiles.policyId){
+                const metadataType = this.metadataRegistry.pixelTilesMetadata[assetUnit].type
+                return metadataType == "Adventurer" || metadataType == "Monster" || metadataType == "Townsfolk" ? "Character" : "Furniture"
+            }
+            return "Character"
+        }
+
+        const processAssets = (policyId: string, assets: any) => 
+        assets.map((asset: any) => ({
+            assetRef: asset.unit,
+            quantity: asset.quantity,
+            type: getCollectionType(policyId, asset.unit)
+        }))
+
+        const collection: Collection<{}> = relevantPolicies.reduce((acc, policy) => {
+            const policyId = this.wellKnownPolicies[policy].policyId
+            const assets = assetList.inventory[policyId]
+            if(assets)return {...acc,[policy]: processAssets(policyId, assets)}
+            return acc
+        }, {} as Collection<{}>)
+
+          return {ctype: "success", collection}
     }
 
     /**
