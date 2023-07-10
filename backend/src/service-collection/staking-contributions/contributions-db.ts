@@ -38,6 +38,7 @@ export class WeeklyContribution extends Model {
     declare weeklyContributionId: string
     declare contribution: string
     declare userId: string
+    declare addDailyContributions: (xs: DailyContribution[]) => Promise<void>
 }
 
 export const weeklyContributionTableAttributes = {
@@ -59,13 +60,13 @@ export const weeklyContributionTableAttributes = {
 export const configureSequelizeModel = (sequelize: Sequelize): void => {
     DailyContribution.init(dailyContributionTableAttributes, {
         sequelize,
-        modelName: "DailyContribution",
+        modelName: "dailyContribution",
         tableName: dailyContributionsTableName
     })
 
     WeeklyContribution.init(weeklyContributionTableAttributes, {
         sequelize, 
-        modelName: 'WeeklyContribution', 
+        modelName: 'weeklyContribution', 
         tableName: weeklyContributionsTableName
     })
 
