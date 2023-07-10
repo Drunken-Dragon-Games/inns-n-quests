@@ -3,19 +3,20 @@ import { CollectionService, GetCollectionResult, GetPassiveStakingInfoResult } f
 
 import path from "path"
 import { Umzug } from "umzug"
+import { AssetManagementService } from "../service-asset-management"
+import { MetadataRegistry, WellKnownPolicies } from "../tools-assets"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
-import { CollectionFilter, CollectibleStakingInfo, CollectibleMetadata, CollectionPolicyNames } from "./models"
-import { AssetManagementService } from "../service-asset-management"
-import { MetadataRegistry, WellKnownPolicies } from "../tools-assets"
-import {Collection} from "./models"
+import { CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles } from "./models"
+import { RandomDSL } from "./random-dsl/dsl"
 
 export type CollectionServiceDependencies = {
     database: Sequelize
     assetManagementService: AssetManagementService
     wellKnownPolicies: WellKnownPolicies
     metadataRegistry: MetadataRegistry
+    randFactory: (s: string) => RandomDSL
 }
 
 export type CollectionServiceConfig = {
@@ -37,6 +38,7 @@ export class CollectionServiceDsl implements CollectionService {
         private readonly assetManagementService: AssetManagementService,
         private readonly wellKnownPolicies: WellKnownPolicies,
         private readonly metadataRegistry: MetadataRegistry,
+        private readonly randFactory: (s: string) => RandomDSL
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -51,7 +53,8 @@ export class CollectionServiceDsl implements CollectionService {
             dependencies.database,
             dependencies.assetManagementService,
             dependencies.wellKnownPolicies,
-            dependencies.metadataRegistry
+            dependencies.metadataRegistry,
+            dependencies.randFactory
         )
         await service.loadDatabaseModels()
         return service
@@ -102,8 +105,12 @@ export class CollectionServiceDsl implements CollectionService {
      * Returns the collection with each asset's weekly contributions to the player's passive staking.
      * Intended to be used on the collection UI.
      */
-    getCollectionWithUIMetadata(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
-        throw new Error("Method not implemented.")
+    async getCollectionWithUIMetadata(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
+        const collectionResult = await this.getCollection(userId, filter, logger)
+        if (collectionResult.ctype !== "success") return collectionResult
+        const metadataCollection = this.hydrateCollectionWithMetadata(collectionResult.collection)
+        const stakingCollection = this.calculateCollectionDailyReward(metadataCollection)
+        return {ctype: "success", collection: stakingCollection}
     }
 
     /**
@@ -158,5 +165,162 @@ export class CollectionServiceDsl implements CollectionService {
             return metadataType == "Adventurer" || metadataType == "Monster" || metadataType == "Townsfolk" ? "Character" : "Furniture"
         }
         return "Character"
+    }
+
+    private hydrateCollectionWithMetadata(assets: Collection<{}>): Collection<CollectibleMetadata> {
+        return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
+            const metadataArray: PolicyCollectibles<CollectibleMetadata> = collectibleArray.map((colletible) => {
+                const partialMetadata = this.formatMetadata(colletible.assetRef, collectionName as typeof relevantPolicies[number], colletible.type)
+                const metadata: CollectibleMetadata = {
+                    aps: this.getCollectibleAPS(colletible.assetRef, collectionName as typeof relevantPolicies[number]),
+                    ...partialMetadata
+                }
+                return {...colletible, ...metadata}
+            })
+            return {...acc, ...{[collectionName]: metadataArray}}
+        }, {} as Collection<CollectibleMetadata>)
+    }
+    private formatMetadata(assetRef: string, collection: typeof relevantPolicies[number], assetType: "Character" | "Furniture"): PartialMetadata{
+        const parseNonFurniturePixelTile = (name: string) => {
+            const regex = /PixelTile\s+#(\d+)\s+(.+)/
+            const match = name.match(regex)
+
+            if (!match) throw new Error(`Invalid PixelTile string: ${name}`)
+            const [, num, keyWords] = match
+            
+            return {
+              miniature: `https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_${num}.png`,
+              assetClass: keyWords
+            }
+          }
+
+        const advOfThioldenSprites = (): {miniature: string, splashArt: string} => {
+            const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
+            const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
+            const chromaOrPlain = this.metadataRegistry.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
+            const finalName = (adventurerName == "avva" ? (Math.floor(Math.random() * 2) == 0 ? "avva_fire" : "avva_ice") : adventurerName)
+                .replace("'", "")
+            const aps = 
+                this.metadataRegistry.advOfThioldenAppMetadata[idx].ath + 
+                this.metadataRegistry.advOfThioldenAppMetadata[idx].int + 
+                this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
+            return {
+                miniature:`https://cdn.ddu.gg/adv-of-thiolden/x6/${finalName}-front-${chromaOrPlain}.png`,
+                splashArt: `https://cdn.ddu.gg/adv-of-thiolden/web/${finalName}_${aps}_${chromaOrPlain == "chroma" ? 1 : 0}.webp`
+            }
+        }
+
+        switch (collection) {
+            case "pixelTiles":{
+                 const name = this.metadataRegistry.pixelTilesMetadata[assetRef].name
+                 const { miniature, assetClass } = assetType === "Furniture" 
+                    ? { miniature: `https://cdn.ddu.gg/pixeltiles/x4/${name}.png`, assetClass: "furniture" }
+                    : parseNonFurniturePixelTile(name)
+     
+                 return {
+                    name, miniature,
+                    splashArt: `https://cdn.ddu.gg/pixeltiles/xl/${name}.png`,
+                    class: assetClass,
+                    mortalRealmsActive: 0
+                 }
+            }
+            case "grandMasterAdventurers":{
+                return {
+                    name: this.metadataRegistry.gmasMetadata[assetRef].name,
+                    splashArt: `https://cdn.ddu.gg/gmas/xl/${assetRef}.gif`,
+                    miniature: `https://cdn.ddu.gg/gmas/x3/${assetRef}.png`,
+                    class: this.metadataRegistry.gmasMetadata[assetRef].class,
+                    mortalRealmsActive: 0
+                }
+            }
+            case "adventurersOfThiolden": {
+                const {miniature, splashArt} = advOfThioldenSprites()
+                return {
+                    name: `${assetRef} ${this.metadataRegistry.advOfThioldenGameMetadata[assetRef].Title}`,
+                    splashArt,
+                    miniature,
+                    class: this.metadataRegistry.advOfThioldenGameMetadata[assetRef]["Game Class"],
+                    mortalRealmsActive: 0
+                }
+            }
+        }
+    }
+
+    private getCollectibleAPS(assetRef: string, collection: typeof relevantPolicies[number]):[number, number, number] {
+        switch (collection) {
+            case "pixelTiles": switch (this.metadataRegistry.pixelTilesMetadata[assetRef].rarity) {
+                case "Common": return [2,2,2]
+                case "Uncommon": return [4,4,4]
+                case "Rare": return [6,6,6]
+                case "Epic": return [8,8,8]
+                default: return [10,10,10]
+            }
+            case "grandMasterAdventurers":
+                const armor = parseInt(this.metadataRegistry.gmasMetadata[assetRef].armor)
+                const weapon = parseInt(this.metadataRegistry.gmasMetadata[assetRef].weapon)
+                const targetAPSSum = Math.round((armor + weapon) * 30 / 10)
+                const deterministicRand = this.randFactory(assetRef)
+                return this.newRandAPS(targetAPSSum, deterministicRand)
+            case "adventurersOfThiolden":
+                const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
+                return [
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].ath,
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].int,
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
+                ]
+        }
+    }
+
+    private newRandAPS(targetAPSSum: number, deterministicRand: RandomDSL):[number, number, number] {
+        // Assign stats as best as possible
+        let currentSum = 0, overflow = 0
+        const baseStatsOrder = deterministicRand.shuffle(
+            ["athleticism", "intellect", "charisma"] as ["athleticism", "intellect", "charisma"])
+        const singleStatMax = 10
+        const stats = { athleticism: 0, intellect: 0, charisma: 0 }
+        baseStatsOrder.forEach((stat, i) => {
+            if (i == 2) {
+                const semiFinalStat = targetAPSSum - currentSum
+                const finalStat = Math.min(singleStatMax, semiFinalStat)
+                overflow = semiFinalStat - finalStat
+                stats[stat] = finalStat
+            } else {
+                const maxPossibleStat = Math.min(Math.min(targetAPSSum - 2, singleStatMax), targetAPSSum - 1 - currentSum)
+                const finalStat = deterministicRand.randomNumberBetween(1, maxPossibleStat)
+                currentSum += finalStat
+                stats[stat] = finalStat
+            }
+        })
+        // Randomly distribute the rest
+        while (overflow > 0) {
+            baseStatsOrder.forEach((stat) => {
+                const currentStat = stats[stat]
+                if (currentStat == singleStatMax || overflow <= 0) return
+                const maxPossibleIncrement = Math.min(singleStatMax - currentStat, overflow)
+                const randomIncrement = deterministicRand.randomNumberBetween(1, maxPossibleIncrement)
+                const finalStat = randomIncrement + currentStat
+                overflow -= randomIncrement
+                stats[stat] = finalStat
+            })
+        }
+        const totalStatSum = stats.athleticism + stats.intellect + stats.charisma
+        if (totalStatSum != targetAPSSum) throw new Error("Expected " + targetAPSSum + " stats but got " + totalStatSum)
+        else return  [stats.athleticism, stats.intellect, stats.charisma]
+    }
+
+    private calculateCollectionDailyReward(assets: Collection<CollectibleMetadata>): Collection<CollectibleStakingInfo & CollectibleMetadata> {
+        return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
+            const stakingArray: PolicyCollectibles<CollectibleStakingInfo & CollectibleMetadata> = collectibleArray.map((collectible) => {
+                const stakingInfo = this.calculateCollectibleDailyReward(collectionName as typeof relevantPolicies[number], collectible.type, collectible.aps)
+                return {...collectible, ...stakingInfo}
+            })
+            return {...acc, ...{[collectionName]: stakingArray}}
+        }, {} as Collection<CollectibleStakingInfo & CollectibleMetadata>)
+
+    }
+
+    private calculateCollectibleDailyReward(collectionName: typeof relevantPolicies[number], type: "Furniture"| "Character", APS: [number, number, number]): CollectibleStakingInfo{
+        //TODO: decide contributions
+        return {stakingContribution: 1}
     }
 }

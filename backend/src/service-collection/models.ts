@@ -10,6 +10,14 @@ export type CollectibleStakingInfo = {
     stakingContribution: number 
 }
 
+export type PartialMetadata = {
+    splashArt: string,
+    miniature: string,
+    name: string,
+    class: string, // "furniture" for furniture
+    mortalRealmsActive: number,
+}
+
 export type CollectibleMetadata = {
     splashArt: string,
     miniature: string,
@@ -19,8 +27,10 @@ export type CollectibleMetadata = {
     mortalRealmsActive: number,
 }
 
+export type PolicyCollectibles<A extends object> = (Collectible & A)[]
+
 export type Collection<A extends object> = { 
-    pixelTiles: (Collectible & A)[],
-    adventurersOfThiolden: (Collectible & A)[],
-    grandmasterAdventurers: (Collectible & A)[],
+    pixelTiles: PolicyCollectibles<A>,
+    adventurersOfThiolden: PolicyCollectibles<A>,
+    grandmasterAdventurers: PolicyCollectibles<A>,
 }
