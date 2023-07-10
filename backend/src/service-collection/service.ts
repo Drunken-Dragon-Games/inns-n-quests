@@ -21,6 +21,13 @@ export type CollectionServiceDependencies = {
 export type CollectionServiceConfig = {
 }
 
+const relevantPolicies = ["pixelTiles", "adventurersOfThiolden", "grandMasterAdventurers"] as const
+const policyIndexMapper: Record<CollectionPolicyNames, typeof relevantPolicies[number]> = {
+        "pixel-tiles": "pixelTiles",
+        "adventurers-of-thiolden": "adventurersOfThiolden",
+        "grandmaster-adventurers": "grandMasterAdventurers"
+    }
+
 export class CollectionServiceDsl implements CollectionService {
 
     private readonly migrator: Umzug<QueryInterface>
@@ -64,13 +71,6 @@ export class CollectionServiceDsl implements CollectionService {
      * Intended to be used on other services like the idle-quests-service.
      */
     async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>> {
-        const relevantPolicies = ["pixelTiles", "adventurersOfThiolden", "grandMasterAdventurers"] as const
-        const policyIndexMapper: Record<CollectionPolicyNames, typeof relevantPolicies[number]> = {
-                "pixel-tiles": "pixelTiles",
-                "adventurers-of-thiolden": "adventurersOfThiolden",
-                "grandmaster-adventurers": "grandMasterAdventurers"
-            }
-            
         const { policy, page } = filter || {}
         const options = {
             page,
@@ -80,20 +80,12 @@ export class CollectionServiceDsl implements CollectionService {
         const assetList = await this.assetManagementService.list(userId, {chain: true, ...options}, logger)
 
         if (assetList.status !== "ok") return {ctype: "failure", error:assetList.status }
-        
-        const getCollectionType = (policyId: string, assetUnit: string) => {
-            if(policyId === this.wellKnownPolicies.pixelTiles.policyId){
-                const metadataType = this.metadataRegistry.pixelTilesMetadata[assetUnit].type
-                return metadataType == "Adventurer" || metadataType == "Monster" || metadataType == "Townsfolk" ? "Character" : "Furniture"
-            }
-            return "Character"
-        }
 
-        const processAssets = (policyId: string, assets: any) => 
+        const processAssets = (policyId: string, assets: any): Collection<{}> => 
         assets.map((asset: any) => ({
             assetRef: asset.unit,
             quantity: asset.quantity,
-            type: getCollectionType(policyId, asset.unit)
+            type: this.getCollectionType(policyId, asset.unit)
         }))
 
         const collection: Collection<{}> = relevantPolicies.reduce((acc, policy) => {
@@ -158,5 +150,13 @@ export class CollectionServiceDsl implements CollectionService {
      */
     removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
         throw new Error("Method not implemented.")
+    }
+
+    private getCollectionType = (policyId: string, assetUnit: string) => {
+        if(policyId === this.wellKnownPolicies.pixelTiles.policyId){
+            const metadataType = this.metadataRegistry.pixelTilesMetadata[assetUnit].type
+            return metadataType == "Adventurer" || metadataType == "Monster" || metadataType == "Townsfolk" ? "Character" : "Furniture"
+        }
+        return "Character"
     }
 }
