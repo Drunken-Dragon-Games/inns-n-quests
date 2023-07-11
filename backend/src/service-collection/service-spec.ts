@@ -60,7 +60,7 @@ export type GetCollectionResult<A extends object> = SResult<{
 }>
 
 export type GetPassiveStakingInfoResult = SResult<{ 
-    weeklyAccumulated: number, 
-    dragonSilverToClaim: number, 
-    dragonSilver: number 
+    weeklyAccumulated: string, 
+    dragonSilverToClaim: string, 
+    dragonSilver: string 
 }>

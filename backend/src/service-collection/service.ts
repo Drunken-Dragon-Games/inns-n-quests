@@ -123,8 +123,16 @@ export class CollectionServiceDsl implements CollectionService {
     /**
      * Intended to be displayed on the user's collection UI.
      */
-    getPassiveStakingInfo(userId: string, logger?: LoggingContext): Promise<GetPassiveStakingInfoResult> {
-        throw new Error("Method not implemented.")
+    async getPassiveStakingInfo(userId: string, logger?: LoggingContext): Promise<GetPassiveStakingInfoResult> {
+        const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId] }, logger)
+        if (assetList.status != "ok") return {ctype: "failure", error: "unknown user"}
+        const inventory = assetList.inventory
+        const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
+        const dragonSilver = invDragonSilver?.find(a => a.chain)?.quantity ?? "0"
+        const dragonSilverToClaim = invDragonSilver?.find(a => !a.chain)?.quantity ?? "0"
+        const weeklyAccumulated = (await Rewards.getWeeklyAccumulated(userId)).toString()
+        return {ctype: "success", weeklyAccumulated, dragonSilverToClaim, dragonSilver}
+
     }
 
     /**
