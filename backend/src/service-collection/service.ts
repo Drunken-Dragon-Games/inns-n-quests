@@ -126,8 +126,7 @@ export class CollectionServiceDsl implements CollectionService {
     async getPassiveStakingInfo(userId: string, logger?: LoggingContext): Promise<GetPassiveStakingInfoResult> {
         const assetList = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId] }, logger)
         if (assetList.status != "ok") return {ctype: "failure", error: "unknown user"}
-        const inventory = assetList.inventory
-        const invDragonSilver = inventory[this.wellKnownPolicies.dragonSilver.policyId]
+        const invDragonSilver = assetList.inventory[this.wellKnownPolicies.dragonSilver.policyId]
         const dragonSilver = invDragonSilver?.find(a => a.chain)?.quantity ?? "0"
         const dragonSilverToClaim = invDragonSilver?.find(a => !a.chain)?.quantity ?? "0"
         const weeklyAccumulated = (await Rewards.getWeeklyAccumulated(userId)).toString()
@@ -142,26 +141,38 @@ export class CollectionServiceDsl implements CollectionService {
      */
     async updateGlobalDailyStakingContributions(logger?: LoggingContext): Promise<void> {
         const dailyRecord = await Records.createDaily()
-        if (dailyRecord.ctype !== "success") return
+        if (dailyRecord.ctype !== "success") {
+            logger?.log.error(`Failed to create daily record beaocuse: ${dailyRecord.error}`)
+            return
+        }
         const userIds = await this.identityService.listAllUserIds(logger)
-        userIds.forEach(async (userId) => {
-            //Depending on how we decide to calculate the weakly earning this might be grealty optimized by not needing the metadata
+        
+        const dailyRewards = await Promise.all(userIds.map(async (userId) => {
+            // Depending on how we decide to calculate the weekly earning this might be greatly optimized by not needing the metadata
             const collection = await this.getCollectionWithUIMetadata(userId)
             if (collection.ctype !== "success"){
                 logger?.log.error(`Getting collection returned: ${collection.error}`)
                 await Rewards.createDaily(userId, `pending because collection returned: ${collection.error}`)
-                return
+                return 0
             }
             else{
                 const rewardRecord = await Rewards.createDaily(userId)
-                if (rewardRecord.ctype !== "success") return
+                if (rewardRecord.ctype !== "success") {
+                    logger?.log.error(`Failed to create daily reward record becaouse: ${rewardRecord.error}.`)
+                    return 0
+                }
                 const dailyReward = Object.entries(collection.collection).reduce((acc, [_policyName, collectibles]) => {
                     return acc + collectibles.reduce((acc, collectible) => {return acc + collectible.stakingContribution}, 0)
                 }, 0)
                 await Rewards.completeDaily(userId, dailyReward.toString())
+                return dailyReward
             }
-        })
+        }))
+    
+        const dailyRewardTotal = dailyRewards.reduce((total, reward) => total + reward, 0)
+        await Records.completeDaily(dailyRewardTotal.toString())
     }
+    
 
     /**
      * Grants the weekly contributions to everyone's dragon silver to claim.
@@ -169,7 +180,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Important: idempotent operation.
      */
     grantGlobalWeeklyStakingGrant(logger?: LoggingContext): Promise<void> {
-        throw new Error("Method not implemented.")
+        const weeklyRecord = Records.c
     }
 
     /**
