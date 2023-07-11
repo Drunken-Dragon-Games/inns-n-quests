@@ -7,6 +7,8 @@ import { AccountState, accountStore } from "../account-state"
 import { AccountTransitions } from "../account-transitions"
 import { AccountThunks } from "../account-thunks"
 import { userInfo } from "os"
+import { GamesButton } from "../../utils/navBar/basic_components"
+import { gamesButtonSection } from "../../../setting"
 
 const WidgetRowContainer = styled.div`
     width: 100%;
@@ -446,6 +448,34 @@ const DashboardCard = (props: { children?: ReactNode, title: string, }) =>
         <DashboardCardContent>{props.children}</DashboardCardContent>
     </DashboardCardContainer>
 
+const OpenInnButtonContainer = styled.div`
+    width: 100%;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+
+    h1 {
+        color: ${colors.textBeige};
+        ${OswaldFontFamily}
+        text-transform: uppercase;
+
+        @media only screen and (max-width: 414px) {
+            display: none;
+        }
+    }
+
+    @media only screen and (max-width: 1400px) {
+        flex-direction: column;
+    }
+`
+
+const OpenInnButton = () =>
+    <OpenInnButtonContainer>
+        <GamesButton game="inns" url={gamesButtonSection.quests} toolTip="My Inn" />
+        <h1>My Inn</h1>
+    </OpenInnButtonContainer>
 
 const DashboardContainer = styled.div`
     width: 100%;
@@ -489,6 +519,7 @@ const WideDashboardCard = (props: { children?: ReactNode, title: string }) => (
 
 export const DashboardView = ({ userInfo }: { userInfo: UserInfo }) => 
     <>
+        <OpenInnButton />
         <DashboardContainer>
             <DashboardCard key="dragon-silver-widget" title="Dragon Silver">
                 <DragonSilverWidget {...userInfo} />
