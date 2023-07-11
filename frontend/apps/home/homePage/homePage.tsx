@@ -27,6 +27,8 @@ const HomeContent = (): JSX.Element => {
                 {userInfo ? <>
                     <DashboardView userInfo={userInfo} /> 
                     <BuySlimeSection />
+                    <CollectionsSection />
+                    <DeadQueenSection />
                 </> : <>
                     <BannerSection />
                     <SocialMediaSection />
