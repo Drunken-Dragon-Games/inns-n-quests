@@ -11,6 +11,8 @@ import { SResult, Unit } from "../tools-utils"
 import { CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles } from "./models"
 import { RandomDSL } from "./random-dsl/dsl"
 
+import * as contributionsDB from "./staking-contributions/contributions-db"
+
 export type CollectionServiceDependencies = {
     database: Sequelize
     assetManagementService: AssetManagementService
@@ -61,7 +63,7 @@ export class CollectionServiceDsl implements CollectionService {
     }
 
     async loadDatabaseModels(): Promise<void> {
-        //leaderboardDB.configureSequelizeModel(this.database)
+        contributionsDB.configureSequelizeModel(this.database)
         await this.migrator.up()
     }
 
@@ -180,35 +182,19 @@ export class CollectionServiceDsl implements CollectionService {
             return {...acc, ...{[collectionName]: metadataArray}}
         }, {} as Collection<CollectibleMetadata>)
     }
+
+    private calculateCollectionDailyReward(assets: Collection<CollectibleMetadata>): Collection<CollectibleStakingInfo & CollectibleMetadata> {
+        return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
+            const stakingArray: PolicyCollectibles<CollectibleStakingInfo & CollectibleMetadata> = collectibleArray.map((collectible) => {
+                const stakingInfo = this.calculateCollectibleDailyReward(collectionName as typeof relevantPolicies[number], collectible.type, collectible.aps)
+                return {...collectible, ...stakingInfo}
+            })
+            return {...acc, ...{[collectionName]: stakingArray}}
+        }, {} as Collection<CollectibleStakingInfo & CollectibleMetadata>)
+
+    }
+
     private formatMetadata(assetRef: string, collection: typeof relevantPolicies[number], assetType: "Character" | "Furniture"): PartialMetadata{
-        const parseNonFurniturePixelTile = (name: string) => {
-            const regex = /PixelTile\s+#(\d+)\s+(.+)/
-            const match = name.match(regex)
-
-            if (!match) throw new Error(`Invalid PixelTile string: ${name}`)
-            const [, num, keyWords] = match
-            
-            return {
-              miniature: `https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_${num}.png`,
-              assetClass: keyWords
-            }
-          }
-
-        const advOfThioldenSprites = (): {miniature: string, splashArt: string} => {
-            const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
-            const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
-            const chromaOrPlain = this.metadataRegistry.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
-            const finalName = (adventurerName == "avva" ? (Math.floor(Math.random() * 2) == 0 ? "avva_fire" : "avva_ice") : adventurerName)
-                .replace("'", "")
-            const aps = 
-                this.metadataRegistry.advOfThioldenAppMetadata[idx].ath + 
-                this.metadataRegistry.advOfThioldenAppMetadata[idx].int + 
-                this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
-            return {
-                miniature:`https://cdn.ddu.gg/adv-of-thiolden/x6/${finalName}-front-${chromaOrPlain}.png`,
-                splashArt: `https://cdn.ddu.gg/adv-of-thiolden/web/${finalName}_${aps}_${chromaOrPlain == "chroma" ? 1 : 0}.webp`
-            }
-        }
 
         switch (collection) {
             case "pixelTiles":{
@@ -234,7 +220,7 @@ export class CollectionServiceDsl implements CollectionService {
                 }
             }
             case "adventurersOfThiolden": {
-                const {miniature, splashArt} = advOfThioldenSprites()
+                const {miniature, splashArt} = this.advOfThioldenSprites(assetRef)
                 return {
                     name: `${assetRef} ${this.metadataRegistry.advOfThioldenGameMetadata[assetRef].Title}`,
                     splashArt,
@@ -243,6 +229,22 @@ export class CollectionServiceDsl implements CollectionService {
                     mortalRealmsActive: 0
                 }
             }
+        }
+    }
+
+    private advOfThioldenSprites = (assetRef: string): {miniature: string, splashArt: string} => {
+        const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
+        const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
+        const chromaOrPlain = this.metadataRegistry.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
+        const finalName = (adventurerName == "avva" ? (Math.floor(Math.random() * 2) == 0 ? "avva_fire" : "avva_ice") : adventurerName)
+            .replace("'", "")
+        const aps = 
+            this.metadataRegistry.advOfThioldenAppMetadata[idx].ath + 
+            this.metadataRegistry.advOfThioldenAppMetadata[idx].int + 
+            this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
+        return {
+            miniature:`https://cdn.ddu.gg/adv-of-thiolden/x6/${finalName}-front-${chromaOrPlain}.png`,
+            splashArt: `https://cdn.ddu.gg/adv-of-thiolden/web/${finalName}_${aps}_${chromaOrPlain == "chroma" ? 1 : 0}.webp`
         }
     }
 
@@ -308,19 +310,21 @@ export class CollectionServiceDsl implements CollectionService {
         else return  [stats.athleticism, stats.intellect, stats.charisma]
     }
 
-    private calculateCollectionDailyReward(assets: Collection<CollectibleMetadata>): Collection<CollectibleStakingInfo & CollectibleMetadata> {
-        return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
-            const stakingArray: PolicyCollectibles<CollectibleStakingInfo & CollectibleMetadata> = collectibleArray.map((collectible) => {
-                const stakingInfo = this.calculateCollectibleDailyReward(collectionName as typeof relevantPolicies[number], collectible.type, collectible.aps)
-                return {...collectible, ...stakingInfo}
-            })
-            return {...acc, ...{[collectionName]: stakingArray}}
-        }, {} as Collection<CollectibleStakingInfo & CollectibleMetadata>)
-
-    }
-
     private calculateCollectibleDailyReward(collectionName: typeof relevantPolicies[number], type: "Furniture"| "Character", APS: [number, number, number]): CollectibleStakingInfo{
         //TODO: decide contributions
         return {stakingContribution: 1}
     }
 }
+
+const parseNonFurniturePixelTile = (name: string) => {
+    const regex = /PixelTile\s+#(\d+)\s+(.+)/
+    const match = name.match(regex)
+
+    if (!match) throw new Error(`Invalid PixelTile string: ${name}`)
+    const [, num, keyWords] = match
+    
+    return {
+      miniature: `https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_${num}.png`,
+      assetClass: keyWords
+    }
+  }
