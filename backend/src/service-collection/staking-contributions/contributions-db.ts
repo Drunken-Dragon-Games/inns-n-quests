@@ -7,6 +7,7 @@ export class DailyContribution extends Model {
     declare dailyContributionId: string
     declare contribution: string
     declare userId: string
+    declare createdAt: string
     declare weeklyContributionId? : string
 }
 
