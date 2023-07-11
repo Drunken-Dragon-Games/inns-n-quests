@@ -51,7 +51,8 @@ export class IdentityServiceDsl implements IdentityService {
         private readonly database: Sequelize,
         private readonly network: string,
         private readonly discordConfig: DiscordConfig,
-        private readonly sessions: Sessions
+        private readonly sessions: Sessions,
+        private readonly cachedUsers: Users
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -73,11 +74,13 @@ export class IdentityServiceDsl implements IdentityService {
     }
 
     static async loadFromConfig(servConfig: IdentityServiceConfig, dependencies: IdentityServiceDependencies): Promise<IdentityService> {
+        const cachedUsers = await Users.initWithCache()
         const service = new IdentityServiceLogging(new IdentityServiceDsl
             ( dependencies.database
             , servConfig.network
             , servConfig.discord
             , new Sessions(servConfig.sessions)
+            , cachedUsers
             ))
         await service.loadDatabaseModels()
         return service
@@ -152,7 +155,7 @@ export class IdentityServiceDsl implements IdentityService {
             if (stakeAddress.ctype == "failure")
                 return { status: "bad-credentials" }
             else {
-                const userId = await Users.registerWithStakingAddress(stakeAddress.result)
+                const userId = await this.cachedUsers.registerWithStakingAddress(stakeAddress.result)
                 const tokens = await this.sessions.create(userId, "Sig", credentials.deviceType)
                 return { status: "ok", tokens }
             }
@@ -161,7 +164,7 @@ export class IdentityServiceDsl implements IdentityService {
             if (discordTokens.ctype == "failure")
                 return { status: "bad-credentials" }
             else {
-                const userId = await Users.registerWithDiscordTokens(discordTokens.result, logger)
+                const userId = await this.cachedUsers.registerWithDiscordTokens(discordTokens.result, logger)
                 if (userId.ctype == "failure"){
                     return { status: "bad-credentials" }
                 }else{
@@ -170,7 +173,7 @@ export class IdentityServiceDsl implements IdentityService {
                 }
             }
         } else if (credentials.ctype === "development" && NODE_ENV === "development") {
-            const userId = await Users.registerSimpleUser(credentials.nickname)
+            const userId = await this.cachedUsers.registerSimpleUser(credentials.nickname)
             const tokens = await this.sessions.create(userId, "Development", credentials.deviceType)
             return { status: "ok", tokens }
         } else {
@@ -215,6 +218,10 @@ export class IdentityServiceDsl implements IdentityService {
 
     async getTotalUsers(): Promise<number> {
         return await Users.total()
+    }
+
+    async listAllUserIds(): Promise<string[]>{
+        return this.cachedUsers.idsCache
     }
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<RefreshResult> {

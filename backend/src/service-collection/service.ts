@@ -11,11 +11,13 @@ import { SResult, Unit } from "../tools-utils"
 import { CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles } from "./models"
 import { RandomDSL } from "./random-dsl/dsl"
 
+import { IdentityService } from "../service-identity"
 import * as contributionsDB from "./staking-contributions/contributions-db"
 
 export type CollectionServiceDependencies = {
     database: Sequelize
-    assetManagementService: AssetManagementService
+    assetManagementService: AssetManagementService,
+    identityService: IdentityService,
     wellKnownPolicies: WellKnownPolicies
     metadataRegistry: MetadataRegistry
     randFactory: (s: string) => RandomDSL
@@ -38,6 +40,7 @@ export class CollectionServiceDsl implements CollectionService {
     constructor(
         private readonly database: Sequelize,
         private readonly assetManagementService: AssetManagementService,
+        private readonly identityService: IdentityService,
         private readonly wellKnownPolicies: WellKnownPolicies,
         private readonly metadataRegistry: MetadataRegistry,
         private readonly randFactory: (s: string) => RandomDSL
@@ -54,6 +57,7 @@ export class CollectionServiceDsl implements CollectionService {
         const service = new CollectionServiceDsl(
             dependencies.database,
             dependencies.assetManagementService,
+            dependencies.identityService,
             dependencies.wellKnownPolicies,
             dependencies.metadataRegistry,
             dependencies.randFactory
