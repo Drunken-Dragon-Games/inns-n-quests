@@ -31,6 +31,8 @@ export interface IdentityService {
 
     listSessions(userId: string, logger?: LoggingContext): Promise<models.ListSessionsResult>
 
+    listAllUserIds(logger?: LoggingContext): Promise<string[]>
+
     signout(sessionId: string, logger?: LoggingContext): Promise<models.SignOutResult>
 
     resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, logger?: LoggingContext): Promise<models.ResolveUserResult>

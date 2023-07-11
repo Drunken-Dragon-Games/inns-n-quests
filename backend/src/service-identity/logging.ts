@@ -94,7 +94,14 @@ export class IdentityServiceLogging implements IdentityService {
 
     async getTotalUsers(logger?: LoggingContext ): Promise<number> {
         const serviceLogger = this.withComponent(logger)
-        const response = await this.base.getTotalUsers()
+        const response = await this.base.getTotalUsers(serviceLogger)
+        return response
+    }
+
+    async listAllUserIds(logger?: LoggingContext): Promise<string[]> {
+        const serviceLogger = this.withComponent(logger)
+        const response = await this.base.listAllUserIds(logger)
+        logger?.log.info(`Listed all users`)
         return response
     }
 

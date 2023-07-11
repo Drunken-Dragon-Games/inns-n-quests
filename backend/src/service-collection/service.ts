@@ -12,7 +12,8 @@ import { CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilt
 import { RandomDSL } from "./random-dsl/dsl"
 
 import { IdentityService } from "../service-identity"
-import * as contributionsDB from "./staking-contributions/contributions-db"
+import * as contributionsDB from "./staking-rewards/rewards-db"
+import { Records, Rewards } from "./staking-rewards/dsl"
 
 export type CollectionServiceDependencies = {
     database: Sequelize
@@ -131,8 +132,27 @@ export class CollectionServiceDsl implements CollectionService {
      * Intended to be called once a day.
      * Important: idempotent operation.
      */
-    updateGlobalDailyStakingContributions(logger?: LoggingContext): Promise<void> {
-        throw new Error("Method not implemented.")
+    async updateGlobalDailyStakingContributions(logger?: LoggingContext): Promise<void> {
+        const dailyRecord = await Records.createDaily()
+        if (dailyRecord.ctype !== "success") return
+        const userIds = await this.identityService.listAllUserIds(logger)
+        userIds.forEach(async (userId) => {
+            //Depending on how we decide to calculate the weakly earning this might be grealty optimized by not needing the metadata
+            const collection = await this.getCollectionWithUIMetadata(userId)
+            if (collection.ctype !== "success"){
+                logger?.log.error(`Getting collection returned: ${collection.error}`)
+                await Rewards.createDaily(userId, `pending because collection returned: ${collection.error}`)
+                return
+            }
+            else{
+                const rewardRecord = await Rewards.createDaily(userId)
+                if (rewardRecord.ctype !== "success") return
+                const dailyReward = Object.entries(collection.collection).reduce((acc, [_policyName, collectibles]) => {
+                    return acc + collectibles.reduce((acc, collectible) => {return acc + collectible.stakingContribution}, 0)
+                }, 0)
+                await Rewards.completeDaily(userId, dailyReward.toString())
+            }
+        })
     }
 
     /**
