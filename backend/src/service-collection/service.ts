@@ -169,7 +169,7 @@ export class CollectionServiceDsl implements CollectionService {
             }
         }))
     
-        const dailyRewardTotal = dailyRewards.reduce((total, reward) => total + reward, 0)
+        const dailyRewardTotal = dailyRewards.reduce((acc, reward) => acc + reward, 0)
         await Records.completeDaily(dailyRewardTotal.toString())
     }
     
@@ -179,8 +179,22 @@ export class CollectionServiceDsl implements CollectionService {
      * Intended to be called once a week after the daily contribution of that day.
      * Important: idempotent operation.
      */
-    grantGlobalWeeklyStakingGrant(logger?: LoggingContext): Promise<void> {
-        const weeklyRecord = Records.c
+    async grantGlobalWeeklyStakingGrant(logger?: LoggingContext): Promise<void> {
+        const weeklyRecord = await Records.createWeekly()
+        if (weeklyRecord.ctype !== "success") {
+            logger?.log.error(`Failed to create daily record beaocuse: ${weeklyRecord.error}`)
+            return
+        }
+        const pendingRewards = await Rewards.getCurrentWeekTotals()
+        const totalGranted = Object.entries(pendingRewards).reduce((acc, [userId, reward]) => {
+            this.assetManagementService.grant(userId, {
+                policyId: this.wellKnownPolicies.dragonSilver.policyId,
+                unit: "DragonSilver", 
+                quantity: reward.toString()
+            })
+            return acc + reward
+        }, 0)
+        await Records.completeWeekly(totalGranted.toString())
     }
 
     /**
