@@ -21,7 +21,7 @@ export const dailyRecordTableAttributes = {
         allowNull: true,
     },
     weeklyRecordId: {
-        type: DataTypes.UUID,
+        type: DataTypes.STRING,
         allowNull: true,
         references: {
             model: weeklyRecordsTableName,
@@ -49,16 +49,16 @@ export const weeklyRecordTableAttributes = {
 }
 
 export const configureSequelizeModel = (sequelize: Sequelize): void => {
-    DailyRecord.init(dailyRecordTableAttributes, {
-        sequelize,
-        modelName: "dailyRecord",
-        tableName: dailyRecordsTableName
-    })
-
     WeeklyRecord.init(weeklyRecordTableAttributes, {
         sequelize, 
         modelName: 'weeklyRecord', 
         tableName: weeklyRecordsTableName
+    })
+
+    DailyRecord.init(dailyRecordTableAttributes, {
+        sequelize,
+        modelName: "dailyRecord",
+        tableName: dailyRecordsTableName
     })
 
     WeeklyRecord.hasMany(DailyRecord, {

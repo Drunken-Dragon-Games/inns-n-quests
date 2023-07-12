@@ -26,7 +26,7 @@ export const dailyRewardTableAttributes = {
         allowNull: false
     },
     weeklyRewardId: {
-        type: DataTypes.UUID,
+        type: DataTypes.STRING,
         allowNull: true,
         references: {
             model: weeklyRewardsTableName,
@@ -59,17 +59,18 @@ export const weeklyRewardTableAttributes = {
 }
 
 export const configureSequelizeModel = (sequelize: Sequelize): void => {
+    WeeklyReward.init(weeklyRewardTableAttributes, {
+        sequelize, 
+        modelName: 'weeklyReward', 
+        tableName: weeklyRewardsTableName
+    })
+
     DailyReward.init(dailyRewardTableAttributes, {
         sequelize,
         modelName: "dailyReward",
         tableName: dailyRewardsTableName
     })
 
-    WeeklyReward.init(weeklyRewardTableAttributes, {
-        sequelize, 
-        modelName: 'weeklyReward', 
-        tableName: weeklyRewardsTableName
-    })
 
     WeeklyReward.hasMany(DailyReward, {
         foreignKey: "weeklyRewardId",

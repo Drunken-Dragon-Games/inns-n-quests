@@ -46,13 +46,13 @@ export interface IdentityServiceDependencies
 export class IdentityServiceDsl implements IdentityService {
 
     private readonly migrator: Umzug<QueryInterface>
+    cachedUsers: Users = {} as Users
 
     constructor(
         private readonly database: Sequelize,
         private readonly network: string,
         private readonly discordConfig: DiscordConfig,
-        private readonly sessions: Sessions,
-        private readonly cachedUsers: Users
+        private readonly sessions: Sessions
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -74,13 +74,11 @@ export class IdentityServiceDsl implements IdentityService {
     }
 
     static async loadFromConfig(servConfig: IdentityServiceConfig, dependencies: IdentityServiceDependencies): Promise<IdentityService> {
-        const cachedUsers = await Users.initWithCache()
         const service = new IdentityServiceLogging(new IdentityServiceDsl
             ( dependencies.database
             , servConfig.network
             , servConfig.discord
             , new Sessions(servConfig.sessions)
-            , cachedUsers
             ))
         await service.loadDatabaseModels()
         return service
@@ -92,6 +90,7 @@ export class IdentityServiceDsl implements IdentityService {
         cardanoDB.configureSequelizeModelTransactionVerification(this.database)
         sessionsDB.configureSequelizeModel(this.database)
         await this.migrator.up()
+        this.cachedUsers = await Users.initWithCache()
     }
 
     async unloadDatabaseModels(): Promise<void> {
@@ -216,11 +215,11 @@ export class IdentityServiceDsl implements IdentityService {
         return await Users.deassociateStakingAddress(userId, stakeAddress)
     }
 
-    async getTotalUsers(): Promise<number> {
+    async getTotalUsers(logger?: LoggingContext): Promise<number> {
         return await Users.total()
     }
 
-    async listAllUserIds(): Promise<string[]>{
+    async listAllUserIds(logger?: LoggingContext): Promise<string[]>{
         return this.cachedUsers.idsCache
     }
 

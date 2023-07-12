@@ -7,12 +7,14 @@ import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
 import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
+import { CollectionService } from "../service-collection"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
     blockchainService: BlockchainService
     governanceService: GovernanceService
+    collectionService: CollectionService
     wellKnownPolicies: WellKnownPolicies
 }
 
@@ -23,6 +25,7 @@ export class AccountServiceDsl implements AccountService {
         private readonly assetManagementService: AssetManagementService,
         private readonly blockchainService: BlockchainService,
         private readonly governanceService: GovernanceService,
+        private readonly collectionService: CollectionService,
         private readonly wellKnownPolicies: WellKnownPolicies,
     ){}
 
@@ -36,6 +39,7 @@ export class AccountServiceDsl implements AccountService {
             dependencies.assetManagementService,
             dependencies.blockchainService,
             dependencies.governanceService,
+            dependencies.collectionService,
             dependencies.wellKnownPolicies,
         )
         await service.loadDatabaseModels()

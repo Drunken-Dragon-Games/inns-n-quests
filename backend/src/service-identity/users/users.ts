@@ -11,9 +11,7 @@ export class Users {
 
     static async initWithCache(): Promise<Users>{
         const users = await User.findAll()
-
         const userIds = users.map(user => user.userId)
-
         return new Users(userIds)
     }
 
