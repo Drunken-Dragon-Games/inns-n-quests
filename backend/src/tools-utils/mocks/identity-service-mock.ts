@@ -33,4 +33,9 @@ export default class IdentityServiceMock {
         return jest.spyOn(this.service, "resolveUser")
             .mockReturnValueOnce(Promise.resolve(response))
     }
+
+    listAllUserIdsReturns(reponse: string[]){
+        return jest.spyOn(this.service, "listAllUserIds")
+            .mockReturnValueOnce(Promise.resolve(reponse))
+    }
 }

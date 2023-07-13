@@ -33,8 +33,14 @@ beforeEach(async () => {
         [testPolicies.adventurersOfThiolden.policyId]: [
             { unit: "AdventurerOfThiolden1", quantity: "1", chain: true },
             { unit: "AdventurerOfThiolden2", quantity: "1", chain: true },
+        ],
+        [testPolicies.dragonSilver.policyId]:[
+            {unit: "dragonSilver", quantity: "15", chain: true},
+            {unit: "dragonSilver", quantity: "10", chain: false}
         ]
     }})
+
+    identityService.listAllUserIdsReturns(["userId", "userId2"])
 
     service = await CollectionServiceDsl.loadFromConfig({}, {
         database: connectToDB(databaseConfig),
@@ -104,12 +110,12 @@ test("get Collection with Metadata ok", async () => {
         ],
         adventurersOfThiolden: [
             { assetRef: "AdventurerOfThiolden1", quantity: "1", type: "Character", stakingContribution: 1, 
-            splashArt: "https://cdn.ddu.gg/adv-of-thiolden/web/vimtyr_32_1.webp", 
+            splashArt: "https://cdn.ddu.gg/adv-of-thiolden/web/vimtyr_32_1.mp4", 
             miniature: "https://cdn.ddu.gg/adv-of-thiolden/x6/vimtyr-front-chroma.png", 
             name: "vimtyr The Whispering Axe", aps: [10,11,11], class: "Rogue", mortalRealmsActive: 0 },
             
             { assetRef: "AdventurerOfThiolden2", quantity: "1", type: "Character", stakingContribution: 1, 
-            splashArt: "https://cdn.ddu.gg/adv-of-thiolden/web/terrorhertz_32_1.webp", 
+            splashArt: "https://cdn.ddu.gg/adv-of-thiolden/web/terrorhertz_32_1.mp4", 
             miniature: "https://cdn.ddu.gg/adv-of-thiolden/x6/terrorhertz-front-chroma.png", 
             name: "terrorhertz Herald of the Drunken Dragon", aps: [10,11,11], class: "Bard", mortalRealmsActive: 0 },
         ]

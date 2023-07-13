@@ -141,7 +141,7 @@ export class CollectionServiceDsl implements CollectionService {
     async updateGlobalDailyStakingContributions(logger?: LoggingContext): Promise<void> {
         const dailyRecord = await Records.createDaily()
         if (dailyRecord.ctype !== "success") {
-            logger?.log.error(`Failed to create daily record beaocuse: ${dailyRecord.error}`)
+            logger?.log.error(`Failed to create daily record because: ${dailyRecord.error}`)
             return
         }
         const userIds = await this.identityService.listAllUserIds(logger)
@@ -193,6 +193,7 @@ export class CollectionServiceDsl implements CollectionService {
             })
             return acc + reward
         }, 0)
+        //i need to maintain the rewards and the records relationship
         await Records.completeWeekly(totalGranted.toString())
     }
 
@@ -300,7 +301,7 @@ export class CollectionServiceDsl implements CollectionService {
             this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
         return {
             miniature:`https://cdn.ddu.gg/adv-of-thiolden/x6/${finalName}-front-${chromaOrPlain}.png`,
-            splashArt: `https://cdn.ddu.gg/adv-of-thiolden/web/${finalName}_${aps}_${chromaOrPlain == "chroma" ? 1 : 0}.webp`,
+            splashArt: `https://cdn.ddu.gg/adv-of-thiolden/web/${finalName}_${aps}_${chromaOrPlain == "chroma" ? 1 : 0}.${chromaOrPlain == "chroma" || finalName =="rei" || finalName == "thelas" || finalName == "arin" ? "mp4" : "webp"}`,
             adventurerName,
         }
     }
