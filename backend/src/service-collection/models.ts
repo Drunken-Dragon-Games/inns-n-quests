@@ -32,5 +32,5 @@ export type PolicyCollectibles<A extends object> = (Collectible & A)[]
 export type Collection<A extends object> = { 
     pixelTiles: PolicyCollectibles<A>,
     adventurersOfThiolden: PolicyCollectibles<A>,
-    grandmasterAdventurers: PolicyCollectibles<A>,
+    grandMasterAdventurers: PolicyCollectibles<A>,
 }

@@ -56,14 +56,13 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
         password: config.stringOrError("DB_PASSWORD"),
         database: config.stringOrError("DB_DATABASE"),
     })
-    const randFactory = RandomDSL.seed
     const blockchainService = BlockchainServiceDsl.loadFromEnv()
     const evenstatsService = await EvenstatsServiceDsl.loadFromEnv({ database })
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const governanceService = await GovernanceServiceDsl.loadFromEnv({database})
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService, blockchainService })
-    const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry, randFactory})
+    const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry})
     const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, blockchainService, governanceService,collectionService, wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService, idleQuestsService })

@@ -8,7 +8,7 @@ import { MetadataRegistry, WellKnownPolicies } from "../tools-assets"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
-import { CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles } from "./models"
+import { Collectible, CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles } from "./models"
 import { RandomDSL } from "./random-dsl/dsl"
 
 import { IdentityService } from "../service-identity"
@@ -21,7 +21,6 @@ export type CollectionServiceDependencies = {
     identityService: IdentityService,
     wellKnownPolicies: WellKnownPolicies
     metadataRegistry: MetadataRegistry
-    randFactory: (s: string) => RandomDSL
 }
 
 export type CollectionServiceConfig = {
@@ -43,8 +42,7 @@ export class CollectionServiceDsl implements CollectionService {
         private readonly assetManagementService: AssetManagementService,
         private readonly identityService: IdentityService,
         private readonly wellKnownPolicies: WellKnownPolicies,
-        private readonly metadataRegistry: MetadataRegistry,
-        private readonly randFactory: (s: string) => RandomDSL
+        private readonly metadataRegistry: MetadataRegistry
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -61,7 +59,6 @@ export class CollectionServiceDsl implements CollectionService {
             dependencies.identityService,
             dependencies.wellKnownPolicies,
             dependencies.metadataRegistry,
-            dependencies.randFactory
         )
         await service.loadDatabaseModels()
         return service
@@ -74,6 +71,10 @@ export class CollectionServiceDsl implements CollectionService {
 
     async unloadDatabaseModels(): Promise<void> {
         await this.migrator.down()
+    }
+
+    async closeDatabaseConnection() {
+        await this.database.close();
     }
 
     /**
@@ -91,12 +92,13 @@ export class CollectionServiceDsl implements CollectionService {
 
         if (assetList.status !== "ok") return {ctype: "failure", error:assetList.status }
 
-        const processAssets = (policyId: string, assets: any): Collection<{}> => 
-        assets.map((asset: any) => ({
-            assetRef: asset.unit,
-            quantity: asset.quantity,
-            type: this.getCollectionType(policyId, asset.unit)
-        }))
+        const processAssets = (policyId: string, assets: {unit: string,quantity: string,chain: boolean}[]): PolicyCollectibles<{}> => {
+            return assets.reduce((acc, asset) => {
+                acc.push({assetRef: asset.unit, quantity: asset.quantity, type: this.getCollectionType(policyId, asset.unit)})
+                return acc
+            }, [] as PolicyCollectibles<{}>)
+            
+        }
 
         const collection: Collection<{}> = relevantPolicies.reduce((acc, policy) => {
             const policyId = this.wellKnownPolicies[policy].policyId
@@ -318,7 +320,8 @@ export class CollectionServiceDsl implements CollectionService {
                 const armor = parseInt(this.metadataRegistry.gmasMetadata[assetRef].armor)
                 const weapon = parseInt(this.metadataRegistry.gmasMetadata[assetRef].weapon)
                 const targetAPSSum = Math.round((armor + weapon) * 30 / 10)
-                const deterministicRand = this.randFactory(assetRef)
+                //const deterministicRand = this.randFactory(assetRef)
+                const deterministicRand = RandomDSL.seed(assetRef)
                 return this.newRandAPS(targetAPSSum, deterministicRand)
             case "adventurersOfThiolden":
                 const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
