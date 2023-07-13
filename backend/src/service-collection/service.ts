@@ -256,12 +256,12 @@ export class CollectionServiceDsl implements CollectionService {
             case "pixelTiles":{
                  const name = this.metadataRegistry.pixelTilesMetadata[assetRef].name
                  const { miniature, assetClass } = assetType === "Furniture" 
-                    ? { miniature: `https://cdn.ddu.gg/pixeltiles/x4/${name}.png`, assetClass: "furniture" }
+                    ? { miniature: `https://cdn.ddu.gg/pixeltiles/x4/${assetRef}.png`, assetClass: "furniture" }
                     : parseNonFurniturePixelTile(name)
      
                  return {
                     name, miniature,
-                    splashArt: `https://cdn.ddu.gg/pixeltiles/xl/${name}.png`,
+                    splashArt: `https://cdn.ddu.gg/pixeltiles/xl/${assetRef}.png`,
                     class: assetClass,
                     mortalRealmsActive: 0
                  }
@@ -276,19 +276,19 @@ export class CollectionServiceDsl implements CollectionService {
                 }
             }
             case "adventurersOfThiolden": {
-                const {miniature, splashArt} = this.advOfThioldenSprites(assetRef)
+                const {miniature, splashArt, adventurerName} = this.advOfThioldenSprites(assetRef)
                 return {
-                    name: `${assetRef} ${this.metadataRegistry.advOfThioldenGameMetadata[assetRef].Title}`,
+                    name: `${adventurerName} ${this.metadataRegistry.advOfThioldenGameMetadata[adventurerName].Title}`,
                     splashArt,
                     miniature,
-                    class: this.metadataRegistry.advOfThioldenGameMetadata[assetRef]["Game Class"],
+                    class: this.metadataRegistry.advOfThioldenGameMetadata[adventurerName]["Game Class"],
                     mortalRealmsActive: 0
                 }
             }
         }
     }
 
-    private advOfThioldenSprites = (assetRef: string): {miniature: string, splashArt: string} => {
+    private advOfThioldenSprites = (assetRef: string): {miniature: string, splashArt: string, adventurerName: string,} => {
         const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
         const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
         const chromaOrPlain = this.metadataRegistry.advOfThioldenAppMetadata[idx].chr ? "chroma" : "plain"
@@ -300,7 +300,8 @@ export class CollectionServiceDsl implements CollectionService {
             this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
         return {
             miniature:`https://cdn.ddu.gg/adv-of-thiolden/x6/${finalName}-front-${chromaOrPlain}.png`,
-            splashArt: `https://cdn.ddu.gg/adv-of-thiolden/web/${finalName}_${aps}_${chromaOrPlain == "chroma" ? 1 : 0}.webp`
+            splashArt: `https://cdn.ddu.gg/adv-of-thiolden/web/${finalName}_${aps}_${chromaOrPlain == "chroma" ? 1 : 0}.webp`,
+            adventurerName,
         }
     }
 

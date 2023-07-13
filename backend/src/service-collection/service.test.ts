@@ -5,7 +5,7 @@ import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-se
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock"
 import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registry"
 import { testPolicies } from "../tools-utils/mocks/test-policies"
-import { Collection } from "./models"
+import { CollectibleMetadata, CollectibleStakingInfo, Collection } from "./models"
 
 let service: CollectionService
 
@@ -55,8 +55,7 @@ test("get Collection ok", async () => {
         expect(collectionResult.ctype).toEqual("success")
         return
     }
-    console.log(collectionResult.collection)
-    const expectedColelction: Collection<{}> = {
+    const expectedCollection: Collection<{}> = {
         pixelTiles: [
             {assetRef:"PixelTile1", quantity: "2", type: "Character" },
             {assetRef:"PixelTile2", quantity: "3", type: "Furniture"}
@@ -71,9 +70,50 @@ test("get Collection ok", async () => {
         ]
     }
 
-    expect(collectionResult.collection).toEqual(expectedColelction)
+    expect(collectionResult.collection).toEqual(expectedCollection)
 })
 
 test("get Collection with Metadata ok", async () => {
-    expect(1).toEqual(1)
+    const collectionResult = await service.getCollectionWithUIMetadata("userId")
+    if (collectionResult.ctype !== "success"){
+        expect(collectionResult.ctype).toEqual("success")
+        return
+    }
+    const expectedCollection: Collection<CollectibleStakingInfo & CollectibleMetadata> = {
+        pixelTiles: [
+            {assetRef:"PixelTile1", quantity: "2", type: "Character", stakingContribution: 1, 
+            splashArt: "https://cdn.ddu.gg/pixeltiles/xl/PixelTile1.png", 
+            miniature: "https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_1.png", 
+            name: "PixelTile #1 Rogue", aps: [4,4,4], class: "Rogue", mortalRealmsActive: 0 },
+            
+            {assetRef:"PixelTile2", quantity: "3", type: "Furniture", stakingContribution: 1, 
+            splashArt: "https://cdn.ddu.gg/pixeltiles/xl/PixelTile2.png", 
+            miniature: "https://cdn.ddu.gg/pixeltiles/x4/PixelTile2.png", 
+            name: "PixelTile #2 Table", aps: [6,6,6], class: "furniture", mortalRealmsActive: 0}
+    ],
+        grandMasterAdventurers: [
+            {assetRef: "GrandmasterAdventurer1", quantity: "1", type: "Character", stakingContribution: 1, 
+            splashArt: "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif", 
+            miniature: "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer1.png", 
+            name: "Grandmaster Adventurer #1", aps: [8,9,4], class: "Ranger", mortalRealmsActive: 0},
+            
+            {assetRef: "GrandmasterAdventurer2", quantity: "1", type: "Character", stakingContribution: 1, 
+            splashArt: "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer2.gif", 
+            miniature: "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer2.png", 
+            name: "Grandmaster Adventurer #2", aps: [1,6,2], class: "Paladin", mortalRealmsActive: 0 },
+        ],
+        adventurersOfThiolden: [
+            { assetRef: "AdventurerOfThiolden1", quantity: "1", type: "Character", stakingContribution: 1, 
+            splashArt: "https://cdn.ddu.gg/adv-of-thiolden/web/vimtyr_32_1.webp", 
+            miniature: "https://cdn.ddu.gg/adv-of-thiolden/x6/vimtyr-front-chroma.png", 
+            name: "vimtyr The Whispering Axe", aps: [10,11,11], class: "Rogue", mortalRealmsActive: 0 },
+            
+            { assetRef: "AdventurerOfThiolden2", quantity: "1", type: "Character", stakingContribution: 1, 
+            splashArt: "https://cdn.ddu.gg/adv-of-thiolden/web/terrorhertz_32_1.webp", 
+            miniature: "https://cdn.ddu.gg/adv-of-thiolden/x6/terrorhertz-front-chroma.png", 
+            name: "terrorhertz Herald of the Drunken Dragon", aps: [10,11,11], class: "Bard", mortalRealmsActive: 0 },
+        ]
+    }
+
+    expect(collectionResult.collection).toEqual(expectedCollection)
 })
