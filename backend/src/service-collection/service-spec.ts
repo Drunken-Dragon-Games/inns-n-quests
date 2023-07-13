@@ -8,8 +8,6 @@ export interface CollectionService {
 
     unloadDatabaseModels(): Promise<void>
 
-    closeDatabaseConnection(): Promise<void>
-
     /**
      * Returns the collection with each asset's quantity and no extra information.
      * Intended to be used on other services like the idle-quests-service.

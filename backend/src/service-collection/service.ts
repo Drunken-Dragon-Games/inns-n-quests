@@ -71,10 +71,7 @@ export class CollectionServiceDsl implements CollectionService {
 
     async unloadDatabaseModels(): Promise<void> {
         await this.migrator.down()
-    }
-
-    async closeDatabaseConnection() {
-        await this.database.close();
+        await this.database.close()
     }
 
     /**

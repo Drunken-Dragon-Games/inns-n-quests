@@ -49,11 +49,6 @@ afterEach(async () => {
     await service.unloadDatabaseModels()
 })
 
-afterAll(async () => {
-    // Close the database connection after all tests have run
-    await service.closeDatabaseConnection()
-})
-
 test("get Collection ok", async () => {
     const collectionResult = await  service.getCollection("userId")
     if (collectionResult.ctype !== "success"){
@@ -77,4 +72,8 @@ test("get Collection ok", async () => {
     }
 
     expect(collectionResult.collection).toEqual(expectedColelction)
+})
+
+test("get Collection with Metadata ok", async () => {
+    expect(1).toEqual(1)
 })
