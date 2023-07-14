@@ -12,15 +12,18 @@ import { Collectible, CollectibleMetadata, CollectibleStakingInfo, Collection, C
 import { RandomDSL } from "./random-dsl/dsl"
 
 import { IdentityService } from "../service-identity"
-import * as contributionsDB from "./staking-rewards/rewards-db"
+import * as rewardsDB from "./staking-rewards/rewards-db"
+import * as recordsDB from "./staking-rewards/records-db"
 import { Records, Rewards } from "./staking-rewards/dsl"
+import { Calendar } from "../tools-utils/calendar"
 
 export type CollectionServiceDependencies = {
     database: Sequelize
     assetManagementService: AssetManagementService,
     identityService: IdentityService,
     wellKnownPolicies: WellKnownPolicies
-    metadataRegistry: MetadataRegistry
+    metadataRegistry: MetadataRegistry,
+    calendar: Calendar
 }
 
 export type CollectionServiceConfig = {
@@ -36,16 +39,21 @@ const policyIndexMapper: Record<CollectionPolicyNames, typeof relevantPolicies[n
 export class CollectionServiceDsl implements CollectionService {
 
     private readonly migrator: Umzug<QueryInterface>
+    private readonly rewards: Rewards
+    private readonly records: Records
 
     constructor(
         private readonly database: Sequelize,
         private readonly assetManagementService: AssetManagementService,
         private readonly identityService: IdentityService,
         private readonly wellKnownPolicies: WellKnownPolicies,
-        private readonly metadataRegistry: MetadataRegistry
+        private readonly metadataRegistry: MetadataRegistry,
+        calendar: Calendar,
     ) {
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
+        this.rewards = new Rewards(calendar)
+        this.records = new Records(calendar)
     }
 
     static async loadFromEnv(dependencies: CollectionServiceDependencies): Promise<CollectionServiceDsl> {
@@ -59,13 +67,15 @@ export class CollectionServiceDsl implements CollectionService {
             dependencies.identityService,
             dependencies.wellKnownPolicies,
             dependencies.metadataRegistry,
+            dependencies.calendar,
         )
         await service.loadDatabaseModels()
         return service
     }
 
     async loadDatabaseModels(): Promise<void> {
-        contributionsDB.configureSequelizeModel(this.database)
+        rewardsDB.configureSequelizeModel(this.database)
+        recordsDB.configureSequelizeModel(this.database)
         await this.migrator.up()
     }
 
@@ -128,7 +138,7 @@ export class CollectionServiceDsl implements CollectionService {
         const invDragonSilver = assetList.inventory[this.wellKnownPolicies.dragonSilver.policyId]
         const dragonSilver = invDragonSilver?.find(a => a.chain)?.quantity ?? "0"
         const dragonSilverToClaim = invDragonSilver?.find(a => !a.chain)?.quantity ?? "0"
-        const weeklyAccumulated = (await Rewards.getWeeklyAccumulated(userId)).toString()
+        const weeklyAccumulated = (await this.rewards.getWeeklyAccumulated(userId)).toString()
         return {ctype: "success", weeklyAccumulated, dragonSilverToClaim, dragonSilver}
 
     }
@@ -139,7 +149,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Important: idempotent operation.
      */
     async updateGlobalDailyStakingContributions(logger?: LoggingContext): Promise<void> {
-        const dailyRecord = await Records.createDaily()
+        const dailyRecord = await this.records.createDaily()
         if (dailyRecord.ctype !== "success") {
             logger?.log.error(`Failed to create daily record because: ${dailyRecord.error}`)
             return
@@ -151,11 +161,11 @@ export class CollectionServiceDsl implements CollectionService {
             const collection = await this.getCollectionWithUIMetadata(userId)
             if (collection.ctype !== "success"){
                 logger?.log.error(`Getting collection returned: ${collection.error}`)
-                await Rewards.createDaily(userId, `pending because collection returned: ${collection.error}`)
+                await this.rewards.createDaily(userId, `pending because collection returned: ${collection.error}`)
                 return 0
             }
             else{
-                const rewardRecord = await Rewards.createDaily(userId)
+                const rewardRecord = await this.rewards.createDaily(userId)
                 if (rewardRecord.ctype !== "success") {
                     logger?.log.error(`Failed to create daily reward record becaouse: ${rewardRecord.error}.`)
                     return 0
@@ -163,13 +173,13 @@ export class CollectionServiceDsl implements CollectionService {
                 const dailyReward = Object.entries(collection.collection).reduce((acc, [_policyName, collectibles]) => {
                     return acc + collectibles.reduce((acc, collectible) => {return acc + collectible.stakingContribution}, 0)
                 }, 0)
-                await Rewards.completeDaily(userId, dailyReward.toString())
+                await this.rewards.completeDaily(userId, dailyReward.toString())
                 return dailyReward
             }
         }))
     
         const dailyRewardTotal = dailyRewards.reduce((acc, reward) => acc + reward, 0)
-        await Records.completeDaily(dailyRewardTotal.toString())
+        await this.records.completeDaily(dailyRewardTotal.toString())
     }
     
 
@@ -179,12 +189,12 @@ export class CollectionServiceDsl implements CollectionService {
      * Important: idempotent operation.
      */
     async grantGlobalWeeklyStakingGrant(logger?: LoggingContext): Promise<void> {
-        const weeklyRecord = await Records.createWeekly()
+        const weeklyRecord = await this.records.createWeekly()
         if (weeklyRecord.ctype !== "success") {
             logger?.log.error(`Failed to create daily record beaocuse: ${weeklyRecord.error}`)
             return
         }
-        const pendingRewards = await Rewards.getCurrentWeekTotals()
+        const pendingRewards = await this.rewards.getCurrentWeekTotals()
         const totalGranted = Object.entries(pendingRewards).reduce((acc, [userId, reward]) => {
             this.assetManagementService.grant(userId, {
                 policyId: this.wellKnownPolicies.dragonSilver.policyId,
@@ -194,7 +204,7 @@ export class CollectionServiceDsl implements CollectionService {
             return acc + reward
         }, 0)
         //i need to maintain the rewards and the records relationship
-        await Records.completeWeekly(totalGranted.toString())
+        await this.records.completeWeekly(totalGranted.toString())
     }
 
     /**

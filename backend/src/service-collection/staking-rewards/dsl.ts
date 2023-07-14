@@ -2,10 +2,13 @@ import { Op, Transaction } from "sequelize"
 import { SResult } from "../../tools-utils"
 import { DailyRecord, WeeklyRecord } from "./records-db"
 import { DailyReward, WeeklyReward } from "./rewards-db"
+import { Calendar } from "../../tools-utils/calendar"
 
 export class Rewards {
-    static async createDaily(userId: string, error?: string): Promise<SResult<{}>>{
-        const today = new Date().toISOString().split('T')[0]
+
+    constructor(private readonly calendar: Calendar){}
+    async createDaily(userId: string, error?: string): Promise<SResult<{}>>{
+        const today = this.calendar.now().toISOString().split('T')[0]
         const dailyRewardId = `${userId}-${today}`
         const existingReward = await DailyReward.findOne({
             where: {dailyRewardId}
@@ -15,8 +18,8 @@ export class Rewards {
         return {ctype: "success"}
     }
 
-    static async completeDaily(userId: string, reward: string): Promise<SResult<{}>>{
-        const today = new Date().toISOString().split('T')[0]
+    async completeDaily(userId: string, reward: string): Promise<SResult<{}>>{
+        const today = this.calendar.now().toISOString().split('T')[0]
         const dailyRewardId = `${userId}-${today}`
         const existingRewardRecord = await DailyReward.findOne({
             where: {dailyRewardId}
@@ -28,8 +31,8 @@ export class Rewards {
         return {ctype: "success"}
     }
 
-    static async getWeeklyAccumulated(userId: string){
-        const now = new Date()
+    async getWeeklyAccumulated(userId: string){
+        try{const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
         const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber, now.getUTCFullYear())
         const dailyRewards = await DailyReward.findAll({
@@ -41,11 +44,15 @@ export class Rewards {
             }
         })
 
-        return dailyRewards.reduce((acc, dailyReward) => acc + Number(dailyReward.reward), 0)   
+        return dailyRewards.reduce((acc, dailyReward) => acc + Number(dailyReward.reward), 0) } 
+        catch(e: any){
+            console.log(e)
+            return 0
+        }
     }
 
-    static async createWeekly(userId: string, transaction: Transaction): Promise<SResult<{}>>{
-        const now = new Date()
+    async createWeekly(userId: string, transaction: Transaction): Promise<SResult<{}>>{
+        const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
         const year = now.getUTCFullYear()
         const weeklyRewardId = `${userId}-${weekNumber}-${year}`;
@@ -57,8 +64,8 @@ export class Rewards {
         return {ctype: "success"}
     }
 
-    static async completeWeekly(userId: string, reward: string, transaction: Transaction): Promise<SResult<{}>>{
-        const now = new Date()
+    async completeWeekly(userId: string, reward: string, transaction: Transaction): Promise<SResult<{}>>{
+        const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
         const year = now.getUTCFullYear()
         const weeklyRewardId = `${userId}-${weekNumber}-${year}`
@@ -72,8 +79,8 @@ export class Rewards {
         return {ctype: "success"}
     }
 
-    static async getCurrentWeekTotals(): Promise<{[userId: string]: number}> {
-        const now = new Date()
+    async getCurrentWeekTotals(): Promise<{[userId: string]: number}> {
+        const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
         const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber, now.getUTCFullYear())
         const dailyRewards = await DailyReward.findAll({
@@ -91,8 +98,10 @@ export class Rewards {
 }
 
 export class Records {
-    static async createDaily(): Promise<SResult<{}>>{
-        const dailyRecordId = new Date().toISOString().split('T')[0]
+
+    constructor(private readonly calendar: Calendar){}
+    async createDaily(): Promise<SResult<{}>>{
+        const dailyRecordId = this.calendar.now().toISOString().split('T')[0]
         const existingRecord = await DailyRecord.findOne({
             where: {dailyRecordId}
         })
@@ -101,8 +110,8 @@ export class Records {
         return {ctype: "success"}
     }
 
-    static async completeDaily(rewardTotal: string): Promise<SResult<{}>>{
-        const dailyRecordId = new Date().toISOString().split('T')[0]
+    async completeDaily(rewardTotal: string): Promise<SResult<{}>>{
+        const dailyRecordId = this.calendar.now().toISOString().split('T')[0]
         const existingRecord = await DailyRecord.findOne({
             where: {dailyRecordId}
         })
@@ -113,8 +122,8 @@ export class Records {
         return {ctype: "success"}
     }
 
-    static async createWeekly(): Promise<SResult<{}>>{
-        const now = new Date()
+    async createWeekly(): Promise<SResult<{}>>{
+        const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
         const year = now.getUTCFullYear()
         const weeklyRecordId = `${weekNumber}-${year}`
@@ -126,8 +135,8 @@ export class Records {
         return {ctype: "success"}
     }
 
-    static async completeWeekly(rewardTotal: string): Promise<SResult<{}>>{
-        const now = new Date()
+    async completeWeekly(rewardTotal: string): Promise<SResult<{}>>{
+        const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
         const year = now.getUTCFullYear()
         const weeklyRecordId = `${weekNumber}-${year}`

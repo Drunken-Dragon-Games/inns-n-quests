@@ -40,7 +40,7 @@ beforeEach(async () => {
         ]
     }})
 
-    identityService.listAllUserIdsReturns(["userId", "userId2"])
+    identityService.listAllUserIdsReturns(["b1925e1f-6820-4155-a917-fa68873906a7", "962b8c9c-2c59-4935-a6e6-57e1f72b85e1"])
 
     service = await CollectionServiceDsl.loadFromConfig({}, {
         database: connectToDB(databaseConfig),
@@ -122,4 +122,23 @@ test("get Collection with Metadata ok", async () => {
     }
 
     expect(collectionResult.collection).toEqual(expectedCollection)
+})
+
+test("get Passsive staking Info", async () => {
+    const pasiveInfo = await service.getPassiveStakingInfo("18e099c5-06d2-4efa-aacf-e087658aab2f")
+    if (pasiveInfo.ctype !== "success"){
+        expect(pasiveInfo.ctype).toEqual("success")
+        return
+    }
+    const expectedInfo = {
+        ctype: "success",
+        weeklyAccumulated: "0", 
+        dragonSilverToClaim: "10", 
+        dragonSilver: "15"}
+
+    expect(pasiveInfo).toEqual(expectedInfo)
+})
+
+test("update and get passive staking Info", async () => {
+    await service.updateGlobalDailyStakingContributions()
 })
