@@ -89,6 +89,11 @@ const IdleQuestsApi = {
     async setInnState(state: { name?: string, objectLocations?: ObjectsLocations}): Promise<void> {
         await IdleQuestsRequestWRefresh("post", "/set-inn-state", state)
     },
+
+    async getInnStateForGuests(host: string): Promise<GetInventoryResult> {
+        const response = await IdleQuestsRequestWRefresh("post", "/host/inn-state", {host})
+        return response.data
+    },
 }
 
 export default IdleQuestsApi
@@ -97,7 +102,7 @@ async function IdleQuestsRequestWRefresh<ReqData = any, ResData = any>(method: M
     return await withTokenRefresh(() => IdleQuestsRequest(method, endpoint, data))
 }
 
-async function IdleQuestsRequest<ReqData = any, ResData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
+async function IdleQuestsRequest<ReqData = any, ResData = any>(method: Method, endpoint: string, data?: ReqData, credentials?: boolean): Promise<AxiosResponse<ResData>> {
     const traceId = v4()
     const baseURL = urljoin(process.env["NEXT_PUBLIC_API_BASE_HOSTNAME"] ?? "http://localhost:5000", "/api/quests")
     //if (baseURL.includes("acceptance.") || baseURL.includes("testnet.") || baseURL.includes("localhost")) 
@@ -113,7 +118,7 @@ async function IdleQuestsRequest<ReqData = any, ResData = any>(method: Method, e
             "Trace-ID": traceId
         },
         timeout: 10000,
-        withCredentials: true,
+        withCredentials: credentials ?? true,
     })
 }
 

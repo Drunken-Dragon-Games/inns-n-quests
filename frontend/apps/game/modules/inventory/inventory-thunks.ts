@@ -26,6 +26,16 @@ const InventoryThunks = {
         }
     },
 
+    getInnStateForGuests: (host: string): InventoryThunk => async (dispatch) => {
+        const response = await IdleQuestsApi.getInnStateForGuests(host)
+        if (response.status == "ok") {
+            dispatch(actions.setInventory(response.inventory))
+            OverworldApi.setInitialInnState(response.inventory)
+        } else if (response.status == "unknown-user") {
+            NotificationsApi.notify(`Unknown host: ${host}`, "alert")
+        }
+    },
+
     takeAvailableQuest: (quest: AvailableStakingQuest, characters: Character[]): InventoryThunk  => async (dispatch) => {
         const response = await IdleQuestsApi.takeAvailableStakingQuest(quest, characters)
         if (response.status == "ok") {

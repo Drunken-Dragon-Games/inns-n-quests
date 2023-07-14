@@ -37,19 +37,25 @@ const OverworldModule = styled(OverworldView)`
     z-index: 1;
 `
 
-const IdleQuestsView = () => {
+const IdleQuestsView = ({ host }: { host?: string }) => {
     const isMobile = useIsMobile()
     if (isMobile && typeof window !== "undefined") window.screen.orientation.lock('landscape')
 
     useIdleQuestsKeyMap()
     return (
         <IdleQuestsContainer>
-            <DragNDropView />
-            <OverworldModule />
-            <HudModule />
-            <NotificationsModule />
-            <QuestBoardModule />
-            <InventoryModule /> 
+            { host ? <>
+                <OverworldModule />
+                <NotificationsModule />
+                <InventoryModule host={host} /> 
+            </> : <>
+                <DragNDropView />
+                <OverworldModule />
+                <HudModule />
+                <NotificationsModule />
+                <QuestBoardModule />
+                <InventoryModule /> 
+            </>}
             {/* <AlphaNotes /> */}
         </IdleQuestsContainer>
     )

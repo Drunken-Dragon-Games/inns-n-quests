@@ -42,6 +42,8 @@ export interface IdleQuestsService {
 
     setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void>
 
+    getInnStateForGuests(host: string, logger?: LoggingContext): Promise<GetInnStateForGuestsResult>
+
     getStakingQuestLeaderboard(size: number, start: Date, end?: Date): Promise<models.Leaderboard>
 }
 
@@ -96,3 +98,9 @@ export type ClaimStakingQuestResult
     | { status: "quest-already-claimed" }
     | { status: "quest-not-finished" }
     | { status: "missing-adventurers", missing: string[] }
+
+/** Player State */
+
+export type GetInnStateForGuestsResult
+    = { status: "ok", inventory: models.IdleQuestsInventory }
+    | { status: "unknown-user" }

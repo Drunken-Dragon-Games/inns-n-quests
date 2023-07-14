@@ -5,7 +5,7 @@ import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
 import { HealthStatus } from "../tools-utils"
-import { AcceptEncounterResult, AcceptStakingQuestResult, ClaimEncounterResult, ClaimStakingQuestResult, GetActiveEncountersResult, GetAvailableEncountersResult, GetAvailableStakingQuestsResult, GetInventoryResult, GetTakenStakingQuestsResult, IdleQuestsService } from "./service-spec"
+import { AcceptEncounterResult, AcceptStakingQuestResult, ClaimEncounterResult, ClaimStakingQuestResult, GetActiveEncountersResult, GetAvailableEncountersResult, GetAvailableStakingQuestsResult, GetInnStateForGuestsResult, GetInventoryResult, GetTakenStakingQuestsResult, IdleQuestsService } from "./service-spec"
 
 import { CharacterDBInfo, CharacterState } from "./state/character-state"
 import { ActiveEncounterDBInfo, ActiveEncounterState } from './state/encounter-state'
@@ -24,12 +24,14 @@ import * as vm from "./game-vm"
 import { testEncounter } from "./game-vm"
 import { AvailableStakingQuestState } from "./state/available-staking-quests-state"
 import { Leaderboard } from "./models"
+import { IdentityService } from "../service-identity"
 
 export interface IdleQuestServiceDependencies 
     { randomSeed: string
     , calendar: Calendar
     , database: Sequelize
     , evenstatsService: EvenstatsService
+    , identityService: IdentityService
     , assetManagementService: AssetManagementService
     , questsRegistry: StakingQuestRegistry
     , metadataRegistry: MetadataRegistry
@@ -51,6 +53,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         private readonly calendar: Calendar,
         private readonly database: Sequelize,
         private readonly evenstatsService: EvenstatsService,
+        private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
         private readonly questsRegistry: StakingQuestRegistry,
         private readonly metadataRegistry: MetadataRegistry,
@@ -79,6 +82,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             dependencies.calendar,
             dependencies.database,
             dependencies.evenstatsService,
+            dependencies.identityService,
             dependencies.assetManagementService,
             dependencies.questsRegistry,
             dependencies.metadataRegistry,
@@ -397,6 +401,12 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     async setInnState(userId: string, name?: string, objectLocations?: vm.ObjectsLocations, logger?: LoggingContext): Promise<void> {
         if (!name && !objectLocations) return
         await SectorState.setPlayerInnState(userId, name, objectLocations)
+    }
+
+    async getInnStateForGuests(host: string, logger?: LoggingContext): Promise<GetInnStateForGuestsResult> {
+        const user = await this.identityService.resolveUser({ ctype: "nickname", nickname: host })
+        if (user.status != "ok") return { status: "unknown-user" }
+        return await this.getInventory(user.info.userId, logger)
     }
 
     async normalizeSingleAssetStatus(userId: string, asset:{ctype: "ref", assetRef: string} | {ctype: "id", assetId: string}, logger?: LoggingContext | undefined): Promise<{status: "ok"} | {status: "failed", reason: string}> {
