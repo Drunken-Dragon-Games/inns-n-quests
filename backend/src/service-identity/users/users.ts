@@ -1,9 +1,10 @@
 import { User, UserStakeAdress } from "./users-db";
 import { generateIdentenfier, generateRandomNickname } from "./utils";
-import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
+import { DiscordConfig, DiscordTokens, checkValidDiscordRefresh, genDiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
 import { UserInfo, UserFullInfo, DeassociationResult } from "../models";
 import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
 import { LoggingContext } from "../../tools-tracing";
+import { Op } from "sequelize";
 
 export class Users {
 
@@ -174,5 +175,25 @@ export class Users {
 
     static total = async () => {
         return await User.count()
+    }
+
+    static migrationFixDiscordUsernameInDB = async (discordConfig: DiscordConfig) => {
+        const users = await User.findAll({ where: { discordUserName: { [Op.notLike]: "%#%" } }, attributes: ["userId", "discordRefreshToken"] })
+        for (const user of users) {
+            const newTokens = await checkValidDiscordRefresh(user.discordRefreshToken, discordConfig)
+            if (newTokens.ctype == "failure") {
+                console.log(`Could not refresh tokens for user ${user.userId}!!!`)
+                continue
+            }
+            const discordUserInfo = await getUserInfoFromBearerToken(genDiscordTokens(newTokens.result).discordBearerToken)
+            if (discordUserInfo.ctype == "failure") {
+                console.log(`Could not get info for user ${user.userId}!!!`)
+                continue
+            }
+            user.discordUserName = discordUserInfo.result.discordName
+            user.discordRefreshToken = newTokens.result.refresh_token
+            await user.save()
+        }
+        console.log(users)
     }
 }

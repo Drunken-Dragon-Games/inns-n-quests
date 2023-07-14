@@ -153,4 +153,11 @@ export class IdentityServiceLogging implements IdentityService {
         serviceLogger?.info(`user update status: ${response.status}`)
         return response
     }
+
+    async migrationFixDiscordUsernameInDB(logger?: LoggingContext): Promise<void> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info("fixing discord usernames in db")
+        await this.base.migrationFixDiscordUsernameInDB(serviceLogger)
+        serviceLogger?.info("finished fixing discord usernames in db")
+    }
 }

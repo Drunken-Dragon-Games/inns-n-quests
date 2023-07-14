@@ -32,7 +32,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
 
-(async () => {
+const runServer = async () => {
     console.log("Starting backend...")
     dotenv.config()
     const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
@@ -70,4 +70,21 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
 
     app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
-})()
+}
+
+const test = async () => {
+    dotenv.config()
+    const database = connectToDB({ 
+        host: config.stringOrError("DB_HOST"),
+        port: config.intOrError("DB_PORT"),
+        sslCertPath: config.stringOrUndefined("DB_SSL_CERT_PATH"),
+        username: config.stringOrError("DB_USERNAME"),
+        password: config.stringOrError("DB_PASSWORD"),
+        database: config.stringOrError("DB_DATABASE"),
+    })
+    const identityService = await IdentityServiceDsl.loadFromEnv({ database })
+    await identityService.migrationFixDiscordUsernameInDB()
+}
+
+//runServer()
+test()
