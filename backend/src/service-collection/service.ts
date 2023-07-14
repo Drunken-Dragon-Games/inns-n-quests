@@ -155,7 +155,6 @@ export class CollectionServiceDsl implements CollectionService {
             return
         }
         const userIds = await this.identityService.listAllUserIds(logger)
-        
         const dailyRewards = await Promise.all(userIds.map(async (userId) => {
             // Depending on how we decide to calculate the weekly earning this might be greatly optimized by not needing the metadata
             const collection = await this.getCollectionWithUIMetadata(userId)

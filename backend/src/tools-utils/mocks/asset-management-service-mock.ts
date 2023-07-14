@@ -26,4 +26,9 @@ export default class AssetManagementServiceMock {
         return jest.spyOn(this.service, "list")
             .mockReturnValueOnce(Promise.resolve(response))
     }
+
+    listAlwaysReturns(response: ListResponse) {
+        return jest.spyOn(this.service, "list")
+            .mockReturnValue(Promise.resolve(response))
+    }
 }

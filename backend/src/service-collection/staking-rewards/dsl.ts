@@ -14,7 +14,7 @@ export class Rewards {
             where: {dailyRewardId}
         })
         if (existingReward) return {ctype: "failure", error: `User with ID ${userId} has already received a reward today.`}
-        await DailyReward.create({dailyRewardId,userId, reward: error})
+        await DailyReward.create({dailyRewardId,userId, reward: error, created: this.calendar.now()})
         return {ctype: "success"}
     }
 
@@ -26,24 +26,27 @@ export class Rewards {
         })
         if(!existingRewardRecord) return {ctype: "failure", error: `No reward row was found.`}
         if (existingRewardRecord.reward) return {ctype: "failure", error: `Reward has already been completed.`}
+        console.log(`updating reward ${dailyRewardId} with ${reward}`)
         existingRewardRecord.reward = reward
         await existingRewardRecord.save()
         return {ctype: "success"}
     }
 
     async getWeeklyAccumulated(userId: string){
+        console.log(`getting wekkly acomulated for ${userId}`)
         try{const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
         const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber, now.getUTCFullYear())
+        console.log({weekStart, weekEnd})
         const dailyRewards = await DailyReward.findAll({
             where: {
                 userId,
-                createdAt: {
+                created: {
                     [Op.between]: [weekStart, weekEnd]
                 }
             }
         })
-
+        console.log(`got dailyRewards ${dailyRewards}`)
         return dailyRewards.reduce((acc, dailyReward) => acc + Number(dailyReward.reward), 0) } 
         catch(e: any){
             console.log(e)

@@ -8,7 +8,7 @@ const addSequelizeColumns = (tableAttributes: ModelAttributes<any, any>): ModelA
   return { 
     ...tableAttributes, 
     createdAt: {
-      allowNull: false,
+      allowNull: true,
       type: DataTypes.DATE
     },
     updatedAt: {

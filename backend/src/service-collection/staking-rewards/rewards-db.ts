@@ -33,6 +33,10 @@ export const dailyRewardTableAttributes = {
             key: 'weeklyRewardId',
         },
     },
+    created: {
+        allowNull: false,
+        type: DataTypes.DATE
+      },
 }
 
 export class WeeklyReward extends Model {
@@ -62,13 +66,15 @@ export const configureSequelizeModel = (sequelize: Sequelize): void => {
     WeeklyReward.init(weeklyRewardTableAttributes, {
         sequelize, 
         modelName: 'weeklyReward', 
-        tableName: weeklyRewardsTableName
+        tableName: weeklyRewardsTableName,
+        createdAt: false
     })
 
     DailyReward.init(dailyRewardTableAttributes, {
         sequelize,
         modelName: "dailyReward",
-        tableName: dailyRewardsTableName
+        tableName: dailyRewardsTableName,
+        createdAt: false
     })
 
 
