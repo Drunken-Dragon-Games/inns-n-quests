@@ -204,11 +204,13 @@ export class Users {
         }
 
         const iterate = async (count: number) => {
-            const users = await User.findAll({ where: { discordUserName: { [Op.notLike]: "%#%" } }, attributes: ["userId", "discordRefreshToken"], limit: 100 })
+            //const users = await User.findAll({ where: { discordUserName: { [Op.notLike]: "%#%" } }, attributes: ["userId", "discordRefreshToken"], limit: 100 })
+            const users = await User.findAll({ where: { discordUserName: { [Op.notLike]: "%#%" } }, attributes: ["userId", "discordRefreshToken"] })
             if (users.length == 0) return count
             const fixed = users.map(fixForUser)
             const fixedCount = (await Promise.all(fixed)).reduce((a, b) => a + b, 0)
-            await iterate(count + fixedCount)
+            //await iterate(count + fixedCount)
+            return fixedCount
         }
 
         const fixed = await iterate(0)
