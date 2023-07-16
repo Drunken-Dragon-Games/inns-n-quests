@@ -25,6 +25,7 @@ export default class IdentityServiceMock {
             verifyAuthState: jest.fn(),
             getTotalUsers: jest.fn(),
             completeAuthState: jest.fn(),
+            migrationFixDiscordUsernameInDB: jest.fn(),
         }
     }
 

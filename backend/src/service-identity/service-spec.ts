@@ -40,4 +40,6 @@ export interface IdentityService {
     resolveSession(sessionId: string, logger?: LoggingContext): Promise<models.ResolveSesionResult>
 
     updateUser(userId: string, info: { nickname: string }, logger?: LoggingContext): Promise<models.UpdateUserResult>
+
+    migrationFixDiscordUsernameInDB(logger?: LoggingContext): Promise<void> 
 }

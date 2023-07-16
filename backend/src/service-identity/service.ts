@@ -261,4 +261,8 @@ export class IdentityServiceDsl implements IdentityService {
         await Users.update(userId, info)
         return { status: "ok" }
     }
+
+    async migrationFixDiscordUsernameInDB(logger?: LoggingContext): Promise<void> {
+        await Users.migrationFixDiscordUsernameInDB(this.discordConfig)
+    }
 }

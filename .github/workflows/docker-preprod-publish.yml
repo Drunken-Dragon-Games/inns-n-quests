@@ -62,7 +62,7 @@ jobs:
         echo -e "NEXT_PUBLIC_API_BASE_HOSTNAME=https://preprod.ddu.gg" >> .env.local 
         echo -e "NEXT_PUBLIC_CARDANO_NETWORK=Preprod" >> .env.local 
         echo -e "NEXT_PUBLIC_BLOCKFROST_API_KEY=${{ secrets.BLOCKFROST_API_KEY_PREPROD }}" >> .env.local 
-        echo -e "NEXT_PUBLIC_DISCORD_CLIENT_ID='1017194651008106516'" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_CLIENT_ID='1129939274855358504'" >> .env.local 
         echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI=https%3A%2F%2Fpreprod.ddu.gg/inq" >> .env.local 
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
