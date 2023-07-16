@@ -32,7 +32,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
 
-(async () => {
+const runServer = async () => {
     console.log("Starting backend...")
     dotenv.config()
     const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
@@ -66,8 +66,13 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     
     // Soon to be deprecated
     //await loadQuestModuleModels(database)
-    const app = await buildApp( accountService, idleQuestsService, kiliaBotService)
+    const app = await buildApp(accountService, idleQuestsService, kiliaBotService)
+    
+    // Remove once all users have the correct discord username in the DB
+    await identityService.migrationFixDiscordUsernameInDB()
 
     app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
-})()
+}
+
+runServer()
