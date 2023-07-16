@@ -6,12 +6,11 @@ import express from "express"
 import helmet from "helmet"
 import { AccountService } from "../service-account"
 import { IdleQuestsService } from "../service-idle-quests"
+import { KiliaBotServiceDsl } from "../service-kilia-bot"
 import apiErrorHandler from "./error/api_error_handler"
 import { accountRoutes } from "./routes-account"
 import { idleQuestRoutes } from "./routes-idle-quests"
 import { corsOptions } from "./settings"
-import { jwtMiddleware } from "./jwt_middleware"
-import { KiliaBotServiceDsl } from "../service-kilia-bot"
 
 dotenv.config()
 
@@ -33,7 +32,7 @@ const buildApp = async (
 
     
     // QUEST MODULE ROUTES
-    app.use("/api/quests", jwtMiddleware, idleQuestRoutes(idleQuestsService, kiliaBotService))
+    app.use("/api/quests", idleQuestRoutes(idleQuestsService, kiliaBotService))
     app.use("/api/account", accountRoutes(accountService, kiliaBotService))
     
     // Error handler middleware

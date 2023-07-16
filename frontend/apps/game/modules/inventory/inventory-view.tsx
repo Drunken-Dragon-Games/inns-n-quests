@@ -72,7 +72,7 @@ type InventoryComponentState = {
     activity?: ActivitySelection
 }
 
-const useInventoryState = (): InventoryComponentState => {
+const useInventoryState = (host?: string): InventoryComponentState => {
 
     const { open, activity } = useSelector((state: InventoryState) => ({
         open: state.open,
@@ -81,6 +81,7 @@ const useInventoryState = (): InventoryComponentState => {
 
     /** Initial load of characters, quests in progress, and tracking init. */ 
     useEffect(() => {
+        if (host) return InventoryTransitions.onLoadHostInn(host)
         InventoryTransitions.onRefreshInventory()
         const interval = InventoryTransitions.trackInventoryState()
         return () => clearInterval(interval)
@@ -89,8 +90,9 @@ const useInventoryState = (): InventoryComponentState => {
     return { open, activity }
 }
 
-const Inventory = ({ className }: { className?: string }) => {
-    const state = useInventoryState()
+const Inventory = ({ host, className }: { host?: string, className?: string }) => {
+    const state = useInventoryState(host)
+    if (host) return <></>
     return (
         <InventoryContainer className={className} open={state.open} activityOpen={state.open && notEmpty(state.activity)}>
             <InventoryBrowser />
@@ -101,9 +103,9 @@ const Inventory = ({ className }: { className?: string }) => {
     )
 }
 
-const InventoryView = ({ className }: { className?: string }) => 
+const InventoryView = ({ host, className }: { host?: string, className?: string }) => 
     <Provider store={inventoryStore}>
-        <Inventory className={className} />
+        <Inventory host={host} className={className} />
     </Provider>
 
 export default InventoryView
