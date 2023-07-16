@@ -272,7 +272,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             const embedFields = await Promise.all(leaderboard.map(async (entry, index) => {
                 const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
                 return {
-                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : user.info.knownDiscord!}`,
+                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : user.info.nickname}`,
                     value: `${entry.succeededQuests} quests succeeded`
                 }
               }))
@@ -452,7 +452,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
                 if (user.status !== "ok") this.replyMessage(message, `could not find user under id ${entry.userId}`)
                 return {
-                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : user.info.knownDiscord!}`,
+                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : user.info.nickname}`,
                     value: `${entry.succeededQuests} quests succeeded`
                 }
               }))
