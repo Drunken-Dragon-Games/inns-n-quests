@@ -94,9 +94,6 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService, kilia?: Ki
 
     router.post('/host/inn-state', requestCatchError(async (request: Request, response: Response) => {
         const host = request.body.host as string
-        console.log("-")
-        console.log(host)
-        console.log("-")
         const result = await idleQuestsService.getInnStateForGuests(host)
         response.status(200).json(result)
     }))

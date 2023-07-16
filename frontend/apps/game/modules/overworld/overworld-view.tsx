@@ -3,6 +3,7 @@ import styled from "styled-components"
 import { Loading } from "../../../utils/components/basic_components"
 import { If } from "../../../common"
 import { usePhaserRender } from "./phaser-render"
+import { OverworldParams } from "./overworld-state"
 
 const OverworldContainer = styled.div`
     position: absolute;
@@ -21,9 +22,9 @@ const LoadingBackground = styled.section`
 
 const PhaserContainerId = "overworld-phaser-container"
 
-const OverworldView = () => {
+const OverworldView = (params: OverworldParams) => {
     const [ready, setReady] = useState(false)
-    usePhaserRender(PhaserContainerId, () => setReady(true))
+    usePhaserRender(PhaserContainerId, params, () => setReady(true))
 
     return <>
         <If $if={!ready}>

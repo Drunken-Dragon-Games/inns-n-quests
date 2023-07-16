@@ -404,7 +404,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     }
 
     async getInnStateForGuests(host: string, logger?: LoggingContext): Promise<GetInnStateForGuestsResult> {
-        const user = await this.identityService.resolveUser({ ctype: "nickname", nickname: host })
+        const user = await this.identityService.resolveUser({ ctype: "discord-username", username: host })
         if (user.status != "ok") return { status: "unknown-user" }
         return await this.getInventory(user.info.userId, logger)
     }

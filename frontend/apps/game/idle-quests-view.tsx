@@ -45,12 +45,12 @@ const IdleQuestsView = ({ host }: { host?: string }) => {
     return (
         <IdleQuestsContainer>
             { host ? <>
-                <OverworldModule />
+                <OverworldModule paramDraggableItems={false} />
                 <NotificationsModule />
                 <InventoryModule host={host} /> 
             </> : <>
                 <DragNDropView />
-                <OverworldModule />
+                <OverworldModule paramDraggableItems={true} />
                 <HudModule />
                 <NotificationsModule />
                 <QuestBoardModule />

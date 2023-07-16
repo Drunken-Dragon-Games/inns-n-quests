@@ -1,8 +1,9 @@
 import { Game } from "phaser"
 import { useEffect } from "react"
 import OverworldApi from "./overworld-api"
+import { OverworldParams } from "./overworld-state"
 
-async function loadPhaser(containerId: string, onReady: () => void): Promise<Game> {
+async function loadPhaser(containerId: string, params: OverworldParams, onReady: () => void): Promise<Game> {
     const Phaser = await import("phaser")
     const { Preloader } = await import("./scenes/preloader")
     const { Overworld } = await import("./scenes/overworld")
@@ -24,14 +25,15 @@ async function loadPhaser(containerId: string, onReady: () => void): Promise<Gam
         scene: [Preloader, Overworld]
     })
 
+    OverworldApi.setParams(params)
     OverworldApi.setEventEmitter(game.events)
     game.events.on("loading-complete", onReady)
 
     return game
 }
 
-export const usePhaserRender = (containerId: string, onReady: () => void) => 
+export const usePhaserRender = (containerId: string, params: OverworldParams, onReady: () => void) => 
     useEffect(() => {
-        const game = loadPhaser(containerId, onReady)
+        const game = loadPhaser(containerId, params, onReady)
         return () => { game.then(g => g.destroy(true)) }
     }, [])

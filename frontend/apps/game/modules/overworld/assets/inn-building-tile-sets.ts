@@ -8,7 +8,7 @@ export type InnBuildingTileSet
 
 export const innBuildingTileSet = new TileSet<InnBuildingTileSet>({
     name: "inn-building",
-    uri: "maps/inn-building.png",
+    uri: "/maps/inn-building.png",
     sheetSize: [480, 160],
     tileSize: [32, 16*5],
     set: {

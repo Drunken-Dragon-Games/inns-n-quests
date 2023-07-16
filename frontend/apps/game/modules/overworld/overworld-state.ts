@@ -2,7 +2,11 @@ import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Character, Furniture } from "../../../common"
 import { PositionedObject, SectorConfiguration } from "./overworld-dsl"
 
-interface OverworldState {
+export type OverworldParams = {
+    paramDraggableItems: boolean
+}
+
+interface OverworldState extends OverworldParams {
     name?: string
     innConfiguration?: SectorConfiguration
 }
@@ -11,6 +15,7 @@ export type OverworldStoreState =
     ReturnType<typeof overworldStore.getState> // Includes Thunks Middleware
 
 const overworldInitialState: OverworldState = {
+    paramDraggableItems: true
 }
 
 export const overworldState = createSlice({
@@ -46,6 +51,10 @@ export const overworldState = createSlice({
             const innConfiguration = state.innConfiguration
             if (innConfiguration && innConfiguration[action.payload.entityId]) 
                     delete innConfiguration[action.payload.entityId]
+        },
+
+        setParams: (state, action: PayloadAction<OverworldParams>) => {
+            state.paramDraggableItems = action.payload.paramDraggableItems
         },
     }
 })

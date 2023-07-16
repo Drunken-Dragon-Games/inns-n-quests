@@ -122,7 +122,7 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
-    async resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, logger?: LoggingContext): Promise<models.ResolveUserResult> {
+    async resolveUser(info: models.UserResolutionType, logger?: LoggingContext): Promise<models.ResolveUserResult> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.info("resolving user", { info })
         const response = await this.base.resolveUser(info, serviceLogger)
