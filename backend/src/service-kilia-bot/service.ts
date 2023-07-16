@@ -193,8 +193,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         const embed = new EmbedBuilder()
             .setColor(0xF5CD1B)
             .setTitle(`${player.info.nickname} (${player.info.knownDiscord}) just ${success} ${quest.availableQuest.name}!`)
-            .setDescription(quest.availableQuest.description)
-            .addFields(
+            .setDescription(`${ player.status !== "ok" ? "" : `[Visit Inn](https://ddu.gg/inn/${player.info.knownDiscord}) \n `}${quest.availableQuest.description}`)
+            .addFields( 
                 { name: "Adventurers", value: adventurers.map(a => `${a.name}`).join(", ") },
             )
 
