@@ -18,6 +18,7 @@ import { IdleQuestsService } from "./service-spec"
 import { CharacterDB, CharacterState } from "./state/character-state"
 import { FurnitureDB, FurnitureState } from "./state/furniture-state"
 import { loadQuestRegistryFromFs } from "./state/staking-quests-registry"
+import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock"
 
 let service: IdleQuestsService
 let database: Sequelize
@@ -29,6 +30,7 @@ let rules: vm.IQRuleset
 beforeAll(async () => {
     const assetManagementService = new AssetManagementServiceMock()
     const evenstatsService = new EvenstatsServiceMock()
+    const identityService = new IdentityServiceMock()
     assetManagementService.listReturns({ status: "ok", inventory: {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [
             { unit: "PixelTile1", quantity: "2", chain: false },
@@ -54,6 +56,7 @@ beforeAll(async () => {
         calendar,
         database,
         evenstatsService: evenstatsService.service,
+        identityService: identityService.service,
         assetManagementService: assetManagementService.service,
         metadataRegistry: testMetadataRegistry,
         questsRegistry: await loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "stubs", "test-quest-registry.yaml"), "yaml"),

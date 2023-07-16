@@ -1,5 +1,6 @@
 import { Character, Furniture, IdleQuestsInventory } from "../../../common"
 import { SectorConfiguration } from "./overworld-dsl"
+import { OverworldParams } from "./overworld-state"
 import OverworldTransitions from "./overworld-transitions"
 
 export let events: Phaser.Events.EventEmitter
@@ -32,6 +33,10 @@ const OverworldApi = {
             OverworldTransitions.setInitialInnState(innState.name, innConfiguration)
         }
     },
+
+    getPrams: (): OverworldParams => OverworldTransitions.getParams(),
+
+    setParams: (params: OverworldParams) => OverworldTransitions.setParams(params),
 }
 
 const retry = (fn: () => void, retries: number, delay: number) => {

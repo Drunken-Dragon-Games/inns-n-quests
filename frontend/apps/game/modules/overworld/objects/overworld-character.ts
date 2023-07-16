@@ -19,10 +19,13 @@ export default class OverworldCharacter {
         const sprite = OverworldCharacter.createSprite(character, overworld, position, flipped)
         const owAdventurer = new OverworldCharacter(character, sprite, overworld)
         overworld.adventurers.push(owAdventurer)
-        sprite.on("pointerup", OverworldCharacter.onPointerUp(overworld, owAdventurer))
-        sprite.on("dragstart", OverworldCharacter.onDragStart(overworld, owAdventurer))
-        sprite.on("drag", OverworldCharacter.onDrag(overworld, owAdventurer))
-        sprite.on("dragend", OverworldCharacter.onDragEnd(overworld, owAdventurer))
+        const draggable = OverworldTransitions.getParams().paramDraggableItems
+        if (draggable) {
+            sprite.on("pointerup", OverworldCharacter.onPointerUp(overworld, owAdventurer))
+            sprite.on("dragstart", OverworldCharacter.onDragStart(overworld, owAdventurer))
+            sprite.on("drag", OverworldCharacter.onDrag(overworld, owAdventurer))
+            sprite.on("dragend", OverworldCharacter.onDragEnd(overworld, owAdventurer))
+        }
         return owAdventurer
     }
 
@@ -82,7 +85,7 @@ export default class OverworldCharacter {
     }
 
     static onDragStart = (overworld: Overworld, character: OverworldCharacter) => () => {
-        overworld.draggingItem =character 
+        overworld.draggingItem = character 
     }
 
     static onDrag = (overworld: Overworld, character: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {

@@ -1,7 +1,7 @@
 import { User, UserStakeAdress } from "./users-db";
 import { generateIdentenfier, generateRandomNickname } from "./utils";
 import { DiscordConfig, DiscordTokens, checkValidDiscordRefresh, genDiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
-import { UserInfo, UserFullInfo, DeassociationResult } from "../models";
+import { UserInfo, UserFullInfo, DeassociationResult, UserResolutionType } from "../models";
 import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
 import { LoggingContext } from "../../tools-tracing";
 import { Op } from "sequelize";
@@ -119,21 +119,10 @@ export class Users {
     }
 
 
-    static resolve = async (info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }): Promise<Attempt<UserInfo>> => {
-        let user: User | null
-        if (info.ctype == "user-id") {
-            const userId = info.userId
-            user = await User.findOne({ where: { userId } })
-        } else {
-            /* const [nickname, nameIdentifier] = info.nickname.split("#")
-            if (!nameIdentifier) 
-                user = await User.findOne({ where: { nickname } })
-            else
-                user = await User.findOne({ where: { nickname, nameIdentifier } }) */
-                user = await User.findOne({where: {nickname: info.nickname}})
-        }
-        if (user == null) return failed
-        else {
+    static resolve = async (info: UserResolutionType): Promise<Attempt<UserInfo>> => {
+
+        const fillKnownStakeAddresses = async (user: User | null): Promise<Attempt<UserInfo>> => {
+            if (user == null) return failed
             const addresses = await UserStakeAdress.findAll({ where: { userId: user.userId }, attributes: ["stakeAddress"] })
             return succeeded({
                 userId: user.userId,
@@ -142,6 +131,14 @@ export class Users {
                 knownStakeAddresses: addresses.map(a => a.stakeAddress)
             })
         }
+
+        if (info.ctype == "user-id")
+            return await fillKnownStakeAddresses(await User.findOne({ where: { userId: info.userId } }))
+        else if (info.ctype == "nickname")
+            return await fillKnownStakeAddresses(await User.findOne({ where: { nickname: info.nickname } }))
+        else
+            return await fillKnownStakeAddresses(await User.findOne({ where: { 
+                discordUserName: info.username.includes("#") ? info.username : `${info.username}#0` } }))
     }
 
     static resolveUsersNoStakeAddresses = async (userIds: string[]): Promise<UserInfo[]> => {

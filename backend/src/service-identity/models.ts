@@ -8,6 +8,11 @@ export type HealthStatus = {
     }[]
 }
 
+export type UserResolutionType 
+    = { ctype: "user-id", userId: string } 
+    | { ctype: "nickname", nickname: string } 
+    | { ctype: "discord-username", username: string }
+
 export type AssosiationOutcome = { ctype: "succeded"} | {ctype: "pending"} | {ctype: "failed", reason: string}
 
 export type DeviceType = "Browser" | "Desktop" | "Mobile"
