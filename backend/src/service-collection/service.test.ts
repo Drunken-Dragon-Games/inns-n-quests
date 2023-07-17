@@ -201,10 +201,42 @@ test("update and get passive staking Info Diff Day", async () => {
 
     calendar.moveDays(1)
     await service.updateGlobalDailyStakingContributions()
-    const SameDayPasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const NextDayPasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const secondExpectedPasiveInfo:GetPassiveStakingInfoResult  = {
+        ctype: 'success',
+        weeklyAccumulated: '12',
+        dragonSilverToClaim: '10',
+        dragonSilver: '15'
+      }
+    expect(NextDayPasiveInfo).toEqual(secondExpectedPasiveInfo)
+})
 
-    expect(SameDayPasiveInfo).toEqual(expectedPasiveInfo)
-    
+test("grant 1 week", async () => {
+    //radom monday
+    calendar.setNow(new Date(2023, 6, 10))
+    for (let i = 1; i <= 7; i++){
+        const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
+            ctype: 'success',
+            weeklyAccumulated: `${6 * i}`,
+            dragonSilverToClaim: '10',
+            dragonSilver: '15'
+          }
+        await service.updateGlobalDailyStakingContributions()
+        const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+        expect(pasiveInfo).toEqual(expectedPasiveInfo)
+        calendar.moveDays(1)
+    }
+
+    //now its monday again
+    await service.grantGlobalWeeklyStakingGrant()
+    await service.updateGlobalDailyStakingContributions()
+    const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    expect(pasiveInfo).toEqual({
+        ctype: 'success',
+        weeklyAccumulated: '6',
+        dragonSilverToClaim: '10',
+        dragonSilver: '15'
+      })
 })
 
 

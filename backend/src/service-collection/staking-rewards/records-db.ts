@@ -6,8 +6,6 @@ export const weeklyRecordsTableName = "collection_weekly_records"
 export class DailyRecord extends Model {
     declare dailyRecordId: string
     declare rewardTotal: string
-    declare createdAt: string
-    declare weeklyRecordId? : string
 }
 
 export const dailyRecordTableAttributes = {
@@ -19,21 +17,12 @@ export const dailyRecordTableAttributes = {
     rewardTotal: {
         type: DataTypes.STRING,
         allowNull: true,
-    },
-    weeklyRecordId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        references: {
-            model: weeklyRecordsTableName,
-            key: 'weeklyRecordId',
-        },
-    },
+    }
 }
 
 export class WeeklyRecord extends Model {
     declare weeklyRecordId: string
     declare rewardTotal: string
-    declare addDailyRecords: (xs: DailyRecord[]) => Promise<void>
 }
 
 export const weeklyRecordTableAttributes = {
@@ -44,7 +33,7 @@ export const weeklyRecordTableAttributes = {
     },
     rewardTotal: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     }
 }
 
@@ -59,14 +48,5 @@ export const configureSequelizeModel = (sequelize: Sequelize): void => {
         sequelize,
         modelName: "dailyRecord",
         tableName: dailyRecordsTableName,
-    })
-
-    WeeklyRecord.hasMany(DailyRecord, {
-        foreignKey: "weeklyRecordId",
-        onDelete: "CASCADE"
-    })
-
-    DailyRecord.belongsTo(WeeklyRecord, {
-        foreignKey: "weeklyRecordId"
     })
 }

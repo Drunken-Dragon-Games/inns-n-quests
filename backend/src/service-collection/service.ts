@@ -184,7 +184,7 @@ export class CollectionServiceDsl implements CollectionService {
 
     /**
      * Grants the weekly contributions to everyone's dragon silver to claim.
-     * Intended to be called once a week after the daily contribution of that day.
+     * Intended to be called once a week to give the grants for the previus week.
      * Important: idempotent operation.
      */
     async grantGlobalWeeklyStakingGrant(logger?: LoggingContext): Promise<void> {
@@ -193,16 +193,25 @@ export class CollectionServiceDsl implements CollectionService {
             logger?.log.error(`Failed to create daily record beaocuse: ${weeklyRecord.error}`)
             return
         }
-        const pendingRewards = await this.rewards.getCurrentWeekTotals()
-        const totalGranted = Object.entries(pendingRewards).reduce((acc, [userId, reward]) => {
-            this.assetManagementService.grant(userId, {
+
+        //this can be refectored to use a single reduce statment
+        //but aparently thats not such a great idea
+        //https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await
+        const pendingRewards = await this.rewards.getPreviusWeekTotals()
+        console.log(pendingRewards)
+        let totalGranted = 0
+        for (const [userId, reward] of Object.entries(pendingRewards)) {
+            const grantRecord = await this.rewards.createWeekly(userId)
+            if (grantRecord.ctype !== "success") continue
+            await this.assetManagementService.grant(userId, {
                 policyId: this.wellKnownPolicies.dragonSilver.policyId,
-                unit: "DragonSilver", 
+                unit: "DragonSilver",
                 quantity: reward.toString()
             })
-            return acc + reward
-        }, 0)
-        //i need to maintain the rewards and the records relationship
+            totalGranted += reward
+            this.rewards.completeWeekly(userId, reward.toString())
+        }
+        
         await this.records.completeWeekly(totalGranted.toString())
     }
 

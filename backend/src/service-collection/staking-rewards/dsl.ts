@@ -57,21 +57,21 @@ export class Rewards {
         }
     }
 
-    async createWeekly(userId: string, transaction: Transaction): Promise<SResult<{}>>{
-        const now = this.calendar.now()
-        const weekNumber= getWeekNumber(now)
+    async createWeekly(userId: string): Promise<SResult<{}>>{
+        const oneWeekAgo = getOneWeekBefore(this.calendar.now())
+        const weekNumber= getWeekNumber(oneWeekAgo)
         const weeklyRewardId = `${userId}-${weekNumber.weekNo}-${weekNumber.year}`
         const existingReward = await WeeklyReward.findOne({
             where: {weeklyRewardId}
         })
         if (existingReward) return {ctype: "failure", error: `User with ID ${userId} has already received a reward this week.`}
-        await WeeklyReward.create({weeklyRewardId, userId}, { transaction })
+        await WeeklyReward.create({weeklyRewardId, userId})
         return {ctype: "success"}
     }
 
-    async completeWeekly(userId: string, reward: string, transaction: Transaction): Promise<SResult<{}>>{
-        const now = this.calendar.now()
-        const weekNumber= getWeekNumber(now)
+    async completeWeekly(userId: string, reward: string): Promise<SResult<{}>>{
+        const oneWeekAgo = getOneWeekBefore(this.calendar.now())
+        const weekNumber= getWeekNumber(oneWeekAgo)
         const weeklyRewardId = `${userId}-${weekNumber.weekNo}-${weekNumber.year}`
         const existingReward = await WeeklyReward.findOne({
             where: {weeklyRewardId}
@@ -79,13 +79,13 @@ export class Rewards {
         if(!existingReward) return {ctype: "failure", error: `No reward record was found.`}
         if (existingReward.reward) return {ctype: "failure", error: `Reward has already been completed.`}
         existingReward.reward = reward
-        await existingReward.save({ transaction })
+        await existingReward.save()
         return {ctype: "success"}
     }
 
-    async getCurrentWeekTotals(): Promise<{[userId: string]: number}> {
-        const now = this.calendar.now()
-        const weekNumber= getWeekNumber(now)
+    async getPreviusWeekTotals(): Promise<{[userId: string]: number}> {
+        const oneWeekAgo = getOneWeekBefore(this.calendar.now())
+        const weekNumber= getWeekNumber(oneWeekAgo)
         const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber.weekNo, weekNumber.year)
         const dailyRewards = await DailyReward.findAll({
             where: {
@@ -105,13 +105,17 @@ export class Records {
 
     constructor(private readonly calendar: Calendar){}
     async createDaily(): Promise<SResult<{}>>{
-        const dailyRecordId = this.calendar.now().toISOString().split('T')[0]
+        try{const dailyRecordId = this.calendar.now().toISOString().split('T')[0]
         const existingRecord = await DailyRecord.findOne({
             where: {dailyRecordId}
         })
         if (existingRecord) return {ctype: "failure", error: `There is already a record for daily rewards being given today.`}
         await DailyRecord.create({dailyRecordId})
-        return {ctype: "success"}
+        return {ctype: "success"}}
+        catch(e: any){
+            console.log(e)
+            return {ctype: "failure", error: e}
+        }
     }
 
     async completeDaily(rewardTotal: string): Promise<SResult<{}>>{
@@ -127,20 +131,24 @@ export class Records {
     }
 
     async createWeekly(): Promise<SResult<{}>>{
-        const now = this.calendar.now()
-        const weekNumber= getWeekNumber(now)
+        try{const oneWeekAgo = getOneWeekBefore(this.calendar.now())
+        const weekNumber= getWeekNumber(oneWeekAgo)
         const weeklyRecordId = `${weekNumber.weekNo}-${weekNumber.year}`
         const existingRecord = await WeeklyRecord.findOne({
             where: {weeklyRecordId}
         })
         if (existingRecord) return {ctype: "failure", error: `There is already a record for weekly rewards being given this week.`}
         await WeeklyRecord.create({weeklyRecordId})
-        return {ctype: "success"}
+        return {ctype: "success"}}
+        catch (e:any){
+            console.log(e)
+            return {ctype: "failure", error: e.mesagge}
+        }
     }
 
     async completeWeekly(rewardTotal: string): Promise<SResult<{}>>{
-        const now = this.calendar.now()
-        const weekNumber= getWeekNumber(now)
+        const oneWeekAgo = getOneWeekBefore(this.calendar.now())
+        const weekNumber= getWeekNumber(oneWeekAgo)
         const weeklyRecordId = `${weekNumber.weekNo}-${weekNumber.year}`
         const existingRecord = await WeeklyRecord.findOne({
             where: {weeklyRecordId}
@@ -168,7 +176,6 @@ const getWeekNumber = (d: Date): {weekNo: number, year: number} => {
     d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1))
     const  weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1)/7)
-    console.log({weekNo})
     return {weekNo, year: d.getUTCFullYear()}
 }
 
@@ -193,4 +200,10 @@ const getDateRangeOfWeek = (weekNumber: number, year: number): [Date, Date] => {
     endDate.setUTCHours(23, 59, 59, 999)
     
     return [startDate, endDate]
+}
+
+const getOneWeekBefore = (d: Date): Date => {
+    const result = new Date(d)
+    result.setDate(d.getDate() - 7)
+    return result
 }
