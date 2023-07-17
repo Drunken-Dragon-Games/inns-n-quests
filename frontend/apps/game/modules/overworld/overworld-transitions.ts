@@ -2,7 +2,7 @@ import _ from "underscore"
 import { Character, Furniture } from "../../../common"
 import IdleQuestsApi from "../../idle-quests-api"
 import { SectorConfiguration } from "./overworld-dsl"
-import { overworldState, overworldStore } from "./overworld-state"
+import { OverworldParams, overworldState, overworldStore } from "./overworld-state"
 import { ObjectsLocations } from "../../game-vm"
 
 const actions = overworldState.actions
@@ -49,6 +49,16 @@ const OverworldTransitions = {
         dispatch(actions.setInitialInnState({ name, innConfiguration }))
         lastInnState = { name, innConfiguration }
     },
+
+    getParams: (): OverworldParams => {
+        const state = overworldStore.getState()
+        return {
+            paramDraggableItems: state.paramDraggableItems,
+        }
+    },
+
+    setParams: (params: OverworldParams) => 
+        dispatch(actions.setParams(params)),
 }
 
 export default OverworldTransitions

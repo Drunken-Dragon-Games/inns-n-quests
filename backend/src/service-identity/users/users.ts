@@ -1,9 +1,10 @@
 import { User, UserStakeAdress } from "./users-db";
 import { generateIdentenfier, generateRandomNickname } from "./utils";
-import { DiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
-import { UserInfo, UserFullInfo, DeassociationResult } from "../models";
+import { DiscordConfig, DiscordTokens, checkValidDiscordRefresh, genDiscordTokens, getUserInfoFromBearerToken } from "../discord/code-verification"
+import { UserInfo, UserFullInfo, DeassociationResult, UserResolutionType } from "../models";
 import { Attempt, succeeded, failed, Unit, unit } from "../../tools-utils";
 import { LoggingContext } from "../../tools-tracing";
+import { Op } from "sequelize";
 
 export class Users {
     
@@ -62,12 +63,18 @@ export class Users {
             (await User.findOne({ where: { discordUserId: discordUserInfo.result.discordUserId } })) ??
             (await User.findOne({ where: { email: discordUserInfo.result.email } }))
         if (existingUser) {
+            /** If there is a current user, we run some fixes on how we save the user's discord information if needed. */
             if(!existingUser.discordUserId) { existingUser.discordUserId = discordUserInfo.result.discordUserId }
+            /** The discord global name is Discord's display name. */
             const discordGlobalName = discordUserInfo.result.discordGlobalName
-            if (discordGlobalName && discordGlobalName !== existingUser.discordUserName) {
-                existingUser.discordUserName = discordGlobalName
+            /** The discord name is the unique Discord's name identifier, if it's using the new discord username system it's saved as username#0 with 0 being the descriminator number. */
+            const discordName = discordUserInfo.result.discordName
+            /** If any of the obove values changed, we save the new ones. */
+            if (discordGlobalName && discordGlobalName !== existingUser.nickname) 
                 existingUser.nickname = discordGlobalName
-            }
+            if (discordName !== existingUser.discordUserName) 
+                existingUser.discordUserName = discordName
+            /** Save new refresh tokens for later use. */
             existingUser.discordRefreshToken = discordTokens.refreshtoken
             await existingUser.save()
             return succeeded(existingUser.userId)
@@ -76,7 +83,7 @@ export class Users {
             const discordUserId = discordUserInfo.result.discordUserId
             const nickname = discordUserInfo.result.discordGlobalName ?? discordUserInfo.result.discordName
             const nameIdentifier = await generateIdentenfier(nickname)
-            const discordUserName = discordUserInfo.result.discordGlobalName ?? discordUserInfo.result.discordName
+            const discordUserName = discordUserInfo.result.discordName
             const email = discordUserInfo.result.email
             const discordRefreshToken = discordTokens.refreshtoken
             const user = await User.create({ discordUserId, discordUserName, email, nickname, nameIdentifier, discordRefreshToken })
@@ -123,21 +130,10 @@ export class Users {
     }
 
 
-    static resolve = async (info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }): Promise<Attempt<UserInfo>> => {
-        let user: User | null
-        if (info.ctype == "user-id") {
-            const userId = info.userId
-            user = await User.findOne({ where: { userId } })
-        } else {
-            /* const [nickname, nameIdentifier] = info.nickname.split("#")
-            if (!nameIdentifier) 
-                user = await User.findOne({ where: { nickname } })
-            else
-                user = await User.findOne({ where: { nickname, nameIdentifier } }) */
-                user = await User.findOne({where: {nickname: info.nickname}})
-        }
-        if (user == null) return failed
-        else {
+    static resolve = async (info: UserResolutionType): Promise<Attempt<UserInfo>> => {
+
+        const fillKnownStakeAddresses = async (user: User | null): Promise<Attempt<UserInfo>> => {
+            if (user == null) return failed
             const addresses = await UserStakeAdress.findAll({ where: { userId: user.userId }, attributes: ["stakeAddress"] })
             return succeeded({
                 userId: user.userId,
@@ -146,6 +142,14 @@ export class Users {
                 knownStakeAddresses: addresses.map(a => a.stakeAddress)
             })
         }
+
+        if (info.ctype == "user-id")
+            return await fillKnownStakeAddresses(await User.findOne({ where: { userId: info.userId } }))
+        else if (info.ctype == "nickname")
+            return await fillKnownStakeAddresses(await User.findOne({ where: { nickname: info.nickname } }))
+        else
+            return await fillKnownStakeAddresses(await User.findOne({ where: { 
+                discordUserName: info.username.includes("#") ? info.username : `${info.username}#0` } }))
     }
 
     static resolveUsersNoStakeAddresses = async (userIds: string[]): Promise<UserInfo[]> => {
@@ -185,5 +189,39 @@ export class Users {
 
     static total = async () => {
         return await User.count()
+    }
+
+    static migrationFixDiscordUsernameInDB = async (discordConfig: DiscordConfig) => {
+        
+        const fixForUser = async (user: User): Promise<number> => {
+            const newTokens = await checkValidDiscordRefresh(user.discordRefreshToken, discordConfig)
+            if (newTokens.ctype == "failure") {
+                console.error(`Could not refresh tokens for user ${user.userId}!!!`)
+                return 0
+            }
+            const discordUserInfo = await getUserInfoFromBearerToken(genDiscordTokens(newTokens.result).discordBearerToken)
+            if (discordUserInfo.ctype == "failure") {
+                console.error(`Could not get info for user ${user.userId}!!!`)
+                return 0
+            }
+            user.discordUserName = discordUserInfo.result.discordName
+            user.discordRefreshToken = newTokens.result.refresh_token
+            await user.save()
+            console.log(`Discord username fixed for user: ${user.dataValues}`)
+            return 1
+        }
+
+        const iterate = async (count: number) => {
+            //const users = await User.findAll({ where: { discordUserName: { [Op.notLike]: "%#%" } }, attributes: ["userId", "discordRefreshToken"], limit: 100 })
+            const users = await User.findAll({ where: { discordUserName: { [Op.notLike]: "%#%" } }, attributes: ["userId", "discordRefreshToken"] })
+            if (users.length == 0) return count
+            const fixed = users.map(fixForUser)
+            const fixedCount = (await Promise.all(fixed)).reduce((a, b) => a + b, 0)
+            //await iterate(count + fixedCount)
+            return fixedCount
+        }
+
+        const fixed = await iterate(0)
+        console.log(`Fixed ${fixed} discord usernames`)
     }
 }

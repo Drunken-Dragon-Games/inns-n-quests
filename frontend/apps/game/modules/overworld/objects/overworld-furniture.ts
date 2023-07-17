@@ -16,10 +16,13 @@ export default class OverworldFurniture {
         const sprite = OverworldFurniture.createSprite(furniture, overworld, position, flipped)
         const owFurniture = new OverworldFurniture(furniture, sprite, overworld)
         overworld.furniture.push(owFurniture)
-        sprite.on("pointerup", OverworldFurniture.onPointerUp(overworld, owFurniture))
-        sprite.on("dragstart", OverworldFurniture.onDragStart(overworld, owFurniture))
-        sprite.on("drag", OverworldFurniture.onDrag(overworld, owFurniture))
-        sprite.on("dragend", OverworldFurniture.onDragEnd(overworld, owFurniture))
+        const draggable = OverworldTransitions.getParams().paramDraggableItems
+        if (draggable) {
+            sprite.on("pointerup", OverworldFurniture.onPointerUp(overworld, owFurniture))
+            sprite.on("dragstart", OverworldFurniture.onDragStart(overworld, owFurniture))
+            sprite.on("drag", OverworldFurniture.onDrag(overworld, owFurniture))
+            sprite.on("dragend", OverworldFurniture.onDragEnd(overworld, owFurniture))
+        }
         return owFurniture
     }
 

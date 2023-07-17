@@ -34,7 +34,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
 
-(async () => {
+const runServer = async () => {
     console.log("Starting backend...")
     dotenv.config()
     const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
@@ -64,13 +64,18 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService, blockchainService })
     const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry, calendar})
     const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, blockchainService, governanceService,collectionService, wellKnownPolicies })
-    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
+    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, identityService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService, idleQuestsService })
     
     // Soon to be deprecated
     //await loadQuestModuleModels(database)
-    const app = await buildApp( accountService, idleQuestsService, kiliaBotService)
+    const app = await buildApp(accountService, idleQuestsService, kiliaBotService)
+    
+    // Remove once all users have the correct discord username in the DB
+    await identityService.migrationFixDiscordUsernameInDB()
 
     app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
-})()
+}
+
+runServer()

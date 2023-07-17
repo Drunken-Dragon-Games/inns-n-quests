@@ -129,7 +129,7 @@ export class IdentityServiceLogging implements IdentityService {
         return response
     }
 
-    async resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, logger?: LoggingContext): Promise<models.ResolveUserResult> {
+    async resolveUser(info: models.UserResolutionType, logger?: LoggingContext): Promise<models.ResolveUserResult> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.info("resolving user", { info })
         const response = await this.base.resolveUser(info, serviceLogger)
@@ -159,5 +159,12 @@ export class IdentityServiceLogging implements IdentityService {
         const response = await this.base.updateUser(userId, info, serviceLogger)
         serviceLogger?.info(`user update status: ${response.status}`)
         return response
+    }
+
+    async migrationFixDiscordUsernameInDB(logger?: LoggingContext): Promise<void> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.info("fixing discord usernames in db")
+        await this.base.migrationFixDiscordUsernameInDB(serviceLogger)
+        serviceLogger?.info("finished fixing discord usernames in db")
     }
 }

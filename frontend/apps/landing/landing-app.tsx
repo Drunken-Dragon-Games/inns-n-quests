@@ -6,6 +6,7 @@ import { LeftLeaningSection, RightLeaningSection } from "./components/info-secti
 import FollowSection from "./components/follow-section"
 import CardsSection from "./components/cards-section"
 import ComicSection from "./components/comic-section"
+import WhitepaperSection from "./components/whitepaper-section"
 
 const bannerInfo = {
     title: "Unleashing Creativity Into An Epic Universe, Together",
@@ -65,6 +66,7 @@ const LandingApp = () =>
     <LandingAppContainer>
         <Header />
         <Banner {...bannerInfo} />
+        <WhitepaperSection />
         <LeftLeaningSection {...s1} />
         <RightLeaningSection {...s2} />
         <LeftLeaningSection {...s3} />

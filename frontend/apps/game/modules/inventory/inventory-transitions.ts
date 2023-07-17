@@ -26,6 +26,10 @@ const InventoryTransitions = {
         dispatch(InventoryThunks.getInventory())
     },
 
+    onLoadHostInn: (host: string) => {
+        dispatch(InventoryThunks.getInnStateForGuests(host))
+    },
+
     onToggleInventory: () => {
         dispatch(actions.toggleInventory())
     },

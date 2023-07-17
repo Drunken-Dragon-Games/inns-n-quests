@@ -192,9 +192,9 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         //const outcome = quest.outcome.ctype === "success-outcome" ? quest.outcome.reward.currencies[0]!.unit : quest.outcome!.reason
         const embed = new EmbedBuilder()
             .setColor(0xF5CD1B)
-            .setTitle(`${player.info.nickname} just ${success} ${quest.availableQuest.name}!`)
-            .setDescription(quest.availableQuest.description)
-            .addFields(
+            .setTitle(`${player.info.nickname} (${player.info.knownDiscord}) just ${success} ${quest.availableQuest.name}!`)
+            .setDescription(`${ player.status !== "ok" ? "" : `[Visit Inn](https://ddu.gg/inn/${player.info.knownDiscord}) \n `}${quest.availableQuest.description}`)
+            .addFields( 
                 { name: "Adventurers", value: adventurers.map(a => `${a.name}`).join(", ") },
             )
 
@@ -272,8 +272,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             const embedFields = await Promise.all(leaderboard.map(async (entry, index) => {
                 const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
                 return {
-                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : user.info.knownDiscord!}`,
-                    value: `${entry.succeededQuests} quests succeeded`
+                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : `${user.info.nickname} (${user.info.knownDiscord})`}`,
+                    value: `${ user.status !== "ok" ? "" : `[Visit Inn](https://ddu.gg/inn/${user.info.knownDiscord}) | `}${entry.succeededQuests} quests succeeded.`
                 }
               }))
             const descriptionArray = ["Between you and me, these are the best...",
@@ -452,8 +452,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                 const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
                 if (user.status !== "ok") this.replyMessage(message, `could not find user under id ${entry.userId}`)
                 return {
-                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : user.info.knownDiscord!}`,
-                    value: `${entry.succeededQuests} quests succeeded`
+                    name: `${index + 1}. ${user.status !== "ok" ? "Anon" : `${user.info.nickname} (${user.info.knownDiscord})`}`,
+                    value: `${ user.status !== "ok" ? "" : `[Visit Inn](https://ddu.gg/inn/${user.info.knownDiscord}) | `}${entry.succeededQuests} quests succeeded`
                 }
               }))
               

@@ -21,7 +21,8 @@ import {
     CleanAssociationTxResult,
     AssosiationOutcome,
     CompleteAuthStateResult,
-    DeassociationResult
+    DeassociationResult,
+    UserResolutionType
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -240,7 +241,7 @@ export class IdentityServiceDsl implements IdentityService {
         else return { status: "unknown-session" }
     }
 
-    async resolveUser(info: { ctype: "user-id", userId: string } | { ctype: "nickname", nickname: string }, logger?: LoggingContext): Promise<ResolveUserResult> {
+    async resolveUser(info: UserResolutionType, logger?: LoggingContext): Promise<ResolveUserResult> {
         const user = await Users.resolve(info)
         if (user.ctype == "failure") return { status: "unknown-user-id" }
         else return { status: "ok", info: user.result }
@@ -266,5 +267,9 @@ export class IdentityServiceDsl implements IdentityService {
     async updateUser(userId: string, info: { nickname: string }, logger?: LoggingContext): Promise<UpdateUserResult> { 
         await Users.update(userId, info)
         return { status: "ok" }
+    }
+
+    async migrationFixDiscordUsernameInDB(logger?: LoggingContext): Promise<void> {
+        await Users.migrationFixDiscordUsernameInDB(this.discordConfig)
     }
 }

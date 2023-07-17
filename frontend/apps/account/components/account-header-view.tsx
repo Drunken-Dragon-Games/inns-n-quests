@@ -38,7 +38,6 @@ const AccountHeaderContent = () => {
     return (
         <AccountHeaderContainer>
             { userInfo ? <>
-                <GamesButton game="inns" url={gamesButtonSection.quests} toolTip="My Inn" />
                 <Nickname>{userInfo.nickname}</Nickname> 
                 <SimpleDDButton onClick={() => AccountTransitions.signout(router)}>Sign Out</SimpleDDButton>
             </>: isDiscordFinish ?
