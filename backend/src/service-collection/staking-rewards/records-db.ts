@@ -53,14 +53,12 @@ export const configureSequelizeModel = (sequelize: Sequelize): void => {
         sequelize, 
         modelName: 'weeklyRecord', 
         tableName: weeklyRecordsTableName,
-        createdAt: false
     })
 
     DailyRecord.init(dailyRecordTableAttributes, {
         sequelize,
         modelName: "dailyRecord",
         tableName: dailyRecordsTableName,
-        createdAt: false
     })
 
     WeeklyRecord.hasMany(DailyRecord, {

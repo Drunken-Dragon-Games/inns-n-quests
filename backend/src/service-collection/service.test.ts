@@ -1,4 +1,4 @@
-import { CollectionService } from "./service-spec"
+import { CollectionService, GetPassiveStakingInfoResult } from "./service-spec"
 import { connectToDB, DBConfig } from "../tools-database"
 import { CollectionServiceDsl } from "./service"
 import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-service-mock"
@@ -9,7 +9,7 @@ import { CollectibleMetadata, CollectibleStakingInfo, Collection } from "./model
 import { MutableCalendar } from "../tools-utils/calendar"
 
 let service: CollectionService
-let calendar: MutableCalendar = new MutableCalendar(new Date(0))
+const calendar: MutableCalendar = new MutableCalendar(new Date(2023, 6, 10))
 const databaseConfig: DBConfig = 
     { host: "localhost"
     , port: 5432
@@ -57,7 +57,7 @@ afterEach(async () => {
     await service.unloadDatabaseModels()
 })
 
-/* test("get Collection ok", async () => {
+test("get Collection ok", async () => {
     const collectionResult = await  service.getCollection("userId")
     if (collectionResult.ctype !== "success"){
         expect(collectionResult.ctype).toEqual("success")
@@ -139,12 +139,72 @@ test("get Passsive staking Info", async () => {
         dragonSilver: "15"}
 
     expect(pasiveInfo).toEqual(expectedInfo)
-}) */
+})
 
-test("update and get passive staking Info", async () => {
-    calendar.moveMonths(1)
+/* test("update and get passive 5 year test", async () => {
+    const startingpoint = 0
+    const timeeeee = 365 * 5
+    calendar.moveDays(startingpoint)
+    for (let i = startingpoint; i < timeeeee; i++){
+    await service.unloadDatabaseModels()
+    await service.loadDatabaseModels()
+    console.log(i)
+    calendar.moveDays(1)
     await service.updateGlobalDailyStakingContributions()
     const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
-    console.log(pasiveInfo)
-    expect(1).toEqual(1)
+    //This (And all smilar test) expects 7 DS pasive per asset
+    const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
+        ctype: 'success',
+        weeklyAccumulated: '6',
+        dragonSilverToClaim: '10',
+        dragonSilver: '15'
+      }
+    expect(pasiveInfo).toEqual(expectedPasiveInfo)
+
+    await service.updateGlobalDailyStakingContributions()
+    const SameDayPasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+
+    expect(SameDayPasiveInfo).toEqual(expectedPasiveInfo)
+}
+}, 1500000) */
+
+test("update and get passive staking Info Same Day", async () => {
+    await service.updateGlobalDailyStakingContributions()
+    const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    //This (And all smilar test) expects 7 DS pasive per asset
+    const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
+        ctype: 'success',
+        weeklyAccumulated: '6',
+        dragonSilverToClaim: '10',
+        dragonSilver: '15'
+      }
+    expect(pasiveInfo).toEqual(expectedPasiveInfo)
+
+    await service.updateGlobalDailyStakingContributions()
+    const SameDayPasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+
+    expect(SameDayPasiveInfo).toEqual(expectedPasiveInfo)
+    
 })
+
+test("update and get passive staking Info Diff Day", async () => {
+    await service.updateGlobalDailyStakingContributions()
+    const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    //This (And all smilar test) expects 7 DS pasive per asset
+    const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
+        ctype: 'success',
+        weeklyAccumulated: '6',
+        dragonSilverToClaim: '10',
+        dragonSilver: '15'
+      }
+    expect(pasiveInfo).toEqual(expectedPasiveInfo)
+
+    calendar.moveDays(1)
+    await service.updateGlobalDailyStakingContributions()
+    const SameDayPasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+
+    expect(SameDayPasiveInfo).toEqual(expectedPasiveInfo)
+    
+})
+
+

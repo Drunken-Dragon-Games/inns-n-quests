@@ -1,5 +1,5 @@
 import { Op, Transaction } from "sequelize"
-import { SResult } from "../../tools-utils"
+import { Result, SResult } from "../../tools-utils"
 import { DailyRecord, WeeklyRecord } from "./records-db"
 import { DailyReward, WeeklyReward } from "./rewards-db"
 import { Calendar } from "../../tools-utils/calendar"
@@ -14,6 +14,7 @@ export class Rewards {
             where: {dailyRewardId}
         })
         if (existingReward) return {ctype: "failure", error: `User with ID ${userId} has already received a reward today.`}
+        //console.log(`creating reward wiht id ${dailyRewardId}`)
         await DailyReward.create({dailyRewardId,userId, reward: error, created: this.calendar.now()})
         return {ctype: "success"}
     }
@@ -26,18 +27,20 @@ export class Rewards {
         })
         if(!existingRewardRecord) return {ctype: "failure", error: `No reward row was found.`}
         if (existingRewardRecord.reward) return {ctype: "failure", error: `Reward has already been completed.`}
-        console.log(`updating reward ${dailyRewardId} with ${reward}`)
+        //console.log(`adding reard to ${dailyRewardId}`)
         existingRewardRecord.reward = reward
         await existingRewardRecord.save()
         return {ctype: "success"}
     }
 
     async getWeeklyAccumulated(userId: string){
-        console.log(`getting wekkly acomulated for ${userId}`)
         try{const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
-        const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber, now.getUTCFullYear())
-        console.log({weekStart, weekEnd})
+        const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber.weekNo, weekNumber.year)
+        /* console.log(`${now.toISOString().split('T')[0]} should be between
+        ${weekStart.toISOString().split('T')[0]} and
+        ${weekEnd.toISOString().split('T')[0]}
+        `) */
         const dailyRewards = await DailyReward.findAll({
             where: {
                 userId,
@@ -46,7 +49,7 @@ export class Rewards {
                 }
             }
         })
-        console.log(`got dailyRewards ${dailyRewards}`)
+        //console.log(dailyRewards)
         return dailyRewards.reduce((acc, dailyReward) => acc + Number(dailyReward.reward), 0) } 
         catch(e: any){
             console.log(e)
@@ -57,8 +60,7 @@ export class Rewards {
     async createWeekly(userId: string, transaction: Transaction): Promise<SResult<{}>>{
         const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
-        const year = now.getUTCFullYear()
-        const weeklyRewardId = `${userId}-${weekNumber}-${year}`;
+        const weeklyRewardId = `${userId}-${weekNumber.weekNo}-${weekNumber.year}`
         const existingReward = await WeeklyReward.findOne({
             where: {weeklyRewardId}
         })
@@ -70,8 +72,7 @@ export class Rewards {
     async completeWeekly(userId: string, reward: string, transaction: Transaction): Promise<SResult<{}>>{
         const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
-        const year = now.getUTCFullYear()
-        const weeklyRewardId = `${userId}-${weekNumber}-${year}`
+        const weeklyRewardId = `${userId}-${weekNumber.weekNo}-${weekNumber.year}`
         const existingReward = await WeeklyReward.findOne({
             where: {weeklyRewardId}
         })
@@ -85,10 +86,10 @@ export class Rewards {
     async getCurrentWeekTotals(): Promise<{[userId: string]: number}> {
         const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
-        const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber, now.getUTCFullYear())
+        const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber.weekNo, weekNumber.year)
         const dailyRewards = await DailyReward.findAll({
             where: {
-                createdAt: {
+                created: {
                     [Op.between]: [weekStart, weekEnd]
                 }
             }
@@ -128,8 +129,7 @@ export class Records {
     async createWeekly(): Promise<SResult<{}>>{
         const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
-        const year = now.getUTCFullYear()
-        const weeklyRecordId = `${weekNumber}-${year}`
+        const weeklyRecordId = `${weekNumber.weekNo}-${weekNumber.year}`
         const existingRecord = await WeeklyRecord.findOne({
             where: {weeklyRecordId}
         })
@@ -141,8 +141,7 @@ export class Records {
     async completeWeekly(rewardTotal: string): Promise<SResult<{}>>{
         const now = this.calendar.now()
         const weekNumber= getWeekNumber(now)
-        const year = now.getUTCFullYear()
-        const weeklyRecordId = `${weekNumber}-${year}`
+        const weeklyRecordId = `${weekNumber.weekNo}-${weekNumber.year}`
         const existingRecord = await WeeklyRecord.findOne({
             where: {weeklyRecordId}
         })
@@ -161,35 +160,37 @@ export class Records {
  * - Milliseconds are converted to days (86400000 is the number of milliseconds in a day) for calculations.
  * - Partial weeks are rounded up as they count as full weeks.
  * - ISO 8601 treats Monday as the first day of the week, not Sunday.
+ * 
+ * Source: https://stackoverflow.com/questions/6117814/get-week-of-year-in-javascript-like-in-php
  */
-const getWeekNumber = (d: Date) => {
-    d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
+const getWeekNumber = (d: Date): {weekNo: number, year: number} => {
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
     d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1))
     const  weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1)/7)
-    return weekNo
+    console.log({weekNo})
+    return {weekNo, year: d.getUTCFullYear()}
 }
 
-/**
- * Returns the date range for a given week number and year.
- * The start date is the first date of the week.
- * The end date is one millisecond before the first date of the next week.
- */
-const getDateRangeOfWeek = (weekNo: number, year: number): [Date, Date] => {
-    const d1 = new Date(year, 0, 1 + (weekNo - 1) * 7)
-    const d2 = new Date(year, 0, 1 + weekNo * 7)
-    d2.setMilliseconds(d2.getMilliseconds() - 1)
-    return [d1, d2]
-}
-
-const getCurrentWeekDates = () => {
-    const currDate = new Date()
-    const currWeekDay = currDate.getUTCDay()
+const getDateRangeOfWeek = (weekNumber: number, year: number): [Date, Date] => {
+    // Start with the first day of the year
+    const startDate = new Date(Date.UTC(year, 0, 1))
     
-    const firstDayUTC = new Date(currDate.valueOf())
-    firstDayUTC.setUTCDate(currDate.getUTCDate() - currWeekDay + 1)  // Monday
-    const lastDayUTC = new Date(firstDayUTC.valueOf())
-    lastDayUTC.setUTCDate(firstDayUTC.getUTCDate() + 6)  // Sunday
+    // Find the first Thursday of the year
+    while (startDate.getUTCDay() !== 4) {
+        startDate.setUTCDate(startDate.getUTCDate() + 1)
+    }
+    
+    // Get to the start (Monday) of this first week
+    startDate.setUTCDate(startDate.getUTCDate() - 3) 
 
-    return [firstDayUTC.toISOString().split('T')[0], lastDayUTC.toISOString().split('T')[0]]
+    // Adjust for the desired week number
+    startDate.setUTCDate(startDate.getUTCDate() + (weekNumber - 1) * 7)
+
+    //getting that weeks last milisecond
+    const endDate = new Date(startDate)
+    endDate.setUTCDate(startDate.getUTCDate() + 6)
+    endDate.setUTCHours(23, 59, 59, 999)
+    
+    return [startDate, endDate]
 }

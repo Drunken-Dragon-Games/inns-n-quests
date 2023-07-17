@@ -6,9 +6,9 @@ type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
 
 const addSequelizeColumns = (tableAttributes: ModelAttributes<any, any>): ModelAttributes<any, any> => {
   return { 
-    ...tableAttributes, 
+    ...tableAttributes,
     createdAt: {
-      allowNull: true,
+      allowNull: false,
       type: DataTypes.DATE
     },
     updatedAt: {

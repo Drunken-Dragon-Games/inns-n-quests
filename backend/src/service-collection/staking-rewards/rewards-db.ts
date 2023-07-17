@@ -67,14 +67,12 @@ export const configureSequelizeModel = (sequelize: Sequelize): void => {
         sequelize, 
         modelName: 'weeklyReward', 
         tableName: weeklyRewardsTableName,
-        createdAt: false
     })
 
     DailyReward.init(dailyRewardTableAttributes, {
         sequelize,
         modelName: "dailyReward",
         tableName: dailyRewardsTableName,
-        createdAt: false
     })
 
 
