@@ -4,6 +4,7 @@ import urljoin from "url-join"
 import { useRouter } from "next/router"
 import { SignedMessage } from "lucid-cardano"
 import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UTxOMinimal, UserBallot, UserFullInfo } from "./account-dsl"
+import { CollectionWithUIMetada } from "../collection/display/display-state-models"
 
 export const AccountBackend = {
 
@@ -117,6 +118,11 @@ export const AccountBackend = {
     async votForBallot(ballotId: string, optionIndex: string, traceId?: string): Promise<VoteResult>{
         const result = await accountRequest("POST", "/governance/vote", {ballotId, optionIndex}, traceId)
         return result.data
+    },
+
+    async getUserCollectionWIthMetadata(traceId?: string): Promise<UserCollectionWithMetadataResult>{
+        const result = await accountRequest("POST", "/assets/collection-with-metadata", traceId)
+        return result.data
     }
 }
 
@@ -188,6 +194,10 @@ export type GovernanceUserBallotss =
 export type VoteResult 
     = { status: "ok" }
     | { status: "invalid", reason: string }
+
+export type UserCollectionWithMetadataResult
+    = {status: "ok", collection: CollectionWithUIMetada}
+    | {status: "invalid", reason: string}
 
 async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
     return await withTokenRefresh(() => accountRequest(method, endpoint, data))

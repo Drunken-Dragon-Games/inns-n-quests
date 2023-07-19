@@ -6,8 +6,8 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { MinimalUTxO } from "../tools-cardano"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
-import { CollectionService } from "../service-collection"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, UserCollectionWithMetadataResult, VoteResult } from "./service-spec"
+import { CollectionService, CollectionWithUIMetadataResult } from "../service-collection"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -235,6 +235,13 @@ export class AccountServiceDsl implements AccountService {
         const voteResult = await this.governanceService.voteForBallot(ballotId, optionIndex, userId, dragonGold)
         if (voteResult.ctype !== "success") return {status: "invalid", reason: voteResult.reason}
         return {status: "ok"}
+    }
+
+    async getUserDisplayCollection(userId: string,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult> {
+        const collectionResult = await this.collectionService.getCollectionWithUIMetadata(userId)
+        if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
+        return {status: "ok", collection: collectionResult.collection}
+
     }
 }
 

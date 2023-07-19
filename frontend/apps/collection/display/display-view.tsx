@@ -7,7 +7,7 @@ import {
 import { useSelector } from "react-redux"
 import { useEffect } from "react"
 import { DisplayTransitions } from "./display-transitions"
-import { DisplasyState } from "./display-state"
+import { DisplayState } from "./display-state"
 const CardContainer = styled.div`
     width: 100%;
     padding: 5vw;
@@ -28,7 +28,7 @@ const isVideoFile = (src: string): boolean => {
 }
 
 export const CollectionView = ({ userInfo }: { userInfo: UserInfo }) => {
-    const { collectionItems } = useSelector((state: DisplasyState) => ({
+    const { collectionItems } = useSelector((state: DisplayState) => ({
         collectionItems: state.collectionItems
     }))
     useEffect(() => {

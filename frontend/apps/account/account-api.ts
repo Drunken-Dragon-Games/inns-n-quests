@@ -1,3 +1,4 @@
+import { AccountBackend } from "./account-backend"
 import { AccountTransitions } from "./account-transitions"
 
 export const AccountApi = {
@@ -12,4 +13,8 @@ export const AccountApi = {
     useRefreshSession(callback?: (signed: boolean) => void): void {
         AccountTransitions.useRefreshSession(callback)
     },
+
+    getUserCollectionWithMetadata(){
+        return AccountBackend.getUserCollectionWIthMetadata()
+    }
 }

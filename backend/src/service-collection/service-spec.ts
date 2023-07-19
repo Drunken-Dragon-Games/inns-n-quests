@@ -18,7 +18,7 @@ export interface CollectionService {
      * Returns the collection with each asset's weekly contributions to the player's passive staking.
      * Intended to be used on the collection UI.
      */
-    getCollectionWithUIMetadata(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>>
+    getCollectionWithUIMetadata(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<CollectionWithUIMetadataResult>
 
     /**
      * Intended to be displayed on the user's collection UI.
@@ -64,3 +64,6 @@ export type GetPassiveStakingInfoResult = SResult<{
     dragonSilverToClaim: string, 
     dragonSilver: string 
 }>
+
+export type CollectionWithUIMetadataResult = GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>
+export type CollectionWithUIMetada = Collection<CollectibleStakingInfo & CollectibleMetadata>

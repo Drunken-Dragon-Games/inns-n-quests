@@ -306,7 +306,7 @@ export const AccountThunks = {
         else 
             dispatch(actions.updateVoteRegistered(ballotId))
             actions.setGovernanceState({ ctype: "idle"})
-    }   
+    }
 }
 
 //local storage set

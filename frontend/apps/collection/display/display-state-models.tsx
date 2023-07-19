@@ -28,3 +28,8 @@ type GetCollectionResult<A extends object>
 export type PolicyCollectiblesWithUIData = PolicyCollectibles<CollectibleStakingInfo & CollectibleMetadata>
 export type CollectionWithUIMetada = Collection<CollectibleStakingInfo & CollectibleMetadata>
 export type CollectionWithUIMetadataResult = GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>
+
+export type CollectionFetchingState
+    = { ctype: "idle" }
+    | { ctype: "loading", details: string }
+    | { ctype: "error", details: string }

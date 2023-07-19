@@ -8,7 +8,6 @@ export interface AccountState {
     dragonSilverClaims: ClaimInfo[]
     governanceBallots: GovernanceBallots
     governanceState: GovernaceState
-    collectionItems: string[]
 }
 
 export type AccountStoreState = 
@@ -72,7 +71,6 @@ const accountInitialState: AccountState = {
     dragonSilverClaims: [],
     governanceBallots: {},//ballotsTestData,
     governanceState: {ctype: "idle"},
-    collectionItems: ["https://cdn.ddu.gg/adv-of-thiolden/web/terrorhertz_32_1.mp4","https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif", "https://cdn.ddu.gg/pixeltiles/xl/PixelTile1.png"]
 }
 
 export const accountState = createSlice({
