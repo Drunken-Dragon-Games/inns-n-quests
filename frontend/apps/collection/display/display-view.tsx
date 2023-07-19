@@ -1,4 +1,3 @@
-import { UserInfo } from "../account-dsl"
 import styled from "styled-components"
 import {
     Character, notEmpty, PixelArtImage, rules, simpleHash, Units,
@@ -6,9 +5,9 @@ import {
     NoDragImage, Video
 } from "../../common"
 import { useSelector } from "react-redux"
-import { AccountState } from "../account-state"
 import { useEffect } from "react"
-import { AccountTransitions } from "../account-transitions"
+import { DisplayTransitions } from "./display-transitions"
+import { DisplasyState } from "./display-state"
 const CardContainer = styled.div`
     width: 100%;
     padding: 5vw;
@@ -29,11 +28,11 @@ const isVideoFile = (src: string): boolean => {
 }
 
 export const CollectionView = ({ userInfo }: { userInfo: UserInfo }) => {
-    const { collectionItems } = useSelector((state: AccountState) => ({
+    const { collectionItems } = useSelector((state: DisplasyState) => ({
         collectionItems: state.collectionItems
     }))
     useEffect(() => {
-        userInfo ? AccountTransitions.getUserOpenBallots() : AccountTransitions.getOpenBallots()
+        userInfo ? DisplayTransitions.getCollection() : DisplayTransitions.getCollection()
     }, [userInfo])
     return <CardContainer>
     {collectionItems.map((src, index) => {
@@ -46,7 +45,7 @@ export const CollectionView = ({ userInfo }: { userInfo: UserInfo }) => {
                     width={5}
                     units={vmax1}
                 />
-            );
+            )
         } else {
             return (
                 <PixelArtImage

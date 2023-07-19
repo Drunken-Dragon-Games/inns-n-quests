@@ -139,10 +139,6 @@ export const accountState = createSlice({
                 ballot.hasVoted = true
             }
         },
-
-        setCollectionItems: (state, action: PayloadAction<string[]>) => {
-            state.collectionItems = action.payload
-        }
     }
 })
 

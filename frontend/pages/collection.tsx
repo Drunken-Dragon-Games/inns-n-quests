@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import CollectionApp from '../apps/collection/collectionApp'
+import CollectionView from '../apps/collection/collection-view'
 
 const Collection: NextPage = () =>
     <>
@@ -8,7 +8,7 @@ const Collection: NextPage = () =>
             <title>Drunken Dragon Collection</title>
             <meta name="Drunken Dragon Inns & Quests" content="A Drunken Dragon Universe Game" />
         </Head>
-        <CollectionApp />
+        <CollectionView />
     </>
 
 export default Collection

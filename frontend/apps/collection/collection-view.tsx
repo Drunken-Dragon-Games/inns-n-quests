@@ -1,9 +1,12 @@
 import LateralBar from "../utils/laterBar/lateralBar"
 import NavBarApp from "../utils/navBar/navBarApp"
 import Footer from "../utils/footer/footer"
-import CollectionComponent from "./collectionComponent/collectionComponent"
 
-const CollectionApp = ():JSX.Element =>{ 
+const CollectionComponent = () => 
+    <>
+    </>
+
+const CollectionView = ():JSX.Element =>{ 
     
     return(<>
                 <LateralBar/>
@@ -13,4 +16,4 @@ const CollectionApp = ():JSX.Element =>{
     </>)
 }
 
-export default CollectionApp
+export default CollectionView
