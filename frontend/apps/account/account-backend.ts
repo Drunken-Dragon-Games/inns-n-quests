@@ -4,7 +4,7 @@ import urljoin from "url-join"
 import { useRouter } from "next/router"
 import { SignedMessage } from "lucid-cardano"
 import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UTxOMinimal, UserBallot, UserFullInfo } from "./account-dsl"
-import { CollectionWithUIMetada } from "../collection/display/display-state-models"
+import { CollectionWithUIMetada } from "../collection/collection-state-models"
 
 export const AccountBackend = {
 

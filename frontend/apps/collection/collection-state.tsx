@@ -1,20 +1,20 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { CollectionFetchingState, CollectionWithUIMetada } from "./display-state-models"
+import { CollectionFetchingState, CollectionWithUIMetada } from "./collection-state-models"
 
 
-export type DisplayStoreState = 
-    ReturnType<typeof displayStore.getState> // Includes Thunks Middleware
+export type CollectionStoreState = 
+    ReturnType<typeof CollectionStore.getState> // Includes Thunks Middleware
 
-export type DisplayThunk<ReturnType = void> = 
-    ThunkAction<ReturnType, DisplayStoreState, unknown, Action<string>>
+export type CollectionThunk<ReturnType = void> = 
+    ThunkAction<ReturnType, CollectionStoreState, unknown, Action<string>>
 
-export interface DisplayState {
+export interface CollectionState {
     isUserLogged: boolean
     collectionItems: CollectionWithUIMetada,
     collectionFetchingState: CollectionFetchingState
 }
 
-const displayInitialState: DisplayState = {
+const collectionInitialState: CollectionState = {
     isUserLogged: false,
     collectionItems: {
         pixelTiles: [],
@@ -24,9 +24,9 @@ const displayInitialState: DisplayState = {
     collectionFetchingState: {ctype: "idle"}
 }
 
-export const displayState = createSlice({
-    name: "collection-display-state",
-    initialState: displayInitialState,
+export const collectinState = createSlice({
+    name: "collection-state",
+    initialState: collectionInitialState,
     reducers: {
         setIsUserLogged: (state, action: PayloadAction<boolean>) => {
             state.isUserLogged = action.payload
@@ -42,7 +42,7 @@ export const displayState = createSlice({
     }
 })
 
-export const displayStore = configureStore({
-    reducer: displayState.reducer,
+export const CollectionStore = configureStore({
+    reducer: collectinState.reducer,
     middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
 })

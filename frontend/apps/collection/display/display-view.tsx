@@ -1,13 +1,6 @@
 import styled from "styled-components"
-import {
-    Character, notEmpty, PixelArtImage, rules, simpleHash, Units,
-    useComputeHeightFromOriginalImage, useRememberLastValue, vmax1, px,
-    NoDragImage, Video
-} from "../../common"
-import { useSelector } from "react-redux"
-import { useEffect } from "react"
-import { DisplayTransitions } from "./display-transitions"
-import { DisplayState } from "./display-state"
+import { CollectionWithUIMetada } from "../collection-state-models"
+import { PixelArtImage, Video, vmax1 } from "../../common"
 const CardContainer = styled.div`
     width: 100%;
     padding: 5vw;
@@ -27,20 +20,14 @@ const isVideoFile = (src: string): boolean => {
     return src.endsWith('.mp4')
 }
 
-export const CollectionView = ({ userInfo }: { userInfo: UserInfo }) => {
-    const { collectionItems } = useSelector((state: DisplayState) => ({
-        collectionItems: state.collectionItems
-    }))
-    useEffect(() => {
-        userInfo ? DisplayTransitions.getCollection() : DisplayTransitions.getCollection()
-    }, [userInfo])
+export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWithUIMetada }) => {
     return <CardContainer>
-    {collectionItems.map((src, index) => {
-        if (isVideoFile(src)) {
+    {collectionItems.pixelTiles.map((src, index) => {
+        if (isVideoFile(src.splashArt)) {
             return (
                 <Video 
                     key={index}
-                    src={src}
+                    src={src.splashArt}
                     height={5}
                     width={5}
                     units={vmax1}
@@ -50,7 +37,7 @@ export const CollectionView = ({ userInfo }: { userInfo: UserInfo }) => {
             return (
                 <PixelArtImage
                     key={index}
-                    src={src}
+                    src={src.splashArt}
                     alt={"Art image"}
                     height={5}
                     width={5}

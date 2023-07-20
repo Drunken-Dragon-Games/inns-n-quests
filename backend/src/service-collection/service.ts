@@ -111,7 +111,7 @@ export class CollectionServiceDsl implements CollectionService {
             const policyId = this.wellKnownPolicies[policy].policyId
             const assets = assetList.inventory[policyId]
             if(assets)return {...acc,[policy]: processAssets(policyId, assets)}
-            return acc
+            return {...acc,[policy]: []}
         }, {} as Collection<{}>)
 
           return {ctype: "success", collection}
