@@ -2,6 +2,7 @@ import { v4 } from "uuid"
 import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
+import router from "next/router"
 import { SignedMessage } from "lucid-cardano"
 import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UTxOMinimal, UserBallot, UserFullInfo } from "./account-dsl"
 import { CollectionWithUIMetada } from "../collection/collection-state-models"
@@ -121,7 +122,7 @@ export const AccountBackend = {
     },
 
     async getUserCollectionWIthMetadata(traceId?: string): Promise<UserCollectionWithMetadataResult>{
-        const result = await accountRequest("POST", "/assets/collection-with-metadata", traceId)
+        const result = await accountRequestWRefresh("POST", "/assets/collection-with-metadata", traceId)
         return result.data
     }
 }
@@ -252,7 +253,7 @@ async function withTokenRefresh<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 async function refreshToken(error: any): Promise<boolean> {
-    const router = useRouter()
+    //const router = useRouter()
     const refreshToken = localStorage.getItem("refresh")
     if(error instanceof AxiosError && error.response?.status == 401 && refreshToken){
         try {

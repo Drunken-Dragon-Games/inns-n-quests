@@ -9,13 +9,11 @@ export type CollectionThunk<ReturnType = void> =
     ThunkAction<ReturnType, CollectionStoreState, unknown, Action<string>>
 
 export interface CollectionState {
-    isUserLogged: boolean
     collectionItems: CollectionWithUIMetada,
     collectionFetchingState: CollectionFetchingState
 }
 
 const collectionInitialState: CollectionState = {
-    isUserLogged: false,
     collectionItems: {
         pixelTiles: [],
         grandMasterAdventurers: [],
@@ -28,10 +26,6 @@ export const collectinState = createSlice({
     name: "collection-state",
     initialState: collectionInitialState,
     reducers: {
-        setIsUserLogged: (state, action: PayloadAction<boolean>) => {
-            state.isUserLogged = action.payload
-        },
-
         setCollectionItems: (state, action: PayloadAction<CollectionWithUIMetada>) => {
             state.collectionItems = action.payload
         },

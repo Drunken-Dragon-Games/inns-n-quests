@@ -10,7 +10,6 @@ export const CollectionThunks = {
             dispatch(actions.setCollectionFetchingState({ctype: "error", details: result.reason}))
         else{
             dispatch(actions.setCollectionItems(result.collection))
-            dispatch(actions.setIsUserLogged(true))
         }
             
     }

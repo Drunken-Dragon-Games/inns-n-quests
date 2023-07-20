@@ -71,15 +71,15 @@ export const appsToShow: appsToShow[] = [
         disable: false
     },
     {
+        url: "/collection",
+        name: "Collection",
+        icon: "event",
+        disable: false
+    },
+    {
         url: "/trade",
         name: "Trading tools",
         icon: "trade",
-        disable: true
-    },
-    {
-        url: "/season_of_lore",
-        name: "season of lore",
-        icon: "event",
         disable: true
     },
     {

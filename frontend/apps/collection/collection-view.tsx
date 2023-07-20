@@ -9,18 +9,13 @@ import { collectionTransitions } from "./collection-transitions"
 import { Provider } from "react-redux"
 
 const CollectionComponent = () =>{
-    const { collectionItems, isUserLogged } = useSelector((state: CollectionState) => ({
+    const { collectionItems } = useSelector((state: CollectionState) => ({
             collectionItems: state.collectionItems,
-            isUserLogged: state.isUserLogged
     }))
     useEffect(() => {collectionTransitions.getCollection()}, [])
     return(
-    <>  {isUserLogged ?
-        <>
-            <DisplayView collectionItems={collectionItems}/>
-        </>:
-        <></>
-    }   
+    <>  
+        <DisplayView collectionItems={collectionItems}/>
     </>
     )
 }
