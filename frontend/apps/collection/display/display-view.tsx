@@ -72,9 +72,36 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
         "advTln": "splashArt",
     })
 
+    const dimensionsMap = {
+        "pxlTs": {
+            "splashArt": { height: 7,  width: 6 },
+            "miniature": { height: 7,  width: 4.5 },
+        },
+        "gmas": {
+            "splashArt": { height: 8,  width: 8 },
+            "miniature": { height: 8,width: 6.4 }
+        },
+        "advTln": {
+            "splashArt": { height: 8,  width: 6 },
+            "miniature": { height: 8,  width: 6 }
+        }
+    }
+
+    const [imageDimensions, setImageDimensions] = useState({
+        "pxlTs": dimensionsMap["pxlTs"]["splashArt"],
+        "gmas": dimensionsMap["gmas"]["splashArt"],
+        "advTln": dimensionsMap["advTln"]["splashArt"],
+    })
+
     const getArtSource = (coll: "pxlTs" | "gmas" | "advTln", src: {splashArt: string, miniature: string}) => {
         if (artType[coll] === 'splashArt') return src.splashArt
         else return src.miniature
+    }
+
+    const handleArtTypeChange = (coll: "pxlTs" | "gmas" | "advTln") => {
+        const newArtType = artType[coll] === "splashArt" ? "miniature" : "splashArt";
+        setArtType({...artType, [coll]: newArtType})
+        setImageDimensions({...imageDimensions, [coll]: dimensionsMap[coll][newArtType]})
     }
 
     return (
@@ -82,7 +109,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
         <PolicyContainer>
             <Header>
                 <ButtonContainer>
-                    <button onClick={() => setArtType({...artType, "pxlTs": artType.pxlTs == "splashArt" ? "miniature" : "splashArt" })}>{artType.pxlTs}</button>
+                    <button onClick={() => handleArtTypeChange("pxlTs")}>{artType.pxlTs}</button>
                 </ButtonContainer>
                 <Title>Pixel Tiles</Title>
                 <ButtonContainer>
@@ -96,11 +123,11 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                 return (
                 <div key={index}>
                     <CollectibleContainer key={index}>
-                        <PixelArtImage src={getArtSource("pxlTs", src)} alt={"Art image"} height={6} width={5}/>
+                        <PixelArtImage src={getArtSource("pxlTs", src)} alt={"Art image"} height={imageDimensions.pxlTs.height} width={ src.class === "furniture" && artType.pxlTs === "miniature" ? imageDimensions.pxlTs.width * 1.5 : imageDimensions.pxlTs.width}/>
                         <CollectibleInfo>
                             <p>{src.name}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
                             <p>Class: {src.class}</p>
+                            <>{src.class === "furniture" ? <></> : <p>APS: {src.aps.join(', ')}</p>}</>
                         </CollectibleInfo>
                     </CollectibleContainer>
                 </div>
@@ -110,7 +137,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
         <PolicyContainer>
             <Header>
                 <ButtonContainer>
-                    <button onClick={() => setArtType({...artType, "gmas": artType.gmas == "splashArt" ? "miniature" : "splashArt" })}>{artType.gmas}</button>
+                    <button onClick={() => handleArtTypeChange("gmas")}>{artType.gmas}</button>
                 </ButtonContainer>
                 <Title>Grand Master Adventurers</Title>
             </Header>
@@ -118,11 +145,11 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                 return (
                 <div key={index}>
                     <CollectibleContainer key={index}>
-                        <PixelArtImage src={getArtSource("gmas", src)} alt={"Art image"} height={5} width={5}/>
+                        <PixelArtImage src={getArtSource("gmas", src)} alt={"Art image"} height={imageDimensions.gmas.height} width={imageDimensions.gmas.width}/>
                         <CollectibleInfo>
                             <p>{src.name}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
                             <p>Class: {src.class}</p>
+                            <p>APS: {src.aps.join(', ')}</p>
                         </CollectibleInfo>
                     </CollectibleContainer>
                 </div>
@@ -132,7 +159,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
         <PolicyContainer>
             <Header>
                 <ButtonContainer>
-                    <button onClick={() => setArtType({...artType, "advTln": artType.advTln == "splashArt" ? "miniature" : "splashArt" })}>{artType.advTln}</button>
+                    <button onClick={() =>  handleArtTypeChange("advTln")}>{artType.advTln}</button>
                 </ButtonContainer>
                 <Title>Adventurers Of Thiolden</Title>
             </Header>
@@ -140,22 +167,22 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                 if (artType.advTln == "splashArt" && isVideoFile(src.splashArt)) {
                     return (
                     <CollectibleContainer key={index}>
-                        <Video src={src.splashArt} height={6} width={5} units={vmax1}/>
+                        <Video src={src.splashArt} height={imageDimensions.advTln.height} width={imageDimensions.advTln.width} units={vmax1}/>
                         <CollectibleInfo>
                             <p>{capitalizeFirstLetter(src.name)}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
                             <p>Class: {src.class}</p>
+                            <p>APS: {src.aps.join(', ')}</p>
                         </CollectibleInfo>
                     </CollectibleContainer>
                     )
                 } else {
                     return (
                     <CollectibleContainer key={index}>
-                        <PixelArtImage src={getArtSource("advTln",src)} alt={"Art image"} height={6} width={5}/>
+                        <PixelArtImage src={getArtSource("advTln",src)} alt={"Art image"} height={imageDimensions.advTln.height} width={imageDimensions.advTln.width}/>
                         <CollectibleInfo>
                             <p>{capitalizeFirstLetter(src.name)}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
                             <p>Class: {src.class}</p>
+                            <p>APS: {src.aps.join(', ')}</p>
                         </CollectibleInfo>
                     </CollectibleContainer>
                     )
