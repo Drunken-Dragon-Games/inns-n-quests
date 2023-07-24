@@ -1,6 +1,6 @@
 import randomseed from 'random-seed'
 /**
- * this class exist to allow us to obtain random deterministic values
+ * this class exist to allow us to obtain deterministic random values
  */
 export class RandomDSL {
     private readonly random: randomseed.RandomSeed
