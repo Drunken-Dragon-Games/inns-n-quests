@@ -1,7 +1,9 @@
 import { MetadataRegistry, WellKnownPolicies } from "../../tools-assets"
 import { SResult } from "../../tools-utils"
 import { Collection, PolicyCollectibles } from "../models"
-import { CreateSyncedAsset, SyncedAsset } from "./assets-sync-db"
+import { SyncedAsset, syncedAssetTablename } from "./assets-sync-db"
+import { DbInteractible, CreateSyncedAsset, SyncedAssetChanges } from "./models"
+import { QueryTypes, Sequelize } from "sequelize"
 
 export class SyncedAssets {
     public relevantPolicies = ["pixelTiles", "adventurersOfThiolden", "grandMasterAdventurers"] as const
@@ -10,9 +12,10 @@ export class SyncedAssets {
         private readonly metadataRegistry: MetadataRegistry,
     ) {}
 
-    async determineUpdates(userId: string, inventory: {[policyId: string]: { unit: string, quantity: string, chain: boolean }[]}){
-        const preSyncedAssets = await SyncedAsset.findAll({where: {userId}})
-
+    async determineUpdates(userId: string, inventory: {[policyId: string]: { unit: string, quantity: string, chain: boolean }[]}): Promise<{
+        syncedAssetChanges: SyncedAssetChanges
+        fullCollection: Collection<{}>
+    }>{
         const processAssets = (policyId: string, assets: {unit: string,quantity: string,chain: boolean}[], policyName: string) => {
             return assets.reduce((acc, asset) => {
                 const collectible = {assetRef: asset.unit, quantity: asset.quantity, type: this.getCollectionType(policyId, asset.unit)}
@@ -24,10 +27,6 @@ export class SyncedAssets {
             }, {} as {policyCollectibles: PolicyCollectibles<{}>, creatableAssets: CreateSyncedAsset[]})
         }
         
-
-        type ChainInfo = {chainAssets:  CreateSyncedAsset[], fullCollection: Collection<{}>}
-        const emptyChainInfo: ChainInfo = {chainAssets: [], fullCollection: {} as Collection<{}>}
-
         const updatedChainInfo = (acc: ChainInfo, policy: string, assets: {unit: string,quantity: string,chain: boolean}[], policyId: string) => {
             const processedAssets = processAssets(policyId, assets, policy);
             return {
@@ -36,6 +35,11 @@ export class SyncedAssets {
             }
         }
 
+        const preSyncedAssets = await SyncedAsset.findAll({where: {userId}})
+
+        type ChainInfo = {chainAssets:  CreateSyncedAsset[], fullCollection: Collection<{}>}
+        const emptyChainInfo: ChainInfo = {chainAssets: [], fullCollection: {} as Collection<{}>}
+
         const chainInfo :ChainInfo = this.relevantPolicies.reduce((acc, policy) => {
             const policyId = this.wellKnownPolicies[policy].policyId
             const assets = inventory[policyId]
@@ -43,17 +47,16 @@ export class SyncedAssets {
             return {...acc, fullCollection: {...acc.fullCollection, [policy]: []}}
         }, emptyChainInfo)
 
-        type DbInteractible = {quantity: string, dbId: string}
+        
         const inventoryRecord: { [assetRef: string]: CreateSyncedAsset } = {}
         const preSyncedRecord: { [assetRef: string]: DbInteractible } = {}
 
         chainInfo.chainAssets.forEach(asset => inventoryRecord[asset.assetRef] = asset)
         preSyncedAssets.forEach(asset => preSyncedRecord[asset.assetRef] = {quantity: asset.quantity, dbId: asset.assetId})
 
-        const empty: { toCreate: CreateSyncedAsset[], toDelete: string[], toUpdate: DbInteractible[] } =
-         { toCreate: [], toDelete: [], toUpdate: [] }
+        const empty: SyncedAssetChanges = {toCreate: [], toDelete: [], toUpdate: []}
 
-         const inventoryKeys = Object.keys(inventoryRecord)
+        const inventoryKeys = Object.keys(inventoryRecord)
         const preSyncedKeys = Object.keys(preSyncedRecord)
 
         const uniqueAssetRefs = Array.from(new Set([...inventoryKeys, ...preSyncedKeys]))
@@ -73,8 +76,26 @@ export class SyncedAssets {
                 { toCreate, toDelete, toUpdate })
         }, empty)
 
-        return { toCreate, toDelete, toUpdate, fullCollection: chainInfo.fullCollection } 
+        return { syncedAssetChanges:{toCreate, toDelete, toUpdate}, fullCollection: chainInfo.fullCollection } 
         
+    }
+
+    async updateDatabase(syncedAssetChanges: SyncedAssetChanges, sequelize: Sequelize){
+        await SyncedAsset.bulkCreate(syncedAssetChanges.toCreate)
+        await SyncedAsset.destroy({where: {assetId: syncedAssetChanges.toDelete}})
+
+        const tempTableString = syncedAssetChanges.toUpdate.map(obj => `('${obj.dbId}', '${obj.quantity}')`).join(',')
+
+        const query = `
+            WITH 'temp_table' (dbId, quantity) AS (VALUES ${tempTableString})
+            UPDATE ${syncedAssetTablename}
+            SET quantity = 'temp_table'.quantity
+            FROM 'temp_table'
+            WHERE ${syncedAssetTablename}.assetId = 'temp_table'.dbId;
+        `;
+
+      
+        await sequelize.query(query, { type: QueryTypes.UPDATE })
     }
 
     async bulkCreateFromAssetList(userId: string, inventory: { [policyId: string]: { unit: string, quantity: string, chain: boolean }[] }): Promise<SResult<{collection: Collection<{}>}>>{

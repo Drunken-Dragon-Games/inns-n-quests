@@ -164,10 +164,13 @@ export class CollectionServiceDsl implements CollectionService {
         }
         const userIds = await this.identityService.listAllUserIds(logger)
         const dailyRewards = await Promise.all(userIds.map(async (userId) => {
-            //here goes the sync
             const userCollection = await this.syncUserCollection(userId, logger)
             //TODO: i need to think how am i going to hanlde this properly
-            if(userCollection.ctype !== "success") return 0
+            if(userCollection.ctype !== "success"){
+                logger?.log.error(`Sync User Collectionreturned: ${userCollection.error}`)
+                await this.rewards.createDaily(userId, `pending because Sync User Collection returned: ${userCollection.error}`)
+                return 0
+            }
             // Depending on how we decide to calculate the weekly earning this might be greatly optimized by not needing the metadata
             const collection = await this.getCollectionWithUIMetadata({ctype: "collection", collection: userCollection.fullCollection})
             if (collection.ctype !== "success"){
@@ -231,8 +234,8 @@ export class CollectionServiceDsl implements CollectionService {
         const options = {chain: true, policies: relevantPolicies.map(policy => this.wellKnownPolicies[policy].policyId)}
         const assetList = await this.assetManagementService.list(userId, options, logger)
         if (assetList.status !== "ok") return {ctype: "failure", error: assetList.status}
-        const { toCreate, toDelete, toUpdate, fullCollection } = await this.syncedAssets.determineUpdates(userId, assetList.inventory)
-        //TODO: actually updwqate the DB
+        const { syncedAssetChanges, fullCollection } = await this.syncedAssets.determineUpdates(userId, assetList.inventory)
+        await this.syncedAssets.updateDatabase(syncedAssetChanges, this.database)
         return {ctype: "success", fullCollection }
     }
 

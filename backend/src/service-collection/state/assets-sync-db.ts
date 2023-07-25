@@ -1,14 +1,7 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
+import { CreateSyncedAsset } from "./models"
 
 export const syncedAssetTablename = "collection_assets"
-
-export type CreateSyncedAsset = {
-    userId: string
-    assetRef: string
-    quantity: string
-    policyName: string
-    type: "Character" | "Furniture"
-}
 
 export class SyncedAsset extends Model implements CreateSyncedAsset {
     declare assetId: string
