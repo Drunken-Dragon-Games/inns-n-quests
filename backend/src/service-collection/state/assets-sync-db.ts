@@ -2,11 +2,20 @@ import { DataTypes, Model, Sequelize } from "sequelize"
 
 export const syncedAssetTablename = "collection_assets"
 
-export class SyncedAsset extends Model {
+export type CreateSyncedAsset = {
+    userId: string
+    assetRef: string
+    quantity: string
+    policyName: string
+    type: "Character" | "Furniture"
+}
+
+export class SyncedAsset extends Model implements CreateSyncedAsset {
     declare assetId: string
-    declare userid: string
+    declare userId: string
     declare assetRef: string
     declare quantity: string
+    declare policyName: string
     declare type: "Character" | "Furniture"
 }
 
@@ -26,6 +35,10 @@ export const syncedAssetTableAttributes = {
         allowNull: false,
     },
     quantity: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    policyName: {
         type: DataTypes.STRING,
         allowNull: false,
     },

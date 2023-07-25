@@ -8,13 +8,15 @@ import { MetadataRegistry, WellKnownPolicies } from "../tools-assets"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
-import { Collectible, CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles } from "./models"
+import { Collectible, CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles, collectionData } from "./models"
 import { RandomDSL } from "./random-dsl/dsl"
 
 import { IdentityService } from "../service-identity"
 import * as rewardsDB from "./staking-rewards/rewards-db"
 import * as recordsDB from "./staking-rewards/records-db"
+import * as syncedAssets from "./state/assets-sync-db"
 import { Records, Rewards } from "./staking-rewards/dsl"
+import {SyncedAssets} from "./state/dsl"
 import { Calendar } from "../tools-utils/calendar"
 
 export type CollectionServiceDependencies = {
@@ -41,7 +43,7 @@ export class CollectionServiceDsl implements CollectionService {
     private readonly migrator: Umzug<QueryInterface>
     private readonly rewards: Rewards
     private readonly records: Records
-
+    private readonly syncedAssets: SyncedAssets
     constructor(
         private readonly database: Sequelize,
         private readonly assetManagementService: AssetManagementService,
@@ -54,6 +56,7 @@ export class CollectionServiceDsl implements CollectionService {
         this.migrator = buildMigrator(database, migrationsPath)
         this.rewards = new Rewards(calendar)
         this.records = new Records(calendar)
+        this.syncedAssets = new SyncedAssets(wellKnownPolicies, metadataRegistry)
     }
 
     static async loadFromEnv(dependencies: CollectionServiceDependencies): Promise<CollectionServiceDsl> {
@@ -76,6 +79,7 @@ export class CollectionServiceDsl implements CollectionService {
     async loadDatabaseModels(): Promise<void> {
         rewardsDB.configureSequelizeModel(this.database)
         recordsDB.configureSequelizeModel(this.database)
+        syncedAssets.configureSequelizeModel(this.database)
         await this.migrator.up()
     }
 
@@ -89,6 +93,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Intended to be used on other services like the idle-quests-service.
      */
     async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>> {
+        //TODO: update this to get the collection from the db
         const { policy, page } = filter || {}
         const options = {
             page,
@@ -121,8 +126,11 @@ export class CollectionServiceDsl implements CollectionService {
      * Returns the collection with each asset's weekly contributions to the player's passive staking.
      * Intended to be used on the collection UI.
      */
-    async getCollectionWithUIMetadata(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
-        const collectionResult = await this.getCollection(userId, filter, logger)
+    async getCollectionWithUIMetadata(userData: collectionData, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
+        const collectionResult:GetCollectionResult<Unit>  = userData.ctype === "collection"
+        ? {ctype: "success", collection: userData.collection}
+        : await this.getCollection(userData.userId, userData.filter, logger)
+        
         if (collectionResult.ctype !== "success") return collectionResult
         const metadataCollection = this.hydrateCollectionWithMetadata(collectionResult.collection)
         const stakingCollection = this.calculateCollectionDailyReward(metadataCollection)
@@ -156,8 +164,12 @@ export class CollectionServiceDsl implements CollectionService {
         }
         const userIds = await this.identityService.listAllUserIds(logger)
         const dailyRewards = await Promise.all(userIds.map(async (userId) => {
+            //here goes the sync
+            const userCollection = await this.syncUserCollection(userId, logger)
+            //TODO: i need to think how am i going to hanlde this properly
+            if(userCollection.ctype !== "success") return 0
             // Depending on how we decide to calculate the weekly earning this might be greatly optimized by not needing the metadata
-            const collection = await this.getCollectionWithUIMetadata(userId)
+            const collection = await this.getCollectionWithUIMetadata({ctype: "collection", collection: userCollection.fullCollection})
             if (collection.ctype !== "success"){
                 logger?.log.error(`Getting collection returned: ${collection.error}`)
                 await this.rewards.createDaily(userId, `pending because collection returned: ${collection.error}`)
@@ -213,6 +225,15 @@ export class CollectionServiceDsl implements CollectionService {
         }
         
         await this.records.completeWeekly(totalGranted.toString())
+    }
+
+    async syncUserCollection(userId: string, logger?: LoggingContext): Promise<SResult<{fullCollection: Collection<{}>}>>{
+        const options = {chain: true, policies: relevantPolicies.map(policy => this.wellKnownPolicies[policy].policyId)}
+        const assetList = await this.assetManagementService.list(userId, options, logger)
+        if (assetList.status !== "ok") return {ctype: "failure", error: assetList.status}
+        const { toCreate, toDelete, toUpdate, fullCollection } = await this.syncedAssets.determineUpdates(userId, assetList.inventory)
+        //TODO: actually updwqate the DB
+        return {ctype: "success", fullCollection }
     }
 
     /**

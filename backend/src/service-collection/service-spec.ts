@@ -1,6 +1,6 @@
 import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
-import { CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter } from "./models"
+import { CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, collectionData } from "./models"
 
 export interface CollectionService {
 
@@ -18,7 +18,7 @@ export interface CollectionService {
      * Returns the collection with each asset's weekly contributions to the player's passive staking.
      * Intended to be used on the collection UI.
      */
-    getCollectionWithUIMetadata(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<CollectionWithUIMetadataResult>
+    getCollectionWithUIMetadata(userData: collectionData, logger?: LoggingContext): Promise<CollectionWithUIMetadataResult>
 
     /**
      * Intended to be displayed on the user's collection UI.

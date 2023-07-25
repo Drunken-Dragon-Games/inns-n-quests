@@ -34,3 +34,5 @@ export type Collection<A extends object> = {
     adventurersOfThiolden: PolicyCollectibles<A>,
     grandMasterAdventurers: PolicyCollectibles<A>,
 }
+
+export type collectionData = {ctype: "IdAndFilter", userId: string, filter?: CollectionFilter} | {ctype: "collection", collection: Collection<{}>}
