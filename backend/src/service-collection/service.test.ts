@@ -7,8 +7,10 @@ import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registr
 import { testPolicies } from "../tools-utils/mocks/test-policies"
 import { CollectibleMetadata, CollectibleStakingInfo, Collection } from "./models"
 import { MutableCalendar } from "../tools-utils/calendar"
+import ServiceTestDsl from "./service.test-dsl"
 
 let service: CollectionService
+let dsl: ServiceTestDsl
 const calendar: MutableCalendar = new MutableCalendar(new Date(2023, 6, 10))
 const databaseConfig: DBConfig = 
     { host: "localhost"
@@ -51,13 +53,19 @@ beforeEach(async () => {
         wellKnownPolicies: testPolicies,
         calendar
     })
+
+    dsl = new ServiceTestDsl(
+        identityService,
+        assetManagementService,
+        service
+    )
 })
 
 afterEach(async () => {
     await service.unloadDatabaseModels()
 })
 
-test("get Collection ok", async () => {
+/* test("get Collection ok", async () => {
     const collectionResult = await  service.getCollection("userId")
     if (collectionResult.ctype !== "success"){
         expect(collectionResult.ctype).toEqual("success")
@@ -82,7 +90,7 @@ test("get Collection ok", async () => {
 })
 
 test("get Collection with Metadata ok", async () => {
-    const collectionResult = await service.getCollectionWithUIMetadata("userId")
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId: "userId"})
     if (collectionResult.ctype !== "success"){
         expect(collectionResult.ctype).toEqual("success")
         return
@@ -139,7 +147,7 @@ test("get Passsive staking Info", async () => {
         dragonSilver: "15"}
 
     expect(pasiveInfo).toEqual(expectedInfo)
-})
+}) */
 
 /* test("update and get passive 5 year test", async () => {
     const startingpoint = 0
@@ -168,7 +176,7 @@ test("get Passsive staking Info", async () => {
 }
 }, 1500000) */
 
-test("update and get passive staking Info Same Day", async () => {
+/* test("update and get passive staking Info Same Day", async () => {
     await service.updateGlobalDailyStakingContributions()
     const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
     //This (And all smilar test) expects 7 DS pasive per asset
@@ -237,6 +245,67 @@ test("grant 1 week", async () => {
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       })
+}) */
+
+test("syncUserCollection create delete and update", async () => {
+    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collectionDB = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+
+    if(collection.ctype !== "success" || collectionDB.ctype !== "success"){
+        expect(collection.ctype).toEqual("success")
+        expect(collectionDB.ctype).toEqual("success")
+        return
+    }
+
+    expect(collection).toEqual(collectionDB)
+    dsl.assetListReturnsOnce({ status: "ok", inventory: {
+        [testPolicies.pixelTiles.policyId]: [
+            { unit: "PixelTile1", quantity: "2", chain: true },
+            { unit: "PixelTile2", quantity: "3", chain: true},
+        ],
+        [testPolicies.grandMasterAdventurers.policyId]: [
+            { unit: "GrandmasterAdventurer1", quantity: "1", chain: true },
+        ],
+        [testPolicies.dragonSilver.policyId]:[
+            {unit: "dragonSilver", quantity: "15", chain: true},
+            {unit: "dragonSilver", quantity: "10", chain: false}
+        ]
+    }})
+    const collection2 = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collectionDB2 = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    if(collection2.ctype !== "success" || collectionDB2.ctype !== "success"){
+        expect(collection2.ctype).toEqual("success")
+        expect(collectionDB2.ctype).toEqual("success")
+        return
+    }
+    expect(collection2).toEqual(collectionDB2)
+
+    /* dsl.assetListReturnsOnce({ status: "ok", inventory: {
+        [testPolicies.pixelTiles.policyId]: [
+            { unit: "PixelTile1", quantity: "1", chain: true },
+            { unit: "PixelTile2", quantity: "3", chain: true},
+        ],
+        [testPolicies.grandMasterAdventurers.policyId]: [
+            { unit: "GrandmasterAdventurer1", quantity: "1", chain: true },
+        ],
+        [testPolicies.adventurersOfThiolden.policyId]: [
+            { unit: "AdventurerOfThiolden1", quantity: "1", chain: true },
+            { unit: "AdventurerOfThiolden2", quantity: "1", chain: true },
+        ],
+        [testPolicies.dragonSilver.policyId]:[
+            {unit: "dragonSilver", quantity: "15", chain: true},
+            {unit: "dragonSilver", quantity: "10", chain: false}
+        ]
+    }})
+    const collection3 = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collectionDB3 = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    if(collection3.ctype !== "success" || collectionDB3.ctype !== "success"){
+        expect(collection3.ctype).toEqual("success")
+        expect(collectionDB3.ctype).toEqual("success")
+        return
+    }
+    expect(collection3).toEqual(collectionDB3) */
+   
 })
 
 

@@ -1,5 +1,5 @@
 import { QueryInterface, Sequelize } from "sequelize"
-import { CollectionService, GetCollectionResult, GetPassiveStakingInfoResult } from "./service-spec"
+import { CollectionService, GetCollectionResult, GetPassiveStakingInfoResult, SyncUserCollectionResult } from "./service-spec"
 
 import path from "path"
 import { Umzug } from "umzug"
@@ -16,7 +16,7 @@ import * as rewardsDB from "./staking-rewards/rewards-db"
 import * as recordsDB from "./staking-rewards/records-db"
 import * as syncedAssets from "./state/assets-sync-db"
 import { Records, Rewards } from "./staking-rewards/dsl"
-import {SyncedAssets} from "./state/dsl"
+import {SyncedAssets, relevantPolicies} from "./state/dsl"
 import { Calendar } from "../tools-utils/calendar"
 
 export type CollectionServiceDependencies = {
@@ -30,13 +30,6 @@ export type CollectionServiceDependencies = {
 
 export type CollectionServiceConfig = {
 }
-
-const relevantPolicies = ["pixelTiles", "adventurersOfThiolden", "grandMasterAdventurers"] as const
-const policyIndexMapper: Record<CollectionPolicyNames, typeof relevantPolicies[number]> = {
-        "pixel-tiles": "pixelTiles",
-        "adventurers-of-thiolden": "adventurersOfThiolden",
-        "grandmaster-adventurers": "grandMasterAdventurers"
-    }
 
 export class CollectionServiceDsl implements CollectionService {
 
@@ -93,31 +86,15 @@ export class CollectionServiceDsl implements CollectionService {
      * Intended to be used on other services like the idle-quests-service.
      */
     async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>> {
-        //TODO: update this to get the collection from the db
-        const { policy, page } = filter || {}
-        const options = {
-            page,
-            policies: policy ? [this.wellKnownPolicies[policyIndexMapper[policy]].policyId] : relevantPolicies.map(policy => this.wellKnownPolicies[policy].policyId)
-        }
+        const emptyCollection: Collection<{}> = {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []}
+        const dbAssets = await this.syncedAssets.getSyncedAssets(userId)
+        console.log(`get collection got from synced assets`)
+        console.log(JSON.stringify(dbAssets, null, 4))
 
-        const assetList = await this.assetManagementService.list(userId, {chain: true, ...options}, logger)
-
-        if (assetList.status !== "ok") return {ctype: "failure", error:assetList.status }
-
-        const processAssets = (policyId: string, assets: {unit: string,quantity: string,chain: boolean}[]): PolicyCollectibles<{}> => {
-            return assets.reduce((acc, asset) => {
-                acc.push({assetRef: asset.unit, quantity: asset.quantity, type: this.getCollectionType(policyId, asset.unit)})
-                return acc
-            }, [] as PolicyCollectibles<{}>)
-            
-        }
-
-        const collection: Collection<{}> = relevantPolicies.reduce((acc, policy) => {
-            const policyId = this.wellKnownPolicies[policy].policyId
-            const assets = assetList.inventory[policyId]
-            if(assets)return {...acc,[policy]: processAssets(policyId, assets)}
-            return {...acc,[policy]: []}
-        }, {} as Collection<{}>)
+        const collection: Collection<{}> = dbAssets.reduce((acc, asset) => {
+            acc[asset.policyName].push({assetRef: asset.assetRef, quantity: asset.quantity, type: asset.type})
+            return acc
+        }, emptyCollection)
 
           return {ctype: "success", collection}
     }
@@ -172,7 +149,7 @@ export class CollectionServiceDsl implements CollectionService {
                 return 0
             }
             // Depending on how we decide to calculate the weekly earning this might be greatly optimized by not needing the metadata
-            const collection = await this.getCollectionWithUIMetadata({ctype: "collection", collection: userCollection.fullCollection})
+            const collection = await this.getCollectionWithUIMetadata({ctype: "collection", collection: userCollection.collection})
             if (collection.ctype !== "success"){
                 logger?.log.error(`Getting collection returned: ${collection.error}`)
                 await this.rewards.createDaily(userId, `pending because collection returned: ${collection.error}`)
@@ -213,7 +190,7 @@ export class CollectionServiceDsl implements CollectionService {
         //but aparently thats not such a great idea
         //https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await
         const pendingRewards = await this.rewards.getPreviusWeekTotals()
-        console.log(pendingRewards)
+        
         let totalGranted = 0
         for (const [userId, reward] of Object.entries(pendingRewards)) {
             const grantRecord = await this.rewards.createWeekly(userId)
@@ -230,13 +207,13 @@ export class CollectionServiceDsl implements CollectionService {
         await this.records.completeWeekly(totalGranted.toString())
     }
 
-    async syncUserCollection(userId: string, logger?: LoggingContext): Promise<SResult<{fullCollection: Collection<{}>}>>{
+    async syncUserCollection(userId: string, logger?: LoggingContext): Promise<SyncUserCollectionResult>{
         const options = {chain: true, policies: relevantPolicies.map(policy => this.wellKnownPolicies[policy].policyId)}
         const assetList = await this.assetManagementService.list(userId, options, logger)
         if (assetList.status !== "ok") return {ctype: "failure", error: assetList.status}
         const { syncedAssetChanges, fullCollection } = await this.syncedAssets.determineUpdates(userId, assetList.inventory)
-        await this.syncedAssets.updateDatabase(syncedAssetChanges, this.database)
-        return {ctype: "success", fullCollection }
+        await this.syncedAssets.updateDatabase(syncedAssetChanges, this.database, logger)
+        return {ctype: "success", collection: fullCollection }
     }
 
     /**
@@ -258,14 +235,6 @@ export class CollectionServiceDsl implements CollectionService {
      */
     removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
         throw new Error("Method not implemented.")
-    }
-
-    private getCollectionType = (policyId: string, assetUnit: string) => {
-        if(policyId === this.wellKnownPolicies.pixelTiles.policyId){
-            const metadataType = this.metadataRegistry.pixelTilesMetadata[assetUnit].type
-            return metadataType == "Adventurer" || metadataType == "Monster" || metadataType == "Townsfolk" ? "Character" : "Furniture"
-        }
-        return "Character"
     }
 
     private hydrateCollectionWithMetadata(assets: Collection<{}>): Collection<CollectibleMetadata> {

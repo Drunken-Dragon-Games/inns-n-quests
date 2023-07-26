@@ -39,6 +39,8 @@ export interface CollectionService {
      */
     grantGlobalWeeklyStakingGrant(logger?: LoggingContext): Promise<void>
 
+    syncUserCollection(userId: string, logger?: LoggingContext): Promise<SyncUserCollectionResult>
+
     /**
      * Returns the collection which currently can be used in the Mortal Realms.
      */
@@ -67,3 +69,5 @@ export type GetPassiveStakingInfoResult = SResult<{
 
 export type CollectionWithUIMetadataResult = GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>
 export type CollectionWithUIMetada = Collection<CollectibleStakingInfo & CollectibleMetadata>
+
+export type SyncUserCollectionResult = SResult<{collection: Collection<{}>}>

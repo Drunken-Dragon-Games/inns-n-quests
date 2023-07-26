@@ -1,5 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
 import { CreateSyncedAsset } from "./models"
+import { relevantPolicies } from "./dsl"
 
 export const syncedAssetTablename = "collection_assets"
 
@@ -8,7 +9,7 @@ export class SyncedAsset extends Model implements CreateSyncedAsset {
     declare userId: string
     declare assetRef: string
     declare quantity: string
-    declare policyName: string
+    declare policyName: typeof relevantPolicies[number]
     declare type: "Character" | "Furniture"
 }
 

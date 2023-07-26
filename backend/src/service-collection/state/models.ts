@@ -1,4 +1,3 @@
-export type DbInteractible = {dbId: string, quantity: string}
 export type CreateSyncedAsset = {
     userId: string
     assetRef: string
@@ -9,5 +8,5 @@ export type CreateSyncedAsset = {
 export type SyncedAssetChanges = {
     toCreate: CreateSyncedAsset[]
     toDelete: string[]
-    toUpdate: DbInteractible[]
+    toUpdate: {dbIds: string[], updatedAssets: CreateSyncedAsset[]}
 }
