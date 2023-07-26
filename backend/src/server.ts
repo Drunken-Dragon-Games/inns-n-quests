@@ -24,7 +24,7 @@ import { cardanoNetworkFromString } from "./tools-cardano"
 import { GovernanceServiceDsl } from "./service-governance/service"
 import { BlockchainServiceDsl } from "./service-blockchain/service"
 import { CollectionServiceDsl } from "./service-collection"
-import { RandomDSL } from "./service-collection/random-dsl/dsl"
+import schedule from 'node-schedule'
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -32,6 +32,12 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     if (amountReverted > 0)
         logger.info(`Reverted ${amountReverted} staled claims`)
     await revertStaledClaimsLoop(assetManagementService, logger)
+}
+
+async function syncUsersCollections(collectionService: CollectionServiceDsl, logger: LoggingContext){
+    const rule = new schedule.RecurrenceRule()
+    rule.hour = 1
+    schedule.scheduleJob(rule, () => collectionService.updateGlobalDailyStakingContributions.bind(collectionService)(logger))
 }
 
 const runServer = async () => {
@@ -76,6 +82,7 @@ const runServer = async () => {
 
     app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
+    syncUsersCollections(collectionService, new LoggingContext({ ctype: "params", component: "collection-service" }))
 }
 
 runServer()

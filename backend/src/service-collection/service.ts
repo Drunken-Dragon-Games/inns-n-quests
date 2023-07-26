@@ -132,6 +132,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Important: idempotent operation.
      */
     async updateGlobalDailyStakingContributions(logger?: LoggingContext): Promise<void> {
+        logger?.log.info(`Syncing all users collections`)
         const dailyRecord = await this.records.createDaily()
         if (dailyRecord.ctype !== "success") {
             logger?.log.error(`Failed to create daily record because: ${dailyRecord.error}`)

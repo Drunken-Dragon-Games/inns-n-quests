@@ -1,13 +1,12 @@
-import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
-import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
+import { AssetManagementService } from "../service-asset-management"
 import { BlockchainService } from "../service-blockchain/service-spec"
+import { CollectionService } from "../service-collection"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { MinimalUTxO } from "../tools-cardano"
+import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
 import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, UserCollectionWithMetadataResult, VoteResult } from "./service-spec"
-import { CollectionService, CollectionWithUIMetadataResult } from "../service-collection"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -238,7 +237,7 @@ export class AccountServiceDsl implements AccountService {
     }
 
     async getUserDisplayCollection(userId: string,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult> {
-        const collectionResult = await this.collectionService.getCollectionWithUIMetadata(userId)
+        const collectionResult = await this.collectionService.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId})
         if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
         return {status: "ok", collection: collectionResult.collection}
 
