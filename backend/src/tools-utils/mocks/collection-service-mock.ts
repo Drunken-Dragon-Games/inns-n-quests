@@ -16,6 +16,7 @@ export default class CollectionServiceMock {
             getMortalCollection: jest.fn(),
             addMortalCollectible: jest.fn(),
             removeMortalCollectible: jest.fn(),
+            syncUserCollection: jest.fn(),
         }
     }
 
