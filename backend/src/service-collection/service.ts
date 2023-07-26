@@ -88,8 +88,6 @@ export class CollectionServiceDsl implements CollectionService {
     async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>> {
         const emptyCollection: Collection<{}> = {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []}
         const dbAssets = await this.syncedAssets.getSyncedAssets(userId)
-        console.log(`get collection got from synced assets`)
-        console.log(JSON.stringify(dbAssets, null, 4))
 
         const collection: Collection<{}> = dbAssets.reduce((acc, asset) => {
             acc[asset.policyName].push({assetRef: asset.assetRef, quantity: asset.quantity, type: asset.type})

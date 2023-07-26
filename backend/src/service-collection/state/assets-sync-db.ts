@@ -5,7 +5,7 @@ import { relevantPolicies } from "./dsl"
 export const syncedAssetTablename = "collection_assets"
 
 export class SyncedAsset extends Model implements CreateSyncedAsset {
-    declare assetId: string
+    declare asset_id: string
     declare userId: string
     declare assetRef: string
     declare quantity: string
@@ -14,7 +14,7 @@ export class SyncedAsset extends Model implements CreateSyncedAsset {
 }
 
 export const syncedAssetTableAttributes = {
-    assetId: {
+    asset_id: {
         type: DataTypes.UUID,
         primaryKey: true,
         unique: true,

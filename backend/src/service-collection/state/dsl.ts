@@ -64,7 +64,7 @@ export class SyncedAssets {
         chainInfo.chainAssets.forEach(asset => inventoryRecord[asset.assetRef] = asset)
         preSyncedAssets.forEach(asset => preSyncedRecord[asset.assetRef] = asset)
 
-        const empty: SyncedAssetChanges = {toCreate: [], toDelete: [], toUpdate: {dbIds: [], updatedAssets: []}}
+        const empty: SyncedAssetChanges = {toCreate: [], toDelete: [], toUpdate: []}
 
         const inventoryKeys = Object.keys(inventoryRecord)
         const preSyncedKeys = Object.keys(preSyncedRecord)
@@ -77,13 +77,11 @@ export class SyncedAssets {
             const preSyncedAssetQuantity = preSyncedRecord[assetRef]?.quantity || 0
             
             if (inventoryAssetQuantity === 0) 
-                toDelete.push(preSyncedRecord[assetRef].assetId)
+                toDelete.push(preSyncedRecord[assetRef].asset_id)
             else if (preSyncedAssetQuantity === 0) 
                 toCreate.push(inventoryRecord[assetRef])
             else if (inventoryAssetQuantity !== preSyncedAssetQuantity){
-                const asset = preSyncedRecord[assetRef]
-                toUpdate.dbIds.push(asset.assetId)
-                toUpdate.updatedAssets.push({userId: asset.userId, assetRef, quantity: asset.quantity, policyName: asset.policyName, type: asset.type})
+                toUpdate.push({dbId: preSyncedRecord[assetRef].asset_id, quantity: inventoryAssetQuantity})
             }
             return (
                 { toCreate, toDelete, toUpdate })
@@ -92,25 +90,23 @@ export class SyncedAssets {
         return { syncedAssetChanges:{toCreate, toDelete, toUpdate}, fullCollection: chainInfo.fullCollection } 
     }catch(e: any){
         console.log(e)
-        return { syncedAssetChanges:{toCreate:[], toDelete:[], toUpdate: {dbIds: [], updatedAssets: []}}, fullCollection: {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []} } 
+        return { syncedAssetChanges:{toCreate:[], toDelete:[], toUpdate: []}, fullCollection: {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []} } 
     }
     }
 
     async updateDatabase(syncedAssetChanges: SyncedAssetChanges, sequelize: Sequelize, logger?: LoggingContext){
         try{
-        console.log(`update databse gpt this changes to be made`)
-        console.log(JSON.stringify(syncedAssetChanges, null, 4))
-        await sequelize.transaction(async (transaction) => {
-        await SyncedAsset.bulkCreate(syncedAssetChanges.toCreate, {transaction})
-        await SyncedAsset.destroy({where: {assetId: syncedAssetChanges.toDelete}, transaction})
-        await SyncedAsset.destroy({where: {assetId: syncedAssetChanges.toUpdate.dbIds}, transaction})
-        await SyncedAsset.bulkCreate(syncedAssetChanges.toUpdate.updatedAssets, {transaction})
-
-        })
-
-    } catch (error: any) {
-        logger ? logger.log.error(error.message) :  console.log(error.message)
-      }
+            await sequelize.transaction(async (transaction) => {
+                await SyncedAsset.bulkCreate(syncedAssetChanges.toCreate, {transaction})
+                await SyncedAsset.destroy({where: {asset_id: syncedAssetChanges.toDelete}, transaction})
+                const updates = syncedAssetChanges.toUpdate.map(
+                    ({ dbId, quantity }) => `UPDATE ${SyncedAsset.tableName} SET quantity='${quantity}' WHERE asset_id='${dbId}'`
+                ).join("; ")
+                await sequelize.query(updates, { transaction })
+            })
+        } catch (error: any) {
+            logger ? logger.log.error(error.message) :  console.log(error.message)
+        }
     }
 
     async getSyncedAssets(userId: string){

@@ -65,8 +65,9 @@ afterEach(async () => {
     await service.unloadDatabaseModels()
 })
 
-/* test("get Collection ok", async () => {
-    const collectionResult = await  service.getCollection("userId")
+test("get Collection ok", async () => {
+    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collectionResult = await  service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
     if (collectionResult.ctype !== "success"){
         expect(collectionResult.ctype).toEqual("success")
         return
@@ -90,7 +91,8 @@ afterEach(async () => {
 })
 
 test("get Collection with Metadata ok", async () => {
-    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId: "userId"})
+    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId: "b1925e1f-6820-4155-a917-fa68873906a7"})
     if (collectionResult.ctype !== "success"){
         expect(collectionResult.ctype).toEqual("success")
         return
@@ -147,7 +149,7 @@ test("get Passsive staking Info", async () => {
         dragonSilver: "15"}
 
     expect(pasiveInfo).toEqual(expectedInfo)
-}) */
+})
 
 /* test("update and get passive 5 year test", async () => {
     const startingpoint = 0
@@ -176,7 +178,7 @@ test("get Passsive staking Info", async () => {
 }
 }, 1500000) */
 
-/* test("update and get passive staking Info Same Day", async () => {
+test("update and get passive staking Info Same Day", async () => {
     await service.updateGlobalDailyStakingContributions()
     const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
     //This (And all smilar test) expects 7 DS pasive per asset
@@ -245,9 +247,9 @@ test("grant 1 week", async () => {
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       })
-}) */
+})
 
-test("syncUserCollection create delete and update", async () => {
+test("syncUserCollection create", async () => {
     const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
     const collectionDB = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
 
@@ -257,7 +259,11 @@ test("syncUserCollection create delete and update", async () => {
         return
     }
 
-    expect(collection).toEqual(collectionDB)
+    expect(dsl.areCollectionsEqual(collection, collectionDB)).toBe(true)
+})
+
+test("syncUserCollection delete", async () => {
+    await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
     dsl.assetListReturnsOnce({ status: "ok", inventory: {
         [testPolicies.pixelTiles.policyId]: [
             { unit: "PixelTile1", quantity: "2", chain: true },
@@ -271,19 +277,25 @@ test("syncUserCollection create delete and update", async () => {
             {unit: "dragonSilver", quantity: "10", chain: false}
         ]
     }})
-    const collection2 = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    const collectionDB2 = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    if(collection2.ctype !== "success" || collectionDB2.ctype !== "success"){
-        expect(collection2.ctype).toEqual("success")
-        expect(collectionDB2.ctype).toEqual("success")
+    
+    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collectionDB = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    
+    if(collection.ctype !== "success" || collectionDB.ctype !== "success"){
+        expect(collection.ctype).toEqual("success")
+        expect(collectionDB.ctype).toEqual("success")
         return
     }
-    expect(collection2).toEqual(collectionDB2)
+    
+    expect(dsl.areCollectionsEqual(collection, collectionDB)).toBe(true)
+})
 
-    /* dsl.assetListReturnsOnce({ status: "ok", inventory: {
+test("syncUserCollection update", async () => {
+    await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    dsl.assetListReturnsOnce({ status: "ok", inventory: {
         [testPolicies.pixelTiles.policyId]: [
             { unit: "PixelTile1", quantity: "1", chain: true },
-            { unit: "PixelTile2", quantity: "3", chain: true},
+            { unit: "PixelTile2", quantity: "7", chain: true},
         ],
         [testPolicies.grandMasterAdventurers.policyId]: [
             { unit: "GrandmasterAdventurer1", quantity: "1", chain: true },
@@ -297,15 +309,18 @@ test("syncUserCollection create delete and update", async () => {
             {unit: "dragonSilver", quantity: "10", chain: false}
         ]
     }})
-    const collection3 = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    const collectionDB3 = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    if(collection3.ctype !== "success" || collectionDB3.ctype !== "success"){
-        expect(collection3.ctype).toEqual("success")
-        expect(collectionDB3.ctype).toEqual("success")
+    
+    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collectionDB = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    
+    if(collection.ctype !== "success" || collectionDB.ctype !== "success"){
+        expect(collection.ctype).toEqual("success")
+        expect(collectionDB.ctype).toEqual("success")
         return
     }
-    expect(collection3).toEqual(collectionDB3) */
-   
+    
+    expect(dsl.areCollectionsEqual(collection, collectionDB)).toBe(true)
 })
+
 
 

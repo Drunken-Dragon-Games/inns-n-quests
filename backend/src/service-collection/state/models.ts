@@ -8,5 +8,6 @@ export type CreateSyncedAsset = {
 export type SyncedAssetChanges = {
     toCreate: CreateSyncedAsset[]
     toDelete: string[]
-    toUpdate: {dbIds: string[], updatedAssets: CreateSyncedAsset[]}
+    //toUpdate: {dbIds: string[], updatedAssets: CreateSyncedAsset[]}
+    toUpdate: {dbId: string, quantity: string}[]
 }
