@@ -34,10 +34,15 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
 
-async function syncUsersCollections(collectionService: CollectionServiceDsl, logger: LoggingContext){
-    const rule = new schedule.RecurrenceRule()
-    rule.hour = 1
-    schedule.scheduleJob(rule, () => collectionService.updateGlobalDailyStakingContributions.bind(collectionService)(logger))
+async function collectionsAndRewardsLoop(collectionService: CollectionServiceDsl, logger: LoggingContext){
+    const dailyRule = new schedule.RecurrenceRule()
+    dailyRule.hour = 1
+    schedule.scheduleJob(dailyRule, () => collectionService.updateGlobalDailyStakingContributions.bind(collectionService)(logger))
+
+    const weeklyRule = new schedule.RecurrenceRule()
+    dailyRule.dayOfWeek = 1
+    dailyRule.hour = 2
+    schedule.scheduleJob(weeklyRule, () => collectionService.grantGlobalWeeklyStakingGrant.bind(collectionService)(logger))
 }
 
 const runServer = async () => {
@@ -82,7 +87,7 @@ const runServer = async () => {
 
     app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
-    syncUsersCollections(collectionService, new LoggingContext({ ctype: "params", component: "collection-service" }))
+    collectionsAndRewardsLoop(collectionService, new LoggingContext({ ctype: "params", component: "collection-service" }))
 }
 
 runServer()

@@ -179,6 +179,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Important: idempotent operation.
      */
     async grantGlobalWeeklyStakingGrant(logger?: LoggingContext): Promise<void> {
+        logger?.log.info(`Granting weekly rewards`)
         const weeklyRecord = await this.records.createWeekly()
         if (weeklyRecord.ctype !== "success") {
             logger?.log.error(`Failed to create daily record beaocuse: ${weeklyRecord.error}`)
@@ -202,7 +203,7 @@ export class CollectionServiceDsl implements CollectionService {
             totalGranted += reward
             this.rewards.completeWeekly(userId, reward.toString())
         }
-        
+        console.log({totalGranted})
         await this.records.completeWeekly(totalGranted.toString())
     }
 
