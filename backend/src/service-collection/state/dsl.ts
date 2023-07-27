@@ -1,10 +1,10 @@
+import { Sequelize } from "sequelize"
 import { MetadataRegistry, WellKnownPolicies } from "../../tools-assets"
 import { LoggingContext } from "../../tools-tracing"
 import { SResult } from "../../tools-utils"
 import { Collection, CollectionPolicyNames, PolicyCollectibles } from "../models"
-import { SyncedAsset, syncedAssetTablename } from "./assets-sync-db"
+import { SyncedAsset, SyncedMortalAsset } from "./assets-sync-db"
 import { CreateSyncedAsset, SyncedAssetChanges } from "./models"
-import { QueryTypes, Sequelize, Transaction } from "sequelize"
 
 export const relevantPolicies = ["pixelTiles", "adventurersOfThiolden", "grandMasterAdventurers"] as const
 const policyIndexMapper: Record<CollectionPolicyNames, typeof relevantPolicies[number]> = {
@@ -99,10 +99,13 @@ export class SyncedAssets {
             await sequelize.transaction(async (transaction) => {
                 await SyncedAsset.bulkCreate(syncedAssetChanges.toCreate, {transaction})
                 await SyncedAsset.destroy({where: {asset_id: syncedAssetChanges.toDelete}, transaction})
+                await SyncedMortalAsset.destroy({where: {asset_id: syncedAssetChanges.toDelete}, transaction})
                 const updates = syncedAssetChanges.toUpdate.map(
                     ({ dbId, quantity }) => `UPDATE ${SyncedAsset.tableName} SET quantity='${quantity}' WHERE asset_id='${dbId}'`
                 ).join("; ")
                 await sequelize.query(updates, { transaction })
+                //TODO: also update the mortal collection if needed
+                //pasar el toUpdate y si exite, si tiene menos en la nueva modificarlo, si no dejarlo como estava
             })
         } catch (error: any) {
             logger ? logger.log.error(error.message) :  console.log(error.message)
@@ -114,11 +117,57 @@ export class SyncedAssets {
         return SyncedAsset.findAll({where: {userId}})
     }
 
+    async getAsset(userId: string, assetRef:string): Promise<SResult<{asset: SyncedAsset}>>{
+        const asset = await SyncedAsset.findOne({where: {userId, assetRef}})
+        if (asset) return {ctype: "success", asset}
+        else return {ctype: "failure", error: "asset does not belong to user in sync DB"}
+    }
+
     private getCollectionType = (policyId: string, assetUnit: string): "Character" | "Furniture" => {
         if(policyId === this.wellKnownPolicies.pixelTiles.policyId){
             const metadataType = this.metadataRegistry.pixelTilesMetadata[assetUnit].type
             return metadataType == "Adventurer" || metadataType == "Monster" || metadataType == "Townsfolk" ? "Character" : "Furniture"
         }
         return "Character"
+    }
+}
+
+export class SyncedMortalAssets {
+    static async addAsset(asset: SyncedAsset): Promise<SResult<{}>>{
+        const mortalAsset = await SyncedMortalAsset.findByPk(asset.asset_id)
+        if (mortalAsset) { 
+            const ethernalQuantity = parseInt(asset.quantity)
+            const mortalQuantity = parseInt(mortalAsset.quantity)
+            if (ethernalQuantity <= mortalQuantity) return {ctype: "failure", error: "No more assets available to add"}
+            mortalAsset.quantity = (mortalQuantity + 1).toString()
+            mortalAsset.save()
+            return {ctype: "success"}
+        }
+        else {
+            const newMortal: CreateSyncedAsset = {
+                userId: asset.userId,
+                assetRef: asset.assetRef,
+                quantity: "1",
+                policyName: asset.policyName,
+                type: asset.type
+            }
+            await SyncedMortalAsset.create({...newMortal, asset_id: asset.asset_id})
+            return {ctype: "success"}
+        }
+    }
+
+    static async updateAssets(toUpdate: {dbId: string, quantity: string}[]){
+        const ids = toUpdate.map((asset) => asset.dbId)
+        const mortalAssets = await SyncedMortalAsset.findAll({where: {asset_id: ids}})
+        toUpdate.forEach((asset) => {
+            const foundAsset = mortalAssets.find(mortalAsset => mortalAsset.asset_id === asset.dbId)
+    
+            if(foundAsset) {
+                const quantityDiff = parseInt(asset.quantity) - parseInt(foundAsset.quantity)
+                console.log(`The difference in quantity for asset_id ${asset.dbId} is ${quantityDiff}`)
+            } else {
+                console.log(`No asset found for asset_id ${asset.dbId}`)
+            }
+        })
     }
 }

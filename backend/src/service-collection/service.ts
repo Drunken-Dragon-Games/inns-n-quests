@@ -16,7 +16,7 @@ import * as rewardsDB from "./staking-rewards/rewards-db"
 import * as recordsDB from "./staking-rewards/records-db"
 import * as syncedAssets from "./state/assets-sync-db"
 import { Records, Rewards } from "./staking-rewards/dsl"
-import {SyncedAssets, relevantPolicies} from "./state/dsl"
+import {SyncedAssets, relevantPolicies, SyncedMortalAssets} from "./state/dsl"
 import { Calendar } from "../tools-utils/calendar"
 
 export type CollectionServiceDependencies = {
@@ -226,8 +226,12 @@ export class CollectionServiceDsl implements CollectionService {
     /**
      * Picks a collectible to be used in the Mortal Realms.
      */
-    addMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
-        throw new Error("Method not implemented.")
+    async addMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
+        const assetResult = await this.syncedAssets.getAsset(userId, assetRef)
+        if (assetResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${assetResult.error}`}
+        const addResult = await SyncedMortalAssets.addAsset(assetResult.asset)
+        if (addResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${addResult.error}`}
+        return addResult
     }
 
     /**

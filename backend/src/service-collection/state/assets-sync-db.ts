@@ -45,10 +45,58 @@ export const syncedAssetTableAttributes = {
     }
 }
 
+export const syncedMortalAssetTablename = "collection_mortal_assets"
+
+export class SyncedMortalAsset extends Model implements CreateSyncedAsset {
+    declare asset_id: string
+    declare userId: string
+    declare assetRef: string
+    declare quantity: string
+    declare policyName: typeof relevantPolicies[number]
+    declare type: "Character" | "Furniture"
+}
+
+export const syncedMortalAssetTableAttributes = {
+    asset_id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        unique: true,
+    },
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false
+    },
+    assetRef: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    quantity: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    policyName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            isIn: [["Character", "Furniture"]]
+        }
+    }
+}
+
 export const configureSequelizeModel =  (sequelize: Sequelize): void => {
     SyncedAsset.init(syncedAssetTableAttributes, {
         sequelize,
-        modelName: "SyncedAsset",
+        modelName: "syncedAsset",
         tableName: syncedAssetTablename
+    })
+
+    SyncedMortalAsset.init(syncedAssetTableAttributes, {
+        sequelize,
+        modelName: "syncedMortalAsset",
+        tableName: syncedMortalAssetTablename
     })
 }
