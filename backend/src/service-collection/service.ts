@@ -31,6 +31,14 @@ export type CollectionServiceDependencies = {
 export type CollectionServiceConfig = {
 }
 
+const formatSyncedAssets = (dbAssets: syncedAssets.SyncedAsset[]): Collection<{}> =>{
+    const emptyCollection: Collection<{}> = {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []}
+    return dbAssets.reduce((acc, asset) => {
+        acc[asset.policyName].push({assetRef: asset.assetRef, quantity: asset.quantity, type: asset.type})
+        return acc
+    }, emptyCollection)
+}
+
 export class CollectionServiceDsl implements CollectionService {
 
     private readonly migrator: Umzug<QueryInterface>
@@ -86,15 +94,9 @@ export class CollectionServiceDsl implements CollectionService {
      * Intended to be used on other services like the idle-quests-service.
      */
     async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>> {
-        const emptyCollection: Collection<{}> = {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []}
         const dbAssets = await this.syncedAssets.getSyncedAssets(userId)
-
-        const collection: Collection<{}> = dbAssets.reduce((acc, asset) => {
-            acc[asset.policyName].push({assetRef: asset.assetRef, quantity: asset.quantity, type: asset.type})
-            return acc
-        }, emptyCollection)
-
-          return {ctype: "success", collection}
+        const collection: Collection<{}> = formatSyncedAssets(dbAssets)
+        return {ctype: "success", collection}
     }
 
     /**
@@ -107,7 +109,7 @@ export class CollectionServiceDsl implements CollectionService {
         : await this.getCollection(userData.userId, userData.filter, logger)
         
         if (collectionResult.ctype !== "success") return collectionResult
-        const metadataCollection = this.hydrateCollectionWithMetadata(collectionResult.collection)
+        const metadataCollection = await this.hydrateCollectionWithMetadata(collectionResult.collection, userData.userId)
         const stakingCollection = this.calculateCollectionDailyReward(metadataCollection)
         return {ctype: "success", collection: stakingCollection}
     }
@@ -148,7 +150,7 @@ export class CollectionServiceDsl implements CollectionService {
                 return 0
             }
             // Depending on how we decide to calculate the weekly earning this might be greatly optimized by not needing the metadata
-            const collection = await this.getCollectionWithUIMetadata({ctype: "collection", collection: userCollection.collection})
+            const collection = await this.getCollectionWithUIMetadata({ctype: "collection", userId, collection: userCollection.collection})
             if (collection.ctype !== "success"){
                 logger?.log.error(`Getting collection returned: ${collection.error}`)
                 await this.rewards.createDaily(userId, `pending because collection returned: ${collection.error}`)
@@ -219,8 +221,11 @@ export class CollectionServiceDsl implements CollectionService {
     /**
      * Returns the collection which currently can be used in the Mortal Realms.
      */
-    getMortalCollection(userId: string, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleMetadata>> {
-        throw new Error("Method not implemented.")
+    async getMortalCollection(userId: string, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleMetadata>> {
+        const dbAssets = await SyncedMortalAssets.getSyncedAssets(userId)
+        const basicCollection: Collection<{}> = formatSyncedAssets(dbAssets)
+        const collection = await this.hydrateCollectionWithMetadata(basicCollection, userId)
+        return {ctype: "success", collection}
     }
 
     /**
@@ -238,22 +243,34 @@ export class CollectionServiceDsl implements CollectionService {
      * Removes a collectible from the Mortal Realms.
      */
     removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
-        throw new Error("Method not implemented.")
+        return SyncedMortalAssets.removeAsset(userId, assetRef)
     }
 
-    private hydrateCollectionWithMetadata(assets: Collection<{}>): Collection<CollectibleMetadata> {
-        return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
-            const metadataArray: PolicyCollectibles<CollectibleMetadata> = collectibleArray.map((colletible) => {
-                const partialMetadata = this.formatMetadata(colletible.assetRef, collectionName as typeof relevantPolicies[number], colletible.type)
+    private async hydrateCollectionWithMetadata(assets: Collection<{}>, userId: string): Promise<Collection<CollectibleMetadata>> {
+        const newCollection: Collection<CollectibleMetadata> = {
+            pixelTiles: [],
+            adventurersOfThiolden: [],
+            grandMasterAdventurers: [],
+        }
+        //again this used to be a reduce but since i am using the await the for loop is better
+        for (const [collectionName, collectibleArray] of Object.entries(assets)) {
+            const metadataArray: PolicyCollectibles<CollectibleMetadata> = [];
+            for (const collectible of collectibleArray) {
+                const partialMetadata = this.formatMetadata(collectible.assetRef, collectionName as keyof Collection<{}>, collectible.type)
                 const metadata: CollectibleMetadata = {
-                    aps: this.getCollectibleAPS(colletible.assetRef, collectionName as typeof relevantPolicies[number]),
+                    aps: this.getCollectibleAPS(collectible.assetRef, collectionName as keyof Collection<{}>),
+                    mortalRealmsActive: await SyncedMortalAssets.getActive(userId, collectible.assetRef),
                     ...partialMetadata
                 }
-                return {...colletible, ...metadata}
-            })
-            return {...acc, ...{[collectionName]: metadataArray}}
-        }, {} as Collection<CollectibleMetadata>)
+                metadataArray.push({...collectible, ...metadata});
+            }
+            newCollection[collectionName as keyof Collection<CollectibleMetadata>] = metadataArray;
+        }
+    
+        return newCollection;
     }
+    
+    
 
     private calculateCollectionDailyReward(assets: Collection<CollectibleMetadata>): Collection<CollectibleStakingInfo & CollectibleMetadata> {
         return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
@@ -279,7 +296,6 @@ export class CollectionServiceDsl implements CollectionService {
                     name, miniature,
                     splashArt: `https://cdn.ddu.gg/pixeltiles/xl/${assetRef}.png`,
                     class: assetClass,
-                    mortalRealmsActive: 0
                  }
             }
             case "grandMasterAdventurers":{
@@ -288,7 +304,6 @@ export class CollectionServiceDsl implements CollectionService {
                     splashArt: `https://cdn.ddu.gg/gmas/xl/${assetRef}.gif`,
                     miniature: `https://cdn.ddu.gg/gmas/x3/${assetRef}.png`,
                     class: this.metadataRegistry.gmasMetadata[assetRef].class,
-                    mortalRealmsActive: 0
                 }
             }
             case "adventurersOfThiolden": {
@@ -298,7 +313,6 @@ export class CollectionServiceDsl implements CollectionService {
                     splashArt,
                     miniature,
                     class: this.metadataRegistry.advOfThioldenGameMetadata[adventurerName]["Game Class"],
-                    mortalRealmsActive: 0
                 }
             }
         }

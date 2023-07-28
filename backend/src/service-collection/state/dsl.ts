@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize"
+import { Sequelize, Transaction } from "sequelize"
 import { MetadataRegistry, WellKnownPolicies } from "../../tools-assets"
 import { LoggingContext } from "../../tools-tracing"
 import { SResult } from "../../tools-utils"
@@ -104,8 +104,7 @@ export class SyncedAssets {
                     ({ dbId, quantity }) => `UPDATE ${SyncedAsset.tableName} SET quantity='${quantity}' WHERE asset_id='${dbId}'`
                 ).join("; ")
                 await sequelize.query(updates, { transaction })
-                //TODO: also update the mortal collection if needed
-                //pasar el toUpdate y si exite, si tiene menos en la nueva modificarlo, si no dejarlo como estava
+                SyncedMortalAssets.updateAssets(syncedAssetChanges.toUpdate, transaction)
             })
         } catch (error: any) {
             logger ? logger.log.error(error.message) :  console.log(error.message)
@@ -156,18 +155,39 @@ export class SyncedMortalAssets {
         }
     }
 
-    static async updateAssets(toUpdate: {dbId: string, quantity: string}[]){
+    static async removeAsset(userId: string, assetRef:string): Promise<SResult<{}>>{
+        const asset = await SyncedMortalAsset.findOne({where: {userId, assetRef}})
+        if (!asset) return {ctype: "failure", error: "asset does not belong to user in mortal DB"}
+        if(parseInt(asset.quantity) > 1){
+            asset.quantity = (parseInt(asset.quantity) - 1).toString()
+            asset.save()
+        }
+        else{
+            asset.destroy()
+        }
+        return {ctype: "success"}
+    }
+
+    static async updateAssets(toUpdate: {dbId: string, quantity: string}[], transaction?: Transaction){
         const ids = toUpdate.map((asset) => asset.dbId)
-        const mortalAssets = await SyncedMortalAsset.findAll({where: {asset_id: ids}})
+        const mortalAssets = await SyncedMortalAsset.findAll({where: {asset_id: ids}, transaction})
         toUpdate.forEach((asset) => {
-            const foundAsset = mortalAssets.find(mortalAsset => mortalAsset.asset_id === asset.dbId)
-    
-            if(foundAsset) {
-                const quantityDiff = parseInt(asset.quantity) - parseInt(foundAsset.quantity)
-                console.log(`The difference in quantity for asset_id ${asset.dbId} is ${quantityDiff}`)
-            } else {
-                console.log(`No asset found for asset_id ${asset.dbId}`)
+            const mortalAsset = mortalAssets.find(mortalAsset => mortalAsset.asset_id === asset.dbId)
+            if(mortalAsset && parseInt(asset.quantity) < parseInt(mortalAsset.quantity)) {
+                mortalAsset.quantity = asset.quantity
+                mortalAsset.save({transaction})
             }
         })
     }
+
+    static async getSyncedAssets(userId: string){
+        return SyncedMortalAsset.findAll({where: {userId}})
+    }
+
+    static async getActive(userId: string, assetRef:string): Promise<number>{
+        const asset = await SyncedMortalAsset.findOne({where: {userId, assetRef}})
+        if(!asset) return 0
+        else return parseInt(asset.quantity)
+    }
 }
+

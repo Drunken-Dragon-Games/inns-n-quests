@@ -15,7 +15,6 @@ export type PartialMetadata = {
     miniature: string,
     name: string,
     class: string, // "furniture" for furniture
-    mortalRealmsActive: number,
 }
 
 export type CollectibleMetadata = {
@@ -35,4 +34,4 @@ export type Collection<A extends object> = {
     grandMasterAdventurers: PolicyCollectibles<A>,
 }
 
-export type collectionData = {ctype: "IdAndFilter", userId: string, filter?: CollectionFilter} | {ctype: "collection", collection: Collection<{}>}
+export type collectionData = {ctype: "IdAndFilter", userId: string, filter?: CollectionFilter} | {ctype: "collection", userId: string, collection: Collection<{}>}
