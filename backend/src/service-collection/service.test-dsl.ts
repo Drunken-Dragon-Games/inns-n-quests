@@ -6,9 +6,9 @@ import { CollectionService } from "./service-spec";
 import { relevantPolicies } from "./state/dsl";
 
 
-interface CollectionResponse {
+interface CollectionResponse<A extends Object> {
     ctype: string;
-    collection: Collection<{}>
+    collection: Collection<A>
 }
 
 
@@ -25,11 +25,11 @@ export default class ServiceTestDsl {
         this.assetManagementService.listReturns(response)
     }
 
-    areCollectionsEqual(col1: CollectionResponse, col2: CollectionResponse): boolean {
+    areCollectionsEqual<A extends object>(col1: CollectionResponse<A>, col2: CollectionResponse<A>): boolean {
         if (col1.ctype !== col2.ctype) return false
     
-        const collections1: Collection<{}> = col1.collection
-        const collections2: Collection<{}> = col2.collection
+        const collections1: Collection<A> = col1.collection
+        const collections2: Collection<A> = col2.collection
     
         for (let key in collections1) {
             if (!this.isCollectionKey(key)) return false

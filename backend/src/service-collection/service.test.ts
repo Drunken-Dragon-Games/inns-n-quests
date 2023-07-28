@@ -19,7 +19,7 @@ const databaseConfig: DBConfig =
     , password: "admin"
     , database: "service_db" 
     }
-
+const userId = "b1925e1f-6820-4155-a917-fa68873906a7"
 beforeEach(async () => {
     const identityService = new IdentityServiceMock()
     const assetManagementService = new AssetManagementServiceMock()
@@ -43,7 +43,7 @@ beforeEach(async () => {
         ]
     }})
 
-    identityService.listAllUserIdsReturns(["b1925e1f-6820-4155-a917-fa68873906a7", "962b8c9c-2c59-4935-a6e6-57e1f72b85e1"])
+    identityService.listAllUserIdsReturns([userId, "962b8c9c-2c59-4935-a6e6-57e1f72b85e1"])
 
     service = await CollectionServiceDsl.loadFromConfig({}, {
         database: connectToDB(databaseConfig),
@@ -66,12 +66,9 @@ afterEach(async () => {
 })
 
 test("get Collection ok", async () => {
-    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    const collectionResult = await  service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    if (collectionResult.ctype !== "success"){
-        expect(collectionResult.ctype).toEqual("success")
-        return
-    }
+    const collection = await service.syncUserCollection(userId)
+    const collectionResult = await  service.getCollection(userId)
+    if (collectionResult.ctype !== "success") fail("collection bad ctype")
     const expectedCollection: Collection<{}> = {
         pixelTiles: [
             {assetRef:"PixelTile1", quantity: "2", type: "Character" },
@@ -91,12 +88,9 @@ test("get Collection ok", async () => {
 })
 
 test("get Collection with Metadata ok", async () => {
-    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId: "b1925e1f-6820-4155-a917-fa68873906a7"})
-    if (collectionResult.ctype !== "success"){
-        expect(collectionResult.ctype).toEqual("success")
-        return
-    }
+    const collection = await service.syncUserCollection(userId)
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId: userId})
+    if (collectionResult.ctype !== "success") fail("Collection bad ctype")
     const expectedCollection: Collection<CollectibleStakingInfo & CollectibleMetadata> = {
         pixelTiles: [
             {assetRef:"PixelTile1", quantity: "2", type: "Character", stakingContribution: 1, 
@@ -138,10 +132,7 @@ test("get Collection with Metadata ok", async () => {
 
 test("get Passsive staking Info", async () => {
     const pasiveInfo = await service.getPassiveStakingInfo("18e099c5-06d2-4efa-aacf-e087658aab2f")
-    if (pasiveInfo.ctype !== "success"){
-        expect(pasiveInfo.ctype).toEqual("success")
-        return
-    }
+    if (pasiveInfo.ctype !== "success") fail("pasive info bad ctype")
     const expectedInfo = {
         ctype: "success",
         weeklyAccumulated: "0", 
@@ -161,7 +152,7 @@ test("get Passsive staking Info", async () => {
     console.log(i)
     calendar.moveDays(1)
     await service.updateGlobalDailyStakingContributions()
-    const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const pasiveInfo = await service.getPassiveStakingInfo(userId)
     //This (And all smilar test) expects 7 DS pasive per asset
     const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
@@ -172,7 +163,7 @@ test("get Passsive staking Info", async () => {
     expect(pasiveInfo).toEqual(expectedPasiveInfo)
 
     await service.updateGlobalDailyStakingContributions()
-    const SameDayPasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const SameDayPasiveInfo = await service.getPassiveStakingInfo(userId)
 
     expect(SameDayPasiveInfo).toEqual(expectedPasiveInfo)
 }
@@ -180,7 +171,7 @@ test("get Passsive staking Info", async () => {
 
 test("update and get passive staking Info Same Day", async () => {
     await service.updateGlobalDailyStakingContributions()
-    const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const pasiveInfo = await service.getPassiveStakingInfo(userId)
     //This (And all smilar test) expects 7 DS pasive per asset
     const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
@@ -191,7 +182,7 @@ test("update and get passive staking Info Same Day", async () => {
     expect(pasiveInfo).toEqual(expectedPasiveInfo)
 
     await service.updateGlobalDailyStakingContributions()
-    const SameDayPasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const SameDayPasiveInfo = await service.getPassiveStakingInfo(userId)
 
     expect(SameDayPasiveInfo).toEqual(expectedPasiveInfo)
     
@@ -199,7 +190,7 @@ test("update and get passive staking Info Same Day", async () => {
 
 test("update and get passive staking Info Diff Day", async () => {
     await service.updateGlobalDailyStakingContributions()
-    const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const pasiveInfo = await service.getPassiveStakingInfo(userId)
     //This (And all smilar test) expects 7 DS pasive per asset
     const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
@@ -211,7 +202,7 @@ test("update and get passive staking Info Diff Day", async () => {
 
     calendar.moveDays(1)
     await service.updateGlobalDailyStakingContributions()
-    const NextDayPasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const NextDayPasiveInfo = await service.getPassiveStakingInfo(userId)
     const secondExpectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
         weeklyAccumulated: '12',
@@ -232,7 +223,7 @@ test("grant 1 week", async () => {
             dragonSilver: '15'
           }
         await service.updateGlobalDailyStakingContributions()
-        const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+        const pasiveInfo = await service.getPassiveStakingInfo(userId)
         expect(pasiveInfo).toEqual(expectedPasiveInfo)
         calendar.moveDays(1)
     }
@@ -240,7 +231,7 @@ test("grant 1 week", async () => {
     //now its monday again
     await service.grantGlobalWeeklyStakingGrant()
     await service.updateGlobalDailyStakingContributions()
-    const pasiveInfo = await service.getPassiveStakingInfo("b1925e1f-6820-4155-a917-fa68873906a7")
+    const pasiveInfo = await service.getPassiveStakingInfo(userId)
     expect(pasiveInfo).toEqual({
         ctype: 'success',
         weeklyAccumulated: '6',
@@ -250,20 +241,16 @@ test("grant 1 week", async () => {
 })
 
 test("syncUserCollection create", async () => {
-    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    const collectionDB = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collection = await service.syncUserCollection(userId)
+    const collectionDB = await service.getCollection(userId)
 
-    if(collection.ctype !== "success" || collectionDB.ctype !== "success"){
-        expect(collection.ctype).toEqual("success")
-        expect(collectionDB.ctype).toEqual("success")
-        return
-    }
+    if(collection.ctype !== "success" || collectionDB.ctype !== "success") fail("Collection bad ctype")
 
     expect(dsl.areCollectionsEqual(collection, collectionDB)).toBe(true)
 })
 
 test("syncUserCollection delete", async () => {
-    await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    await service.syncUserCollection(userId)
     dsl.assetListReturnsOnce({ status: "ok", inventory: {
         [testPolicies.pixelTiles.policyId]: [
             { unit: "PixelTile1", quantity: "2", chain: true },
@@ -278,20 +265,16 @@ test("syncUserCollection delete", async () => {
         ]
     }})
     
-    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    const collectionDB = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collection = await service.syncUserCollection(userId)
+    const collectionDB = await service.getCollection(userId)
     
-    if(collection.ctype !== "success" || collectionDB.ctype !== "success"){
-        expect(collection.ctype).toEqual("success")
-        expect(collectionDB.ctype).toEqual("success")
-        return
-    }
+    if(collection.ctype !== "success" || collectionDB.ctype !== "success") fail("Collection bad ctype")
     
     expect(dsl.areCollectionsEqual(collection, collectionDB)).toBe(true)
 })
 
 test("syncUserCollection update", async () => {
-    await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    await service.syncUserCollection(userId)
     dsl.assetListReturnsOnce({ status: "ok", inventory: {
         [testPolicies.pixelTiles.policyId]: [
             { unit: "PixelTile1", quantity: "1", chain: true },
@@ -310,16 +293,63 @@ test("syncUserCollection update", async () => {
         ]
     }})
     
-    const collection = await service.syncUserCollection("b1925e1f-6820-4155-a917-fa68873906a7")
-    const collectionDB = await service.getCollection("b1925e1f-6820-4155-a917-fa68873906a7")
+    const collection = await service.syncUserCollection(userId)
+    const collectionDB = await service.getCollection(userId)
     
-    if(collection.ctype !== "success" || collectionDB.ctype !== "success"){
-        expect(collection.ctype).toEqual("success")
-        expect(collectionDB.ctype).toEqual("success")
-        return
-    }
+    if(collection.ctype !== "success" || collectionDB.ctype !== "success") fail("Collection bad ctype")
     
     expect(dsl.areCollectionsEqual(collection, collectionDB)).toBe(true)
+})
+
+test("mortal collection add and remove",async () => {
+    await service.syncUserCollection(userId)
+    const emptyMortal = await service.getMortalCollection(userId)
+    if(emptyMortal.ctype !== "success") fail("get mortal bad ctype")
+    expect(emptyMortal).toEqual({"ctype":"success","collection":{"pixelTiles":[],"adventurersOfThiolden":[],"grandMasterAdventurers":[]}})
+    await service.addMortalCollectible(userId, "GrandmasterAdventurer1")
+    const oneMortal = await service.getMortalCollection(userId)
+    if(oneMortal.ctype !== "success") fail("get mortal one bad ctype")
+    emptyMortal.collection.grandMasterAdventurers.push({
+        assetRef:"GrandmasterAdventurer1",
+        quantity:"1",
+        type:"Character",
+        aps:[8,9,4],
+        mortalRealmsActive:1,
+        name:"Grandmaster Adventurer #1",
+        splashArt:"https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif",
+        miniature:"https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer1.png",
+        class:"Ranger"
+    })
+    expect(dsl.areCollectionsEqual(oneMortal, emptyMortal)).toBe(true)
+    const failedMortals = await service.addMortalCollectible(userId, "PixelTile5")
+    expect(failedMortals).toEqual({"ctype":"failure","error":"Could not Add asset asset does not belong to user in sync DB"})
+    await service.addMortalCollectible(userId, "PixelTile1")
+    await service.addMortalCollectible(userId, "PixelTile1")
+    const twoMortal = await service.getMortalCollection(userId)
+    if(twoMortal.ctype !== "success") fail("get mortal one bad ctype")
+    emptyMortal.collection.pixelTiles.push({
+        assetRef: "PixelTile1",
+        quantity: "2",
+        type: "Character",
+        aps: [4, 4, 4],
+        mortalRealmsActive: 2,
+        name: "PixelTile #1 Rogue",
+        miniature: "https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_1.png",
+        splashArt: "https://cdn.ddu.gg/pixeltiles/xl/PixelTile1.png",
+        class: "Rogue"
+    })
+    expect(dsl.areCollectionsEqual(twoMortal, emptyMortal)).toBe(true)
+    /*User Only has 2 PixelTiles1*/
+    const failedAdd = await service.addMortalCollectible(userId, "PixelTile1")
+    expect(failedAdd).toEqual({"ctype":"failure","error":"Could not Add asset No more assets available to add"})
+    await service.removeMortalCollectible(userId, "PixelTile1")
+    const modifiedAsset = emptyMortal.collection.pixelTiles.find(tile => tile.assetRef === "PixelTile1")
+    if(!modifiedAsset) fail("this should not be possible")
+    modifiedAsset.quantity = "1"
+    modifiedAsset.mortalRealmsActive = 1
+    const twoMortalMod = await service.getMortalCollection(userId)
+    if(twoMortalMod.ctype !== "success") fail("get mortal one bad ctype")
+    expect(dsl.areCollectionsEqual(twoMortalMod, emptyMortal)).toBe(true)
 })
 
 
