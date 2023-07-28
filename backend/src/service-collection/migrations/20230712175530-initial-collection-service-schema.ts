@@ -1,7 +1,7 @@
 import { DataTypes, ModelAttributes, QueryInterface } from 'sequelize'
 import { dailyRecordsTableName, dailyRecordTableAttributes, weeklyRecordsTableName, weeklyRecordTableAttributes } from '../staking-rewards/records-db'
 import { dailyRewardsTableName, dailyRewardTableAttributes, weeklyRewardsTableName, weeklyRewardTableAttributes } from '../staking-rewards/rewards-db'
-import { syncedAssetTableAttributes, syncedAssetTablename } from '../state/assets-sync-db'
+import { syncedAssetTableAttributes, syncedAssetTablename, syncedMortalAssetTableAttributes, syncedMortalAssetTablename } from '../state/assets-sync-db'
 
 type MigrationFun = (migrator: { context: QueryInterface }) => Promise<void>
 
@@ -25,6 +25,7 @@ export const up: MigrationFun = async ({ context: query }) => {
   await query.createTable(dailyRecordsTableName, addSequelizeColumns(dailyRecordTableAttributes))
   await query.createTable(dailyRewardsTableName, addSequelizeColumns(dailyRewardTableAttributes))
   await query.createTable(syncedAssetTablename, addSequelizeColumns(syncedAssetTableAttributes))
+  await query.createTable(syncedMortalAssetTablename, addSequelizeColumns(syncedMortalAssetTableAttributes))
 }
 
 export const down: MigrationFun = async ({ context: query }) => {
@@ -34,4 +35,5 @@ export const down: MigrationFun = async ({ context: query }) => {
   await query.dropTable(dailyRewardsTableName, options)
   await query.dropTable(weeklyRewardsTableName, options)
   await query.dropTable(syncedAssetTablename, options)
+  await query.dropTable(syncedMortalAssetTablename, options)
 }

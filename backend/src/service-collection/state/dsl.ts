@@ -104,7 +104,7 @@ export class SyncedAssets {
                     ({ dbId, quantity }) => `UPDATE ${SyncedAsset.tableName} SET quantity='${quantity}' WHERE asset_id='${dbId}'`
                 ).join("; ")
                 await sequelize.query(updates, { transaction })
-                SyncedMortalAssets.updateAssets(syncedAssetChanges.toUpdate, transaction)
+                await SyncedMortalAssets.updateAssets(syncedAssetChanges.toUpdate, transaction)
             })
         } catch (error: any) {
             logger ? logger.log.error(error.message) :  console.log(error.message)
@@ -139,7 +139,7 @@ export class SyncedMortalAssets {
             const mortalQuantity = parseInt(mortalAsset.quantity)
             if (ethernalQuantity <= mortalQuantity) return {ctype: "failure", error: "No more assets available to add"}
             mortalAsset.quantity = (mortalQuantity + 1).toString()
-            mortalAsset.save()
+            await mortalAsset.save()
             return {ctype: "success"}
         }
         else {
@@ -160,10 +160,10 @@ export class SyncedMortalAssets {
         if (!asset) return {ctype: "failure", error: "asset does not belong to user in mortal DB"}
         if(parseInt(asset.quantity) > 1){
             asset.quantity = (parseInt(asset.quantity) - 1).toString()
-            asset.save()
+            await asset.save()
         }
         else{
-            asset.destroy()
+            await asset.destroy()
         }
         return {ctype: "success"}
     }
@@ -171,11 +171,11 @@ export class SyncedMortalAssets {
     static async updateAssets(toUpdate: {dbId: string, quantity: string}[], transaction?: Transaction){
         const ids = toUpdate.map((asset) => asset.dbId)
         const mortalAssets = await SyncedMortalAsset.findAll({where: {asset_id: ids}, transaction})
-        toUpdate.forEach((asset) => {
+        toUpdate.forEach(async (asset) => {
             const mortalAsset = mortalAssets.find(mortalAsset => mortalAsset.asset_id === asset.dbId)
             if(mortalAsset && parseInt(asset.quantity) < parseInt(mortalAsset.quantity)) {
                 mortalAsset.quantity = asset.quantity
-                mortalAsset.save({transaction})
+                await mortalAsset.save({transaction})
             }
         })
     }

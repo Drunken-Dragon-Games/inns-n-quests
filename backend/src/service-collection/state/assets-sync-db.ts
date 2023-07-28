@@ -94,7 +94,7 @@ export const configureSequelizeModel =  (sequelize: Sequelize): void => {
         tableName: syncedAssetTablename
     })
 
-    SyncedMortalAsset.init(syncedAssetTableAttributes, {
+    SyncedMortalAsset.init(syncedMortalAssetTableAttributes, {
         sequelize,
         modelName: "syncedMortalAsset",
         tableName: syncedMortalAssetTablename
