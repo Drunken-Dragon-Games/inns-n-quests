@@ -132,27 +132,21 @@ export class SyncedAssets {
 }
 
 export class SyncedMortalAssets {
-    static async addAsset(asset: SyncedAsset): Promise<SResult<{}>>{
-        const mortalAsset = await SyncedMortalAsset.findByPk(asset.asset_id)
-        if (mortalAsset) { 
-            const ethernalQuantity = parseInt(asset.quantity)
-            const mortalQuantity = parseInt(mortalAsset.quantity)
-            if (ethernalQuantity <= mortalQuantity) return {ctype: "failure", error: "No more assets available to add"}
-            mortalAsset.quantity = (mortalQuantity + 1).toString()
-            await mortalAsset.save()
-            return {ctype: "success"}
+    static async addAsset(userId: string, asset: SyncedAsset): Promise<SResult<{}>>{
+        const mortalAssets = await SyncedMortalAsset.findAll({where: {userId}})
+        const activeAssetsAmount = this.countActiveAssets(mortalAssets)
+
+        //this will eventually come from another service and will dpeend on the userId
+        const maxAssetsAllowed = {characters: 5, furniture: 7}
+
+        const exceedsMaxAllowed = this.assetExceedsMaxAllowed(asset, activeAssetsAmount, maxAssetsAllowed)
+        if (exceedsMaxAllowed) {
+            return { ctype: "failure", error: `Maximum allowed ${asset.type} assets reached` }
         }
-        else {
-            const newMortal: CreateSyncedAsset = {
-                userId: asset.userId,
-                assetRef: asset.assetRef,
-                quantity: "1",
-                policyName: asset.policyName,
-                type: asset.type
-            }
-            await SyncedMortalAsset.create({...newMortal, asset_id: asset.asset_id})
-            return {ctype: "success"}
-        }
+
+        const mortalAsset = mortalAssets.find(tile => tile.asset_id === asset.asset_id)
+        if (mortalAsset) return await this.incrementMortalAssetQuantity(asset, mortalAsset)
+        else return await this.createMortalAsset(asset)
     }
 
     static async removeAsset(userId: string, assetRef:string): Promise<SResult<{}>>{
@@ -188,6 +182,51 @@ export class SyncedMortalAssets {
         const asset = await SyncedMortalAsset.findOne({where: {userId, assetRef}})
         if(!asset) return 0
         else return parseInt(asset.quantity)
+    }
+
+    private static countActiveAssets(assets: SyncedAsset[]): { characters: number; furniture: number } {
+        return assets.reduce(
+            (acc, asset) => {
+                const quantity = parseInt(asset.quantity)
+                asset.type === "Character" ? (acc.characters += quantity) : (acc.furniture += quantity)
+                return acc
+            },
+            { characters: 0, furniture: 0 }
+        );
+    }
+    
+    private static assetExceedsMaxAllowed(
+        asset: SyncedAsset,
+        activeAssetsAmount: { characters: number; furniture: number },
+        maxAssetsAllowed:  { characters: number; furniture: number }
+    ): boolean {
+        return (
+            (asset.type === "Character" && activeAssetsAmount.characters >= maxAssetsAllowed.characters) ||
+            (asset.type === "Furniture" && activeAssetsAmount.furniture >= maxAssetsAllowed.furniture)
+        )
+    }
+
+    private static async incrementMortalAssetQuantity(ethernalAsset: SyncedMortalAsset, mortalAsset: SyncedMortalAsset): Promise<SResult<{}>> {
+        const ethernalQuantity = parseInt(ethernalAsset.quantity)
+        const mortalQuantity = parseInt(mortalAsset.quantity)
+            if (ethernalQuantity <= mortalQuantity) {
+                return { ctype: "failure", error: "No more assets available to add" };
+            }
+        mortalAsset.quantity = (mortalQuantity + 1).toString()
+        await mortalAsset.save()
+        return {ctype: "success"}
+    }
+
+    private static async createMortalAsset(asset: SyncedAsset): Promise<SResult<{}>> {
+        const newMortal: CreateSyncedAsset = {
+            userId: asset.userId,
+            assetRef: asset.assetRef,
+            quantity: "1",
+            policyName: asset.policyName,
+            type: asset.type,
+        }
+        await SyncedMortalAsset.create({ ...newMortal, asset_id: asset.asset_id })
+        return {ctype: "success"}
     }
 }
 

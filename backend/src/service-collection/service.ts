@@ -234,7 +234,7 @@ export class CollectionServiceDsl implements CollectionService {
     async addMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
         const assetResult = await this.syncedAssets.getAsset(userId, assetRef)
         if (assetResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${assetResult.error}`}
-        const addResult = await SyncedMortalAssets.addAsset(assetResult.asset)
+        const addResult = await SyncedMortalAssets.addAsset(userId, assetResult.asset)
         if (addResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${addResult.error}`}
         return addResult
     }
