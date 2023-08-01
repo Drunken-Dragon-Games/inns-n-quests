@@ -13,8 +13,7 @@ export type CollectibleStakingInfo = {
 export type PartialMetadata = {
     splashArt: string,
     miniature: string,
-    name: string,
-    class: string, // "furniture" for furniture
+    name: string
 }
 
 export type CollectibleMetadata = {

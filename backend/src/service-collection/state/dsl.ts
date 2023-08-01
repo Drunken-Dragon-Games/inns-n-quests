@@ -2,7 +2,7 @@ import { Sequelize, Transaction } from "sequelize"
 import { MetadataRegistry, WellKnownPolicies } from "../../tools-assets"
 import { LoggingContext } from "../../tools-tracing"
 import { SResult } from "../../tools-utils"
-import { Collection, CollectionPolicyNames, PolicyCollectibles, StoredMetadata } from "../models"
+import { Collection, CollectionFilter, CollectionPolicyNames, PolicyCollectibles, StoredMetadata } from "../models"
 import { SyncedAsset, SyncedMortalAsset } from "./assets-sync-db"
 import { CreateSyncedAsset, SyncedAssetChanges } from "./models"
 import { RandomDSL } from "../random-dsl/dsl"
@@ -96,7 +96,7 @@ export class SyncedAssets {
         }
     }
 
-    async getSyncedAssets(userId: string){
+    async getSyncedAssets(userId: string, filter?: CollectionFilter){
         //TODO: here we will hanlde filters
         return SyncedAsset.findAll({where: {userId}})
     }

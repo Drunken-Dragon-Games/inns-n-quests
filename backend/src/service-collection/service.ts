@@ -272,15 +272,17 @@ export class CollectionServiceDsl implements CollectionService {
         }
         //again this used to be a reduce but since i am using the await the for loop is better
         for (const [collectionName, collectibleArray] of Object.entries(assets)) {
-            const metadataArray: PolicyCollectibles<CollectibleMetadata> = [];
+            const metadataArray: PolicyCollectibles<CollectibleMetadata> = []
             for (const collectible of collectibleArray) {
                 const partialMetadata = this.formatMetadata(collectible.assetRef, collectionName as keyof Collection<{}>, collectible.type)
                 const metadata: CollectibleMetadata = {
                     aps: [collectible.ath, collectible.int, collectible.cha],
+                    class: collectible.class,
                     mortalRealmsActive: await SyncedMortalAssets.getActive(userId, collectible.assetRef),
                     ...partialMetadata
                 }
-                metadataArray.push({...collectible, ...metadata})
+                const uiCollectible: Collectible = {assetRef: collectible.assetRef, quantity: collectible.quantity, type: collectible.type}
+                metadataArray.push({...uiCollectible, ...metadata})
             }
             newCollection[collectionName as keyof Collection<CollectibleMetadata>] = metadataArray
         }
@@ -304,14 +306,13 @@ export class CollectionServiceDsl implements CollectionService {
         switch (collection) {
             case "pixelTiles":{
                  const name = this.metadataRegistry.pixelTilesMetadata[assetRef].name
-                 const { miniature, assetClass } = assetType === "Furniture" 
-                    ? { miniature: `https://cdn.ddu.gg/pixeltiles/x4/${assetRef}.png`, assetClass: "furniture" }
+                 const miniature = assetType === "Furniture" 
+                    ? `https://cdn.ddu.gg/pixeltiles/x4/${assetRef}.png`
                     : parseNonFurniturePixelTile(name)
      
                  return {
                     name, miniature,
-                    splashArt: `https://cdn.ddu.gg/pixeltiles/xl/${assetRef}.png`,
-                    class: assetClass,
+                    splashArt: `https://cdn.ddu.gg/pixeltiles/xl/${assetRef}.png`
                  }
             }
             case "grandMasterAdventurers":{
@@ -319,7 +320,6 @@ export class CollectionServiceDsl implements CollectionService {
                     name: this.metadataRegistry.gmasMetadata[assetRef].name,
                     splashArt: `https://cdn.ddu.gg/gmas/xl/${assetRef}.gif`,
                     miniature: `https://cdn.ddu.gg/gmas/x3/${assetRef}.png`,
-                    class: this.metadataRegistry.gmasMetadata[assetRef].class,
                 }
             }
             case "adventurersOfThiolden": {
@@ -327,8 +327,7 @@ export class CollectionServiceDsl implements CollectionService {
                 return {
                     name: `${adventurerName} ${this.metadataRegistry.advOfThioldenGameMetadata[adventurerName].Title}`,
                     splashArt,
-                    miniature,
-                    class: this.metadataRegistry.advOfThioldenGameMetadata[adventurerName]["Game Class"],
+                    miniature
                 }
             }
         }
@@ -369,8 +368,5 @@ const parseNonFurniturePixelTile = (name: string) => {
     if (!match) throw new Error(`Invalid PixelTile string: ${name}`)
     const [, num, keyWords] = match
     
-    return {
-      miniature: `https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_${num}.png`,
-      assetClass: keyWords
-    }
+    return `https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_${num}.png`
   }
