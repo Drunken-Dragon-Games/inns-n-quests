@@ -352,5 +352,9 @@ test("mortal collection add and remove",async () => {
     expect(dsl.areCollectionsEqual(twoMortalMod, emptyMortal)).toBe(true)
 })
 
+test("filters",async () => {
+    await service.syncUserCollection(userId)
+    const collectionResult = await  service.getCollection(userId)
+})
 
 

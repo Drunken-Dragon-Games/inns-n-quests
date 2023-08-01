@@ -1,8 +1,8 @@
-import { Sequelize, Transaction } from "sequelize"
+import { Op, Sequelize, Transaction, WhereOptions } from "sequelize"
 import { MetadataRegistry, WellKnownPolicies } from "../../tools-assets"
 import { LoggingContext } from "../../tools-tracing"
 import { SResult } from "../../tools-utils"
-import { Collection, CollectionFilter, CollectionPolicyNames, PolicyCollectibles, StoredMetadata } from "../models"
+import { AssetClass, Collection, CollectionFilter, CollectionPolicyNames, PolicyCollectibles, StoredMetadata } from "../models"
 import { SyncedAsset, SyncedMortalAsset } from "./assets-sync-db"
 import { CreateSyncedAsset, SyncedAssetChanges } from "./models"
 import { RandomDSL } from "../random-dsl/dsl"
@@ -96,9 +96,42 @@ export class SyncedAssets {
         }
     }
 
-    async getSyncedAssets(userId: string, filter?: CollectionFilter){
-        //TODO: here we will hanlde filters
-        return SyncedAsset.findAll({where: {userId}})
+    async getSyncedAssets(userId: string, filter?: CollectionFilter): Promise<SyncedAsset[]>{
+        if (!filter) return SyncedAsset.findAll({where: {userId}})
+        const PAGE_SIZE = 50
+        const whereClause: WhereOptions = { userId }
+        if (filter.policy) whereClause.policyName = filter.policy
+
+        // If attributes are provided in the filter
+        if (filter.attributes) {
+            filter.attributes.forEach(attribute => {
+                // Apply class filter
+                if (attribute.classFilter) {whereClause.class = { [Op.in]: attribute.classFilter }}
+
+                // Apply APS filters
+                const apsAttributes = ["ath", "int", "cha"] as const
+                apsAttributes.forEach(apsAttribute => {
+                    if (attribute.APSFilter[apsAttribute]) {
+                        if (attribute.APSFilter[apsAttribute].from) {
+                            whereClause[apsAttribute] = {
+                                ...whereClause[apsAttribute],
+                                [Op.gte]: attribute.APSFilter[apsAttribute].from
+                            }
+                        }
+                        if (attribute.APSFilter[apsAttribute].to) {
+                            whereClause[apsAttribute] = {
+                                ...whereClause[apsAttribute],
+                                [Op.lte]: attribute.APSFilter[apsAttribute].to
+                            }
+                        }
+                    }
+                })
+            })
+        }
+
+        const offset = (filter.page - 1) * PAGE_SIZE
+        return SyncedAsset.findAll({ where: whereClause, limit: PAGE_SIZE, offset: offset })
+
     }
 
     async getAsset(userId: string, assetRef:string): Promise<SResult<{asset: SyncedAsset}>>{
@@ -178,19 +211,19 @@ export class SyncedAssets {
         else return  [stats.athleticism, stats.intellect, stats.charisma]
     }
 
-    private getAssetClass(assetRef: string, collection: typeof relevantPolicies[number], assetType: "Character" | "Furniture"): string {
+    private getAssetClass(assetRef: string, collection: typeof relevantPolicies[number], assetType: "Character" | "Furniture"): AssetClass {
         switch (collection) {
             case "pixelTiles": {
                 return assetType === "Furniture"
                     ? "furniture" 
-                    : parseNonFurniturePixelTile(this.metadataRegistry.pixelTilesMetadata[assetRef].name)
+                    : this.metadataRegistry.pixelTilesGameMetadata[assetRef].class as AssetClass
             }
             case "grandMasterAdventurers": {
-                return this.metadataRegistry.gmasMetadata[assetRef].class
+                return this.metadataRegistry.gmasMetadata[assetRef].class as AssetClass
             }
             case "adventurersOfThiolden": {
                 const adventurerName  = this.advOfThioldenAdventurerName(assetRef)
-                return this.metadataRegistry.advOfThioldenGameMetadata[adventurerName]["Game Class"]
+                return this.metadataRegistry.advOfThioldenGameMetadata[adventurerName]["Game Class"] as AssetClass
             }
         }
     }
@@ -217,16 +250,6 @@ export class SyncedAssets {
         }, emptyAssetAcomulator)
     }
 }
-
-const parseNonFurniturePixelTile = (name: string) => {
-    const regex = /PixelTile\s+#(\d+)\s+(.+)/
-    const match = name.match(regex)
-
-    if (!match) throw new Error(`Invalid PixelTile string: ${name}`)
-    const [, num, keyWords] = match
-    
-    return keyWords
-  }
 
 export class SyncedMortalAssets {
     static async addAsset(userId: string, asset: SyncedAsset): Promise<SResult<{}>>{

@@ -103,13 +103,13 @@ export class CollectionServiceDsl implements CollectionService {
      * Intended to be used on other services like the idle-quests-service.
      */
     async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<{}>> {
-        const dbAssets = await this.syncedAssets.getSyncedAssets(userId)
+        const dbAssets = await this.syncedAssets.getSyncedAssets(userId,filter)
         const collection = toAssetCollection (dbAssets)
         return {ctype: "success",  collection: collection}
     }
 
     private async getMetadataCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<StoredMetadata>> {
-        const dbAssets = await this.syncedAssets.getSyncedAssets(userId)
+        const dbAssets = await this.syncedAssets.getSyncedAssets(userId, filter)
         const collection = toMetadataAssetCollection (dbAssets)
         return {ctype: "success",  collection}
     }

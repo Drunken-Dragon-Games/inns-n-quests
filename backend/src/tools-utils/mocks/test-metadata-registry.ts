@@ -70,7 +70,7 @@ export const testMetadataRegistry: MetadataRegistry = {
     },
     pixelTilesGameMetadata: {
         "PixelTile1": {
-            "class": "rogue",
+            "class": "Rogue",
             "race": "human"
         },
     }

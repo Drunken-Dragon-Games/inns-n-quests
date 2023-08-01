@@ -1,8 +1,15 @@
+import { CharacterClass } from "../service-idle-quests/game-vm"
 
 export type CollectionPolicyNames = "pixel-tiles" | "adventurers-of-thiolden" | "grandmaster-adventurers"
 
+export type AssetClass = CharacterClass | "furniture"
+
+export type APSRange = {from?: number, to?: number}
+export type APSFilter = {ath:APSRange, int: APSRange, cha: APSRange }
+export type Attributes = {classFilter: AssetClass[], APSFilter: APSFilter}
+
 export type CollectionFilter 
-    = { policy: CollectionPolicyNames, page: number, keyWords?: string[]}
+    = { policy: CollectionPolicyNames, page: number, attributes?: Attributes[]}
 
 export type Collectible = { assetRef: string, quantity: string, type: "Character" | "Furniture" }
 

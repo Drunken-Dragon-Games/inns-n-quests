@@ -1,10 +1,12 @@
+import { AssetClass } from "../models"
+
 export type CreateSyncedAsset = {
     userId: string
     assetRef: string
     quantity: string
     policyName: string
     type: "Character" | "Furniture",
-    class: string,
+    class: AssetClass,
     ath: number,
     int: number,
     cha: number
