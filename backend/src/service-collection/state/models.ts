@@ -3,7 +3,11 @@ export type CreateSyncedAsset = {
     assetRef: string
     quantity: string
     policyName: string
-    type: "Character" | "Furniture"
+    type: "Character" | "Furniture",
+    class: string,
+    ath: number,
+    int: number,
+    cha: number
 }
 export type SyncedAssetChanges = {
     toCreate: CreateSyncedAsset[]

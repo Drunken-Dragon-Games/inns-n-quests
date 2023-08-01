@@ -8,7 +8,7 @@ import { MetadataRegistry, WellKnownPolicies } from "../tools-assets"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
-import { Collectible, CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles, collectionData } from "./models"
+import { Collectible, CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles, CollectionData, StoredMetadata } from "./models"
 import { RandomDSL } from "./random-dsl/dsl"
 
 import { IdentityService } from "../service-identity"
@@ -31,10 +31,19 @@ export type CollectionServiceDependencies = {
 export type CollectionServiceConfig = {
 }
 
-const formatSyncedAssets = (dbAssets: syncedAssets.SyncedAsset[]): Collection<{}> =>{
+const toAssetCollection = (dbAssets: syncedAssets.SyncedAsset[]): Collection<{}> =>{
     const emptyCollection: Collection<{}> = {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []}
     return dbAssets.reduce((acc, asset) => {
         acc[asset.policyName].push({assetRef: asset.assetRef, quantity: asset.quantity, type: asset.type})
+        return acc
+    }, emptyCollection)
+}
+
+const toMetadataAssetCollection  = (dbAssets: syncedAssets.SyncedAsset[]): Collection<StoredMetadata> =>{
+    const emptyCollection: Collection<StoredMetadata> = {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []}
+    return dbAssets.reduce((acc, asset) => {
+        acc[asset.policyName].push({assetRef: asset.assetRef, quantity: asset.quantity, type: asset.type,
+             class: asset.class, ath: asset.ath, int: asset.int, cha: asset.cha})
         return acc
     }, emptyCollection)
 }
@@ -93,20 +102,27 @@ export class CollectionServiceDsl implements CollectionService {
      * Returns the collection with each asset's quantity and no extra information.
      * Intended to be used on other services like the idle-quests-service.
      */
-    async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>> {
+    async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<{}>> {
         const dbAssets = await this.syncedAssets.getSyncedAssets(userId)
-        const collection: Collection<{}> = formatSyncedAssets(dbAssets)
-        return {ctype: "success", collection}
+        const collection = toAssetCollection (dbAssets)
+        return {ctype: "success",  collection: collection}
     }
+
+    private async getMetadataCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<StoredMetadata>> {
+        const dbAssets = await this.syncedAssets.getSyncedAssets(userId)
+        const collection = toMetadataAssetCollection (dbAssets)
+        return {ctype: "success",  collection}
+    }
+
 
     /**
      * Returns the collection with each asset's weekly contributions to the player's passive staking.
      * Intended to be used on the collection UI.
      */
-    async getCollectionWithUIMetadata(userData: collectionData, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
-        const collectionResult:GetCollectionResult<Unit>  = userData.ctype === "collection"
+    async getCollectionWithUIMetadata(userData: CollectionData, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
+        const collectionResult:GetCollectionResult<StoredMetadata>  = userData.ctype === "collection"
         ? {ctype: "success", collection: userData.collection}
-        : await this.getCollection(userData.userId, userData.filter, logger)
+        : await this.getMetadataCollection(userData.userId,userData.filter, logger)
         
         if (collectionResult.ctype !== "success") return collectionResult
         const metadataCollection = await this.hydrateCollectionWithMetadata(collectionResult.collection, userData.userId)
@@ -145,7 +161,7 @@ export class CollectionServiceDsl implements CollectionService {
             const userCollection = await this.syncUserCollection(userId, logger)
             //TODO: i need to think how am i going to hanlde this properly
             if(userCollection.ctype !== "success"){
-                logger?.log.error(`Sync User Collectionreturned: ${userCollection.error}`)
+                logger?.log.error(`Sync User Collection returned: ${userCollection.error}`)
                 await this.rewards.createDaily(userId, `pending because Sync User Collection returned: ${userCollection.error}`)
                 return 0
             }
@@ -223,7 +239,7 @@ export class CollectionServiceDsl implements CollectionService {
      */
     async getMortalCollection(userId: string, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleMetadata>> {
         const dbAssets = await SyncedMortalAssets.getSyncedAssets(userId)
-        const basicCollection: Collection<{}> = formatSyncedAssets(dbAssets)
+        const basicCollection = toMetadataAssetCollection (dbAssets)
         const collection = await this.hydrateCollectionWithMetadata(basicCollection, userId)
         return {ctype: "success", collection}
     }
@@ -232,6 +248,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Picks a collectible to be used in the Mortal Realms.
      */
     async addMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
+        if(this.mortalCollectionLocked(userId)) return {ctype: "failure", error: `Could not Add asset as Mortal Collection is currently locked`}
         const assetResult = await this.syncedAssets.getAsset(userId, assetRef)
         if (assetResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${assetResult.error}`}
         const addResult = await SyncedMortalAssets.addAsset(userId, assetResult.asset)
@@ -242,11 +259,12 @@ export class CollectionServiceDsl implements CollectionService {
     /**
      * Removes a collectible from the Mortal Realms.
      */
-    removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
+    async removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
+        if(this.mortalCollectionLocked(userId)) return {ctype: "failure", error: `Could not remove asset as Mortal Collection is currently locked`}
         return SyncedMortalAssets.removeAsset(userId, assetRef)
     }
 
-    private async hydrateCollectionWithMetadata(assets: Collection<{}>, userId: string): Promise<Collection<CollectibleMetadata>> {
+    private async hydrateCollectionWithMetadata(assets: Collection<StoredMetadata>, userId: string): Promise<Collection<CollectibleMetadata>> {
         const newCollection: Collection<CollectibleMetadata> = {
             pixelTiles: [],
             adventurersOfThiolden: [],
@@ -258,19 +276,17 @@ export class CollectionServiceDsl implements CollectionService {
             for (const collectible of collectibleArray) {
                 const partialMetadata = this.formatMetadata(collectible.assetRef, collectionName as keyof Collection<{}>, collectible.type)
                 const metadata: CollectibleMetadata = {
-                    aps: this.getCollectibleAPS(collectible.assetRef, collectionName as keyof Collection<{}>),
+                    aps: [collectible.ath, collectible.int, collectible.cha],
                     mortalRealmsActive: await SyncedMortalAssets.getActive(userId, collectible.assetRef),
                     ...partialMetadata
                 }
-                metadataArray.push({...collectible, ...metadata});
+                metadataArray.push({...collectible, ...metadata})
             }
-            newCollection[collectionName as keyof Collection<CollectibleMetadata>] = metadataArray;
+            newCollection[collectionName as keyof Collection<CollectibleMetadata>] = metadataArray
         }
     
         return newCollection;
     }
-    
-    
 
     private calculateCollectionDailyReward(assets: Collection<CollectibleMetadata>): Collection<CollectibleStakingInfo & CollectibleMetadata> {
         return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
@@ -335,72 +351,14 @@ export class CollectionServiceDsl implements CollectionService {
         }
     }
 
-    private getCollectibleAPS(assetRef: string, collection: typeof relevantPolicies[number]):[number, number, number] {
-        switch (collection) {
-            case "pixelTiles": switch (this.metadataRegistry.pixelTilesMetadata[assetRef].rarity) {
-                case "Common": return [2,2,2]
-                case "Uncommon": return [4,4,4]
-                case "Rare": return [6,6,6]
-                case "Epic": return [8,8,8]
-                default: return [10,10,10]
-            }
-            case "grandMasterAdventurers":
-                const armor = parseInt(this.metadataRegistry.gmasMetadata[assetRef].armor)
-                const weapon = parseInt(this.metadataRegistry.gmasMetadata[assetRef].weapon)
-                const targetAPSSum = Math.round((armor + weapon) * 30 / 10)
-                //const deterministicRand = this.randFactory(assetRef)
-                const deterministicRand = RandomDSL.seed(assetRef)
-                return this.newRandAPS(targetAPSSum, deterministicRand)
-            case "adventurersOfThiolden":
-                const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
-                return [
-                    this.metadataRegistry.advOfThioldenAppMetadata[idx].ath,
-                    this.metadataRegistry.advOfThioldenAppMetadata[idx].int,
-                    this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
-                ]
-        }
-    }
-
-    private newRandAPS(targetAPSSum: number, deterministicRand: RandomDSL):[number, number, number] {
-        // Assign stats as best as possible
-        let currentSum = 0, overflow = 0
-        const baseStatsOrder = deterministicRand.shuffle(
-            ["athleticism", "intellect", "charisma"] as ["athleticism", "intellect", "charisma"])
-        const singleStatMax = 10
-        const stats = { athleticism: 0, intellect: 0, charisma: 0 }
-        baseStatsOrder.forEach((stat, i) => {
-            if (i == 2) {
-                const semiFinalStat = targetAPSSum - currentSum
-                const finalStat = Math.min(singleStatMax, semiFinalStat)
-                overflow = semiFinalStat - finalStat
-                stats[stat] = finalStat
-            } else {
-                const maxPossibleStat = Math.min(Math.min(targetAPSSum - 2, singleStatMax), targetAPSSum - 1 - currentSum)
-                const finalStat = deterministicRand.randomNumberBetween(1, maxPossibleStat)
-                currentSum += finalStat
-                stats[stat] = finalStat
-            }
-        })
-        // Randomly distribute the rest
-        while (overflow > 0) {
-            baseStatsOrder.forEach((stat) => {
-                const currentStat = stats[stat]
-                if (currentStat == singleStatMax || overflow <= 0) return
-                const maxPossibleIncrement = Math.min(singleStatMax - currentStat, overflow)
-                const randomIncrement = deterministicRand.randomNumberBetween(1, maxPossibleIncrement)
-                const finalStat = randomIncrement + currentStat
-                overflow -= randomIncrement
-                stats[stat] = finalStat
-            })
-        }
-        const totalStatSum = stats.athleticism + stats.intellect + stats.charisma
-        if (totalStatSum != targetAPSSum) throw new Error("Expected " + targetAPSSum + " stats but got " + totalStatSum)
-        else return  [stats.athleticism, stats.intellect, stats.charisma]
-    }
-
     private calculateCollectibleDailyReward(collectionName: typeof relevantPolicies[number], type: "Furniture"| "Character", APS: [number, number, number]): CollectibleStakingInfo{
         //TODO: decide contributions
         return {stakingContribution: 1}
+    }
+
+    private mortalCollectionLocked(userId: string): boolean {
+        //TODO: decide conditions for locking collection
+        return false
     }
 }
 

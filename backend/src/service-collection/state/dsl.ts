@@ -2,9 +2,10 @@ import { Sequelize, Transaction } from "sequelize"
 import { MetadataRegistry, WellKnownPolicies } from "../../tools-assets"
 import { LoggingContext } from "../../tools-tracing"
 import { SResult } from "../../tools-utils"
-import { Collection, CollectionPolicyNames, PolicyCollectibles } from "../models"
+import { Collection, CollectionPolicyNames, PolicyCollectibles, StoredMetadata } from "../models"
 import { SyncedAsset, SyncedMortalAsset } from "./assets-sync-db"
 import { CreateSyncedAsset, SyncedAssetChanges } from "./models"
+import { RandomDSL } from "../random-dsl/dsl"
 
 export const relevantPolicies = ["pixelTiles", "adventurersOfThiolden", "grandMasterAdventurers"] as const
 const policyIndexMapper: Record<CollectionPolicyNames, typeof relevantPolicies[number]> = {
@@ -19,26 +20,10 @@ export class SyncedAssets {
         private readonly metadataRegistry: MetadataRegistry,
     ) {}
 
-    async determineUpdates(userId: string, inventory: {[policyId: string]: { unit: string, quantity: string, chain: boolean }[]}): Promise<{
-        syncedAssetChanges: SyncedAssetChanges
-        fullCollection: Collection<{}>
-    }>{
+    async determineUpdates(userId: string, inventory: {[policyId: string]: { unit: string, quantity: string, chain: boolean }[]}): Promise<{ syncedAssetChanges: SyncedAssetChanges, fullCollection: Collection<StoredMetadata>}>{
         try{
-        const processAssets = (policyId: string, assets: {unit: string,quantity: string,chain: boolean}[], policyName: string) => {
-            type AssetsAcomulator = {policyCollectibles: PolicyCollectibles<{}>, creatableAssets: CreateSyncedAsset[]}
-            const emptyAssetAcomulator: AssetsAcomulator = {policyCollectibles: [], creatableAssets: []}
-            return assets.reduce((acc, asset) => {
-                const collectible = {assetRef: asset.unit, quantity: asset.quantity, type: this.getCollectionType(policyId, asset.unit)}
-                
-                acc.policyCollectibles.push(collectible)
-                acc.creatableAssets.push({...collectible, userId, policyName})
-        
-                return acc
-            }, emptyAssetAcomulator)
-        }
-        
-        const updatedChainInfo = (acc: ChainInfo, policy: string, assets: {unit: string,quantity: string,chain: boolean}[], policyId: string) => {
-            const processedAssets = processAssets(policyId, assets, policy)
+        const updatedChainInfo = (acc: ChainInfo, policy:  typeof relevantPolicies[number], assets: {unit: string,quantity: string,chain: boolean}[], policyId: string) => {
+            const processedAssets = this.processAssets(userId, policyId, assets, policy)
             return {
                 chainAssets: acc.chainAssets.concat(processedAssets.creatableAssets),
                 fullCollection: {...acc.fullCollection, [policy]: processedAssets.policyCollectibles}
@@ -47,8 +32,8 @@ export class SyncedAssets {
         
         const preSyncedAssets = await SyncedAsset.findAll({where: {userId}})
 
-        type ChainInfo = {chainAssets:  CreateSyncedAsset[], fullCollection: Collection<{}>}
-        const emptyChainInfo: ChainInfo = {chainAssets: [], fullCollection: {} as Collection<{}>}
+        type ChainInfo = {chainAssets:  CreateSyncedAsset[], fullCollection: Collection<StoredMetadata>}
+        const emptyChainInfo: ChainInfo = {chainAssets: [], fullCollection: {pixelTiles: [], grandMasterAdventurers: [], adventurersOfThiolden: []}}
 
         const chainInfo :ChainInfo = relevantPolicies.reduce((acc, policy) => {
             const policyId = this.wellKnownPolicies[policy].policyId
@@ -129,7 +114,119 @@ export class SyncedAssets {
         }
         return "Character"
     }
+
+    private getCollectibleAPS(assetRef: string, collection: typeof relevantPolicies[number]):[number, number, number] {
+        switch (collection) {
+            case "pixelTiles": switch (this.metadataRegistry.pixelTilesMetadata[assetRef].rarity) {
+                case "Common": return [2,2,2]
+                case "Uncommon": return [4,4,4]
+                case "Rare": return [6,6,6]
+                case "Epic": return [8,8,8]
+                default: return [10,10,10]
+            }
+            case "grandMasterAdventurers":
+                const armor = parseInt(this.metadataRegistry.gmasMetadata[assetRef].armor)
+                const weapon = parseInt(this.metadataRegistry.gmasMetadata[assetRef].weapon)
+                const targetAPSSum = Math.round((armor + weapon) * 30 / 10)
+                //const deterministicRand = this.randFactory(assetRef)
+                const deterministicRand = RandomDSL.seed(assetRef)
+                return this.newRandAPS(targetAPSSum, deterministicRand)
+            case "adventurersOfThiolden":
+                const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
+                return [
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].ath,
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].int,
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
+                ]
+        }
+    }
+
+    private newRandAPS(targetAPSSum: number, deterministicRand: RandomDSL):[number, number, number] {
+        // Assign stats as best as possible
+        let currentSum = 0, overflow = 0
+        const baseStatsOrder = deterministicRand.shuffle(
+            ["athleticism", "intellect", "charisma"] as ["athleticism", "intellect", "charisma"])
+        const singleStatMax = 10
+        const stats = { athleticism: 0, intellect: 0, charisma: 0 }
+        baseStatsOrder.forEach((stat, i) => {
+            if (i == 2) {
+                const semiFinalStat = targetAPSSum - currentSum
+                const finalStat = Math.min(singleStatMax, semiFinalStat)
+                overflow = semiFinalStat - finalStat
+                stats[stat] = finalStat
+            } else {
+                const maxPossibleStat = Math.min(Math.min(targetAPSSum - 2, singleStatMax), targetAPSSum - 1 - currentSum)
+                const finalStat = deterministicRand.randomNumberBetween(1, maxPossibleStat)
+                currentSum += finalStat
+                stats[stat] = finalStat
+            }
+        })
+        // Randomly distribute the rest
+        while (overflow > 0) {
+            baseStatsOrder.forEach((stat) => {
+                const currentStat = stats[stat]
+                if (currentStat == singleStatMax || overflow <= 0) return
+                const maxPossibleIncrement = Math.min(singleStatMax - currentStat, overflow)
+                const randomIncrement = deterministicRand.randomNumberBetween(1, maxPossibleIncrement)
+                const finalStat = randomIncrement + currentStat
+                overflow -= randomIncrement
+                stats[stat] = finalStat
+            })
+        }
+        const totalStatSum = stats.athleticism + stats.intellect + stats.charisma
+        if (totalStatSum != targetAPSSum) throw new Error("Expected " + targetAPSSum + " stats but got " + totalStatSum)
+        else return  [stats.athleticism, stats.intellect, stats.charisma]
+    }
+
+    private getAssetClass(assetRef: string, collection: typeof relevantPolicies[number], assetType: "Character" | "Furniture"): string {
+        switch (collection) {
+            case "pixelTiles": {
+                return assetType === "Furniture"
+                    ? "furniture" 
+                    : parseNonFurniturePixelTile(this.metadataRegistry.pixelTilesMetadata[assetRef].name)
+            }
+            case "grandMasterAdventurers": {
+                return this.metadataRegistry.gmasMetadata[assetRef].class
+            }
+            case "adventurersOfThiolden": {
+                const adventurerName  = this.advOfThioldenAdventurerName(assetRef)
+                return this.metadataRegistry.advOfThioldenGameMetadata[adventurerName]["Game Class"]
+            }
+        }
+    }
+
+    private advOfThioldenAdventurerName = (assetRef: string): string => {
+        const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
+        const adventurerName = this.metadataRegistry.advOfThioldenAppMetadata[idx].adv
+        return adventurerName
+    }
+    
+    private processAssets = (userId: string, policyId: string, assets: {unit: string,quantity: string,chain: boolean}[], policyName:  typeof relevantPolicies[number]) => {
+        type AssetsAcomulator = {policyCollectibles: PolicyCollectibles<{}>, creatableAssets: CreateSyncedAsset[]}
+        const emptyAssetAcomulator: AssetsAcomulator = {policyCollectibles: [], creatableAssets: []}
+        return assets.reduce((acc, asset) => {
+            const type =  this.getCollectionType(policyId, asset.unit)
+            const collectible = {assetRef: asset.unit, quantity: asset.quantity, type}
+            const assetAPS = this.getCollectibleAPS(asset.unit, policyName)
+            const aClass = this.getAssetClass(asset.unit, policyName, type)
+            const metadata = {class: aClass, ath:assetAPS[0], int: assetAPS[1], cha: assetAPS[2] }
+            acc.policyCollectibles.push(collectible)
+            acc.creatableAssets.push({...collectible, ...metadata, userId, policyName})
+    
+            return acc
+        }, emptyAssetAcomulator)
+    }
 }
+
+const parseNonFurniturePixelTile = (name: string) => {
+    const regex = /PixelTile\s+#(\d+)\s+(.+)/
+    const match = name.match(regex)
+
+    if (!match) throw new Error(`Invalid PixelTile string: ${name}`)
+    const [, num, keyWords] = match
+    
+    return keyWords
+  }
 
 export class SyncedMortalAssets {
     static async addAsset(userId: string, asset: SyncedAsset): Promise<SResult<{}>>{
@@ -224,6 +321,10 @@ export class SyncedMortalAssets {
             quantity: "1",
             policyName: asset.policyName,
             type: asset.type,
+            class: asset.class,
+            ath: asset.ath,
+            int: asset.int,
+            cha: asset.cha
         }
         await SyncedMortalAsset.create({ ...newMortal, asset_id: asset.asset_id })
         return {ctype: "success"}

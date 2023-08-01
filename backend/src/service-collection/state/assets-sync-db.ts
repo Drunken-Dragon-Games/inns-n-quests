@@ -11,6 +11,10 @@ export class SyncedAsset extends Model implements CreateSyncedAsset {
     declare quantity: string
     declare policyName: typeof relevantPolicies[number]
     declare type: "Character" | "Furniture"
+    declare class: string
+    declare ath: number
+    declare int: number
+    declare cha: number
 }
 
 export const syncedAssetTableAttributes = {
@@ -42,7 +46,23 @@ export const syncedAssetTableAttributes = {
         validate: {
             isIn: [["Character", "Furniture"]]
         }
-    }
+    },
+    class: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    ath: {
+        type: DataTypes.NUMBER,
+        allowNull: false,
+    },
+    int: {
+        type: DataTypes.NUMBER,
+        allowNull: false,
+    },
+    cha: {
+        type: DataTypes.NUMBER,
+        allowNull: false,
+    },
 }
 
 export const syncedMortalAssetTablename = "collection_mortal_assets"
@@ -54,6 +74,10 @@ export class SyncedMortalAsset extends Model implements CreateSyncedAsset {
     declare quantity: string
     declare policyName: typeof relevantPolicies[number]
     declare type: "Character" | "Furniture"
+    declare class: string
+    declare ath: number
+    declare int: number
+    declare cha: number
 }
 
 export const syncedMortalAssetTableAttributes = {
@@ -84,7 +108,23 @@ export const syncedMortalAssetTableAttributes = {
         validate: {
             isIn: [["Character", "Furniture"]]
         }
-    }
+    },
+    class: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    ath: {
+        type: DataTypes.NUMBER,
+        allowNull: false,
+    },
+    int: {
+        type: DataTypes.NUMBER,
+        allowNull: false,
+    },
+    cha: {
+        type: DataTypes.NUMBER,
+        allowNull: false,
+    },
 }
 
 export const configureSequelizeModel =  (sequelize: Sequelize): void => {
