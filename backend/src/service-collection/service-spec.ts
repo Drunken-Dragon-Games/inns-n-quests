@@ -12,13 +12,13 @@ export interface CollectionService {
      * Returns the collection with each asset's quantity and no extra information.
      * Intended to be used on other services like the idle-quests-service.
      */
-    getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<Unit>>
+    getCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<Unit>>
 
     /**
      * Returns the collection with each asset's weekly contributions to the player's passive staking.
      * Intended to be used on the collection UI.
      */
-    getCollectionWithUIMetadata(userData: CollectionData, logger?: LoggingContext): Promise<CollectionWithUIMetadataResult>
+    getCollectionWithUIMetadata(userData: CollectionData, pageSize?: number, logger?: LoggingContext): Promise<CollectionWithUIMetadataResult>
 
     /**
      * Intended to be displayed on the user's collection UI.

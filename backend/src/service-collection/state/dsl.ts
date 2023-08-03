@@ -96,42 +96,36 @@ export class SyncedAssets {
         }
     }
 
-    async getSyncedAssets(userId: string, filter?: CollectionFilter): Promise<SyncedAsset[]>{
+    async getSyncedAssets(userId: string, filter?: CollectionFilter, pageSize = 50): Promise<SyncedAsset[]>{
         if (!filter) return SyncedAsset.findAll({where: {userId}})
-        const PAGE_SIZE = 50
+
         const whereClause: WhereOptions = { userId }
-        if (filter.policy) whereClause.policyName = filter.policy
+        if (filter.policy && filter.policy.length > 0) 
+            whereClause.policyName = { [Op.in]: filter.policy.map((policy) => policyIndexMapper[policy] ) }
+        
+        // Apply class filter
+        if (filter.classFilter && filter.classFilter.length > 0) 
+            whereClause.class = { [Op.in]: filter.classFilter }
 
-        // If attributes are provided in the filter
-        if (filter.attributes) {
-            filter.attributes.forEach(attribute => {
-                // Apply class filter
-                if (attribute.classFilter) {whereClause.class = { [Op.in]: attribute.classFilter }}
+        // Apply APS filters
+        const apsAttributes = ["ath", "int", "cha"] as const
+        apsAttributes.forEach(apsAttribute => {
+            if (filter.APSFilter[apsAttribute].from) {
+                whereClause[apsAttribute] = {
+                    ...whereClause[apsAttribute],
+                    [Op.gte]: filter.APSFilter[apsAttribute].from
+                }
+            }
+            if (filter.APSFilter[apsAttribute].to) {
+                whereClause[apsAttribute] = {
+                    ...whereClause[apsAttribute],
+                    [Op.lte]: filter.APSFilter[apsAttribute].to
+                }
+            }
+        })
 
-                // Apply APS filters
-                const apsAttributes = ["ath", "int", "cha"] as const
-                apsAttributes.forEach(apsAttribute => {
-                    if (attribute.APSFilter[apsAttribute]) {
-                        if (attribute.APSFilter[apsAttribute].from) {
-                            whereClause[apsAttribute] = {
-                                ...whereClause[apsAttribute],
-                                [Op.gte]: attribute.APSFilter[apsAttribute].from
-                            }
-                        }
-                        if (attribute.APSFilter[apsAttribute].to) {
-                            whereClause[apsAttribute] = {
-                                ...whereClause[apsAttribute],
-                                [Op.lte]: attribute.APSFilter[apsAttribute].to
-                            }
-                        }
-                    }
-                })
-            })
-        }
-
-        const offset = (filter.page - 1) * PAGE_SIZE
-        return SyncedAsset.findAll({ where: whereClause, limit: PAGE_SIZE, offset: offset })
-
+        const offset = (filter.page - 1) * pageSize
+        return SyncedAsset.findAll({ where: whereClause, limit: pageSize, offset: offset })
     }
 
     async getAsset(userId: string, assetRef:string): Promise<SResult<{asset: SyncedAsset}>>{

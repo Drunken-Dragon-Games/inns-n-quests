@@ -102,14 +102,14 @@ export class CollectionServiceDsl implements CollectionService {
      * Returns the collection with each asset's quantity and no extra information.
      * Intended to be used on other services like the idle-quests-service.
      */
-    async getCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<{}>> {
-        const dbAssets = await this.syncedAssets.getSyncedAssets(userId,filter)
+    async getCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<{}>> {
+        const dbAssets = await this.syncedAssets.getSyncedAssets(userId,filter,pageSize)
         const collection = toAssetCollection (dbAssets)
         return {ctype: "success",  collection: collection}
     }
 
-    private async getMetadataCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<GetCollectionResult<StoredMetadata>> {
-        const dbAssets = await this.syncedAssets.getSyncedAssets(userId, filter)
+    private async getMetadataCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<StoredMetadata>> {
+        const dbAssets = await this.syncedAssets.getSyncedAssets(userId, filter, pageSize)
         const collection = toMetadataAssetCollection (dbAssets)
         return {ctype: "success",  collection}
     }
@@ -119,10 +119,10 @@ export class CollectionServiceDsl implements CollectionService {
      * Returns the collection with each asset's weekly contributions to the player's passive staking.
      * Intended to be used on the collection UI.
      */
-    async getCollectionWithUIMetadata(userData: CollectionData, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
+    async getCollectionWithUIMetadata(userData: CollectionData, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
         const collectionResult:GetCollectionResult<StoredMetadata>  = userData.ctype === "collection"
         ? {ctype: "success", collection: userData.collection}
-        : await this.getMetadataCollection(userData.userId,userData.filter, logger)
+        : await this.getMetadataCollection(userData.userId,userData.filter, pageSize ,logger)
         
         if (collectionResult.ctype !== "success") return collectionResult
         const metadataCollection = await this.hydrateCollectionWithMetadata(collectionResult.collection, userData.userId)

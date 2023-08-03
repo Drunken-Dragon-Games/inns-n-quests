@@ -1,12 +1,12 @@
-import { CollectionService, GetPassiveStakingInfoResult } from "./service-spec"
-import { connectToDB, DBConfig } from "../tools-database"
-import { CollectionServiceDsl } from "./service"
+import { DBConfig, connectToDB } from "../tools-database"
+import { MutableCalendar } from "../tools-utils/calendar"
 import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-service-mock"
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock"
 import { testMetadataRegistry } from "../tools-utils/mocks/test-metadata-registry"
 import { testPolicies } from "../tools-utils/mocks/test-policies"
-import { CollectibleMetadata, CollectibleStakingInfo, Collection } from "./models"
-import { MutableCalendar } from "../tools-utils/calendar"
+import { CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter } from "./models"
+import { CollectionServiceDsl } from "./service"
+import { CollectionService, CollectionWithUIMetadataResult, GetPassiveStakingInfoResult } from "./service-spec"
 import ServiceTestDsl from "./service.test-dsl"
 
 let service: CollectionService
@@ -339,7 +339,7 @@ test("mortal collection add and remove",async () => {
         class: "Rogue"
     })
     expect(dsl.areCollectionsEqual(twoMortal, emptyMortal)).toBe(true)
-    /*User Only has 2 PixelTiles1*/
+    //User Only has 2 PixelTiles1
     const failedAdd = await service.addMortalCollectible(userId, "PixelTile1")
     expect(failedAdd).toEqual({"ctype":"failure","error":"Could not Add asset No more assets available to add"})
     await service.removeMortalCollectible(userId, "PixelTile1")
@@ -352,9 +352,226 @@ test("mortal collection add and remove",async () => {
     expect(dsl.areCollectionsEqual(twoMortalMod, emptyMortal)).toBe(true)
 })
 
-test("filters",async () => {
+test("filter by class",async () => {
     await service.syncUserCollection(userId)
-    const collectionResult = await  service.getCollection(userId)
+    const filter: CollectionFilter = {policy: ["grandmaster-adventurers"], page: 1, classFilter: ["Ranger"], APSFilter: {ath: {}, int: {}, cha: {}}}
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter})
+    if(collectionResult.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
+    const expectedCollection: CollectionWithUIMetadataResult = {
+        "ctype": "success",
+        "collection": {
+            "pixelTiles": [],
+            "adventurersOfThiolden": [],
+            "grandMasterAdventurers": [
+                {
+                    "assetRef": "GrandmasterAdventurer1",
+                    "quantity": "1",
+                    "type": "Character",
+                    "aps": [
+                        8,
+                        9,
+                        4
+                    ],
+                    "class": "Ranger",
+                    "mortalRealmsActive": 0,
+                    "name": "Grandmaster Adventurer #1",
+                    "splashArt": "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif",
+                    "miniature": "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer1.png",
+                    "stakingContribution": 1
+                }
+            ]
+        }
+    }
+    expect(dsl.areCollectionsEqual(collectionResult, expectedCollection)).toBe(true)
 })
 
+test("filter by APS",async () => {
+    await service.syncUserCollection(userId)
+    const filter: CollectionFilter = {page: 1, classFilter: [], APSFilter: {ath: {}, int: {from: 7}, cha: {}}}
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter})
+    if(collectionResult.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
+    const expectedCollection: CollectionWithUIMetadataResult = {
+        "ctype": "success",
+        "collection": {
+            "pixelTiles": [],
+            "adventurersOfThiolden": [
+                {
+                    "assetRef": "AdventurerOfThiolden1",
+                    "quantity": "1",
+                    "type": "Character",
+                    "aps": [
+                        10,
+                        11,
+                        11
+                    ],
+                    "class": "Rogue",
+                    "mortalRealmsActive": 0,
+                    "name": "vimtyr The Whispering Axe",
+                    "splashArt": "https://cdn.ddu.gg/adv-of-thiolden/web/vimtyr_32_1.mp4",
+                    "miniature": "https://cdn.ddu.gg/adv-of-thiolden/x6/vimtyr-front-chroma.png",
+                    "stakingContribution": 1
+                },
+                {
+                    "assetRef": "AdventurerOfThiolden2",
+                    "quantity": "1",
+                    "type": "Character",
+                    "aps": [
+                        10,
+                        11,
+                        11
+                    ],
+                    "class": "Bard",
+                    "mortalRealmsActive": 0,
+                    "name": "terrorhertz Herald of the Drunken Dragon",
+                    "splashArt": "https://cdn.ddu.gg/adv-of-thiolden/web/terrorhertz_32_1.mp4",
+                    "miniature": "https://cdn.ddu.gg/adv-of-thiolden/x6/terrorhertz-front-chroma.png",
+                    "stakingContribution": 1
+                }
+            ],
+            "grandMasterAdventurers": [
+                {
+                    "assetRef": "GrandmasterAdventurer1",
+                    "quantity": "1",
+                    "type": "Character",
+                    "aps": [
+                        8,
+                        9,
+                        4
+                    ],
+                    "class": "Ranger",
+                    "mortalRealmsActive": 0,
+                    "name": "Grandmaster Adventurer #1",
+                    "splashArt": "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif",
+                    "miniature": "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer1.png",
+                    "stakingContribution": 1
+                }
+            ]
+        }
+    }
+    expect(dsl.areCollectionsEqual(collectionResult, expectedCollection)).toBe(true)
+})
 
+test("filter pagination",async () => {
+    await service.syncUserCollection(userId)
+    const filter: CollectionFilter = {page: 1, classFilter: [], APSFilter: {ath: {}, int: {from: 5}, cha: {}}}
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 2)
+    if(collectionResult.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
+    const expectedCollectionPage1: CollectionWithUIMetadataResult = {
+        "ctype": "success",
+        "collection": {
+            "pixelTiles": [
+                {
+                    "assetRef": "PixelTile2",
+                    "quantity": "3",
+                    "type": "Furniture",
+                    "aps": [
+                        6,
+                        6,
+                        6
+                    ],
+                    "class": "furniture",
+                    "mortalRealmsActive": 0,
+                    "name": "PixelTile #2 Table",
+                    "miniature": "https://cdn.ddu.gg/pixeltiles/x4/PixelTile2.png",
+                    "splashArt": "https://cdn.ddu.gg/pixeltiles/xl/PixelTile2.png",
+                    "stakingContribution": 1
+                }
+            ],
+            "adventurersOfThiolden": [
+                {
+                    "assetRef": "AdventurerOfThiolden1",
+                    "quantity": "1",
+                    "type": "Character",
+                    "aps": [
+                        10,
+                        11,
+                        11
+                    ],
+                    "class": "Rogue",
+                    "mortalRealmsActive": 0,
+                    "name": "vimtyr The Whispering Axe",
+                    "splashArt": "https://cdn.ddu.gg/adv-of-thiolden/web/vimtyr_32_1.mp4",
+                    "miniature": "https://cdn.ddu.gg/adv-of-thiolden/x6/vimtyr-front-chroma.png",
+                    "stakingContribution": 1
+                }
+            ],
+            "grandMasterAdventurers": []
+        }
+    }
+    expect(dsl.areCollectionsEqual(collectionResult, expectedCollectionPage1)).toBe(true)
+    filter.page = 2
+    const collectionResult2 = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 2)
+    if(collectionResult2.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
+    const expectedCollectionPage2: CollectionWithUIMetadataResult ={
+        "ctype": "success",
+        "collection": {
+            "pixelTiles": [],
+            "adventurersOfThiolden": [
+                {
+                    "assetRef": "AdventurerOfThiolden2",
+                    "quantity": "1",
+                    "type": "Character",
+                    "aps": [
+                        10,
+                        11,
+                        11
+                    ],
+                    "class": "Bard",
+                    "mortalRealmsActive": 0,
+                    "name": "terrorhertz Herald of the Drunken Dragon",
+                    "splashArt": "https://cdn.ddu.gg/adv-of-thiolden/web/terrorhertz_32_1.mp4",
+                    "miniature": "https://cdn.ddu.gg/adv-of-thiolden/x6/terrorhertz-front-chroma.png",
+                    "stakingContribution": 1
+                }
+            ],
+            "grandMasterAdventurers": [
+                {
+                    "assetRef": "GrandmasterAdventurer1",
+                    "quantity": "1",
+                    "type": "Character",
+                    "aps": [
+                        8,
+                        9,
+                        4
+                    ],
+                    "class": "Ranger",
+                    "mortalRealmsActive": 0,
+                    "name": "Grandmaster Adventurer #1",
+                    "splashArt": "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif",
+                    "miniature": "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer1.png",
+                    "stakingContribution": 1
+                }
+            ]
+        }
+    }
+    expect(dsl.areCollectionsEqual(collectionResult2, expectedCollectionPage2)).toBe(true)
+    filter.page = 3
+    const collectionResult3 = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 2)
+    if(collectionResult3.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
+    const expectedCollectionPage3: CollectionWithUIMetadataResult = {
+        "ctype": "success",
+        "collection": {
+            "pixelTiles": [],
+            "adventurersOfThiolden": [],
+            "grandMasterAdventurers": [
+                {
+                    "assetRef": "GrandmasterAdventurer2",
+                    "quantity": "1",
+                    "type": "Character",
+                    "aps": [
+                        1,
+                        6,
+                        2
+                    ],
+                    "class": "Paladin",
+                    "mortalRealmsActive": 0,
+                    "name": "Grandmaster Adventurer #2",
+                    "splashArt": "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer2.gif",
+                    "miniature": "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer2.png",
+                    "stakingContribution": 1
+                }
+            ]
+        }
+    }
+    expect(dsl.areCollectionsEqual(collectionResult3, expectedCollectionPage3)).toBe(true)
+})
