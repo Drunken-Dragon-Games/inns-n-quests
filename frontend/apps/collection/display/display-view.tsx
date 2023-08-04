@@ -10,7 +10,7 @@ const CardContainer = styled.div`
     gap: 20px;
 `
 
-const PolicyContainer = styled.div`
+const EthernalCollectionContainer = styled.div`
     border: 2px solid #ccc;
     border-radius: 10px;
     padding: 20px;
@@ -64,7 +64,7 @@ const capitalizeFirstLetter = (input: string): string => {
     return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
-export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWithUIMetada }) => {
+export const DisplayVieww = ({ collectionItems }: { collectionItems: CollectionWithUIMetada }) => {
     const [pixelTilesFilter, setPixelTilesFilter] = useState('adventurers')
     const [artType, setArtType] = useState({
         "pxlTs": "splashArt",
@@ -106,7 +106,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
 
     return (
     <CardContainer>
-        <PolicyContainer>
+        <EthernalCollectionContainer>
             <Header>
                 <ButtonContainer>
                     <button onClick={() => handleArtTypeChange("pxlTs")}>{artType.pxlTs}</button>
@@ -133,8 +133,8 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                 </div>
                 )
             })}
-        </PolicyContainer>
-        <PolicyContainer>
+        </EthernalCollectionContainer>
+        <EthernalCollectionContainer>
             <Header>
                 <ButtonContainer>
                     <button onClick={() => handleArtTypeChange("gmas")}>{artType.gmas}</button>
@@ -155,8 +155,8 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                 </div>
                 )
             })}
-        </PolicyContainer>
-        <PolicyContainer>
+        </EthernalCollectionContainer>
+        <EthernalCollectionContainer>
             <Header>
                 <ButtonContainer>
                     <button onClick={() =>  handleArtTypeChange("advTln")}>{artType.advTln}</button>
@@ -188,8 +188,117 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                     )
                 }
             })}
-        </PolicyContainer>
+        </EthernalCollectionContainer>
     </CardContainer>
     )
 }
-    
+
+export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWithUIMetada }) => {
+    const [artType, setArtType] = useState("splashArt")
+    const handleArtTypeChange = () => {
+        const newArtType = artType === "splashArt" ? "miniature" : "splashArt"
+        setArtType(newArtType)
+        setImageDimensions({
+            "pxlTs": dimensionsMap["pxlTs"][newArtType],
+            "gmas": dimensionsMap["gmas"][newArtType],
+            "advTln": dimensionsMap["advTln"][newArtType],
+        })
+    }
+   
+    const dimensionsMap = {
+        "pxlTs": {
+            "splashArt": { height: 7,  width: 6 },
+            "miniature": { height: 7,  width: 4.5 },
+        },
+        "gmas": {
+            "splashArt": { height: 8,  width: 8 },
+            "miniature": { height: 8,width: 6.4 }
+        },
+        "advTln": {
+            "splashArt": { height: 8,  width: 6 },
+            "miniature": { height: 8,  width: 6 }
+        }
+    }
+    const getArtSource = ( src: {splashArt: string, miniature: string}) => {
+        if (artType === 'splashArt') return src.splashArt
+        else return src.miniature
+    }
+    const [imageDimensions, setImageDimensions] = useState({
+        "pxlTs": dimensionsMap["pxlTs"]["splashArt"],
+        "gmas": dimensionsMap["gmas"]["splashArt"],
+        "advTln": dimensionsMap["advTln"]["splashArt"],
+    })
+    return( 
+    <EthernalCollectionContainer>
+        <Header>
+                <ButtonContainer>
+                    <button onClick={() =>  handleArtTypeChange()}>{artType}</button>
+                </ButtonContainer>
+                <Title>Collection</Title>
+        </Header>
+        {collectionItems.adventurersOfThiolden.map((src, index) => {
+                if (artType == "splashArt" && isVideoFile(src.splashArt)) {
+                    return (
+                    <CollectibleContainer key={index}>
+                        <Video src={src.splashArt} height={imageDimensions.advTln.height} width={imageDimensions.advTln.width} units={vmax1}/>
+                        <CollectibleInfo>
+                            <p>{capitalizeFirstLetter(src.name)}</p>
+                            <p>Class: {src.class}</p>
+                            <p>APS: {src.aps.join(', ')}</p>
+                        </CollectibleInfo>
+                    </CollectibleContainer>
+                    )
+                } else {
+                    return (
+                    <CollectibleContainer key={index}>
+                        <PixelArtImage src={getArtSource(src)} alt={"Art image"} height={imageDimensions.advTln.height} width={imageDimensions.advTln.width}/>
+                        <CollectibleInfo>
+                            <p>{capitalizeFirstLetter(src.name)}</p>
+                            <p>Class: {src.class}</p>
+                            <p>APS: {src.aps.join(', ')}</p>
+                        </CollectibleInfo>
+                    </CollectibleContainer>
+                    )
+                }
+            })}
+            {collectionItems.grandMasterAdventurers.map((src, index) => {
+                    return (
+                    <CollectibleContainer key={index}>
+                        <PixelArtImage src={getArtSource(src)} alt={"Art image"} height={imageDimensions.gmas.height} width={imageDimensions.gmas.width}/>
+                        <CollectibleInfo>
+                            <p>{capitalizeFirstLetter(src.name)}</p>
+                            <p>Class: {src.class}</p>
+                            <p>APS: {src.aps.join(', ')}</p>
+                        </CollectibleInfo>
+                    </CollectibleContainer>
+                    )
+            })}
+            {collectionItems.pixelTiles.filter(src => src.class !== 'furniture')
+            .map((src, index) => {
+                    return (
+                    <CollectibleContainer key={index}>
+                        <PixelArtImage src={getArtSource(src)} alt={"Art image"} height={imageDimensions.pxlTs.height} width={imageDimensions.pxlTs.width}/>
+                        <CollectibleInfo>
+                            <p>{capitalizeFirstLetter(src.name)}</p>
+                            <p>Class: {src.class}</p>
+                            <p>APS: {src.aps.join(', ')}</p>
+                        </CollectibleInfo>
+                    </CollectibleContainer>
+                    )
+            })}
+            {collectionItems.pixelTiles.filter(src => src.class == 'furniture')
+            .map((src, index) => {
+                    return (
+                    <CollectibleContainer key={index}>
+                        <PixelArtImage src={getArtSource(src)} alt={"Art image"} height={imageDimensions.pxlTs.height} width={imageDimensions.pxlTs.width}/>
+                        <CollectibleInfo>
+                            <p>{capitalizeFirstLetter(src.name)}</p>
+                            <p>Class: {src.class}</p>
+                            <p>APS: {src.aps.join(', ')}</p>
+                        </CollectibleInfo>
+                    </CollectibleContainer>
+                    )
+            })}
+    </EthernalCollectionContainer>
+    )
+}
