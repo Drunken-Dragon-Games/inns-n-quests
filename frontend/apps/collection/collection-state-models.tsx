@@ -1,3 +1,5 @@
+import { CharacterClass } from "../game/game-vm"
+
 type Collectible = { assetRef: string, quantity: string, type: "Character" | "Furniture" }
 
 export type PolicyCollectibles<A extends object> = (Collectible & A)[]
@@ -33,3 +35,10 @@ export type CollectionFetchingState
     = { ctype: "idle" }
     | { ctype: "loading", details: string }
     | { ctype: "error", details: string }
+
+export type CollectionPolicyNames = "pixel-tiles" | "adventurers-of-thiolden" | "grandmaster-adventurers"
+export type AssetClass = CharacterClass | "furniture"
+export type APSRange = {from?: number, to?: number}
+export type APSFilter = {ath:APSRange, int: APSRange, cha: APSRange }
+export type CollectionFilter 
+    = { page: number, policy?: CollectionPolicyNames[], classFilter: AssetClass[], APSFilter: APSFilter}

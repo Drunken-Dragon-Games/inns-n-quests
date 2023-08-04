@@ -1,3 +1,4 @@
+import { CollectionFilter } from "../collection/collection-state-models"
 import { AccountBackend } from "./account-backend"
 import { AccountTransitions } from "./account-transitions"
 
@@ -14,7 +15,7 @@ export const AccountApi = {
         AccountTransitions.useRefreshSession(callback)
     },
 
-    getUserCollectionWithMetadata(){
-        return AccountBackend.getUserCollectionWIthMetadata()
+    getUserCollectionWithMetadata(filter?: CollectionFilter){
+        return AccountBackend.getUserCollectionWIthMetadata(filter)
     }
 }

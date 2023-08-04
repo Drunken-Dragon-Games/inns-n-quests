@@ -7,6 +7,13 @@ import { DisplayView } from "./display/display-view"
 import { useEffect } from "react"
 import { collectionTransitions } from "./collection-transitions"
 import { Provider } from "react-redux"
+import { FilterView } from "./filter/filter-view"
+import styled from "styled-components"
+
+const Container = styled.div`
+  position: relative;
+  margin-left: 105px;
+`;
 
 const CollectionComponent = () =>{
     const { collectionItems } = useSelector((state: CollectionState) => ({
@@ -14,9 +21,10 @@ const CollectionComponent = () =>{
     }))
     useEffect(() => {collectionTransitions.getCollection()}, [])
     return(
-    <>  
-        <DisplayView collectionItems={collectionItems}/>
-    </>
+    <Container>
+      <FilterView />
+      <DisplayView collectionItems={collectionItems} />
+    </Container>
     )
 }
 

@@ -114,6 +114,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                             <p>{capitalizeFirstLetter(src.name)}</p>
                             <p>Class: {src.class}</p>
                             <p>APS: {src.aps.join(', ')}</p>
+                            <p>Active: {src.mortalRealmsActive}</p>
                         </CollectibleInfo>
                     </CollectibleContainer>
                     )
@@ -122,7 +123,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                     <CollectibleContainer key={index}>
                         <MirroredPixelArtImage 
                             src={getArtSource(src)} 
-                            alt={"Art image"} 
+                            alt={src.name} 
                             height={imageDimensions.advTln.height} 
                             width={imageDimensions.advTln.width} 
                             isFlipped={artType === 'miniature'}
@@ -131,6 +132,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                             <p>{capitalizeFirstLetter(src.name)}</p>
                             <p>Class: {src.class}</p>
                             <p>APS: {src.aps.join(', ')}</p>
+                            <p>Active: {src.mortalRealmsActive}</p>
                         </CollectibleInfo>
                     </CollectibleContainer>
                     )
@@ -141,7 +143,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                     <CollectibleContainer key={index}>
                         <MirroredPixelArtImage 
                             src={getArtSource(src)} 
-                            alt={"Art image"} 
+                            alt={src.name} 
                             height={imageDimensions.gmas.height} 
                             width={imageDimensions.gmas.width} 
                             isFlipped={artType === 'miniature'}
@@ -150,6 +152,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                             <p>{capitalizeFirstLetter(src.name)}</p>
                             <p>Class: {src.class}</p>
                             <p>APS: {src.aps.join(', ')}</p>
+                            <p>Active: {src.mortalRealmsActive}</p>
                         </CollectibleInfo>
                     </CollectibleContainer>
                     )
@@ -160,7 +163,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                     <CollectibleContainer key={index}>
                        <MirroredPixelArtImage 
                             src={getArtSource(src)} 
-                            alt={"Art image"} 
+                            alt={src.name} 
                             height={imageDimensions.pxlTs.height} 
                             width={imageDimensions.pxlTs.width} 
                             isFlipped={artType === 'miniature'}
@@ -169,6 +172,8 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                             <p>{capitalizeFirstLetter(src.name)}</p>
                             <p>Class: {src.class}</p>
                             <p>APS: {src.aps.join(', ')}</p>
+                            <p>Quantity: {src.quantity}</p>
+                            <p>Active: {src.mortalRealmsActive}</p>
                         </CollectibleInfo>
                     </CollectibleContainer>
                     )
@@ -179,7 +184,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                     <CollectibleContainer key={index}>
                         <MirroredPixelArtImage 
                             src={getArtSource(src)} 
-                            alt={"Art image"} 
+                            alt={src.name} 
                             height={imageDimensions.pxlTs.height} 
                             width={imageDimensions.pxlTs.width * (artType === 'splashArt' ? 1 : 1.5)} 
                             isFlipped={artType === 'miniature'}
@@ -188,6 +193,8 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                             <p>{capitalizeFirstLetter(src.name)}</p>
                             <p>Class: {src.class}</p>
                             <p>APS: {src.aps.join(', ')}</p>
+                            <p>Quantity: {src.quantity}</p>
+                            <p>Active: {src.mortalRealmsActive}</p>
                         </CollectibleInfo>
                     </CollectibleContainer>
                     )

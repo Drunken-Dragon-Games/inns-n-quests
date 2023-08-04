@@ -5,7 +5,7 @@ import { useRouter } from "next/router"
 import router from "next/router"
 import { SignedMessage } from "lucid-cardano"
 import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UTxOMinimal, UserBallot, UserFullInfo } from "./account-dsl"
-import { CollectionWithUIMetada } from "../collection/collection-state-models"
+import { CollectionFilter, CollectionWithUIMetada } from "../collection/collection-state-models"
 
 export const AccountBackend = {
 
@@ -121,8 +121,8 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getUserCollectionWIthMetadata(traceId?: string): Promise<UserCollectionWithMetadataResult>{
-        const result = await accountRequestWRefresh("POST", "/assets/collection-with-metadata", traceId)
+    async getUserCollectionWIthMetadata(filter?: CollectionFilter, traceId?: string): Promise<UserCollectionWithMetadataResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/collection-with-metadata", {filter}, traceId)
         return result.data
     }
 }
@@ -200,7 +200,7 @@ export type UserCollectionWithMetadataResult
     = {status: "ok", collection: CollectionWithUIMetada}
     | {status: "invalid", reason: string}
 
-async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
+async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {
     return await withTokenRefresh(() => accountRequest(method, endpoint, data))
 }
 
