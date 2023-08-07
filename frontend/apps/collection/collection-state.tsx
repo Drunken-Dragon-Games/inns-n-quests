@@ -1,5 +1,5 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { CollectionFetchingState, CollectionWithUIMetada } from "./collection-state-models"
+import { CollectionFetchingState, CollectionFilter, CollectionWithUIMetada } from "./collection-state-models"
 
 
 export type CollectionStoreState = 
@@ -10,7 +10,8 @@ export type CollectionThunk<ReturnType = void> =
 
 export interface CollectionState {
     collectionItems: CollectionWithUIMetada,
-    collectionFetchingState: CollectionFetchingState
+    collectionFetchingState: CollectionFetchingState,
+    collectionFilter: CollectionFilter
 }
 
 const collectionInitialState: CollectionState = {
@@ -19,7 +20,8 @@ const collectionInitialState: CollectionState = {
         grandMasterAdventurers: [],
         adventurersOfThiolden: []
     },
-    collectionFetchingState: {ctype: "idle"}
+    collectionFetchingState: {ctype: "idle"},
+    collectionFilter: {page: 1, policyFilter: [], classFilter: [], APSFilter:{ath: {}, int: {}, cha: {}}}
 }
 
 export const collectinState = createSlice({
@@ -33,6 +35,10 @@ export const collectinState = createSlice({
         setCollectionFetchingState: (state, action: PayloadAction<CollectionFetchingState>) => {
             state.collectionFetchingState = action.payload
         },
+
+        setCollectionFilter: (state, action: PayloadAction<CollectionFilter>) => {
+            state.collectionFilter = action.payload
+        }
     }
 })
 

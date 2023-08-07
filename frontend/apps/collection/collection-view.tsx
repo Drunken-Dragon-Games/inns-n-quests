@@ -17,13 +17,14 @@ const Container = styled.div`
 `;
 
 const CollectionComponent = () =>{
-    const { collectionItems } = useSelector((state: CollectionState) => ({
+    const { collectionItems, filter } = useSelector((state: CollectionState) => ({
             collectionItems: state.collectionItems,
+            filter: state.collectionFilter
     }))
     useEffect(() => {collectionTransitions.getCollection()}, [])
     return(
     <Container>
-      <FilterView />
+      <FilterView filter={filter}/>
       <DisplayView collectionItems={collectionItems} />
     </Container>
     )

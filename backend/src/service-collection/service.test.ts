@@ -354,7 +354,7 @@ test("mortal collection add and remove",async () => {
 
 test("filter by class",async () => {
     await service.syncUserCollection(userId)
-    const filter: CollectionFilter = {policy: ["grandmaster-adventurers"], page: 1, classFilter: ["Ranger"], APSFilter: {ath: {}, int: {}, cha: {}}}
+    const filter: CollectionFilter = {policyFilter: ["grandmaster-adventurers"], page: 1, classFilter: ["Ranger"], APSFilter: {ath: {}, int: {}, cha: {}}}
     const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter})
     if(collectionResult.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
     const expectedCollection: CollectionWithUIMetadataResult = {
@@ -387,7 +387,7 @@ test("filter by class",async () => {
 
 test("filter by APS",async () => {
     await service.syncUserCollection(userId)
-    const filter: CollectionFilter = {page: 1, classFilter: [], APSFilter: {ath: {}, int: {from: 7}, cha: {}}}
+    const filter: CollectionFilter = {page: 1, policyFilter: [], classFilter: [], APSFilter: {ath: {}, int: {from: 7}, cha: {}}}
     const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter})
     if(collectionResult.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
     const expectedCollection: CollectionWithUIMetadataResult = {
@@ -453,7 +453,7 @@ test("filter by APS",async () => {
 
 test("filter pagination",async () => {
     await service.syncUserCollection(userId)
-    const filter: CollectionFilter = {page: 1, classFilter: [], APSFilter: {ath: {}, int: {from: 5}, cha: {}}}
+    const filter: CollectionFilter = {page: 1, policyFilter: [], classFilter: [], APSFilter: {ath: {}, int: {from: 5}, cha: {}}}
     const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 2)
     if(collectionResult.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
     const expectedCollectionPage1: CollectionWithUIMetadataResult = {

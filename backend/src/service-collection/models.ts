@@ -5,7 +5,7 @@ export type AssetClass = CharacterClass | "furniture"
 export type APSRange = {from?: number, to?: number}
 export type APSFilter = {ath:APSRange, int: APSRange, cha: APSRange }
 export type CollectionFilter 
-    = { page: number, policy?: CollectionPolicyNames[], classFilter: AssetClass[], APSFilter: APSFilter}
+    = { page: number, policyFilter: CollectionPolicyNames[], classFilter: AssetClass[], APSFilter: APSFilter}
 
 export type Collectible = { assetRef: string, quantity: string, type: "Character" | "Furniture" }
 

@@ -192,7 +192,6 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                         <CollectibleInfo>
                             <p>{capitalizeFirstLetter(src.name)}</p>
                             <p>Class: {src.class}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
                             <p>Quantity: {src.quantity}</p>
                             <p>Active: {src.mortalRealmsActive}</p>
                         </CollectibleInfo>

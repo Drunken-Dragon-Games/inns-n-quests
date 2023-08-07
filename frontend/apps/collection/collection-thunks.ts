@@ -11,7 +11,10 @@ export const CollectionThunks = {
             dispatch(actions.setCollectionFetchingState({ctype: "error", details: result.reason}))
         else{
             dispatch(actions.setCollectionItems(result.collection))
-        }
-            
+        } 
+    },
+
+    setFilter: (filter: CollectionFilter): CollectionThunk => async (dispatch) => {
+        dispatch(actions.setCollectionFilter(filter))
     }
 }

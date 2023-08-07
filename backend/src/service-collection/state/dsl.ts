@@ -100,14 +100,12 @@ export class SyncedAssets {
         if (!filter) return SyncedAsset.findAll({where: {userId}})
 
         const whereClause: WhereOptions = { userId }
-        if (filter.policy && filter.policy.length > 0) 
-            whereClause.policyName = { [Op.in]: filter.policy.map((policy) => policyIndexMapper[policy] ) }
+        if (filter.policyFilter.length > 0) 
+            whereClause.policyName = { [Op.in]: filter.policyFilter.map((policy) => policyIndexMapper[policy] ) }
         
-        // Apply class filter
-        if (filter.classFilter && filter.classFilter.length > 0) 
+        if (filter.classFilter.length > 0) 
             whereClause.class = { [Op.in]: filter.classFilter }
 
-        // Apply APS filters
         const apsAttributes = ["ath", "int", "cha"] as const
         apsAttributes.forEach(apsAttribute => {
             if (filter.APSFilter[apsAttribute].from) {
