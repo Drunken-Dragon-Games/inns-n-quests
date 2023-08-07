@@ -9,6 +9,7 @@ import { collectionTransitions } from "./collection-transitions"
 import { Provider } from "react-redux"
 import { FilterView } from "./filter/filter-view"
 import styled from "styled-components"
+import { PaginationView } from "./pagination/pagination-view"
 
 const Container = styled.div`
   position: relative;
@@ -26,6 +27,7 @@ const CollectionComponent = () =>{
     <Container>
       <FilterView filter={filter}/>
       <DisplayView collectionItems={collectionItems} />
+      <PaginationView filter={filter}/>
     </Container>
     )
 }

@@ -96,8 +96,8 @@ export class SyncedAssets {
         }
     }
 
-    async getSyncedAssets(userId: string, filter?: CollectionFilter, pageSize = 50): Promise<SyncedAsset[]>{
-        if (!filter) return SyncedAsset.findAll({where: {userId}})
+    async getSyncedAssets(userId: string, filter?: CollectionFilter, pageSize = 4): Promise<SyncedAsset[]>{
+        if (!filter) return SyncedAsset.findAll({where: {userId}, limit: pageSize})
 
         const whereClause: WhereOptions = { userId }
         if (filter.policyFilter.length > 0) 
