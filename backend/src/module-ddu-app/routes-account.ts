@@ -172,7 +172,8 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
     router.post("/assets/collection-with-metadata", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
-        const result = await accountService.getUserDisplayCollection(userId, logger)
+        const filter = request.body.filter
+        const result = await accountService.getUserDisplayCollection(userId, filter, logger)
         response.status(200).json(result)
     }) )
 

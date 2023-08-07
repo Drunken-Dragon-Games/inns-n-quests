@@ -1,6 +1,6 @@
 import { AssetManagementService } from "../service-asset-management"
 import { BlockchainService } from "../service-blockchain/service-spec"
-import { CollectionService } from "../service-collection"
+import { CollectionFilter, CollectionService } from "../service-collection"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
@@ -236,8 +236,8 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok"}
     }
 
-    async getUserDisplayCollection(userId: string,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult> {
-        const collectionResult = await this.collectionService.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId})
+    async getUserDisplayCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<UserCollectionWithMetadataResult> {
+        const collectionResult = await this.collectionService.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, undefined, logger)
         if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
         return {status: "ok", collection: collectionResult.collection}
 

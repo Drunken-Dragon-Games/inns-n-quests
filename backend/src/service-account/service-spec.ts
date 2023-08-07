@@ -27,7 +27,7 @@ export interface AccountService {
     getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult>
     submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string,  logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
-    getUserDisplayCollection(userId: string,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
+    getUserDisplayCollection(userId: string, filter?: CollectionFilter,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
 }
 
 export type CleanAssociationTxResult 

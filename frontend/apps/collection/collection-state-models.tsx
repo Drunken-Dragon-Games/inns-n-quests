@@ -1,4 +1,4 @@
-import { CharacterClass } from "../game/game-vm"
+import { CharacterClass, CharacterClasses } from "../game/game-vm"
 
 type Collectible = { assetRef: string, quantity: string, type: "Character" | "Furniture" }
 
@@ -42,3 +42,5 @@ export type APSRange = {from?: number, to?: number}
 export type APSFilter = {ath:APSRange, int: APSRange, cha: APSRange }
 export type CollectionFilter 
     = { page: number, policy?: CollectionPolicyNames[], classFilter: AssetClass[], APSFilter: APSFilter}
+export const filterClasses: AssetClass[] = [...CharacterClasses, 'furniture']
+export const collectionPolicies: CollectionPolicyNames[] = ["pixel-tiles", "adventurers-of-thiolden", "grandmaster-adventurers"]

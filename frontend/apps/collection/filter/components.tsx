@@ -10,9 +10,9 @@ const CheckMarkWrapper = styled.div`
     top: 0;
 `
 
-export const PixelCheckbox = ({ checked, size, onChange }: { checked: boolean, size: Units, onChange: (checked: boolean) => void }) => {
+export const PixelCheckbox = ({ checked, size }: { checked: boolean, size: Units}) => {
     return (
-        <CheckWrapper onClick={() => onChange(!checked)}>
+        <CheckWrapper >
             <PixelArtImage 
                 src="https://d1f9hywwzs4bxo.cloudfront.net/modules/quests/dashboard/questPaper/checkbox.svg" 
                 alt="drunken Dragon checkbox" 

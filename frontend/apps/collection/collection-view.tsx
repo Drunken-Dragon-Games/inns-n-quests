@@ -13,6 +13,7 @@ import styled from "styled-components"
 const Container = styled.div`
   position: relative;
   margin-left: 105px;
+  min-height: 850px;
 `;
 
 const CollectionComponent = () =>{
