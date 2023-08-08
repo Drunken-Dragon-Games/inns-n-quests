@@ -67,7 +67,7 @@ afterEach(async () => {
 
 test("get Collection ok", async () => {
     const collection = await service.syncUserCollection(userId)
-    const collectionResult = await  service.getCollection(userId)
+    const collectionResult = await  service.getCollection(userId, undefined, 6)
     if (collectionResult.ctype !== "success") fail("collection bad ctype")
     const expectedCollection: Collection<{}> = {
         pixelTiles: [
@@ -89,7 +89,7 @@ test("get Collection ok", async () => {
 
 test("get Collection with Metadata ok", async () => {
     const collection = await service.syncUserCollection(userId)
-    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId: userId})
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId: userId}, 6)
     if (collectionResult.ctype !== "success") fail("Collection bad ctype")
     const expectedCollection: Collection<CollectibleStakingInfo & CollectibleMetadata> = {
         pixelTiles: [
@@ -242,7 +242,7 @@ test("grant 1 week", async () => {
 
 test("syncUserCollection create", async () => {
     const collection = await service.syncUserCollection(userId)
-    const collectionDB = await service.getCollection(userId)
+    const collectionDB = await service.getCollection(userId, undefined, 6)
 
     if(collection.ctype !== "success" || collectionDB.ctype !== "success") fail("Collection bad ctype")
 
@@ -266,7 +266,7 @@ test("syncUserCollection delete", async () => {
     }})
     
     const collection = await service.syncUserCollection(userId)
-    const collectionDB = await service.getCollection(userId)
+    const collectionDB = await service.getCollection(userId, undefined, 6)
     
     if(collection.ctype !== "success" || collectionDB.ctype !== "success") fail("Collection bad ctype")
     
@@ -294,7 +294,7 @@ test("syncUserCollection update", async () => {
     }})
     
     const collection = await service.syncUserCollection(userId)
-    const collectionDB = await service.getCollection(userId)
+    const collectionDB = await service.getCollection(userId, undefined, 6)
     
     if(collection.ctype !== "success" || collectionDB.ctype !== "success") fail("Collection bad ctype")
     
