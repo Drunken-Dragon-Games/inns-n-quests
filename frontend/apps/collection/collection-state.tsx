@@ -9,17 +9,19 @@ export type CollectionThunk<ReturnType = void> =
     ThunkAction<ReturnType, CollectionStoreState, unknown, Action<string>>
 
 export interface CollectionState {
-    collectionItems: CollectionWithUIMetada,
+    displayedCollectionItems: CollectionWithUIMetada,
+    collectionCache: Record<number, CollectionWithUIMetada>,
     collectionFetchingState: CollectionFetchingState,
     collectionFilter: CollectionFilter
 }
 
 const collectionInitialState: CollectionState = {
-    collectionItems: {
+    displayedCollectionItems: {
         pixelTiles: [],
         grandMasterAdventurers: [],
         adventurersOfThiolden: []
     },
+    collectionCache: {},
     collectionFetchingState: {ctype: "idle"},
     collectionFilter: {page: 1, policyFilter: [], classFilter: [], APSFilter:{ath: {}, int: {}, cha: {}}}
 }
@@ -28,8 +30,16 @@ export const collectinState = createSlice({
     name: "collection-state",
     initialState: collectionInitialState,
     reducers: {
-        setCollectionItems: (state, action: PayloadAction<CollectionWithUIMetada>) => {
-            state.collectionItems = action.payload
+        setDisplayedCollection: (state, action: PayloadAction<CollectionWithUIMetada>) => {
+            state.displayedCollectionItems = action.payload
+        },
+
+        addToCollectionCache: (state, action: PayloadAction<{page: number, collection: CollectionWithUIMetada}>) => {
+            state.collectionCache[action.payload.page] = action.payload.collection
+        },
+
+        clearCache: (state) => {
+            state.collectionCache = {}
         },
 
         setCollectionFetchingState: (state, action: PayloadAction<CollectionFetchingState>) => {

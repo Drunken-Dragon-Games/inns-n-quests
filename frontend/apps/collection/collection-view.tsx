@@ -18,16 +18,17 @@ const Container = styled.div`
 `;
 
 const CollectionComponent = () =>{
-    const { collectionItems, filter } = useSelector((state: CollectionState) => ({
-            collectionItems: state.collectionItems,
+    const { collectionItems, collectionCache, filter } = useSelector((state: CollectionState) => ({
+            collectionItems: state.displayedCollectionItems,
+            collectionCache: state.collectionCache,
             filter: state.collectionFilter
     }))
-    useEffect(() => {collectionTransitions.getCollection()}, [])
+    useEffect(() => {collectionTransitions.setDisplayCollection(collectionCache, filter)}, [])
     return(
     <Container>
-      <FilterView filter={filter}/>
+      <FilterView />
       <DisplayView collectionItems={collectionItems} />
-      <PaginationView filter={filter}/>
+      <PaginationView filter={filter} collectionCache={collectionCache}/>
     </Container>
     )
 }
