@@ -20,6 +20,15 @@ export const CollectionThunks = {
         }
     },
 
+    getMortalCollection: (): CollectionThunk => async (dispatch) => {
+        const result = await AccountApi.getUserMortalCollection()
+        if (result.status !== "ok") {
+            dispatch(actions.setCollectionFetchingState({ ctype: "error", details: result.reason }))
+        } else {
+            dispatch(actions.setMortalCollection(result.collection))
+        }
+    },
+
     setFilter: (filter: CollectionFilter): CollectionThunk => async (dispatch) => {
         dispatch(actions.setCollectionFilter(filter))
     },

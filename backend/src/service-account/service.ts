@@ -6,7 +6,7 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, UserCollectionWithMetadataResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -240,7 +240,12 @@ export class AccountServiceDsl implements AccountService {
         const collectionResult = await this.collectionService.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, undefined, logger)
         if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
         return {status: "ok", collection: collectionResult.collection, hasMore: collectionResult.hasMore}
+    }
 
+    async getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>{
+        const collectionResult = await this.collectionService.getMortalCollection(userId, logger)
+        if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
+        return {status: "ok", collection: collectionResult.collection}
     }
 }
 

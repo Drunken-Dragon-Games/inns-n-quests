@@ -10,6 +10,7 @@ import { Provider } from "react-redux"
 import { FilterView } from "./filter/filter-view"
 import styled from "styled-components"
 import { PaginationView } from "./pagination/pagination-view"
+import { MortalView } from "./mortal-display/mortal-view"
 
 const Container = styled.div`
   position: relative;
@@ -18,14 +19,16 @@ const Container = styled.div`
 `;
 
 const CollectionComponent = () =>{
-    const { collectionItems, collectionCache, filter } = useSelector((state: CollectionState) => ({
+    const { mortalItems, collectionItems, collectionCache, filter } = useSelector((state: CollectionState) => ({
             collectionItems: state.displayedCollectionItems,
+            mortalItems: state.mortalCollectionItems,
             collectionCache: state.collectionCache,
             filter: state.collectionFilter
     }))
     useEffect(() => {collectionTransitions.setDisplayCollection(collectionCache, filter)}, [])
     return(
     <Container>
+      <MortalView collectionItems={mortalItems}/>
       <FilterView />
       <DisplayView collectionItems={collectionItems} />
       <PaginationView filter={filter} collectionCache={collectionCache}/>

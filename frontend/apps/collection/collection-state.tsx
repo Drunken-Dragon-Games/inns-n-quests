@@ -1,5 +1,5 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { CollectionFetchingState, CollectionFilter, CollectionWithUIMetada } from "./collection-state-models"
+import { CollectionFetchingState, CollectionFilter, CollectionWithGameData, CollectionWithUIMetada } from "./collection-state-models"
 
 
 export type CollectionStoreState = 
@@ -10,6 +10,7 @@ export type CollectionThunk<ReturnType = void> =
 
 export interface CollectionState {
     displayedCollectionItems: CollectionWithUIMetada,
+    mortalCollectionItems: CollectionWithGameData,
     collectionCache: Record<number, CollectionWithUIMetada & {hasMore: boolean}>,
     collectionFetchingState: CollectionFetchingState,
     collectionFilter: CollectionFilter
@@ -17,6 +18,11 @@ export interface CollectionState {
 
 const collectionInitialState: CollectionState = {
     displayedCollectionItems: {
+        pixelTiles: [],
+        grandMasterAdventurers: [],
+        adventurersOfThiolden: []
+    },
+    mortalCollectionItems: {
         pixelTiles: [],
         grandMasterAdventurers: [],
         adventurersOfThiolden: []
@@ -32,6 +38,10 @@ export const collectinState = createSlice({
     reducers: {
         setDisplayedCollection: (state, action: PayloadAction<CollectionWithUIMetada>) => {
             state.displayedCollectionItems = action.payload
+        },
+
+        setMortalCollection: (state, action: PayloadAction<CollectionWithGameData> )=> {
+            state.mortalCollectionItems = action.payload
         },
 
         addToCollectionCache: (state, action: PayloadAction<{page: number, collection: CollectionWithUIMetada, hasMore: boolean}>) => {

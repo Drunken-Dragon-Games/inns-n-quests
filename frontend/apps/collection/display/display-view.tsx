@@ -100,10 +100,10 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
     return( 
     <EthernalCollectionContainer>
         <Header>
+                <Title>Ethernal Collection</Title>
                 <ButtonContainer>
                     <button onClick={() =>  handleArtTypeChange()}>{artType}</button>
                 </ButtonContainer>
-                <Title>Collection</Title>
         </Header>
         {collectionItems.adventurersOfThiolden.map((src, index) => {
                 if (artType == "splashArt" && isVideoFile(src.splashArt)) {

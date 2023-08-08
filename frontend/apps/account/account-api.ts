@@ -17,5 +17,9 @@ export const AccountApi = {
 
     getUserCollectionWithMetadata(filter?: CollectionFilter){
         return AccountBackend.getUserCollectionWIthMetadata(filter)
+    },
+
+    getUserMortalCollection(){
+        return AccountBackend.getUserMortalCollection()
     }
 }

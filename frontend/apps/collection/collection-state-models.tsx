@@ -30,6 +30,7 @@ type GetCollectionResult<A extends object>
 export type PolicyCollectiblesWithUIData = PolicyCollectibles<CollectibleStakingInfo & CollectibleMetadata>
 export type CollectionWithUIMetada = Collection<CollectibleStakingInfo & CollectibleMetadata>
 export type CollectionWithUIMetadataResult = GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>
+export type CollectionWithGameData = Collection<CollectibleMetadata>
 
 export type CollectionFetchingState
     = { ctype: "idle" }

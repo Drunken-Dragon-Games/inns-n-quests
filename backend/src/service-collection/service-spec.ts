@@ -69,5 +69,5 @@ export type GetPassiveStakingInfoResult = SResult<{
 
 export type CollectionWithUIMetadataResult = GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata> & {hasMore: boolean}
 export type CollectionWithUIMetada = Collection<CollectibleStakingInfo & CollectibleMetadata>
-
+export type CollectionWithGameData = Collection<CollectibleMetadata>
 export type SyncUserCollectionResult = SResult<{collection: Collection<StoredMetadata>}>

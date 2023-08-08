@@ -9,6 +9,10 @@ export const collectionTransitions = {
         dispatch(CollectionThunks.getCollection(cache, filter))
     },
 
+    setMortalCollection(){
+        dispatch(CollectionThunks.getMortalCollection())
+    },
+
     setFilter(filter: CollectionFilter){
         dispatch(CollectionThunks.setFilter(filter))
     },

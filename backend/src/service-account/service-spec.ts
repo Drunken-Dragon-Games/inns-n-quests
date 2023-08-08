@@ -1,5 +1,5 @@
 import { ClaimStatus } from "../service-asset-management"
-import { CollectionFilter, CollectionWithUIMetada, GetCollectionResult } from "../service-collection"
+import { CollectionFilter, CollectionWithGameData, CollectionWithUIMetada, GetCollectionResult } from "../service-collection"
 import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
 import { LoggingContext } from "../tools-tracing"
@@ -28,6 +28,7 @@ export interface AccountService {
     submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string,  logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
     getUserDisplayCollection(userId: string, filter?: CollectionFilter,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
+    getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>
 }
 
 export type CleanAssociationTxResult 
@@ -111,4 +112,8 @@ export type UserBallotResult =
 
 export type UserCollectionWithMetadataResult
     = {status: "ok", collection: CollectionWithUIMetada, hasMore: boolean}
+    | {status: "invalid", reason: string}
+
+export type UserMortalCollectionResult
+    = {status: "ok", collection: CollectionWithGameData}
     | {status: "invalid", reason: string}
