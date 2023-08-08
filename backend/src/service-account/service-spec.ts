@@ -110,5 +110,5 @@ export type UserBallotResult =
   {status: "invalid", reason: string}
 
 export type UserCollectionWithMetadataResult
-    = {status: "ok", collection: CollectionWithUIMetada}
+    = {status: "ok", collection: CollectionWithUIMetada, hasMore: boolean}
     | {status: "invalid", reason: string}

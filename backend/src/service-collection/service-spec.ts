@@ -67,7 +67,7 @@ export type GetPassiveStakingInfoResult = SResult<{
     dragonSilver: string 
 }>
 
-export type CollectionWithUIMetadataResult = GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>
+export type CollectionWithUIMetadataResult = GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata> & {hasMore: boolean}
 export type CollectionWithUIMetada = Collection<CollectibleStakingInfo & CollectibleMetadata>
 
 export type SyncUserCollectionResult = SResult<{collection: Collection<StoredMetadata>}>

@@ -96,8 +96,14 @@ export class SyncedAssets {
         }
     }
 
-    async getSyncedAssets(userId: string, filter?: CollectionFilter, pageSize = 4): Promise<SyncedAsset[]>{
-        if (!filter) return SyncedAsset.findAll({where: {userId}, limit: pageSize})
+    async getSyncedAssets(userId: string, filter?: CollectionFilter, pageSize = 4): Promise<{ assets: SyncedAsset[], hasMore: boolean }>{
+        const requestedSize = pageSize + 1
+        
+        if (!filter) {
+            const assets = await SyncedAsset.findAll({ where: { userId }, limit: requestedSize })
+            const hasMore = assets.length > pageSize
+            return { assets: assets.slice(0, pageSize), hasMore }
+        }
 
         const whereClause: WhereOptions = { userId }
         if (filter.policyFilter.length > 0) 
@@ -123,7 +129,9 @@ export class SyncedAssets {
         })
 
         const offset = (filter.page - 1) * pageSize
-        return SyncedAsset.findAll({ where: whereClause, limit: pageSize, offset: offset })
+        const assets = await SyncedAsset.findAll({ where: whereClause, limit: requestedSize, offset: offset })
+        const hasMore = assets.length > pageSize;
+        return { assets: assets.slice(0, pageSize), hasMore }
     }
 
     async getAsset(userId: string, assetRef:string): Promise<SResult<{asset: SyncedAsset}>>{

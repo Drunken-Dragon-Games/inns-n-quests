@@ -14,7 +14,7 @@ export const CollectionThunks = {
             if (result.status !== "ok") {
                 dispatch(actions.setCollectionFetchingState({ ctype: "error", details: result.reason }))
             } else {
-                dispatch(actions.addToCollectionCache({page: filter.page, collection:result.collection}))
+                dispatch(actions.addToCollectionCache({page: filter.page, collection:result.collection, hasMore: result.hasMore}))
                 dispatch(actions.setDisplayedCollection(result.collection))
             }
         }

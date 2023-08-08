@@ -1,5 +1,5 @@
 import { QueryInterface, Sequelize } from "sequelize"
-import { CollectionService, GetCollectionResult, GetPassiveStakingInfoResult, SyncUserCollectionResult } from "./service-spec"
+import { CollectionService, CollectionWithUIMetadataResult, GetCollectionResult, GetPassiveStakingInfoResult, SyncUserCollectionResult } from "./service-spec"
 
 import path from "path"
 import { Umzug } from "umzug"
@@ -104,14 +104,14 @@ export class CollectionServiceDsl implements CollectionService {
      */
     async getCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<{}>> {
         const dbAssets = await this.syncedAssets.getSyncedAssets(userId,filter,pageSize)
-        const collection = toAssetCollection (dbAssets)
+        const collection = toAssetCollection (dbAssets.assets)
         return {ctype: "success",  collection: collection}
     }
 
-    private async getMetadataCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<StoredMetadata>> {
+    private async getMetadataCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<StoredMetadata> & {hasMore: boolean}> {
         const dbAssets = await this.syncedAssets.getSyncedAssets(userId, filter, pageSize)
-        const collection = toMetadataAssetCollection (dbAssets)
-        return {ctype: "success",  collection}
+        const collection = toMetadataAssetCollection (dbAssets.assets)
+        return {ctype: "success",  collection, hasMore: dbAssets.hasMore}
     }
 
 
@@ -119,15 +119,15 @@ export class CollectionServiceDsl implements CollectionService {
      * Returns the collection with each asset's weekly contributions to the player's passive staking.
      * Intended to be used on the collection UI.
      */
-    async getCollectionWithUIMetadata(userData: CollectionData, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleStakingInfo & CollectibleMetadata>> {
-        const collectionResult:GetCollectionResult<StoredMetadata>  = userData.ctype === "collection"
-        ? {ctype: "success", collection: userData.collection}
+    async getCollectionWithUIMetadata(userData: CollectionData, pageSize?: number, logger?: LoggingContext): Promise<CollectionWithUIMetadataResult> {
+        const collectionResult:GetCollectionResult<StoredMetadata> & {hasMore: boolean} = userData.ctype === "collection"
+        ? {ctype: "success", collection: userData.collection, hasMore: false}
         : await this.getMetadataCollection(userData.userId,userData.filter, pageSize ,logger)
         
         if (collectionResult.ctype !== "success") return collectionResult
         const metadataCollection = await this.hydrateCollectionWithMetadata(collectionResult.collection, userData.userId)
         const stakingCollection = this.calculateCollectionDailyReward(metadataCollection)
-        return {ctype: "success", collection: stakingCollection}
+        return {ctype: "success", collection: stakingCollection, hasMore: collectionResult.hasMore}
     }
 
     /**

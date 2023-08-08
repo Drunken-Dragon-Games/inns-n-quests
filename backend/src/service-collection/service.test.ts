@@ -355,7 +355,7 @@ test("mortal collection add and remove",async () => {
 test("filter by class",async () => {
     await service.syncUserCollection(userId)
     const filter: CollectionFilter = {policyFilter: ["grandmaster-adventurers"], page: 1, classFilter: ["Ranger"], APSFilter: {ath: {}, int: {}, cha: {}}}
-    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter})
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 4)
     if(collectionResult.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
     const expectedCollection: CollectionWithUIMetadataResult = {
         "ctype": "success",
@@ -380,7 +380,8 @@ test("filter by class",async () => {
                     "stakingContribution": 1
                 }
             ]
-        }
+        },
+        "hasMore": false
     }
     expect(dsl.areCollectionsEqual(collectionResult, expectedCollection)).toBe(true)
 })
@@ -388,7 +389,7 @@ test("filter by class",async () => {
 test("filter by APS",async () => {
     await service.syncUserCollection(userId)
     const filter: CollectionFilter = {page: 1, policyFilter: [], classFilter: [], APSFilter: {ath: {}, int: {from: 7}, cha: {}}}
-    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter})
+    const collectionResult = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 4)
     if(collectionResult.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
     const expectedCollection: CollectionWithUIMetadataResult = {
         "ctype": "success",
@@ -446,7 +447,8 @@ test("filter by APS",async () => {
                     "stakingContribution": 1
                 }
             ]
-        }
+        },
+        "hasMore": false
     }
     expect(dsl.areCollectionsEqual(collectionResult, expectedCollection)).toBe(true)
 })
@@ -496,7 +498,8 @@ test("filter pagination",async () => {
                 }
             ],
             "grandMasterAdventurers": []
-        }
+        },
+        hasMore: true
     }
     expect(dsl.areCollectionsEqual(collectionResult, expectedCollectionPage1)).toBe(true)
     filter.page = 2
@@ -542,7 +545,8 @@ test("filter pagination",async () => {
                     "stakingContribution": 1
                 }
             ]
-        }
+        },
+        "hasMore": true
     }
     expect(dsl.areCollectionsEqual(collectionResult2, expectedCollectionPage2)).toBe(true)
     filter.page = 3
@@ -571,7 +575,8 @@ test("filter pagination",async () => {
                     "stakingContribution": 1
                 }
             ]
-        }
+        },
+        "hasMore": false
     }
     expect(dsl.areCollectionsEqual(collectionResult3, expectedCollectionPage3)).toBe(true)
 })

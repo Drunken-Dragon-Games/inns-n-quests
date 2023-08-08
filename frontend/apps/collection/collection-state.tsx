@@ -10,7 +10,7 @@ export type CollectionThunk<ReturnType = void> =
 
 export interface CollectionState {
     displayedCollectionItems: CollectionWithUIMetada,
-    collectionCache: Record<number, CollectionWithUIMetada>,
+    collectionCache: Record<number, CollectionWithUIMetada & {hasMore: boolean}>,
     collectionFetchingState: CollectionFetchingState,
     collectionFilter: CollectionFilter
 }
@@ -34,8 +34,8 @@ export const collectinState = createSlice({
             state.displayedCollectionItems = action.payload
         },
 
-        addToCollectionCache: (state, action: PayloadAction<{page: number, collection: CollectionWithUIMetada}>) => {
-            state.collectionCache[action.payload.page] = action.payload.collection
+        addToCollectionCache: (state, action: PayloadAction<{page: number, collection: CollectionWithUIMetada, hasMore: boolean}>) => {
+            state.collectionCache[action.payload.page] = {...action.payload.collection, hasMore: action.payload.hasMore}
         },
 
         clearCache: (state) => {

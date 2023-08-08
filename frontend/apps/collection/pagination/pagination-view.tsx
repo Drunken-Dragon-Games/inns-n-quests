@@ -10,9 +10,10 @@ const PaginationContainer = styled.div`
   margin: 15px;
 `;
 
-export const PaginationView = ({ filter, collectionCache }: { filter: CollectionFilter, collectionCache: Record<number, CollectionWithUIMetada> }) => {
+export const PaginationView = ({ filter, collectionCache }: { filter: CollectionFilter, collectionCache: Record<number, CollectionWithUIMetada & {hasMore: boolean}> }) => {
     
     const onNext = () => {
+        if (!collectionCache[filter.page].hasMore) return
         collectionTransitions.setFilter({...filter, page: filter.page + 1})
         collectionTransitions.setDisplayCollection(collectionCache, {...filter, page: filter.page + 1})
       }
@@ -24,8 +25,8 @@ export const PaginationView = ({ filter, collectionCache }: { filter: Collection
       }
     return (
     <PaginationContainer>
-      <button onClick={onPrevious}>Previous Page</button>
-      <button onClick={onNext}>Next Page</button>
+      <button onClick={onPrevious}  disabled={filter.page < 2}>Previous Page</button>
+      <button onClick={onNext} disabled={collectionCache[filter.page] ? !collectionCache[filter.page].hasMore : true}>Next Page</button>
     </PaginationContainer>
     )
 }

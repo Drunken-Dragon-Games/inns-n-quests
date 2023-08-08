@@ -239,7 +239,7 @@ export class AccountServiceDsl implements AccountService {
     async getUserDisplayCollection(userId: string, filter?: CollectionFilter, logger?: LoggingContext): Promise<UserCollectionWithMetadataResult> {
         const collectionResult = await this.collectionService.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, undefined, logger)
         if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
-        return {status: "ok", collection: collectionResult.collection}
+        return {status: "ok", collection: collectionResult.collection, hasMore: collectionResult.hasMore}
 
     }
 }
