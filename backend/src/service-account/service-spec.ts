@@ -29,6 +29,7 @@ export interface AccountService {
     cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
     getUserDisplayCollection(userId: string, filter?: CollectionFilter,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
     getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>
+    modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>
 }
 
 export type CleanAssociationTxResult 
@@ -116,4 +117,8 @@ export type UserCollectionWithMetadataResult
 
 export type UserMortalCollectionResult
     = {status: "ok", collection: CollectionWithGameData}
+    | {status: "invalid", reason: string}
+
+export type ModifyMortalCollectionResult
+    = {status: "ok"}
     | {status: "invalid", reason: string}

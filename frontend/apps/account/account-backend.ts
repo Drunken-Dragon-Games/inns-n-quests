@@ -129,6 +129,11 @@ export const AccountBackend = {
     async getUserMortalCollection(traceId?: string): Promise<UserMortalCollectionResult>{
         const result = await accountRequestWRefresh("POST", "/assets/mortal-collection", traceId)
         return result.data
+    },
+
+    async modifyMortalCollection(assetRef: string, action: "add" | "remove", traceId?: string): Promise<ModifyMortalCollectionResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/modify-mortal-collection", {assetRef, action} ,traceId)
+        return result.data
     }
 }
 
@@ -207,6 +212,10 @@ export type UserCollectionWithMetadataResult
 
 export type UserMortalCollectionResult
     = {status: "ok", collection: CollectionWithGameData}
+    | {status: "invalid", reason: string}
+
+export type ModifyMortalCollectionResult
+    = {status: "ok"}
     | {status: "invalid", reason: string}
 
 async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {

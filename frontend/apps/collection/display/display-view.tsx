@@ -1,7 +1,8 @@
 import styled from "styled-components"
-import { CollectionWithUIMetada } from "../collection-state-models"
+import { CollectionWithUIMetada, UICollectible } from "../collection-state-models"
 import { PixelArtImage, Video, vmax1 } from "../../common"
 import { useState } from "react"
+import { collectionTransitions } from "../collection-transitions"
 
 const EthernalCollectionContainer = styled.div`
     border: 2px solid #ccc;
@@ -62,142 +63,101 @@ const capitalizeFirstLetter = (input: string): string => {
     return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
+const modifyMortalCollection = (assetRef: string, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
+    collectionTransitions.modifyMortalCollection(assetRef, action, policy)
+}
+
+type RenderCollectible = { 
+    src: UICollectible, 
+    imageDimensions: any, 
+    type: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", 
+    isVideo?: boolean, 
+    artType: string
+}
+
+export const Collectible = ({ src, imageDimensions, type, isVideo, artType }: RenderCollectible) => {
+    const getArtSource = ( src: {splashArt: string, miniature: string}) => {
+        if (artType === 'splashArt') return src.splashArt
+        else return src.miniature
+    }
+    return (
+        <CollectibleContainer>
+            {isVideo ? (
+                <Video src={src.splashArt} height={imageDimensions.adventurersOfThiolden.height} width={imageDimensions.adventurersOfThiolden.width} units={vmax1} />
+            ) : (
+                <MirroredPixelArtImage
+                    src={getArtSource(src)}
+                    alt={src.name}
+                    height={imageDimensions[type].height}
+                    width={imageDimensions[type].width * (type === 'pixelTiles' && artType === 'miniature' && src.class === 'furniture'? 1.5 : 1)}
+                    isFlipped={artType === 'miniature'}
+                />
+            )}
+            <CollectibleInfo>
+                <p>{capitalizeFirstLetter(src.name)}</p>
+                <p>Class: {src.class}</p>
+                {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
+                <p>Quantity: {src.quantity} </p>
+                <p>Active: {src.mortalRealmsActive}</p>
+            </CollectibleInfo>
+            <button onClick={() => modifyMortalCollection(src.assetRef, "add", type)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</button>
+            <button onClick={() => modifyMortalCollection(src.assetRef, "remove", type)} disabled={src.mortalRealmsActive < 1}>Remove from Mortal</button>
+        </CollectibleContainer>
+    )
+}
+
 export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWithUIMetada }) => {
     const [artType, setArtType] = useState("splashArt")
     const handleArtTypeChange = () => {
         const newArtType = artType === "splashArt" ? "miniature" : "splashArt"
         setArtType(newArtType)
         setImageDimensions({
-            "pxlTs": dimensionsMap["pxlTs"][newArtType],
-            "gmas": dimensionsMap["gmas"][newArtType],
-            "advTln": dimensionsMap["advTln"][newArtType],
+            "pixelTiles": dimensionsMap["pixelTiles"][newArtType],
+            "grandMasterAdventurers": dimensionsMap["grandMasterAdventurers"][newArtType],
+            "adventurersOfThiolden": dimensionsMap["adventurersOfThiolden"][newArtType],
         })
     }
    
     const dimensionsMap = {
-        "pxlTs": {
+        "pixelTiles": {
             "splashArt": { height: 10.5,  width: 9 },
             "miniature": { height: 10.5,  width: 6.75 },
         },
-        "gmas": {
+        "grandMasterAdventurers": {
             "splashArt": { height: 12,  width: 12 },
             "miniature": { height: 12,width: 9.6 }
         },
-        "advTln": {
+        "adventurersOfThiolden": {
             "splashArt": { height: 12,  width: 9 },
             "miniature": { height: 12,  width: 9 }
         }
     }
-    const getArtSource = ( src: {splashArt: string, miniature: string}) => {
-        if (artType === 'splashArt') return src.splashArt
-        else return src.miniature
-    }
+
     const [imageDimensions, setImageDimensions] = useState({
-        "pxlTs": dimensionsMap["pxlTs"]["splashArt"],
-        "gmas": dimensionsMap["gmas"]["splashArt"],
-        "advTln": dimensionsMap["advTln"]["splashArt"],
+        "pixelTiles": dimensionsMap["pixelTiles"]["splashArt"],
+        "grandMasterAdventurers": dimensionsMap["grandMasterAdventurers"]["splashArt"],
+        "adventurersOfThiolden": dimensionsMap["adventurersOfThiolden"]["splashArt"],
     })
-    return( 
-    <EthernalCollectionContainer>
-        <Header>
+    return (
+        <EthernalCollectionContainer>
+            <Header>
                 <Title>Ethernal Collection</Title>
                 <ButtonContainer>
-                    <button onClick={() =>  handleArtTypeChange()}>{artType}</button>
+                    <button onClick={() => handleArtTypeChange()}>{artType}</button>
                 </ButtonContainer>
-        </Header>
-        {collectionItems.adventurersOfThiolden.map((src, index) => {
-                if (artType == "splashArt" && isVideoFile(src.splashArt)) {
-                    return (
-                    <CollectibleContainer key={index}>
-                        <Video src={src.splashArt} height={imageDimensions.advTln.height} width={imageDimensions.advTln.width} units={vmax1}/>
-                        <CollectibleInfo>
-                            <p>{capitalizeFirstLetter(src.name)}</p>
-                            <p>Class: {src.class}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
-                            <p>Active: {src.mortalRealmsActive}</p>
-                        </CollectibleInfo>
-                    </CollectibleContainer>
-                    )
-                } else {
-                    return (
-                    <CollectibleContainer key={index}>
-                        <MirroredPixelArtImage 
-                            src={getArtSource(src)} 
-                            alt={src.name} 
-                            height={imageDimensions.advTln.height} 
-                            width={imageDimensions.advTln.width} 
-                            isFlipped={artType === 'miniature'}
-                        />
-                        <CollectibleInfo>
-                            <p>{capitalizeFirstLetter(src.name)}</p>
-                            <p>Class: {src.class}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
-                            <p>Active: {src.mortalRealmsActive}</p>
-                        </CollectibleInfo>
-                    </CollectibleContainer>
-                    )
-                }
-            })}
-            {collectionItems.grandMasterAdventurers.map((src, index) => {
-                    return (
-                    <CollectibleContainer key={index}>
-                        <MirroredPixelArtImage 
-                            src={getArtSource(src)} 
-                            alt={src.name} 
-                            height={imageDimensions.gmas.height} 
-                            width={imageDimensions.gmas.width} 
-                            isFlipped={artType === 'miniature'}
-                        />
-                        <CollectibleInfo>
-                            <p>{capitalizeFirstLetter(src.name)}</p>
-                            <p>Class: {src.class}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
-                            <p>Active: {src.mortalRealmsActive}</p>
-                        </CollectibleInfo>
-                    </CollectibleContainer>
-                    )
-            })}
-            {collectionItems.pixelTiles.filter(src => src.class !== 'furniture')
-            .map((src, index) => {
-                    return (
-                    <CollectibleContainer key={index}>
-                       <MirroredPixelArtImage 
-                            src={getArtSource(src)} 
-                            alt={src.name} 
-                            height={imageDimensions.pxlTs.height} 
-                            width={imageDimensions.pxlTs.width} 
-                            isFlipped={artType === 'miniature'}
-                        />
-                        <CollectibleInfo>
-                            <p>{capitalizeFirstLetter(src.name)}</p>
-                            <p>Class: {src.class}</p>
-                            <p>APS: {src.aps.join(', ')}</p>
-                            <p>Quantity: {src.quantity}</p>
-                            <p>Active: {src.mortalRealmsActive}</p>
-                        </CollectibleInfo>
-                    </CollectibleContainer>
-                    )
-            })}
-            {collectionItems.pixelTiles.filter(src => src.class == 'furniture')
-            .map((src, index) => {
-                    return (
-                    <CollectibleContainer key={index}>
-                        <MirroredPixelArtImage 
-                            src={getArtSource(src)} 
-                            alt={src.name} 
-                            height={imageDimensions.pxlTs.height} 
-                            width={imageDimensions.pxlTs.width * (artType === 'splashArt' ? 1 : 1.5)} 
-                            isFlipped={artType === 'miniature'}
-                        />
-                        <CollectibleInfo>
-                            <p>{capitalizeFirstLetter(src.name)}</p>
-                            <p>Class: {src.class}</p>
-                            <p>Quantity: {src.quantity}</p>
-                            <p>Active: {src.mortalRealmsActive}</p>
-                        </CollectibleInfo>
-                    </CollectibleContainer>
-                    )
-            })}
-    </EthernalCollectionContainer>
+            </Header>
+            {collectionItems.adventurersOfThiolden.map((src, index) =>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions} type="adventurersOfThiolden" isVideo={artType == "splashArt" && isVideoFile(src.splashArt)} artType={artType} />
+            )}
+            {collectionItems.grandMasterAdventurers.map((src, index) =>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions} type="grandMasterAdventurers" artType={artType}/>
+            )}
+            {collectionItems.pixelTiles.filter(src => src.class !== 'furniture').map((src, index) =>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions} type="pixelTiles" artType={artType}/>
+            )}
+            {collectionItems.pixelTiles.filter(src => src.class == 'furniture').map((src, index) =>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions} type="pixelTiles" artType={artType}/>
+            )}
+        </EthernalCollectionContainer>
     )
 }

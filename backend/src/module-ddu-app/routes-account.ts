@@ -184,6 +184,14 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         response.status(200).json(result)
     }) )
 
+    router.post("/assets/modify-mortal-collection", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const {assetRef, action} = request.body
+        const result = await accountService.modifyMortalCollection(userId, assetRef, action, logger)
+        response.status(200).json(result)
+    }) )
+
     router.get("/assets/test/grant", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         if (process.env.NODE_ENV !== "development") {response.status(401).json({status: "Not allowed"})}
         else {

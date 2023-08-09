@@ -6,7 +6,7 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -246,6 +246,15 @@ export class AccountServiceDsl implements AccountService {
         const collectionResult = await this.collectionService.getMortalCollection(userId, logger)
         if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
         return {status: "ok", collection: collectionResult.collection}
+    }
+
+    async modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>{
+        const operationResult = action === "add" ?
+        await this.collectionService.addMortalCollectible(userId, assetRef, logger) :
+        await this.collectionService.removeMortalCollectible(userId, assetRef, logger)
+        
+        if (operationResult.ctype !== "success") return {status: "invalid", reason: operationResult.error}
+        return {status: "ok"}
     }
 }
 

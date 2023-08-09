@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { CollectionWithGameData, CollectionWithUIMetada } from "../collection-state-models"
+import { CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada } from "../collection-state-models"
 import { PixelArtImage, Video, vmax1 } from "../../common"
 import { useState } from "react"
 
@@ -8,6 +8,7 @@ const MortalCollectionContainer = styled.div`
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
+    margin-left: 9.5vw;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 
     display: grid;
@@ -43,7 +44,7 @@ const CollectibleInfo = styled.div`
 `;
 
 const MirroredPixelArtImage = styled(PixelArtImage)`
-  transform: 'scaleX(-1)';
+  transform: scaleX(-1);
 `;
 
 const capitalizeFirstLetter = (input: string): string => {
@@ -53,32 +54,35 @@ const capitalizeFirstLetter = (input: string): string => {
 
 export const MortalView = ({ collectionItems }: { collectionItems: CollectionWithGameData }) => {
     const dimensionsMap = {
-        "pxlTs": {height: 10.5,  width: 6.75 },
-        "gmas": { height: 12,width: 9.6 },
-        "advTln": {height: 12,  width: 9 }
+        "pixelTiles": {height: 10.5,  width: 6.75 },
+        "grandMasterAdventurers": { height: 12,width: 9.6 },
+        "adventurersOfThiolden": {height: 12,  width: 9 }
     }
+    type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
     return(
     <MortalCollectionContainer>
         <Header>
             <Title>Mortal Collection</Title>
         </Header>
-        {Object.values(collectionItems).map((itemsArray) => 
-            itemsArray.map((src, index) => (
+        {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+            const policyName = policyNameKey as PolicyName
+            return itemsArray.map((src, index) => (
                 <CollectibleContainer key={index}>
-                    <MirroredPixelArtImage 
-                        src={src.miniature} 
-                        alt={src.name} 
-                        height={dimensionsMap.advTln.height} 
-                        width={dimensionsMap.advTln.width}
-                    />
-                    <CollectibleInfo>
-                        <p>{capitalizeFirstLetter(src.name)}</p>
-                        <p>Class: {src.class}</p>
-                        <p>APS: {src.aps.join(', ')}</p>
-                    </CollectibleInfo>
+                <MirroredPixelArtImage
+                    src={src.miniature}
+                    alt={src.name}
+                    height={dimensionsMap[policyName].height}
+                    width={dimensionsMap[policyName].width}
+                />
+                <CollectibleInfo>
+                    <p>{capitalizeFirstLetter(src.name)}</p>
+                    <p>Class: {src.class}</p>
+                    <p>APS: {src.aps.join(", ")}</p>
+                </CollectibleInfo>
                 </CollectibleContainer>
-        ))
-)}
+            ));
+            })
+        }
 
     </MortalCollectionContainer>
     )

@@ -15,6 +15,7 @@ import { MortalView } from "./mortal-display/mortal-view"
 const Container = styled.div`
   position: relative;
   margin-left: 105px;
+  margin-bottom: 75px;
   min-height: 850px;
 `;
 
@@ -25,12 +26,15 @@ const CollectionComponent = () =>{
             collectionCache: state.collectionCache,
             filter: state.collectionFilter
     }))
-    useEffect(() => {collectionTransitions.setDisplayCollection(collectionCache, filter)}, [])
+    useEffect(() => {
+      collectionTransitions.setDisplayCollection(collectionCache, filter)
+      collectionTransitions.setMortalCollection()
+    }, [])
     return(
     <Container>
       <MortalView collectionItems={mortalItems}/>
       <FilterView />
-      <DisplayView collectionItems={collectionItems} />
+      <DisplayView collectionItems={collectionItems}/>
       <PaginationView filter={filter} collectionCache={collectionCache}/>
     </Container>
     )

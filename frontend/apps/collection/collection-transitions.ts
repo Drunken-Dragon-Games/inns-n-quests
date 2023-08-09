@@ -13,6 +13,10 @@ export const collectionTransitions = {
         dispatch(CollectionThunks.getMortalCollection())
     },
 
+    modifyMortalCollection(assetRef: string, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"){
+        dispatch(CollectionThunks.modifyMortalCollection(assetRef, action, policy))
+    },
+
     setFilter(filter: CollectionFilter){
         dispatch(CollectionThunks.setFilter(filter))
     },
