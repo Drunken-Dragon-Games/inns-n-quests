@@ -20,6 +20,17 @@ export const CollectionThunks = {
         }
     },
 
+    syncCollection: (): CollectionThunk => async (dispatch, getState) => {
+        const result = await AccountApi.syncCollection()
+        if (result.status !== "ok") {
+            dispatch(actions.setCollectionFetchingState({ ctype: "error", details: result.reason }))
+        } else {
+            const state = getState()
+            dispatch(CollectionThunks.clearCache())
+            dispatch(CollectionThunks.getCollection({}, state.collectionFilter))
+        }
+    },
+
     getMortalCollection: (): CollectionThunk => async (dispatch) => {
         const result = await AccountApi.getUserMortalCollection()
         if (result.status !== "ok") {
@@ -34,7 +45,7 @@ export const CollectionThunks = {
         if (modifyResult.status !== "ok") return (actions.setCollectionFetchingState({ ctype: "error", details: modifyResult.reason }))
         const result = await AccountApi.getUserMortalCollection()
         if (result.status !== "ok") return dispatch(actions.setCollectionFetchingState({ ctype: "error", details: result.reason }))
-        const state = getState();
+        const state = getState()
         const collection = { ...state.collectionCache[state.collectionFilter.page] }; // Create a shallow copy
         const ethernalIndex = collection[policy].findIndex((policy) => policy.assetRef === assetRef)
         const newActive = collection[policy][ethernalIndex].mortalRealmsActive + (action === "add" ? 1 : -1)

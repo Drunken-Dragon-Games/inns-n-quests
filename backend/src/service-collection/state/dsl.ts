@@ -96,7 +96,7 @@ export class SyncedAssets {
         }
     }
 
-    async getSyncedAssets(userId: string, filter?: CollectionFilter, pageSize = 4): Promise<{ assets: SyncedAsset[], hasMore: boolean }>{
+    async getSyncedAssets(userId: string, filter?: CollectionFilter, pageSize = 9): Promise<{ assets: SyncedAsset[], hasMore: boolean }>{
         const requestedSize = pageSize + 1
         
         if (!filter) {
@@ -257,7 +257,7 @@ export class SyncedMortalAssets {
         const activeAssetsAmount = this.countActiveAssets(mortalAssets)
 
         //this will eventually come from another service and will dpeend on the userId
-        const maxAssetsAllowed = {characters: 5, furniture: 7}
+        const maxAssetsAllowed = {characters: 5, furniture: 5}
 
         const exceedsMaxAllowed = this.assetExceedsMaxAllowed(asset, activeAssetsAmount, maxAssetsAllowed)
         if (exceedsMaxAllowed) {

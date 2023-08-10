@@ -30,6 +30,7 @@ export interface AccountService {
     getUserDisplayCollection(userId: string, filter?: CollectionFilter,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
     getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>
     modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>
+    syncUserCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
 }
 
 export type CleanAssociationTxResult 
@@ -120,5 +121,9 @@ export type UserMortalCollectionResult
     | {status: "invalid", reason: string}
 
 export type ModifyMortalCollectionResult
+    = {status: "ok"}
+    | {status: "invalid", reason: string}
+
+export type SyncUserCollectionResult
     = {status: "ok"}
     | {status: "invalid", reason: string}

@@ -141,6 +141,9 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
     return (
         <EthernalCollectionContainer>
             <Header>
+                <ButtonContainer>
+                    <button onClick={() => collectionTransitions.syncCollection()}>Sync Collection</button>
+                </ButtonContainer>
                 <Title>Ethernal Collection</Title>
                 <ButtonContainer>
                     <button onClick={() => handleArtTypeChange()}>{artType}</button>

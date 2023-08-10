@@ -25,5 +25,9 @@ export const AccountApi = {
 
     modifyUserMortalCollection(assetRef: string, action: "add" | "remove"){
         return AccountBackend.modifyMortalCollection(assetRef, action)
+    },
+
+    syncCollection(){
+        return AccountBackend.syncUserCollection()
     }
 }

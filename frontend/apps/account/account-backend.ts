@@ -134,6 +134,11 @@ export const AccountBackend = {
     async modifyMortalCollection(assetRef: string, action: "add" | "remove", traceId?: string): Promise<ModifyMortalCollectionResult>{
         const result = await accountRequestWRefresh("POST", "/assets/modify-mortal-collection", {assetRef, action} ,traceId)
         return result.data
+    },
+
+    async syncUserCollection(traceId?: string): Promise<ModifyMortalCollectionResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/sync-collection" ,traceId)
+        return result.data
     }
 }
 
