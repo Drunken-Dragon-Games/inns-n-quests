@@ -76,7 +76,7 @@ export const MortalView = ({ collectionItems }: { collectionItems: CollectionWit
                     <CollectibleInfo>
                         <p>{capitalizeFirstLetter(src.name)}</p>
                         <p>Class: {src.class}</p>
-                        <p>APS: {src.aps.join(", ")}</p>
+                        {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
                     </CollectibleInfo>
                 </CollectibleContainer>
             )
