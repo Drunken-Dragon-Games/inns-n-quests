@@ -46,17 +46,25 @@ export const CollectionThunks = {
         const result = await AccountApi.getUserMortalCollection()
         if (result.status !== "ok") return dispatch(actions.setCollectionFetchingState({ ctype: "error", details: result.reason }))
         const state = getState()
-        const collection = { ...state.collectionCache[state.collectionFilter.page] }; // Create a shallow copy
+        const [foundPage, foundCollection] = Object.entries(state.collectionCache).find(([_, collection]) => 
+        collection[policy].some((policyItem) => policyItem.assetRef === assetRef)
+        ) || []
+
+        if (!foundCollection) {
+            console.error('AssetRef not found in any collection.');
+            return
+        }
+        const collection = { ...foundCollection } // Create a shallow copy
         const ethernalIndex = collection[policy].findIndex((policy) => policy.assetRef === assetRef)
         const newActive = collection[policy][ethernalIndex].mortalRealmsActive + (action === "add" ? 1 : -1)
-        if (ethernalIndex !== -1) {
-            // Create a copy of the policy array before modifying it
-            collection[policy] = [...collection[policy]]
-            collection[policy][ethernalIndex] = { ...collection[policy][ethernalIndex], mortalRealmsActive: newActive }
-        }
-        dispatch(actions.addToCollectionCache({ page: state.collectionFilter.page, collection, hasMore: collection.hasMore }))
+        
+        collection[policy] = [...collection[policy]]
+        collection[policy][ethernalIndex] = { ...collection[policy][ethernalIndex], mortalRealmsActive: newActive }
+        
+        dispatch(actions.addToCollectionCache({ page: Number(foundPage), collection, hasMore: collection.hasMore }))
         dispatch(actions.setMortalCollection(result.collection))
-        dispatch(CollectionThunks.getCollection({ ...state.collectionCache, [state.collectionFilter.page]: collection }, state.collectionFilter))
+        if(state.collectionFilter.page === Number(foundPage))
+            dispatch(CollectionThunks.getCollection({ ...state.collectionCache, [state.collectionFilter.page]: collection }, state.collectionFilter))
     },
 
     setFilter: (filter: CollectionFilter): CollectionThunk => async (dispatch) => {
