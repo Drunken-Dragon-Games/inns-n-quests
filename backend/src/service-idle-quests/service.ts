@@ -315,7 +315,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      */
     async getInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult> {
         const collectionResult = await this.collectionService.getMortalCollection(userId, logger)
-        if (collectionResult.ctype !== "success") return { status: `could not get mortal collection: ${collectionResult.error}` }
+        if (collectionResult.ctype !== "success") return { status: "Could not get mortal collection" }
         const gameInvenotry = this.collectionToInventory(collectionResult.collection)
         const inventoryResult = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId] })
         if (inventoryResult.status == "unknown-user") return { status: "unknown-user" }
