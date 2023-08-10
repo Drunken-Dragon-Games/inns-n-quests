@@ -2,6 +2,7 @@ import styled from "styled-components"
 import { CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada } from "../collection-state-models"
 import { PixelArtImage, Video, vmax1 } from "../../common"
 import { useState } from "react"
+import { collectionTransitions } from "../collection-transitions"
 
 const MortalCollectionContainer = styled.div`
     border: 2px solid #ccc;
@@ -48,6 +49,11 @@ const MirroredPixelArtImage = styled(PixelArtImage)`
   transform: scaleX(-1);
 `;
 
+const removeFromMortalCollection = (assetRef: string, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
+    collectionTransitions.modifyMortalCollection(assetRef, "remove", policy)
+}
+
+
 const capitalizeFirstLetter = (input: string): string => {
     if (input.length === 0) return ''
     return input.charAt(0).toUpperCase() + input.slice(1)
@@ -78,6 +84,7 @@ export const MortalView = ({ collectionItems }: { collectionItems: CollectionWit
                         <p>Class: {src.class}</p>
                         {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
                     </CollectibleInfo>
+                    <button onClick={() => removeFromMortalCollection(src.assetRef, policyName)} >Remove</button>
                 </CollectibleContainer>
             )
         }
