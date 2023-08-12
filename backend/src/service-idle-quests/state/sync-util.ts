@@ -43,10 +43,14 @@ export const syncData = <DbAsset extends PreSynced, InvAsset extends InventoryAs
             const preSyncedAssetQuantity = preSyncedRecord[assetRef]?.length || 0
             // If possitive, create new assets. If negative, delete assets. If zero, add to surviving.
             const diff = inventoryAssetQuantity - preSyncedAssetQuantity
-            if (diff > 0) 
+            if (diff > 0) {
                 toCreate.push({ ...inventoryRecord[assetRef], quantity: diff })
-            else if (diff < 0) 
+                surviving.push(...preSyncedRecord[assetRef])
+            }
+            else if (diff < 0){ 
                 toDelete.push(...preSyncedRecord[assetRef].slice(0, Math.abs(diff)))
+                surviving.push(...preSyncedRecord[assetRef].slice(0, inventoryAssetQuantity))
+            }
             else 
                 surviving.push(...preSyncedRecord[assetRef])
             return (

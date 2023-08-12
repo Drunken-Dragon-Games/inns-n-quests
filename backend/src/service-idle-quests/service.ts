@@ -323,18 +323,19 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             this.characterState.syncCharacters(userId, gameInvenotry),
             this.furnitureState.syncFurniture(userId, gameInvenotry),
         ]))
-
         /* if (process.env.NODE_ENV === "development" && characters.length == 0)
             return await this.grantTestInventory(userId) */
 
         const dragonSilver = parseInt(inventoryResult.inventory[this.wellKnownPolicies.dragonSilver.policyId]?.find(a => a.unit == "DragonSilver")?.quantity ?? "0")
+        const inventory = await SectorState.syncPlayerInn(userId, {
+            dragonSilver,
+            characters: vm.makeRecord(characters, c => c.entityId),//testCharacters(userId), c => c.entityId),
+            furniture: vm.makeRecord(furniture, f => f.entityId)
+        }) 
+        
         return { 
             status: "ok", 
-            inventory: await SectorState.syncPlayerInn(userId, {
-                dragonSilver,
-                characters: vm.makeRecord(characters, c => c.entityId),//testCharacters(userId), c => c.entityId),
-                furniture: vm.makeRecord(furniture, f => f.entityId)
-            }) 
+            inventory
         }
     }
 
