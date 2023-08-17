@@ -19,6 +19,8 @@ export default class AssetManagementServiceMock {
             revertStaledClaims: jest.fn(),
             createAssociationTx: jest.fn(),
             submitAuthTransaction: jest.fn(),
+            faucetClaim: jest.fn(),
+            faucetClaimSubmmit: jest.fn()
         }
     }
     
