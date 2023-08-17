@@ -42,6 +42,11 @@ export class BlockchainServiceDsl implements BlockchainService {
         return response.data as BuildTxResponse
     }
 
+    async buildBulkMintTx(address: string, assetsInfo: { [policyId: string]: { unit: string; quantityToClaim: string; }[]; }, feeInfo?: { feeAddress: string; feeAmount: string; } | undefined): Promise<BuildTxResponse> {
+        const response = await this.callImplementation(blockchainEnpoints.buildBulkMintTx, {address, assetsInfo, feeInfo})
+        return response.data as BuildTxResponse
+    }
+
     async submitTransaction(serilizedSignedTransaction: string): Promise<SubmitTransactionReponse> {
         const response = await this.callImplementation(blockchainEnpoints.submitTransaction, {serilizedSignedTransaction})
         return response.data as SubmitTransactionReponse

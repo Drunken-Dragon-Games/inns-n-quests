@@ -140,6 +140,23 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         response.status(200).json(result)
     }))
 
+    router.post("/assets/claim/test-faucet", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        if (process.env.NODE_ENV !== "development") {response.status(401).json({status: "Not allowed"})}
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const address: string = request.body.address
+        const result = await accountService.testClaimNFTs(userId, address, logger)
+        response.status(200).json(result)
+    }))
+
+    router.post("/assets/claim/faucet-sign-and-submit", requestCatchError(async (request: Request, response: Response) => {
+        if (process.env.NODE_ENV !== "development") {response.status(401).json({status: "Not allowed"})}
+        const logger = baseLogger.trace(request)
+        const {serializedSignedTx} = request.body
+        const result = await accountService.faucetSubmmit(serializedSignedTx, logger)
+        response.status(200).json(result)
+    }))
+
     router.post("/assets/claim/sign-and-submit", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const {serializedSignedTx, claimId} = request.body

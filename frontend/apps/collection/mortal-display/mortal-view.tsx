@@ -43,11 +43,18 @@ const CollectibleInfo = styled.div`
     padding: 10px;
     border-radius: 5px;
     text-align: center;
-`;
+`
+
+const ButtonContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 10px 0px 10px 0px;
+`
 
 const MirroredPixelArtImage = styled(PixelArtImage)`
   transform: scaleX(-1);
-`;
+`
 
 const removeFromMortalCollection = (assetRef: string, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
     collectionTransitions.modifyMortalCollection(assetRef, "remove", policy)
@@ -91,7 +98,17 @@ export const MortalView = ({ collectionItems }: { collectionItems: CollectionWit
         return assetArray;
     }
 
-    return (
+    return (<>
+        <MortalCollectionContainer>
+        { process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ? 
+                <ButtonContainer>
+                    <button onClick = {() => collectionTransitions.grantTestCollection("Nami")}>Get Collection on Nami</button>
+                    <button onClick = {() => collectionTransitions.grantTestCollection("Eternl")}>Get Collection on Eternl</button>
+                </ButtonContainer>
+                : 
+                <></>
+            }
+        </MortalCollectionContainer>
         <MortalCollectionContainer>
             <Header>
                 <Title>Mortal Collection</Title>
@@ -116,6 +133,7 @@ export const MortalView = ({ collectionItems }: { collectionItems: CollectionWit
                 ));
             })}
         </MortalCollectionContainer>
+        </>
     )
 }
 

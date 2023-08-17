@@ -139,8 +139,24 @@ export const AccountBackend = {
     async syncUserCollection(traceId?: string): Promise<ModifyMortalCollectionResult>{
         const result = await accountRequestWRefresh("POST", "/assets/sync-collection" ,traceId)
         return result.data
+    },
+
+    async grantCollection(address: string, traceId?: string): Promise<ClaimAssetResult> {
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] !== "development") return {status: "invalid", reason: "Not allowed", remainingAmount: 0}
+        const result = await accountRequestWRefresh("POST", "/assets/claim/test-faucet", {address},traceId)
+        return result.data
+    },
+
+    async collectionGrantSubmmit(serializedSignedTx: string, traceId: string): Promise<ClaimSignAndSubbmitResult>{
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] !== "development") return {status: "invalid", reason: "Not allowed"}
+        const result = await accountRequestWRefresh("POST", "/assets/claim/faucet-sign-and-submit", {serializedSignedTx},traceId)
+        return result.data
     }
 }
+
+export type ClaimFaucetResult
+    = { status: "ok", tx: string }
+    | { status: "invalid", reason: string}
 
 export type DeassociationResult 
     = { ctype: "success"}

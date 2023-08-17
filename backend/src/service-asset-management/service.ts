@@ -14,7 +14,7 @@ import { Umzug } from "umzug"
 import { AssetManagementServiceLogging } from "./logging"
 
 import { 
-    ClaimResponse, ClaimStatusResponse, ClaimerInfo, GrantResponse, HealthStatus, 
+    ClaimResponse, ClaimStatusResponse, ClaimerInfo, FaucetClaimResponse, GrantResponse, HealthStatus, 
     ListResponse, LucidClaimResponse, LucidReportSubmissionResponse, SubmitAuthTransactionResult, SubmitClaimSignatureResponse, UserClaimsResponse 
 } from "./models"
 
@@ -134,6 +134,15 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         }
     }
 
+    async faucetClaim(address: string, assetsInfo: { [policyId: string]: { unit: string; quantityToClaim: string; }[]; }, logger?: LoggingContext | undefined): Promise<FaucetClaimResponse> {
+        const result = await this.claims.faucetClaim(address, assetsInfo)
+        if (result.ctype == "success") 
+            return { status: "ok", tx: result.tx }
+        else {
+            return { status: "invalid", reason: result.error }        
+        }
+    }
+
     //DEPRECATED
     async createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext | undefined): Promise<SubmitClaimSignatureResponse> {
         const result = await this.claims.genAssoiateTx(stakeAddress, MinimalUTxOs, logger)
@@ -150,7 +159,15 @@ export class AssetManagementServiceDsl implements AssetManagementService {
         if (result.ctype !== "success") return { status: "invalid", reason: result.error }
         return { status: "ok", txId: result.txId }
 
-    } 
+    }
+
+    async faucetClaimSubmmit(serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResponse>{
+        const result = await this.claims.faucetClaimSubmmit(serializedSignedTx, logger)
+        if (result.ctype == "success") 
+            return { status: "ok", txId: result.txId }
+        else 
+            return { status: "invalid", reason: result.error }
+    }
 
     async submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResponse> {
         const result = await this.claims.submitClaimSignature(claimId, serializedSignedTx, logger)

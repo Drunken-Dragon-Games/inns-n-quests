@@ -32,6 +32,16 @@ export default class Registry {
         return {status:"ok", value: signedTx.toString()}
     }
 
+    public async signWithMultiplePolicies(policyIds: string[], transaction: Lucid.Transaction): Promise<Resolution<string>>{
+        const iterate = async (policyIds: string[], acc: Lucid.Transaction): Promise<Resolution<Lucid.Transaction>> => {
+            if (policyIds.length == 0) return {status: "ok", value: acc}
+            const result = await this.signWithPolicy(policyIds[0], acc)
+            if (result.status == "ok") iterate(policyIds.slice(1, policyIds.length), result.value)
+            return result
+        }
+        return await iterate(policyIds, transaction)
+    }
+
     public policy(policyId: string): Resolution<Lucid.Script> {
         const info = this.cache[policyId]
         if (info == undefined) return {status: "invalid", reason: "could not find policy in registry"}

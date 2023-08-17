@@ -6,7 +6,7 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -186,6 +186,38 @@ export class AccountServiceDsl implements AccountService {
         if (claimResponse.status == "ok") return { ...claimResponse, remainingAmount: 0 }
         else return { ...claimResponse, remainingAmount: parseInt(dragonSilverToClaim) }
         
+    }
+
+    async testClaimNFTs(userId: string, address: string, logger?: LoggingContext): Promise<ClaimFaucetResult>{
+        if (process.env.NODE_ENV !== "development") return {status: "invalid",reason: "invalid call"}
+        const generateRandomAssets = (collection: string, collectionSize: number, maxAmount: number, multiple?: number): { unit: string, quantityToClaim: string }[] => {
+            const randomLength = Math.floor(Math.random() * maxAmount) + 1
+            const result: { unit: string, quantityToClaim: string }[] = []
+        
+            for (let i = 0; i < randomLength; i++) {
+                const randomNum = Math.floor(Math.random() * collectionSize) + 1
+                const unit = `${collection}${randomNum}`
+                const quantityToClaim= multiple ? (Math.floor(Math.random() * multiple) + 1 ).toString() : "1"
+                result.push({unit, quantityToClaim})
+            }
+        
+            return result
+        }
+       
+       const assetInfo: { [policyId: string]: { unit: string, quantityToClaim: string }[] } = {
+            [this.wellKnownPolicies.pixelTiles.policyId] : generateRandomAssets("PixelTile", 62, 12, 3),
+            [this.wellKnownPolicies.grandMasterAdventurers.policyId]: generateRandomAssets("GrandmasterAdventurer", 10000, 12),
+            [this.wellKnownPolicies.adventurersOfThiolden.policyId]: generateRandomAssets("AdventurerOfThiolden", 25000, 16)
+       }
+ 
+       const claimResponse = await this.assetManagementService.faucetClaim(address, assetInfo)
+       //const claimResponse = await this.assetManagementService.claim(userId, address, options, logger)
+       if (claimResponse.status !== "ok") return {status: "invalid", reason: `could not claim bacause ${claimResponse.reason}`}
+       return claimResponse
+    }
+
+    async faucetSubmmit(serializedSignedTx: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>{
+        return this.assetManagementService.faucetClaimSubmmit(serializedSignedTx, logger)
     }
 
     async claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {

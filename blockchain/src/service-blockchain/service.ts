@@ -21,6 +21,10 @@ export class BlockchainServiceDsl implements BlockchainService {
     async buildMintTx(address: string, asset: {policyId: string, unit:string}, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<BuildTxResponse> {
         return await this.transactionDSL.buildMintTx(address, asset, quantityToClaim, feeInfo)
     }
+    
+    async buildBulkMintTx(address: string, assetsInfo: {[policyId: string]: {unit:string, quantityToClaim:string}[]}): Promise<BuildTxResponse> {
+        return await this.transactionDSL.buildBulkMintTx(address, assetsInfo)
+    }
 
     async getTxHashFromTransaction(serilizedTransaction: string): Promise<TransactionHashReponse> {
         return await this.transactionDSL.hashSerializedTransaction(serilizedTransaction)

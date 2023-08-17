@@ -20,12 +20,16 @@ export interface AssetManagementService {
 
     claim(userId: string, stakeAddress: string, address: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<models.ClaimResponse>
 
+    faucetClaim(address: string, assetsInfo: { [policyId: string]: { unit: string; quantityToClaim: string; }[]; }, logger?: LoggingContext | undefined): Promise<models.FaucetClaimResponse>
+
     //DEPRECATED
     createAssociationTx(stakeAddress: string, MinimalUTxOs: MinimalUTxO[], logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse>
 
     submitAuthTransaction(witness: string, tx: string, logger?: LoggingContext): Promise<models.SubmitAuthTransactionResult>
     
     submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse>
+
+    faucetClaimSubmmit(serializedSignedTx: string, logger?: LoggingContext): Promise<models.SubmitClaimSignatureResponse>
 
     claimStatus(claimId: string, logger?: LoggingContext): Promise<models.ClaimStatusResponse>
 

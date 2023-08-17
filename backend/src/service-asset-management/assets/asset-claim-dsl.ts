@@ -21,6 +21,8 @@ export type GenAssosiateTxResult = SResult<{ txId: string }>
 
 export type ClaimResult = SResult<{ claimId: string, tx: string }>
 
+export type FaucetClaimResult = SResult<{ tx: string }>
+
 export type LucidClaimResult = SResult<{ claimId: string, tx: string, signature: string }>
 
 export type SubmitClaimSignatureResult = SResult<{ txId: string }>
@@ -111,8 +113,21 @@ export class AssetClaimDsl {
 			await transaction.rollback()
 			return sfailure(e.message)
 		}
-		
 	}
+
+	async faucetClaim(address: string, aassetsInfo: { [policyId: string]: { unit: string, quantityToClaim: string }[] }, logger?: LoggingContext): Promise<FaucetClaimResult>{
+		if (process.env.NODE_ENV !== "development") return {ctype: "failure",error: "not allowed"}
+		const builtTxResponse = await this.blockchainService.buildBulkMintTx(address, aassetsInfo)
+		if (builtTxResponse.status !== "ok") return sfailure(builtTxResponse.reason)
+		return success({ tx: builtTxResponse.value.rawTransaction })
+	}
+
+	async faucetClaimSubmmit(serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResult> {
+		if (process.env.NODE_ENV !== "development") return {ctype: "failure",error: "not allowed"}
+    	const txIdResponse = await this.blockchainService.submitTransaction(serializedSignedTx)
+		if (txIdResponse.status !== "ok") return sfailure(`TX not submitted: ${txIdResponse.reason} `)
+		return success({ txId: txIdResponse.value })
+    }
 
     async submitClaimSignature(claimId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitClaimSignatureResult> {
 		const claim = await AssetClaim.findOne({ where: { claimId }})

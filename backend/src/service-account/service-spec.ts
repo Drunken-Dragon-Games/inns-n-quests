@@ -14,6 +14,8 @@ export interface AccountService {
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string, logger?: LoggingContext): Promise<SubmitAssociationSignatureResult>
     deassociateWallet(userId: string, stakeAddress: string, logger?: LoggingContext): Promise<DeassociationResult>
     getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult>
+    testClaimNFTs(userId: string, address: string, logger?: LoggingContext): Promise<ClaimFaucetResult>
+    faucetSubmmit(serializedSignedTx: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult>
@@ -79,6 +81,9 @@ export type ClaimDragonSilverResult
     = { status: "ok", claimId: string, tx: string, remainingAmount: number }
     | { status: "invalid", reason: string, remainingAmount?: number }
 
+export type ClaimFaucetResult
+    = { status: "ok", tx: string }
+    | { status: "invalid", reason: string}
 
 export type ClaimSignAndSubbmitResult 
     = { status: "ok", txId: string }

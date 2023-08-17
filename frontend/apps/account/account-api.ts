@@ -1,5 +1,6 @@
 import { CollectionFilter } from "../collection/collection-state-models"
 import { AccountBackend } from "./account-backend"
+import { SupportedWallet } from "./account-dsl"
 import { AccountTransitions } from "./account-transitions"
 
 export const AccountApi = {
@@ -29,5 +30,17 @@ export const AccountApi = {
 
     syncCollection(){
         return AccountBackend.syncUserCollection()
+    },
+
+    grantCollection(address: string){
+        return AccountBackend.grantCollection(address)
+    },
+
+    submmitGrantColleciton(serializedSignedTx: string, traceId: string){
+        return AccountBackend.collectionGrantSubmmit(serializedSignedTx, traceId)
+    },
+
+    getWallet(supportedWallet: SupportedWallet){
+        return AccountTransitions.getWallet(supportedWallet)
     }
 }

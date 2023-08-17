@@ -1,3 +1,4 @@
+import { SupportedWallet } from "../account"
 import { CollectionStore } from "./collection-state"
 import { CollectionFilter, CollectionWithUIMetada } from "./collection-state-models"
 import { CollectionThunks } from "./collection-thunks"
@@ -27,5 +28,9 @@ export const collectionTransitions = {
 
     clearCache(){
         dispatch(CollectionThunks.clearCache())
+    },
+
+    grantTestCollection(supportedWallet: SupportedWallet){
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] === "development") dispatch(CollectionThunks.grantTestCollection(supportedWallet))
     }
 }

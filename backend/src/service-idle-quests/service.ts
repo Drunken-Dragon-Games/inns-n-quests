@@ -288,7 +288,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
        const outcome = this.rules.stakingQuest.outcome(takenQuest.availableQuest, adventurers)
         // If success, grant dragon silver
         if (outcome.ctype == "success-outcome") 
-            await this.assetManagementService.grant(userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() })
+            await this.assetManagementService.grant(userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() }, logger)
         // Check if any adventurer died
         // TODO
         // Claim quest

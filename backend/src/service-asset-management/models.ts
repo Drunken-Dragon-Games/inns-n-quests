@@ -63,6 +63,10 @@ export type ClaimResponse
     = { status: "ok", claimId: string, tx: string }
     | { status: "invalid", reason: string }
 
+export type FaucetClaimResponse
+    = { status: "ok", tx: string }
+    | { status: "invalid", reason: string }
+
 export type CreateAssociationTxResult
     = { status: "ok", rawTx: string, txInfoId: string }
     | { status: "invalid", reason: string }
