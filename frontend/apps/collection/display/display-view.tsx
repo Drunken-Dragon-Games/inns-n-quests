@@ -99,6 +99,7 @@ export const Collectible = ({ src, imageDimensions, type, isVideo, artType }: Re
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
                 <p>Quantity: {src.quantity} </p>
                 <p>Active: {src.mortalRealmsActive}</p>
+                <p>Pasive Stake: {src.stakingContribution}</p>
             </CollectibleInfo>
             <button onClick={() => modifyMortalCollection(src.assetRef, "add", type)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</button>
             <button onClick={() => modifyMortalCollection(src.assetRef, "remove", type)} disabled={src.mortalRealmsActive < 1}>Remove from Mortal</button>

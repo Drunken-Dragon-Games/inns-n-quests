@@ -126,7 +126,7 @@ export class CollectionServiceDsl implements CollectionService {
         
         if (collectionResult.ctype !== "success") return collectionResult
         const metadataCollection = await this.hydrateCollectionWithMetadata(collectionResult.collection, userData.userId)
-        const stakingCollection = this.calculateCollectionDailyReward(metadataCollection)
+        const stakingCollection = this.calculateCollectionWeeklyReward(metadataCollection)
         return {ctype: "success", collection: stakingCollection, hasMore: collectionResult.hasMore}
     }
 
@@ -171,11 +171,10 @@ export class CollectionServiceDsl implements CollectionService {
                     logger?.log.error(`Failed to create daily reward record becaouse: ${rewardRecord.error}.`)
                     return 0
                 }
-                const dailyReward = Object.entries(userCollection.collection).reduce((acc, [policyName, collectibles]) => {
+                const stakingCollection = this.calculateCollectionWeeklyReward(userCollection.collection)
+                const dailyReward = Object.entries(stakingCollection).reduce((acc, [policyName, collectibles]) => {
                     return acc + collectibles.reduce((acc, collectible) => {
-                        const stakingParameters = this.syncedAssets.getStakingParameters(policyName as typeof relevantPolicies[number], collectible.assetRef)
-                        const stakingContribution = this.calculateCollectibleDailyReward(stakingParameters)
-                        return acc + (Math.round(stakingContribution.stakingContribution * 10 / 7) / 10)
+                        return acc + (Math.round(collectible.stakingContribution * 10 / 7) / 10)
                     }, 0)
                 }, 0)
                 await this.rewards.completeDaily(userId, dailyReward.toString())
@@ -287,11 +286,11 @@ export class CollectionServiceDsl implements CollectionService {
         return newCollection;
     }
 
-    private calculateCollectionDailyReward<A extends object>(assets: Collection<A>): Collection< A & CollectibleStakingInfo> {
+    private calculateCollectionWeeklyReward<A extends object>(assets: Collection<A>): Collection< A & CollectibleStakingInfo> {
         return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
             const stakingArray: PolicyCollectibles< A & CollectibleStakingInfo> = collectibleArray.map((collectible) => {
                 const stakingParameters = this.syncedAssets.getStakingParameters(collectionName as typeof relevantPolicies[number], collectible.assetRef)
-                const stakingInfo = this.calculateCollectibleDailyReward(stakingParameters)
+                const stakingInfo = this.calculateCollectibleWeeklyReward(stakingParameters, collectible.quantity)
                 return {...collectible, ...stakingInfo}
             })
             return {...acc, ...{[collectionName]: stakingArray}}
@@ -348,8 +347,8 @@ export class CollectionServiceDsl implements CollectionService {
         }
     }
 
-    private calculateCollectibleDailyReward( parameters: CollectibleContributionParameters): CollectibleStakingInfo{
-        if(parameters.collection === "pixelTiles"){
+    private calculateCollectibleWeeklyReward( parameters: CollectibleContributionParameters, quantity: string): CollectibleStakingInfo{
+        const getSingleReward = () => {if(parameters.collection === "pixelTiles"){
             const rarityContributionMap = {
                 "Common": 1,
                 "Uncommon": 1,
@@ -358,7 +357,7 @@ export class CollectionServiceDsl implements CollectionService {
                 "Legendary": 5,
                 "Unique": 5
             }
-            return {stakingContribution:rarityContributionMap[parameters.rarity]}
+            return rarityContributionMap[parameters.rarity] 
         }
         else if(parameters.collection === "grandMasterAdventurers"){
             const sumContributionMap: Record<number, number> = {
@@ -396,7 +395,7 @@ export class CollectionServiceDsl implements CollectionService {
             const bonusContribution = bonusContributionMap[keyWithSubrace] 
                 || bonusContributionMap[parameters.race] 
                 || 0
-                return {stakingContribution:baseContribution + bonusContribution}
+                return baseContribution + bonusContribution
         }
         else if(parameters.collection === "adventurersOfThiolden"){
             const baseContribution = 
@@ -419,10 +418,13 @@ export class CollectionServiceDsl implements CollectionService {
             }
 
             const bonusContribution = bonusContributionMap[parameters.faction] || 0
-            return {stakingContribution:baseContribution + bonusContribution}
+            return baseContribution + bonusContribution
         }
-            
-        return {stakingContribution:0}
+
+        return 0
+    }
+        const singleReward = getSingleReward()
+        return {stakingContribution: singleReward * Number(quantity)}
     }
 
     private mortalCollectionLocked(userId: string): boolean {

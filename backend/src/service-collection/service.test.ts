@@ -20,6 +20,7 @@ const databaseConfig: DBConfig =
     , database: "service_db" 
     }
 const userId = "b1925e1f-6820-4155-a917-fa68873906a7"
+const expectedDailyReward = "8.1"
 beforeEach(async () => {
     const identityService = new IdentityServiceMock()
     const assetManagementService = new AssetManagementServiceMock()
@@ -93,12 +94,12 @@ test("get Collection with Metadata ok", async () => {
     if (collectionResult.ctype !== "success") fail("Collection bad ctype")
     const expectedCollection: Collection<CollectibleStakingInfo & CollectibleMetadata> = {
         pixelTiles: [
-            {assetRef:"PixelTile1", quantity: "2", type: "Character", stakingContribution: 1, 
+            {assetRef:"PixelTile1", quantity: "2", type: "Character", stakingContribution: 2, 
             splashArt: "https://cdn.ddu.gg/pixeltiles/xl/PixelTile1.png", 
             miniature: "https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_1.png", 
             name: "PixelTile #1 Rogue", aps: [4,4,4], class: "Rogue", mortalRealmsActive: 0 },
             
-            {assetRef:"PixelTile2", quantity: "3", type: "Furniture", stakingContribution: 2, 
+            {assetRef:"PixelTile2", quantity: "3", type: "Furniture", stakingContribution: 6, 
             splashArt: "https://cdn.ddu.gg/pixeltiles/xl/PixelTile2.png", 
             miniature: "https://cdn.ddu.gg/pixeltiles/x4/PixelTile2.png", 
             name: "PixelTile #2 Table", aps: [6,6,6], class: "furniture", mortalRealmsActive: 0}
@@ -175,7 +176,7 @@ test("update and get passive staking Info Same Day", async () => {
     //This (And all smilar test) expects 7 DS pasive per asset
     const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
-        weeklyAccumulated: '7.3',
+        weeklyAccumulated: expectedDailyReward,
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       }
@@ -193,7 +194,7 @@ test("update and get passive staking Info Diff Day", async () => {
     const pasiveInfo = await service.getPassiveStakingInfo(userId)
     const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
-        weeklyAccumulated: '7.3',
+        weeklyAccumulated: expectedDailyReward,
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       }
@@ -204,7 +205,7 @@ test("update and get passive staking Info Diff Day", async () => {
     const NextDayPasiveInfo = await service.getPassiveStakingInfo(userId)
     const secondExpectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
-        weeklyAccumulated: '14.6',
+        weeklyAccumulated: (Number(expectedDailyReward) * 2).toString(),
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       }
@@ -217,7 +218,7 @@ test("grant 1 week", async () => {
     for (let i = 1; i <= 7; i++){
         const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
             ctype: 'success',
-            weeklyAccumulated: `${7.3 * i}`,
+            weeklyAccumulated: (Number(expectedDailyReward) * i).toFixed(1),
             dragonSilverToClaim: '10',
             dragonSilver: '15'
           }
@@ -233,7 +234,7 @@ test("grant 1 week", async () => {
     const pasiveInfo = await service.getPassiveStakingInfo(userId)
     expect(pasiveInfo).toEqual({
         ctype: 'success',
-        weeklyAccumulated: '7.3',
+        weeklyAccumulated: expectedDailyReward,
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       })
