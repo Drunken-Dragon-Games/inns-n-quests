@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada } from "../collection-state-models"
+import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada } from "../collection-state-models"
 import { PixelArtImage, Video, vmax1 } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
@@ -66,7 +66,7 @@ const capitalizeFirstLetter = (input: string): string => {
     return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
-export const MortalView = ({ collectionItems }: { collectionItems: CollectionWithGameData }) => {
+export const MortalView = ({ collectionItems, status }: { collectionItems: CollectionWithGameData, status: CollectionFetchingState}) => {
     const dimensionsMap = {
         "pixelTiles": {height: 10.5 * 0.5,  width: 6.75 * 0.5 },
         "grandMasterAdventurers": { height: 12 * 0.5, width: 9.6 * 0.5 },
@@ -95,11 +95,12 @@ export const MortalView = ({ collectionItems }: { collectionItems: CollectionWit
                 </CollectibleContainer>
             )
         }
-        return assetArray;
+        return assetArray
     }
 
     return (<>
         <MortalCollectionContainer>
+            <h2 style={{ color : 'white'}}>{JSON.stringify(status)}</h2>
         { process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ? 
                 <ButtonContainer>
                     <button onClick = {() => collectionTransitions.grantTestCollection("Nami")}>Get Collection on Nami</button>
