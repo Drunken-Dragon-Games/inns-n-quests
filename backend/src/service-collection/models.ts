@@ -37,3 +37,8 @@ export type Collection<A extends object> = {
 }
 export type StoredMetadata = {class: string, ath: number, int: number, cha: number}
 export type CollectionData = {ctype: "IdAndFilter", userId: string, filter?: CollectionFilter} | {ctype: "collection", userId: string, collection: Collection<StoredMetadata>}
+
+export type CollectibleContributionParameters
+= {collection: "pixelTiles", rarity: "Common"|  "Uncommon"|  "Rare"|  "Epic"| "Legendary" | "Unique"}
+| {collection: "grandMasterAdventurers", AWSum: number, race: string, subrace: string}
+| {collection: "adventurersOfThiolden", APSSum: number, faction: string}

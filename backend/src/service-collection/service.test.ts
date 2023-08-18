@@ -98,29 +98,29 @@ test("get Collection with Metadata ok", async () => {
             miniature: "https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_1.png", 
             name: "PixelTile #1 Rogue", aps: [4,4,4], class: "Rogue", mortalRealmsActive: 0 },
             
-            {assetRef:"PixelTile2", quantity: "3", type: "Furniture", stakingContribution: 1, 
+            {assetRef:"PixelTile2", quantity: "3", type: "Furniture", stakingContribution: 2, 
             splashArt: "https://cdn.ddu.gg/pixeltiles/xl/PixelTile2.png", 
             miniature: "https://cdn.ddu.gg/pixeltiles/x4/PixelTile2.png", 
             name: "PixelTile #2 Table", aps: [6,6,6], class: "furniture", mortalRealmsActive: 0}
     ],
         grandMasterAdventurers: [
-            {assetRef: "GrandmasterAdventurer1", quantity: "1", type: "Character", stakingContribution: 1, 
+            {assetRef: "GrandmasterAdventurer1", quantity: "1", type: "Character", stakingContribution: 5, 
             splashArt: "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif", 
             miniature: "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer1.png", 
             name: "Grandmaster Adventurer #1", aps: [8,9,4], class: "Ranger", mortalRealmsActive: 0},
             
-            {assetRef: "GrandmasterAdventurer2", quantity: "1", type: "Character", stakingContribution: 1, 
+            {assetRef: "GrandmasterAdventurer2", quantity: "1", type: "Character", stakingContribution: 3, 
             splashArt: "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer2.gif", 
             miniature: "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer2.png", 
             name: "Grandmaster Adventurer #2", aps: [1,6,2], class: "Paladin", mortalRealmsActive: 0 },
         ],
         adventurersOfThiolden: [
-            { assetRef: "AdventurerOfThiolden1", quantity: "1", type: "Character", stakingContribution: 1, 
+            { assetRef: "AdventurerOfThiolden1", quantity: "1", type: "Character", stakingContribution: 20, 
             splashArt: "https://cdn.ddu.gg/adv-of-thiolden/web/vimtyr_32_1.mp4", 
             miniature: "https://cdn.ddu.gg/adv-of-thiolden/x6/vimtyr-front-chroma.png", 
             name: "vimtyr The Whispering Axe", aps: [10,11,11], class: "Rogue", mortalRealmsActive: 0 },
             
-            { assetRef: "AdventurerOfThiolden2", quantity: "1", type: "Character", stakingContribution: 1, 
+            { assetRef: "AdventurerOfThiolden2", quantity: "1", type: "Character", stakingContribution: 20, 
             splashArt: "https://cdn.ddu.gg/adv-of-thiolden/web/terrorhertz_32_1.mp4", 
             miniature: "https://cdn.ddu.gg/adv-of-thiolden/x6/terrorhertz-front-chroma.png", 
             name: "terrorhertz Herald of the Drunken Dragon", aps: [10,11,11], class: "Bard", mortalRealmsActive: 0 },
@@ -135,7 +135,7 @@ test("get Passsive staking Info", async () => {
     if (pasiveInfo.ctype !== "success") fail("pasive info bad ctype")
     const expectedInfo = {
         ctype: "success",
-        weeklyAccumulated: "0", 
+        weeklyAccumulated: "0.0", 
         dragonSilverToClaim: "10", 
         dragonSilver: "15"}
 
@@ -175,7 +175,7 @@ test("update and get passive staking Info Same Day", async () => {
     //This (And all smilar test) expects 7 DS pasive per asset
     const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
-        weeklyAccumulated: '6',
+        weeklyAccumulated: '7.3',
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       }
@@ -191,10 +191,9 @@ test("update and get passive staking Info Same Day", async () => {
 test("update and get passive staking Info Diff Day", async () => {
     await service.updateGlobalDailyStakingContributions()
     const pasiveInfo = await service.getPassiveStakingInfo(userId)
-    //This (And all smilar test) expects 7 DS pasive per asset
     const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
-        weeklyAccumulated: '6',
+        weeklyAccumulated: '7.3',
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       }
@@ -205,7 +204,7 @@ test("update and get passive staking Info Diff Day", async () => {
     const NextDayPasiveInfo = await service.getPassiveStakingInfo(userId)
     const secondExpectedPasiveInfo:GetPassiveStakingInfoResult  = {
         ctype: 'success',
-        weeklyAccumulated: '12',
+        weeklyAccumulated: '14.6',
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       }
@@ -218,7 +217,7 @@ test("grant 1 week", async () => {
     for (let i = 1; i <= 7; i++){
         const expectedPasiveInfo:GetPassiveStakingInfoResult  = {
             ctype: 'success',
-            weeklyAccumulated: `${6 * i}`,
+            weeklyAccumulated: `${7.3 * i}`,
             dragonSilverToClaim: '10',
             dragonSilver: '15'
           }
@@ -234,7 +233,7 @@ test("grant 1 week", async () => {
     const pasiveInfo = await service.getPassiveStakingInfo(userId)
     expect(pasiveInfo).toEqual({
         ctype: 'success',
-        weeklyAccumulated: '6',
+        weeklyAccumulated: '7.3',
         dragonSilverToClaim: '10',
         dragonSilver: '15'
       })

@@ -8,7 +8,7 @@ import { MetadataRegistry, WellKnownPolicies } from "../tools-assets"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
-import { Collectible, CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles, CollectionData, StoredMetadata } from "./models"
+import { Collectible, CollectibleMetadata, CollectibleStakingInfo, Collection, CollectionFilter, CollectionPolicyNames, PartialMetadata, PolicyCollectibles, CollectionData, StoredMetadata, CollectibleContributionParameters } from "./models"
 import { RandomDSL } from "./random-dsl/dsl"
 
 import { IdentityService } from "../service-identity"
@@ -139,7 +139,7 @@ export class CollectionServiceDsl implements CollectionService {
         const invDragonSilver = assetList.inventory[this.wellKnownPolicies.dragonSilver.policyId]
         const dragonSilver = invDragonSilver?.find(a => a.chain)?.quantity ?? "0"
         const dragonSilverToClaim = invDragonSilver?.find(a => !a.chain)?.quantity ?? "0"
-        const weeklyAccumulated = (await this.rewards.getWeeklyAccumulated(userId)).toString()
+        const weeklyAccumulated = (await this.rewards.getWeeklyAccumulated(userId)).toFixed(1)
         return {ctype: "success", weeklyAccumulated, dragonSilverToClaim, dragonSilver}
 
     }
@@ -159,17 +159,10 @@ export class CollectionServiceDsl implements CollectionService {
         const userIds = await this.identityService.listAllUserIds(logger)
         const dailyRewards = await Promise.all(userIds.map(async (userId) => {
             const userCollection = await this.syncUserCollection(userId, logger)
-            //TODO: i need to think how am i going to hanlde this properly
+
             if(userCollection.ctype !== "success"){
                 logger?.log.error(`Sync User Collection returned: ${userCollection.error}`)
                 await this.rewards.createDaily(userId, `pending because Sync User Collection returned: ${userCollection.error}`)
-                return 0
-            }
-            // Depending on how we decide to calculate the weekly earning this might be greatly optimized by not needing the metadata
-            const collection = await this.getCollectionWithUIMetadata({ctype: "collection", userId, collection: userCollection.collection})
-            if (collection.ctype !== "success"){
-                logger?.log.error(`Getting collection returned: ${collection.error}`)
-                await this.rewards.createDaily(userId, `pending because collection returned: ${collection.error}`)
                 return 0
             }
             else{
@@ -178,8 +171,12 @@ export class CollectionServiceDsl implements CollectionService {
                     logger?.log.error(`Failed to create daily reward record becaouse: ${rewardRecord.error}.`)
                     return 0
                 }
-                const dailyReward = Object.entries(collection.collection).reduce((acc, [_policyName, collectibles]) => {
-                    return acc + collectibles.reduce((acc, collectible) => {return acc + collectible.stakingContribution}, 0)
+                const dailyReward = Object.entries(userCollection.collection).reduce((acc, [policyName, collectibles]) => {
+                    return acc + collectibles.reduce((acc, collectible) => {
+                        const stakingParameters = this.syncedAssets.getStakingParameters(policyName as typeof relevantPolicies[number], collectible.assetRef)
+                        const stakingContribution = this.calculateCollectibleDailyReward(stakingParameters)
+                        return acc + (Math.round(stakingContribution.stakingContribution * 10 / 7) / 10)
+                    }, 0)
                 }, 0)
                 await this.rewards.completeDaily(userId, dailyReward.toString())
                 return dailyReward
@@ -290,14 +287,15 @@ export class CollectionServiceDsl implements CollectionService {
         return newCollection;
     }
 
-    private calculateCollectionDailyReward(assets: Collection<CollectibleMetadata>): Collection<CollectibleStakingInfo & CollectibleMetadata> {
+    private calculateCollectionDailyReward<A extends object>(assets: Collection<A>): Collection< A & CollectibleStakingInfo> {
         return Object.entries(assets).reduce((acc, [collectionName, collectibleArray]) => {
-            const stakingArray: PolicyCollectibles<CollectibleStakingInfo & CollectibleMetadata> = collectibleArray.map((collectible) => {
-                const stakingInfo = this.calculateCollectibleDailyReward(collectionName as typeof relevantPolicies[number], collectible.type, collectible.aps)
+            const stakingArray: PolicyCollectibles< A & CollectibleStakingInfo> = collectibleArray.map((collectible) => {
+                const stakingParameters = this.syncedAssets.getStakingParameters(collectionName as typeof relevantPolicies[number], collectible.assetRef)
+                const stakingInfo = this.calculateCollectibleDailyReward(stakingParameters)
                 return {...collectible, ...stakingInfo}
             })
             return {...acc, ...{[collectionName]: stakingArray}}
-        }, {} as Collection<CollectibleStakingInfo & CollectibleMetadata>)
+        }, {} as Collection< A & CollectibleStakingInfo>)
 
     }
 
@@ -350,9 +348,81 @@ export class CollectionServiceDsl implements CollectionService {
         }
     }
 
-    private calculateCollectibleDailyReward(collectionName: typeof relevantPolicies[number], type: "Furniture"| "Character", APS: [number, number, number]): CollectibleStakingInfo{
-        //TODO: decide contributions
-        return {stakingContribution: 1}
+    private calculateCollectibleDailyReward( parameters: CollectibleContributionParameters): CollectibleStakingInfo{
+        if(parameters.collection === "pixelTiles"){
+            const rarityContributionMap = {
+                "Common": 1,
+                "Uncommon": 1,
+                "Rare": 2,
+                "Epic": 4,
+                "Legendary": 5,
+                "Unique": 5
+            }
+            return {stakingContribution:rarityContributionMap[parameters.rarity]}
+        }
+        else if(parameters.collection === "grandMasterAdventurers"){
+            const sumContributionMap: Record<number, number> = {
+                2:2, 3:2, 4:2, 5:2, 6:3, 7:4, 8:5, 9:6, 10:7
+            }
+            const baseContribution = sumContributionMap[parameters.AWSum] ?? 0
+
+            const bonusContributionMap: Record<string, number> = {
+                "Human": 1,
+                "Elf": 1,
+                "Tiefling:Laigt'an": 2,
+                "Tiefling:Outcast": 2,
+                "Tiefling:Kulthul": 3,
+                "Tiefling:Arc'an": 3,
+                "Troll:Forest Troll": 3,
+                "Troll:Maiztlanian": 3,
+                "Troll:Uztec Empire": 4,
+                "Worgenkin:Shadowlands Pack": 3,
+                "Worgenkin:Woodlans Pack": 4,
+                "Worgenkin:Northen Mountains Pack": 4,
+                "Dragonkin:Firewing": 3,
+                "Dragonkin:Thunderwing": 4,
+                "Dragonkin:Frostwing": 4,
+                "Vulkin:Slykin":4,
+                "Vulkin:Frostkin":5,
+                "Orc:Bloodfang Clan":4,
+                "Orc:Plain Walker":6,
+                "Undead:Rotten":7,
+                "Undead:Forgotten":9,
+                "Tauren:Eagle Spear Tribe": 9,
+                "Viera:Empire": 10
+            }
+
+            const keyWithSubrace = `${parameters.race}:${parameters.subrace}`
+            const bonusContribution = bonusContributionMap[keyWithSubrace] 
+                || bonusContributionMap[parameters.race] 
+                || 0
+                return {stakingContribution:baseContribution + bonusContribution}
+        }
+        else if(parameters.collection === "adventurersOfThiolden"){
+            const baseContribution = 
+                parameters.APSSum < 8 ? 1 :
+                parameters.APSSum < 11 ? 2 :
+                parameters.APSSum < 15 ? 3:
+                parameters.APSSum < 20 ? 4:
+                parameters.APSSum < 25 ? 5:
+                parameters.APSSum < 30 ? 6:
+                parameters.APSSum < 32 ? 7: 8
+            const bonusContributionMap: Record<string, number> = {
+                "Vilnayan":1,
+                "Auristar":2,
+                "Kullmyr":3,
+                "Jagermyr":5,
+                "Nurmyr":6,
+                "Adventurer of the East":7,
+                "The Dead Queen": 10,
+                "Adventurer of the Drunken Dragon": 12
+            }
+
+            const bonusContribution = bonusContributionMap[parameters.faction] || 0
+            return {stakingContribution:baseContribution + bonusContribution}
+        }
+            
+        return {stakingContribution:0}
     }
 
     private mortalCollectionLocked(userId: string): boolean {

@@ -2,7 +2,7 @@ import { Op, Sequelize, Transaction, WhereOptions } from "sequelize"
 import { MetadataRegistry, WellKnownPolicies } from "../../tools-assets"
 import { LoggingContext } from "../../tools-tracing"
 import { SResult } from "../../tools-utils"
-import { AssetClass, Collection, CollectionFilter, CollectionPolicyNames, PolicyCollectibles, StoredMetadata } from "../models"
+import { AssetClass, CollectibleContributionParameters, Collection, CollectionFilter, CollectionPolicyNames, PolicyCollectibles, StoredMetadata } from "../models"
 import { SyncedAsset, SyncedMortalAsset } from "./assets-sync-db"
 import { CreateSyncedAsset, SyncedAssetChanges } from "./models"
 import { RandomDSL } from "../random-dsl/dsl"
@@ -138,6 +138,32 @@ export class SyncedAssets {
         const asset = await SyncedAsset.findOne({where: {userId, assetRef}})
         if (asset) return {ctype: "success", asset}
         else return {ctype: "failure", error: "asset does not belong to user in sync DB"}
+    }
+
+    getStakingParameters(collection: typeof relevantPolicies[number], assetRef: string): CollectibleContributionParameters{
+        switch (collection) {
+            case "pixelTiles": return {collection: "pixelTiles", rarity: this.metadataRegistry.pixelTilesMetadata[assetRef].rarity}
+            case "grandMasterAdventurers": return {
+                collection: "grandMasterAdventurers", 
+                AWSum: parseInt(this.metadataRegistry.gmasMetadata[assetRef].armor) + parseInt(this.metadataRegistry.gmasMetadata[assetRef].weapon),
+                race: this.metadataRegistry.gmasMetadata[assetRef].race,
+                subrace: this.metadataRegistry.gmasMetadata[assetRef].subrace
+            }
+            case "adventurersOfThiolden": {
+                const idx = parseInt(assetRef.replace("AdventurerOfThiolden", "")) - 1
+                const APSSum = 
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].ath +
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].int +
+                    this.metadataRegistry.advOfThioldenAppMetadata[idx].cha
+                const adventurerName  = this.advOfThioldenAdventurerName(assetRef)
+                return {
+                    collection: "adventurersOfThiolden",
+                    APSSum,
+                    faction: this.metadataRegistry.advOfThioldenGameMetadata[adventurerName].Faction
+                }
+            }
+
+        }
     }
 
     private getCollectionType = (policyId: string, assetUnit: string): "Character" | "Furniture" => {
