@@ -407,7 +407,7 @@ export class CollectionServiceDsl implements CollectionService {
                 parameters.APSSum < 30 ? 6:
                 parameters.APSSum < 32 ? 7: 8
             const bonusContributionMap: Record<string, number> = {
-                "Vilnayan":1,
+                "Vilnay":1,
                 "Auristar":2,
                 "Kullmyr":3,
                 "Jagermyr":5,

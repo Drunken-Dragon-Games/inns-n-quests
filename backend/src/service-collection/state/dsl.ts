@@ -176,13 +176,16 @@ export class SyncedAssets {
 
     private getCollectibleAPS(assetRef: string, collection: typeof relevantPolicies[number]):[number, number, number] {
         switch (collection) {
-            case "pixelTiles": switch (this.metadataRegistry.pixelTilesMetadata[assetRef].rarity) {
-                case "Common": return [2,2,2]
-                case "Uncommon": return [4,4,4]
-                case "Rare": return [6,6,6]
-                case "Epic": return [8,8,8]
-                default: return [10,10,10]
-            }
+            case "pixelTiles": {
+                const metadataType = this.metadataRegistry.pixelTilesMetadata[assetRef].type
+                if(metadataType !== "Adventurer" && metadataType !== "Monster" && metadataType !== "Townsfolk") return [0,0,0]
+                switch (this.metadataRegistry.pixelTilesMetadata[assetRef].rarity) {
+                    case "Common": return [2,2,2]
+                    case "Uncommon": return [4,4,4]
+                    case "Rare": return [6,6,6]
+                    case "Epic": return [8,8,8]
+                    default: return [10,10,10]
+            }}
             case "grandMasterAdventurers":
                 const armor = parseInt(this.metadataRegistry.gmasMetadata[assetRef].armor)
                 const weapon = parseInt(this.metadataRegistry.gmasMetadata[assetRef].weapon)
