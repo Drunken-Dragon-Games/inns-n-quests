@@ -5,6 +5,7 @@ export * from "./dropdown-menu"
 export * from "./claim-button"
 export * from "./helper-components"
 export * from "./images"
+export * from "./videos"
 export * from "./medals"
 export { default as ProgressBar } from "./progress-bar"
 

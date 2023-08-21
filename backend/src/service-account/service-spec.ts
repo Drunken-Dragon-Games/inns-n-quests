@@ -1,8 +1,8 @@
-import { ClaimerInfo } from "../service-asset-management"
+import { ClaimStatus } from "../service-asset-management"
+import { CollectionFilter, CollectionWithGameData, CollectionWithUIMetada, GetCollectionResult } from "../service-collection"
+import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
 import { LoggingContext } from "../tools-tracing"
-import { MinimalUTxO } from "../tools-cardano"
-import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
 import { SResult } from "../tools-utils"
 
 export interface AccountService {
@@ -14,6 +14,8 @@ export interface AccountService {
     submitAssociationSignature(userId: string, nonce: string, publicKey: string, signature: string, logger?: LoggingContext): Promise<SubmitAssociationSignatureResult>
     deassociateWallet(userId: string, stakeAddress: string, logger?: LoggingContext): Promise<DeassociationResult>
     getDragonSilverClaims(userId: string, page?: number, logger?: LoggingContext): Promise<GetDragonSilverClaimsResult>
+    testClaimNFTs(userId: string, address: string, logger?: LoggingContext): Promise<ClaimFaucetResult>
+    faucetSubmmit(serializedSignedTx: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     claimDragonSilver(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<ClaimDragonSilverResult>
     claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     getUserInventory(userId: string, logger?: LoggingContext): Promise<GetUserInventoryResult>
@@ -27,6 +29,10 @@ export interface AccountService {
     getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult>
     submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string,  logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
+    getUserDisplayCollection(userId: string, filter?: CollectionFilter,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
+    getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>
+    modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>
+    syncUserCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
 }
 
 export type CleanAssociationTxResult 
@@ -75,16 +81,13 @@ export type ClaimDragonSilverResult
     = { status: "ok", claimId: string, tx: string, remainingAmount: number }
     | { status: "invalid", reason: string, remainingAmount?: number }
 
+export type ClaimFaucetResult
+    = { status: "ok", tx: string }
+    | { status: "invalid", reason: string}
 
 export type ClaimSignAndSubbmitResult 
     = { status: "ok", txId: string }
     | { status: "invalid", reason: string }
-
-type ClaimStatus 
-    = "created"
-    | "submitted"
-    | "timed-out"
-    | "confirmed"
 
 export type ClaimStatusResult
     = { status: "ok", claimStatus: ClaimStatus }
@@ -102,7 +105,7 @@ export type OpenUserBallotsResult =
     {status: "ok", payload: {[ballotId: string]: StoredUserBallot}}|
     {status: "invalid", reason: string}
 
-export type VoteResult 
+export type VoteResult
     = { status: "ok" }
     | { status: "invalid", reason: string }
 
@@ -113,3 +116,19 @@ export type PublicBallotResult =
 export type UserBallotResult =
   {status: "ok", payload: {[ballotId: string]: UserBallot}}|
   {status: "invalid", reason: string}
+
+export type UserCollectionWithMetadataResult
+    = {status: "ok", collection: CollectionWithUIMetada, hasMore: boolean}
+    | {status: "invalid", reason: string}
+
+export type UserMortalCollectionResult
+    = {status: "ok", collection: CollectionWithGameData}
+    | {status: "invalid", reason: string}
+
+export type ModifyMortalCollectionResult
+    = {status: "ok"}
+    | {status: "invalid", reason: string}
+
+export type SyncUserCollectionResult
+    = {status: "ok"}
+    | {status: "invalid", reason: string}

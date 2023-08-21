@@ -57,7 +57,7 @@ export type HealthStatus =
 
 export type GetInventoryResult 
     = { status: "ok", inventory: models.IdleQuestsInventory }
-    | { status: "unknown-user" }
+    | { status: "unknown-user" } | { status: "Could not get mortal collection" }
 
 /** Encounters */
 
@@ -103,4 +103,4 @@ export type ClaimStakingQuestResult
 
 export type GetInnStateForGuestsResult
     = { status: "ok", inventory: models.IdleQuestsInventory }
-    | { status: "unknown-user" }
+    | { status: "unknown-user" } | { status: "Could not get mortal collection" }

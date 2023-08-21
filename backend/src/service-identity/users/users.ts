@@ -7,22 +7,32 @@ import { LoggingContext } from "../../tools-tracing";
 import { Op } from "sequelize";
 
 export class Users {
+    
+    constructor(public idsCache: string[]){}
 
-    static registerSimpleUser = async (nickname: string): Promise<string> => {
+    static async initWithCache(): Promise<Users>{
+        const users = await User.findAll()
+        const userIds = users.map(user => user.userId)
+        return new Users(userIds)
+    }
+
+    registerSimpleUser = async (nickname: string): Promise<string> => {
         const existingUser = await User.findOne({ where: { nickname } })
         if (existingUser) return existingUser.userId
         const nameIdentifier = await generateIdentenfier(nickname)
         const user = await User.create({ nickname, nameIdentifier })
+        this.idsCache.push(user.userId)
         return user.userId
     }
 
-    static registerWithStakingAddress = async (stakeAddress: string): Promise<string> => {
+    registerWithStakingAddress = async (stakeAddress: string): Promise<string> => {
         const existingRegistration = await UserStakeAdress.findOne({ where: { stakeAddress } });
         if (existingRegistration) return existingRegistration.userId
         else {
             const nickname = await generateRandomNickname()
             const nameIdentifier = await generateIdentenfier(nickname)
             const user = await User.create({ nickname, nameIdentifier })
+            this.idsCache.push(user.userId)
             const registration = await UserStakeAdress.create({ stakeAddress, userId: user.userId })
             return registration.userId
         }
@@ -46,7 +56,7 @@ export class Users {
         return {ctype: "success"}
     }
 
-    static registerWithDiscordTokens = async (discordTokens: DiscordTokens, logger?: LoggingContext): Promise<Attempt<string>> => {
+    registerWithDiscordTokens = async (discordTokens: DiscordTokens, logger?: LoggingContext): Promise<Attempt<string>> => {
         const discordUserInfo = await getUserInfoFromBearerToken(discordTokens.discordBearerToken, logger)
         if (discordUserInfo.ctype == "failure") return failed
         const existingUser = 
@@ -77,6 +87,7 @@ export class Users {
             const email = discordUserInfo.result.email
             const discordRefreshToken = discordTokens.refreshtoken
             const user = await User.create({ discordUserId, discordUserName, email, nickname, nameIdentifier, discordRefreshToken })
+            this.idsCache.push(user.userId)
             return succeeded(user.userId)
         }
     }

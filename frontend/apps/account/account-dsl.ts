@@ -56,7 +56,7 @@ export type StoredBallot = {
 export type GovernaceState
     = { ctype: "idle" }
     | { ctype: "loading", details: string }
-    | { ctype: "error", details: string };
+    | { ctype: "error", details: string }
 
 export type WalletAssociationProcessState
     = { ctype: "idle" }

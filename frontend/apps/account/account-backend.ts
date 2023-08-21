@@ -2,8 +2,10 @@ import { v4 } from "uuid"
 import axios, { AxiosError, AxiosResponse, Method } from "axios"
 import urljoin from "url-join"
 import { useRouter } from "next/router"
+import router from "next/router"
 import { SignedMessage } from "lucid-cardano"
 import { AuthenticationTokens, ClaimInfo, ClaimStatus, ClaimerInfo, GovernanceBallots, PublicBallot, UTxOMinimal, UserBallot, UserFullInfo } from "./account-dsl"
+import { CollectionFilter, CollectionWithGameData, CollectionWithUIMetada } from "../collection/collection-state-models"
 
 export const AccountBackend = {
 
@@ -117,8 +119,44 @@ export const AccountBackend = {
     async votForBallot(ballotId: string, optionIndex: string, traceId?: string): Promise<VoteResult>{
         const result = await accountRequest("POST", "/governance/vote", {ballotId, optionIndex}, traceId)
         return result.data
+    },
+
+    async getUserCollectionWIthMetadata(filter?: CollectionFilter, traceId?: string): Promise<UserCollectionWithMetadataResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/collection-with-metadata", {filter}, traceId)
+        return result.data
+    },
+
+    async getUserMortalCollection(traceId?: string): Promise<UserMortalCollectionResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/mortal-collection", traceId)
+        return result.data
+    },
+
+    async modifyMortalCollection(assetRef: string, action: "add" | "remove", traceId?: string): Promise<ModifyMortalCollectionResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/modify-mortal-collection", {assetRef, action} ,traceId)
+        return result.data
+    },
+
+    async syncUserCollection(traceId?: string): Promise<ModifyMortalCollectionResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/sync-collection" ,traceId)
+        return result.data
+    },
+
+    async grantCollection(address: string, traceId?: string): Promise<ClaimAssetResult> {
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] !== "development") return {status: "invalid", reason: "Not allowed", remainingAmount: 0}
+        const result = await accountRequestWRefresh("POST", "/assets/claim/test-faucet", {address},traceId)
+        return result.data
+    },
+
+    async collectionGrantSubmmit(serializedSignedTx: string, traceId: string): Promise<ClaimSignAndSubbmitResult>{
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] !== "development") return {status: "invalid", reason: "Not allowed"}
+        const result = await accountRequestWRefresh("POST", "/assets/claim/faucet-sign-and-submit", {serializedSignedTx},traceId)
+        return result.data
     }
 }
+
+export type ClaimFaucetResult
+    = { status: "ok", tx: string }
+    | { status: "invalid", reason: string}
 
 export type DeassociationResult 
     = { ctype: "success"}
@@ -189,7 +227,19 @@ export type VoteResult
     = { status: "ok" }
     | { status: "invalid", reason: string }
 
-async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData): Promise<AxiosResponse<ResData>> {
+export type UserCollectionWithMetadataResult
+    = {status: "ok", collection: CollectionWithUIMetada, hasMore: boolean}
+    | {status: "invalid", reason: string}
+
+export type UserMortalCollectionResult
+    = {status: "ok", collection: CollectionWithGameData}
+    | {status: "invalid", reason: string}
+
+export type ModifyMortalCollectionResult
+    = {status: "ok"}
+    | {status: "invalid", reason: string}
+
+async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {
     return await withTokenRefresh(() => accountRequest(method, endpoint, data))
 }
 
@@ -242,7 +292,7 @@ async function withTokenRefresh<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 async function refreshToken(error: any): Promise<boolean> {
-    const router = useRouter()
+    //const router = useRouter()
     const refreshToken = localStorage.getItem("refresh")
     if(error instanceof AxiosError && error.response?.status == 401 && refreshToken){
         try {

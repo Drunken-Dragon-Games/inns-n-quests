@@ -70,7 +70,7 @@ const accountInitialState: AccountState = {
     associateProcessState: { ctype: "idle" },
     dragonSilverClaims: [],
     governanceBallots: {},//ballotsTestData,
-    governanceState: {ctype: "idle"}
+    governanceState: {ctype: "idle"},
 }
 
 export const accountState = createSlice({

@@ -13,8 +13,8 @@ import { LoggingContext } from "./tools-tracing"
 import { config } from "./tools-utils"
 
 import path from "path"
-import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./registry-metadata"
-import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./registry-policies"
+import { loadMetadataCache, loadMetadataLocationsFromEnv } from "./tools-assets/registry-metadata"
+import { loadWellKnownPoliciesFromEnv, wellKnownPoliciesMainnet } from "./tools-assets/registry-policies"
 import { loadQuestRegistry } from "./service-idle-quests/state/staking-quests-registry"
 import { EvenstatsServiceDsl } from "./service-evenstats/service"
 import { KiliaBotServiceDsl } from "./service-kilia-bot"
@@ -23,6 +23,8 @@ import { AccountServiceDsl } from "./service-account"
 import { cardanoNetworkFromString } from "./tools-cardano"
 import { GovernanceServiceDsl } from "./service-governance/service"
 import { BlockchainServiceDsl } from "./service-blockchain/service"
+import { CollectionServiceDsl } from "./service-collection"
+import schedule from 'node-schedule'
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -30,6 +32,19 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     if (amountReverted > 0)
         logger.info(`Reverted ${amountReverted} staled claims`)
     await revertStaledClaimsLoop(assetManagementService, logger)
+}
+
+async function collectionsAndRewardsLoop(collectionService: CollectionServiceDsl, logger: LoggingContext){
+    const dailyRule = new schedule.RecurrenceRule()
+    dailyRule.hour = 1
+    schedule.scheduleJob(dailyRule, () => collectionService.updateGlobalDailyStakingContributions.bind(collectionService)(logger))
+
+    const weeklyRule = new schedule.RecurrenceRule()
+    //CHECKME: temporrly mkaing this work on wendsdays instead of mondays
+    //weeklyRule.dayOfWeek = 1
+    weeklyRule.dayOfWeek = 3
+    weeklyRule.hour = 2
+    schedule.scheduleJob(weeklyRule, () => collectionService.grantGlobalWeeklyStakingGrant.bind(collectionService)(logger))
 }
 
 const runServer = async () => {
@@ -60,8 +75,9 @@ const runServer = async () => {
     const governanceService = await GovernanceServiceDsl.loadFromEnv({database})
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService, blockchainService })
-    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, blockchainService, governanceService,wellKnownPolicies })
-    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, identityService, assetManagementService, metadataRegistry, questsRegistry, wellKnownPolicies })
+    const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry, calendar})
+    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, blockchainService, governanceService,collectionService, wellKnownPolicies })
+    const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, identityService, assetManagementService, metadataRegistry, collectionService, questsRegistry, wellKnownPolicies })
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService, idleQuestsService })
     
     // Soon to be deprecated
@@ -73,6 +89,7 @@ const runServer = async () => {
 
     app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
+    collectionsAndRewardsLoop(collectionService, new LoggingContext({ ctype: "params", component: "collection-service" }))
 }
 
 runServer()

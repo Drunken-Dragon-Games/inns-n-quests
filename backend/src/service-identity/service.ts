@@ -47,6 +47,7 @@ export interface IdentityServiceDependencies
 export class IdentityServiceDsl implements IdentityService {
 
     private readonly migrator: Umzug<QueryInterface>
+    cachedUsers: Users = {} as Users
 
     constructor(
         private readonly database: Sequelize,
@@ -90,6 +91,7 @@ export class IdentityServiceDsl implements IdentityService {
         cardanoDB.configureSequelizeModelTransactionVerification(this.database)
         sessionsDB.configureSequelizeModel(this.database)
         await this.migrator.up()
+        this.cachedUsers = await Users.initWithCache()
     }
 
     async unloadDatabaseModels(): Promise<void> {
@@ -153,7 +155,7 @@ export class IdentityServiceDsl implements IdentityService {
             if (stakeAddress.ctype == "failure")
                 return { status: "bad-credentials" }
             else {
-                const userId = await Users.registerWithStakingAddress(stakeAddress.result)
+                const userId = await this.cachedUsers.registerWithStakingAddress(stakeAddress.result)
                 const tokens = await this.sessions.create(userId, "Sig", credentials.deviceType)
                 return { status: "ok", tokens }
             }
@@ -162,7 +164,7 @@ export class IdentityServiceDsl implements IdentityService {
             if (discordTokens.ctype == "failure")
                 return { status: "bad-credentials" }
             else {
-                const userId = await Users.registerWithDiscordTokens(discordTokens.result, logger)
+                const userId = await this.cachedUsers.registerWithDiscordTokens(discordTokens.result, logger)
                 if (userId.ctype == "failure"){
                     return { status: "bad-credentials" }
                 }else{
@@ -171,7 +173,7 @@ export class IdentityServiceDsl implements IdentityService {
                 }
             }
         } else if (credentials.ctype === "development" && NODE_ENV === "development") {
-            const userId = await Users.registerSimpleUser(credentials.nickname)
+            const userId = await this.cachedUsers.registerSimpleUser(credentials.nickname)
             const tokens = await this.sessions.create(userId, "Development", credentials.deviceType)
             return { status: "ok", tokens }
         } else {
@@ -214,8 +216,12 @@ export class IdentityServiceDsl implements IdentityService {
         return await Users.deassociateStakingAddress(userId, stakeAddress)
     }
 
-    async getTotalUsers(): Promise<number> {
+    async getTotalUsers(logger?: LoggingContext): Promise<number> {
         return await Users.total()
+    }
+
+    async listAllUserIds(logger?: LoggingContext): Promise<string[]>{
+        return this.cachedUsers.idsCache
     }
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<RefreshResult> {

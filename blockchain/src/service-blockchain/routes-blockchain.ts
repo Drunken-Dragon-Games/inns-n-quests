@@ -8,7 +8,7 @@ import { BlockchainService, blockchainEnpoints } from "./service-spec.ts"
 export const blockchainRoutes = (blockchainService: BlockchainService) => {
     const router = Router()
 
-    router.get(blockchainEnpoints.health.path, requestCatchError(async (request: Request, response: Response) => {
+    router.get(blockchainEnpoints.health.path, requestCatchError(async (_request: Request, response: Response) => {
         const helthStatus = await blockchainService.health()
         generateHttpResponse(helthStatus, response)
     }))
@@ -22,6 +22,12 @@ export const blockchainRoutes = (blockchainService: BlockchainService) => {
     router.post(blockchainEnpoints.buildMintTx.path, requestCatchError(async (request: Request, response: Response) => {
         const {address, asset, quantityToClaim, feeInfo} = request.body
         const txInfo = await blockchainService.buildMintTx(address, asset, quantityToClaim, feeInfo)
+        generateHttpResponse(txInfo, response)
+    }))
+
+    router.post(blockchainEnpoints.buildBulkMintTx.path, requestCatchError(async (request: Request, response: Response) => {
+        const {address, assetsInfo, feeInfo} = request.body
+        const txInfo = await blockchainService.buildBulkMintTx(address, assetsInfo, feeInfo)
         generateHttpResponse(txInfo, response)
     }))
 

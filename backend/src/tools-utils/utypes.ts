@@ -21,11 +21,11 @@ export type Unit = {}
 
 export const unit: Unit = {}
 
-export type Success<A extends object> = 
-    { ctype: "success"} & A
+export type Success<A extends object> =
+    { ctype: "success" } & A
 
 export type Failure<A extends object> =
-    { ctype: "failure"} & A
+    { ctype: "failure" } & A
 
 export type Result<A extends object, B extends object> = 
     Success<A> | Failure<B>

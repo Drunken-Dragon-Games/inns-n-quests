@@ -13,9 +13,9 @@ import { FurnitureDBInfo, FurnitureState } from "./state/furniture-state"
 import { SectorDBInfo, SectorState } from "./state/sector-state"
 import { TakenStakingQuestDBInfo, TakenStakingQuestState } from "./state/taken-staking-quest-state"
 
-import { MetadataRegistry } from "../registry-metadata"
-import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService, AssetUnit } from "../service-asset-management"
+import { MetadataRegistry } from "../tools-assets/registry-metadata"
+import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
+import { AssetManagementService, AssetUnit, Inventory } from "../service-asset-management"
 import { EvenstatsService } from "../service-evenstats"
 import { Calendar } from "../tools-utils/calendar"
 import { StakingQuestRegistry } from "./state/staking-quests-registry"
@@ -25,6 +25,7 @@ import { testEncounter } from "./game-vm"
 import { AvailableStakingQuestState } from "./state/available-staking-quests-state"
 import { Leaderboard } from "./models"
 import { IdentityService } from "../service-identity"
+import { CollectibleMetadata, Collection, CollectionService } from "../service-collection"
 
 export interface IdleQuestServiceDependencies 
     { randomSeed: string
@@ -33,6 +34,7 @@ export interface IdleQuestServiceDependencies
     , evenstatsService: EvenstatsService
     , identityService: IdentityService
     , assetManagementService: AssetManagementService
+    , collectionService: CollectionService
     , questsRegistry: StakingQuestRegistry
     , metadataRegistry: MetadataRegistry
     , wellKnownPolicies: WellKnownPolicies
@@ -55,6 +57,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         private readonly evenstatsService: EvenstatsService,
         private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
+        private readonly collectionService: CollectionService,
         private readonly questsRegistry: StakingQuestRegistry,
         private readonly metadataRegistry: MetadataRegistry,
         private readonly wellKnownPolicies: WellKnownPolicies,
@@ -84,6 +87,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
             dependencies.evenstatsService,
             dependencies.identityService,
             dependencies.assetManagementService,
+            dependencies.collectionService,
             dependencies.questsRegistry,
             dependencies.metadataRegistry,
             dependencies.wellKnownPolicies,
@@ -284,7 +288,7 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
        const outcome = this.rules.stakingQuest.outcome(takenQuest.availableQuest, adventurers)
         // If success, grant dragon silver
         if (outcome.ctype == "success-outcome") 
-            await this.assetManagementService.grant(userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() })
+            await this.assetManagementService.grant(userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() }, logger)
         // Check if any adventurer died
         // TODO
         // Claim quest
@@ -310,26 +314,28 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @returns 
      */
     async getInventory(userId: string, logger?: LoggingContext): Promise<GetInventoryResult> {
-        //fulll on chain and of chain inventory
-        const inventoryResult = await this.assetManagementService.list(userId, { policies: onlyPolicies(this.wellKnownPolicies) })
-        if (inventoryResult.status == "unknown-user") 
-            return { status: "unknown-user" }
+        const collectionResult = await this.collectionService.getMortalCollection(userId, logger)
+        if (collectionResult.ctype !== "success") return { status: "Could not get mortal collection" }
+        const gameInvenotry = this.collectionToInventory(collectionResult.collection)
+        const inventoryResult = await this.assetManagementService.list(userId, { policies: [this.wellKnownPolicies.dragonSilver.policyId] })
+        if (inventoryResult.status == "unknown-user") return { status: "unknown-user" }
         const [ characters, furniture ] = (await Promise.all([
-            this.characterState.syncCharacters(userId, inventoryResult.inventory),
-            this.furnitureState.syncFurniture(userId, inventoryResult.inventory),
+            this.characterState.syncCharacters(userId, gameInvenotry),
+            this.furnitureState.syncFurniture(userId, gameInvenotry),
         ]))
-
-        if (process.env.NODE_ENV === "development" && characters.length == 0)
-            return await this.grantTestInventory(userId)
+        /* if (process.env.NODE_ENV === "development" && characters.length == 0)
+            return await this.grantTestInventory(userId) */
 
         const dragonSilver = parseInt(inventoryResult.inventory[this.wellKnownPolicies.dragonSilver.policyId]?.find(a => a.unit == "DragonSilver")?.quantity ?? "0")
+        const inventory = await SectorState.syncPlayerInn(userId, {
+            dragonSilver,
+            characters: vm.makeRecord(characters, c => c.entityId),//testCharacters(userId), c => c.entityId),
+            furniture: vm.makeRecord(furniture, f => f.entityId)
+        }) 
+        
         return { 
             status: "ok", 
-            inventory: await SectorState.syncPlayerInn(userId, {
-                dragonSilver,
-                characters: vm.makeRecord(characters, c => c.entityId),//testCharacters(userId), c => c.entityId),
-                furniture: vm.makeRecord(furniture, f => f.entityId)
-            }) 
+            inventory
         }
     }
 
@@ -438,4 +444,17 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
     async getStakingQuestLeaderboard(size: number, start: Date, end: Date = new Date()): Promise<Leaderboard>{
         return this.takenQuestState.getLeaderboard(size, start, end)
     }
+
+    private collectionToInventory = (collection: Collection<CollectibleMetadata>): Inventory => {
+        const emptyInventory: Inventory = {}
+        return Object.entries(collection).reduce((acc, [policyName, policyCollectibles]) => {
+            type policyNames = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
+            const policyInvenotry = policyCollectibles.map((collectible) => {
+                return { unit: collectible.assetRef, quantity: collectible.quantity, chain: true}
+            })
+            const policyId = this.wellKnownPolicies[policyName as policyNames].policyId
+            return {...acc, [policyId]: policyInvenotry}
+        }, emptyInventory)
 }
+}
+

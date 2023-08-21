@@ -56,8 +56,8 @@ const ProductInfoWrapper = styled.div`
     };
 `
 
-const ProductButton = (props: { title: string, image: string, href: string, alt: string }) => 
-    <ProductButtonContainer bg={props.image} href={props.href} target="_blank">
+const ProductButton = (props: { title: string, image: string, href: string, alt: string, target?: string }) => 
+    <ProductButtonContainer bg={props.image} href={props.href} target= {props.target ?? "_blank"}>
         <ProductInfoWrapper>
             <Push />
             <h2>{props.title}</h2>
@@ -93,7 +93,8 @@ const ProductsSection = () =>
             image="https://cdn.ddu.gg/modules/landing/product-comic.png" 
             alt="The Dead Queen Comic Product" />
         <ProductButton 
-            href="https://ddu.gg/inq"
+            href="/inq"
+            target="_self"
             title="Start Playing"
             image="https://cdn.ddu.gg/modules/landing/product-inq.png" 
             alt="Inns & Quests Game Product" />
