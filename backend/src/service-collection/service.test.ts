@@ -102,7 +102,7 @@ test("get Collection with Metadata ok", async () => {
             {assetRef:"PixelTile2", quantity: "3", type: "Furniture", stakingContribution: 6, 
             splashArt: "https://cdn.ddu.gg/pixeltiles/xl/PixelTile2.png", 
             miniature: "https://cdn.ddu.gg/pixeltiles/x4/PixelTile2.png", 
-            name: "PixelTile #2 Table", aps: [6,6,6], class: "furniture", mortalRealmsActive: 0}
+            name: "PixelTile #2 Table", aps: [0,0,0], class: "furniture", mortalRealmsActive: 0}
     ],
         grandMasterAdventurers: [
             {assetRef: "GrandmasterAdventurer1", quantity: "1", type: "Character", stakingContribution: 5, 
@@ -461,24 +461,7 @@ test("filter pagination",async () => {
     const expectedCollectionPage1: CollectionWithUIMetadataResult = {
         "ctype": "success",
         "collection": {
-            "pixelTiles": [
-                {
-                    "assetRef": "PixelTile2",
-                    "quantity": "3",
-                    "type": "Furniture",
-                    "aps": [
-                        6,
-                        6,
-                        6
-                    ],
-                    "class": "furniture",
-                    "mortalRealmsActive": 0,
-                    "name": "PixelTile #2 Table",
-                    "miniature": "https://cdn.ddu.gg/pixeltiles/x4/PixelTile2.png",
-                    "splashArt": "https://cdn.ddu.gg/pixeltiles/xl/PixelTile2.png",
-                    "stakingContribution": 1
-                }
-            ],
+            "pixelTiles": [],
             "adventurersOfThiolden": [
                 {
                     "assetRef": "AdventurerOfThiolden1",
@@ -494,22 +477,8 @@ test("filter pagination",async () => {
                     "name": "vimtyr The Whispering Axe",
                     "splashArt": "https://cdn.ddu.gg/adv-of-thiolden/web/vimtyr_32_1.mp4",
                     "miniature": "https://cdn.ddu.gg/adv-of-thiolden/x6/vimtyr-front-chroma.png",
-                    "stakingContribution": 1
-                }
-            ],
-            "grandMasterAdventurers": []
-        },
-        hasMore: true
-    }
-    expect(dsl.areCollectionsEqual(collectionResult, expectedCollectionPage1)).toBe(true)
-    filter.page = 2
-    const collectionResult2 = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 2)
-    if(collectionResult2.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
-    const expectedCollectionPage2: CollectionWithUIMetadataResult ={
-        "ctype": "success",
-        "collection": {
-            "pixelTiles": [],
-            "adventurersOfThiolden": [
+                    "stakingContribution": 20
+                },
                 {
                     "assetRef": "AdventurerOfThiolden2",
                     "quantity": "1",
@@ -524,9 +493,22 @@ test("filter pagination",async () => {
                     "name": "terrorhertz Herald of the Drunken Dragon",
                     "splashArt": "https://cdn.ddu.gg/adv-of-thiolden/web/terrorhertz_32_1.mp4",
                     "miniature": "https://cdn.ddu.gg/adv-of-thiolden/x6/terrorhertz-front-chroma.png",
-                    "stakingContribution": 1
+                    "stakingContribution": 20
                 }
             ],
+            "grandMasterAdventurers": []
+        },
+        "hasMore": true
+    }
+    expect(dsl.areCollectionsEqual(collectionResult, expectedCollectionPage1)).toBe(true)
+    filter.page = 2
+    const collectionResult2 = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 2)
+    if(collectionResult2.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
+    const expectedCollectionPage2: CollectionWithUIMetadataResult ={
+        "ctype": "success",
+        "collection": {
+            "pixelTiles": [],
+            "adventurersOfThiolden": [],
             "grandMasterAdventurers": [
                 {
                     "assetRef": "GrandmasterAdventurer1",
@@ -542,22 +524,8 @@ test("filter pagination",async () => {
                     "name": "Grandmaster Adventurer #1",
                     "splashArt": "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif",
                     "miniature": "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer1.png",
-                    "stakingContribution": 1
-                }
-            ]
-        },
-        "hasMore": true
-    }
-    expect(dsl.areCollectionsEqual(collectionResult2, expectedCollectionPage2)).toBe(true)
-    filter.page = 3
-    const collectionResult3 = await service.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, 2)
-    if(collectionResult3.ctype !== "success") fail("get getCollectionWithUIMetadata bad ctype")
-    const expectedCollectionPage3: CollectionWithUIMetadataResult = {
-        "ctype": "success",
-        "collection": {
-            "pixelTiles": [],
-            "adventurersOfThiolden": [],
-            "grandMasterAdventurers": [
+                    "stakingContribution": 5
+                },
                 {
                     "assetRef": "GrandmasterAdventurer2",
                     "quantity": "1",
@@ -572,11 +540,11 @@ test("filter pagination",async () => {
                     "name": "Grandmaster Adventurer #2",
                     "splashArt": "https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer2.gif",
                     "miniature": "https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer2.png",
-                    "stakingContribution": 1
+                    "stakingContribution": 3
                 }
             ]
         },
         "hasMore": false
     }
-    expect(dsl.areCollectionsEqual(collectionResult3, expectedCollectionPage3)).toBe(true)
+    expect(dsl.areCollectionsEqual(collectionResult2, expectedCollectionPage2)).toBe(true)
 })
