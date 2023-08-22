@@ -187,18 +187,13 @@ interface Dimensions {
     offset: [number, number]
 }
 
-const useCharacterSpriteState = (character: CollectionCharacter, units: Units): Dimensions => {
-    const dimensions = useMemo(() => {
-        const [width, offset] =
-            character.collection == "pixelTiles" ?
-                ptMeasures(character) :
-            character.collection == "grandMasterAdventurers" ?
-                gmasMeasures(character) :
-            // character.collection == "adventurersOfThiolden" ?
-                aotMeasures(character)
-        return { width, height: 0, units, offset: offset as [number,number] }
-    }, [character, units])
-    return {...dimensions, height: useComputeHeightFromOriginalImage(character.sprite, dimensions.width) }
+const characterSpriteState = (character: CollectionCharacter, units: Units): Dimensions => {
+    const [width, offset] =
+        character.collection == "pixelTiles" ? ptMeasures(character) :
+        character.collection == "grandMasterAdventurers" ? gmasMeasures(character) : aotMeasures(character)
+    const dimensions =  { width, height: 0, units, offset: offset as [number,number] }
+    //return {...dimensions, height: useComputeHeightFromOriginalImage(character.sprite, dimensions.width) }
+    return {...dimensions, height: 7 }
 }
 
 interface CharacterSpriteProps {
@@ -219,7 +214,7 @@ const MirroredPixelArtImage = styled(PixelArtImage)`
 `;
 
 const CharacterSprite = ({className, character, units = vmax1 } : CharacterSpriteProps) => {
-    const dimensions = useCharacterSpriteState(character, units)
+    const dimensions = characterSpriteState(character, units)
     return (
         <CharacterSpriteContainer className={className} dimensions={dimensions}>
             <CharacterImageContainer dimensions={dimensions}>

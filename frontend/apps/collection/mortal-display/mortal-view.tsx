@@ -3,6 +3,7 @@ import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData,
 import { PixelArtImage, Video, vmax1 } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
+import { CharacterSprite, FurnitureSprite } from "../display/sprites"
 
 const MortalCollectionContainer = styled.div`
     border: 2px solid #ccc;
@@ -80,12 +81,7 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
         for (let i = 0; i < Number(src.quantity); i++) {
             assetArray.push(
                 <CollectibleContainer key={`${src.name}-${i}`}>
-                    <MirroredPixelArtImage
-                        src={src.miniature}
-                        alt={src.name}
-                        height={dimensionsMap[policyName].height}
-                        width={dimensionsMap[policyName].width * (policyName === 'pixelTiles'&& src.class === 'furniture'? 1.5 : 1)}
-                    />
+                    {CharacterSprite({character: {sprite: src.miniature, collection: policyName, class: src.class, assetRef: src.assetRef}})}
                     <CollectibleInfo>
                         <p>{capitalizeFirstLetter(src.name)}</p>
                         <p>Class: {src.class}</p>

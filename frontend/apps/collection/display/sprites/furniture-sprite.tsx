@@ -71,11 +71,8 @@ type CollectionFurniture = {
 }
 
 const useFurnitureSpriteState = (furniture: CollectionFurniture, units: Units): Dimensions => {
-    const dimensions = useMemo(() => {
-        const [width, offset] =
-            ptMeasures(furniture.assetRef) 
-        return { width, height: 0, units, offset: offset as [number,number] }
-    }, [furniture, units])
+    const [width, offset] = ptMeasures(furniture.assetRef) 
+    const dimensions = { width, height: 0, units, offset: offset as [number,number] }
     return {...dimensions, height: useComputeHeightFromOriginalImage(furniture.sprite, dimensions.width) }
 }
 
