@@ -71,7 +71,7 @@ export class TransactionDSL {
             const policyResponse = this.secureSigningService.policy(policyId);
             
             if (policyResponse.status !== "ok") {
-                return {status: "invalid", reason: `Could not build Tx because: ${policyResponse.reason}`};
+                return {status: "invalid", reason: `Could not build wiht policy: ${policyId}, Tx because: ${policyResponse.reason}`};
             }
     
             tx.attachMintingPolicy(policyResponse.value);
