@@ -7,6 +7,7 @@ export class AES256 {
 	constructor(private key: CryptoKey) {}
 
 	static async load(storedKey: string): Promise<AES256> {
+		console.log({storedKey})
 		const rawKey = hex.decode(strToUint8(storedKey))
 		const key = await crypto.subtle.importKey("raw", rawKey.buffer, "AES-CBC", true, ["encrypt", "decrypt"])
 		return new AES256(key)
