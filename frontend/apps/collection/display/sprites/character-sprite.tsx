@@ -161,12 +161,11 @@ const aotMeasures = (character: CollectionCharacter): [number, [number,number]] 
 const CharacterSpriteContainer = styled.div<{ dimensions: Dimensions}>`
     position: relative;
     width: ${props => props.dimensions.units.u(5)};
-    height: ${props => props.dimensions.units.u(5)};
+    height: ${props => props.dimensions.units.u(props.dimensions.height)};
     overflow: visible;
     display: flex;
     flex-direction: column-reverse;
     align-items: center;
-    height: ${props => props.dimensions.units.u(props.dimensions.height)};
 `
 
 
@@ -187,15 +186,6 @@ interface Dimensions {
     offset: [number, number]
 }
 
-const characterSpriteState = (character: CollectionCharacter, units: Units): Dimensions => {
-    const [width, offset] =
-        character.collection == "pixelTiles" ? ptMeasures(character) :
-        character.collection == "grandMasterAdventurers" ? gmasMeasures(character) : aotMeasures(character)
-    const dimensions =  { width, height: 0, units, offset: offset as [number,number] }
-    //return {...dimensions, height: useComputeHeightFromOriginalImage(character.sprite, dimensions.width) }
-    return {...dimensions, height: 7 }
-}
-
 interface CharacterSpriteProps {
     className?: string
     character:CollectionCharacter 
@@ -214,16 +204,21 @@ const MirroredPixelArtImage = styled(PixelArtImage)`
 `;
 
 const CharacterSprite = ({className, character, units = vmax1 } : CharacterSpriteProps) => {
-    const dimensions = characterSpriteState(character, units)
+    const [width, offset] =
+        character.collection == "pixelTiles" ? ptMeasures(character) :
+        character.collection == "grandMasterAdventurers" ? gmasMeasures(character) : aotMeasures(character)
+    const dimensions =  { width, height: 0, units, offset: offset as [number,number] }
+    const height = useComputeHeightFromOriginalImage(character.sprite, dimensions.width)
+    const completeDimensions = { ...dimensions, height }
     return (
-        <CharacterSpriteContainer className={className} dimensions={dimensions}>
+        <CharacterSpriteContainer className={className} dimensions={completeDimensions}>
             <CharacterImageContainer dimensions={dimensions}>
                 <MirroredPixelArtImage
                     src={character.sprite}
                     alt={character.assetRef}
-                    width={dimensions.width}
-                    height={dimensions.height}
-                    units={dimensions.units}
+                    width={completeDimensions.width}
+                    height={completeDimensions.height}
+                    units={completeDimensions.units}
                 />
             </CharacterImageContainer>
         </CharacterSpriteContainer>

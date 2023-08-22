@@ -84,17 +84,35 @@ export const Collectible = ({ src, imageDimensions, collectionName, isVideo, art
                 <Video src={src.splashArt} height={imageDimensions.height} width={imageDimensions.width} units={vmax1} />
             ) : (
             <> { 
-                artType === 'splashArt' ?
+                artType === 'splashArt' ? (
                     <PixelArtImage
                         src={src.splashArt}
                         alt={src.name}
                         height={imageDimensions.height}
-                        width={imageDimensions.width }
-                    /> :
-                    type == "Furniture" ?
-                    FurnitureSprite({furniture: {sprite: src.miniature, assetRef: src.assetRef, name: src.name}}) :
-                    CharacterSprite({character: {sprite: src.miniature, collection: collectionName, class: src.class, assetRef: src.assetRef}})
-            } </>
+                        width={imageDimensions.width}
+                    />
+                ) : (
+                    type === "Furniture" ? (
+                        <FurnitureSprite
+                            furniture={{
+                                sprite: src.miniature,
+                                assetRef: src.assetRef,
+                                name: src.name
+                            }}
+                        />
+                    ) : (
+                        <CharacterSprite
+                            character={{
+                                sprite: src.miniature,
+                                collection: collectionName,
+                                class: src.class,
+                                assetRef: src.assetRef
+                            }}
+                        />
+                    )
+                )
+            }
+             </>
             )}
             <CollectibleInfo>
                 <p>{capitalizeFirstLetter(src.name)}</p>
@@ -118,7 +136,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
     }
    
     const imageDimensions = {
-        "pixelTiles": { height: 10.5,  width: 9 },
+        "pixelTiles": { height: 12,  width: 9 },
         "grandMasterAdventurers": { height: 12,  width: 12 },
         "adventurersOfThiolden": { height: 12,  width: 9 },
     }
