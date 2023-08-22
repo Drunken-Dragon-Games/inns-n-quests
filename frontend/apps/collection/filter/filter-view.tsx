@@ -7,13 +7,14 @@ import { PixelCheckbox } from './components';
 
 const FilterContainer = styled.div`
   width: 9.5vw;
-  position: absolute;
   left: 0;
   top: 0;
   color: #333;
   background-color: #999;
   z-index: 2;
-`
+  align-self: start;
+`;
+
 
 const LabelWrapper = styled.label`
   display: flex;

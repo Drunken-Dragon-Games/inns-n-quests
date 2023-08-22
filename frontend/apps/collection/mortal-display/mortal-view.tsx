@@ -8,14 +8,12 @@ import { CharacterSprite, FurnitureSprite } from "../display/sprites"
 const MortalCollectionContainer = styled.div`
     border: 2px solid #ccc;
     border-radius: 10px;
-    padding: 10px; /* reduced from 20px */
-    margin-bottom: 10px; /* reduced from 20px */
-    margin-left: 25vw; /* reduced from 9.5vw */
+    padding: 10px;
+    margin-bottom: 10px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 10px; /* reduced from 20px */
+    gap: 10px;
 `
 
 const Header = styled.div`
@@ -46,16 +44,27 @@ const CollectibleInfo = styled.div`
     text-align: center;
 `
 
+const FaucetContainer = styled.div`
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+`;
+
 const ButtonContainer = styled.div`
     display: flex;
     justify-content: center;
-    width: 100%;
-    margin: 10px 0px 10px 0px;
-`
+    align-items: center;
+    margin-top: 10px;
+`;
 
-const MirroredPixelArtImage = styled(PixelArtImage)`
-  transform: scaleX(-1);
-`
+const StyledButton = styled.button`
+    height: 80px;
+    margin: 0 5px;
+`;
+
 
 const removeFromMortalCollection = (assetRef: string, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
     collectionTransitions.modifyMortalCollection(assetRef, "remove", policy)
@@ -68,44 +77,48 @@ const capitalizeFirstLetter = (input: string): string => {
 }
 
 export const MortalView = ({ collectionItems, status }: { collectionItems: CollectionWithGameData, status: CollectionFetchingState}) => {
-    const dimensionsMap = {
-        "pixelTiles": {height: 10.5 * 0.5,  width: 6.75 * 0.5 },
-        "grandMasterAdventurers": { height: 12 * 0.5, width: 9.6 * 0.5 },
-        "adventurersOfThiolden": {height: 12 * 0.5,  width: 9 * 0.5 }
-    }
     
     type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
 
     const renderAsset = (src: any, policyName: PolicyName) => {
         const assetArray = [];
         for (let i = 0; i < Number(src.quantity); i++) {
-            assetArray.push(
-                <CollectibleContainer key={`${src.name}-${i}`}>
-                    {CharacterSprite({character: {sprite: src.miniature, collection: policyName, class: src.class, assetRef: src.assetRef}})}
-                    <CollectibleInfo>
-                        <p>{capitalizeFirstLetter(src.name)}</p>
-                        <p>Class: {src.class}</p>
-                        {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
-                    </CollectibleInfo>
-                    <button onClick={() => removeFromMortalCollection(src.assetRef, policyName)} >Remove</button>
-                </CollectibleContainer>
-            )
+          assetArray.push(
+            <CollectibleContainer key={`${src.name}-${i}`}>
+              <CharacterSprite 
+                character={{
+                  sprite: src.miniature,
+                  collection: policyName,
+                  class: src.class,
+                  assetRef: src.assetRef,
+                }}
+              />
+              <CollectibleInfo>
+                <p>{capitalizeFirstLetter(src.name)}</p>
+                <p>Class: {src.class}</p>
+                {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
+              </CollectibleInfo>
+              <button onClick={() => removeFromMortalCollection(src.assetRef, policyName)}>Remove</button>
+            </CollectibleContainer>
+          );
         }
-        return assetArray
-    }
+        return assetArray;
+      };
+      
 
     return (<>
-        <MortalCollectionContainer>
-            <h2 style={{ color : 'white'}}>{JSON.stringify(status)}</h2>
-        { process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ? 
-                <ButtonContainer>
-                    <button onClick = {() => collectionTransitions.grantTestCollection("Nami")}>Get Collection on Nami</button>
-                    <button onClick = {() => collectionTransitions.grantTestCollection("Eternl")}>Get Collection on Eternl</button>
-                </ButtonContainer>
-                : 
-                <></>
-            }
-        </MortalCollectionContainer>
+        <FaucetContainer>
+            <h2 style={{ color: 'white' }}>{JSON.stringify(status)}</h2>
+            <ButtonContainer>
+                <StyledButton onClick={() => collectionTransitions.grantTestCollection("Nami")}>
+                    Get Collection on Nami
+                </StyledButton>
+                <StyledButton onClick={() => collectionTransitions.grantTestCollection("Eternl")}>
+                    Get Collection on Eternl
+                </StyledButton>
+            </ButtonContainer>
+        </FaucetContainer>
+
         <MortalCollectionContainer>
             <Header>
                 <Title>Mortal Collection</Title>
