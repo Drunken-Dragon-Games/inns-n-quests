@@ -3,6 +3,7 @@ import { CollectionWithUIMetada, UICollectible } from "../collection-state-model
 import { PixelArtImage, Video, vmax1 } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
+import { CharacterSprite, FurnitureSprite } from "./sprites"
 
 const EthernalCollectionContainer = styled.div`
     border: 2px solid #ccc;
@@ -69,29 +70,31 @@ const modifyMortalCollection = (assetRef: string, action: "add" | "remove", poli
 
 type RenderCollectible = { 
     src: UICollectible, 
-    imageDimensions: any, 
-    type: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", 
+    imageDimensions: { height: number,  width: number }, 
+    collectionName: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", 
     isVideo?: boolean, 
-    artType: string
+    artType: string,
+    type? : "Furniture" | "Character"
 }
 
-export const Collectible = ({ src, imageDimensions, type, isVideo, artType }: RenderCollectible) => {
-    const getArtSource = ( src: {splashArt: string, miniature: string}) => {
-        if (artType === 'splashArt') return src.splashArt
-        else return src.miniature
-    }
+export const Collectible = ({ src, imageDimensions, collectionName, isVideo, artType, type}: RenderCollectible) => {
     return (
         <CollectibleContainer>
             {isVideo ? (
-                <Video src={src.splashArt} height={imageDimensions.adventurersOfThiolden.height} width={imageDimensions.adventurersOfThiolden.width} units={vmax1} />
+                <Video src={src.splashArt} height={imageDimensions.height} width={imageDimensions.width} units={vmax1} />
             ) : (
-                <MirroredPixelArtImage
-                    src={getArtSource(src)}
-                    alt={src.name}
-                    height={imageDimensions[type].height}
-                    width={imageDimensions[type].width * (type === 'pixelTiles' && artType === 'miniature' && src.class === 'furniture'? 1.5 : 1)}
-                    isFlipped={artType === 'miniature'}
-                />
+            <> { 
+                artType === 'splashArt' ?
+                    <PixelArtImage
+                        src={src.splashArt}
+                        alt={src.name}
+                        height={imageDimensions.height}
+                        width={imageDimensions.width }
+                    /> :
+                    type == "Furniture" ?
+                    FurnitureSprite({furniture: {sprite: src.miniature, assetRef: src.assetRef, name: src.name}}) :
+                    CharacterSprite({character: {sprite: src.miniature, collection: collectionName, class: src.class, assetRef: src.assetRef}})
+            } </>
             )}
             <CollectibleInfo>
                 <p>{capitalizeFirstLetter(src.name)}</p>
@@ -101,8 +104,8 @@ export const Collectible = ({ src, imageDimensions, type, isVideo, artType }: Re
                 <p>Active: {src.mortalRealmsActive}</p>
                 <p>Pasive Stake: {src.stakingContribution}</p>
             </CollectibleInfo>
-            <button onClick={() => modifyMortalCollection(src.assetRef, "add", type)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</button>
-            <button onClick={() => modifyMortalCollection(src.assetRef, "remove", type)} disabled={src.mortalRealmsActive < 1}>Remove from Mortal</button>
+            <button onClick={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</button>
+            <button onClick={() => modifyMortalCollection(src.assetRef, "remove", collectionName)} disabled={src.mortalRealmsActive < 1}>Remove from Mortal</button>
         </CollectibleContainer>
     )
 }
@@ -112,33 +115,14 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
     const handleArtTypeChange = () => {
         const newArtType = artType === "splashArt" ? "miniature" : "splashArt"
         setArtType(newArtType)
-        setImageDimensions({
-            "pixelTiles": dimensionsMap["pixelTiles"][newArtType],
-            "grandMasterAdventurers": dimensionsMap["grandMasterAdventurers"][newArtType],
-            "adventurersOfThiolden": dimensionsMap["adventurersOfThiolden"][newArtType],
-        })
     }
    
-    const dimensionsMap = {
-        "pixelTiles": {
-            "splashArt": { height: 10.5,  width: 9 },
-            "miniature": { height: 10.5,  width: 6.75 },
-        },
-        "grandMasterAdventurers": {
-            "splashArt": { height: 12,  width: 12 },
-            "miniature": { height: 12,width: 9.6 }
-        },
-        "adventurersOfThiolden": {
-            "splashArt": { height: 12,  width: 9 },
-            "miniature": { height: 12,  width: 9 }
-        }
+    const imageDimensions = {
+        "pixelTiles": { height: 10.5,  width: 9 },
+        "grandMasterAdventurers": { height: 12,  width: 12 },
+        "adventurersOfThiolden": { height: 12,  width: 9 },
     }
 
-    const [imageDimensions, setImageDimensions] = useState({
-        "pixelTiles": dimensionsMap["pixelTiles"]["splashArt"],
-        "grandMasterAdventurers": dimensionsMap["grandMasterAdventurers"]["splashArt"],
-        "adventurersOfThiolden": dimensionsMap["adventurersOfThiolden"]["splashArt"],
-    })
     return (
         <EthernalCollectionContainer>
             <Header>
@@ -151,16 +135,16 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                 </ButtonContainer>
             </Header>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions} type="adventurersOfThiolden" isVideo={artType == "splashArt" && isVideoFile(src.splashArt)} artType={artType} />
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" isVideo={artType == "splashArt" && isVideoFile(src.splashArt)} artType={artType} />
             )}
             {collectionItems.grandMasterAdventurers.map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions} type="grandMasterAdventurers" artType={artType}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.grandMasterAdventurers} collectionName="grandMasterAdventurers" artType={artType}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class !== 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions} type="pixelTiles" artType={artType}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class == 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions} type="pixelTiles" artType={artType}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType}/>
             )}
         </EthernalCollectionContainer>
     )
