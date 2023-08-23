@@ -42,7 +42,7 @@ export const AccountThunks = {
             return {status: "error", details: `${wallet} does not have a reward address.`}
         const utxos = await walletApi.wallet.getUtxos()
 
-        if (utxos.length <= 0) 
+        if (process.env["NEXT_PUBLIC_ENVIROMENT"] !== "development" && utxos.length <= 0) 
             return {status: "error", details: `${wallet} must have at least one transaction.`}
 
         return { status: "ok", walletApi, stakeAddress, address };
