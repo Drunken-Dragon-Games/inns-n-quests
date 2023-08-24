@@ -1,20 +1,11 @@
 import styled from "styled-components"
 import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada } from "../collection-state-models"
-import { PixelArtImage, Video, vmax1 } from "../../common"
+import { MessiriFontFamily, PixelArtImage, Video, vmax1, colors, OswaldFontFamily } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
 import { CharacterSprite, FurnitureSprite } from "../display/sprites"
-
-const MortalCollectionContainer = styled.div`
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-`
+import { Section } from "../commponents"
+import { Button } from "../../utils/components/basic_components"
 
 const Header = styled.div`
     display: flex;
@@ -39,12 +30,23 @@ const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
 `;
 
 const CollectibleInfo = styled.div`
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.5);
     padding: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 5px;
+    box-shadow: 0 0 20px 0 rgba(0,0,0,0.8);
+    background-color: rgba(0, 0, 0, 0.5);
     text-align: center;
+    color: #fff;
 `
+
+const CollectibleName = styled.p`
+    font-size: 20px;
+    color: ${colors.textGray};  // Assuming you import this from your colors file
+    ${OswaldFontFamily};  // Assuming you import this font family from your styles file
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
 
 const FaucetContainer = styled.div`
     border-radius: 10px;
@@ -93,7 +95,7 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
         const assetArray = [];
         for (let i = 0; i < Number(src.quantity); i++) {
           assetArray.push(
-            <CollectibleContainer key={`${src.name}-${i}`} maxHeight={maxHeight} onClick={() => removeFromMortalCollection(src.assetRef, policyName)}>
+            <CollectibleContainer key={`${src.name}-${i}`} maxHeight={maxHeight}>
               <CharacterSprite 
                 character={{
                   sprite: src.miniature,
@@ -103,10 +105,11 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
                 }}
               />
               <CollectibleInfo>
-                <p>{capitalizeFirstLetter(src.name)}</p>
+                <CollectibleName>{capitalizeFirstLetter(src.name)}</CollectibleName>
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
-              </CollectibleInfo>
+            </CollectibleInfo>
+            <Button action ={ () => removeFromMortalCollection(src.assetRef, policyName)} size="regular">Remove</Button>
             </CollectibleContainer>
           );
         }
@@ -131,18 +134,11 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
         <></>
         }
 
-<MortalCollectionContainer>
+<Section  key="mortal-collection" title="Mortal Collection">
   {(
     <>
-      <Header>
-          <Title>Mortal Collection</Title>
-      </Header>
-      
       {hasItemsNotInCategory(collectionItems, "furniture") && (
         <>
-          <Header>
-              <Title>Adventurers</Title>
-          </Header>
           {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
               const policyName = policyNameKey as PolicyName
               return itemsArray.map((src) => (
@@ -167,7 +163,7 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
       )}
     </>
   )}
-</MortalCollectionContainer>
+</Section>
 
         </>
     )
