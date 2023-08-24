@@ -102,10 +102,10 @@ export class CollectionServiceDsl implements CollectionService {
      * Returns the collection with each asset's quantity and no extra information.
      * Intended to be used on other services like the idle-quests-service.
      */
-    async getCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<{}>> {
+    async getCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<{}> & {hasMore: boolean}> {
         const dbAssets = await this.syncedAssets.getSyncedAssets(userId,filter,pageSize)
         const collection = toAssetCollection (dbAssets.assets)
-        return {ctype: "success",  collection: collection}
+        return {ctype: "success",  collection: collection, hasMore: dbAssets.hasMore}
     }
 
     private async getMetadataCollection(userId: string, filter?: CollectionFilter, pageSize?: number, logger?: LoggingContext): Promise<GetCollectionResult<StoredMetadata> & {hasMore: boolean}> {
@@ -235,7 +235,8 @@ export class CollectionServiceDsl implements CollectionService {
      */
     async getMortalCollection(userId: string, logger?: LoggingContext): Promise<GetCollectionResult<CollectibleMetadata>> {
         const dbAssets = await SyncedMortalAssets.getSyncedAssets(userId)
-        const basicCollection = toMetadataAssetCollection (dbAssets)
+        const noFurnitureDbAssets = dbAssets.filter((asset) => asset.type !== "Furniture")
+        const basicCollection = toMetadataAssetCollection (noFurnitureDbAssets)
         const collection = await this.hydrateCollectionWithMetadata(basicCollection, userId)
         return {ctype: "success", collection}
     }
@@ -247,6 +248,7 @@ export class CollectionServiceDsl implements CollectionService {
         if(this.mortalCollectionLocked(userId)) return {ctype: "failure", error: `Could not Add asset as Mortal Collection is currently locked`}
         const assetResult = await this.syncedAssets.getAsset(userId, assetRef)
         if (assetResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${assetResult.error}`}
+        if(assetResult.asset.type === "Furniture") return {ctype: "failure", error: `Could not Add asset as mortal collection does not inlcude furniture at the moment`}
         const addResult = await SyncedMortalAssets.addAsset(userId, assetResult.asset)
         if (addResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${addResult.error}`}
         return addResult

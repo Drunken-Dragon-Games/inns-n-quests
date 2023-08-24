@@ -190,7 +190,8 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const filter = request.body.filter
-        const result = await accountService.getUserDisplayCollection(userId, filter, logger)
+        const pageSize = request.body.pageSize
+        const result = await accountService.getUserDisplayCollection(userId, pageSize, filter, logger)
         response.status(200).json(result)
     }) )
 

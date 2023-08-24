@@ -20,7 +20,7 @@ export const CollectionThunks = {
                 dispatch(actions.setDisplayedCollection(cache[filter.page]))
           } 
         else {
-            const result = await AccountApi.getUserCollectionWithMetadata(filter)
+            const result = await AccountApi.getUserCollectionWithMetadata(9,filter)
             if (result.status !== "ok") {
                 dispatch(CollectionThunks.displayStatus({ ctype: "error", details: result.reason }))
             } else {

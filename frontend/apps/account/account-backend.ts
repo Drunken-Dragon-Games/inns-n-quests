@@ -121,8 +121,8 @@ export const AccountBackend = {
         return result.data
     },
 
-    async getUserCollectionWIthMetadata(filter?: CollectionFilter, traceId?: string): Promise<UserCollectionWithMetadataResult>{
-        const result = await accountRequestWRefresh("POST", "/assets/collection-with-metadata", {filter}, traceId)
+    async getUserCollectionWIthMetadata(pageSize: number, filter?: CollectionFilter, traceId?: string): Promise<UserCollectionWithMetadataResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/collection-with-metadata", {pageSize, filter}, traceId)
         return result.data
     },
 

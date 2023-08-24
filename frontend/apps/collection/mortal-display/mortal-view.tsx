@@ -29,11 +29,13 @@ const Title = styled.h2`
     grid-column: span 5;
     margin: 0;
 `
-const CollectibleContainer = styled.div`
+const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
+    min-height: 180px;
+    max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '300px')};
 `;
 
 const CollectibleInfo = styled.div`
@@ -45,7 +47,6 @@ const CollectibleInfo = styled.div`
 `
 
 const FaucetContainer = styled.div`
-    border: 2px solid #ccc;
     border-radius: 10px;
     padding: 10px;
     margin-bottom: 10px;
@@ -65,7 +66,6 @@ const StyledButton = styled.button`
     margin: 0 5px;
 `;
 
-
 const removeFromMortalCollection = (assetRef: string, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
     collectionTransitions.modifyMortalCollection(assetRef, "remove", policy)
 }
@@ -76,15 +76,24 @@ const capitalizeFirstLetter = (input: string): string => {
     return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
+const hasItemsInCategory = (items: any, category: string) => {
+    return Object.values(items).some((itemsArray: any) => itemsArray.some((src: any) => src.class === category));
+  };
+  
+  const hasItemsNotInCategory = (items: any, category: string) => {
+    return Object.values(items).some((itemsArray: any) => itemsArray.some((src: any) => src.class !== category));
+  };
+
+
 export const MortalView = ({ collectionItems, status }: { collectionItems: CollectionWithGameData, status: CollectionFetchingState}) => {
     
     type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
 
-    const renderAsset = (src: any, policyName: PolicyName) => {
+    const renderAsset = (src: any, policyName: PolicyName, maxHeight?: string) => {
         const assetArray = [];
         for (let i = 0; i < Number(src.quantity); i++) {
           assetArray.push(
-            <CollectibleContainer key={`${src.name}-${i}`}>
+            <CollectibleContainer key={`${src.name}-${i}`} maxHeight={maxHeight} onClick={() => removeFromMortalCollection(src.assetRef, policyName)}>
               <CharacterSprite 
                 character={{
                   sprite: src.miniature,
@@ -98,15 +107,16 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
               </CollectibleInfo>
-              <button onClick={() => removeFromMortalCollection(src.assetRef, policyName)}>Remove</button>
             </CollectibleContainer>
           );
         }
         return assetArray;
       };
       
+      
 
     return (<>
+        {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ?
         <FaucetContainer>
             <h2 style={{ color: 'white' }}>{JSON.stringify(status)}</h2>
             <ButtonContainer>
@@ -117,32 +127,48 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
                     Get Collection on Eternl
                 </StyledButton>
             </ButtonContainer>
-        </FaucetContainer>
+        </FaucetContainer> :
+        <></>
+        }
 
-        <MortalCollectionContainer>
-            <Header>
-                <Title>Mortal Collection</Title>
-            </Header>
-            <Header>
-                <Title>Adventurers</Title>
-            </Header>
-            {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-                const policyName = policyNameKey as PolicyName
-                return itemsArray.map((src) => (
-                    src.class !== "furniture" && renderAsset(src, policyName)
-                ));
-            })}
-            
-            <Header>
-                <Title>Furniture</Title>
-            </Header>
-            {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-                const policyName = policyNameKey as PolicyName
-                return itemsArray.map((src) => (
-                    src.class === "furniture" && renderAsset(src, policyName)
-                ));
-            })}
-        </MortalCollectionContainer>
+<MortalCollectionContainer>
+  {(
+    <>
+      <Header>
+          <Title>Mortal Collection</Title>
+      </Header>
+      
+      {hasItemsNotInCategory(collectionItems, "furniture") && (
+        <>
+          <Header>
+              <Title>Adventurers</Title>
+          </Header>
+          {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+              const policyName = policyNameKey as PolicyName
+              return itemsArray.map((src) => (
+                  src.class !== "furniture" && renderAsset(src, policyName)
+              ));
+          })}
+        </>
+      )}
+      
+      {hasItemsInCategory(collectionItems, "furniture") && (
+        <>
+          <Header>
+              <Title>Furniture</Title>
+          </Header>
+          {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+              const policyName = policyNameKey as PolicyName
+              return itemsArray.map((src) => (
+                  src.class === "furniture" && renderAsset(src, policyName, "180")
+              ));
+          })}
+        </>
+      )}
+    </>
+  )}
+</MortalCollectionContainer>
+
         </>
     )
 }
