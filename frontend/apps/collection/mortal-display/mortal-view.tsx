@@ -87,7 +87,7 @@ const hasItemsInCategory = (items: any, category: string) => {
   };
 
 
-export const MortalView = ({ collectionItems, status }: { collectionItems: CollectionWithGameData, status: CollectionFetchingState}) => {
+export const MortalView = ({ collectionItems, status, artType }: { collectionItems: CollectionWithGameData, status: CollectionFetchingState, artType: "miniature" | "splashArt"}) => {
     
     type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
 
@@ -123,6 +123,14 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
         <FaucetContainer>
             <h2 style={{ color: 'white' }}>{JSON.stringify(status)}</h2>
             <ButtonContainer>
+                <StyledButton onClick={() => collectionTransitions.syncCollection()}>
+                    Sync Collection
+                </StyledButton>
+                <StyledButton onClick={() => collectionTransitions.flipDisplayArtType()}>
+                    {artType}
+                </StyledButton>
+            </ButtonContainer>
+            <ButtonContainer>
                 <StyledButton onClick={() => collectionTransitions.grantTestCollection("Nami")}>
                     Get Collection on Nami
                 </StyledButton>
@@ -134,7 +142,7 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
         <></>
         }
 
-<Section  key="mortal-collection" title="Mortal Collection">
+<Section  key="mortal-collection" title="Mortal Collection" colums={5}>
   {(
     <>
       {hasItemsNotInCategory(collectionItems, "furniture") && (

@@ -13,7 +13,8 @@ export interface CollectionState {
     mortalCollectionItems: CollectionWithGameData,
     collectionCache: Record<number, CollectionWithUIMetada & {hasMore: boolean}>,
     collectionFetchingState: CollectionFetchingState,
-    collectionFilter: CollectionFilter
+    collectionFilter: CollectionFilter,
+    displayArtStyle: "miniature" | "splashArt",
 }
 
 const collectionInitialState: CollectionState = {
@@ -29,7 +30,8 @@ const collectionInitialState: CollectionState = {
     },
     collectionCache: {},
     collectionFetchingState: {ctype: "idle"},
-    collectionFilter: {page: 1, policyFilter: [], classFilter: [], APSFilter:{ath: {}, int: {}, cha: {}}}
+    collectionFilter: {page: 1, policyFilter: [], classFilter: [], APSFilter:{ath: {}, int: {}, cha: {}}},
+    displayArtStyle: "miniature"
 }
 
 export const collectinState = createSlice({
@@ -58,7 +60,11 @@ export const collectinState = createSlice({
 
         setCollectionFilter: (state, action: PayloadAction<CollectionFilter>) => {
             state.collectionFilter = action.payload
-        }
+        },
+
+        setDisplayArtStyle: (state, action: PayloadAction<"miniature" | "splashArt">) => {
+            state.displayArtStyle = action.payload
+        },
     }
 })
 

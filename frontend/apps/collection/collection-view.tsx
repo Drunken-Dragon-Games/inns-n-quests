@@ -22,12 +22,13 @@ const Container = styled.div`
 `;
 
 const CollectionComponent = () =>{
-    const { mortalItems, collectionItems, collectionCache, filter, status } = useSelector((state: CollectionState) => ({
+    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType } = useSelector((state: CollectionState) => ({
             collectionItems: state.displayedCollectionItems,
             mortalItems: state.mortalCollectionItems,
             collectionCache: state.collectionCache,
             filter: state.collectionFilter,
-            status: state.collectionFetchingState
+            status: state.collectionFetchingState,
+            displayArtType: state.displayArtStyle
     }))
     useEffect(() => {
       collectionTransitions.setDisplayCollection(collectionCache, filter)
@@ -35,9 +36,9 @@ const CollectionComponent = () =>{
     }, [])
     return(
     <Container>
-      <MortalView collectionItems={mortalItems} status={status}/>
+      <MortalView collectionItems={mortalItems} status={status} artType={displayArtType}/>
       <FilterView />
-      <DisplayView collectionItems={collectionItems}/>
+      <DisplayView collectionItems={collectionItems} artType={displayArtType}/>
       <div style={{ gridColumn: "2", gridRow: "3" }}>
         <PaginationView filter={filter} collectionCache={collectionCache} />
       </div>

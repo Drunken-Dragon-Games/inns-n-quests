@@ -4,6 +4,7 @@ import { PixelArtImage, Video, vmax1 } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
 import { CharacterSprite, FurnitureSprite } from "./sprites"
+import { Section } from "../commponents"
 
 const EthernalCollectionContainer = styled.div`
     border: 2px solid #ccc;
@@ -128,13 +129,7 @@ export const Collectible = ({ src, imageDimensions, collectionName, isVideo, art
     )
 }
 
-export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWithUIMetada }) => {
-    const [artType, setArtType] = useState("splashArt")
-    const handleArtTypeChange = () => {
-        const newArtType = artType === "splashArt" ? "miniature" : "splashArt"
-        setArtType(newArtType)
-    }
-   
+export const DisplayView = ({ collectionItems, artType }: { collectionItems: CollectionWithUIMetada, artType: "miniature" | "splashArt" }) => { 
     const imageDimensions = {
         "pixelTiles": { height: 12,  width: 9 },
         "grandMasterAdventurers": { height: 12,  width: 12 },
@@ -142,16 +137,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
     }
 
     return (
-        <EthernalCollectionContainer>
-            <Header>
-                <ButtonContainer>
-                    <button onClick={() => collectionTransitions.syncCollection()}>Sync Collection</button>
-                </ButtonContainer>
-                <Title>Ethernal Collection</Title>
-                <ButtonContainer>
-                    <button onClick={() => handleArtTypeChange()}>{artType}</button>
-                </ButtonContainer>
-            </Header>
+        <Section key={"Ethernal Collection"} title="Ethernal Collection" colums={3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" isVideo={artType == "splashArt" && isVideoFile(src.splashArt)} artType={artType} />
             )}
@@ -164,6 +150,6 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
             {collectionItems.pixelTiles.filter(src => src.class == 'furniture').map((src, index) =>
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"}/>
             )}
-        </EthernalCollectionContainer>
+        </Section>
     )
 }

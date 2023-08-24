@@ -27,15 +27,15 @@ const SectionTitle = styled.h1`
     font-weight: bold;
 `;
 
-const SectionContent = styled.div`
+const SectionContent = styled.div<{columns: number}>`
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(${(p) => p.columns}, 1fr);
     gap: 10px;
     width: 100%;
 `;
 
-export const Section = (props: { children?: ReactNode, title: string }) => 
+export const Section = (props: { children?: ReactNode, title: string, colums: number }) => 
     <SectionContainer>
         <SectionTitle>{props.title}</SectionTitle>
-        <SectionContent> {props.children}</SectionContent>
+        <SectionContent columns={props.colums}> {props.children}</SectionContent>
     </SectionContainer>
