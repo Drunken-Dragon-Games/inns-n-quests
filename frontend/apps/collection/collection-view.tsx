@@ -11,6 +11,7 @@ import { FilterView } from "./filter/filter-view"
 import styled from "styled-components"
 import { PaginationView } from "./pagination/pagination-view"
 import { MortalView } from "./mortal-display/mortal-view"
+import { DashboardView } from "./dashboard/calloction-dashboard-view"
 
 const Container = styled.div`
   position: relative;
@@ -36,7 +37,8 @@ const CollectionComponent = () =>{
     }, [])
     return(
     <Container>
-      <MortalView collectionItems={mortalItems} status={status} artType={displayArtType}/>
+      <DashboardView status={status} artType={displayArtType}></DashboardView>
+      <MortalView collectionItems={mortalItems}/>
       <FilterView />
       <DisplayView collectionItems={collectionItems} artType={displayArtType}/>
       <div style={{ gridColumn: "2", gridRow: "3" }}>
