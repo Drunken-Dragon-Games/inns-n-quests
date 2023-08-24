@@ -20,15 +20,14 @@ export const DashboardView = ({ status, artType }: {  status: CollectionFetching
             <>
             <h2 style={{ color: 'white' }}>{`Grant is ${status.ctype}`}</h2>
             <Button action={() => collectionTransitions.grantTestCollection("Nami")} size="small">
-                Facuet Nami
+                Faucet Nami
             </Button>
             <Button action={() => collectionTransitions.grantTestCollection("Eternl")} size="small">
-                Facuet Eternl
+                Faucet Eternl
             </Button>
             </>
             : <></>
         }
-            
     </Section>
   )
 }

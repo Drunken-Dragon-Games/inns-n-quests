@@ -41,8 +41,8 @@ const CollectibleInfo = styled.div`
 
 const CollectibleName = styled.p`
     font-size: 20px;
-    color: ${colors.textGray};  // Assuming you import this from your colors file
-    ${OswaldFontFamily};  // Assuming you import this font family from your styles file
+    color: ${colors.textGray};
+    ${OswaldFontFamily};
     font-weight: bold;
     margin-bottom: 10px;
 `
