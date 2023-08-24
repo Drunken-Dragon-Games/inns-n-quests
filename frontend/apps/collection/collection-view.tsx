@@ -38,7 +38,9 @@ const CollectionComponent = () =>{
       <MortalView collectionItems={mortalItems} status={status}/>
       <FilterView />
       <DisplayView collectionItems={collectionItems}/>
-      <PaginationView filter={filter} collectionCache={collectionCache}/>
+      <div style={{ gridColumn: "2", gridRow: "3" }}>
+        <PaginationView filter={filter} collectionCache={collectionCache} />
+      </div>
     </Container>
     )
 }

@@ -119,11 +119,11 @@ export const Collectible = ({ src, imageDimensions, collectionName, isVideo, art
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
                 <p>Quantity: {src.quantity} </p>
-                <p>Active: {src.mortalRealmsActive}</p>
+                {type === "Furniture" && src.mortalRealmsActive < 1 ? <></> :<p>Active: {src.mortalRealmsActive}</p>}
                 <p>Pasive Stake: {src.stakingContribution}</p>
             </CollectibleInfo>
-            <button onClick={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</button>
-            <button onClick={() => modifyMortalCollection(src.assetRef, "remove", collectionName)} disabled={src.mortalRealmsActive < 1}>Remove from Mortal</button>
+            { type === "Furniture" ? <></> : <button onClick={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</button>}
+            { type === "Furniture" && src.mortalRealmsActive < 1 ? <></> : <button onClick={() => modifyMortalCollection(src.assetRef, "remove", collectionName)} disabled={src.mortalRealmsActive < 1}>Remove from Mortal</button>}
         </CollectibleContainer>
     )
 }
@@ -162,7 +162,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class == 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"}/>
             )}
         </EthernalCollectionContainer>
     )

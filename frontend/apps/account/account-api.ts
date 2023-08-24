@@ -16,8 +16,8 @@ export const AccountApi = {
         AccountTransitions.useRefreshSession(callback)
     },
 
-    getUserCollectionWithMetadata(filter?: CollectionFilter){
-        return AccountBackend.getUserCollectionWIthMetadata(filter)
+    getUserCollectionWithMetadata(pageSize: number, filter?: CollectionFilter){
+        return AccountBackend.getUserCollectionWIthMetadata(pageSize, filter)
     },
 
     getUserMortalCollection(){

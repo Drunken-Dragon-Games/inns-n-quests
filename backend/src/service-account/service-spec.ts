@@ -29,7 +29,7 @@ export interface AccountService {
     getAssociationTx(userId: string, stakeAddress: string, address: string, logger?: LoggingContext): Promise<CreateAssociationTxResult>
     submitAssociationTx(userId: string, serializedSignedTx: string, authStateId: string,  logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>
     cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
-    getUserDisplayCollection(userId: string, filter?: CollectionFilter,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
+    getUserDisplayCollection(userId: string, pageSize: number, filter?: CollectionFilter,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
     getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>
     modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>
     syncUserCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
