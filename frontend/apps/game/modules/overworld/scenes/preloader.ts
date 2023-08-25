@@ -20,7 +20,22 @@ export class Preloader extends Phaser.Scene {
                 frameWidth: 52,
                 frameHeight: 75,
             })
+            
         }
+
+        //Ferraz Input
+
+        this.load.atlas("lake-assets", "/maps/lake_assets_name.png", "/maps/lake_assets_name_atlas.json")
+        this.load.image('inn-roof', "/maps/inn-roof.png")
+        
+        this.load.spritesheet("BGSpritesheet", "/maps/BGSpritesheet.png", {
+            frameWidth: 1577, 
+            frameHeight: 1300
+        })
+        this.load.spritesheet("tree-sprite-sheet", "/maps/TreeSpritesheet.png", {
+            frameWidth: 256, 
+            frameHeight: 256
+        })
 
         this.load.spritesheet("pixel-tiles-adventurers-front", "/maps/adventurers/pixel-tiles-adventurers-front.png", {
             frameWidth: 32,
@@ -65,7 +80,7 @@ export class Preloader extends Phaser.Scene {
             frameHeight: 48,
         }) 
 
-        this.load.image("inn-bg", "/maps/inn-bg-2.png")
+        this.load.image("inn-bg", "/maps/inn-bg-2.png") 
     }
 
     create() {
