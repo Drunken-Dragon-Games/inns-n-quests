@@ -209,12 +209,14 @@ export class CollectionServiceDsl implements CollectionService {
         for (const [userId, reward] of Object.entries(pendingRewards)) {
             const grantRecord = await this.rewards.createWeekly(userId)
             if (grantRecord.ctype !== "success") continue
+            console.log(`created weekly reward`)
             await this.assetManagementService.grant(userId, {
                 policyId: this.wellKnownPolicies.dragonSilver.policyId,
                 unit: "DragonSilver",
                 quantity: reward.toString()
             })
             totalGranted += reward
+            console.log(`compleating rward with ${reward}`)
             this.rewards.completeWeekly(userId, reward.toString())
         }
         console.log({totalGranted})
