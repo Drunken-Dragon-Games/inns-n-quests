@@ -16,6 +16,7 @@ const ButtonWrapper = styled.div<ButtonWrapperProps>`
     cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
     opacity: ${(props) => (props.disabled ? "0.5" : "1")};
     position: relative;
+    z-index: 100;
 
     @media only screen and (max-width: 414px) {
         width: 35vw;
