@@ -133,7 +133,10 @@ export class Records {
     }
 
     async createWeekly(): Promise<SResult<{}>>{
-        try{const oneWeekAgo = getOneWeekBefore(this.calendar.now())
+        try{
+            //Temporary making this work on current week
+        //const oneWeekAgo = getOneWeekBefore(this.calendar.now())
+        const oneWeekAgo = getOneWeekBefore(this.calendar.now())
         const weekNumber= getWeekNumber(oneWeekAgo)
         const weeklyRecordId = `${weekNumber.weekNo}-${weekNumber.year}`
         const existingRecord = await WeeklyRecord.findOne({
