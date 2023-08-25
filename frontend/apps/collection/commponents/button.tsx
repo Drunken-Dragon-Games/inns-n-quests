@@ -5,12 +5,8 @@ import { TextOswald } from "../../utils/components/basic_components"
 
 interface ButtonWrapperProps {
     size?: "big" | "regular" | "small";
-    disabled?: boolean;
+    disabled: boolean;
   }
-
-interface ButtonWrapper{
-    size?: "big" | "regular" | "small"
-}
 
 const ButtonWrapper = styled.div<ButtonWrapperProps>`
     width: 7.344vw;
@@ -18,7 +14,7 @@ const ButtonWrapper = styled.div<ButtonWrapperProps>`
     ${props => props.size == "big" ? "width: 18.229vw !important; height: 4.740vw !important;" : ""};
     ${props => props.size == "big" ? "max-width: 466.66px !important; max-height: 121.34px !important;" : "max-width: 466.66px !important; max-height: 121.344 !important;"};
     cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
-    opacity: ${(props) => (props.disabled ? "0.5" : "1")}
+    opacity: ${(props) => (props.disabled ? "0.5" : "1")};
     position: relative;
 
     @media only screen and (max-width: 414px) {
@@ -64,24 +60,23 @@ const TextWrapper = styled.div`
 const Center = styled.div`
     margin: auto;
 `
-
 interface ButtonProps {
     action: () => void;
     children: string;
     size?: "big" | "regular" | "small";
-    disabled?: boolean;
+    disabled: boolean;
   }
 
 export const Button = ({action, children, size, disabled } : ButtonProps): JSX.Element =>{
 
     const [hover, setHover] = useState<boolean>(false)
     return(<>
-            <ButtonWrapper onClick={disabled ? undefined : action} onMouseOver={() => !disabled && setHover(true)} onMouseLeave={() => !disabled && setHover(false)} size ={size} disabled={disabled}>
-                <ImageWrapper hover={hover && !disabled}>
+            <ButtonWrapper onClick={action} onMouseOver = {() => setHover(true)} onMouseLeave = {() => setHover(false)} size ={size} disabled={disabled}>
+                <ImageWrapper hover ={hover && !disabled}>
                     <Image src ="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/utils/button/button_hover.svg" alt="drunken dragon button" width={10.262} height={2.668} layout="responsive" />
                 </ImageWrapper>
 
-                <ImageWrapperT hover={!hover || !!(disabled)}>
+                <ImageWrapperT hover ={hover && !disabled}>
                     <Image src = "https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/utils/button/button.svg" alt="drunken dragon button" width={10.262} height={2.668} layout="responsive" />
                 </ImageWrapperT>
                 

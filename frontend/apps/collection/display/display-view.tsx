@@ -123,7 +123,7 @@ export const Collectible = ({ src, imageDimensions, collectionName, isVideo, art
                 <p>Quantity: {src.quantity} </p>
                 <p>Pasive Stake: {src.stakingContribution}</p>
             </CollectibleInfo>
-            { type === "Furniture" ? <></> : <button onClick={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</button>}
+            { type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>
     )
 }
