@@ -25,8 +25,8 @@ const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    min-height: 180px;
-    max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '300px')};
+    min-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '350px')};
+    max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '400px')};
 `;
 
 const CollectibleInfo = styled.div`

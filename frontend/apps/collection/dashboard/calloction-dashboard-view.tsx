@@ -4,13 +4,13 @@ import { CollectionFetchingState } from "../collection-state-models";
 import { Section } from "../commponents";
 import { Button } from "../../utils/components/basic_components";
 
-const StyledButton = styled.button`
-    height: 80px;
-    margin: 0 5px;
+const DashboardContainer = styled.div`
+  width: 10vw;
 `;
 
 export const DashboardView = ({ status, artType }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt"}) => {
   return (
+    <DashboardContainer>
     <Section title="Dashboard" colums={1}>
             <Button action={() => collectionTransitions.syncCollection()} size="regular"> Sync </Button>
             <Button action={() => collectionTransitions.flipDisplayArtType()} size="regular">
@@ -29,5 +29,6 @@ export const DashboardView = ({ status, artType }: {  status: CollectionFetching
             : <></>
         }
     </Section>
+    </DashboardContainer>
   )
 }

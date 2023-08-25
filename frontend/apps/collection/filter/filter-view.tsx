@@ -2,26 +2,38 @@ import React, { useState } from 'react';
 import { collectionTransitions } from "../collection-transitions"
 import { APSFilter, AssetClass, CollectionFilter, CollectionPolicyNames, CollectionWithUIMetada, collectionPolicies, filterClasses } from '../collection-state-models'
 import styled from 'styled-components';
-import { vh } from '../../common';
+import { OswaldFontFamily, colors, vh } from '../../common';
 import { PixelCheckbox } from './components';
 
 const FilterContainer = styled.div`
-  width: 9.5vw;
-  left: 0;
-  top: 0;
-  color: #333;
-  background-color: #999;
+  width: 10vw;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  box-shadow: 0 0 20px 0 rgba(0,0,0,0.8);
+  background-color: ${colors.dduBrackground2};
+  color: #fff;
   z-index: 2;
   align-self: start;
 `;
 
+const FilterHeading = styled.h3`
+  font-size: 20px;
+  color: ${colors.textGray};
+  ${OswaldFontFamily};
+  font-weight: bold;
+  margin-bottom: 10px;
+`;
 
 const LabelWrapper = styled.label`
   display: flex;
   align-items: center;
   cursor: pointer;
   margin-bottom: 10px;
-`
+  ${OswaldFontFamily};
+  gap: 10px;
+`;
+
 const RangeWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -33,10 +45,17 @@ const RangeLabel = styled.span`
 `
 
 const RangeInput = styled.input`
-  width: 50px; // You can adjust this as needed
+  width: 35px;
   margin-right: 5px;
 `
-
+const APSHeading = styled.h5`
+  color: ${colors.textBeige};
+  ${OswaldFontFamily};
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 16px;
+`
 export const FilterView = () => {
     type  filterChange 
       = {ctype: "class", filterClass: AssetClass}
@@ -87,25 +106,25 @@ export const FilterView = () => {
   
     return (
       <FilterContainer>
-        <h3>Classes</h3>
+        <FilterHeading>Classes</FilterHeading>
         <hr />
         {filterClasses.map((filterClass, index) => (
           <LabelWrapper key={index} onClick={() => hanldeFilterChange({ctype: "class", filterClass}, !classFilter.includes(filterClass))}>
             <PixelCheckbox checked={classFilter.includes(filterClass)} size={vh(2)} /> {filterClass}
           </LabelWrapper>
         ))}
-        <h3>Policies</h3>
+        <FilterHeading>Policies</FilterHeading>
         <hr />
         {collectionPolicies.map((policy, index) => (
           <LabelWrapper key={index} onClick={() => hanldeFilterChange({ctype: "policy", policy}, !policyFilter.includes(policy))}>
             <PixelCheckbox checked={policyFilter.includes(policy)} size={vh(2)} /> {policy}
           </LabelWrapper>
         ))}
-        <h3>APS</h3>
+        <FilterHeading>APS</FilterHeading>
       <hr />
       {Object.keys(APSFilter).map((key) => (
         <div key={key}>
-          <h5>{key.toUpperCase()}</h5>
+          <APSHeading>{key.toUpperCase()}</APSHeading>
           <RangeWrapper>
             <RangeLabel>From:</RangeLabel>
             <RangeInput

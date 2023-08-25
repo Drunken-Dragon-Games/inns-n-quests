@@ -19,7 +19,7 @@ const Container = styled.div`
   margin-bottom: 75px;
   min-height: 850px;
   display: grid;
-  grid-template-columns: 10vw 1fr;
+  grid-template-columns: 11vw 1fr;
 `;
 
 const CollectionComponent = () =>{
