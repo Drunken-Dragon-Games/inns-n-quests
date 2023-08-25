@@ -1,9 +1,11 @@
 import styled from "styled-components"
 import { CollectionWithUIMetada, UICollectible } from "../collection-state-models"
-import { PixelArtImage, Video, vmax1 } from "../../common"
+import { OswaldFontFamily, PixelArtImage, Video, colors, vmax1 } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
 import { CharacterSprite, FurnitureSprite } from "./sprites"
+import { Section } from "../commponents"
+import { Button } from "../commponents/button"
 
 const EthernalCollectionContainer = styled.div`
     border: 2px solid #ccc;
@@ -29,31 +31,33 @@ const Title = styled.h2`
     grid-column: span 3;
     margin: 0;
 `
-const CollectibleContainer = styled.div`
+const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    min-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '350px')};
+    max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '400px')};
 `;
+
 
 const CollectibleInfo = styled.div`
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.5);
     padding: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 5px;
+    box-shadow: 0 0 20px 0 rgba(0,0,0,0.8);
+    background-color: rgba(0, 0, 0, 0.5);
     text-align: center;
-`;
+    color: #fff;
+`
 
-//TODO: use a button form the common components
-const ButtonContainer = styled.div`
-    display: flex;
-    gap: 20px;
-`;
-
-const MirroredPixelArtImage = styled(PixelArtImage)<{ isFlipped: boolean }>`
-  transform: ${props => props.isFlipped ? 'scaleX(-1)' : 'none'};
-`;
-
+const CollectibleName = styled.p`
+    font-size: 20px;
+    color: ${colors.textGray};
+    ${OswaldFontFamily}; 
+    font-weight: bold;
+    margin-bottom: 10px;
+`
 
 const isVideoFile = (src: string): boolean => {
     return src.endsWith('.mp4')
@@ -115,26 +119,18 @@ export const Collectible = ({ src, imageDimensions, collectionName, isVideo, art
              </>
             )}
             <CollectibleInfo>
-                <p>{capitalizeFirstLetter(src.name)}</p>
+                <CollectibleName>{capitalizeFirstLetter(src.name)}</CollectibleName>
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
                 <p>Quantity: {src.quantity} </p>
-                {type === "Furniture" && src.mortalRealmsActive < 1 ? <></> :<p>Active: {src.mortalRealmsActive}</p>}
                 <p>Pasive Stake: {src.stakingContribution}</p>
             </CollectibleInfo>
-            { type === "Furniture" ? <></> : <button onClick={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</button>}
-            { type === "Furniture" && src.mortalRealmsActive < 1 ? <></> : <button onClick={() => modifyMortalCollection(src.assetRef, "remove", collectionName)} disabled={src.mortalRealmsActive < 1}>Remove from Mortal</button>}
+            { type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>
     )
 }
 
-export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWithUIMetada }) => {
-    const [artType, setArtType] = useState("splashArt")
-    const handleArtTypeChange = () => {
-        const newArtType = artType === "splashArt" ? "miniature" : "splashArt"
-        setArtType(newArtType)
-    }
-   
+export const DisplayView = ({ collectionItems, artType }: { collectionItems: CollectionWithUIMetada, artType: "miniature" | "splashArt" }) => { 
     const imageDimensions = {
         "pixelTiles": { height: 12,  width: 9 },
         "grandMasterAdventurers": { height: 12,  width: 12 },
@@ -142,16 +138,7 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
     }
 
     return (
-        <EthernalCollectionContainer>
-            <Header>
-                <ButtonContainer>
-                    <button onClick={() => collectionTransitions.syncCollection()}>Sync Collection</button>
-                </ButtonContainer>
-                <Title>Ethernal Collection</Title>
-                <ButtonContainer>
-                    <button onClick={() => handleArtTypeChange()}>{artType}</button>
-                </ButtonContainer>
-            </Header>
+        <Section key={"Ethernal Collection"} title="Ethernal Collection" colums={3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" isVideo={artType == "splashArt" && isVideoFile(src.splashArt)} artType={artType} />
             )}
@@ -164,6 +151,6 @@ export const DisplayView = ({ collectionItems }: { collectionItems: CollectionWi
             {collectionItems.pixelTiles.filter(src => src.class == 'furniture').map((src, index) =>
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"}/>
             )}
-        </EthernalCollectionContainer>
+        </Section>
     )
 }

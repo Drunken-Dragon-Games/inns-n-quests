@@ -30,6 +30,10 @@ export const collectionTransitions = {
         dispatch(CollectionThunks.clearCache())
     },
 
+    flipDisplayArtType(){
+        dispatch(CollectionThunks.flipDisplayArtStyle())
+    },
+
     grantTestCollection(supportedWallet: SupportedWallet){
         if (process.env["NEXT_PUBLIC_ENVIROMENT"] === "development") dispatch(CollectionThunks.grantTestCollection(supportedWallet))
     }

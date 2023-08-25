@@ -11,6 +11,7 @@ import { FilterView } from "./filter/filter-view"
 import styled from "styled-components"
 import { PaginationView } from "./pagination/pagination-view"
 import { MortalView } from "./mortal-display/mortal-view"
+import { DashboardView } from "./dashboard/calloction-dashboard-view"
 
 const Container = styled.div`
   position: relative;
@@ -18,16 +19,17 @@ const Container = styled.div`
   margin-bottom: 75px;
   min-height: 850px;
   display: grid;
-  grid-template-columns: 10vw 1fr;
+  grid-template-columns: 11vw 1fr;
 `;
 
 const CollectionComponent = () =>{
-    const { mortalItems, collectionItems, collectionCache, filter, status } = useSelector((state: CollectionState) => ({
+    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType } = useSelector((state: CollectionState) => ({
             collectionItems: state.displayedCollectionItems,
             mortalItems: state.mortalCollectionItems,
             collectionCache: state.collectionCache,
             filter: state.collectionFilter,
-            status: state.collectionFetchingState
+            status: state.collectionFetchingState,
+            displayArtType: state.displayArtStyle
     }))
     useEffect(() => {
       collectionTransitions.setDisplayCollection(collectionCache, filter)
@@ -35,9 +37,10 @@ const CollectionComponent = () =>{
     }, [])
     return(
     <Container>
-      <MortalView collectionItems={mortalItems} status={status}/>
+      <DashboardView status={status} artType={displayArtType}></DashboardView>
+      <MortalView collectionItems={mortalItems}/>
       <FilterView />
-      <DisplayView collectionItems={collectionItems}/>
+      <DisplayView collectionItems={collectionItems} artType={displayArtType}/>
       <div style={{ gridColumn: "2", gridRow: "3" }}>
         <PaginationView filter={filter} collectionCache={collectionCache} />
       </div>

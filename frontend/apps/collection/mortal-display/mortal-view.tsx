@@ -25,8 +25,8 @@ const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    min-height: 180px;
-    max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '300px')};
+    min-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '350px')};
+    max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '400px')};
 `;
 
 const CollectibleInfo = styled.div`
@@ -41,32 +41,11 @@ const CollectibleInfo = styled.div`
 
 const CollectibleName = styled.p`
     font-size: 20px;
-    color: ${colors.textGray};  // Assuming you import this from your colors file
-    ${OswaldFontFamily};  // Assuming you import this font family from your styles file
+    color: ${colors.textGray};
+    ${OswaldFontFamily};
     font-weight: bold;
     margin-bottom: 10px;
 `
-
-
-const FaucetContainer = styled.div`
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    text-align: center;
-`;
-
-const ButtonContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-`;
-
-const StyledButton = styled.button`
-    height: 80px;
-    margin: 0 5px;
-`;
 
 const removeFromMortalCollection = (assetRef: string, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
     collectionTransitions.modifyMortalCollection(assetRef, "remove", policy)
@@ -87,7 +66,7 @@ const hasItemsInCategory = (items: any, category: string) => {
   };
 
 
-export const MortalView = ({ collectionItems, status }: { collectionItems: CollectionWithGameData, status: CollectionFetchingState}) => {
+export const MortalView = ({ collectionItems}: { collectionItems: CollectionWithGameData}) => {
     
     type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
 
@@ -114,58 +93,39 @@ export const MortalView = ({ collectionItems, status }: { collectionItems: Colle
           );
         }
         return assetArray;
-      };
-      
-      
+      }
 
-    return (<>
-        {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ?
-        <FaucetContainer>
-            <h2 style={{ color: 'white' }}>{JSON.stringify(status)}</h2>
-            <ButtonContainer>
-                <StyledButton onClick={() => collectionTransitions.grantTestCollection("Nami")}>
-                    Get Collection on Nami
-                </StyledButton>
-                <StyledButton onClick={() => collectionTransitions.grantTestCollection("Eternl")}>
-                    Get Collection on Eternl
-                </StyledButton>
-            </ButtonContainer>
-        </FaucetContainer> :
-        <></>
-        }
-
-<Section  key="mortal-collection" title="Mortal Collection">
-  {(
-    <>
-      {hasItemsNotInCategory(collectionItems, "furniture") && (
+    return (
+    <Section  key="mortal-collection" title="Mortal Collection" colums={5}>
+      {(
         <>
-          {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-              const policyName = policyNameKey as PolicyName
-              return itemsArray.map((src) => (
-                  src.class !== "furniture" && renderAsset(src, policyName)
-              ));
-          })}
+          {hasItemsNotInCategory(collectionItems, "furniture") && (
+            <>
+              {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+                  const policyName = policyNameKey as PolicyName
+                  return itemsArray.map((src) => (
+                      src.class !== "furniture" && renderAsset(src, policyName)
+                  ));
+              })}
+            </>
+          )}
+          
+          {hasItemsInCategory(collectionItems, "furniture") && (
+            <>
+              <Header>
+                  <Title>Furniture</Title>
+              </Header>
+              {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+                  const policyName = policyNameKey as PolicyName
+                  return itemsArray.map((src) => (
+                      src.class === "furniture" && renderAsset(src, policyName, "180")
+                  ));
+              })}
+            </>
+          )}
         </>
       )}
-      
-      {hasItemsInCategory(collectionItems, "furniture") && (
-        <>
-          <Header>
-              <Title>Furniture</Title>
-          </Header>
-          {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-              const policyName = policyNameKey as PolicyName
-              return itemsArray.map((src) => (
-                  src.class === "furniture" && renderAsset(src, policyName, "180")
-              ));
-          })}
-        </>
-      )}
-    </>
-  )}
-</Section>
-
-        </>
-    )
+    </Section>
+  )
 }
 

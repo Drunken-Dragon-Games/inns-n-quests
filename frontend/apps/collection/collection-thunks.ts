@@ -5,6 +5,7 @@ import { CollectionFetchingState, CollectionFilter, CollectionWithUIMetada } fro
 import { Blockfrost, Lucid } from "lucid-cardano"
 import { blockfrostApiKey, blockfrostUri, cardanoNetwork} from "../../setting"
 import { isEmpty } from "../common"
+import Collection from "../home/homePage/compoenents/basic_components/collection"
 
 const actions = collectinState.actions
 
@@ -83,6 +84,13 @@ export const CollectionThunks = {
 
     clearCache: (): CollectionThunk => async (dispatch) => {
         dispatch(actions.clearCache())
+    },
+
+    flipDisplayArtStyle: (): CollectionThunk =>async (dispatch, getState) => {
+        const state = getState()
+        const artStyle = state.displayArtStyle
+        const newArtType = artStyle === "splashArt" ? "miniature" : "splashArt"
+        dispatch(actions.setDisplayArtStyle(newArtType))
     },
 
     grantTestCollection: (supportedWallet: SupportedWallet): CollectionThunk => async (dispatch, getState) => {
