@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { collectionTransitions } from "../collection-transitions"
 import { APSFilter, AssetClass, CollectionFilter, CollectionPolicyNames, CollectionWithUIMetada, collectionPolicies, filterClasses } from '../collection-state-models'
 import styled from 'styled-components';
-import { OswaldFontFamily, colors, vh } from '../../common';
+import { OswaldFontFamily, SimpleDDButton, colors, vh } from '../../common';
 import { PixelCheckbox } from './components';
+import { SimpleButton, } from '../../utils/components/basic_components';
 
 const FilterContainer = styled.div`
   width: 10vw;
@@ -42,10 +43,13 @@ const RangeWrapper = styled.div`
 
 const RangeLabel = styled.span`
   margin-right: 5px;
+  ${OswaldFontFamily};
+  font-size: 18px;
 `
 
 const RangeInput = styled.input`
   width: 35px;
+  height: 22px;
   margin-right: 5px;
 `
 const APSHeading = styled.h5`
@@ -54,8 +58,19 @@ const APSHeading = styled.h5`
   font-weight: bold;
   margin-top: 5px;
   margin-bottom: 5px;
-  font-size: 16px;
+  font-size: 18px;
 `
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 10px; // Add gap between buttons
+`;
+
+const attributeNames: { [key: string]: string } = {
+  'ath': 'Athletism',
+  'cha': 'Charisma',
+  'int': 'Intelligence',
+};
 export const FilterView = () => {
     type  filterChange 
       = {ctype: "class", filterClass: AssetClass}
@@ -124,7 +139,7 @@ export const FilterView = () => {
       <hr />
       {Object.keys(APSFilter).map((key) => (
         <div key={key}>
-          <APSHeading>{key.toUpperCase()}</APSHeading>
+          <APSHeading>{attributeNames[key]}</APSHeading>
           <RangeWrapper>
             <RangeLabel>From:</RangeLabel>
             <RangeInput
@@ -141,8 +156,10 @@ export const FilterView = () => {
           </RangeWrapper>
         </div>
       ))}
-        <button onClick={handleApply}>Apply</button>
-        <button onClick={handleClear}>Clear</button>
+        <ButtonContainer>
+          <SimpleDDButton onClick={handleApply}>Apply</SimpleDDButton>
+          <SimpleDDButton onClick={handleClear}>Clear</SimpleDDButton>
+        </ButtonContainer>
       </FilterContainer>
     )
   }

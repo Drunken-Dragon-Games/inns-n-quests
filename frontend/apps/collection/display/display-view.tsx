@@ -31,11 +31,13 @@ const Title = styled.h2`
     grid-column: span 3;
     margin: 0;
 `
-const CollectibleContainer = styled.div`
+const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    min-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '350px')};
+    max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '400px')};
 `;
 
 
