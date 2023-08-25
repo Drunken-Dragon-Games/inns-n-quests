@@ -182,8 +182,6 @@ export class Overworld extends Phaser.Scene {
         this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
             this.cameras.main.setZoom(deltaY > 0 ? Math.max(this.cameras.main.zoom - 1, .75) :  Math.min(this.cameras.main.zoom + 1, 2) )
             if(this.cameras.main.zoom > 1){
-                console.log("zoomed in")
-                
                 innRoof.setVisible(false)
             }else{
                 innRoof.setVisible(true)
