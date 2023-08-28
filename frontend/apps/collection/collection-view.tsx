@@ -23,21 +23,23 @@ const Container = styled.div`
 `;
 
 const CollectionComponent = () =>{
-    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType } = useSelector((state: CollectionState) => ({
+    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType, mortalLocked } = useSelector((state: CollectionState) => ({
             collectionItems: state.displayedCollectionItems,
             mortalItems: state.mortalCollectionItems,
             collectionCache: state.collectionCache,
             filter: state.collectionFilter,
             status: state.collectionFetchingState,
-            displayArtType: state.displayArtStyle
+            displayArtType: state.displayArtStyle,
+            mortalLocked: state.mortalLocked
     }))
     useEffect(() => {
       collectionTransitions.setDisplayCollection(collectionCache, filter)
       collectionTransitions.setMortalCollection()
+      collectionTransitions.getMortalCollectionLockedState()
     }, [])
     return(
     <Container>
-      <DashboardView status={status} artType={displayArtType}></DashboardView>
+      <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked}></DashboardView>
       <MortalView collectionItems={mortalItems}/>
       <FilterView />
       <DisplayView collectionItems={collectionItems} artType={displayArtType}/>

@@ -22,6 +22,14 @@ export const collectionTransitions = {
         dispatch(CollectionThunks.modifyMortalCollection(assetRef, action, policy))
     },
 
+    getMortalCollectionLockedState(){
+        dispatch(CollectionThunks.getMortalCollectionLockedState())
+    },
+
+    lockMortalCollection() {
+        dispatch(CollectionThunks.lockMortalCollection())
+    },
+
     setFilter(filter: CollectionFilter){
         dispatch(CollectionThunks.setFilter(filter))
     },

@@ -33,6 +33,10 @@ export interface IdentityService {
 
     listAllUserIds(logger?: LoggingContext): Promise<string[]>
 
+    setCollectionLock(userId: string, locked: boolean, logger?: LoggingContext): Promise<models.SetCollectionLockResult>
+
+    getCollectionLockState(userId: string, logger?: LoggingContext): Promise<models.GetCollectionLockResult>
+
     signout(sessionId: string, logger?: LoggingContext): Promise<models.SignOutResult>
 
     resolveUser(info: models.UserResolutionType, logger?: LoggingContext): Promise<models.ResolveUserResult>

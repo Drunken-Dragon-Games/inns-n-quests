@@ -208,6 +208,7 @@ export class CollectionServiceDsl implements CollectionService {
         for (const [userId, reward] of Object.entries(pendingRewards)) {
             const grantRecord = await this.rewards.createWeekly(userId)
             if (grantRecord.ctype !== "success") continue
+            await this.identityService.setCollectionLock(userId, false)
             await this.assetManagementService.grant(userId, {
                 policyId: this.wellKnownPolicies.dragonSilver.policyId,
                 unit: "DragonSilver",
@@ -245,7 +246,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Picks a collectible to be used in the Mortal Realms.
      */
     async addMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
-        if(this.mortalCollectionLocked(userId)) return {ctype: "failure", error: `Could not Add asset as Mortal Collection is currently locked`}
+        if((await this.mortalCollectionLocked(userId))) return {ctype: "failure", error: `Could not Add asset as Mortal Collection is currently locked`}
         const assetResult = await this.syncedAssets.getAsset(userId, assetRef)
         if (assetResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${assetResult.error}`}
         if(assetResult.asset.type === "Furniture") return {ctype: "failure", error: `Could not Add asset as mortal collection does not inlcude furniture at the moment`}
@@ -258,7 +259,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Removes a collectible from the Mortal Realms.
      */
     async removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
-        if(this.mortalCollectionLocked(userId)) return {ctype: "failure", error: `Could not remove asset as Mortal Collection is currently locked`}
+        if((await this.mortalCollectionLocked(userId))) return {ctype: "failure", error: `Could not remove asset as Mortal Collection is currently locked`}
         return SyncedMortalAssets.removeAsset(userId, assetRef)
     }
 
@@ -429,9 +430,10 @@ export class CollectionServiceDsl implements CollectionService {
         return {stakingContribution: singleReward * Number(quantity)}
     }
 
-    private mortalCollectionLocked(userId: string): boolean {
-        //TODO: decide conditions for locking collection
-        return false
+    private async mortalCollectionLocked(userId: string): Promise<boolean> {
+        const result = await this.identityService.getCollectionLockState(userId)
+        if(result.status == "invalid") return true
+        return result.locked
     }
 }
 

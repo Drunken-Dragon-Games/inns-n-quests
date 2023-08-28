@@ -24,6 +24,14 @@ export const AccountApi = {
         return AccountBackend.getUserMortalCollection()
     },
 
+    getMortalCollectionLockedState(){
+        return AccountBackend.getMortalLockState()
+    },
+
+    lockMortalCollection(){
+        return AccountBackend.lockMortalCollection()
+    },
+
     modifyUserMortalCollection(assetRef: string, action: "add" | "remove"){
         return AccountBackend.modifyMortalCollection(assetRef, action)
     },

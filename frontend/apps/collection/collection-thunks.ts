@@ -78,6 +78,18 @@ export const CollectionThunks = {
         
     },
 
+    getMortalCollectionLockedState: (): CollectionThunk => async (dispatch) => {
+        const stateResult = await AccountApi.getMortalCollectionLockedState()
+        if (stateResult.status === "ok") dispatch(actions.setMortalCollectionLocked(stateResult.locked))
+        else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: stateResult.reason }))
+    },
+
+    lockMortalCollection: (): CollectionThunk => async (dispatch) => {
+        const result = await AccountApi.lockMortalCollection()
+        if (result.status === "ok") dispatch(actions.setMortalCollectionLocked(true))
+        else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: result.reason }))
+    },
+
     setFilter: (filter: CollectionFilter): CollectionThunk => async (dispatch) => {
         dispatch(actions.setCollectionFilter(filter))
     },

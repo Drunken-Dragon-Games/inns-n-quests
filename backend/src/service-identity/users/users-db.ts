@@ -22,6 +22,7 @@ export class User extends Model implements IUser {
     declare nickname: string;
     declare nameIdentifier: string;
     declare discordRefreshToken: string;
+    declare mortalCollectionLocked: boolean;
 }
 
 export const UserTableName = "identity_users"
@@ -113,6 +114,14 @@ export const UserTableAttributes = {
     }
 }
 
+export const collectionLockedAttribute = {
+    mortalCollectionLocked: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    }
+}
+
 export const configureSequelizeModel = (sequelize: Sequelize): void => {
     UserStakeAdress.init(UserStakeAdressTableAttributes, {
         sequelize,
@@ -120,7 +129,7 @@ export const configureSequelizeModel = (sequelize: Sequelize): void => {
         tableName: UserStakeAddressTableName
     })
 
-    User.init(UserTableAttributes, {
+    User.init({...UserTableAttributes, ...collectionLockedAttribute}, {
         sequelize, 
         modelName: 'User', 
         tableName: UserTableName

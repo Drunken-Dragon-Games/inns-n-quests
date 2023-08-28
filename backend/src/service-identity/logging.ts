@@ -100,8 +100,24 @@ export class IdentityServiceLogging implements IdentityService {
 
     async listAllUserIds(logger?: LoggingContext): Promise<string[]> {
         const serviceLogger = this.withComponent(logger)
-        const response = await this.base.listAllUserIds(logger)
+        const response = await this.base.listAllUserIds(serviceLogger)
         logger?.log.info(`Listed all users`)
+        return response
+    }
+
+    async setCollectionLock(userId: string, locked: boolean, logger?: LoggingContext | undefined): Promise<models.SetCollectionLockResult> {
+        const serviceLogger = this.withComponent(logger)
+        const response = await this.base.setCollectionLock(userId, locked, serviceLogger)
+        if (response.status == "ok") logger?.log.info(`set Collection locked state to ${locked}`)
+        else logger?.log.error(`Could not set collection state`)
+        return response
+    }
+
+    async getCollectionLockState(userId: string, logger?: LoggingContext | undefined): Promise<models.GetCollectionLockResult> {
+        const serviceLogger = this.withComponent(logger)
+        const response = await this.base.getCollectionLockState(userId, serviceLogger)
+        if (response.status == "ok") logger?.log.info(`Retrived colleciton state`)
+        else logger?.log.error(`Could not get collection state`)
         return response
     }
 

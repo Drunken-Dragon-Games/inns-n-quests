@@ -15,6 +15,7 @@ export interface CollectionState {
     collectionFetchingState: CollectionFetchingState,
     collectionFilter: CollectionFilter,
     displayArtStyle: "miniature" | "splashArt",
+    mortalLocked: boolean
 }
 
 const collectionInitialState: CollectionState = {
@@ -31,7 +32,8 @@ const collectionInitialState: CollectionState = {
     collectionCache: {},
     collectionFetchingState: {ctype: "idle"},
     collectionFilter: {page: 1, policyFilter: [], classFilter: [], APSFilter:{ath: {}, int: {}, cha: {}}},
-    displayArtStyle: "miniature"
+    displayArtStyle: "splashArt",
+    mortalLocked: true
 }
 
 export const collectinState = createSlice({
@@ -44,6 +46,10 @@ export const collectinState = createSlice({
 
         setMortalCollection: (state, action: PayloadAction<CollectionWithGameData> )=> {
             state.mortalCollectionItems = action.payload
+        },
+
+        setMortalCollectionLocked: (state, action: PayloadAction<boolean>) => {
+            state.mortalLocked = action.payload
         },
 
         addToCollectionCache: (state, action: PayloadAction<{page: number, collection: CollectionWithUIMetada, hasMore: boolean}>) => {

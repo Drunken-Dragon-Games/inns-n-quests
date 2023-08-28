@@ -22,7 +22,9 @@ import {
     AssosiationOutcome,
     CompleteAuthStateResult,
     DeassociationResult,
-    UserResolutionType
+    UserResolutionType,
+    SetCollectionLockResult,
+    GetCollectionLockResult
 } from "./models"
 
 import * as cardanoDB from "./cardano/signature-verification-db"
@@ -222,6 +224,20 @@ export class IdentityServiceDsl implements IdentityService {
 
     async listAllUserIds(logger?: LoggingContext): Promise<string[]>{
         return this.cachedUsers.idsCache
+    }
+
+    async setCollectionLock(userId: string, state: boolean, logger?: LoggingContext | undefined): Promise<SetCollectionLockResult> {
+        const result = state ?
+            await Users.lockUserMortalCollection(userId):
+            await Users.unlockUserMortalCollection(userId)
+        if (result.ctype !== "success") return {status: "invalid", reason: `Could not set State`}
+        return {status: "ok"}
+    }
+
+    async getCollectionLockState(userId: string, logger?: LoggingContext | undefined): Promise<GetCollectionLockResult> {
+        const result = await Users.getUserMortalCollectionState(userId)
+        if (result.ctype !== "success") return {status: "invalid", reason: `Could not get State`}
+        return {status: "ok", locked: result.result.locked}
     }
 
     async refresh(sessionId: string, refreshToken: string, logger?: LoggingContext): Promise<RefreshResult> {

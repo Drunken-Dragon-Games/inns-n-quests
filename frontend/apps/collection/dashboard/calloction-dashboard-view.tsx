@@ -2,10 +2,10 @@ import styled from "styled-components";
 import { collectionTransitions } from "../collection-transitions";
 import { CollectionFetchingState } from "../collection-state-models";
 import { Section } from "../commponents";
-import { Button } from "../../utils/components/basic_components";
 import { GamesButton } from "../../utils/navBar/basic_components";
 import { gamesButtonSection } from "../../../setting";
 import { OswaldFontFamily, colors } from "../../common";
+import { Button } from "../commponents/button"
 
 const DashboardContainer = styled.div`
   width: 10vw;
@@ -22,7 +22,7 @@ const OpenInnButtonContainer = styled.div`
     }
 `
 
-export const DashboardView = ({ status, artType }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt"}) => {
+export const DashboardView = ({ status, artType, mortalLocked }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt", mortalLocked: boolean}) => {
   return (
     <DashboardContainer>
     <Section title="Dashboard" colums={1}>
@@ -32,6 +32,9 @@ export const DashboardView = ({ status, artType }: {  status: CollectionFetching
             <Button action={() => collectionTransitions.syncCollection()} size="regular"> Sync </Button>
             <Button action={() => collectionTransitions.flipDisplayArtType()} size="regular">
                 {artType} 
+            </Button>
+            <Button action={() => collectionTransitions.lockMortalCollection()} size="regular" disabled={mortalLocked}>
+                {mortalLocked ? "Locked" : "Lock"}
             </Button>
             {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ?
             <>

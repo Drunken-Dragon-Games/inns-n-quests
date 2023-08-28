@@ -129,3 +129,11 @@ export type ResolveSesionResult
 export type UpdateUserResult
     = { status: "ok" }
     | { status: "nickname-unavailable" }
+
+export type SetCollectionLockResult
+    = {status:"ok"}
+    | {status: "invalid", reason: string}
+
+export type GetCollectionLockResult
+    = {status:"ok", locked: boolean}
+    | {status: "invalid", reason: string}

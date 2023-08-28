@@ -33,6 +33,8 @@ export interface AccountService {
     getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>
     modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>
     syncUserCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
+    lockMortalCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
+    getMortalCollectionLockedState(userId: string, logger?: LoggingContext):Promise<MortalCollectionLockedStateResult>
 }
 
 export type CleanAssociationTxResult 
@@ -131,4 +133,8 @@ export type ModifyMortalCollectionResult
 
 export type SyncUserCollectionResult
     = {status: "ok"}
+    | {status: "invalid", reason: string}
+
+export type MortalCollectionLockedStateResult
+    = {status: "ok", locked: boolean}
     | {status: "invalid", reason: string}

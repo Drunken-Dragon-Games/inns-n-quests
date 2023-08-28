@@ -65,10 +65,10 @@ interface ButtonProps {
     action: () => void;
     children: string;
     size?: "big" | "regular" | "small";
-    disabled: boolean;
+    disabled?: boolean;
   }
 
-export const Button = ({action, children, size, disabled } : ButtonProps): JSX.Element =>{
+export const Button = ({action, children, size, disabled = false } : ButtonProps): JSX.Element =>{
 
     const [hover, setHover] = useState<boolean>(false)
     return(<>
