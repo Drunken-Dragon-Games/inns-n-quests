@@ -196,7 +196,7 @@ export class CollectionServiceDsl implements CollectionService {
         logger?.log.info(`Granting weekly rewards`)
         const weeklyRecord = await this.records.createWeekly()
         if (weeklyRecord.ctype !== "success") {
-            logger?.log.error(`Failed to create daily record beaocuse: ${weeklyRecord.error}`)
+            logger?.log.error(`Failed to create weekly record becouse: ${weeklyRecord.error}`)
             return
         }
 
@@ -204,16 +204,14 @@ export class CollectionServiceDsl implements CollectionService {
         //but aparently thats not such a great idea
         //https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await
         const pendingRewards = await this.rewards.getPreviusWeekTotals()
-        
         let totalGranted = 0
         for (const [userId, reward] of Object.entries(pendingRewards)) {
             const grantRecord = await this.rewards.createWeekly(userId)
             if (grantRecord.ctype !== "success") continue
-            console.log(`created weekly reward`)
             await this.assetManagementService.grant(userId, {
                 policyId: this.wellKnownPolicies.dragonSilver.policyId,
                 unit: "DragonSilver",
-                quantity: reward.toString()
+                quantity: reward.toFixed(0)
             })
             totalGranted += reward
             console.log(`compleating rward with ${reward}`)
