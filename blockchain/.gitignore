@@ -28,3 +28,7 @@ gclient_config.py_entries
 /tools/wpt/certs/serial*
 
 /ext/websocket/autobahn/reports
+
+# Wallets
+*.sk
+*.addr
