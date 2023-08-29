@@ -59,6 +59,10 @@ const CollectibleName = styled.p`
     margin-bottom: 10px;
 `
 
+const GoldenP = styled.p`
+    color: ${colors.dduGold}
+`
+
 const isVideoFile = (src: string): boolean => {
     return src.endsWith('.mp4')
 }
@@ -98,8 +102,8 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
                 <CollectibleName>{capitalizeFirstLetter(src.name)}</CollectibleName>
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
-                <p>Quantity: {src.quantity} </p>
-                <p>Pasive Stake: {src.stakingContribution}</p>
+                { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
+                <GoldenP>{src.stakingContribution} $DS/week</GoldenP>
             </CollectibleInfo>
             { mortalLocked || type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>
@@ -114,7 +118,7 @@ export const DisplayView = ({ collectionItems, artType, mortalLocked }: { collec
     }
 
     return (
-        <Section key={"Ethernal Collection"} title="Ethernal Collection" colums={3}>
+        <Section key={"Eternal Collection"} title="Eternal Collection" colums={3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} mortalLocked={mortalLocked}/>
             )}

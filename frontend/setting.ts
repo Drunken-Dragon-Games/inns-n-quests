@@ -57,26 +57,29 @@ export const appsToShow: appsToShow[] = [
         url: "/inq",
         name: "Home",
         icon: "home",
-        disable: false
+        disable: false,
+        hoverMessage: "Home"
     },
     {
         url: "/s2",
         name: "Browse",
         icon: "browse",
-        disable: false
+        disable: false,
+        hoverMessage: "Browse"
     },
     {
         url: "https://encyclopedia.drunkendragon.games/",
         name: "Encyclopedia",
         icon: "encyclopedia",
-        disable: false
+        disable: false,
+        hoverMessage: "Encyclopedia"
     },
     {
         url: "/collection",
-        name: "Collection",
+        name: "My Collection",
         icon: "event",
         disable: false,
-        hoverMessage: "Remember to be logged in!"
+        hoverMessage: "My Collection"
     },
     {
         url: "/trade",
