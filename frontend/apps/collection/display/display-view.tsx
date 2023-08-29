@@ -77,10 +77,11 @@ type RenderCollectible = {
     imageDimensions: { height: number,  width: number }, 
     collectionName: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers",
     artType: "miniature" | "splashArt",
+    mortalLocked: boolean,
     type? : "Furniture" | "Character"
 }
 
-export const Collectible = ({ src, imageDimensions, collectionName, artType, type}: RenderCollectible) => {
+export const Collectible = ({ src, imageDimensions, collectionName, artType, type, mortalLocked}: RenderCollectible) => {
     return (
         <CollectibleContainer artType={artType}>
             {
@@ -100,12 +101,12 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
                 <p>Quantity: {src.quantity} </p>
                 <p>Pasive Stake: {src.stakingContribution}</p>
             </CollectibleInfo>
-            { type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
+            { mortalLocked || type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>
     )
 }
 
-export const DisplayView = ({ collectionItems, artType }: { collectionItems: CollectionWithUIMetada, artType: "miniature" | "splashArt" }) => { 
+export const DisplayView = ({ collectionItems, artType, mortalLocked }: { collectionItems: CollectionWithUIMetada, artType: "miniature" | "splashArt", mortalLocked: boolean }) => { 
     const imageDimensions = {
         "pixelTiles": { height: 12,  width: 9 },
         "grandMasterAdventurers": { height: 12,  width: 12 },
@@ -115,16 +116,16 @@ export const DisplayView = ({ collectionItems, artType }: { collectionItems: Col
     return (
         <Section key={"Ethernal Collection"} title="Ethernal Collection" colums={3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} />
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} mortalLocked={mortalLocked}/>
             )}
             {collectionItems.grandMasterAdventurers.map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.grandMasterAdventurers} collectionName="grandMasterAdventurers" artType={artType}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.grandMasterAdventurers} collectionName="grandMasterAdventurers" artType={artType} mortalLocked={mortalLocked}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class !== 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} mortalLocked={mortalLocked}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class == 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"} mortalLocked={mortalLocked}/>
             )}
         </Section>
     )

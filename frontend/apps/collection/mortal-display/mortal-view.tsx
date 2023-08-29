@@ -66,7 +66,7 @@ const hasItemsInCategory = (items: any, category: string) => {
   };
 
 
-export const MortalView = ({ collectionItems}: { collectionItems: CollectionWithGameData}) => {
+export const MortalView = ({ collectionItems, mortalLocked}: { collectionItems: CollectionWithGameData, mortalLocked: boolean}) => {
     
     type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
 
@@ -88,7 +88,7 @@ export const MortalView = ({ collectionItems}: { collectionItems: CollectionWith
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
             </CollectibleInfo>
-            <Button action ={ () => removeFromMortalCollection(src.assetRef, policyName)} size="regular">Remove</Button>
+            {mortalLocked ? <></> : <Button action ={ () => removeFromMortalCollection(src.assetRef, policyName)} size="regular">Remove</Button>}
             </CollectibleContainer>
           );
         }

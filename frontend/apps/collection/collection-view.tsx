@@ -40,9 +40,9 @@ const CollectionComponent = () =>{
     return(
     <Container>
       <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked}></DashboardView>
-      <MortalView collectionItems={mortalItems}/>
+      <MortalView collectionItems={mortalItems} mortalLocked={mortalLocked}/>
       <FilterView />
-      <DisplayView collectionItems={collectionItems} artType={displayArtType}/>
+      <DisplayView collectionItems={collectionItems} artType={displayArtType} mortalLocked={mortalLocked}/>
       <div style={{ gridColumn: "2", gridRow: "3" }}>
         <PaginationView filter={filter} collectionCache={collectionCache} />
       </div>
