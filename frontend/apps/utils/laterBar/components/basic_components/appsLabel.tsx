@@ -2,6 +2,7 @@ import styled from "styled-components"
 import { useState } from "react"
 import { TextOswald, LinkDisable, ConditionalRender } from "../../../components/basic_components"
 import Image from "next/image"
+import { colors, OswaldFontFamily } from "../../../../common"
 
 interface AppLabelWrapper {
     disable?: boolean 
@@ -76,7 +77,19 @@ const IconWrapperRegular = styled.div<hover>`
     position: absolute;
     visibility: ${props => props.hover ? "hidden" : "visibility"};
 `
-
+const TooltipWrapper = styled.div`
+  position: fixed;
+  left: 80px;
+  color: white;
+  background-color: ${colors.textGray};
+  ${OswaldFontFamily};
+  padding: 8px;
+  border-radius: 4px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 9999;
+`;
 
 interface appsLabel{
     url: string
@@ -84,16 +97,21 @@ interface appsLabel{
     app: string
     active: boolean
     disable?: boolean
+    hoverMessage?: string
 }
 
-const AppsLabel = ( {url, children, app, active, disable } : appsLabel ) : JSX.Element => {
+const AppsLabel = ( {url, children, app, active, disable, hoverMessage } : appsLabel ) : JSX.Element => {
 
     const [hover, setHover] = useState<boolean>(false)
     
 
-    return (<> 
-    
+    return (<>
+
+        {hover && hoverMessage ? <TooltipWrapper style={{ visibility: 'visible', opacity: 1 }}>
+            {hoverMessage}
+        </TooltipWrapper> : <></>}
         <AppLabelWrapper disable = {disable}>
+        
             <LinkDisable url={url} disable = {disable}>
                 <Flex>
                     <IconWrapper onMouseOver= { () => setHover(true) } onMouseLeave={ () => setHover(false) } disablePointer ={disable}> 

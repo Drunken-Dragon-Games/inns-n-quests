@@ -49,6 +49,7 @@ interface appsToShow {
     name: string
     icon: string
     disable: boolean
+    hoverMessage?: string
 }
 
 export const appsToShow: appsToShow[] = [
@@ -74,7 +75,8 @@ export const appsToShow: appsToShow[] = [
         url: "/collection",
         name: "Collection",
         icon: "event",
-        disable: false
+        disable: false,
+        hoverMessage: "Remember to be logged in!"
     },
     {
         url: "/trade",

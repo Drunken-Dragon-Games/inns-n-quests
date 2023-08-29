@@ -139,7 +139,7 @@ const LateralBar = (): JSX.Element => {
                     {appsToShow.map((el => {
                         return (
                             <AppWrapper key={el.name}>
-                                <AppsLabel url={el.url} active ={el.url == router.pathname } app = {el.icon} disable = {el.disable}>{el.name}</AppsLabel>
+                                <AppsLabel url={el.url} active ={el.url == router.pathname } app = {el.icon} disable = {el.disable} hoverMessage={el.hoverMessage}>{el.name}</AppsLabel>
                             </AppWrapper>
                         )
                     }))}
