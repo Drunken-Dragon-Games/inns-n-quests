@@ -18,7 +18,7 @@ const ToolTipContent= styled.div<ToolTipContent>`
     visibility: ${props => props.hover ? "visible": "hidden"};
     opacity: ${props => props.hover ? "1": "0"};
     transition: opacity 0.3s, visibility 0.3s;
-    z-index: 2;
+    z-index: 3;
     display: inline-block;
 `
 
