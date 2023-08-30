@@ -18,6 +18,7 @@ import * as syncedAssets from "./state/assets-sync-db"
 import { Records, Rewards } from "./staking-rewards/dsl"
 import {SyncedAssets, relevantPolicies, SyncedMortalAssets} from "./state/dsl"
 import { Calendar } from "../tools-utils/calendar"
+import { CreateMortal, CreateSyncedAsset } from "./state/models"
 
 export type CollectionServiceDependencies = {
     database: Sequelize
@@ -261,6 +262,30 @@ export class CollectionServiceDsl implements CollectionService {
     async removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
         if((await this.mortalCollectionLocked(userId))) return {ctype: "failure", error: `Could not remove asset as Mortal Collection is currently locked`}
         return SyncedMortalAssets.removeAsset(userId, assetRef)
+    }
+
+    async setMortalCollection(userId: string, assets: {assetRef: string, quantity: string}[], logger?: LoggingContext | undefined): Promise<SResult<{}>> {
+        if((await this.mortalCollectionLocked(userId))) return {ctype: "failure", error: `Could not remove asset as Mortal Collection is currently locked`}
+        const dbTransaction = await this.database.transaction()
+        try{
+            const newAssets: (CreateMortal | null)[] = await Promise.all(assets.map(async (asset) => {
+                const assetResult = await this.syncedAssets.getAsset(userId, asset.assetRef)
+                if (assetResult.ctype !== "success" || assetResult.asset.type === "Furniture") return null
+                return Number(assetResult.asset.quantity) < Number(asset.quantity)
+                    ? {...assetResult.asset.dataValues}
+                    : { ...assetResult.asset.dataValues, quantity: asset.quantity}
+            }))
+            
+            const filteredNewAssets: CreateMortal[] = newAssets.filter((asset) => asset !== null) as CreateMortal[]
+            const setResult = await SyncedMortalAssets.setMortal(userId, filteredNewAssets, dbTransaction)
+            if (setResult.ctype !== "success" ) throw new Error(setResult.error)
+            await dbTransaction.commit()
+            return {ctype: "success"}
+        }
+        catch(e: any){
+            await dbTransaction.rollback()
+            return {ctype: "failure", error: e.message}
+        }
     }
 
     private async hydrateCollectionWithMetadata(assets: Collection<StoredMetadata>, userId: string): Promise<Collection<CollectibleMetadata>> {

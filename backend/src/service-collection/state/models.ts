@@ -11,6 +11,8 @@ export type CreateSyncedAsset = {
     int: number,
     cha: number
 }
+
+export type CreateMortal = CreateSyncedAsset & {asset_id: string}
 export type SyncedAssetChanges = {
     toCreate: CreateSyncedAsset[]
     toDelete: string[]
