@@ -215,7 +215,6 @@ export class CollectionServiceDsl implements CollectionService {
                 quantity: reward.toFixed(0)
             })
             totalGranted += reward
-            console.log(`compleating rward with ${reward}`)
             this.rewards.completeWeekly(userId, reward.toString())
         }
         console.log({totalGranted})

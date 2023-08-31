@@ -4,6 +4,7 @@ import { NotificationsApi } from "../notifications"
 import { OverworldApi } from "../overworld"
 import { activityId } from "./inventory-dsl"
 import { inventoryState, inventoryStore, InventoryThunk } from "./inventory-state"
+import router from "next/router"
 
 const actions = inventoryState.actions
 
@@ -12,8 +13,11 @@ const InventoryThunks = {
     getInventory: (): InventoryThunk => async (dispatch) => {
         const itemResponse = await IdleQuestsApi.getInventory()
         if (itemResponse.status == "ok") {
-            dispatch(actions.setInventory(itemResponse.inventory))
-            OverworldApi.setInitialInnState(itemResponse.inventory)
+            if (Object.keys(itemResponse.inventory.characters).length === 0) router.push("/collection")
+            else {
+                dispatch(actions.setInventory(itemResponse.inventory))
+                OverworldApi.setInitialInnState(itemResponse.inventory)
+            }
         }
         else
             NotificationsApi.notify(`Error getting inventory: ${itemResponse.status}`, "alert")

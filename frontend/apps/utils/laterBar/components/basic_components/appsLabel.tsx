@@ -107,9 +107,11 @@ const AppsLabel = ( {url, children, app, active, disable, hoverMessage } : appsL
 
     return (<>
 
-        {hover && hoverMessage ? <TooltipWrapper style={{ visibility: 'visible', opacity: 1 }}>
+        {hover && hoverMessage ? 
+        <TooltipWrapper style={{ visibility: 'visible', opacity: 1 }}>
             {hoverMessage}
-        </TooltipWrapper> : <></>}
+        </TooltipWrapper> : 
+        <></>}
         <AppLabelWrapper disable = {disable}>
         
             <LinkDisable url={url} disable = {disable}>
