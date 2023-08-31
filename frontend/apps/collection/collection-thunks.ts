@@ -6,6 +6,7 @@ import { Blockfrost, Lucid } from "lucid-cardano"
 import { blockfrostApiKey, blockfrostUri, cardanoNetwork} from "../../setting"
 import { isEmpty } from "../common"
 import Collection from "../home/homePage/compoenents/basic_components/collection"
+import { CollectionAssets } from "../account/account-backend"
 
 const actions = collectinState.actions
 
@@ -80,7 +81,16 @@ export const CollectionThunks = {
         else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: stateResult.reason }))
     },
 
-    lockMortalCollection: (): CollectionThunk => async (dispatch) => {
+    lockMortalCollection: (): CollectionThunk => async (dispatch, getState) => {
+        const state = getState()
+        const mortalColleciton = state.mortalCollectionItems
+        const mortalCreatableAssets = Object.entries(mortalColleciton).reduce((acc, [_policyName, policyItems]) => {
+            const policyAssets = policyItems.map((item) => {return {assetRef: item.assetRef, quantity: item.quantity}})
+            acc.push(...policyAssets)
+            return acc
+        }, [] as CollectionAssets)
+        const setResult = await AccountApi.setMortalCollection(mortalCreatableAssets)
+        if(setResult.status !== "ok") return dispatch(CollectionThunks.displayStatus({ ctype: "error", details: setResult.reason }))
         const result = await AccountApi.lockMortalCollection()
         if (result.status === "ok") dispatch(actions.setMortalCollectionLocked(true))
         else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: result.reason }))

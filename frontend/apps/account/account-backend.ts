@@ -131,6 +131,11 @@ export const AccountBackend = {
         return result.data
     },
 
+    async setMortalCollection(assets: CollectionAssets, traceId?: string): Promise<CleanAssociationTxResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/set-mortal-collection", {assets}, traceId)
+        return result.data
+    },
+
     async getMortalLockState(traceId?: string): Promise<MortalCollectionLockedStateResult>{
         const result = await accountRequestWRefresh("POST", "/assets/get-mortal-collection-state", traceId)
         return result.data
@@ -163,6 +168,8 @@ export const AccountBackend = {
         return result.data
     }
 }
+
+export type CollectionAssets = { assetRef: string; quantity: string; }[]
 
 export type ClaimFaucetResult
     = { status: "ok", tx: string }
