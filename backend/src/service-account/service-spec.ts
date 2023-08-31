@@ -35,6 +35,7 @@ export interface AccountService {
     syncUserCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
     lockMortalCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
     getMortalCollectionLockedState(userId: string, logger?: LoggingContext):Promise<MortalCollectionLockedStateResult>
+    setMortalCollection(userId: string, assets: CollectionAssets, logger?: LoggingContext): Promise<SyncUserCollectionResult>
 }
 
 export type CleanAssociationTxResult 
@@ -138,3 +139,5 @@ export type SyncUserCollectionResult
 export type MortalCollectionLockedStateResult
     = {status: "ok", locked: boolean}
     | {status: "invalid", reason: string}
+
+export type CollectionAssets = { assetRef: string; quantity: string; }[]

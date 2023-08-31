@@ -217,6 +217,14 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         response.status(200).json(result)
     }))
 
+    router.post("/assets/set-mortal-collection", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const {assets} = request.body
+        const result = await accountService.setMortalCollection(userId, assets, logger)
+        response.status(200).json(result)
+    }))
+
     router.post("/assets/get-mortal-collection-state", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
