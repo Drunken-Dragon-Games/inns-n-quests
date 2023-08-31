@@ -1,7 +1,7 @@
 import { v4 } from "uuid"
 import { AccountApi, SupportedWallet, ExtractWalletResult } from "../account"
 import { CollectionThunk, collectinState } from "./collection-state"
-import { CollectionFetchingState, CollectionFilter, CollectionWithUIMetada, MortalCollectible } from "./collection-state-models"
+import { CollectionFetchingState, CollectionFilter, CollectionWithGameData, CollectionWithUIMetada, MortalCollectible } from "./collection-state-models"
 import { Blockfrost, Lucid } from "lucid-cardano"
 import { blockfrostApiKey, blockfrostUri, cardanoNetwork} from "../../setting"
 import { isEmpty } from "../common"
@@ -53,37 +53,22 @@ export const CollectionThunks = {
 
     modifyMortalCollection: (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"): CollectionThunk => async (dispatch, getState) => {
         const state = getState()
-        const [foundPage, foundCollection] = Object.entries(state.collectionCache).find(([pageNumber, collection]) => 
-            collection[policy].some((policyItem) => policyItem.assetRef === asset.assetRef)
-        ) || []
+        const foundEntry = Object.entries(state.collectionCache).find(([, collection]) =>
+            collection[policy].some(item => item.assetRef === asset.assetRef)
+        )
 
-        if (foundCollection) {
-            const collection = { ...foundCollection } // Create a shallow copy
-            const ethernalIndex = collection[policy].findIndex((policy) => policy.assetRef === asset.assetRef)
-            const newActive = collection[policy][ethernalIndex].mortalRealmsActive + (action === "add" ? 1 : -1)
-            
-            collection[policy] = [...collection[policy]]
-            collection[policy][ethernalIndex] = { ...collection[policy][ethernalIndex], mortalRealmsActive: newActive }
-            
-            dispatch(actions.addToCollectionCache({ page: Number(foundPage), collection, hasMore: collection.hasMore }))
+        if (foundEntry) {
+            const [foundPage, foundCollection] = foundEntry
+            const updatedCollection = updateCollection({ ...foundCollection }, policy, asset, action)
+            dispatch(actions.addToCollectionCache({ page: Number(foundPage), collection: updatedCollection, hasMore: updatedCollection.hasMore }))
 
-            if(state.collectionFilter.page === Number(foundPage))
-                dispatch(CollectionThunks.getCollection({ ...state.collectionCache, [state.collectionFilter.page]: collection }, state.collectionFilter))
+            if (state.collectionFilter.page === Number(foundPage)) {
+                dispatch(CollectionThunks.getCollection({ ...state.collectionCache, [state.collectionFilter.page]: updatedCollection }, state.collectionFilter))
+            }
         }
-        const oldMortalCollection = {...state.mortalCollectionItems}
-        const mortalPolicyIndex = oldMortalCollection[policy].findIndex((item) => item.assetRef === asset.assetRef)
-        oldMortalCollection[policy] = [...oldMortalCollection[policy]]
-        
 
-        if (mortalPolicyIndex !== -1){
-            const newQuantity = (Number(oldMortalCollection[policy][mortalPolicyIndex].quantity)  + (action === "add" ? 1 : -1)).toString()
-            oldMortalCollection[policy][mortalPolicyIndex] = { ...oldMortalCollection[policy][mortalPolicyIndex], quantity: newQuantity }
-        }else{
-            const policyItemns = [...oldMortalCollection[policy]]
-            policyItemns.push({...asset, quantity: "1"})
-            oldMortalCollection[policy] = [...policyItemns]
-        } 
-        dispatch(actions.setMortalCollection(oldMortalCollection))   
+        const updatedMortalCollection = updateMortalCollection({ ...state.mortalCollectionItems }, policy, asset, action);
+        dispatch(actions.setMortalCollection(updatedMortalCollection));  
     },
 
     getMortalCollectionLockedState: (): CollectionThunk => async (dispatch) => {
@@ -133,4 +118,25 @@ export const CollectionThunks = {
         }
         }
     }
+}
+
+const updateCollection = (collection: CollectionWithUIMetada & {hasMore: boolean} , policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", asset: MortalCollectible, action: "add" | "remove") => {
+    const index = collection[policy].findIndex(item => item.assetRef === asset.assetRef)
+    const newActive = collection[policy][index].mortalRealmsActive + (action === "add" ? 1 : -1)
+    collection[policy] = [...collection[policy]]
+    collection[policy][index] = { ...collection[policy][index], mortalRealmsActive: newActive }
+    return collection
+}
+
+const updateMortalCollection = (mortalCollection: CollectionWithGameData, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", asset: MortalCollectible, action: "add" | "remove") => {
+    const index = mortalCollection[policy].findIndex(item => item.assetRef === asset.assetRef)
+    const updatedItems = [...mortalCollection[policy]]
+
+    if (index !== -1) {
+        const newQuantity = (Number(updatedItems[index].quantity) + (action === "add" ? 1 : -1)).toString()
+        updatedItems[index] = { ...updatedItems[index], quantity: newQuantity }
+    } 
+    else updatedItems.push({ ...asset, quantity: "1" })
+
+    return {...mortalCollection, [policy]: updatedItems}
 }
