@@ -56,7 +56,6 @@ export const verifyDiscordAuthCode = async (code: string, config: DiscordConfig,
 export const getUserInfoFromBearerToken = async (Authorization: string, logger?: LoggingContext): Promise<Attempt<DiscordUserInfo>> => {
     try {
         let playerInfo = await axios.get('https://discord.com/api/users/@me', { headers: { Authorization } })
-        console.log("playerInfo", playerInfo.data)
         return succeeded({
             discordUserId: playerInfo.data.id,
             discordName: playerInfo.data.username + "#" + playerInfo.data.discriminator,

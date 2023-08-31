@@ -234,6 +234,12 @@ export class IdentityServiceDsl implements IdentityService {
         return {status: "ok"}
     }
 
+    async setCollectionLockAll(state: boolean, logger?: LoggingContext | undefined): Promise<SetCollectionLockResult> {
+        const result = await Users.setAllUsersCollectionLock(state)
+        if (result.ctype !== "success") return {status: "invalid", reason: `Could not set State`}
+        return {status: "ok"}
+    }
+
     async getCollectionLockState(userId: string, logger?: LoggingContext | undefined): Promise<GetCollectionLockResult> {
         const result = await Users.getUserMortalCollectionState(userId)
         if (result.ctype !== "success") return {status: "invalid", reason: `Could not get State`}

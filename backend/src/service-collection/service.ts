@@ -200,7 +200,7 @@ export class CollectionServiceDsl implements CollectionService {
             logger?.log.error(`Failed to create weekly record becouse: ${weeklyRecord.error}`)
             return
         }
-
+        await this.identityService.setCollectionLockAll(false)
         //this can be refectored to use a single reduce statment
         //but aparently thats not such a great idea
         //https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await
@@ -209,7 +209,6 @@ export class CollectionServiceDsl implements CollectionService {
         for (const [userId, reward] of Object.entries(pendingRewards)) {
             const grantRecord = await this.rewards.createWeekly(userId)
             if (grantRecord.ctype !== "success") continue
-            await this.identityService.setCollectionLock(userId, false)
             await this.assetManagementService.grant(userId, {
                 policyId: this.wellKnownPolicies.dragonSilver.policyId,
                 unit: "DragonSilver",
@@ -230,6 +229,14 @@ export class CollectionServiceDsl implements CollectionService {
         const { syncedAssetChanges, fullCollection } = await this.syncedAssets.determineUpdates(userId, assetList.inventory)
         await this.syncedAssets.updateDatabase(syncedAssetChanges, this.database, logger)
         return {ctype: "success", collection: fullCollection }
+    }
+
+    async lockAllUsersCollections(logger?: LoggingContext): Promise<void>{
+        logger?.log.info("locking all collections")
+        const userIds = await this.identityService.listAllUserIds(logger)
+        await Promise.all(userIds.map(async (userId) => {
+            await this.identityService.setCollectionLock(userId, true)
+        }))
     }
 
     /**
