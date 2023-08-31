@@ -29,6 +29,7 @@ export default class IdentityServiceMock {
             migrationFixDiscordUsernameInDB: jest.fn(),
             getCollectionLockState: jest.fn(),
             setCollectionLock: jest.fn(),
+            setCollectionLockAll: jest.fn(),
         }
     }
 
