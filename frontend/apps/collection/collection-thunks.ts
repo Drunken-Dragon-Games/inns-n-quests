@@ -53,6 +53,9 @@ export const CollectionThunks = {
 
     modifyMortalCollection: (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"): CollectionThunk => async (dispatch, getState) => {
         const state = getState()
+        //TODO: This will eventually come from an endpoint
+        const maxAmount = 5
+        if(countCollectionItems(state.mortalCollectionItems) >= maxAmount && action == "add") return
         const foundEntry = Object.entries(state.collectionCache).find(([, collection]) =>
             collection[policy].some(item => item.assetRef === asset.assetRef)
         )
@@ -119,7 +122,11 @@ export const CollectionThunks = {
         }
     }
 }
-
+const countCollectionItems = (collection: CollectionWithGameData): number => {
+    return Object.entries(collection).reduce((total, [_policyName, policyItems]) =>
+        total + policyItems.reduce((policyTotal, item) =>  policyTotal + Number(item.quantity), 0)
+    , 0)
+}
 const updateCollection = (collection: CollectionWithUIMetada & {hasMore: boolean} , policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", asset: MortalCollectible, action: "add" | "remove") => {
     const index = collection[policy].findIndex(item => item.assetRef === asset.assetRef)
     const newActive = collection[policy][index].mortalRealmsActive + (action === "add" ? 1 : -1)
