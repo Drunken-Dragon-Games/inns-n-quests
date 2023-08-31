@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada } from "../collection-state-models"
+import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada, MortalCollectible } from "../collection-state-models"
 import { MessiriFontFamily, PixelArtImage, Video, vmax1, colors, OswaldFontFamily } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
@@ -47,8 +47,8 @@ const CollectibleName = styled.p`
     margin-bottom: 10px;
 `
 
-const removeFromMortalCollection = (assetRef: string, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
-    collectionTransitions.modifyMortalCollection(assetRef, "remove", policy)
+const removeFromMortalCollection = (asset: MortalCollectible, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
+    collectionTransitions.modifyMortalCollection(asset, "remove", policy)
 }
 
 
@@ -88,7 +88,7 @@ export const MortalView = ({ collectionItems, mortalLocked}: { collectionItems: 
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
             </CollectibleInfo>
-            {mortalLocked ? <></> : <Button action ={ () => removeFromMortalCollection(src.assetRef, policyName)} size="regular">Remove</Button>}
+            {mortalLocked ? <></> : <Button action ={ () => removeFromMortalCollection(src, policyName)} size="regular">Remove</Button>}
             </CollectibleContainer>
           );
         }

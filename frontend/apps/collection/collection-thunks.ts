@@ -1,7 +1,7 @@
 import { v4 } from "uuid"
 import { AccountApi, SupportedWallet, ExtractWalletResult } from "../account"
 import { CollectionThunk, collectinState } from "./collection-state"
-import { CollectionFetchingState, CollectionFilter, CollectionWithUIMetada } from "./collection-state-models"
+import { CollectionFetchingState, CollectionFilter, CollectionWithUIMetada, MortalCollectible } from "./collection-state-models"
 import { Blockfrost, Lucid } from "lucid-cardano"
 import { blockfrostApiKey, blockfrostUri, cardanoNetwork} from "../../setting"
 import { isEmpty } from "../common"
@@ -51,19 +51,15 @@ export const CollectionThunks = {
         }
     },
 
-    modifyMortalCollection: (assetRef: string, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"): CollectionThunk => async (dispatch, getState) => {
-        const modifyResult = await AccountApi.modifyUserMortalCollection(assetRef, action)
-        if (modifyResult.status !== "ok") return (CollectionThunks.displayStatus({ ctype: "error", details: modifyResult.reason }))
-        const result = await AccountApi.getUserMortalCollection()
-        if (result.status !== "ok") return dispatch(CollectionThunks.displayStatus({ ctype: "error", details: result.reason }))
+    modifyMortalCollection: (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"): CollectionThunk => async (dispatch, getState) => {
         const state = getState()
         const [foundPage, foundCollection] = Object.entries(state.collectionCache).find(([pageNumber, collection]) => 
-            collection[policy].some((policyItem) => policyItem.assetRef === assetRef)
+            collection[policy].some((policyItem) => policyItem.assetRef === asset.assetRef)
         ) || []
 
         if (foundCollection) {
             const collection = { ...foundCollection } // Create a shallow copy
-            const ethernalIndex = collection[policy].findIndex((policy) => policy.assetRef === assetRef)
+            const ethernalIndex = collection[policy].findIndex((policy) => policy.assetRef === asset.assetRef)
             const newActive = collection[policy][ethernalIndex].mortalRealmsActive + (action === "add" ? 1 : -1)
             
             collection[policy] = [...collection[policy]]
@@ -74,8 +70,20 @@ export const CollectionThunks = {
             if(state.collectionFilter.page === Number(foundPage))
                 dispatch(CollectionThunks.getCollection({ ...state.collectionCache, [state.collectionFilter.page]: collection }, state.collectionFilter))
         }
-        dispatch(actions.setMortalCollection(result.collection))
+        const oldMortalCollection = {...state.mortalCollectionItems}
+        const mortalPolicyIndex = oldMortalCollection[policy].findIndex((item) => item.assetRef === asset.assetRef)
+        oldMortalCollection[policy] = [...oldMortalCollection[policy]]
         
+
+        if (mortalPolicyIndex !== -1){
+            const newQuantity = (Number(oldMortalCollection[policy][mortalPolicyIndex].quantity)  + (action === "add" ? 1 : -1)).toString()
+            oldMortalCollection[policy][mortalPolicyIndex] = { ...oldMortalCollection[policy][mortalPolicyIndex], quantity: newQuantity }
+        }else{
+            const policyItemns = [...oldMortalCollection[policy]]
+            policyItemns.push({...asset, quantity: "1"})
+            oldMortalCollection[policy] = [...policyItemns]
+        } 
+        dispatch(actions.setMortalCollection(oldMortalCollection))   
     },
 
     getMortalCollectionLockedState: (): CollectionThunk => async (dispatch) => {

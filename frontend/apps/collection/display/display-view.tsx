@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { CollectionWithUIMetada, UICollectible } from "../collection-state-models"
+import { CollectionWithUIMetada, MortalCollectible, UICollectible } from "../collection-state-models"
 import { OswaldFontFamily, PixelArtImage, Video, colors, vmax1 } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
@@ -72,8 +72,8 @@ const capitalizeFirstLetter = (input: string): string => {
     return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
-const modifyMortalCollection = (assetRef: string, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
-    collectionTransitions.modifyMortalCollection(assetRef, action, policy)
+const modifyMortalCollection = (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
+    collectionTransitions.modifyMortalCollection(asset, action, policy)
 }
 
 type RenderCollectible = { 
@@ -105,7 +105,7 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
                 { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
                 <GoldenP>{src.stakingContribution} $DS/week</GoldenP>
             </CollectibleInfo>
-            { mortalLocked || type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
+            { mortalLocked || type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>
     )
 }
