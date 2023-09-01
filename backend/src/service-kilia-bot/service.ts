@@ -268,7 +268,15 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         if (subcommand === "leaderboard") {
             const startDate = new Date()
             startDate.setDate(1)
+            startDate.setHours(0)
+            startDate.setMinutes(0)
+            startDate.setSeconds(0)
+
             const leaderboard = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
+            if(leaderboard.length < 1) {
+                await interaction.reply("Ah, adventurers! The ink's still wet on this month's tales. No quests to rank yet!")
+                return
+            }
             const embedFields = await Promise.all(leaderboard.map(async (entry, index) => {
                 const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
                 return {

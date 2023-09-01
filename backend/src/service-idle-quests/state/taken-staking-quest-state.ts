@@ -109,7 +109,6 @@ export class TakenStakingQuestState {
                 },
             }
         })
-
         const leaderboardObject = leaderboardArray.reduce((acc, entry) => {
             if (!acc[entry.userId]) return {...acc, [entry.userId]: 1}
             else return {...acc, [entry.userId]: acc[entry.userId] + 1}

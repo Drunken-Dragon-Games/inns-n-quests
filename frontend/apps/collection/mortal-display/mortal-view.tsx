@@ -46,6 +46,14 @@ const CollectibleName = styled.p`
     font-weight: bold;
     margin-bottom: 10px;
 `
+const EmptyCollectionMessage = styled.div`
+    font-size: 30px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 20px;
+    ${OswaldFontFamily}
+    font-weight: bold;
+`
 
 const removeFromMortalCollection = (asset: MortalCollectible, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
     collectionTransitions.modifyMortalCollection(asset, "remove", policy)
@@ -62,7 +70,7 @@ const hasItemsInCategory = (items: any, category: string) => {
   };
   
   const hasItemsNotInCategory = (items: any, category: string) => {
-    return Object.values(items).some((itemsArray: any) => itemsArray.some((src: any) => src.class !== category));
+    return Object.values(items).some((itemsArray: any) => itemsArray.some((src: any) => src.class !== category))
   };
 
 
@@ -96,35 +104,41 @@ export const MortalView = ({ collectionItems, mortalLocked}: { collectionItems: 
       }
 
     return (
-    <Section  key="mortal-collection" title="Mortal Collection" colums={5}>
-      {(
-        <>
-          {hasItemsNotInCategory(collectionItems, "furniture") && (
-            <>
-              {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-                  const policyName = policyNameKey as PolicyName
-                  return itemsArray.map((src) => (
-                      src.class !== "furniture" && renderAsset(src, policyName)
-                  ));
-              })}
-            </>
-          )}
-          
-          {hasItemsInCategory(collectionItems, "furniture") && (
-            <>
-              <Header>
-                  <Title>Furniture</Title>
-              </Header>
-              {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-                  const policyName = policyNameKey as PolicyName
-                  return itemsArray.map((src) => (
-                      src.class === "furniture" && renderAsset(src, policyName, "180")
-                  ));
-              })}
-            </>
-          )}
-        </>
-      )}
+      !hasItemsNotInCategory(collectionItems, "furniture") && !hasItemsInCategory(collectionItems, "furniture") 
+      ? 
+      <Section key="mortal-collection" title="Mortal Collection" colums={1}>
+        <EmptyCollectionMessage>
+          Select adventurers below to quest in the Mortal Realms.
+        </EmptyCollectionMessage>
+      </Section> 
+      : 
+      <Section key="mortal-collection" title="Mortal Collection" colums={5}>
+        {hasItemsNotInCategory(collectionItems, "furniture") && (
+          <>
+            {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+              const policyName = policyNameKey as PolicyName;
+              return itemsArray.map((src) => (
+                src.class !== "furniture" && renderAsset(src, policyName)
+              ))
+            })}
+          </>
+        )
+        }
+            
+        {hasItemsInCategory(collectionItems, "furniture") && (
+          <>
+            <Header>
+              <Title>Furniture</Title>
+            </Header>
+            {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+              const policyName = policyNameKey as PolicyName;
+              return itemsArray.map((src) => (
+                src.class === "furniture" && renderAsset(src, policyName, "180")
+              ));
+            })}
+          </>
+        )}
+ 
     </Section>
   )
 }

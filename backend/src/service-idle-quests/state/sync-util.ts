@@ -14,7 +14,7 @@ export type SyncData<DbAsset extends PreSynced, InvAsset extends InventoryAsset>
 
 export const syncData = <DbAsset extends PreSynced, InvAsset extends InventoryAsset>( preSynced: DbAsset[], assetInventory: InvAsset[]): SyncData<DbAsset, InvAsset> => {
 
-    const inventoryRecord: { [assetRef: string]: InvAsset } = {}
+    try{const inventoryRecord: { [assetRef: string]: InvAsset } = {}
 
     assetInventory.forEach(asset => {
         if (inventoryRecord[asset.assetRef])
@@ -57,5 +57,8 @@ export const syncData = <DbAsset extends PreSynced, InvAsset extends InventoryAs
                 { toCreate, toDelete, surviving })
         }, empty)
         
-    return result
+    return result}
+    catch(e: any){
+        return { toCreate: [], toDelete: [], surviving: [] }
+    }
 }
