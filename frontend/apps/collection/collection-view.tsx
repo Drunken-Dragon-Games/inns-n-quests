@@ -23,14 +23,15 @@ const Container = styled.div`
 `;
 
 const CollectionComponent = () =>{
-    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType, mortalLocked } = useSelector((state: CollectionState) => ({
+    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType, mortalLocked, justLocked } = useSelector((state: CollectionState) => ({
             collectionItems: state.displayedCollectionItems,
             mortalItems: state.mortalCollectionItems,
             collectionCache: state.collectionCache,
             filter: state.collectionFilter,
             status: state.collectionFetchingState,
             displayArtType: state.displayArtStyle,
-            mortalLocked: state.mortalLocked
+            mortalLocked: state.mortalLocked,
+            justLocked: state.justLocked
     }))
     useEffect(() => {
       collectionTransitions.setDisplayCollection(collectionCache, filter)
@@ -40,7 +41,7 @@ const CollectionComponent = () =>{
     return(
     <Container>
       <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked}></DashboardView>
-      <MortalView collectionItems={mortalItems} mortalLocked={mortalLocked}/>
+      <MortalView collectionItems={mortalItems} mortalLocked={mortalLocked} justLocked={justLocked}/>
       <FilterView />
       <DisplayView collectionItems={collectionItems} artType={displayArtType} mortalLocked={mortalLocked}/>
       <div style={{ gridColumn: "2", gridRow: "3" }}>

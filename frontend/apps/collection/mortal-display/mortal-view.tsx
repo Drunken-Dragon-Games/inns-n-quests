@@ -46,13 +46,22 @@ const CollectibleName = styled.p`
     font-weight: bold;
     margin-bottom: 10px;
 `
-const EmptyCollectionMessage = styled.div`
+const EmptyCollectionHeaderMessage = styled.div`
     font-size: 30px;
     text-align: center;
     color: ${colors.textBeige};
     margin-top: 20px;
     ${OswaldFontFamily}
     font-weight: bold;
+    text-transform: uppercase;
+`
+
+const EmptyCollectionMessage = styled.div`
+    font-size: 20px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 20px;
+    ${OswaldFontFamily}
 `
 
 const removeFromMortalCollection = (asset: MortalCollectible, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
@@ -74,7 +83,7 @@ const hasItemsInCategory = (items: any, category: string) => {
   };
 
 
-export const MortalView = ({ collectionItems, mortalLocked}: { collectionItems: CollectionWithGameData, mortalLocked: boolean}) => {
+export const MortalView = ({ collectionItems, mortalLocked, justLocked}: { collectionItems: CollectionWithGameData, mortalLocked: boolean, justLocked: boolean}) => {
     
     type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
 
@@ -106,13 +115,19 @@ export const MortalView = ({ collectionItems, mortalLocked}: { collectionItems: 
     return (
       !hasItemsNotInCategory(collectionItems, "furniture") && !hasItemsInCategory(collectionItems, "furniture") 
       ? 
-      <Section key="mortal-collection" title="Mortal Collection" colums={1}>
-        <EmptyCollectionMessage>
+      <Section key="mortal-collection" title="Mortal Collection" colums={1} highlight={ !mortalLocked ? colors.dduGold : justLocked ? colors.successText : undefined}>
+        <EmptyCollectionHeaderMessage>
           Select adventurers below to quest in the Mortal Realms.
+        </EmptyCollectionHeaderMessage>
+        <EmptyCollectionMessage>
+          Select up to 5 adventurers and click "Lock".
+        </EmptyCollectionMessage>
+        <EmptyCollectionMessage>
+          Once a week you can make changes to your Mortal Collection.
         </EmptyCollectionMessage>
       </Section> 
       : 
-      <Section key="mortal-collection" title="Mortal Collection" colums={5}>
+      <Section key="mortal-collection" title="Mortal Collection" colums={5} highlight={ !mortalLocked ? colors.dduGold : justLocked ? "rgb(102, 176, 105)" : undefined}>
         {hasItemsNotInCategory(collectionItems, "furniture") && (
           <>
             {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {

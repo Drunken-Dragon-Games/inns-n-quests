@@ -92,7 +92,11 @@ export const CollectionThunks = {
         const setResult = await AccountApi.setMortalCollection(mortalCreatableAssets)
         if(setResult.status !== "ok") return dispatch(CollectionThunks.displayStatus({ ctype: "error", details: setResult.reason }))
         const result = await AccountApi.lockMortalCollection()
-        if (result.status === "ok") dispatch(actions.setMortalCollectionLocked(true))
+        if (result.status === "ok"){
+            dispatch(actions.setMortalCollectionLocked(true))
+            dispatch(actions.setJustLocked(true))
+            setTimeout(() => {dispatch(actions.setJustLocked(false))}, 500)
+        }
         else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: result.reason }))
     },
 
