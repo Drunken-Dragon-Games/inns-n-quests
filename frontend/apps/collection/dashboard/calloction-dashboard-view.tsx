@@ -31,7 +31,7 @@ export const DashboardView = ({ status, artType, mortalLocked }: {  status: Coll
             </OpenInnButtonContainer>
             <Button action={() => collectionTransitions.syncCollection()} size="regular"> Sync </Button>
             <Button action={() => collectionTransitions.flipDisplayArtType()} size="regular">
-                {artType} 
+                {artType == "miniature" ? "Splash Art" : "Miniature"} 
             </Button>
             <Button action={() => collectionTransitions.lockMortalCollection()} size="regular" disabled={mortalLocked}>
                 {mortalLocked ? "Locked" : "Lock"}
