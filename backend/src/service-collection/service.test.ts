@@ -301,11 +301,47 @@ test("syncUserCollection update", async () => {
     expect(dsl.areCollectionsEqual(collection, collectionDB)).toBe(true)
 })
 
+test("set mortal collection", async () => {
+    await service.syncUserCollection(userId)
+    const emptyMortal = await service.getMortalCollection(userId)
+    if(emptyMortal.ctype !== "success") fail("get mortal bad ctype")
+    expect(emptyMortal).toEqual({"ctype":"success","collection":{"pixelTiles":[],"adventurersOfThiolden":[],"grandMasterAdventurers":[]}})
+    dsl.identityLockReturns({status: "ok", locked: false})
+    const setResult = await service.setMortalCollection(userId, [{assetRef: "PixelTile1", quantity: "2"}, {assetRef: "GrandmasterAdventurer1", quantity: "1"}])
+    if(setResult.ctype !== "success") fail(setResult.error)
+    const updated = await service.getMortalCollection(userId)
+    if(updated.ctype !== "success") fail("get mortal bad ctype")
+    emptyMortal.collection.grandMasterAdventurers.push({
+        assetRef:"GrandmasterAdventurer1",
+        quantity:"1",
+        type:"Character",
+        aps:[8,9,4],
+        mortalRealmsActive:1,
+        name:"Grandmaster Adventurer #1",
+        splashArt:"https://cdn.ddu.gg/gmas/xl/GrandmasterAdventurer1.gif",
+        miniature:"https://cdn.ddu.gg/gmas/x3/GrandmasterAdventurer1.png",
+        class:"Ranger"
+    })
+    emptyMortal.collection.pixelTiles.push({
+        assetRef: "PixelTile1",
+        quantity: "2",
+        type: "Character",
+        aps: [4, 4, 4],
+        mortalRealmsActive: 2,
+        name: "PixelTile #1 Rogue",
+        miniature: "https://cdn.ddu.gg/pixeltiles/x3/pixel_tile_1.png",
+        splashArt: "https://cdn.ddu.gg/pixeltiles/xl/PixelTile1.png",
+        class: "Rogue"
+    })
+    expect(dsl.areCollectionsEqual(updated, emptyMortal)).toBe(true)
+})
+
 test("mortal collection add and remove",async () => {
     await service.syncUserCollection(userId)
     const emptyMortal = await service.getMortalCollection(userId)
     if(emptyMortal.ctype !== "success") fail("get mortal bad ctype")
     expect(emptyMortal).toEqual({"ctype":"success","collection":{"pixelTiles":[],"adventurersOfThiolden":[],"grandMasterAdventurers":[]}})
+    dsl.identityLockReturns({status: "ok", locked: false})
     await service.addMortalCollectible(userId, "GrandmasterAdventurer1")
     const oneMortal = await service.getMortalCollection(userId)
     if(oneMortal.ctype !== "success") fail("get mortal one bad ctype")

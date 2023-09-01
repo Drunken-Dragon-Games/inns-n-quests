@@ -55,6 +55,10 @@ export interface CollectionService {
      * Removes a collectible from the Mortal Realms.
      */
     removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>>
+
+    setMortalCollection(userId: string, assets: {assetRef: string, quantity: string}[], logger?: LoggingContext): Promise<SResult<{}>>
+
+    lockAllUsersCollections(logger?: LoggingContext): Promise<void>
 }
 
 export type GetCollectionResult<A extends object> = SResult<{ 

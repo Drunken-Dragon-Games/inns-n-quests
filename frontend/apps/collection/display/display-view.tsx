@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { CollectionWithUIMetada, UICollectible } from "../collection-state-models"
+import { CollectionWithUIMetada, MortalCollectible, UICollectible } from "../collection-state-models"
 import { OswaldFontFamily, PixelArtImage, Video, colors, vmax1 } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
@@ -31,13 +31,13 @@ const Title = styled.h2`
     grid-column: span 3;
     margin: 0;
 `
-const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
+const CollectibleContainer = styled.div<{ artType: "miniature" | "splashArt", maxHeight?: string | number}>`
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     min-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '350px')};
-    max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '400px')};
+    max-height: ${({ artType, maxHeight }) => artType === 'splashArt' ? 'none' : (maxHeight ? `${maxHeight}px` : '400px')};
 `;
 
 
@@ -59,6 +59,10 @@ const CollectibleName = styled.p`
     margin-bottom: 10px;
 `
 
+const GoldenP = styled.p`
+    color: ${colors.dduGold}
+`
+
 const isVideoFile = (src: string): boolean => {
     return src.endsWith('.mp4')
 }
@@ -68,69 +72,45 @@ const capitalizeFirstLetter = (input: string): string => {
     return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
-const modifyMortalCollection = (assetRef: string, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
-    collectionTransitions.modifyMortalCollection(assetRef, action, policy)
+const modifyMortalCollection = (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
+    collectionTransitions.modifyMortalCollection(asset, action, policy)
 }
 
 type RenderCollectible = { 
     src: UICollectible, 
     imageDimensions: { height: number,  width: number }, 
-    collectionName: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", 
-    isVideo?: boolean, 
-    artType: string,
+    collectionName: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers",
+    artType: "miniature" | "splashArt",
+    mortalLocked: boolean,
     type? : "Furniture" | "Character"
 }
 
-export const Collectible = ({ src, imageDimensions, collectionName, isVideo, artType, type}: RenderCollectible) => {
+export const Collectible = ({ src, imageDimensions, collectionName, artType, type, mortalLocked}: RenderCollectible) => {
     return (
-        <CollectibleContainer>
-            {isVideo ? (
-                <Video src={src.splashArt} height={imageDimensions.height} width={imageDimensions.width} units={vmax1} />
-            ) : (
-            <> { 
-                artType === 'splashArt' ? (
-                    <PixelArtImage
-                        src={src.splashArt}
-                        alt={src.name}
-                        height={imageDimensions.height}
-                        width={imageDimensions.width}
-                    />
-                ) : (
-                    type === "Furniture" ? (
-                        <FurnitureSprite
-                            furniture={{
-                                sprite: src.miniature,
-                                assetRef: src.assetRef,
-                                name: src.name
-                            }}
-                        />
-                    ) : (
-                        <CharacterSprite
-                            character={{
-                                sprite: src.miniature,
-                                collection: collectionName,
-                                class: src.class,
-                                assetRef: src.assetRef
-                            }}
-                        />
-                    )
-                )
+        <CollectibleContainer artType={artType}>
+            {
+            artType === 'splashArt' ?
+                isVideoFile(src.splashArt) ?
+                    <Video src={src.splashArt} height={imageDimensions.height} width={imageDimensions.width} units={vmax1} /> :
+                    <PixelArtImage src={src.splashArt} alt={src.name} height={imageDimensions.height} width={imageDimensions.width}/>
+                :
+                type === "Furniture" ? 
+                    <FurnitureSprite furniture={{ sprite: src.miniature, assetRef: src.assetRef, name: src.name}}/> :
+                    <CharacterSprite character={{sprite: src.miniature,collection: collectionName,class: src.class,assetRef: src.assetRef}} />  
             }
-             </>
-            )}
             <CollectibleInfo>
                 <CollectibleName>{capitalizeFirstLetter(src.name)}</CollectibleName>
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
-                <p>Quantity: {src.quantity} </p>
-                <p>Pasive Stake: {src.stakingContribution}</p>
+                { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
+                <GoldenP>{src.stakingContribution} $DS/week</GoldenP>
             </CollectibleInfo>
-            { type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src.assetRef, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
+            { mortalLocked || type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>
     )
 }
 
-export const DisplayView = ({ collectionItems, artType }: { collectionItems: CollectionWithUIMetada, artType: "miniature" | "splashArt" }) => { 
+export const DisplayView = ({ collectionItems, artType, mortalLocked }: { collectionItems: CollectionWithUIMetada, artType: "miniature" | "splashArt", mortalLocked: boolean }) => { 
     const imageDimensions = {
         "pixelTiles": { height: 12,  width: 9 },
         "grandMasterAdventurers": { height: 12,  width: 12 },
@@ -138,18 +118,18 @@ export const DisplayView = ({ collectionItems, artType }: { collectionItems: Col
     }
 
     return (
-        <Section key={"Ethernal Collection"} title="Ethernal Collection" colums={3}>
+        <Section key={"Eternal Collection"} title="Eternal Collection" colums={3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" isVideo={artType == "splashArt" && isVideoFile(src.splashArt)} artType={artType} />
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} mortalLocked={mortalLocked}/>
             )}
             {collectionItems.grandMasterAdventurers.map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.grandMasterAdventurers} collectionName="grandMasterAdventurers" artType={artType}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.grandMasterAdventurers} collectionName="grandMasterAdventurers" artType={artType} mortalLocked={mortalLocked}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class !== 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} mortalLocked={mortalLocked}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class == 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"} mortalLocked={mortalLocked}/>
             )}
         </Section>
     )

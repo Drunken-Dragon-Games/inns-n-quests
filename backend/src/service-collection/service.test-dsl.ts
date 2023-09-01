@@ -1,4 +1,5 @@
 import { ListResponse } from "../service-asset-management";
+import { GetCollectionLockResult } from "../service-identity";
 import AssetManagementServiceMock from "../tools-utils/mocks/asset-management-service-mock";
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock";
 import { Collection } from "./models";
@@ -23,6 +24,10 @@ export default class ServiceTestDsl {
     //mock the asset seice response once
     assetListReturnsOnce(response: ListResponse){
         this.assetManagementService.listReturns(response)
+    }
+
+    identityLockReturns(response: GetCollectionLockResult){
+        this.identityService.getCollectionLockStateReturns(response)
     }
 
     areCollectionsEqual<A extends object>(col1: CollectionResponse<A>, col2: CollectionResponse<A>): boolean {

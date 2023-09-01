@@ -366,3 +366,20 @@ test("update user: ok", async () => {
     expect(userInfo2.nickname).toContain("Vledic")
     expect(userInfo.userId).toBe(userInfo2.userId)
 })
+
+test("set collection lock", async () => {
+    const usersIds = await service.listAllUserIds()
+    usersIds.forEach(async (userId) => {
+        const colecttionLocked = await service.getCollectionLockState(userId)
+        if(colecttionLocked.status !== "ok") fail(colecttionLocked.reason)
+        expect(colecttionLocked.locked).toBe(false)
+    })
+
+    await service.setCollectionLockAll(true)
+
+    usersIds.forEach(async (userId) => {
+        const colecttionLocked = await service.getCollectionLockState(userId)
+        if(colecttionLocked.status !== "ok") fail(colecttionLocked.reason)
+        expect(colecttionLocked.locked).toBe(true)
+    })
+})

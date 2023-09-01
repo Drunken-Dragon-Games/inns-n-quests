@@ -1,5 +1,5 @@
 import { CollectionFilter } from "../collection/collection-state-models"
-import { AccountBackend } from "./account-backend"
+import { AccountBackend, CollectionAssets } from "./account-backend"
 import { SupportedWallet } from "./account-dsl"
 import { AccountTransitions } from "./account-transitions"
 
@@ -22,6 +22,18 @@ export const AccountApi = {
 
     getUserMortalCollection(){
         return AccountBackend.getUserMortalCollection()
+    },
+
+    getMortalCollectionLockedState(){
+        return AccountBackend.getMortalLockState()
+    },
+
+    setMortalCollection(assets: CollectionAssets){
+        return AccountBackend.setMortalCollection(assets)
+    },
+
+    lockMortalCollection(){
+        return AccountBackend.lockMortalCollection()
     },
 
     modifyUserMortalCollection(assetRef: string, action: "add" | "remove"){

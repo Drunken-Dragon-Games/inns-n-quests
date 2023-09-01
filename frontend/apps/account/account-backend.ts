@@ -131,6 +131,21 @@ export const AccountBackend = {
         return result.data
     },
 
+    async setMortalCollection(assets: CollectionAssets, traceId?: string): Promise<CleanAssociationTxResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/set-mortal-collection", {assets}, traceId)
+        return result.data
+    },
+
+    async getMortalLockState(traceId?: string): Promise<MortalCollectionLockedStateResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/get-mortal-collection-state", traceId)
+        return result.data
+    },
+
+    async lockMortalCollection(traceId?: string): Promise<MortalCollectionLockedStateResult>{
+        const result = await accountRequestWRefresh("POST", "/assets/lock-mortal-collection", traceId)
+        return result.data
+    },
+
     async modifyMortalCollection(assetRef: string, action: "add" | "remove", traceId?: string): Promise<ModifyMortalCollectionResult>{
         const result = await accountRequestWRefresh("POST", "/assets/modify-mortal-collection", {assetRef, action} ,traceId)
         return result.data
@@ -153,6 +168,8 @@ export const AccountBackend = {
         return result.data
     }
 }
+
+export type CollectionAssets = { assetRef: string; quantity: string; }[]
 
 export type ClaimFaucetResult
     = { status: "ok", tx: string }
@@ -237,6 +254,10 @@ export type UserMortalCollectionResult
 
 export type ModifyMortalCollectionResult
     = {status: "ok"}
+    | {status: "invalid", reason: string}
+
+export type MortalCollectionLockedStateResult
+    = {status: "ok", locked: boolean}
     | {status: "invalid", reason: string}
 
 async function accountRequestWRefresh<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {

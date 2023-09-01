@@ -1,11 +1,12 @@
 import { v4 } from "uuid"
 import { AccountApi, SupportedWallet, ExtractWalletResult } from "../account"
 import { CollectionThunk, collectinState } from "./collection-state"
-import { CollectionFetchingState, CollectionFilter, CollectionWithUIMetada } from "./collection-state-models"
+import { CollectionFetchingState, CollectionFilter, CollectionWithGameData, CollectionWithUIMetada, MortalCollectible } from "./collection-state-models"
 import { Blockfrost, Lucid } from "lucid-cardano"
 import { blockfrostApiKey, blockfrostUri, cardanoNetwork} from "../../setting"
 import { isEmpty } from "../common"
 import Collection from "../home/homePage/compoenents/basic_components/collection"
+import { CollectionAssets } from "../account/account-backend"
 
 const actions = collectinState.actions
 
@@ -51,31 +52,52 @@ export const CollectionThunks = {
         }
     },
 
-    modifyMortalCollection: (assetRef: string, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"): CollectionThunk => async (dispatch, getState) => {
-        const modifyResult = await AccountApi.modifyUserMortalCollection(assetRef, action)
-        if (modifyResult.status !== "ok") return (CollectionThunks.displayStatus({ ctype: "error", details: modifyResult.reason }))
-        const result = await AccountApi.getUserMortalCollection()
-        if (result.status !== "ok") return dispatch(CollectionThunks.displayStatus({ ctype: "error", details: result.reason }))
+    modifyMortalCollection: (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"): CollectionThunk => async (dispatch, getState) => {
         const state = getState()
-        const [foundPage, foundCollection] = Object.entries(state.collectionCache).find(([pageNumber, collection]) => 
-            collection[policy].some((policyItem) => policyItem.assetRef === assetRef)
-        ) || []
+        //TODO: This will eventually come from an endpoint
+        const maxAmount = 5
+        if(countCollectionItems(state.mortalCollectionItems) >= maxAmount && action == "add") return
+        const foundEntry = Object.entries(state.collectionCache).find(([, collection]) =>
+            collection[policy].some(item => item.assetRef === asset.assetRef)
+        )
 
-        if (foundCollection) {
-            const collection = { ...foundCollection } // Create a shallow copy
-            const ethernalIndex = collection[policy].findIndex((policy) => policy.assetRef === assetRef)
-            const newActive = collection[policy][ethernalIndex].mortalRealmsActive + (action === "add" ? 1 : -1)
-            
-            collection[policy] = [...collection[policy]]
-            collection[policy][ethernalIndex] = { ...collection[policy][ethernalIndex], mortalRealmsActive: newActive }
-            
-            dispatch(actions.addToCollectionCache({ page: Number(foundPage), collection, hasMore: collection.hasMore }))
+        if (foundEntry) {
+            const [foundPage, foundCollection] = foundEntry
+            const updatedCollection = updateCollection({ ...foundCollection }, policy, asset, action)
+            dispatch(actions.addToCollectionCache({ page: Number(foundPage), collection: updatedCollection, hasMore: updatedCollection.hasMore }))
 
-            if(state.collectionFilter.page === Number(foundPage))
-                dispatch(CollectionThunks.getCollection({ ...state.collectionCache, [state.collectionFilter.page]: collection }, state.collectionFilter))
+            if (state.collectionFilter.page === Number(foundPage)) {
+                dispatch(CollectionThunks.getCollection({ ...state.collectionCache, [state.collectionFilter.page]: updatedCollection }, state.collectionFilter))
+            }
         }
-        dispatch(actions.setMortalCollection(result.collection))
-        
+
+        const updatedMortalCollection = updateMortalCollection({ ...state.mortalCollectionItems }, policy, asset, action);
+        dispatch(actions.setMortalCollection(updatedMortalCollection));  
+    },
+
+    getMortalCollectionLockedState: (): CollectionThunk => async (dispatch) => {
+        const stateResult = await AccountApi.getMortalCollectionLockedState()
+        if (stateResult.status === "ok") dispatch(actions.setMortalCollectionLocked(stateResult.locked))
+        else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: stateResult.reason }))
+    },
+
+    lockMortalCollection: (): CollectionThunk => async (dispatch, getState) => {
+        const state = getState()
+        const mortalColleciton = state.mortalCollectionItems
+        const mortalCreatableAssets = Object.entries(mortalColleciton).reduce((acc, [_policyName, policyItems]) => {
+            const policyAssets = policyItems.map((item) => {return {assetRef: item.assetRef, quantity: item.quantity}})
+            acc.push(...policyAssets)
+            return acc
+        }, [] as CollectionAssets)
+        const setResult = await AccountApi.setMortalCollection(mortalCreatableAssets)
+        if(setResult.status !== "ok") return dispatch(CollectionThunks.displayStatus({ ctype: "error", details: setResult.reason }))
+        const result = await AccountApi.lockMortalCollection()
+        if (result.status === "ok"){
+            dispatch(actions.setMortalCollectionLocked(true))
+            dispatch(actions.setJustLocked(true))
+            setTimeout(() => {dispatch(actions.setJustLocked(false))}, 500)
+        }
+        else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: result.reason }))
     },
 
     setFilter: (filter: CollectionFilter): CollectionThunk => async (dispatch) => {
@@ -113,4 +135,30 @@ export const CollectionThunks = {
         }
         }
     }
+}
+const countCollectionItems = (collection: CollectionWithGameData): number => {
+    return Object.entries(collection).reduce((total, [_policyName, policyItems]) =>
+        total + policyItems.reduce((policyTotal, item) =>  policyTotal + Number(item.quantity), 0)
+    , 0)
+}
+const updateCollection = (collection: CollectionWithUIMetada & {hasMore: boolean} , policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", asset: MortalCollectible, action: "add" | "remove") => {
+    const index = collection[policy].findIndex(item => item.assetRef === asset.assetRef)
+    const newActive = collection[policy][index].mortalRealmsActive + (action === "add" ? 1 : -1)
+    collection[policy] = [...collection[policy]]
+    collection[policy][index] = { ...collection[policy][index], mortalRealmsActive: newActive }
+    return collection
+}
+
+const updateMortalCollection = (mortalCollection: CollectionWithGameData, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers", asset: MortalCollectible, action: "add" | "remove") => {
+    const index = mortalCollection[policy].findIndex(item => item.assetRef === asset.assetRef)
+    const updatedItems = [...mortalCollection[policy]]
+
+    if (index !== -1) {
+        const newQuantity = (Number(updatedItems[index].quantity) + (action === "add" ? 1 : -1)).toString()
+        if (newQuantity === "0") updatedItems.splice(index, 1)
+        else updatedItems[index] = { ...updatedItems[index], quantity: newQuantity }
+    } 
+    else if (action === "add") updatedItems.push({ ...asset, quantity: "1" })
+
+    return { ...mortalCollection, [policy]: updatedItems };
 }

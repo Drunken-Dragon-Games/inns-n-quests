@@ -1,6 +1,6 @@
 import { SupportedWallet } from "../account"
 import { CollectionStore } from "./collection-state"
-import { CollectionFilter, CollectionWithUIMetada } from "./collection-state-models"
+import { CollectionFilter, CollectionWithUIMetada, MortalCollectible } from "./collection-state-models"
 import { CollectionThunks } from "./collection-thunks"
 
 const dispatch = CollectionStore.dispatch
@@ -18,8 +18,16 @@ export const collectionTransitions = {
         dispatch(CollectionThunks.syncCollection())
     },
 
-    modifyMortalCollection(assetRef: string, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"){
-        dispatch(CollectionThunks.modifyMortalCollection(assetRef, action, policy))
+    modifyMortalCollection(asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"){
+        dispatch(CollectionThunks.modifyMortalCollection(asset, action, policy))
+    },
+
+    getMortalCollectionLockedState(){
+        dispatch(CollectionThunks.getMortalCollectionLockedState())
+    },
+
+    lockMortalCollection() {
+        dispatch(CollectionThunks.lockMortalCollection())
     },
 
     setFilter(filter: CollectionFilter){

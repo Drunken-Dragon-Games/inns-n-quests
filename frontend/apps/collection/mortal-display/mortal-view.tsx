@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada } from "../collection-state-models"
+import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada, MortalCollectible } from "../collection-state-models"
 import { MessiriFontFamily, PixelArtImage, Video, vmax1, colors, OswaldFontFamily } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
@@ -46,9 +46,26 @@ const CollectibleName = styled.p`
     font-weight: bold;
     margin-bottom: 10px;
 `
+const EmptyCollectionHeaderMessage = styled.div`
+    font-size: 30px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 20px;
+    ${OswaldFontFamily}
+    font-weight: bold;
+    text-transform: uppercase;
+`
 
-const removeFromMortalCollection = (assetRef: string, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
-    collectionTransitions.modifyMortalCollection(assetRef, "remove", policy)
+const EmptyCollectionMessage = styled.div`
+    font-size: 20px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 20px;
+    ${OswaldFontFamily}
+`
+
+const removeFromMortalCollection = (asset: MortalCollectible, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
+    collectionTransitions.modifyMortalCollection(asset, "remove", policy)
 }
 
 
@@ -62,11 +79,11 @@ const hasItemsInCategory = (items: any, category: string) => {
   };
   
   const hasItemsNotInCategory = (items: any, category: string) => {
-    return Object.values(items).some((itemsArray: any) => itemsArray.some((src: any) => src.class !== category));
+    return Object.values(items).some((itemsArray: any) => itemsArray.some((src: any) => src.class !== category))
   };
 
 
-export const MortalView = ({ collectionItems}: { collectionItems: CollectionWithGameData}) => {
+export const MortalView = ({ collectionItems, mortalLocked, justLocked}: { collectionItems: CollectionWithGameData, mortalLocked: boolean, justLocked: boolean}) => {
     
     type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
 
@@ -88,7 +105,7 @@ export const MortalView = ({ collectionItems}: { collectionItems: CollectionWith
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
             </CollectibleInfo>
-            <Button action ={ () => removeFromMortalCollection(src.assetRef, policyName)} size="regular">Remove</Button>
+            {mortalLocked ? <></> : <Button action ={ () => removeFromMortalCollection(src, policyName)} size="regular">Remove</Button>}
             </CollectibleContainer>
           );
         }
@@ -96,35 +113,47 @@ export const MortalView = ({ collectionItems}: { collectionItems: CollectionWith
       }
 
     return (
-    <Section  key="mortal-collection" title="Mortal Collection" colums={5}>
-      {(
-        <>
-          {hasItemsNotInCategory(collectionItems, "furniture") && (
-            <>
-              {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-                  const policyName = policyNameKey as PolicyName
-                  return itemsArray.map((src) => (
-                      src.class !== "furniture" && renderAsset(src, policyName)
-                  ));
-              })}
-            </>
-          )}
-          
-          {hasItemsInCategory(collectionItems, "furniture") && (
-            <>
-              <Header>
-                  <Title>Furniture</Title>
-              </Header>
-              {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-                  const policyName = policyNameKey as PolicyName
-                  return itemsArray.map((src) => (
-                      src.class === "furniture" && renderAsset(src, policyName, "180")
-                  ));
-              })}
-            </>
-          )}
-        </>
-      )}
+      !hasItemsNotInCategory(collectionItems, "furniture") && !hasItemsInCategory(collectionItems, "furniture") 
+      ? 
+      <Section key="mortal-collection" title="Mortal Collection" colums={1} highlight={ !mortalLocked ? colors.infoText : justLocked ? colors.successText : colors.dduGold}>
+        <EmptyCollectionHeaderMessage>
+          Select adventurers below to quest in the Mortal Realms.
+        </EmptyCollectionHeaderMessage>
+        <EmptyCollectionMessage>
+          Select up to 5 adventurers and click "Lock".
+        </EmptyCollectionMessage>
+        <EmptyCollectionMessage>
+          Once a week you can make changes to your Mortal Collection.
+        </EmptyCollectionMessage>
+      </Section> 
+      : 
+      <Section key="mortal-collection" title="Mortal Collection" colums={5} highlight={ !mortalLocked ? colors.infoText : justLocked ? colors.successHigthlight : colors.dduGold}>
+        {hasItemsNotInCategory(collectionItems, "furniture") && (
+          <>
+            {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+              const policyName = policyNameKey as PolicyName;
+              return itemsArray.map((src) => (
+                src.class !== "furniture" && renderAsset(src, policyName)
+              ))
+            })}
+          </>
+        )
+        }
+            
+        {hasItemsInCategory(collectionItems, "furniture") && (
+          <>
+            <Header>
+              <Title>Furniture</Title>
+            </Header>
+            {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
+              const policyName = policyNameKey as PolicyName;
+              return itemsArray.map((src) => (
+                src.class === "furniture" && renderAsset(src, policyName, "180")
+              ));
+            })}
+          </>
+        )}
+ 
     </Section>
   )
 }

@@ -18,6 +18,7 @@ import * as syncedAssets from "./state/assets-sync-db"
 import { Records, Rewards } from "./staking-rewards/dsl"
 import {SyncedAssets, relevantPolicies, SyncedMortalAssets} from "./state/dsl"
 import { Calendar } from "../tools-utils/calendar"
+import { CreateMortal, CreateSyncedAsset } from "./state/models"
 
 export type CollectionServiceDependencies = {
     database: Sequelize
@@ -196,27 +197,24 @@ export class CollectionServiceDsl implements CollectionService {
         logger?.log.info(`Granting weekly rewards`)
         const weeklyRecord = await this.records.createWeekly()
         if (weeklyRecord.ctype !== "success") {
-            logger?.log.error(`Failed to create daily record beaocuse: ${weeklyRecord.error}`)
+            logger?.log.error(`Failed to create weekly record becouse: ${weeklyRecord.error}`)
             return
         }
-
+        await this.identityService.setCollectionLockAll(false)
         //this can be refectored to use a single reduce statment
         //but aparently thats not such a great idea
         //https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await
         const pendingRewards = await this.rewards.getPreviusWeekTotals()
-        
         let totalGranted = 0
         for (const [userId, reward] of Object.entries(pendingRewards)) {
             const grantRecord = await this.rewards.createWeekly(userId)
             if (grantRecord.ctype !== "success") continue
-            console.log(`created weekly reward`)
             await this.assetManagementService.grant(userId, {
                 policyId: this.wellKnownPolicies.dragonSilver.policyId,
                 unit: "DragonSilver",
-                quantity: reward.toString()
+                quantity: reward.toFixed(0)
             })
             totalGranted += reward
-            console.log(`compleating rward with ${reward}`)
             this.rewards.completeWeekly(userId, reward.toString())
         }
         console.log({totalGranted})
@@ -230,6 +228,14 @@ export class CollectionServiceDsl implements CollectionService {
         const { syncedAssetChanges, fullCollection } = await this.syncedAssets.determineUpdates(userId, assetList.inventory)
         await this.syncedAssets.updateDatabase(syncedAssetChanges, this.database, logger)
         return {ctype: "success", collection: fullCollection }
+    }
+
+    async lockAllUsersCollections(logger?: LoggingContext): Promise<void>{
+        logger?.log.info("locking all collections")
+        const userIds = await this.identityService.listAllUserIds(logger)
+        await Promise.all(userIds.map(async (userId) => {
+            await this.identityService.setCollectionLock(userId, true)
+        }))
     }
 
     /**
@@ -247,7 +253,7 @@ export class CollectionServiceDsl implements CollectionService {
      * Picks a collectible to be used in the Mortal Realms.
      */
     async addMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
-        if(this.mortalCollectionLocked(userId)) return {ctype: "failure", error: `Could not Add asset as Mortal Collection is currently locked`}
+        if((await this.mortalCollectionLocked(userId))) return {ctype: "failure", error: `Could not Add asset as Mortal Collection is currently locked`}
         const assetResult = await this.syncedAssets.getAsset(userId, assetRef)
         if (assetResult.ctype !== "success") return {ctype: "failure", error: `Could not Add asset ${assetResult.error}`}
         if(assetResult.asset.type === "Furniture") return {ctype: "failure", error: `Could not Add asset as mortal collection does not inlcude furniture at the moment`}
@@ -260,8 +266,33 @@ export class CollectionServiceDsl implements CollectionService {
      * Removes a collectible from the Mortal Realms.
      */
     async removeMortalCollectible(userId: string, assetRef: string, logger?: LoggingContext): Promise<SResult<{}>> {
-        if(this.mortalCollectionLocked(userId)) return {ctype: "failure", error: `Could not remove asset as Mortal Collection is currently locked`}
+        if((await this.mortalCollectionLocked(userId))) return {ctype: "failure", error: `Could not remove asset as Mortal Collection is currently locked`}
         return SyncedMortalAssets.removeAsset(userId, assetRef)
+    }
+
+    async setMortalCollection(userId: string, assets: {assetRef: string, quantity: string}[], logger?: LoggingContext | undefined): Promise<SResult<{}>> {
+        if((await this.mortalCollectionLocked(userId))) return {ctype: "failure", error: `Could not remove asset as Mortal Collection is currently locked`}
+        const dbTransaction = await this.database.transaction()
+        try{
+            const newAssets: (CreateMortal | null)[] = await Promise.all(assets.map(async (asset) => {
+                if (Number(asset.quantity) < 1) return null
+                const assetResult = await this.syncedAssets.getAsset(userId, asset.assetRef)
+                if (assetResult.ctype !== "success" || assetResult.asset.type === "Furniture") return null
+                return Number(assetResult.asset.quantity) < Number(asset.quantity)
+                    ? {...assetResult.asset.dataValues}
+                    : { ...assetResult.asset.dataValues, quantity: asset.quantity}
+            }))
+            
+            const filteredNewAssets: CreateMortal[] = newAssets.filter((asset) => asset !== null) as CreateMortal[]
+            const setResult = await SyncedMortalAssets.setMortal(userId, filteredNewAssets, dbTransaction)
+            if (setResult.ctype !== "success" ) throw new Error(setResult.error)
+            await dbTransaction.commit()
+            return {ctype: "success"}
+        }
+        catch(e: any){
+            await dbTransaction.rollback()
+            return {ctype: "failure", error: e.message}
+        }
     }
 
     private async hydrateCollectionWithMetadata(assets: Collection<StoredMetadata>, userId: string): Promise<Collection<CollectibleMetadata>> {
@@ -431,9 +462,10 @@ export class CollectionServiceDsl implements CollectionService {
         return {stakingContribution: singleReward * Number(quantity)}
     }
 
-    private mortalCollectionLocked(userId: string): boolean {
-        //TODO: decide conditions for locking collection
-        return false
+    private async mortalCollectionLocked(userId: string): Promise<boolean> {
+        const result = await this.identityService.getCollectionLockState(userId)
+        if(result.status == "invalid") return true
+        return result.locked
     }
 }
 

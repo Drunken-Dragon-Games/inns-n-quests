@@ -224,4 +224,34 @@ export class Users {
         const fixed = await iterate(0)
         console.log(`Fixed ${fixed} discord usernames`)
     }
+
+    static async lockUserMortalCollection(userId: string): Promise<Attempt<Unit>>{
+        const user = await User.findOne({ where: { userId } })
+        if (user == null) return failed
+        user.mortalCollectionLocked = true
+        await user.save()
+        return succeeded(unit)
+    }
+
+    static async unlockUserMortalCollection(userId: string): Promise<Attempt<Unit>>{
+        const user = await User.findOne({ where: { userId } })
+        if (user == null) return failed
+        user.mortalCollectionLocked = false
+        await user.save()
+        return succeeded(unit)
+    }
+
+    static async setAllUsersCollectionLock(state: boolean): Promise<Attempt<Unit>>{
+        await User.update(
+            { mortalCollectionLocked: state },
+            { where: { mortalCollectionLocked: !state}}
+        )
+        return succeeded(unit)
+    }
+
+    static async getUserMortalCollectionState(userId: string): Promise<Attempt<{locked: boolean}>>{
+        const user = await User.findOne({ where: { userId } })
+        if (user == null) return failed
+        return succeeded({locked: user.mortalCollectionLocked})
+    }
 }

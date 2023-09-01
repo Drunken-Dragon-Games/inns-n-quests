@@ -3,6 +3,9 @@ import { MenuButton, AppsLabel, SocialMedia } from "./components/basic_component
 import { appsToShow, socialMedia } from "../../../setting"
 import { useState } from "react"
 import { useRouter } from 'next/router'
+import { AccountState, accountStore } from "../../account/account-state"
+import { Provider } from "react-redux"
+import { useSelector } from "react-redux"
 
 interface LateralBarComponent{
     isOpen: boolean
@@ -121,11 +124,11 @@ const SocialMediaWrapper = styled.div`
     }
 `
 
-const LateralBar = (): JSX.Element => {
+const LateralBarNoProvider = (): JSX.Element => {
 
     const [isOpen, setIsOpen] =useState<boolean>(false)
     const router = useRouter()
-    
+    const state = useSelector((state: AccountState) => state)
     return (<>
             <LateralBarComponent isOpen ={isOpen}>
                 <MenuButtonWrapper>
@@ -139,7 +142,7 @@ const LateralBar = (): JSX.Element => {
                     {appsToShow.map((el => {
                         return (
                             <AppWrapper key={el.name}>
-                                <AppsLabel url={el.url} active ={el.url == router.pathname } app = {el.icon} disable = {el.disable}>{el.name}</AppsLabel>
+                                <AppsLabel url={el.url} active ={el.url == router.pathname } app = {el.icon} disable = {el.loginOnly && !state.userInfo ? true : el.disable} hoverMessage={el.loginOnly && !state.userInfo ? `Please Log in to see ${el.hoverMessage}` : el.hoverMessage}>{el.name}</AppsLabel>
                             </AppWrapper>
                         )
                     }))}
@@ -163,5 +166,15 @@ const LateralBar = (): JSX.Element => {
             </LateralBarComponent>
     </>)
 }
+
+export const LateralBar = () => {
+    return (
+        <Provider store={accountStore}>
+            <LateralBarNoProvider/>
+      </Provider>
+    )
+}
+      
+  
 
 export default LateralBar

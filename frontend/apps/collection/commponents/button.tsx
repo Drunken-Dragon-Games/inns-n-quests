@@ -15,8 +15,9 @@ const ButtonWrapper = styled.div<ButtonWrapperProps>`
     ${props => props.size == "big" ? "max-width: 466.66px !important; max-height: 121.34px !important;" : "max-width: 466.66px !important; max-height: 121.344 !important;"};
     cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
     opacity: ${(props) => (props.disabled ? "0.5" : "1")};
+    pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
     position: relative;
-    z-index: 100;
+    z-index: 2;
 
     @media only screen and (max-width: 414px) {
         width: 35vw;
@@ -65,14 +66,15 @@ interface ButtonProps {
     action: () => void;
     children: string;
     size?: "big" | "regular" | "small";
-    disabled: boolean;
+    disabled?: boolean;
   }
 
-export const Button = ({action, children, size, disabled } : ButtonProps): JSX.Element =>{
+export const Button = ({action, children, size, disabled = false } : ButtonProps): JSX.Element =>{
 
     const [hover, setHover] = useState<boolean>(false)
+    const handleClick = () => { if (!disabled) action()}
     return(<>
-            <ButtonWrapper onClick={action} onMouseOver = {() => setHover(true)} onMouseLeave = {() => setHover(false)} size ={size} disabled={disabled}>
+            <ButtonWrapper onClick={handleClick} onMouseOver = {() => setHover(true)} onMouseLeave = {() => setHover(false)} size ={size} disabled={disabled}>
                 <ImageWrapper hover ={hover && !disabled}>
                     <Image src ="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/utils/button/button_hover.svg" alt="drunken dragon button" width={10.262} height={2.668} layout="responsive" />
                 </ImageWrapper>

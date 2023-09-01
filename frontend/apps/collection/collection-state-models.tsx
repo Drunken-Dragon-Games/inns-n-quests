@@ -1,6 +1,7 @@
 import { CharacterClass, CharacterClasses } from "../game/game-vm"
 
 type Collectible = { assetRef: string, quantity: string, type: "Character" | "Furniture" }
+export type MortalCollectible = Collectible & CollectibleMetadata
 export type UICollectible = Collectible & CollectibleStakingInfo & CollectibleMetadata
 
 export type PolicyCollectibles<A extends object> = (Collectible & A)[]
