@@ -151,9 +151,10 @@ const updateMortalCollection = (mortalCollection: CollectionWithGameData, policy
 
     if (index !== -1) {
         const newQuantity = (Number(updatedItems[index].quantity) + (action === "add" ? 1 : -1)).toString()
-        updatedItems[index] = { ...updatedItems[index], quantity: newQuantity }
+        if (newQuantity === "0") updatedItems.splice(index, 1)
+        else updatedItems[index] = { ...updatedItems[index], quantity: newQuantity }
     } 
-    else updatedItems.push({ ...asset, quantity: "1" })
+    else if (action === "add") updatedItems.push({ ...asset, quantity: "1" })
 
-    return {...mortalCollection, [policy]: updatedItems}
+    return { ...mortalCollection, [policy]: updatedItems };
 }

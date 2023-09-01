@@ -275,6 +275,7 @@ export class CollectionServiceDsl implements CollectionService {
         const dbTransaction = await this.database.transaction()
         try{
             const newAssets: (CreateMortal | null)[] = await Promise.all(assets.map(async (asset) => {
+                if (Number(asset.quantity) < 1) return null
                 const assetResult = await this.syncedAssets.getAsset(userId, asset.assetRef)
                 if (assetResult.ctype !== "success" || assetResult.asset.type === "Furniture") return null
                 return Number(assetResult.asset.quantity) < Number(asset.quantity)
