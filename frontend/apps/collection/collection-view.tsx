@@ -53,13 +53,14 @@ const CollectionComponent = () =>{
 
 const CollectionView = ():JSX.Element =>{ 
     
-    return(<>
-                <LateralBar/>
-                <NavBarApp/>
-                <Provider store={CollectionStore}>
-                    <CollectionComponent/>
-                </Provider>
-                <Footer/>
+    return(
+    <>   
+      <LateralBar/>
+      <NavBarApp/>
+      <Provider store={CollectionStore}>
+          <CollectionComponent/>
+      </Provider>
+      <Footer/>
     </>)
 }
 
