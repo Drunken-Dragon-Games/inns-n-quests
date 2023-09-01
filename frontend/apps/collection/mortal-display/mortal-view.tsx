@@ -115,7 +115,7 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked}: { colle
     return (
       !hasItemsNotInCategory(collectionItems, "furniture") && !hasItemsInCategory(collectionItems, "furniture") 
       ? 
-      <Section key="mortal-collection" title="Mortal Collection" colums={1} highlight={ !mortalLocked ? colors.dduGold : justLocked ? colors.successText : undefined}>
+      <Section key="mortal-collection" title="Mortal Collection" colums={1} highlight={ !mortalLocked ? colors.infoText : justLocked ? colors.successText : colors.dduGold}>
         <EmptyCollectionHeaderMessage>
           Select adventurers below to quest in the Mortal Realms.
         </EmptyCollectionHeaderMessage>
@@ -127,7 +127,7 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked}: { colle
         </EmptyCollectionMessage>
       </Section> 
       : 
-      <Section key="mortal-collection" title="Mortal Collection" colums={5} highlight={ !mortalLocked ? colors.dduGold : justLocked ? colors.successHigthlight : undefined}>
+      <Section key="mortal-collection" title="Mortal Collection" colums={5} highlight={ !mortalLocked ? colors.infoText : justLocked ? colors.successHigthlight : colors.dduGold}>
         {hasItemsNotInCategory(collectionItems, "furniture") && (
           <>
             {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
