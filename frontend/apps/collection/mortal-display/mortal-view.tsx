@@ -127,7 +127,7 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked}: { colle
         </EmptyCollectionMessage>
       </Section> 
       : 
-      <Section key="mortal-collection" title="Mortal Collection" colums={5} highlight={ !mortalLocked ? colors.dduGold : justLocked ? "rgb(102, 176, 105)" : undefined}>
+      <Section key="mortal-collection" title="Mortal Collection" colums={5} highlight={ !mortalLocked ? colors.dduGold : justLocked ? colors.successHigthlight : undefined}>
         {hasItemsNotInCategory(collectionItems, "furniture") && (
           <>
             {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {

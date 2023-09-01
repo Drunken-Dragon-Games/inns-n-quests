@@ -7,6 +7,7 @@ export const colors = {
     infoText:          "white",
     successBackground: "rgb(12, 19, 13)",
     successText:       "rgb(204, 232, 205)",
+    successHigthlight: "rgb(102, 176, 105)",
     textGray:          "rgb(74, 83, 98)",
     textBeige:         "#CAC6BE",
     dduBackground:     "#0B1015",
