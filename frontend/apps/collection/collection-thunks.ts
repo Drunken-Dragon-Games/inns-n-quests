@@ -33,13 +33,17 @@ export const CollectionThunks = {
     },
 
     syncCollection: (): CollectionThunk => async (dispatch, getState) => {
+        const state = getState()
+        if (state.isSyncing) return
+        dispatch(actions.setIsSyncing(true))
         const result = await AccountApi.syncCollection()
         if (result.status !== "ok") {
             dispatch(CollectionThunks.displayStatus({ ctype: "error", details: result.reason }))
+            setTimeout(() => {dispatch(actions.setIsSyncing(false))}, 3000)
         } else {
-            const state = getState()
             dispatch(CollectionThunks.clearCache())
             dispatch(CollectionThunks.getCollection({}, state.collectionFilter))
+            setTimeout(() => {dispatch(actions.setIsSyncing(false))}, 10000)
         }
     },
 

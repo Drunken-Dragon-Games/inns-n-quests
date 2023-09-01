@@ -84,9 +84,7 @@ export class Rewards {
     }
 
     async getPreviusWeekTotals(): Promise<{[userId: string]: number}> {
-        //CHECKME: temporrly mkaing this work on current week
-        //const oneWeekAgo = getOneWeekBefore(this.calendar.now())
-        const oneWeekAgo = this.calendar.now()
+        const oneWeekAgo = getOneWeekBefore(this.calendar.now())
         const weekNumber= getWeekNumber(oneWeekAgo)
         const [weekStart, weekEnd] = getDateRangeOfWeek(weekNumber.weekNo, weekNumber.year)
         const dailyRewards = await DailyReward.findAll({
@@ -134,8 +132,6 @@ export class Records {
 
     async createWeekly(): Promise<SResult<{}>>{
         try{
-            //Temporary making this work on current week
-        //const oneWeekAgo = getOneWeekBefore(this.calendar.now())
         const oneWeekAgo = getOneWeekBefore(this.calendar.now())
         const weekNumber= getWeekNumber(oneWeekAgo)
         const weeklyRecordId = `${weekNumber.weekNo}-${weekNumber.year}`
