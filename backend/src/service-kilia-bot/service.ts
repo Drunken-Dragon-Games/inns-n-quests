@@ -535,6 +535,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
         *get-leaderboard <days?>*: Retrieves the leaderboard information for the specified number of days. if no day is provided it defaults to the first of the current month
             it promts for confirmation to publish leaderboard to the public channel
+
+        *clear-week-stake <weekNumber> <year>: Removes the records for granting rewrds for a given week. only works if the env is set to development
         
         *help* : Provides a list of available commands and a description of their function.
         
