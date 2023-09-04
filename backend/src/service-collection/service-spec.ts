@@ -58,6 +58,8 @@ export interface CollectionService {
 
     setMortalCollection(userId: string, assets: {assetRef: string, quantity: string}[], logger?: LoggingContext): Promise<SResult<{}>>
 
+    clearWeekStake(weekNo: number, year: number): Promise<SResult<{message: string}>>
+
     lockAllUsersCollections(logger?: LoggingContext): Promise<void>
 }
 

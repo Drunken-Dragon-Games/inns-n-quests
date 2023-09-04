@@ -22,14 +22,14 @@ const OpenInnButtonContainer = styled.div`
     }
 `
 
-export const DashboardView = ({ status, artType, mortalLocked }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt", mortalLocked: boolean}) => {
+export const DashboardView = ({ status, artType, mortalLocked, isSyncing }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt", mortalLocked: boolean, isSyncing: boolean}) => {
   return (
     <DashboardContainer>
     <Section title="Dashboard" colums={1}>
             <OpenInnButtonContainer>
                 <GamesButton game="inns" url={gamesButtonSection.quests} toolTip="My Inn" />
             </OpenInnButtonContainer>
-            <Button action={() => collectionTransitions.syncCollection()} size="regular"> Sync </Button>
+            <Button action={() => collectionTransitions.syncCollection()} size="regular" disabled={isSyncing}> Sync </Button>
             <Button action={() => collectionTransitions.flipDisplayArtType()} size="regular">
                 {artType == "miniature" ? "Splash Art" : "Miniature"} 
             </Button>

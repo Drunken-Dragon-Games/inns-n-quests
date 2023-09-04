@@ -17,6 +17,7 @@ export interface CollectionState {
     displayArtStyle: "miniature" | "splashArt",
     mortalLocked: boolean,
     justLocked: boolean,
+    isSyncing: boolean
 }
 
 const collectionInitialState: CollectionState = {
@@ -35,7 +36,8 @@ const collectionInitialState: CollectionState = {
     collectionFilter: {page: 1, policyFilter: [], classFilter: [], APSFilter:{ath: {}, int: {}, cha: {}}},
     displayArtStyle: "splashArt",
     mortalLocked: true,
-    justLocked: false
+    justLocked: false,
+    isSyncing: false
 }
 
 export const collectinState = createSlice({
@@ -56,6 +58,10 @@ export const collectinState = createSlice({
 
         setJustLocked: (state, action: PayloadAction<boolean>) => {
             state.justLocked = action.payload
+        },
+
+        setIsSyncing: (state, action: PayloadAction<boolean>) => {
+            state.isSyncing = action.payload
         },
 
         addToCollectionCache: (state, action: PayloadAction<{page: number, collection: CollectionWithUIMetada, hasMore: boolean}>) => {

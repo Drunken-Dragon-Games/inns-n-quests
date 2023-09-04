@@ -36,22 +36,18 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
 
 async function collectionsAndRewardsLoop(collectionService: CollectionServiceDsl, logger: LoggingContext){
     const dailyRule = new schedule.RecurrenceRule()
-    //CHECKME: temporrly mkaing this work every minute
-    //dailyRule.hour = 1
-    dailyRule.second = 1
+    dailyRule.hour = 1
     schedule.scheduleJob(dailyRule, () => collectionService.updateGlobalDailyStakingContributions.bind(collectionService)(logger))
 
     const weeklyRule = new schedule.RecurrenceRule()
-    //CHECKME: temporrly mkaing this work every minute
-    //weeklyRule.dayOfWeek = 1
-    //weeklyRule.hour = 2
-    weeklyRule.second = 50
+    /* weeklyRule.dayOfWeek = 1
+    weeklyRule.hour = 18 */
     schedule.scheduleJob(weeklyRule, () => collectionService.grantGlobalWeeklyStakingGrant.bind(collectionService)(logger))
 
-    const lockRule = new schedule.RecurrenceRule()
+    /* const lockRule = new schedule.RecurrenceRule()
     lockRule.dayOfWeek = 2
-    lockRule.hour = 2
-    schedule.scheduleJob(lockRule, () => collectionService.lockAllUsersCollections.bind(collectionService)(logger))
+    lockRule.hour = 19
+    schedule.scheduleJob(lockRule, () => collectionService.lockAllUsersCollections.bind(collectionService)(logger)) */
 
 }
 
@@ -86,7 +82,7 @@ const runServer = async () => {
     const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry, calendar})
     const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, blockchainService, governanceService,collectionService, wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, identityService, assetManagementService, metadataRegistry, collectionService, questsRegistry, wellKnownPolicies })
-    const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService, idleQuestsService })
+    const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService, idleQuestsService, collectionService })
     
     // Soon to be deprecated
     //await loadQuestModuleModels(database)

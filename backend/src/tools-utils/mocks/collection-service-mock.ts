@@ -19,6 +19,7 @@ export default class CollectionServiceMock {
             syncUserCollection: jest.fn(),
             setMortalCollection: jest.fn(),
             lockAllUsersCollections: jest.fn(),
+            clearWeekStake: jest.fn(),
         }
     }
 

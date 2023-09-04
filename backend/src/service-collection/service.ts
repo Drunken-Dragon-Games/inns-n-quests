@@ -295,6 +295,13 @@ export class CollectionServiceDsl implements CollectionService {
         }
     }
 
+    async clearWeekStake(weekNo: number, year: number): Promise<SResult<{ message: string}>> {
+        if (process.env.NODE_ENV !== "development") return {ctype: "failure", error: "not allowed"}
+        const recordClear = await this.records.destroyWeekly(weekNo, year)
+        if (recordClear.ctype !== "success") return recordClear
+        const rewardClear = await this.rewards.destroyWeekly(weekNo, year)
+        return rewardClear
+    }
     private async hydrateCollectionWithMetadata(assets: Collection<StoredMetadata>, userId: string): Promise<Collection<CollectibleMetadata>> {
         const newCollection: Collection<CollectibleMetadata> = {
             pixelTiles: [],

@@ -23,7 +23,7 @@ const Container = styled.div`
 `;
 
 const CollectionComponent = () =>{
-    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType, mortalLocked, justLocked } = useSelector((state: CollectionState) => ({
+    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType, mortalLocked, justLocked, isSyncing } = useSelector((state: CollectionState) => ({
             collectionItems: state.displayedCollectionItems,
             mortalItems: state.mortalCollectionItems,
             collectionCache: state.collectionCache,
@@ -31,7 +31,8 @@ const CollectionComponent = () =>{
             status: state.collectionFetchingState,
             displayArtType: state.displayArtStyle,
             mortalLocked: state.mortalLocked,
-            justLocked: state.justLocked
+            justLocked: state.justLocked,
+            isSyncing: state.isSyncing
     }))
     useEffect(() => {
       collectionTransitions.setDisplayCollection(collectionCache, filter)
@@ -40,7 +41,7 @@ const CollectionComponent = () =>{
     }, [])
     return(
     <Container>
-      <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked}></DashboardView>
+      <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked} isSyncing={isSyncing}></DashboardView>
       <MortalView collectionItems={mortalItems} mortalLocked={mortalLocked} justLocked={justLocked}/>
       <FilterView />
       <DisplayView collectionItems={collectionItems} artType={displayArtType} mortalLocked={mortalLocked}/>
