@@ -83,6 +83,18 @@ export class Rewards {
         return {ctype: "success"}
     }
 
+    async destroyWeekly(weekNo: number, year: number): Promise<SResult<{message: string}>>{
+        if (process.env.NODE_ENV !== "development") return {ctype: "failure", error: "not allowed"}
+        const searchString = `%-${weekNo}-${year}`
+        const deletedRewardCount = await WeeklyReward.destroy({
+            where: {weeklyRewardId: { [Op.like]: searchString}}
+        })
+        return {
+        ctype: "success",
+        message: `Deleted ${deletedRewardCount} WeeklyReward(s) for week ${weekNo} of year ${year}`,
+        }
+    }
+
     async getPreviusWeekTotals(): Promise<{[userId: string]: number}> {
         const oneWeekAgo = getOneWeekBefore(this.calendar.now())
         const weekNumber= getWeekNumber(oneWeekAgo)
@@ -159,6 +171,16 @@ export class Records {
         existingRecord.rewardTotal = rewardTotal
         await existingRecord.save()
         return {ctype: "success"}
+    }
+
+    async destroyWeekly(weekNo: number, year: number): Promise<SResult<{message: string}>>{
+        if (process.env.NODE_ENV !== "development") return {ctype: "failure", error: "not allowed"}
+        const weeklyRecordId = `${weekNo}-${year}`
+        const deletedRecordCount = await WeeklyRecord.destroy({where: {weeklyRecordId}})
+        return {
+        ctype: "success",
+        message: `Deleted ${deletedRecordCount} WeeklyRecord(s) for week ${weekNo} of year ${year}`,
+        }
     }
 }
 
