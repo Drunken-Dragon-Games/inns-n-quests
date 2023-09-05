@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada, MortalCollectible } from "../collection-state-models"
-import { MessiriFontFamily, PixelArtImage, Video, vmax1, colors, OswaldFontFamily } from "../../common"
+import { MessiriFontFamily, PixelArtImage, Video, vmax1, colors, OswaldFontFamily, vmax } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
 import { CharacterSprite, FurnitureSprite } from "../display/sprites"
@@ -29,7 +29,7 @@ const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
     max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : '400px')};
 `;
 
-const CollectibleInfo = styled.div`
+const CollectibleInfo = styled.div<{isMobile: boolean}>`
     padding: 10px;
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 5px;
@@ -37,10 +37,11 @@ const CollectibleInfo = styled.div`
     background-color: rgba(0, 0, 0, 0.5);
     text-align: center;
     color: #fff;
+    font-size: ${(isMobile) => isMobile ? "20px" : "16px"};
 `
 
-const CollectibleName = styled.p`
-    font-size: 20px;
+const CollectibleName = styled.p<{isMobile: boolean}>`
+    font-size: ${(isMobile) => isMobile ? "22px" : "20px"};
     color: ${colors.textGray};
     ${OswaldFontFamily};
     font-weight: bold;
@@ -83,7 +84,7 @@ const hasItemsInCategory = (items: any, category: string) => {
   };
 
 
-export const MortalView = ({ collectionItems, mortalLocked, justLocked}: { collectionItems: CollectionWithGameData, mortalLocked: boolean, justLocked: boolean}) => {
+export const MortalView = ({ collectionItems, mortalLocked, justLocked, isMobile}: { collectionItems: CollectionWithGameData, mortalLocked: boolean, justLocked: boolean, isMobile: boolean}) => {
     
     type PolicyName = "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"
 
@@ -99,9 +100,10 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked}: { colle
                   class: src.class,
                   assetRef: src.assetRef,
                 }}
+                units={isMobile ? vmax(3) : vmax1}
               />
-              <CollectibleInfo>
-                <CollectibleName>{capitalizeFirstLetter(src.name)}</CollectibleName>
+              <CollectibleInfo isMobile={isMobile}>
+                <CollectibleName isMobile={isMobile}>{capitalizeFirstLetter(src.name)}</CollectibleName>
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
             </CollectibleInfo>
@@ -127,7 +129,7 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked}: { colle
         </EmptyCollectionMessage>
       </Section> 
       : 
-      <Section key="mortal-collection" title="Mortal Collection" colums={5} highlight={ !mortalLocked ? colors.infoText : justLocked ? colors.successHigthlight : colors.dduGold}>
+      <Section key="mortal-collection" title="Mortal Collection" colums={isMobile ? 1 : 5} highlight={ !mortalLocked ? colors.infoText : justLocked ? colors.successHigthlight : colors.dduGold}>
         {hasItemsNotInCategory(collectionItems, "furniture") && (
           <>
             {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {

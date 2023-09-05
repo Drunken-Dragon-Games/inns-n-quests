@@ -9,7 +9,12 @@ import { Button } from "../commponents/button"
 
 const DashboardContainer = styled.div`
   width: 10vw;
+
+  @media only screen and (max-width: 768px) {
+    width: 100%;
+  }
 `;
+
 
 const OpenInnButtonContainer = styled.div`
     width: 100%;
@@ -22,10 +27,10 @@ const OpenInnButtonContainer = styled.div`
     }
 `
 
-export const DashboardView = ({ status, artType, mortalLocked, isSyncing }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt", mortalLocked: boolean, isSyncing: boolean}) => {
+export const DashboardView = ({ status, artType, mortalLocked, isSyncing, isMobile }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt", mortalLocked: boolean, isSyncing: boolean, isMobile: boolean}) => {
   return (
     <DashboardContainer>
-    <Section title="Dashboard" colums={1}>
+    <Section title="Dashboard" colums={isMobile ? 2 : 1}>
             <OpenInnButtonContainer>
                 <GamesButton game="inns" url={gamesButtonSection.quests} toolTip="My Inn" />
             </OpenInnButtonContainer>
@@ -36,7 +41,7 @@ export const DashboardView = ({ status, artType, mortalLocked, isSyncing }: {  s
             <Button action={() => collectionTransitions.lockMortalCollection()} size="regular" disabled={mortalLocked}>
                 {mortalLocked ? "Locked" : "Lock"}
             </Button>
-            {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ?
+            {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" && !isMobile ?
             <>
             <h2 style={{ color: 'white' }}>{`Grant is ${status.ctype}`}</h2>
             <Button action={() => collectionTransitions.grantTestCollection("Nami")} size="small">

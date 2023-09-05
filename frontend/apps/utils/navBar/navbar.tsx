@@ -165,7 +165,7 @@ const Navbar = (): JSX.Element =>{
 
     return (
         <NavbarComponent>
-            { cardanoNetwork != "Mainnet" ? <TestnetBanner>{cardanoNetwork}</TestnetBanner> : <></>}
+            {/* { cardanoNetwork != "Mainnet" ? <TestnetBanner>{cardanoNetwork}</TestnetBanner> : <></>} */}
             <HeaderBarContainer>
                 <EmptyDiv />
                 {/*<GamesButton game="inns" url={gamesButtonSection.quests} toolTip="Inns" />*/}
