@@ -1,37 +1,14 @@
 import styled from "styled-components"
 import { CollectionWithUIMetada, MortalCollectible, UICollectible } from "../collection-state-models"
-import { OswaldFontFamily, PixelArtImage, Video, colors, vmax1 } from "../../common"
+import { OswaldFontFamily, PixelArtImage, Video, colors, vmax, vmax1 } from "../../common"
 import { useState } from "react"
 import { collectionTransitions } from "../collection-transitions"
 import { CharacterSprite, FurnitureSprite } from "./sprites"
 import { Section } from "../commponents"
 import { Button } from "../commponents/button"
 
-const EthernalCollectionContainer = styled.div`
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-`
-const Header = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    grid-column: span 3;
-`;
-
-const Title = styled.h2`
-    color: #fff;
-    text-align: center;
-    grid-column: span 3;
-    margin: 0;
-`
 const CollectibleContainer = styled.div<{ artType: "miniature" | "splashArt", maxHeight?: string | number}>`
+    margin-top: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,7 +18,7 @@ const CollectibleContainer = styled.div<{ artType: "miniature" | "splashArt", ma
 `;
 
 
-const CollectibleInfo = styled.div`
+const CollectibleInfo = styled.div<{isMobile: boolean}>`
     padding: 10px;
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 5px;
@@ -49,10 +26,11 @@ const CollectibleInfo = styled.div`
     background-color: rgba(0, 0, 0, 0.5);
     text-align: center;
     color: #fff;
+    font-size: ${(isMobile) => isMobile ? "20px" : "16px"};
 `
 
-const CollectibleName = styled.p`
-    font-size: 20px;
+const CollectibleName = styled.p<{isMobile: boolean}>`
+    font-size: ${(isMobile) => isMobile ? "22px" : "20px"};
     color: ${colors.textGray};
     ${OswaldFontFamily}; 
     font-weight: bold;
@@ -82,24 +60,25 @@ type RenderCollectible = {
     collectionName: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers",
     artType: "miniature" | "splashArt",
     mortalLocked: boolean,
-    type? : "Furniture" | "Character"
+    type? : "Furniture" | "Character",
+    isMobile: boolean
 }
 
-export const Collectible = ({ src, imageDimensions, collectionName, artType, type, mortalLocked}: RenderCollectible) => {
+export const Collectible = ({ src, imageDimensions, collectionName, artType, type, mortalLocked, isMobile}: RenderCollectible) => {
     return (
         <CollectibleContainer artType={artType}>
             {
             artType === 'splashArt' ?
                 isVideoFile(src.splashArt) ?
-                    <Video src={src.splashArt} height={imageDimensions.height} width={imageDimensions.width} units={vmax1} /> :
-                    <PixelArtImage src={src.splashArt} alt={src.name} height={imageDimensions.height} width={imageDimensions.width}/>
+                    <Video src={src.splashArt} height={imageDimensions.height} width={imageDimensions.width} units={isMobile ? vmax(3) : vmax1} /> :
+                    <PixelArtImage src={src.splashArt} alt={src.name} height={imageDimensions.height} width={imageDimensions.width} units={isMobile ? vmax(3) : vmax1}/>
                 :
                 type === "Furniture" ? 
-                    <FurnitureSprite furniture={{ sprite: src.miniature, assetRef: src.assetRef, name: src.name}}/> :
-                    <CharacterSprite character={{sprite: src.miniature,collection: collectionName,class: src.class,assetRef: src.assetRef}} />  
+                    <FurnitureSprite furniture={{ sprite: src.miniature, assetRef: src.assetRef, name: src.name}} units={isMobile ? vmax(3) : vmax1}/> :
+                    <CharacterSprite character={{sprite: src.miniature,collection: collectionName,class: src.class,assetRef: src.assetRef}} units={isMobile ? vmax(3) : vmax1} />  
             }
-            <CollectibleInfo>
-                <CollectibleName>{capitalizeFirstLetter(src.name)}</CollectibleName>
+            <CollectibleInfo isMobile={isMobile}>
+                <CollectibleName isMobile={isMobile}>{capitalizeFirstLetter(src.name)}</CollectibleName>
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
                 { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
@@ -110,7 +89,7 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
     )
 }
 
-export const DisplayView = ({ collectionItems, artType, mortalLocked }: { collectionItems: CollectionWithUIMetada, artType: "miniature" | "splashArt", mortalLocked: boolean }) => { 
+export const DisplayView = ({ collectionItems, artType, mortalLocked, isMobile }: { collectionItems: CollectionWithUIMetada, artType: "miniature" | "splashArt", mortalLocked: boolean, isMobile: boolean }) => { 
     const imageDimensions = {
         "pixelTiles": { height: 12,  width: 9 },
         "grandMasterAdventurers": { height: 12,  width: 12 },
@@ -118,18 +97,18 @@ export const DisplayView = ({ collectionItems, artType, mortalLocked }: { collec
     }
 
     return (
-        <Section key={"Eternal Collection"} title="Eternal Collection" colums={3}>
+        <Section key={"Eternal Collection"} title="Eternal Collection" colums={isMobile ? 1 : 3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} mortalLocked={mortalLocked}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} mortalLocked={mortalLocked} isMobile={isMobile}/>
             )}
             {collectionItems.grandMasterAdventurers.map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.grandMasterAdventurers} collectionName="grandMasterAdventurers" artType={artType} mortalLocked={mortalLocked}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.grandMasterAdventurers} collectionName="grandMasterAdventurers" artType={artType} mortalLocked={mortalLocked} isMobile={isMobile}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class !== 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} mortalLocked={mortalLocked}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} mortalLocked={mortalLocked} isMobile={isMobile}/>
             )}
             {collectionItems.pixelTiles.filter(src => src.class == 'furniture').map((src, index) =>
-                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"} mortalLocked={mortalLocked}/>
+                <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"} mortalLocked={mortalLocked} isMobile={isMobile}/>
             )}
         </Section>
     )

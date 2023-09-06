@@ -19,6 +19,12 @@ const ButtonWrapper = styled.div<ButtonWrapperProps>`
     position: relative;
     z-index: 2;
 
+    @media only screen and (max-width: 768px) {
+        width: 80%;
+        height: auto;
+        margin-bottom: 10px;  // add some space between buttons
+      }
+
     @media only screen and (max-width: 414px) {
         width: 35vw;
         height: 8.58vw;
