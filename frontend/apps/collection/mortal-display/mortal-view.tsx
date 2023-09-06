@@ -7,6 +7,10 @@ import { CharacterSprite, FurnitureSprite } from "../display/sprites"
 import { Section } from "../commponents"
 import { Button } from "../../utils/components/basic_components"
 
+const MortalContainer = styled.div<{isMobile: boolean}>`
+  padding-right: ${(p)=>p.isMobile? "15px": "8vw"};
+`
+
 const Header = styled.div`
     display: flex;
     align-items: center;
@@ -83,6 +87,7 @@ const hasItemsInCategory = (items: any, category: string) => {
     return Object.values(items).some((itemsArray: any) => itemsArray.some((src: any) => src.class !== category))
   };
 
+  
 
 export const MortalView = ({ collectionItems, mortalLocked, justLocked, isMobile}: { collectionItems: CollectionWithGameData, mortalLocked: boolean, justLocked: boolean, isMobile: boolean}) => {
     
@@ -116,8 +121,9 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked, isMobile
 
     return (
       !hasItemsNotInCategory(collectionItems, "furniture") && !hasItemsInCategory(collectionItems, "furniture") 
-      ? 
-      <Section key="mortal-collection" title="Mortal Collection" colums={1} highlight={ !mortalLocked ? colors.infoText : justLocked ? colors.successText : colors.dduGold}>
+      ?
+      <MortalContainer isMobile={isMobile}>
+      <Section key="mortal-collection" title="Mortal Collection" colums={1} highlight={ !mortalLocked ? colors.dduGold : justLocked ? colors.successHigthlight : undefined}>
         <EmptyCollectionHeaderMessage>
           Select adventurers below to quest in the Mortal Realms.
         </EmptyCollectionHeaderMessage>
@@ -127,9 +133,11 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked, isMobile
         <EmptyCollectionMessage>
           Once a week you can make changes to your Mortal Collection.
         </EmptyCollectionMessage>
-      </Section> 
-      : 
-      <Section key="mortal-collection" title="Mortal Collection" colums={isMobile ? 1 : 5} highlight={ !mortalLocked ? colors.infoText : justLocked ? colors.successHigthlight : colors.dduGold}>
+      </Section>
+      </MortalContainer>
+      :
+      <MortalContainer isMobile={isMobile}>
+      <Section key="mortal-collection" title="Mortal Collection" colums={isMobile ? 1 : 5} highlight={ !mortalLocked ? colors.dduGold : justLocked ? colors.successHigthlight : undefined}>
         {hasItemsNotInCategory(collectionItems, "furniture") && (
           <>
             {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
@@ -141,22 +149,8 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked, isMobile
           </>
         )
         }
-            
-        {hasItemsInCategory(collectionItems, "furniture") && (
-          <>
-            <Header>
-              <Title>Furniture</Title>
-            </Header>
-            {Object.entries(collectionItems).map(([policyNameKey, itemsArray]) => {
-              const policyName = policyNameKey as PolicyName;
-              return itemsArray.map((src) => (
-                src.class === "furniture" && renderAsset(src, policyName, "180")
-              ));
-            })}
-          </>
-        )}
- 
     </Section>
-  )
+    </MortalContainer>
+    )
 }
 

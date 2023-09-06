@@ -6,7 +6,7 @@ import { OswaldFontFamily, SimpleDDButton, colors, vh } from '../../common';
 import { PixelCheckbox } from './components';
 import { SimpleButton, } from '../../utils/components/basic_components';
 
-const FilterContainer = styled.div`
+const FilterContainer = styled.div<{isMobile: boolean}>`
   width: 10vw;
   padding: 20px;
   border: 1px solid rgba(255,255,255,0.1);
@@ -17,8 +17,9 @@ const FilterContainer = styled.div`
   z-index: 2;
   align-self: start;
   @media only screen and (max-width: 1400px) {
-    width: 100%;
+    width: 95%;
     max-width: 900px;
+    margin-bottom: 20px;
 }
 `;
 
@@ -126,7 +127,7 @@ export const FilterView = ({isMobile}: {isMobile: boolean}) => {
     
   
     return (
-      <FilterContainer>
+      <FilterContainer isMobile={isMobile}>
         <FilterHeading>Classes</FilterHeading>
         <hr />
         {filterClasses.map((filterClass, index) => (

@@ -12,7 +12,6 @@ const SectionContainer = styled.div<{highlight?: string}>`
     flex-direction: column;
     align-items: center;
     margin-bottom: 20px;
-    margin-right: 20px;
     
     @media only screen and (max-width: 1400px) {
         width: 100%;
