@@ -7,31 +7,8 @@ import { CharacterSprite, FurnitureSprite } from "./sprites"
 import { Section } from "../commponents"
 import { Button } from "../commponents/button"
 
-const EthernalCollectionContainer = styled.div`
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-`
-const Header = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    grid-column: span 3;
-`;
-
-const Title = styled.h2`
-    color: #fff;
-    text-align: center;
-    grid-column: span 3;
-    margin: 0;
-`
 const CollectibleContainer = styled.div<{ artType: "miniature" | "splashArt", maxHeight?: string | number}>`
+    margin-top: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -97,7 +74,7 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
                     <PixelArtImage src={src.splashArt} alt={src.name} height={imageDimensions.height} width={imageDimensions.width} units={isMobile ? vmax(3) : vmax1}/>
                 :
                 type === "Furniture" ? 
-                    <FurnitureSprite furniture={{ sprite: src.miniature, assetRef: src.assetRef, name: src.name}}/> :
+                    <FurnitureSprite furniture={{ sprite: src.miniature, assetRef: src.assetRef, name: src.name}} units={isMobile ? vmax(3) : vmax1}/> :
                     <CharacterSprite character={{sprite: src.miniature,collection: collectionName,class: src.class,assetRef: src.assetRef}} units={isMobile ? vmax(3) : vmax1} />  
             }
             <CollectibleInfo isMobile={isMobile}>
