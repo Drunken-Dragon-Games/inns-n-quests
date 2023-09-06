@@ -53,8 +53,8 @@ const CollectionComponent = () =>{
     <Container isMobile={isMobile}>
       <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked} isSyncing={isSyncing} isMobile={isMobile}></DashboardView>
       <MortalView collectionItems={mortalItems} mortalLocked={mortalLocked} justLocked={justLocked} isMobile={isMobile}/>
-      <FilterView />
-      <DisplayView collectionItems={collectionItems} artType={displayArtType} mortalLocked={mortalLocked}/>
+      <FilterView isMobile={isMobile}/>
+      <DisplayView collectionItems={collectionItems} artType={displayArtType} mortalLocked={mortalLocked} isMobile={isMobile}/>
       <div style={{ gridColumn: "2", gridRow: "3" }}>
         <PaginationView filter={filter} collectionCache={collectionCache} />
       </div>

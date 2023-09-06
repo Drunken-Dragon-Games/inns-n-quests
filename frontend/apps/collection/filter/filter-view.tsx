@@ -16,6 +16,10 @@ const FilterContainer = styled.div`
   color: #fff;
   z-index: 2;
   align-self: start;
+  @media only screen and (max-width: 1400px) {
+    width: 100%;
+    max-width: 900px;
+}
 `;
 
 const FilterHeading = styled.h3`
@@ -26,13 +30,14 @@ const FilterHeading = styled.h3`
   margin-bottom: 10px;
 `;
 
-const LabelWrapper = styled.label`
+const LabelWrapper = styled.label<{isMobile: boolean}>`
   display: flex;
   align-items: center;
   cursor: pointer;
   margin-bottom: 10px;
   ${OswaldFontFamily};
   gap: 10px;
+  font-size: ${(p) => p.isMobile ? "22px" : "16px"};
 `;
 
 const RangeWrapper = styled.div`
@@ -63,7 +68,8 @@ const APSHeading = styled.h5`
 
 const ButtonContainer = styled.div`
   display: flex;
-  gap: 10px; // Add gap between buttons
+  gap: 10px;
+  font-size: 16px;
 `;
 
 const attributeNames: { [key: string]: string } = {
@@ -71,7 +77,7 @@ const attributeNames: { [key: string]: string } = {
   'cha': 'Charisma',
   'int': 'Intelligence',
 };
-export const FilterView = () => {
+export const FilterView = ({isMobile}: {isMobile: boolean}) => {
     type  filterChange 
       = {ctype: "class", filterClass: AssetClass}
       | {ctype: "policy", policy: CollectionPolicyNames}
@@ -124,14 +130,14 @@ export const FilterView = () => {
         <FilterHeading>Classes</FilterHeading>
         <hr />
         {filterClasses.map((filterClass, index) => (
-          <LabelWrapper key={index} onClick={() => hanldeFilterChange({ctype: "class", filterClass}, !classFilter.includes(filterClass))}>
+          <LabelWrapper key={index} onClick={() => hanldeFilterChange({ctype: "class", filterClass}, !classFilter.includes(filterClass))} isMobile={isMobile}>
             <PixelCheckbox checked={classFilter.includes(filterClass)} size={vh(2)} /> {filterClass}
           </LabelWrapper>
         ))}
         <FilterHeading>Policies</FilterHeading>
         <hr />
         {collectionPolicies.map((policy, index) => (
-          <LabelWrapper key={index} onClick={() => hanldeFilterChange({ctype: "policy", policy}, !policyFilter.includes(policy))}>
+          <LabelWrapper key={index} onClick={() => hanldeFilterChange({ctype: "policy", policy}, !policyFilter.includes(policy))} isMobile={isMobile}>
             <PixelCheckbox checked={policyFilter.includes(policy)} size={vh(2)} /> {policy}
           </LabelWrapper>
         ))}
