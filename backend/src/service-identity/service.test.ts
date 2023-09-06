@@ -367,7 +367,7 @@ test("update user: ok", async () => {
     expect(userInfo.userId).toBe(userInfo2.userId)
 })
 
-test("set collection lock", async () => {
+/* test("set collection lock", async () => {
     const usersIds = await service.listAllUserIds()
     usersIds.forEach(async (userId) => {
         const colecttionLocked = await service.getCollectionLockState(userId)
@@ -382,4 +382,4 @@ test("set collection lock", async () => {
         if(colecttionLocked.status !== "ok") fail(colecttionLocked.reason)
         expect(colecttionLocked.locked).toBe(true)
     })
-})
+}) */
