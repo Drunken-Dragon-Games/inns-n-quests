@@ -47,6 +47,24 @@ const ClickableText = styled.p`
     cursor: pointer;
 `
 
+const EmptyCollectionHeaderMessage = styled.div`
+    font-size: 30px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 20px;
+    ${OswaldFontFamily}
+    font-weight: bold;
+    text-transform: uppercase;
+`
+
+const EmptyCollectionMessage = styled.div`
+    font-size: 20px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 20px;
+    ${OswaldFontFamily}
+`
+
 const isVideoFile = (src: string): boolean => {
     return src.endsWith('.mp4')
 }
@@ -58,6 +76,14 @@ const capitalizeFirstLetter = (input: string): string => {
 
 const modifyMortalCollection = (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
     collectionTransitions.modifyMortalCollection(asset, action, policy)
+}
+
+const isCollectionEmpty = (collectionItems: CollectionWithUIMetada): boolean => {
+    return (
+        collectionItems.adventurersOfThiolden.length < 1 && 
+        collectionItems.grandMasterAdventurers.length < 1 && 
+        collectionItems.pixelTiles.length < 1
+    )
 }
 
 type RenderCollectible = { 
@@ -108,6 +134,15 @@ export const DisplayView = ({ collectionItems, artType, mortalLocked, isMobile }
 
     return (
         <DisplaylContainer isMobile={isMobile}>
+        {isCollectionEmpty(collectionItems) ?
+        <Section key={"Eternal Collection"} title="Eternal Collection" colums={isMobile ? 1 : 1}>
+            <EmptyCollectionHeaderMessage>
+            Press the Sync button on the dashboard to load your assets from the blockchain
+            </EmptyCollectionHeaderMessage>
+            <EmptyCollectionMessage>
+            This actions is perfomed automatically every 24 hrs
+            </EmptyCollectionMessage>
+        </Section> : 
         <Section key={"Eternal Collection"} title="Eternal Collection" colums={isMobile ? 1 : 3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} mortalLocked={mortalLocked} isMobile={isMobile}/>
@@ -122,6 +157,7 @@ export const DisplayView = ({ collectionItems, artType, mortalLocked, isMobile }
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"} mortalLocked={mortalLocked} isMobile={isMobile}/>
             )}
         </Section>
+        }
         </DisplaylContainer>
     )
 }
