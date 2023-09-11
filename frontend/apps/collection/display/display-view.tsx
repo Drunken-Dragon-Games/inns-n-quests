@@ -41,10 +41,10 @@ const CollectibleName = styled.p<{isMobile: boolean}>`
     margin-bottom: 10px;
 `
 
-const GoldenP = styled.p`
-    color: ${colors.textBeige};
+const ClickableText = styled.p`
+    color: ${colors.dduGold};
     font-weight: bold;
-    ${OswaldFontFamily};
+    cursor: pointer;
 `
 
 const isVideoFile = (src: string): boolean => {
@@ -71,6 +71,10 @@ type RenderCollectible = {
 }
 
 export const Collectible = ({ src, imageDimensions, collectionName, artType, type, mortalLocked, isMobile}: RenderCollectible) => {
+    const handleStakingContributionClick = () => {
+        window.open("https://github.com/Drunken-Dragon-Games/ddu-ballots/blob/main/s1/001-passive-active-adventurers.md", '_blank')
+    }
+
     return (
         <CollectibleContainer artType={artType}>
             {
@@ -88,7 +92,7 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
                 <p>Class: {src.class}</p>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
                 { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
-                <GoldenP>{src.stakingContribution} $DS/week</GoldenP>
+                <ClickableText onClick={handleStakingContributionClick}>{src.stakingContribution} $DS/week</ClickableText>
             </CollectibleInfo>
             { mortalLocked || type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>
