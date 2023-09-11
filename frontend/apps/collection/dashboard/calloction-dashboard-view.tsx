@@ -9,9 +9,8 @@ import { Button } from "../commponents/button"
 
 const DashboardContainer = styled.div`
   width: 10vw;
-
   @media only screen and (max-width: 768px) {
-    width: 100%;
+    width: 95%;
   }
 `;
 

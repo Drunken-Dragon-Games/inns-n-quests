@@ -7,6 +7,10 @@ import { CharacterSprite, FurnitureSprite } from "./sprites"
 import { Section } from "../commponents"
 import { Button } from "../commponents/button"
 
+const DisplaylContainer = styled.div<{isMobile: boolean}>`
+padding-right: ${(p)=>p.isMobile? "15px": "8vw"};
+`
+
 const CollectibleContainer = styled.div<{ artType: "miniature" | "splashArt", maxHeight?: string | number}>`
     margin-top: 15px;
     display: flex;
@@ -38,7 +42,9 @@ const CollectibleName = styled.p<{isMobile: boolean}>`
 `
 
 const GoldenP = styled.p`
-    color: ${colors.dduGold}
+    color: ${colors.textBeige};
+    font-weight: bold;
+    ${OswaldFontFamily};
 `
 
 const isVideoFile = (src: string): boolean => {
@@ -97,6 +103,7 @@ export const DisplayView = ({ collectionItems, artType, mortalLocked, isMobile }
     }
 
     return (
+        <DisplaylContainer isMobile={isMobile}>
         <Section key={"Eternal Collection"} title="Eternal Collection" colums={isMobile ? 1 : 3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} mortalLocked={mortalLocked} isMobile={isMobile}/>
@@ -111,5 +118,6 @@ export const DisplayView = ({ collectionItems, artType, mortalLocked, isMobile }
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"} mortalLocked={mortalLocked} isMobile={isMobile}/>
             )}
         </Section>
+        </DisplaylContainer>
     )
 }
