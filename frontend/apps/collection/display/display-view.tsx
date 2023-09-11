@@ -72,7 +72,7 @@ type RenderCollectible = {
 
 export const Collectible = ({ src, imageDimensions, collectionName, artType, type, mortalLocked, isMobile}: RenderCollectible) => {
     const handleStakingContributionClick = () => {
-        window.open("https://github.com/Drunken-Dragon-Games/ddu-ballots/blob/main/s1/001-passive-active-adventurers.md", '_blank')
+        window.open("https://github.com/Drunken-Dragon-Games/ddu-ballots/blob/main/s1/001-passive-active-adventurers.md#passive-staking-earned-ds", '_blank')
     }
 
     return (
