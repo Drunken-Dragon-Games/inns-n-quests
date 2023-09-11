@@ -42,7 +42,9 @@ const CollectibleName = styled.p<{isMobile: boolean}>`
 `
 
 const GoldenP = styled.p`
-    color: ${colors.dduGold}
+    color: ${colors.textBeige};
+    font-weight: bold;
+    ${OswaldFontFamily};
 `
 
 const isVideoFile = (src: string): boolean => {

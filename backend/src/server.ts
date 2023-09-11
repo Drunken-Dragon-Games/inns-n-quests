@@ -36,17 +36,17 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
 
 async function collectionsAndRewardsLoop(collectionService: CollectionServiceDsl, logger: LoggingContext){
     const dailyRule = new schedule.RecurrenceRule()
-    dailyRule.hour = 1
+    dailyRule.hour = 22
     schedule.scheduleJob(dailyRule, () => collectionService.updateGlobalDailyStakingContributions.bind(collectionService)(logger))
 
     const weeklyRule = new schedule.RecurrenceRule()
     weeklyRule.dayOfWeek = 2
-    weeklyRule.hour = 17
+    weeklyRule.hour = 23
     schedule.scheduleJob(weeklyRule, () => collectionService.grantGlobalWeeklyStakingGrant.bind(collectionService)(logger))
 
     const lockRule = new schedule.RecurrenceRule()
     lockRule.dayOfWeek = 2
-    lockRule.hour = 20
+    lockRule.hour = 23
     schedule.scheduleJob(lockRule, () => collectionService.lockAllUsersCollections.bind(collectionService)(logger))
 
 }
