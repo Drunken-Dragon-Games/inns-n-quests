@@ -49,6 +49,8 @@ interface appsToShow {
     name: string
     icon: string
     disable: boolean
+    hoverMessage?: string
+    loginOnly?: boolean
 }
 
 export const appsToShow: appsToShow[] = [
@@ -56,30 +58,35 @@ export const appsToShow: appsToShow[] = [
         url: "/inq",
         name: "Home",
         icon: "home",
-        disable: false
+        disable: false,
+        hoverMessage: "Home"
     },
     {
         url: "/s2",
         name: "Browse",
         icon: "browse",
-        disable: false
+        disable: false,
+        hoverMessage: "Browse"
     },
     {
         url: "https://encyclopedia.drunkendragon.games/",
         name: "Encyclopedia",
         icon: "encyclopedia",
-        disable: false
+        disable: false,
+        hoverMessage: "Encyclopedia"
+    },
+    {
+        url: "/collection",
+        name: "My Collection",
+        icon: "event",
+        disable: false,
+        hoverMessage: "My Collection",
+        loginOnly: true
     },
     {
         url: "/trade",
         name: "Trading tools",
         icon: "trade",
-        disable: true
-    },
-    {
-        url: "/season_of_lore",
-        name: "season of lore",
-        icon: "event",
         disable: true
     },
     {

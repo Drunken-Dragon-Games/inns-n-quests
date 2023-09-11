@@ -30,7 +30,10 @@ const buildApp = async (
     app.use(cors(corsOptions))
     app.use(compression())
 
-    
+    /* app.use((req, res, next) => {
+        console.log(`Received ${req.method} request for ${req.url}`)
+        next()
+      }) */
     // QUEST MODULE ROUTES
     app.use("/api/quests", idleQuestRoutes(idleQuestsService, kiliaBotService))
     app.use("/api/account", accountRoutes(accountService, kiliaBotService))

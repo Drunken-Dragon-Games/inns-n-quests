@@ -1,3 +1,7 @@
+import { Lucid } from "./deps.ts";
+
+export type LucidFactory = () => Promise<Lucid.Lucid>
+
 export type Resolution<A, B = string> = {status: "ok", value: A} | {status: "invalid", reason: B, code?: number}
 
 export const succeed = <A>(value: A): Resolution<A> => {return {status: "ok", value }}

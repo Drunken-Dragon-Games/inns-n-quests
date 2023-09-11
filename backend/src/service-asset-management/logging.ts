@@ -65,12 +65,34 @@ export class AssetManagementServiceLogging implements AssetManagementService {
 
     async claim(userId: string, stakeAddress: string, address: string, asset: { unit: string, policyId: string, quantity?: string }, logger?: LoggingContext): Promise<models.ClaimResponse> {
         const serviceLogger = this.withComponent(logger)
-        serviceLogger?.log.info(`claiming assets for user ${userId}`, { stakeAddress, asset })
+        serviceLogger?.log.info(`claiming assets for user ${userId}`, { address, asset })
         const response = await this.base.claim(userId, stakeAddress, address, asset, serviceLogger)
         if (response.status == "invalid")
             serviceLogger?.log.info(`invalid claim for user ${userId} reason:${response.reason}`)
         else 
             serviceLogger?.log.info(`claim successful`)
+        return response
+    }
+
+    async faucetClaim(address: string, assetsInfo: { [policyId: string]: { unit: string; quantityToClaim: string; }[]; }, logger?: LoggingContext | undefined): Promise<models.FaucetClaimResponse> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.log.info(`claiming assets for user `, { assetsInfo })
+        const response = await this.base.faucetClaim(address, assetsInfo, serviceLogger)
+        if (response.status == "invalid")
+            serviceLogger?.log.info(`invalid claim for user reason:${response.reason}`)
+        else 
+            serviceLogger?.log.info(`claim successful`)
+        return response
+    }
+
+    async faucetClaimSubmmit(serializedSignedTx: string, logger?: LoggingContext | undefined): Promise<models.SubmitClaimSignatureResponse> {
+        const serviceLogger = this.withComponent(logger)
+        serviceLogger?.log.info(`submmiting claim `)
+        const response = await this.base.faucetClaimSubmmit(serializedSignedTx, logger)
+        if (response.status == "invalid")
+            serviceLogger?.log.info(`invalid submmit for user reason:${response.reason}`)
+        else 
+            serviceLogger?.log.info(`submmit successful`)
         return response
     }
 

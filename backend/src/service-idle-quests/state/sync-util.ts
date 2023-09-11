@@ -14,7 +14,7 @@ export type SyncData<DbAsset extends PreSynced, InvAsset extends InventoryAsset>
 
 export const syncData = <DbAsset extends PreSynced, InvAsset extends InventoryAsset>( preSynced: DbAsset[], assetInventory: InvAsset[]): SyncData<DbAsset, InvAsset> => {
 
-    const inventoryRecord: { [assetRef: string]: InvAsset } = {}
+    try{const inventoryRecord: { [assetRef: string]: InvAsset } = {}
 
     assetInventory.forEach(asset => {
         if (inventoryRecord[asset.assetRef])
@@ -43,15 +43,22 @@ export const syncData = <DbAsset extends PreSynced, InvAsset extends InventoryAs
             const preSyncedAssetQuantity = preSyncedRecord[assetRef]?.length || 0
             // If possitive, create new assets. If negative, delete assets. If zero, add to surviving.
             const diff = inventoryAssetQuantity - preSyncedAssetQuantity
-            if (diff > 0) 
+            if (diff > 0) {
                 toCreate.push({ ...inventoryRecord[assetRef], quantity: diff })
-            else if (diff < 0) 
+                if(preSyncedRecord[assetRef]) surviving.push(...preSyncedRecord[assetRef])
+            }
+            else if (diff < 0){ 
                 toDelete.push(...preSyncedRecord[assetRef].slice(0, Math.abs(diff)))
+                surviving.push(...preSyncedRecord[assetRef].slice(0, inventoryAssetQuantity))
+            }
             else 
                 surviving.push(...preSyncedRecord[assetRef])
             return (
                 { toCreate, toDelete, surviving })
         }, empty)
         
-    return result
+    return result}
+    catch(e: any){
+        return { toCreate: [], toDelete: [], surviving: [] }
+    }
 }

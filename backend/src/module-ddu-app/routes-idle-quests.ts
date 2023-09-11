@@ -60,9 +60,10 @@ export const idleQuestRoutes = (idleQuestsService: IdleQuestsService, kilia?: Ki
     }))
 
     router.post('/staking-quest/claim', jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const takenQuestId: string = request.body.takenQuestId
-        const result = await idleQuestsService.claimStakingQuestResult(userId, takenQuestId)
+        const result = await idleQuestsService.claimStakingQuestResult(userId, takenQuestId, logger)
         response.status(200).json(result)
     }))
 

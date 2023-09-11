@@ -1,7 +1,7 @@
 import path from "path"
 import { Sequelize } from "sequelize"
 import { v4 } from "uuid"
-import { wellKnownPoliciesMainnet } from "../registry-policies"
+import { wellKnownPoliciesMainnet } from "../tools-assets/registry-policies"
 import { Inventory } from "../service-asset-management"
 import { connectToDB } from "../tools-database"
 import { sfailure, success } from "../tools-utils"
@@ -19,6 +19,7 @@ import { CharacterDB, CharacterState } from "./state/character-state"
 import { FurnitureDB, FurnitureState } from "./state/furniture-state"
 import { loadQuestRegistryFromFs } from "./state/staking-quests-registry"
 import IdentityServiceMock from "../tools-utils/mocks/identity-service-mock"
+import CollectionServiceMock from "../tools-utils/mocks/collection-service-mock"
 
 let service: IdleQuestsService
 let database: Sequelize
@@ -31,6 +32,7 @@ beforeAll(async () => {
     const assetManagementService = new AssetManagementServiceMock()
     const evenstatsService = new EvenstatsServiceMock()
     const identityService = new IdentityServiceMock()
+    const collecitonService = new CollectionServiceMock()
     assetManagementService.listReturns({ status: "ok", inventory: {
         [wellKnownPoliciesMainnet.pixelTiles.policyId]: [
             { unit: "PixelTile1", quantity: "2", chain: false },
@@ -58,6 +60,7 @@ beforeAll(async () => {
         evenstatsService: evenstatsService.service,
         identityService: identityService.service,
         assetManagementService: assetManagementService.service,
+        collectionService: collecitonService.service,
         metadataRegistry: testMetadataRegistry,
         questsRegistry: await loadQuestRegistryFromFs(path.join(__dirname, "..", "..", "stubs", "test-quest-registry.yaml"), "yaml"),
         wellKnownPolicies: wellKnownPoliciesMainnet

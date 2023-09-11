@@ -1,5 +1,5 @@
 import axios from "axios"
-import { config } from "./tools-utils"
+import { config } from "../tools-utils"
 
 export type AdvOfThioldenAppMetadata = 
     { adv: string, n: string, ath: number, int: number, cha: number, chr: boolean }[]

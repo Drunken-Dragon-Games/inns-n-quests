@@ -10,7 +10,8 @@ export default class BlockchainServiceMock {
             getWalletAuthenticationSelfTx:  jest.fn(),
             buildMintTx:  jest.fn(),
             getTxHashFromTransaction:  jest.fn(),
-            submitTransaction:  jest.fn()
+            submitTransaction:  jest.fn(),
+            buildBulkMintTx: jest.fn(),
         }
     }
 }

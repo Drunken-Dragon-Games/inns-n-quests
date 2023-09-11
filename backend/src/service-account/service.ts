@@ -1,18 +1,19 @@
-import { onlyPolicies, WellKnownPolicies } from "../registry-policies"
-import { AssetManagementService, ClaimerInfo } from "../service-asset-management"
+import { AssetManagementService } from "../service-asset-management"
 import { BlockchainService } from "../service-blockchain/service-spec"
+import { CollectionFilter, CollectionService } from "../service-collection"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { MinimalUTxO } from "../tools-cardano"
+import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, UserBallotResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
     blockchainService: BlockchainService
     governanceService: GovernanceService
+    collectionService: CollectionService
     wellKnownPolicies: WellKnownPolicies
 }
 
@@ -23,6 +24,7 @@ export class AccountServiceDsl implements AccountService {
         private readonly assetManagementService: AssetManagementService,
         private readonly blockchainService: BlockchainService,
         private readonly governanceService: GovernanceService,
+        private readonly collectionService: CollectionService,
         private readonly wellKnownPolicies: WellKnownPolicies,
     ){}
 
@@ -36,6 +38,7 @@ export class AccountServiceDsl implements AccountService {
             dependencies.assetManagementService,
             dependencies.blockchainService,
             dependencies.governanceService,
+            dependencies.collectionService,
             dependencies.wellKnownPolicies,
         )
         await service.loadDatabaseModels()
@@ -185,6 +188,38 @@ export class AccountServiceDsl implements AccountService {
         
     }
 
+    async testClaimNFTs(userId: string, address: string, logger?: LoggingContext): Promise<ClaimFaucetResult>{
+        if (process.env.NODE_ENV !== "development") return {status: "invalid",reason: "invalid call"}
+        const generateRandomAssets = (collection: string, collectionSize: number, maxAmount: number, multiple?: number): { unit: string, quantityToClaim: string }[] => {
+            const randomLength = Math.floor(Math.random() * maxAmount) + 1
+            const result: { unit: string, quantityToClaim: string }[] = []
+        
+            for (let i = 0; i < randomLength; i++) {
+                const randomNum = Math.floor(Math.random() * collectionSize) + 1
+                const unit = `${collection}${randomNum}`
+                const quantityToClaim= multiple ? (Math.floor(Math.random() * multiple) + 1 ).toString() : "1"
+                result.push({unit, quantityToClaim})
+            }
+        
+            return result
+        }
+       
+       const assetInfo: { [policyId: string]: { unit: string, quantityToClaim: string }[] } = {
+            [this.wellKnownPolicies.pixelTiles.policyId] : generateRandomAssets("PixelTile", 62, 12, 3),
+            [this.wellKnownPolicies.grandMasterAdventurers.policyId]: generateRandomAssets("GrandmasterAdventurer", 10000, 12),
+            [this.wellKnownPolicies.adventurersOfThiolden.policyId]: generateRandomAssets("AdventurerOfThiolden", 25000, 16)
+       }
+ 
+       const claimResponse = await this.assetManagementService.faucetClaim(address, assetInfo)
+       //const claimResponse = await this.assetManagementService.claim(userId, address, options, logger)
+       if (claimResponse.status !== "ok") return {status: "invalid", reason: `could not claim bacause ${claimResponse.reason}`}
+       return claimResponse
+    }
+
+    async faucetSubmmit(serializedSignedTx: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult>{
+        return this.assetManagementService.faucetClaimSubmmit(serializedSignedTx, logger)
+    }
+
     async claimSignAndSubbmit(serializedSignedTx: string, claimId: string, logger?: LoggingContext): Promise<ClaimSignAndSubbmitResult> {
         return this.assetManagementService.submitClaimSignature(claimId, serializedSignedTx, logger)
     }
@@ -230,6 +265,51 @@ export class AccountServiceDsl implements AccountService {
         //CHECKME: currenlty hanlding draonGold as number, is posible it will need to be changed to a bigInt
         const voteResult = await this.governanceService.voteForBallot(ballotId, optionIndex, userId, dragonGold)
         if (voteResult.ctype !== "success") return {status: "invalid", reason: voteResult.reason}
+        return {status: "ok"}
+    }
+
+    async getUserDisplayCollection(userId: string, pageSize: number, filter?: CollectionFilter, logger?: LoggingContext): Promise<UserCollectionWithMetadataResult> {
+        const collectionResult = await this.collectionService.getCollectionWithUIMetadata({ctype: "IdAndFilter", userId, filter}, pageSize, logger)
+        if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
+        return {status: "ok", collection: collectionResult.collection, hasMore: collectionResult.hasMore}
+    }
+
+    async getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>{
+        const collectionResult = await this.collectionService.getMortalCollection(userId, logger)
+        if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
+        return {status: "ok", collection: collectionResult.collection}
+    }
+
+    async modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>{
+        const operationResult = action === "add" ?
+        await this.collectionService.addMortalCollectible(userId, assetRef, logger) :
+        await this.collectionService.removeMortalCollectible(userId, assetRef, logger)
+        
+        if (operationResult.ctype !== "success") return {status: "invalid", reason: operationResult.error}
+        return {status: "ok"}
+    }
+
+    async syncUserCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>{
+        const result = await this.collectionService.syncUserCollection(userId, logger)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
+        return {status: "ok"}
+    }
+
+    async lockMortalCollection(userId: string, logger?: LoggingContext | undefined): Promise<SyncUserCollectionResult> {
+        const result = await this.identityService.setCollectionLock(userId, true, logger)
+        if (result.status !== "ok") return {status: "invalid", reason: result.reason}
+        return {status: "ok"}
+    }
+
+    async getMortalCollectionLockedState(userId: string, logger?: LoggingContext | undefined): Promise<MortalCollectionLockedStateResult> {
+        const result = await this.identityService.getCollectionLockState(userId, logger)
+        if (result.status !== "ok") return {status: "invalid", reason: result.reason}
+        return {status: "ok", locked: result.locked}
+    }
+
+    async setMortalCollection(userId: string, assets: CollectionAssets, logger?: LoggingContext): Promise<SyncUserCollectionResult> {
+        const result = await this.collectionService.setMortalCollection(userId, assets, logger)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
         return {status: "ok"}
     }
 }

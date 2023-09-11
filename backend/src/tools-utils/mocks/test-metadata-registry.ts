@@ -1,4 +1,4 @@
-import { MetadataRegistry } from "../../registry-metadata"
+import { MetadataRegistry } from "../../tools-assets/registry-metadata"
 
 export const testMetadataRegistry: MetadataRegistry = {
     advOfThioldenAppMetadata: [{ "adv": "vimtyr", "n": "1", "ath": 10, "int": 11, "cha": 11, "chr": true }, { "adv": "terrorhertz", "n": "2", "ath": 10, "int": 11, "cha": 11, "chr": true }],
@@ -70,7 +70,7 @@ export const testMetadataRegistry: MetadataRegistry = {
     },
     pixelTilesGameMetadata: {
         "PixelTile1": {
-            "class": "rogue",
+            "class": "Rogue",
             "race": "human"
         },
     }

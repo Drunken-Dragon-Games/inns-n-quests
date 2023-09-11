@@ -132,5 +132,9 @@ export const AccountTransitions = {
 
     voteForBallot: (ballotId: string, optionIndex: string) => {
         dispatch(AccountThunks.voteForGovernanceBallot(ballotId, optionIndex))
+    },
+
+    getWallet(supportedWallet: SupportedWallet){
+        return AccountThunks.extractWalletApiAndStakeAddress(supportedWallet)
     }
 } 

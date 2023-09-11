@@ -140,6 +140,23 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         response.status(200).json(result)
     }))
 
+    router.post("/assets/claim/test-faucet", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        if (process.env.NODE_ENV !== "development") {response.status(401).json({status: "Not allowed"})}
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const address: string = request.body.address
+        const result = await accountService.testClaimNFTs(userId, address, logger)
+        response.status(200).json(result)
+    }))
+
+    router.post("/assets/claim/faucet-sign-and-submit", requestCatchError(async (request: Request, response: Response) => {
+        if (process.env.NODE_ENV !== "development") {response.status(401).json({status: "Not allowed"})}
+        const logger = baseLogger.trace(request)
+        const {serializedSignedTx} = request.body
+        const result = await accountService.faucetSubmmit(serializedSignedTx, logger)
+        response.status(200).json(result)
+    }))
+
     router.post("/assets/claim/sign-and-submit", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const {serializedSignedTx, claimId} = request.body
@@ -160,6 +177,67 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         const result = await accountService.getUserInventory(userId, logger)
         response.status(200).json(result)
     }))
+
+    /* router.post("/assets/collection", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const {filter} = request.body
+        const result = await accountService.getUserCollection(userId, filter, logger)
+        response.status(200).json(result)
+    })) */
+
+    router.post("/assets/collection-with-metadata", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const filter = request.body.filter
+        const pageSize = request.body.pageSize
+        const result = await accountService.getUserDisplayCollection(userId, pageSize, filter, logger)
+        response.status(200).json(result)
+    }) )
+
+    router.post("/assets/mortal-collection", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const result = await accountService.getUserMortalCollection(userId,logger)
+        response.status(200).json(result)
+    }) )
+
+    router.post("/assets/modify-mortal-collection", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const {assetRef, action} = request.body
+        const result = await accountService.modifyMortalCollection(userId, assetRef, action, logger)
+        response.status(200).json(result)
+    }) )
+
+    router.post("/assets/lock-mortal-collection", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const result = await accountService.lockMortalCollection(userId, logger)
+        response.status(200).json(result)
+    }))
+
+    router.post("/assets/set-mortal-collection", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const {assets} = request.body
+        const result = await accountService.setMortalCollection(userId, assets, logger)
+        response.status(200).json(result)
+    }))
+
+    router.post("/assets/get-mortal-collection-state", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const result = await accountService.getMortalCollectionLockedState(userId, logger)
+        response.status(200).json(result)
+    }))
+
+    router.post("/assets/sync-collection", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+        const logger = baseLogger.trace(request)
+        const userId: string = request.auth!.userId
+        const result = await accountService.syncUserCollection(userId, logger)
+        response.status(200).json(result)
+    }) )
 
     router.get("/assets/test/grant", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
         if (process.env.NODE_ENV !== "development") {response.status(401).json({status: "Not allowed"})}

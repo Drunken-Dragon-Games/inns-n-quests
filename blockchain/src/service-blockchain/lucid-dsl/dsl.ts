@@ -59,8 +59,37 @@ export class TransactionDSL {
         }catch(e){
             return fail(e.message ?? JSON.stringify(e, null, 4))
         }
-            
     }
+
+    async buildBulkMintTx(address: string, assetsInfo: {[policyId: string]: {unit:string, quantityToClaim:string}[]}): Promise<Resolution<CardanoTransactionInfo>>{
+        const lucidInstance = await this.lucidFactory();
+        lucidInstance.selectWalletFrom({ address });
+        const mintRedeemer = Lucid.Data.to(new Lucid.Constr(0, []));
+        const tx = lucidInstance.newTx();
+    
+        for (const policyId of Object.keys(assetsInfo)) {
+            const policyResponse = this.secureSigningService.policy(policyId);
+            
+            if (policyResponse.status !== "ok") {
+                return {status: "invalid", reason: `Could not build wiht policy: ${policyId}, Tx because: ${policyResponse.reason}`};
+            }
+    
+            tx.attachMintingPolicy(policyResponse.value);
+            const assets = assetsInfo[policyId].reduce((acc, assetInfo) => {
+                acc[`${policyId}${Lucid.fromText(assetInfo.unit)}`] = BigInt(assetInfo.quantityToClaim);
+                return acc;
+            }, {} as Record<string, bigint>);
+            
+            tx.mintAssets(assets, mintRedeemer)
+            .payToAddress(address, assets);
+        }
+    
+        const completeUnsignedTx = await tx.complete();
+    
+        const txHash = completeUnsignedTx.toHash();
+        return succeed({rawTransaction: completeUnsignedTx.toString(), txHash});
+    }
+    
 
     async hashSerializedTransaction (serializedTrasnaction: Lucid.Transaction): Promise<TransactionHashReponse> {
         try{

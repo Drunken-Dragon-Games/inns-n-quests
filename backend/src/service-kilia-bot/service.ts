@@ -17,6 +17,7 @@ import * as messagesDSL from "./discord-messages-dsl"
 import * as ballotDSL from "./ballots/ballot-dsl"
 import { ConfirmMessage } from "./models"
 import { LoggingContext } from "../tools-tracing"
+import { CollectionService } from "../service-collection"
 
 
 export type KiliaBotServiceDependencies = {
@@ -25,6 +26,7 @@ export type KiliaBotServiceDependencies = {
     identityService: IdentityService,
     governanceService: GovernanceService,
     idleQuestsService: IdleQuestsService,
+    collectionService: CollectionService,
 }
 
 export type KiliaBotServiceConfig = {
@@ -91,6 +93,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         private readonly governanceService: GovernanceService,
         private readonly idleQuestService: IdleQuestsService,
         private readonly serverId: string,
+        private readonly collectionService: CollectionService,
     ){
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -116,6 +119,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             dependencies.governanceService,
             dependencies.idleQuestsService,
             config.serverId,
+            dependencies.collectionService,
         )
         //setting up DB and pre loading cache
         await service.loadDatabaseModels()
@@ -268,7 +272,15 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         if (subcommand === "leaderboard") {
             const startDate = new Date()
             startDate.setDate(1)
+            startDate.setHours(0)
+            startDate.setMinutes(0)
+            startDate.setSeconds(0)
+
             const leaderboard = await this.idleQuestService.getStakingQuestLeaderboard(10, startDate)
+            if(leaderboard.length < 1) {
+                await interaction.reply("Ah, adventurers! The ink's still wet on this month's tales. No quests to rank yet!")
+                return
+            }
             const embedFields = await Promise.all(leaderboard.map(async (entry, index) => {
                 const user = await this.identityService.resolveUser({ ctype: "user-id", userId: entry.userId })
                 return {
@@ -483,6 +495,23 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                     return `Leaderboard Published on the leaderboard Notification Channel `
                 })
         }
+        else if (subcommand == "clear-week-stake"){
+            if (process.env.NODE_ENV !== "development") return this.replyMessage(message, "Comand only allowed on devleopemnt enviroments")
+            const [weekNo, year] = messagesDSL.getArguments(message).split(" ")
+            if (weekNo == "" || year == "") return this.replyMessage(message, "could not get week from arguments")
+            const weekNoNum = Number(weekNo)
+            const yearNum = Number(year)
+
+            if (isNaN(weekNoNum) || weekNoNum < 1 || weekNoNum > 53) {
+                return this.replyMessage(message, "Week number must be a number between 1 and 53")
+            }
+            if (isNaN(yearNum) || yearNum < 2022 ) {
+                return this.replyMessage(message, "Year must be a number stating with 2022 ")
+            }
+            const clearResult = await this.collectionService.clearWeekStake(weekNoNum, yearNum)
+            if (clearResult.ctype !== "success") return this.replyMessage(message, `Error clearing ${clearResult.error}`)
+            return this.replyMessage(message, `Done!`)
+        }
         else if (subcommand == "help"){
             const helpMessage = `
         **Available Development Commands**
@@ -506,13 +535,15 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
         *get-leaderboard <days?>*: Retrieves the leaderboard information for the specified number of days. if no day is provided it defaults to the first of the current month
             it promts for confirmation to publish leaderboard to the public channel
+
+        *clear-week-stake <weekNumber> <year>: Removes the records for granting rewrds for a given week. only works if the env is set to development
         
         *help* : Provides a list of available commands and a description of their function.
         
         To use these commands, prefix the command with a '!dev '.`
             return await this.replyMessage(message, helpMessage)
         }
-        else return await this.replyMessage(message, "unknown development command")
+        else return await this.replyMessage(message, `unknown development command ${subcommand}`)
     }
 
     sendErrorMessage(error: Error, route: string, method: string, traceId?: string, userId?: string){

@@ -1,4 +1,4 @@
-import { IdentityService, ResolveUserResult } from "../../service-identity"
+import { GetCollectionLockResult, IdentityService, ResolveUserResult } from "../../service-identity"
 
 export default class IdentityServiceMock {
 
@@ -25,12 +25,26 @@ export default class IdentityServiceMock {
             verifyAuthState: jest.fn(),
             getTotalUsers: jest.fn(),
             completeAuthState: jest.fn(),
+            listAllUserIds: jest.fn(),
             migrationFixDiscordUsernameInDB: jest.fn(),
+            getCollectionLockState: jest.fn(),
+            setCollectionLock: jest.fn(),
+            setCollectionLockAll: jest.fn(),
         }
     }
 
     resolveUserReturns(response: ResolveUserResult) {
         return jest.spyOn(this.service, "resolveUser")
             .mockReturnValueOnce(Promise.resolve(response))
+    }
+
+    listAllUserIdsReturns(reponse: string[]){
+        return jest.spyOn(this.service, "listAllUserIds")
+            .mockReturnValue(Promise.resolve(reponse))
+    }
+
+    getCollectionLockStateReturns(response: GetCollectionLockResult){
+        return jest.spyOn(this.service, "getCollectionLockState")
+            .mockReturnValue(Promise.resolve(response))
     }
 }

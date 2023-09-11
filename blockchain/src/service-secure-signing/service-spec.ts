@@ -3,5 +3,6 @@ import { Resolution } from "../utypes.ts"
 
 export interface SecureSigningService {
     policy(policyId: string): Resolution<Lucid.Script>
-    signWithPolicy(policyId: string, transaction: Lucid.Transaction): Promise<Resolution<string>> 
+    signWithPolicy(policyId: string, transaction: Lucid.Transaction): Promise<Resolution<string>>
+    signMultiplePolicies(policyIds: string[], transaction: Lucid.Transaction): Promise<Resolution<string>>
 }

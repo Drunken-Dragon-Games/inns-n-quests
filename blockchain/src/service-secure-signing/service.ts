@@ -48,5 +48,15 @@ export class SecureSigningServiceDsl implements SecureSigningService {
         }
     }
 
+    async signMultiplePolicies(policyIds: string[], transaction: Lucid.Transaction): Promise<Resolution<string>> {
+        try {
+            const response = await this.registry.signWithMultiplePolicies(policyIds, transaction)
+            if (response.status !== "ok") return {status: "invalid", reason: `could not sign with policy reason: ${response.reason}`}
+            return response
+        } catch (_) {
+            return {status: "invalid", reason: "bad-tx"}
+        }
+    }
+
 }
  
