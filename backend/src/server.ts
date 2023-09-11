@@ -52,7 +52,7 @@ async function collectionsAndRewardsLoop(collectionService: CollectionServiceDsl
 }
 
 const runServer = async () => {
-    console.log("Starting backend...")
+    console.log("Starting Backend...")
     dotenv.config()
     const randomSeed = config.stringOrElse("RANDOM_SEED", Date.now().toString())
     const calendar = commonCalendar
