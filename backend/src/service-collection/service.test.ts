@@ -131,6 +131,13 @@ test("get Collection with Metadata ok", async () => {
     expect(collectionResult.collection).toEqual(expectedCollection)
 })
 
+test("get weekly earnings", async () => {
+    await service.updateGlobalDailyStakingContributions()
+    const weeklyEarnings = await service.getWeeklyPasiveTotal(userId)
+    if (weeklyEarnings.ctype !== "success") fail("pasive info bad ctype")
+    expect(weeklyEarnings.weeklyEarns).toEqual(56)
+})
+
 test("get Passsive staking Info", async () => {
     const pasiveInfo = await service.getPassiveStakingInfo("18e099c5-06d2-4efa-aacf-e087658aab2f")
     if (pasiveInfo.ctype !== "success") fail("pasive info bad ctype")

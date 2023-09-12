@@ -20,6 +20,7 @@ export default class CollectionServiceMock {
             setMortalCollection: jest.fn(),
             lockAllUsersCollections: jest.fn(),
             clearWeekStake: jest.fn(),
+            getWeeklyPasiveTotal: jest.fn(),
         }
     }
 

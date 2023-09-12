@@ -45,7 +45,47 @@ const ClickableText = styled.p`
     color: ${colors.dduGold};
     font-weight: bold;
     cursor: pointer;
+    font-size: 24px;
+    img {
+        vertical-align: middle; // Align the image vertically in the middle
+        margin-left: 5px; // Add some spacing between text and image
+    }
 `
+
+const EmptyCollectionHeaderMessage = styled.div`
+    font-size: 30px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 20px;
+    ${OswaldFontFamily}
+    font-weight: bold;
+    text-transform: uppercase;
+`
+
+const EmptyCollectionMessage = styled.div`
+    font-size: 20px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 20px;
+    ${OswaldFontFamily}
+`
+
+const StyledP = styled.p`
+    img {
+        vertical-align: middle; // Align the image vertically in the middle
+        margin-left: 5px; // Add some spacing between text and image
+    }
+`
+
+const TextImage = styled.div`
+    display: inline-flex; // Ensures the text and image are inline
+    align-items: center; // Vertically aligns the content
+    margin-left: 5px; // Add spacing between text and image
+
+    img {
+        margin-left: 5px;
+    }
+`;
 
 const isVideoFile = (src: string): boolean => {
     return src.endsWith('.mp4')
@@ -58,6 +98,14 @@ const capitalizeFirstLetter = (input: string): string => {
 
 const modifyMortalCollection = (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
     collectionTransitions.modifyMortalCollection(asset, action, policy)
+}
+
+const isCollectionEmpty = (collectionItems: CollectionWithUIMetada): boolean => {
+    return (
+        collectionItems.adventurersOfThiolden.length < 1 && 
+        collectionItems.grandMasterAdventurers.length < 1 && 
+        collectionItems.pixelTiles.length < 1
+    )
 }
 
 type RenderCollectible = { 
@@ -89,10 +137,20 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
             }
             <CollectibleInfo isMobile={isMobile}>
                 <CollectibleName isMobile={isMobile}>{capitalizeFirstLetter(src.name)}</CollectibleName>
-                <p>Class: {src.class}</p>
-                {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
+                {src.class !== 'furniture' &&  
+                    <StyledP>
+                        <img src={`https://cdn.ddu.gg/modules/ddu-app/s2Explorer/class/${src.class.toLowerCase()}.svg`} alt="Class Logo"/> {src.class}
+                    </StyledP>
+                }
+                {src.class !== 'furniture' && 
+                    <StyledP>
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/athleticism.svg" alt="Athleticism"/> {`${src.aps[0]} `} 
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/intellect.svg" alt="Intellect"/> {`${src.aps[1]} `} 
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/charisma.svg" alt="Charisma"/> {`${src.aps[2]} `} 
+                    </StyledP>
+                    }
                 { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
-                <ClickableText onClick={handleStakingContributionClick}>{src.stakingContribution} $DS/week</ClickableText>
+                <ClickableText onClick={handleStakingContributionClick}>{src.stakingContribution} <img src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver_toClaim.svg" alt="DS Logo"/> / week</ClickableText>
             </CollectibleInfo>
             { mortalLocked || type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>
@@ -108,6 +166,15 @@ export const DisplayView = ({ collectionItems, artType, mortalLocked, isMobile }
 
     return (
         <DisplaylContainer isMobile={isMobile}>
+        {isCollectionEmpty(collectionItems) ?
+        <Section key={"Eternal Collection"} title="Eternal Collection" colums={isMobile ? 1 : 1}>
+            <EmptyCollectionHeaderMessage>
+            Press the Sync button on the dashboard to load your assets from the blockchain
+            </EmptyCollectionHeaderMessage>
+            <EmptyCollectionMessage>
+            This actions is perfomed automatically every 24 hrs
+            </EmptyCollectionMessage>
+        </Section> : 
         <Section key={"Eternal Collection"} title="Eternal Collection" colums={isMobile ? 1 : 3}>
             {collectionItems.adventurersOfThiolden.map((src, index) =>
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.adventurersOfThiolden} collectionName="adventurersOfThiolden" artType={artType} mortalLocked={mortalLocked} isMobile={isMobile}/>
@@ -122,6 +189,7 @@ export const DisplayView = ({ collectionItems, artType, mortalLocked, isMobile }
                 <Collectible key={index} src={src} imageDimensions={imageDimensions.pixelTiles} collectionName="pixelTiles" artType={artType} type={"Furniture"} mortalLocked={mortalLocked} isMobile={isMobile}/>
             )}
         </Section>
+        }
         </DisplaylContainer>
     )
 }

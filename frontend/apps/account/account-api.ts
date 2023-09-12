@@ -28,6 +28,10 @@ export const AccountApi = {
         return AccountBackend.getMortalLockState()
     },
 
+    getUserWeeklyPasiveEarnings(){
+        return AccountBackend.getUserWeeklyPasiveEarnings()
+    },
+
     setMortalCollection(assets: CollectionAssets){
         return AccountBackend.setMortalCollection(assets)
     },
