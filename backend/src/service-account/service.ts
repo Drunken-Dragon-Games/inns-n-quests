@@ -6,7 +6,7 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -278,6 +278,12 @@ export class AccountServiceDsl implements AccountService {
         const collectionResult = await this.collectionService.getMortalCollection(userId, logger)
         if (collectionResult.ctype !== "success") return {status: "invalid", reason: collectionResult.error}
         return {status: "ok", collection: collectionResult.collection}
+    }
+
+    async getUserWeeklyPasiveEarnings(userId: string, logger?: LoggingContext | undefined): Promise<UserWeeklyPasiveEarnings> {
+        const earningsReuslt = await this.collectionService.getWeeklyPasiveTotal(userId, logger)
+        if (earningsReuslt.ctype !== "success") return {status: "invalid", reason: earningsReuslt.error}
+        return {status: "ok", weeklyEarnings: earningsReuslt.weeklyEarns}
     }
 
     async modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>{

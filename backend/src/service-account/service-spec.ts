@@ -31,6 +31,7 @@ export interface AccountService {
     cleanAssociationState(authStateId: string, error: string, logger?: LoggingContext): Promise<CleanAssociationTxResult>
     getUserDisplayCollection(userId: string, pageSize: number, filter?: CollectionFilter,  logger?: LoggingContext): Promise<UserCollectionWithMetadataResult>
     getUserMortalCollection(userId: string, logger?: LoggingContext): Promise<UserMortalCollectionResult>
+    getUserWeeklyPasiveEarnings(userId: string, logger?: LoggingContext): Promise<UserWeeklyPasiveEarnings>
     modifyMortalCollection(userId: string, assetRef: string, action: "add" | "remove", logger?: LoggingContext): Promise<ModifyMortalCollectionResult>
     syncUserCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
     lockMortalCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
@@ -126,6 +127,10 @@ export type UserCollectionWithMetadataResult
 
 export type UserMortalCollectionResult
     = {status: "ok", collection: CollectionWithGameData}
+    | {status: "invalid", reason: string}
+
+export type UserWeeklyPasiveEarnings
+    = {status: "ok", weeklyEarnings: number}
     | {status: "invalid", reason: string}
 
 export type ModifyMortalCollectionResult

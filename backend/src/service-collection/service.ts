@@ -1,5 +1,5 @@
 import { QueryInterface, Sequelize } from "sequelize"
-import { CollectionService, CollectionWithUIMetadataResult, GetCollectionResult, GetPassiveStakingInfoResult, SyncUserCollectionResult } from "./service-spec"
+import { CollectionService, CollectionWeeklyEarningsResult, CollectionWithUIMetadataResult, GetCollectionResult, GetPassiveStakingInfoResult, SyncUserCollectionResult } from "./service-spec"
 
 import path from "path"
 import { Umzug } from "umzug"
@@ -142,7 +142,18 @@ export class CollectionServiceDsl implements CollectionService {
         const dragonSilverToClaim = invDragonSilver?.find(a => !a.chain)?.quantity ?? "0"
         const weeklyAccumulated = (await this.rewards.getWeeklyAccumulated(userId)).toFixed(1)
         return {ctype: "success", weeklyAccumulated, dragonSilverToClaim, dragonSilver}
+    }
 
+    async getWeeklyPasiveTotal(userId: string, logger?: LoggingContext | undefined): Promise<CollectionWeeklyEarningsResult> {
+        const userCollection = await this.getCollection(userId)
+        if (userCollection.ctype !== "success") return {ctype: "failure", error: userCollection.error}
+        const stakingCollection = this.calculateCollectionWeeklyReward(userCollection.collection)
+        const weeklyReward = Object.entries(stakingCollection).reduce((acc, [policyName, collectibles]) => {
+            return acc + collectibles.reduce((acc, collectible) => {
+                return acc + (Math.round(collectible.stakingContribution))
+            }, 0)
+        }, 0)
+        return {ctype: "success", weeklyEarns: weeklyReward}
     }
 
     /**

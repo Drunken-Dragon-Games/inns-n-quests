@@ -26,7 +26,21 @@ const OpenInnButtonContainer = styled.div`
     }
 `
 
-export const DashboardView = ({ status, artType, mortalLocked, isSyncing, isMobile }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt", mortalLocked: boolean, isSyncing: boolean, isMobile: boolean}) => {
+const DashboardMessage = styled.div`
+    font-size: 18px;
+    text-align: center;
+    color: ${colors.textBeige};
+    margin-top: 5px;
+    ${OswaldFontFamily};
+    font-weight: bold;
+
+    img {
+      vertical-align: middle; // Align the image vertically in the middle
+      margin-left: 5px; // Add some spacing between text and image
+  }
+`
+
+export const DashboardView = ({ status, artType, mortalLocked, isSyncing, isMobile, weeklyEranings }: {  status: CollectionFetchingState, artType: "miniature" | "splashArt", mortalLocked: boolean, isSyncing: boolean, isMobile: boolean, weeklyEranings: number}) => {
   return (
     <DashboardContainer>
     <Section title="Dashboard" colums={isMobile ? 2 : 1}>
@@ -40,7 +54,9 @@ export const DashboardView = ({ status, artType, mortalLocked, isSyncing, isMobi
             <Button action={() => collectionTransitions.lockMortalCollection()} size="regular" disabled={mortalLocked}>
                 {mortalLocked ? "Locked" : "Lock"}
             </Button>
-            {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" && !isMobile ?
+            <DashboardMessage>{`Earning Per Week`}</DashboardMessage>
+            <DashboardMessage><img src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver_toClaim.svg" alt="DS Logo"/> {`${weeklyEranings}`}</DashboardMessage>
+            {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" && !isMobile && false ?
             <>
             <h2 style={{ color: 'white' }}>{`Grant is ${status.ctype}`}</h2>
             <Button action={() => collectionTransitions.grantTestCollection("Nami")} size="small">

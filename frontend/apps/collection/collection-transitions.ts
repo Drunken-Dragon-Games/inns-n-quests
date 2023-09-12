@@ -26,6 +26,10 @@ export const collectionTransitions = {
         dispatch(CollectionThunks.getMortalCollectionLockedState())
     },
 
+    getWeeklyEarnings(){
+        dispatch(CollectionThunks.getWeeklyEarnings())
+    },
+
     lockMortalCollection() {
         dispatch(CollectionThunks.lockMortalCollection())
     },

@@ -85,6 +85,12 @@ export const CollectionThunks = {
         else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: stateResult.reason }))
     },
 
+    getWeeklyEarnings: (): CollectionThunk => async (dispatch) => {
+        const stateResult = await AccountApi.getUserWeeklyPasiveEarnings()
+        if (stateResult.status === "ok") dispatch(actions.setWeeklyEarnings(stateResult.weeklyEarnings))
+        else dispatch(CollectionThunks.displayStatus({ ctype: "error", details: stateResult.reason }))
+    },
+
     lockMortalCollection: (): CollectionThunk => async (dispatch, getState) => {
         const state = getState()
         const mortalColleciton = state.mortalCollectionItems
