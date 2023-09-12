@@ -126,6 +126,11 @@ export const AccountBackend = {
         return result.data
     },
 
+    async getUserWeeklyPasiveEarnings(traceId?: string): Promise<UserWeeklyPasiveEarnings>{
+        const result = await accountRequestWRefresh("POST", "/assets/collection-earnings", traceId)
+        return result.data
+    },
+
     async getUserMortalCollection(traceId?: string): Promise<UserMortalCollectionResult>{
         const result = await accountRequestWRefresh("POST", "/assets/mortal-collection", traceId)
         return result.data
@@ -246,6 +251,10 @@ export type VoteResult
 
 export type UserCollectionWithMetadataResult
     = {status: "ok", collection: CollectionWithUIMetada, hasMore: boolean}
+    | {status: "invalid", reason: string}
+
+export type UserWeeklyPasiveEarnings
+    = {status: "ok", weeklyEarnings: number}
     | {status: "invalid", reason: string}
 
 export type UserMortalCollectionResult

@@ -45,6 +45,11 @@ const ClickableText = styled.p`
     color: ${colors.dduGold};
     font-weight: bold;
     cursor: pointer;
+    font-size: 24px;
+    img {
+        vertical-align: middle; // Align the image vertically in the middle
+        margin-left: 5px; // Add some spacing between text and image
+    }
 `
 
 const EmptyCollectionHeaderMessage = styled.div`
@@ -63,6 +68,10 @@ const EmptyCollectionMessage = styled.div`
     color: ${colors.textBeige};
     margin-top: 20px;
     ${OswaldFontFamily}
+`
+
+const StyledP = styled.p`
+
 `
 
 const isVideoFile = (src: string): boolean => {
@@ -115,10 +124,10 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
             }
             <CollectibleInfo isMobile={isMobile}>
                 <CollectibleName isMobile={isMobile}>{capitalizeFirstLetter(src.name)}</CollectibleName>
-                <p>Class: {src.class}</p>
+                <StyledP>Class: {src.class}</StyledP>
                 {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
                 { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
-                <ClickableText onClick={handleStakingContributionClick}>{src.stakingContribution} $DS/week</ClickableText>
+                <ClickableText onClick={handleStakingContributionClick}>{src.stakingContribution} <img src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver_toClaim.svg" alt="DS Logo"/> / week</ClickableText>
             </CollectibleInfo>
             { mortalLocked || type === "Furniture" ? <></> : <Button action={() => modifyMortalCollection(src, "add", collectionName)} disabled={src.mortalRealmsActive >= parseInt(src.quantity)}>Add To Mortal</Button>}
         </CollectibleContainer>

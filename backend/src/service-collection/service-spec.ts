@@ -25,6 +25,8 @@ export interface CollectionService {
      */
     getPassiveStakingInfo(userId: string, logger?: LoggingContext): Promise<GetPassiveStakingInfoResult>
 
+    getWeeklyPasiveTotal(userId: string, logger?: LoggingContext): Promise<CollectionWeeklyEarningsResult>
+
     /**
      * Resyncs everyone's collection and adds the daily contributions to their passive staking.
      * Intended to be called once a day.
@@ -77,3 +79,4 @@ export type CollectionWithUIMetadataResult = GetCollectionResult<CollectibleStak
 export type CollectionWithUIMetada = Collection<CollectibleStakingInfo & CollectibleMetadata>
 export type CollectionWithGameData = Collection<CollectibleMetadata>
 export type SyncUserCollectionResult = SResult<{collection: Collection<StoredMetadata>}>
+export type CollectionWeeklyEarningsResult = SResult<{ weeklyEarns: number}>

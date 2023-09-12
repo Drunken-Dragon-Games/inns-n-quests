@@ -12,6 +12,7 @@ import styled from "styled-components"
 import { PaginationView } from "./pagination/pagination-view"
 import { MortalView } from "./mortal-display/mortal-view"
 import { DashboardView } from "./dashboard/calloction-dashboard-view"
+import { OswaldFontFamily, colors } from "../common"
 
 const Container = styled.div<{ isMobile: boolean }>`
   width: 100vw;
@@ -33,7 +34,7 @@ const CollectionComponent = () =>{
       return () => {window.removeEventListener("resize", handleResize)}
     }, [])
 
-    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType, mortalLocked, justLocked, isSyncing } = useSelector((state: CollectionState) => ({
+    const { mortalItems, collectionItems, collectionCache, filter, status, displayArtType, mortalLocked, justLocked, isSyncing, weeklyEranings } = useSelector((state: CollectionState) => ({
             collectionItems: state.displayedCollectionItems,
             mortalItems: state.mortalCollectionItems,
             collectionCache: state.collectionCache,
@@ -42,16 +43,18 @@ const CollectionComponent = () =>{
             displayArtType: state.displayArtStyle,
             mortalLocked: state.mortalLocked,
             justLocked: state.justLocked,
-            isSyncing: state.isSyncing
+            isSyncing: state.isSyncing,
+            weeklyEranings: state.weeklyEarnings,
     }))
     useEffect(() => {
       collectionTransitions.setDisplayCollection(collectionCache, filter)
       collectionTransitions.setMortalCollection()
       collectionTransitions.getMortalCollectionLockedState()
+      collectionTransitions.getWeeklyEarnings()
     }, [])
     return(
     <Container isMobile={isMobile}>
-      <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked} isSyncing={isSyncing} isMobile={isMobile}></DashboardView>
+      <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked} isSyncing={isSyncing} isMobile={isMobile} weeklyEranings={weeklyEranings}></DashboardView>
       <MortalView collectionItems={mortalItems} mortalLocked={mortalLocked} justLocked={justLocked} isMobile={isMobile}/>
       <FilterView isMobile={isMobile}/>
       <DisplayView collectionItems={collectionItems} artType={displayArtType} mortalLocked={mortalLocked} isMobile={isMobile}/>

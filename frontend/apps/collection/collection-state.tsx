@@ -15,6 +15,7 @@ export interface CollectionState {
     collectionFetchingState: CollectionFetchingState,
     collectionFilter: CollectionFilter,
     displayArtStyle: "miniature" | "splashArt",
+    weeklyEarnings: number,
     mortalLocked: boolean,
     justLocked: boolean,
     isSyncing: boolean
@@ -35,6 +36,7 @@ const collectionInitialState: CollectionState = {
     collectionFetchingState: {ctype: "idle"},
     collectionFilter: {page: 1, policyFilter: [], classFilter: [], APSFilter:{ath: {}, int: {}, cha: {}}},
     displayArtStyle: "splashArt",
+    weeklyEarnings: 0,
     mortalLocked: true,
     justLocked: false,
     isSyncing: false
@@ -54,6 +56,10 @@ export const collectinState = createSlice({
 
         setMortalCollectionLocked: (state, action: PayloadAction<boolean>) => {
             state.mortalLocked = action.payload
+        },
+
+        setWeeklyEarnings: (state, action: PayloadAction<number>) => {
+            state.weeklyEarnings = action.payload
         },
 
         setJustLocked: (state, action: PayloadAction<boolean>) => {
