@@ -1,4 +1,4 @@
-import styled from "styled-components"
+import styled, { keyframes } from "styled-components"
 import { CollectionFetchingState, CollectionPolicyNames, CollectionWithGameData, CollectionWithUIMetada, MortalCollectible } from "../collection-state-models"
 import { MessiriFontFamily, PixelArtImage, Video, vmax1, colors, OswaldFontFamily, vmax } from "../../common"
 import { useState } from "react"
@@ -35,10 +35,10 @@ const CollectibleContainer = styled.div<{ maxHeight?: string | number}>`
 
 const CollectibleInfo = styled.div<{isMobile: boolean}>`
     padding: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
+    #border: 1px solid rgba(255,255,255,0.1);
     border-radius: 5px;
-    box-shadow: 0 0 20px 0 rgba(0,0,0,0.8);
-    background-color: rgba(0, 0, 0, 0.5);
+    #box-shadow: 0 0 20px 0 rgba(0,0,0,0.8);
+    #background-color: rgba(0, 0, 0, 0.5);
     text-align: center;
     color: #fff;
     font-size: ${(isMobile) => isMobile ? "20px" : "16px"};
@@ -67,6 +67,48 @@ const EmptyCollectionMessage = styled.div`
     color: ${colors.textBeige};
     margin-top: 20px;
     ${OswaldFontFamily}
+`
+const StyledP = styled.p`
+    img {
+        vertical-align: middle; // Align the image vertically in the middle
+        margin-left: 5px; // Add some spacing between text and image
+    }
+`
+
+const hoverAnimation = keyframes`
+    0% {
+        transform: scale(1);
+        filter: drop-shadow(0px 0px 10px black);
+    }
+    100% {
+        transform: scale(1.25);
+        filter: drop-shadow(5px 5px 15px ${colors.dduGold});
+    }
+`
+
+
+const hoverOutAnimation = keyframes`
+    0% {
+        transform: scale(1.25);
+        filter: drop-shadow(5px 5px 15px ${colors.dduGold});
+    }
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0px 0px 10px black);
+    }
+`
+
+const ArtContainer = styled.div`
+& > * {
+    filter: drop-shadow(0px 0px 10px black);
+    animation: ${hoverOutAnimation} 200ms ease-in-out;
+    &:hover {
+        animation: ${hoverAnimation} 200ms ease-in-out;
+        transform: scale(1.25);
+        filter: drop-shadow(5px 5px 15px ${colors.dduGold});
+        z-index: 10;
+    }
+} 
 `
 
 const removeFromMortalCollection = (asset: MortalCollectible, policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers") => {
@@ -98,6 +140,7 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked, isMobile
         for (let i = 0; i < Number(src.quantity); i++) {
           assetArray.push(
             <CollectibleContainer key={`${src.name}-${i}`} maxHeight={maxHeight}>
+              <ArtContainer>
               <CharacterSprite 
                 character={{
                   sprite: src.miniature,
@@ -107,10 +150,21 @@ export const MortalView = ({ collectionItems, mortalLocked, justLocked, isMobile
                 }}
                 units={isMobile ? vmax(3) : vmax1}
               />
+              </ArtContainer>
               <CollectibleInfo isMobile={isMobile}>
                 <CollectibleName isMobile={isMobile}>{capitalizeFirstLetter(src.name)}</CollectibleName>
-                <p>Class: {src.class}</p>
-                {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
+                {src.class !== 'furniture' && 
+                    <StyledP>
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/athleticism.svg" alt="Athleticism"/> {`${src.aps[0]} `} 
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/intellect.svg" alt="Intellect"/> {`${src.aps[1]} `} 
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/charisma.svg" alt="Charisma"/> {`${src.aps[2]} `} 
+                    </StyledP>
+                    }
+                {src.class !== 'furniture' &&  
+                    <StyledP>
+                        <img src={`https://cdn.ddu.gg/modules/ddu-app/s2Explorer/class/${src.class.toLowerCase()}.svg`} alt="Class Logo"/> {src.class}
+                    </StyledP>
+                }
             </CollectibleInfo>
             {mortalLocked ? <></> : <Button action ={ () => removeFromMortalCollection(src, policyName)} size="regular">Remove</Button>}
             </CollectibleContainer>

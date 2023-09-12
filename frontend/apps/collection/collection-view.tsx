@@ -54,7 +54,7 @@ const CollectionComponent = () =>{
     }, [])
     return(
     <Container isMobile={isMobile}>
-      <DashboardView status={status} artType={displayArtType} mortalLocked={mortalLocked} isSyncing={isSyncing} isMobile={isMobile} weeklyEranings={weeklyEranings}></DashboardView>
+      <DashboardView status={status} artType={displayArtType} collectionItems={mortalItems} mortalLocked={mortalLocked} isSyncing={isSyncing} isMobile={isMobile} weeklyEranings={weeklyEranings}></DashboardView>
       <MortalView collectionItems={mortalItems} mortalLocked={mortalLocked} justLocked={justLocked} isMobile={isMobile}/>
       <FilterView isMobile={isMobile}/>
       <DisplayView collectionItems={collectionItems} artType={displayArtType} mortalLocked={mortalLocked} isMobile={isMobile}/>
