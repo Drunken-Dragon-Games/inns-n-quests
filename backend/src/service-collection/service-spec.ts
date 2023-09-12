@@ -62,7 +62,7 @@ export interface CollectionService {
 
     clearWeekStake(weekNo: number, year: number): Promise<SResult<{message: string}>>
 
-    lockAllUsersCollections(logger?: LoggingContext): Promise<void>
+    setLockAllUsersCollections(locked: boolean, logger?: LoggingContext): Promise<void>
 }
 
 export type GetCollectionResult<A extends object> = SResult<{ 

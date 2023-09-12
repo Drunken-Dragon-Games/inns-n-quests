@@ -44,10 +44,10 @@ async function collectionsAndRewardsLoop(collectionService: CollectionServiceDsl
     weeklyRule.hour = 2
     schedule.scheduleJob(weeklyRule, () => collectionService.grantGlobalWeeklyStakingGrant.bind(collectionService)(logger))
 
-    const lockRule = new schedule.RecurrenceRule()
+    /* const lockRule = new schedule.RecurrenceRule()
     lockRule.dayOfWeek = 2
     lockRule.hour = 2
-    schedule.scheduleJob(lockRule, () => collectionService.lockAllUsersCollections.bind(collectionService)(logger))
+    schedule.scheduleJob(lockRule, () => collectionService.setLockAllUsersCollections.bind(collectionService)(logger)) */
 
 }
 

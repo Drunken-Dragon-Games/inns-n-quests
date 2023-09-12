@@ -512,6 +512,27 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             if (clearResult.ctype !== "success") return this.replyMessage(message, `Error clearing ${clearResult.error}`)
             return this.replyMessage(message, `Done!`)
         }
+        else if (subcommand == "set-collection-lock"){
+            const lockedString = messagesDSL.getArguments(message)
+            console.log({lockedString})
+            const locked = lockedString === "true" ||  lockedString === "True" ||  lockedString === "t" ? true :  lockedString === "false" ||  lockedString === "False" ||  lockedString === "f" ? false : undefined
+            if (locked === undefined) return this.replyMessage(message, "Could not parse boolean state please use comand wiht either **true** or **false**")
+            this.replyMessage(message, `Got command to set all users collections locked to be ${locked} fi this is correct reply with **yes** If you wish to cancel, reply with **no** or wait for 60 seconds for this request to time out.`)
+            await this.waitForConfirmation(message, 60,
+                {
+                    cancel: 'Colleciton set confirmation canceled.',
+                    timeout: 'Colleciton set confirmation timed out.'
+                },
+                async () => {
+                    try{
+                        await this.collectionService.setLockAllUsersCollections(locked)
+                        return `Collecitons succesfully set to ${locked ? "Locked" : "unlokced"}`
+                    }
+                    catch(e: any){
+                        return JSON.stringify(e, null, 4)
+                    }
+                })
+        }
         else if (subcommand == "help"){
             const helpMessage = `
         **Available Development Commands**
@@ -537,6 +558,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             it promts for confirmation to publish leaderboard to the public channel
 
         *clear-week-stake <weekNumber> <year>: Removes the records for granting rewrds for a given week. only works if the env is set to development
+
+        *set-collection-lock* <state>: Sets all users collections to the provided state
         
         *help* : Provides a list of available commands and a description of their function.
         

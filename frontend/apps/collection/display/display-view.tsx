@@ -1,4 +1,4 @@
-import styled from "styled-components"
+import styled, { keyframes } from "styled-components"
 import { CollectionWithUIMetada, MortalCollectible, UICollectible } from "../collection-state-models"
 import { OswaldFontFamily, PixelArtImage, Video, colors, vmax, vmax1 } from "../../common"
 import { useState } from "react"
@@ -24,10 +24,10 @@ const CollectibleContainer = styled.div<{ artType: "miniature" | "splashArt", ma
 
 const CollectibleInfo = styled.div<{isMobile: boolean}>`
     padding: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
+    #border: 1px solid rgba(255,255,255,0.1);
     border-radius: 5px;
-    box-shadow: 0 0 20px 0 rgba(0,0,0,0.8);
-    background-color: rgba(0, 0, 0, 0.5);
+    #box-shadow: 0 0 20px 0 rgba(0,0,0,0.8);
+    #background-color: rgba(0, 0, 0, 0.5);
     text-align: center;
     color: #fff;
     font-size: ${(isMobile) => isMobile ? "20px" : "16px"};
@@ -76,16 +76,41 @@ const StyledP = styled.p`
         margin-left: 5px; // Add some spacing between text and image
     }
 `
-
-const TextImage = styled.div`
-    display: inline-flex; // Ensures the text and image are inline
-    align-items: center; // Vertically aligns the content
-    margin-left: 5px; // Add spacing between text and image
-
-    img {
-        margin-left: 5px;
+const hoverAnimation = keyframes`
+    0% {
+        transform: scale(1);
+        filter: drop-shadow(0px 0px 10px black);
     }
-`;
+    100% {
+        transform: scale(1.25);
+        filter: drop-shadow(5px 5px 15px ${colors.dduGold});
+    }
+`
+
+
+const hoverOutAnimation = keyframes`
+    0% {
+        transform: scale(1.25);
+        filter: drop-shadow(5px 5px 15px ${colors.dduGold});
+    }
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0px 0px 10px black);
+    }
+`
+
+const ArtContainer = styled.div`
+& > * {
+    filter: drop-shadow(0px 0px 10px black);
+    animation: ${hoverOutAnimation} 200ms ease-in-out;
+    &:hover {
+        animation: ${hoverAnimation} 200ms ease-in-out;
+        transform: scale(1.25);
+        filter: drop-shadow(5px 5px 15px ${colors.dduGold});
+        z-index: 10;
+    }
+} 
+`
 
 const isVideoFile = (src: string): boolean => {
     return src.endsWith('.mp4')
@@ -125,23 +150,20 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
 
     return (
         <CollectibleContainer artType={artType}>
-            {
-            artType === 'splashArt' ?
-                isVideoFile(src.splashArt) ?
-                    <Video src={src.splashArt} height={imageDimensions.height} width={imageDimensions.width} units={isMobile ? vmax(3) : vmax1} /> :
-                    <PixelArtImage src={src.splashArt} alt={src.name} height={imageDimensions.height} width={imageDimensions.width} units={isMobile ? vmax(3) : vmax1}/>
-                :
-                type === "Furniture" ? 
-                    <FurnitureSprite furniture={{ sprite: src.miniature, assetRef: src.assetRef, name: src.name}} units={isMobile ? vmax(3) : vmax1}/> :
-                    <CharacterSprite character={{sprite: src.miniature,collection: collectionName,class: src.class,assetRef: src.assetRef}} units={isMobile ? vmax(3) : vmax1} />  
-            }
+            <ArtContainer>
+                {
+                artType === 'splashArt' ?
+                    isVideoFile(src.splashArt) ?
+                        <Video src={src.splashArt} height={imageDimensions.height} width={imageDimensions.width} units={isMobile ? vmax(3) : vmax1} /> :
+                        <PixelArtImage src={src.splashArt} alt={src.name} height={imageDimensions.height} width={imageDimensions.width} units={isMobile ? vmax(3) : vmax1}/>
+                    :
+                    type === "Furniture" ? 
+                        <FurnitureSprite furniture={{ sprite: src.miniature, assetRef: src.assetRef, name: src.name}} units={isMobile ? vmax(3) : vmax1}/> :
+                        <CharacterSprite character={{sprite: src.miniature,collection: collectionName,class: src.class,assetRef: src.assetRef}} units={isMobile ? vmax(3) : vmax1} />  
+                }
+            </ArtContainer>
             <CollectibleInfo isMobile={isMobile}>
                 <CollectibleName isMobile={isMobile}>{capitalizeFirstLetter(src.name)}</CollectibleName>
-                {src.class !== 'furniture' &&  
-                    <StyledP>
-                        <img src={`https://cdn.ddu.gg/modules/ddu-app/s2Explorer/class/${src.class.toLowerCase()}.svg`} alt="Class Logo"/> {src.class}
-                    </StyledP>
-                }
                 {src.class !== 'furniture' && 
                     <StyledP>
                         <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/athleticism.svg" alt="Athleticism"/> {`${src.aps[0]} `} 
@@ -149,6 +171,11 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
                         <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/charisma.svg" alt="Charisma"/> {`${src.aps[2]} `} 
                     </StyledP>
                     }
+                {src.class !== 'furniture' &&  
+                    <StyledP>
+                        <img src={`https://cdn.ddu.gg/modules/ddu-app/s2Explorer/class/${src.class.toLowerCase()}.svg`} alt="Class Logo"/> {src.class}
+                    </StyledP>
+                }
                 { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
                 <ClickableText onClick={handleStakingContributionClick}>{src.stakingContribution} <img src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver_toClaim.svg" alt="DS Logo"/> / week</ClickableText>
             </CollectibleInfo>
