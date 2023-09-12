@@ -241,11 +241,11 @@ export class CollectionServiceDsl implements CollectionService {
         return {ctype: "success", collection: fullCollection }
     }
 
-    async lockAllUsersCollections(logger?: LoggingContext): Promise<void>{
+    async setLockAllUsersCollections(locked: boolean, logger?: LoggingContext): Promise<void>{
         logger?.log.info("locking all collections")
         const userIds = await this.identityService.listAllUserIds(logger)
         await Promise.all(userIds.map(async (userId) => {
-            await this.identityService.setCollectionLock(userId, true)
+            await this.identityService.setCollectionLock(userId, locked)
         }))
     }
 
