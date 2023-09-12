@@ -71,8 +71,21 @@ const EmptyCollectionMessage = styled.div`
 `
 
 const StyledP = styled.p`
-
+    img {
+        vertical-align: middle; // Align the image vertically in the middle
+        margin-left: 5px; // Add some spacing between text and image
+    }
 `
+
+const TextImage = styled.div`
+    display: inline-flex; // Ensures the text and image are inline
+    align-items: center; // Vertically aligns the content
+    margin-left: 5px; // Add spacing between text and image
+
+    img {
+        margin-left: 5px;
+    }
+`;
 
 const isVideoFile = (src: string): boolean => {
     return src.endsWith('.mp4')
@@ -124,8 +137,18 @@ export const Collectible = ({ src, imageDimensions, collectionName, artType, typ
             }
             <CollectibleInfo isMobile={isMobile}>
                 <CollectibleName isMobile={isMobile}>{capitalizeFirstLetter(src.name)}</CollectibleName>
-                <StyledP>Class: {src.class}</StyledP>
-                {src.class !== 'furniture' && <p>APS: {src.aps.join(', ')}</p>}
+                {src.class !== 'furniture' &&  
+                    <StyledP>
+                        <img src={`https://cdn.ddu.gg/modules/ddu-app/s2Explorer/class/${src.class.toLowerCase()}.svg`} alt="Class Logo"/> {src.class}
+                    </StyledP>
+                }
+                {src.class !== 'furniture' && 
+                    <StyledP>
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/athleticism.svg" alt="Athleticism"/> {`${src.aps[0]} `} 
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/intellect.svg" alt="Intellect"/> {`${src.aps[1]} `} 
+                        <img src="https://cdn.ddu.gg/modules/ddu-app/s2Explorer/adventurer_data/charisma.svg" alt="Charisma"/> {`${src.aps[2]} `} 
+                    </StyledP>
+                    }
                 { Number(src.quantity) > 1 ? <p>Quantity: {src.quantity} </p> : <></>}
                 <ClickableText onClick={handleStakingContributionClick}>{src.stakingContribution} <img src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver_toClaim.svg" alt="DS Logo"/> / week</ClickableText>
             </CollectibleInfo>
