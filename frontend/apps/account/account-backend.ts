@@ -316,7 +316,7 @@ async function refreshToken(error: any): Promise<boolean> {
             return false 
         }
     } else {
-        router.push("/")
+        router.push("/inq")
         return false
     }
 }

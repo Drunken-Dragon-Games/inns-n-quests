@@ -5,22 +5,36 @@ import TextOswaldStyle from "./textOswald"
 
 
 interface ButtonWrapper{
-    size?: "big" | "regular" | "small"
+    size?: "big" | "regular" | "small" | "big-long"
 }
 
 const ButtonWrapper = styled.div<ButtonWrapper>`
     width: 7.344vw;
     height: 1.8vw;
-    ${props => props.size == "big" ? "width: 18.229vw !important; height: 4.740vw !important;" : ""};
-    ${props => props.size == "big" ? "max-width: 466.66px !important; max-height: 121.34px !important;" : "max-width: 466.66px !important; max-height: 121.344 !important;"};
+    ${props =>
+        props.size == "big" ?
+            "width: 18.229vw !important; height: 4.740vw !important;" : 
+        props.size === "big-long" ? 
+            "width: 20vw !important; height: 4.740vw !important;"
+        : ""};
+    ${props => 
+        props.size == "big" ? 
+            "max-width: 466.66px !important; max-height: 121.34px !important;" : 
+        props.size === "big-long" ? 
+            "max-width: 500px !important; max-height: 121.34px !important;"
+        :"max-width: 466.66px !important; max-height: 121.344 !important;"};
     cursor: pointer;
     position: relative;
 
     @media only screen and (max-width: 414px) {
         width: 35vw;
         height: 8.58vw;
-
-        ${props => props.size == "big" ? "width: 65vw !important; height: 15.94vw !important;" : ""};
+        ${props => 
+            props.size == "big" ? 
+                "width: 65vw !important; height: 15.94vw !important;" : 
+            props.size === "big-long" ? 
+                "width: 80vw !important; height: 15.94vw !important;"
+            :""};
     }
 `
 
@@ -63,7 +77,7 @@ const Center = styled.div`
 interface button {
     action: () => void
     children: string
-    size?: "big" | "regular" | "small"
+    size?: "big" | "regular" | "small" | "big-long"
 }
 
 const Button = ({action, children, size} : button): JSX.Element =>{
@@ -81,7 +95,7 @@ const Button = ({action, children, size} : button): JSX.Element =>{
                 
                 <TextWrapper>
                     <Center>
-                        <TextOswaldStyle fontsize={size == "big" ? 2 : 0.9} color="white" fontsizeMobile={size == "big" ? 8 : 4} lineHeightMobil={5}>{children}</TextOswaldStyle>
+                        <TextOswaldStyle fontsize={size == "big" || size == "big-long" ? 2 : 0.9} color="white" fontsizeMobile={size == "big" || size == "big-long" ? 8 : 4} lineHeightMobil={5}>{children}</TextOswaldStyle>
                     </Center>
                 </TextWrapper>
             </ButtonWrapper>

@@ -104,8 +104,8 @@ const CardSectionMobile = () =>{
 
             <ButtonMintPosition>
                 <Center>
-                    <LinkDisable url = "https://www.jpg.store/collection/drunkendragon?tab=minting " openExternal ={true}>
-                        <Button action = { ()=> null} size="big">MINT NOW!</Button>
+                    <LinkDisable url = "/quests" openExternal ={true}>
+                        <Button action = { ()=> null} size="big-long">Adventure Awaits!</Button>
                     </LinkDisable>
                 </Center>
             </ButtonMintPosition>
