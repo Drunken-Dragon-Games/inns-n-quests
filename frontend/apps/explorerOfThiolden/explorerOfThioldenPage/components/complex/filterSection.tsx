@@ -78,15 +78,15 @@ const FilterSection = () =>{
                     />
                 </RightCorner>
 
-                <CenterImage>
+                {<CenterImage>
 
                     <Center>
-                        <LinkDisable url="https://www.jpg.store/collection/drunkendragon?tab=minting" openExternal={true}>
-                            <Button action ={ () =>null} size="big">MINT NOW!</Button>
+                        <LinkDisable url="/quests" openExternal={true}>
+                            <Button action ={ () =>null} size="big-long">Adventure Awaits!</Button>
                         </LinkDisable>
                         
                     </Center>
-                </CenterImage>
+                </CenterImage>}
 
                 <TitleWrapper>
                     <TextElMessiri color="#FFFFFF" textAlign="center" fontsize={1.302}>Search by</TextElMessiri>

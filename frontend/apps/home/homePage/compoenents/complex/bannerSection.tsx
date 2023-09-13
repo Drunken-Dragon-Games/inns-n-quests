@@ -97,11 +97,11 @@ const BannerSection = (): JSX.Element => {
                     <BannerCardMobile />
                 </BannerMobile>
 
-                <ButtonPosition>
+  {/*               <ButtonPosition>
                     <LinkDisable url="https://www.jpg.store/collection/drunkendragon?tab=minting" openExternal = {true}>
                         <Button size="big"  action={() => null}>Mint Now</Button>
                     </LinkDisable>
-                </ButtonPosition>
+                </ButtonPosition> */}
                 </PositionRelative>
             </BannerSectionComponent>
     </>)

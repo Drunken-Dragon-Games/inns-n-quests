@@ -34,12 +34,15 @@ const buildApp = async (
         console.log(`Received ${req.method} request for ${req.url}`)
         next()
       }) */
+    
+    // Error handler middleware
+    app.use(apiErrorHandler)
+    
     // QUEST MODULE ROUTES
     app.use("/api/quests", idleQuestRoutes(idleQuestsService, kiliaBotService))
     app.use("/api/account", accountRoutes(accountService, kiliaBotService))
     
-    // Error handler middleware
-    app.use(apiErrorHandler)
+    
     return app
 }
 
