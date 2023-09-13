@@ -293,26 +293,6 @@ async function accountRequest<ResData = any, ReqData = any>(method: Method, endp
     })
 }
 
-//for TESTING purposes only
-async function blockChainRequest<ResData = any, ReqData = any>(method: Method, endpoint: string, data?: ReqData, traceId?: string): Promise<AxiosResponse<ResData>> {
-    const finalTraceId = traceId ?? v4()
-    const baseURL = urljoin("http://localhost:8000", "blockchain")
-        console.log(baseURL)
-    return await axios.request<ResData, AxiosResponse<ResData>, ReqData>({
-        method,
-        baseURL,
-        url: endpoint,
-        data,
-        headers: {
-            "Content-Type": "application/json",
-            accept: "application/json",
-            "Trace-ID": finalTraceId
-        },
-        timeout: 10000,
-        withCredentials: true,
-    })
-}
-
 async function withTokenRefresh<T>(fn: () => Promise<T>): Promise<T> {
     try { return await fn() }
     catch (err) { 
@@ -326,13 +306,13 @@ async function refreshToken(error: any): Promise<boolean> {
     const refreshToken = localStorage.getItem("refresh")
     if(error instanceof AxiosError && error.response?.status == 401 && refreshToken){
         try {
-            const response = await accountRequest("POST", "/api/refreshSession/", { "fullRefreshToken": refreshToken })
+            const response = await accountRequest("POST", "/session/refresh", { refreshToken })
             localStorage.setItem("refresh", response.data.refreshToken)
             return true
         }
         catch (err) { 
             localStorage.removeItem("refresh")
-            router.push("/")
+            router.push("/inq")
             return false 
         }
     } else {
