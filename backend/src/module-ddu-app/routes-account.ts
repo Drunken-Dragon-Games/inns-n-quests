@@ -292,9 +292,14 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
 
     router.use((err: any, request: Request, response: Response, next: any) => {
         const logger = baseLogger.trace(request)
-        kilia?.sendErrorMessage(err, request.originalUrl, request.method, logger.traceId, logger.userId)
-        logger.error(err.message, { stack: err.stack })
-        response.status(500).send("Internal server error.")
+        if (err.name === "UnauthorizedError") {
+            response.status(401).send({ message: "The token is invalid", code: "invalid_token"})
+        }
+        else{
+            kilia?.sendErrorMessage(err, request.originalUrl, request.method, logger.traceId, logger.userId)
+            logger.error(err.message, { stack: err.stack })
+            response.status(500).send("Internal server error.")
+        }
     })
 
     return router

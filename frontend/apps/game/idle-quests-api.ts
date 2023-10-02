@@ -140,11 +140,11 @@ async function refreshToken(error: any): Promise<boolean> {
         }
         catch (err) { 
             localStorage.removeItem("refresh")
-            router.push("/")
+            router.push("/inq")
             return false 
         }
     } else {
-        router.push("/")
+        router.push("/inq")
         return false
     }
 }
