@@ -6,6 +6,8 @@ import OverworldFurniture from "../objects/overworld-furniture"
 import { overworldStore } from "../overworld-state"
 import OverworldTransitions from "../overworld-transitions"
 import { any } from "underscore"
+import { group } from "console"
+import { Group } from "next/dist/shared/lib/router/utils/route-regex"
 
 type KInputs = {
     W: Phaser.Input.Keyboard.Key,
@@ -37,10 +39,36 @@ export class Overworld extends Phaser.Scene {
     nenufar3 : Phaser.GameObjects.Image | undefined
     nenufar4 : Phaser.GameObjects.Image | undefined
     nenufar5 : Phaser.GameObjects.Image | undefined
+    bgBlue: Phaser.GameObjects.Sprite | undefined
+    cloud1: Phaser.GameObjects.Sprite | undefined
+    cloud2: Phaser.GameObjects.Sprite | undefined
+    cloud3: Phaser.GameObjects.Sprite | undefined
+    bridgeSide1 : Phaser.GameObjects.Sprite | undefined
+    bridgeSide2 : Phaser.GameObjects.Sprite | undefined
+    statueDummie : Phaser.GameObjects.Sprite | undefined
+    treeTrunk : Phaser.GameObjects.Sprite | undefined
+    treeYellow : Phaser.GameObjects.Sprite | undefined
+    wall: Phaser.Types.Physics.Arcade.ImageWithDynamicBody|undefined
+    //NPC's
 
+    npcs: Phaser.Physics.Arcade.Sprite[] = []
+   
+     
+    timerstate: number = 0
+    
     constructor() { super("Overworld")
 
         this.tree1 = undefined
+        this.bgBlue = undefined
+        this.cloud1 = undefined
+        this.cloud2 = undefined
+        this.cloud3 = undefined
+        this.bridgeSide1 = undefined
+        this.bridgeSide2 = undefined
+        this.statueDummie = undefined
+        this.treeTrunk = undefined
+        this.treeYellow = undefined
+        
     }
 
     subscribeDraggingItemFromInventory() {
@@ -99,6 +127,8 @@ export class Overworld extends Phaser.Scene {
         }
         OverworldTransitions.trackOverworldState()
     }
+      
+    
 
     preload() {
         
@@ -127,11 +157,42 @@ export class Overworld extends Phaser.Scene {
         })
         this.cameras.main.setBounds(0, 0, 1577, 1300, true)
         this.cameras.main.scrollX = this.cameras.main.scrollX - 190
+        
     }
 
     create() {
-        this.add.image(0, 0, "inn-bg").setOrigin(0, 0)
+      
+        //NPC´s
+        // this.npcs = []
+        // for (let i = 0; i < 15; i++) {
+            
+        //     const x = Phaser.Math.Between(100, 1500)
+        //     const y  = Phaser.Math.Between(100, 1300)
+        //     const npc = this.physics.add.sprite(x,y, "npc")
+        //     npc.setDepth(20)
+            
         
+        //     npc.setCollideWorldBounds(true)
+        //     this.npcs.push(npc)
+            
+        // }
+        this.physics.world.setBounds(0, 0, 1500, 1300)
+        this.physics.world.setBoundsCollision(true, true, true, true)
+         
+        this.npcs.forEach((npc) => {
+            npc.setData("state", "idle")// Initial state is idle
+            npc.setData("lifeTime",0)
+            
+            this.time.addEvent({
+                delay: 1000, 
+                loop: true,
+                callback: () => {
+                    const newLifeTime = npc.getData("lifeTime") +1
+                    npc.setData("lifeTime", newLifeTime)
+                }
+            })
+            
+        })
         
         const innOrigin: [number, number] = [350, 485]
         const [floor, walls] = innBuildingRenderMatrix
@@ -162,8 +223,25 @@ export class Overworld extends Phaser.Scene {
         tree2.play("tree-sprite-anim")
         tree3.play("tree-sprite-anim")
         tree4.play("tree-sprite-anim")
+        this.bgBlue = this.add.sprite(910,650,"blue-bg")
+        this.bgBlue.setDepth(-1)
+        this.cloud1 = this.add.sprite(1400,850,"cloud1")
+        this.cloud2 = this.add.sprite(1800,250,"cloud2")
+        this.cloud3 = this.add.sprite(1000,400,"cloud2")
 
-
+        this.cloud1.alpha = 0.6
+        this.cloud2.alpha = 0.6
+        this.cloud3.alpha = 0.6
+        this.cloud1.setDepth(-1)
+        this.cloud2.setDepth(-1)
+        this.cloud3.setDepth(-1)
+        this.bridgeSide1 = this.add.sprite(880,650,"bridge-side1")
+        this.bridgeSide2 = this.add.sprite(880,650,"bridge-side2")
+        this.statueDummie = this.add.sprite(880,650,"statue-dummie")
+        this.treeYellow = this.add.sprite(880,650,"tree-yellow")
+        this.treeTrunk = this.add.sprite(880,650,"tree-trunk")
+        
+        
         //Inn-Roof
         const innRoof = this.add.sprite(789, 650, 'inn-roof')
         innRoof.setDepth(9999)
@@ -176,7 +254,33 @@ export class Overworld extends Phaser.Scene {
         this.nenufar4 = this.add.image(819,1030, "lake-assets","layer_4")
         this.nenufar5 = this.add.image(660,1030, "lake-assets","layer_5")
         
-        
+        //Walls
+        // this.wall = this.physics.add.image(790,650, "no_zone")
+        // this.wall.setImmovable(true)
+        // this.physics.add.collider(this.npcs, this.wall, (npc, wall) => {
+            
+        //     const randomDirection = Phaser.Math.Between(0, 3);
+        //     switch (randomDirection) {
+        //         case 0:
+        //             console.log("up")
+                    
+        //             npc.setVelocity(Phaser.Math.Between(-30, 30), -20); // Move up
+        //             break;
+        //         case 1:
+        //             console.log("right")
+        //             npc.setVelocity(20, Phaser.Math.Between(-30, 30)); // Move right
+        //             break;
+        //         case 2:
+        //             console.log("down")
+        //             npc.setVelocity(Phaser.Math.Between(-30, 30), 20); // Move down
+        //             break;
+        //         case 3:
+        //             console.log("left")
+        //             npc.setVelocity(-20, Phaser.Math.Between(-30, 30)); // Move left
+        //             break;
+        //     }
+
+        // })
 
         // @ts-ignore
         this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
@@ -187,14 +291,6 @@ export class Overworld extends Phaser.Scene {
                 innRoof.setVisible(true)
             }
     })
-        // Timer
-        const timer = this.time.addEvent({
-            delay: 500,
-            callback: any,
-            callbackScope: this,
-            loop : true
-        })
-
         
         this.setInitialInnState()
     }
@@ -214,7 +310,12 @@ export class Overworld extends Phaser.Scene {
         this.nenufar3!.y = valY + 1033
         this.nenufar4!.y = valY2 + 919
         this.nenufar5!.y = valY2 + 963
+        // Timer
+        this.timerstate = this.timerstate + delta 
         
+        if(this.timerstate > 2000){
+            this.timerstate = 0
+        }
 
         if (this.game.input.activePointer.isDown && !this.draggingItem) {
             if (this.origDragPoint) {
@@ -227,5 +328,71 @@ export class Overworld extends Phaser.Scene {
         } else {
             this.origDragPoint = undefined
         }
+
+
+        //Props Animation
+        //move cloud1 
+        this.cloud1!.x -= 0.5  
+        this.cloud2!.x -= 0.5
+        this.cloud3!.x -= 0.5
+        if(this.cloud1!.x < 100){
+            this.cloud1!.x = 1800
+        }
+        if(this.cloud2!.x < 100){  
+            this.cloud2!.x = 2000
+        }
+        if(this.cloud3!.x < 100){
+            this.cloud3!.x = 1800
+        }
+
+        //NPC´s
+
+        // this.npcs.forEach((npc, index) => {
+        //     const state: string = npc.getData("state")
+        //     const lifeTimer: number = npc.getData("lifeTime")
+        //     //trnsiciitons
+        //     switch (state) {
+        //         case "idle":
+        //             if ((lifeTimer) %2 == 0) {
+                        
+        //                 npc.setData("state", "startingToMove")
+        //                // npc.setData("lifeTime", 0);
+        //             }
+        //             break
+        //         case "move":
+        //             if ((lifeTimer)%3 == 0) {
+        //                 npc.setData("lifetime", 10)
+        //                 npc.setData("state", "idle")
+        //             }
+        //             break
+        //     }
+           
+        //     if(npc.getData("state") == "idle"){
+                
+        //         npc.setVelocity(0); // Stop moving
+        //     }
+        //     else if(npc.getData("state") == "startingToMove"){
+        //         const randomDirection = Phaser.Math.Between(0, 3)
+        //         switch (randomDirection) {
+        //             case 0:
+        //                 npc.setVelocity(Phaser.Math.Between(-30, 30), -20); // Move up
+        //                 npc.setData("state", "move");
+        //                 break
+        //             case 1:
+        //                 npc.setVelocity(20, Phaser.Math.Between(-30, 30)); // Move right
+        //                 npc.setData("state", "move");
+        //                 break
+        //             case 2:
+        //                 npc.setVelocity(Phaser.Math.Between(-30, 30), 20); // Move down
+        //                 npc.setData("state", "move");
+        //                 break
+        //             case 3:
+        //                 npc.setVelocity(-20,Phaser.Math.Between(-30, 30)); // Move left
+        //                 npc.setData("state", "move");
+        //                 break
+        //         }
+                
+        //     } 
+        // })      
     }
 }
