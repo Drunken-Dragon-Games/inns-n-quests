@@ -27,12 +27,24 @@ export class Preloader extends Phaser.Scene {
 
         this.load.atlas("lake-assets", "/maps/lake_assets_name.png", "/maps/lake_assets_name_atlas.json")
         this.load.image('inn-roof', "/maps/inn-roof.png")
+        this.load.image("npc", "/maps/Enemy_Paladin.png")
+        this.load.image("blue-bg", "/maps/BG-blueFall.png")
+        this.load.image("bridge-side1", "/maps/bridge-side1.png")
+        this.load.image("bridge-side2", "/maps/bridge-side2.png")
+        this.load.image("cloud1", "/maps/cloud1.png")
+        this.load.image("cloud2", "/maps/cloud2.png")
+        this.load.image("dummies", "/maps/dummies.png")
+        this.load.image("statue-dummy", "/maps/statue-dummy.png")
+        this.load.image("tree-trunk", "/maps/tree-trunk.png")
+        this.load.image("tree-yellow", "/maps/tree-yellow.png")
+        //this.load.image("no_zone", "/maps/NO_Zone.png")
+
         
-        this.load.spritesheet("BGSpritesheet", "/maps/BGSpritesheet.png", {
+        this.load.spritesheet("BGSpritesheet", "/maps/BGSpritesheetFall.png", {
             frameWidth: 1577, 
             frameHeight: 1300
         })
-        this.load.spritesheet("tree-sprite-sheet", "/maps/TreeSpritesheet.png", {
+        this.load.spritesheet("tree-sprite-sheet", "/maps/TreeSpritesheetFall.png", {
             frameWidth: 256, 
             frameHeight: 256
         })
