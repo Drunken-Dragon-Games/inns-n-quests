@@ -40,10 +40,8 @@ export class Preloader extends Phaser.Scene {
         //this.load.image("no_zone", "/maps/NO_Zone.png")
 
         
-        this.load.spritesheet("BGSpritesheet", "/maps/BGSpritesheetFall.png", {
-            frameWidth: 1577, 
-            frameHeight: 1300
-        })
+        this.load.atlas("BGSpritesheet", "/maps/BGSpritesheetFall.png","/maps/BG_Fall.json" )
+        
         this.load.spritesheet("tree-sprite-sheet", "/maps/TreeSpritesheetFall.png", {
             frameWidth: 256, 
             frameHeight: 256
