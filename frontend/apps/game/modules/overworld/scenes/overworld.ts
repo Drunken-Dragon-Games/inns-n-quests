@@ -157,6 +157,21 @@ export class Overworld extends Phaser.Scene {
         })
         this.cameras.main.setBounds(0, 0, 1577, 1300, true)
         this.cameras.main.scrollX = this.cameras.main.scrollX - 190
+
+        // BG ANIMATION
+        this.anims.create({
+            key: "BGSpritesheet_anim",
+            frameRate: 10,
+            frames : this.anims.generateFrameNames("BGSpritesheet", {
+                prefix: "bg",
+                suffix: ".png",
+                start: 1,
+                end: 8
+            }),
+            
+            repeat: -1
+         })
+        
         
     }
 
@@ -207,13 +222,8 @@ export class Overworld extends Phaser.Scene {
             frameRate: 10,
             repeat: -1
          })
-        this.anims.create({
-            key: "BGSpritesheet_anim",
-            frames : this.anims.generateFrameNumbers("BGSpritesheet", {start: 0, end: 7}),
-            frameRate: 10,
-            repeat: -1
-         })
-        const BGSspriteSheet = this.add.sprite(789, 650, "BGSpritesheet");
+        const BGSspriteSheet: Phaser.GameObjects.Sprite = this.add.sprite(769, 650,"tree-sprite-sheet")
+       // const BGSspriteSheet: Phaser.GameObjects.Sprite = this.add.sprite(769, 650, "BGSpritesheet","bg1" );
         BGSspriteSheet.play("BGSpritesheet_anim");
         this.tree1 = this.add.sprite(830,240,"tree-sprite-sheet")
         this.tree1?.play("tree-sprite-anim")
