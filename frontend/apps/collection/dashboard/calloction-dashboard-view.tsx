@@ -114,7 +114,7 @@ export const DashboardView = ({ status, artType, collectionItems, mortalLocked, 
             </Button>
             <DashboardMessage>{`Earning Per Week`}</DashboardMessage>
             <DashboardMessage><img src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver_toClaim.svg" alt="DS Logo"/> {`${weeklyEranings}`}</DashboardMessage>
-            {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" && !isMobile && false ?
+            {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" && !isMobile?
             <>
             <h2 style={{ color: 'white' }}>{`Grant is ${status.ctype}`}</h2>
             <Button action={() => collectionTransitions.grantTestCollection("Nami")} size="small">
