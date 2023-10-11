@@ -40,7 +40,18 @@ export class Preloader extends Phaser.Scene {
         //this.load.image("no_zone", "/maps/NO_Zone.png")
 
         
-        this.load.atlas("BGSpritesheet", "/maps/BGSpritesheetFall.png","/maps/BG_Fall.json" )
+        //this.load.atlas("BGSpritesheet", "/maps/BGSpritesheetFall.png","/maps/BG_Fall.json" )
+
+        // BG Images load
+
+        this.load.image("layer0", "/maps/layer0.png") 
+        this.load.image("layer1", "/maps/layer1.png")
+        this.load.image("layer2", "/maps/layer2.png")
+        this.load.image("layer3", "/maps/layer3.png")
+        this.load.image("layer4", "/maps/layer4.png")
+        this.load.image("layer5", "/maps/layer5.png")
+        this.load.image("layer6", "/maps/layer6.png")
+        this.load.image("layer7", "/maps/layer7.png")
         
         this.load.spritesheet("tree-sprite-sheet", "/maps/TreeSpritesheetFall.png", {
             frameWidth: 256, 
