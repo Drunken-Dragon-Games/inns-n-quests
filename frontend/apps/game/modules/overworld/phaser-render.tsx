@@ -19,6 +19,7 @@ async function loadPhaser(containerId: string, params: OverworldParams, onReady:
         physics: {
             default: "arcade",
             arcade: {
+                gravity: { y: 0 },
                 debug: false
             }
         },
