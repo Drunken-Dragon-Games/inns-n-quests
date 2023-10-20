@@ -25,9 +25,15 @@ export class Preloader extends Phaser.Scene {
 
         //Ferraz Input
 
+        //Audio
+
+        this.load.audio("ambient-sound","/maps/audio/river-sound2.mp3")
+
+        //Animation Assets
+
         this.load.atlas("lake-assets", "/maps/lake_assets_name.png", "/maps/lake_assets_name_atlas.json")
         this.load.image('inn-roof', "/maps/inn-roof.png")
-        this.load.image("npc", "/maps/Enemy_Paladin.png")
+        //this.load.image("npc", "/maps/Enemy_Paladin.png")
         this.load.image("blue-bg", "/maps/BG-blueFall.png")
         this.load.image("bridge-side1", "/maps/bridge-side1.png")
         this.load.image("bridge-side2", "/maps/bridge-side2.png")
@@ -52,6 +58,11 @@ export class Preloader extends Phaser.Scene {
         this.load.image("layer5", "/maps/layer5.png")
         this.load.image("layer6", "/maps/layer6.png")
         this.load.image("layer7", "/maps/layer7.png")
+
+        this.load.spritesheet("Hearth-fire", "/maps/furniture/pixel-tiles/FirePlaceSpriteSheet.png", {
+            frameWidth: 64, 
+            frameHeight: 64
+        })
         
         this.load.spritesheet("tree-sprite-sheet", "/maps/TreeSpritesheetFall.png", {
             frameWidth: 256, 

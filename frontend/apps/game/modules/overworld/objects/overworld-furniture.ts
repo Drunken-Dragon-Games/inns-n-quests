@@ -2,13 +2,14 @@ import { Furniture } from "../../../../common";
 import OverworldTransitions from "../overworld-transitions";
 import { Overworld } from "../scenes/overworld";
 
-export default class OverworldFurniture {
+export default class OverworldFurniture  {
 
     public lastClickTime: number = 0
 
-    constructor(
+    constructor( 
         public readonly furniture: Furniture,
         public readonly sprite: Phaser.Physics.Arcade.Sprite,
+        //public readonly animationSprite: Phaser.Physics.Arcade.Sprite,
         private readonly overworld: Overworld,
     ){}
 
@@ -31,16 +32,35 @@ export default class OverworldFurniture {
         // Later check furniture collection and load from right sprite sheet
         const { sheet, index, size, offset } = pixelTilesSpritesheetMap(i)
         const sprite = overworld.physics.add.sprite(position.x, position.y, sheet, index)
+        const animationSprite = overworld.physics.add.sprite(sprite.x, sprite.y+42, sheet, index)
         sprite.setSize(size[0], size[1]) /** Collision box size */
         sprite.setOffset(offset[0], offset[1]) /** Collision box offset */
         sprite.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
         overworld.input.setDraggable(sprite)
         overworld.physics.add.collider(sprite, overworld.walls)
 
-        sprite.flipX = isFacingRight
+        // If a furniture has a fire, create animation
+        if(furniture.assetRef=="PixelTile18"||furniture.assetRef=="PixelTile19"){
+            console.log("se agrega animacion")
+            
+            animationSprite.anims.create({key: "PixelTile18_anim",
+            frames : sprite.anims.generateFrameNumbers("Hearth-fire", {start: 0, end: 7}),
+            frameRate: 10,
+            repeat: -1})
+            
+            animationSprite.play("PixelTile18_anim")
+            animationSprite.setDepth(9999)
+            animationSprite.x = sprite.x
+            animationSprite.y = sprite.y+42
+        }
+        console.log(furniture.assetRef) 
+
+        
 
         return sprite 
+        
     }
+    
 
     destroy() {
         this.sprite.destroy()

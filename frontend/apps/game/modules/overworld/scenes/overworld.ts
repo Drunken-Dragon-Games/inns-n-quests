@@ -5,9 +5,6 @@ import OverworldCharacter from "../objects/overworld-character"
 import OverworldFurniture from "../objects/overworld-furniture"
 import { overworldStore } from "../overworld-state"
 import OverworldTransitions from "../overworld-transitions"
-import { any } from "underscore"
-import { group } from "console"
-import { Group } from "next/dist/shared/lib/router/utils/route-regex"
 
 type KInputs = {
     W: Phaser.Input.Keyboard.Key,
@@ -33,6 +30,7 @@ export class Overworld extends Phaser.Scene {
     /**Animation */
     //BGSspriteSheet: any
     charsTime:0 | undefined
+    hearth: Phaser.GameObjects.Sprite | undefined
     tree1: Phaser.GameObjects.Sprite | undefined
     nenufar1 : Phaser.GameObjects.Image | undefined
     nenufar2 : Phaser.GameObjects.Image | undefined
@@ -59,6 +57,7 @@ export class Overworld extends Phaser.Scene {
     constructor() { super("Overworld")
 
         this.tree1 = undefined
+        this.hearth = undefined
         this.bgBlue = undefined
         this.cloud1 = undefined
         this.cloud2 = undefined
@@ -195,6 +194,14 @@ export class Overworld extends Phaser.Scene {
         //     this.npcs.push(npc)
             
         // }
+
+        // Sound
+
+        var ambientSound = this.sound.add("ambient-sound") 
+        ambientSound.play()
+
+        //Physics
+        
         this.physics.world.setBounds(0, 0, 1500, 1300)
         this.physics.world.setBoundsCollision(true, true, true, true)
          
@@ -226,10 +233,19 @@ export class Overworld extends Phaser.Scene {
             frameRate: 10,
             repeat: -1
          })
+         this.anims.create({
+            key: "PixelTile18_anim",
+            frames : this.anims.generateFrameNumbers("Hearth-fire", {start: 0, end: 7}),
+            frameRate: 10,
+            repeat: -1
+         })
         this.add.sprite(769, 650,"layer0").play("BGSpritesheet_anim")
        
         this.tree1 = this.add.sprite(830,240,"tree-sprite-sheet")
         this.tree1?.play("tree-sprite-anim")
+        this.hearth = this.add.sprite(485,545,"Hearth-fire")
+        this.hearth?.setDepth(9999)
+        this.hearth?.play("PixelTile18_anim")
         const tree2 = this.add.sprite(215,835,"tree-sprite-sheet" )
         const tree3 = this.add.sprite(0,635,"tree-sprite-sheet" )
         const tree4 = this.add.sprite(390,150,"tree-sprite-sheet" )
@@ -296,14 +312,23 @@ export class Overworld extends Phaser.Scene {
         // })
 
         // @ts-ignore
+        // this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+        //     this.cameras.main.setZoom(deltaY > 0 ? Math.max(this.cameras.main.zoom - 1, .75) :  Math.min(this.cameras.main.zoom + 1, 2) )
+        //     if(this.cameras.main.zoom > 1){
+        //         innRoof.setVisible(false)
+        //     }else{
+        //         innRoof.setVisible(true)
+        //     }
+            
+        // }
         this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-            this.cameras.main.setZoom(deltaY > 0 ? Math.max(this.cameras.main.zoom - 1, .75) :  Math.min(this.cameras.main.zoom + 1, 2) )
+            this.cameras.main.setZoom(deltaY > 0 ? Math.max(this.cameras.main.zoom - .5, .75) :  Math.min(this.cameras.main.zoom + .5, 2) )
             if(this.cameras.main.zoom > 1){
                 innRoof.setVisible(false)
             }else{
                 innRoof.setVisible(true)
             }
-    })
+        })
         
         this.setInitialInnState()
     }
