@@ -29,7 +29,7 @@ export class TileRenderMatrix<TileId extends string> {
                         tilesetName, 
                         this.metadata.tileSet.tileSpriteSheetLocation(tile as TileId)
                     )
-                    sprite.depth = 10
+                    sprite.depth = 1 // The lower bound of 3d objects is 10. Therefore the depth of the floor is by convention 1.
                     //sprite.depth = position[1] + sprite.y / 2 
                     group.push(sprite)
                 } else if (tile !== "") {

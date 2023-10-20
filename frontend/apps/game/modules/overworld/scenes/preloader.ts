@@ -46,7 +46,7 @@ export class Preloader extends Phaser.Scene {
         //this.load.image("no_zone", "/maps/NO_Zone.png")
 
         
-        //this.load.atlas("BGSpritesheet", "/maps/BGSpritesheetFall.png","/maps/BG_Fall.json" )
+        
 
         // BG Images load
 

@@ -5,6 +5,7 @@ import OverworldCharacter from "../objects/overworld-character"
 import OverworldFurniture from "../objects/overworld-furniture"
 import { overworldStore } from "../overworld-state"
 import OverworldTransitions from "../overworld-transitions"
+import OverworldObject from "../objects/overworld-object"
 
 type KInputs = {
     W: Phaser.Input.Keyboard.Key,
@@ -20,7 +21,7 @@ export class Overworld extends Phaser.Scene {
     walls!: Phaser.GameObjects.Sprite[]
     adventurers: OverworldCharacter[] = []
     furniture: OverworldFurniture[]= []
-    draggingItem?: OverworldCharacter | OverworldFurniture
+    draggingObject?: OverworldObject<any>
     
     /** Controls */
     inputs!: KInputs
@@ -74,25 +75,25 @@ export class Overworld extends Phaser.Scene {
         this.game.events.on("dragging-item-from-inventory", (item: Character | Furniture, position?: [number, number]) => {
             const camera = this.cameras.main
             if (!position) {
-                this.draggingItem?.updateLocationState()
-                this.draggingItem = undefined
+                this.draggingObject?.updateLocationState()
+                this.draggingObject = undefined
                 return 
             }
             const overworldPosition = new Phaser.Math.Vector2(
                 (position[0] * camera.scaleManager.displayScale.x / camera.zoom + camera.worldView.left), 
                 (position[1] * camera.scaleManager.displayScale.y / camera.zoom + camera.worldView.top)
             )
-            if (this.draggingItem) {
-                this.draggingItem.x = overworldPosition.x
-                this.draggingItem.y = overworldPosition.y
+            if (this.draggingObject) {
+                this.draggingObject.x = overworldPosition.x
+                this.draggingObject.y = overworldPosition.y
             }
             else {
                 if (item.ctype === "character")
-                    this.draggingItem = 
+                    this.draggingObject = 
                         this.adventurers.filter(adventurer => adventurer.character.entityId === item.entityId)[0] ||
                         OverworldCharacter.init(item, this, overworldPosition, false)
                 else if (item.ctype === "furniture")
-                    this.draggingItem = 
+                    this.draggingObject = 
                         this.furniture.filter(furniture => furniture.furniture.entityId === item.entityId)[0] ||
                         OverworldFurniture.init(item, this, overworldPosition, false)
             }
@@ -101,9 +102,9 @@ export class Overworld extends Phaser.Scene {
 
     subscribeCancelDraggingItemFromInventory() {
         this.game.events.on("cancel-dragging-item-from-inventory", () => {
-            if (this.draggingItem) {
-                this.draggingItem.destroy()
-                this.draggingItem = undefined
+            if (this.draggingObject) {
+                this.draggingObject.destroy()
+                this.draggingObject = undefined
                 
             }
         })
@@ -180,7 +181,7 @@ export class Overworld extends Phaser.Scene {
 
     create() {
       
-        //NPC´s
+        // NPC´s
         // this.npcs = []
         // for (let i = 0; i < 15; i++) {
             
@@ -233,19 +234,13 @@ export class Overworld extends Phaser.Scene {
             frameRate: 10,
             repeat: -1
          })
-         this.anims.create({
-            key: "PixelTile18_anim",
-            frames : this.anims.generateFrameNumbers("Hearth-fire", {start: 0, end: 7}),
-            frameRate: 10,
-            repeat: -1
-         })
+         
         this.add.sprite(769, 650,"layer0").play("BGSpritesheet_anim")
        
         this.tree1 = this.add.sprite(830,240,"tree-sprite-sheet")
         this.tree1?.play("tree-sprite-anim")
-        this.hearth = this.add.sprite(485,545,"Hearth-fire")
-        this.hearth?.setDepth(9999)
-        this.hearth?.play("PixelTile18_anim")
+        
+        
         const tree2 = this.add.sprite(215,835,"tree-sprite-sheet" )
         const tree3 = this.add.sprite(0,635,"tree-sprite-sheet" )
         const tree4 = this.add.sprite(390,150,"tree-sprite-sheet" )
@@ -271,6 +266,7 @@ export class Overworld extends Phaser.Scene {
         this.treeTrunk = this.add.sprite(880,650,"tree-trunk")
         
         
+        
         //Inn-Roof
         const innRoof = this.add.sprite(789, 650, 'inn-roof')
         innRoof.setDepth(9999)
@@ -283,7 +279,7 @@ export class Overworld extends Phaser.Scene {
         this.nenufar4 = this.add.image(819,1030, "lake-assets","layer_4")
         this.nenufar5 = this.add.image(660,1030, "lake-assets","layer_5")
         
-        //Walls
+        // Walls
         // this.wall = this.physics.add.image(790,650, "no_zone")
         // this.wall.setImmovable(true)
         // this.physics.add.collider(this.npcs, this.wall, (npc, wall) => {
@@ -293,21 +289,24 @@ export class Overworld extends Phaser.Scene {
         //         case 0:
         //             console.log("up")
                     
-        //             npc.setVelocity(Phaser.Math.Between(-30, 30), -20); // Move up
+        //             npc.body.gameObject.setVelocity(Phaser.Math.Between(-30, 30), -20); // Move up
         //             break;
         //         case 1:
         //             console.log("right")
-        //             npc.setVelocity(20, Phaser.Math.Between(-30, 30)); // Move right
+        //             npc.body.gameObject.setVelocity(20, Phaser.Math.Between(-30, 30)); // Move right
         //             break;
         //         case 2:
         //             console.log("down")
-        //             npc.setVelocity(Phaser.Math.Between(-30, 30), 20); // Move down
+        //             npc.body.gameObject.setVelocity(Phaser.Math.Between(-30, 30), 20); // Move down
         //             break;
         //         case 3:
+                    
         //             console.log("left")
-        //             npc.setVelocity(-20, Phaser.Math.Between(-30, 30)); // Move left
+        //             npc.body.gameObject.setVelocity(-20, Phaser.Math.Between(-30, 30)); // Move left
         //             break;
+                    
         //     }
+            
 
         // })
 
@@ -334,7 +333,11 @@ export class Overworld extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        this.adventurers.forEach(adventurer => adventurer.setDepth())
+        this.adventurers.forEach(adventurer => {
+            // TODO: Mover al update de character
+            adventurer.setDepth()
+            adventurer.update(time, delta)
+        })
         this.furniture.forEach(furniture => furniture.setDepth())
         //this.walls.forEach(wall => wall.depth = wall.y + 10)
         this.cameraControls.update(delta)
@@ -355,7 +358,7 @@ export class Overworld extends Phaser.Scene {
             this.timerstate = 0
         }
 
-        if (this.game.input.activePointer.isDown && !this.draggingItem) {
+        if (this.game.input.activePointer.isDown && !this.draggingObject) {
             if (this.origDragPoint) {
                 // move the camera by the amount the mouse has moved since last update		
                 this.cameras.main.scrollX += this.origDragPoint.x - this.game.input.activePointer.position.x
@@ -369,7 +372,7 @@ export class Overworld extends Phaser.Scene {
 
 
         //Props Animation
-        //move cloud1 
+         
         this.cloud1!.x -= 0.5  
         this.cloud2!.x -= 0.5
         this.cloud3!.x -= 0.5
@@ -383,7 +386,7 @@ export class Overworld extends Phaser.Scene {
             this.cloud3!.x = 1800
         }
 
-        //NPC´s
+        // NPC´s
 
         // this.npcs.forEach((npc, index) => {
         //     const state: string = npc.getData("state")
