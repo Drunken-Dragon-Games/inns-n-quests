@@ -1,104 +1,82 @@
 import { Furniture } from "../../../../common";
 import OverworldTransitions from "../overworld-transitions";
 import { Overworld } from "../scenes/overworld";
+import OverworldObject from "./overworld-object";
 
-export default class OverworldFurniture {
+export default class OverworldFurniture extends OverworldObject<Furniture>  {
 
     public lastClickTime: number = 0
 
-    constructor(
+    constructor( 
         public readonly furniture: Furniture,
-        public readonly sprite: Phaser.Physics.Arcade.Sprite,
-        private readonly overworld: Overworld,
-    ){}
+        public readonly sprites: Phaser.Physics.Arcade.Sprite[],
+        public readonly overworld: Overworld,
+    ){
+        const objectType = furniture.assetRef == "PixelTile62" ? "floor-object" : "3d-object"
+        super(furniture, sprites, overworld, objectType, true)
+    }
 
-    static init (furniture: Furniture, overworld: Overworld, position: Phaser.Math.Vector2, flipped: boolean): OverworldFurniture {
-        const sprite = OverworldFurniture.createSprite(furniture, overworld, position, flipped)
-        const owFurniture = new OverworldFurniture(furniture, sprite, overworld)
+    static init(furniture: Furniture, overworld: Overworld, position: Phaser.Math.Vector2, flipped: boolean = false): OverworldFurniture {
+        const spriteComposite = OverworldFurniture.buildSprites(furniture, overworld, position)
+        const owFurniture = new OverworldFurniture(furniture, spriteComposite, overworld)
+        owFurniture.flip = flipped
         overworld.furniture.push(owFurniture)
-        const draggable = OverworldTransitions.getParams().paramDraggableItems
-        if (draggable) {
-            sprite.on("pointerup", OverworldFurniture.onPointerUp(overworld, owFurniture))
-            sprite.on("dragstart", OverworldFurniture.onDragStart(overworld, owFurniture))
-            sprite.on("drag", OverworldFurniture.onDrag(overworld, owFurniture))
-            sprite.on("dragend", OverworldFurniture.onDragEnd(overworld, owFurniture))
-        }
         return owFurniture
     }
 
-    static createSprite (furniture: Furniture, overworld: Overworld, position: Phaser.Math.Vector2, isFacingRight: boolean): Phaser.Physics.Arcade.Sprite {
+    static buildSprites(furniture: Furniture, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite[] {
+        const spriteComposite: Phaser.Physics.Arcade.Sprite[] = []
+
         const i = parseInt(furniture.assetRef.match(/(\d+)/)![0])
         // Later check furniture collection and load from right sprite sheet
         const { sheet, index, size, offset } = pixelTilesSpritesheetMap(i)
-        const sprite = overworld.physics.add.sprite(position.x, position.y, sheet, index)
-        sprite.setSize(size[0], size[1]) /** Collision box size */
-        sprite.setOffset(offset[0], offset[1]) /** Collision box offset */
-        sprite.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
-        overworld.input.setDraggable(sprite)
-        overworld.physics.add.collider(sprite, overworld.walls)
+        const baseSprite = overworld.physics.add.sprite(position.x, position.y, sheet, index)
+        const animationSprite = overworld.physics.add.sprite(baseSprite.x, baseSprite.y+42, sheet, index)
+        baseSprite.setSize(size[0], size[1]) /** Collision box size */
+        baseSprite.setOffset(offset[0], offset[1]) /** Collision box offset */
+        baseSprite.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
+        overworld.input.setDraggable(baseSprite)
+        overworld.physics.add.collider(baseSprite, overworld.walls)
+        spriteComposite.push(baseSprite)
 
-        sprite.flipX = isFacingRight
+        // If a furniture has a fire, create animation
+        if(furniture.assetRef=="PixelTile18"||furniture.assetRef=="PixelTile19"){
+            
+            animationSprite.anims.create({key: "PixelTile18_anim",
+            frames : baseSprite.anims.generateFrameNumbers("Hearth-fire", {start: 0, end: 7}),
+            frameRate: 10,
+            repeat: -1})
+            
+            animationSprite.play("PixelTile18_anim")
+            animationSprite.x = baseSprite.x
+            animationSprite.y = baseSprite.y+42
 
-        return sprite 
+            spriteComposite.push(animationSprite)
+
+        } else if (furniture.assetRef=="PixelTile5") {
+
+        } else if (furniture.assetRef=="PixelTile6") {
+
+        }
+
+        return spriteComposite
     }
+    
+    get objectId() { return this.furniture.entityId }
 
     destroy() {
-        this.sprite.destroy()
+        this.sprites.forEach(sprite => sprite.destroy())
         this.overworld.furniture = this.overworld.furniture.filter(a => a.furniture.entityId !== this.furniture.entityId)
         OverworldTransitions.removeObject(this.furniture)
     }
 
-    static onPointerUp = (overworld: Overworld, furniture: OverworldFurniture) => (pointer: Phaser.Input.Pointer) => {
-        const now = Date.now()
-        const isDoubleClick = now - furniture.lastClickTime < 300
-        furniture.lastClickTime = now
-
-        if (isDoubleClick) return furniture.destroy()
-        if (pointer.getDuration() < 300) {
-            furniture.sprite.flipX = !furniture.sprite.flipX
-            furniture.updateLocationState()
-            return
-        }
+    updateLocationState() {
+        OverworldTransitions.setObjectLocation(this.furniture, [this.x, this.y], this.flip)
     }
 
-    static onDragStart = (overworld: Overworld, furniture: OverworldFurniture) => () => {
-        overworld.draggingItem = furniture 
+    update(time: number, delta: number): void {
+        super.update(time, delta)
     }
-
-    static onDrag = (overworld: Overworld, furniture: OverworldFurniture) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-        furniture.x = dragX
-        furniture.y = dragY
-    }
-
-    static onDragEnd = (overworld: Overworld, furniture: OverworldFurniture) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-        overworld.draggingItem = undefined
-        furniture.updateLocationState()
-    }
-
-    get objectId() { return this.furniture.entityId }
-
-    get depth() { return this.sprite.depth }
-
-    setDepth() { 
-        if (this.furniture.assetRef === "PixelTile62")
-            this.sprite.depth = 9
-        else 
-            this.sprite.depth = this.sprite.y + this.sprite.height / 2
-    }
-
-    get x() { return this.sprite.x }
-
-    set x(x: number) { this.sprite.x = x }
-
-    get y() { return this.sprite.y }
-
-    set y(y: number) { this.sprite.y = y }
-
-    get flip() {return this.sprite.flipX}
-
-    set flip(flipped: boolean) { this.sprite.flipX = flipped }
-
-    updateLocationState() { OverworldTransitions.setObjectLocation(this.furniture, [this.x, this.y], this.flip) }
 }
 
 const pixelTilesSpritesheetMap = (pxNum: number): { sheet: string, index: number, size: [number, number], offset: [number, number] } => {

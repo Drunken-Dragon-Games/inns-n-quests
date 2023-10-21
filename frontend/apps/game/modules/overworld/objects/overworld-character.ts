@@ -1,35 +1,32 @@
 import { Character } from "../../../../common";
 import OverworldTransitions from "../overworld-transitions";
 import { Overworld } from "../scenes/overworld";
+import OverworldObject from "./overworld-object";
 
 /**
  * Handles the creation, positioning, and interaction of character sprites in the Overworld
  */
-export default class OverworldCharacter {
+export default class OverworldCharacter extends OverworldObject<Character> {
 
     public lastClickTime: number = 0
 
     constructor(
         public readonly character: Character,
-        public readonly sprite: Phaser.Physics.Arcade.Sprite,
-        private readonly overworld: Overworld
-    ){}
+        public readonly sprites: Phaser.Physics.Arcade.Sprite[],
+        public readonly overworld: Overworld,
+    ){
+        super(character, sprites, overworld, "3d-object", true)
+    }
 
-    static init (character: Character, overworld: Overworld, position: Phaser.Math.Vector2, flipped: boolean): OverworldCharacter {
-        const sprite = OverworldCharacter.createSprite(character, overworld, position, flipped)
-        const owAdventurer = new OverworldCharacter(character, sprite, overworld)
+    static init(character: Character, overworld: Overworld, position: Phaser.Math.Vector2, flipped: boolean): OverworldCharacter {
+        const sprites = OverworldCharacter.buildSprites(character, overworld, position)
+        const owAdventurer = new OverworldCharacter(character, sprites, overworld)
+        owAdventurer.flip = flipped
         overworld.adventurers.push(owAdventurer)
-        const draggable = OverworldTransitions.getParams().paramDraggableItems
-        if (draggable) {
-            sprite.on("pointerup", OverworldCharacter.onPointerUp(overworld, owAdventurer))
-            sprite.on("dragstart", OverworldCharacter.onDragStart(overworld, owAdventurer))
-            sprite.on("drag", OverworldCharacter.onDrag(overworld, owAdventurer))
-            sprite.on("dragend", OverworldCharacter.onDragEnd(overworld, owAdventurer))
-        }
         return owAdventurer
     }
 
-    static createSprite (character: Character, overworld: Overworld, position: Phaser.Math.Vector2, isFacingRight: boolean): Phaser.Physics.Arcade.Sprite {
+    static buildSprites(character: Character, overworld: Overworld, position: Phaser.Math.Vector2): Phaser.Physics.Arcade.Sprite[] {
         const i = parseInt(character.assetRef.match(/(\d+)/)![0])
         // Later check character collection and load from right sprite sheet
         const sheet = 
@@ -60,65 +57,22 @@ export default class OverworldCharacter {
         overworld.input.setDraggable(sprite)
         overworld.physics.add.collider(sprite, overworld.walls)
         //here we set the sprite direction
-        sprite.flipX = isFacingRight
-        return sprite 
-    }
-
-    destroy() {
-        this.sprite.destroy()
-        this.overworld.adventurers = this.overworld.adventurers.filter(a => a.character.entityId !== this.character.entityId)
-        OverworldTransitions.removeObject(this.character)
-    }
-
-    static onPointerUp = (overworld: Overworld, character: OverworldCharacter) => (pointer: Phaser.Input.Pointer) => {
-        const now = Date.now()
-        const isDoubleClick = now - character.lastClickTime < 300
-        character.lastClickTime = now
-
-        if (isDoubleClick) return character.destroy()
-        //if (isDoubleClick) return character.sprite.depth = 900
-        if (pointer.getDuration() < 300) {
-            character.sprite.flipX = !character.sprite.flipX
-            character.updateLocationState()
-            return
-        }
-    }
-
-    static onDragStart = (overworld: Overworld, character: OverworldCharacter) => () => {
-        overworld.draggingItem = character 
-    }
-
-    static onDrag = (overworld: Overworld, character: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-        character.sprite.x = dragX
-        character.sprite.y = dragY
-    }
-
-    static onDragEnd = (overworld: Overworld, character: OverworldCharacter) => (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-        overworld.draggingItem = undefined
-        character.updateLocationState()
+        return [sprite]
     }
 
     get objectId() { return this.character.entityId }
 
-    get depth() { return this.sprite.depth }
-
-    setDepth() { 
-        this.sprite.depth = this.sprite.y + this.sprite.height / 2
+    destroy() {
+        this.sprites.forEach(sprite => sprite.destroy())
+        this.overworld.adventurers = this.overworld.adventurers.filter(a => a.character.entityId !== this.character.entityId)
+        OverworldTransitions.removeObject(this.character)
     }
 
-    get x() { return this.sprite.x }
-
-    set x(x: number) { this.sprite.x = x }
-
-    get y() { return this.sprite.y }
-
-    set y(y: number) { this.sprite.y = y }
-
-    get flip() {return this.sprite.flipX}
-
-    set flip(flipped: boolean) { this.sprite.flipX = flipped }
-
     updateLocationState() { OverworldTransitions.setObjectLocation(this.character, [this.x, this.y], this.flip) }
+
+    update(time: number, delta: number): void {
+        super.update(time, delta)
+    }
 }
 
 const pixelTilesSpritesheetMap = (pxNum: number) => {
@@ -222,3 +176,6 @@ const adventurerOfThioldenSpritesheetMap = (spriteName: string) => {
     }
     return chroma ? index * 2 : index * 2 + 1
 }
+// Logic
+
+
