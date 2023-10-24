@@ -1,0 +1,1 @@
+export type AssetState = "idle" | "reserved" | "sold"

@@ -1,0 +1,43 @@
+import { DataTypes, Model, Sequelize } from "sequelize"
+import { AssetState } from "../models"
+
+//TODO: review table name
+export const invenotryTableName = "store_aots"
+
+export class AOTStoreAsset extends Model {
+    declare assetId: string
+    declare state: AssetState
+    declare contract: string | null
+}
+
+type AssetStateArray = Array<AssetState>
+const assetStates: AssetStateArray = ["idle", "reserved", "sold"]
+
+export const storeAOTTableAttributes = {
+    assetId: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        unique: true,
+        defaultValue: DataTypes.UUIDV4
+    },
+    state: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "idle",
+        validate: {
+            isIn: [assetStates]
+        }
+    },
+    contract: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+}
+
+export const configureSequelizeModel = (sequelize: Sequelize): void => {
+    AOTStoreAsset.init(storeAOTTableAttributes, {
+        sequelize,
+        modelName: "Store-AOTs",
+        tableName: invenotryTableName
+    })
+}
