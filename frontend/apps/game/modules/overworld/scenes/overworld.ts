@@ -48,6 +48,7 @@ export class Overworld extends Phaser.Scene {
     treeTrunk : Phaser.GameObjects.Sprite | undefined
     treeYellow : Phaser.GameObjects.Sprite | undefined
     wall: Phaser.Types.Physics.Arcade.ImageWithDynamicBody|undefined
+    statedirection : number | undefined
     //NPC's
 
     npcs: Phaser.Physics.Arcade.Sprite[] = []
@@ -176,26 +177,10 @@ export class Overworld extends Phaser.Scene {
             repeat: -1
          })
         
-        
     }
 
-    create() {
+    create(time: number, delta: number) {
       
-        // NPC´s
-        // this.npcs = []
-        // for (let i = 0; i < 15; i++) {
-            
-        //     const x = Phaser.Math.Between(100, 1500)
-        //     const y  = Phaser.Math.Between(100, 1300)
-        //     const npc = this.physics.add.sprite(x,y, "npc")
-        //     npc.setDepth(20)
-            
-        
-        //     npc.setCollideWorldBounds(true)
-        //     this.npcs.push(npc)
-            
-        // }
-
         // Sound
 
         var ambientSound = this.sound.add("ambient-sound") 
@@ -205,7 +190,7 @@ export class Overworld extends Phaser.Scene {
         
         this.physics.world.setBounds(0, 0, 1500, 1300)
         this.physics.world.setBoundsCollision(true, true, true, true)
-         
+
         this.npcs.forEach((npc) => {
             npc.setData("state", "idle")// Initial state is idle
             npc.setData("lifeTime",0)
@@ -218,8 +203,10 @@ export class Overworld extends Phaser.Scene {
                     npc.setData("lifeTime", newLifeTime)
                 }
             })
-            
         })
+        
+        
+    
         
         const innOrigin: [number, number] = [350, 485]
         const [floor, walls] = innBuildingRenderMatrix
@@ -280,35 +267,29 @@ export class Overworld extends Phaser.Scene {
         this.nenufar5 = this.add.image(660,1030, "lake-assets","layer_5")
         
         // Walls
-        // this.wall = this.physics.add.image(790,650, "no_zone")
-        // this.wall.setImmovable(true)
-        // this.physics.add.collider(this.npcs, this.wall, (npc, wall) => {
+        this.wall = this.physics.add.image(790,650, "no_zone")
+        this.wall.setImmovable(true)
+        this.physics.add.collider(this.npcs, this.wall, (npc, wall) => {
             
-        //     const randomDirection = Phaser.Math.Between(0, 3);
-        //     switch (randomDirection) {
-        //         case 0:
-        //             console.log("up")
+            const randomDirection = Phaser.Math.Between(0, 3);
+            switch (randomDirection) {
+                case 0:
+                    npc.body.gameObject.setVelocity(Phaser.Math.Between(-30, 30), -20); // Move up
+                    break;
+                case 1:
+                    npc.body.gameObject.setVelocity(20, Phaser.Math.Between(-30, 30)); // Move right
+                    break;
+                case 2:
+                    npc.body.gameObject.setVelocity(Phaser.Math.Between(-30, 30), 20); // Move down
+                    break;
+                case 3:
+                    npc.body.gameObject.setVelocity(-20, Phaser.Math.Between(-30, 30)); // Move left
+                    break;
                     
-        //             npc.body.gameObject.setVelocity(Phaser.Math.Between(-30, 30), -20); // Move up
-        //             break;
-        //         case 1:
-        //             console.log("right")
-        //             npc.body.gameObject.setVelocity(20, Phaser.Math.Between(-30, 30)); // Move right
-        //             break;
-        //         case 2:
-        //             console.log("down")
-        //             npc.body.gameObject.setVelocity(Phaser.Math.Between(-30, 30), 20); // Move down
-        //             break;
-        //         case 3:
-                    
-        //             console.log("left")
-        //             npc.body.gameObject.setVelocity(-20, Phaser.Math.Between(-30, 30)); // Move left
-        //             break;
-                    
-        //     }
+            }
             
 
-        // })
+         })
 
         // @ts-ignore
         // this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
@@ -328,21 +309,129 @@ export class Overworld extends Phaser.Scene {
                 innRoof.setVisible(true)
             }
         })
+         // Select Adveturer
+         this.input.on('pointerdown', (pointer:Phaser.Input.Pointer) => {
+            // Check if the left mouse button was clicked
+            if (pointer.leftButtonDown()) {
+                const selectedAdventurer = this.adventurers[0]; 
+    
+                // Check if an adventurer is selected
+                if (selectedAdventurer) {
+                    // Get the target position based on the mouse click
+                    const targetX = pointer.worldX;
+                    const targetY = pointer.worldY;
+    
+                    // Set the target position for the adventurer
+                    selectedAdventurer.sprites[0].setData("targetX", targetX);
+                    selectedAdventurer.sprites[0].setData("targetY", targetY);
+    
+                    // Change the adventurer's state to moveToTarget
+                    selectedAdventurer.sprites[0].setData("state", "moveToTarget");
+                }
+            }
+        });
         
         this.setInitialInnState()
-    }
+        
+        this.adventurers.forEach((adventurer) => {
+            const state : string = adventurer.sprites[0].getData("state")
+            const randNum : number = Phaser.Math.Between(0, 100)
+            
+            if(state==undefined){
+                adventurer.sprites[0].setData("state","transitionState")
+            }
+         })
+        }
 
     update(time: number, delta: number): void {
+       
+        // Timer
+        this.timerstate = this.timerstate + delta 
+        if(this.timerstate > 2000){
+            this.timerstate = 0
+        }
+        
+        // Adventurer's steps
+        const stepY = Math.sin(time/60)*0.5
+
         this.adventurers.forEach(adventurer => {
             // TODO: Mover al update de character
             adventurer.setDepth()
             adventurer.update(time, delta)
+            const state : string = adventurer.sprites[0].getData("state")
+            const randomDirection = Phaser.Math.Between(0, 3)
+
+            // Set adventurer State
+            
+            var randomState = Phaser.Math.Between(0, 2)
+            if(state === "transitionState"){
+                switch(randomState){
+                    case 0:
+                        console.log("Idle State")
+                        adventurer.sprites[0].setData("state","idle")
+                        
+                    break
+                    case 1:
+                        console.log("Move State")
+                        adventurer.sprites[0].setData("state","move")
+                        
+                    break
+                    case 2:
+                        console.log("Transition State")
+                        this.timerstate = 0
+                        this.statedirection = randomDirection
+                        adventurer.sprites[0].setData("state","transitionState")
+                    break
+                }
+
+            }else if(state === "idle"){
+                //Idle behavior
+                adventurer.sprites[0].setVelocity(0); // Not move
+                if(this.timerstate > 1900){
+                    adventurer.sprites[0].setData("state","transitionState")
+                }
+            }else if(state === "move"){
+                //Move Behavior
+            
+                 switch (this.statedirection) {
+                    case 0:
+                         adventurer.sprites[0].setVelocity(0, -20-200*stepY); // Move up
+                         break
+                    case 1:
+                        adventurer.sprites[0].setVelocity(20, 200*stepY); // Move right
+                         break
+                    case 2:
+                         adventurer.sprites[0].setVelocity(0, 20+200*stepY); // Move down
+                        break
+                    case 3:
+                        adventurer.sprites[0].setVelocity(-20,200*stepY); // Move left
+                        break
+                        }
+                 if(this.timerstate > 1900){
+                    adventurer.sprites[0].setData("state","transitionState")
+                }
+            }else if(state == "moveToTarget"){
+                //Move to target behavior
+                 const targetX = adventurer.sprites[0].getData("targetX");
+            const targetY = adventurer.sprites[0].getData("targetY");
+            const velocityX = targetX - adventurer.sprites[0].x;
+            const velocityY = targetY - adventurer.sprites[0].y;
+            adventurer.sprites[0].setVelocity(velocityX, velocityY);
+            
+            // Check if the adventurer has reached the target
+            if (Phaser.Math.Distance.Between(adventurer.sprites[0].x, adventurer.sprites[0].y, targetX, targetY) < 10) {
+                adventurer.sprites[0].setData("state", "idle");
+            }
+
+            }
+            
         })
         this.furniture.forEach(furniture => furniture.setDepth())
         //this.walls.forEach(wall => wall.depth = wall.y + 10)
         this.cameraControls.update(delta)
 
-        // Use math sin function to create a wave
+        
+        //Nenufar wave
         const valY = Math.sin(time / 200) * 0.5
         const valY2 = Math.cos(time / 200) * 0.5
         //move nenufar up and down
@@ -351,12 +440,7 @@ export class Overworld extends Phaser.Scene {
         this.nenufar3!.y = valY + 1033
         this.nenufar4!.y = valY2 + 919
         this.nenufar5!.y = valY2 + 963
-        // Timer
-        this.timerstate = this.timerstate + delta 
         
-        if(this.timerstate > 2000){
-            this.timerstate = 0
-        }
 
         if (this.game.input.activePointer.isDown && !this.draggingObject) {
             if (this.origDragPoint) {
@@ -385,55 +469,6 @@ export class Overworld extends Phaser.Scene {
         if(this.cloud3!.x < 100){
             this.cloud3!.x = 1800
         }
-
-        // NPC´s
-
-        // this.npcs.forEach((npc, index) => {
-        //     const state: string = npc.getData("state")
-        //     const lifeTimer: number = npc.getData("lifeTime")
-        //     //trnsiciitons
-        //     switch (state) {
-        //         case "idle":
-        //             if ((lifeTimer) %2 == 0) {
-                        
-        //                 npc.setData("state", "startingToMove")
-        //                // npc.setData("lifeTime", 0);
-        //             }
-        //             break
-        //         case "move":
-        //             if ((lifeTimer)%3 == 0) {
-        //                 npc.setData("lifetime", 10)
-        //                 npc.setData("state", "idle")
-        //             }
-        //             break
-        //     }
-           
-        //     if(npc.getData("state") == "idle"){
-                
-        //         npc.setVelocity(0); // Stop moving
-        //     }
-        //     else if(npc.getData("state") == "startingToMove"){
-        //         const randomDirection = Phaser.Math.Between(0, 3)
-        //         switch (randomDirection) {
-        //             case 0:
-        //                 npc.setVelocity(Phaser.Math.Between(-30, 30), -20); // Move up
-        //                 npc.setData("state", "move");
-        //                 break
-        //             case 1:
-        //                 npc.setVelocity(20, Phaser.Math.Between(-30, 30)); // Move right
-        //                 npc.setData("state", "move");
-        //                 break
-        //             case 2:
-        //                 npc.setVelocity(Phaser.Math.Between(-30, 30), 20); // Move down
-        //                 npc.setData("state", "move");
-        //                 break
-        //             case 3:
-        //                 npc.setVelocity(-20,Phaser.Math.Between(-30, 30)); // Move left
-        //                 npc.setData("state", "move");
-        //                 break
-        //         }
-                
-        //     } 
-        // })      
+        
     }
 }

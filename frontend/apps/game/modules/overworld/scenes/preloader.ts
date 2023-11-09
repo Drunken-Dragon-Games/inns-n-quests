@@ -33,7 +33,7 @@ export class Preloader extends Phaser.Scene {
 
         this.load.atlas("lake-assets", "/maps/lake_assets_name.png", "/maps/lake_assets_name_atlas.json")
         this.load.image('inn-roof', "/maps/inn-roof.png")
-        //this.load.image("npc", "/maps/Enemy_Paladin.png")
+       // this.load.image("npc", "/maps/Enemy_Paladin.png")
         this.load.image("blue-bg", "/maps/BG-blueFall.png")
         this.load.image("bridge-side1", "/maps/bridge-side1.png")
         this.load.image("bridge-side2", "/maps/bridge-side2.png")
