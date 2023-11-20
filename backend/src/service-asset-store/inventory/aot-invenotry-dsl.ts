@@ -1,6 +1,12 @@
 import { Token } from "../models";
 
 export class AOTInventory {
+    constructor(private readonly AOTPolicy: string){}
+
+    /*
+    async loadCollection
+    */
+
     async reserveAssets(quantity: number): Promise<Token[]>{
         return []
     }
