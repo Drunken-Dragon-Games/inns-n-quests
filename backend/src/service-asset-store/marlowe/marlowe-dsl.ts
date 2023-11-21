@@ -7,11 +7,11 @@ export class MarloweDSl {
     //TODO: this will some configuration like the minUTxODeposit
     constructor(private readonly webServerURl : string){}
 
-    async genInitContractTx(buyerAddress: string, sellerAddress: string, assets: Token[]): Promise<SResult<{constractInfo: CreateContractResponse}>>{
+    async genInitContractTx(buyerAddress: string, sellerAddress: string, assets: Token[]): Promise<SResult<{contractInfo: CreateContractResponse}>>{
         //Generamos el marlowe contract json
         //const client = clientModule.mkRestClient(MARLOWE_RT_WEBSERVER_URL)
         //llamamos client.createContract
-        return {} as SResult<{constractInfo: CreateContractResponse}>
+        return {} as SResult<{contractInfo: CreateContractResponse}>
     }
 
     async signCreateContractTx(unsignedTxCBORHex: string): Promise<SResult<{signedTx: string}>>{

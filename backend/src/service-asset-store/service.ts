@@ -1,10 +1,10 @@
 import { UserNotificationDSl } from "../service-user-notification/service-spec";
 import { LoggingContext } from "../tools-tracing";
-import { SResult, success } from "../tools-utils";
+import { SResult, sfailure, success } from "../tools-utils";
 import { AOTInventory } from "./inventory/aot-invenotry-dsl";
 import { MarloweDSl } from "./marlowe/marlowe-dsl";
 import { CreateContractResponse } from "./marlowe/models";
-import { ExitComand } from "./models";
+import { CompensatingAction } from "./models";
 import { AssetStoreDSL } from "./service-spec";
 
 export type AssetStoreServiceConfig = {
@@ -16,44 +16,61 @@ class AssetStoreService implements AssetStoreDSL {
     constructor(
         private readonly changeAddress: string,
         private readonly AOTPrice: number,
-        private readonly marloweDSl: MarloweDSl,
+        private readonly marloweDSL: MarloweDSl,
         private readonly notificaitons: UserNotificationDSl,
-        private readonly aotInvenotry: AOTInventory
+        private readonly aotInventory: AOTInventory
         ){}
 
     async loadDatabaseModels(): Promise<void>{}
 
     async unloadDatabaseModels(): Promise<void>{}
 
-    async initAOTContract(userId: string, buyerAddres: string, quantity: number, logger?: LoggingContext): Promise<SResult<{contractId: string}>>{
-        const reservedItems = await this.aotInvenotry.reserveAssets(quantity)
-        const constractInfoResult = await this.marloweDSl.genInitContractTx(buyerAddres, this.changeAddress, reservedItems)
-        if (constractInfoResult.ctype !== "success") {
-            await this.aotInvenotry.releaseReservedAssets(reservedItems)
-            return constractInfoResult
+    async initAOTContract(userId: string, buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string }>> {
+        const compensatingActions: CompensatingAction[] = []
+        try {
+          const reservedItems = await this.aotInventory.reserveAssets(quantity);
+          compensatingActions.push({ command: "release assets", assets: reservedItems })
+          const contractInfoResult = await this.marloweDSL.genInitContractTx(buyerAddress, this.changeAddress, reservedItems)
+          if (contractInfoResult.ctype !== "success") throw new Error("Failed to generate contract transaction")
+          // Purposely not awaited
+          this.depositAdventurers(userId, contractInfoResult.contractInfo, compensatingActions);
+          return success({ contractId: contractInfoResult.contractInfo.contractId });
+        } catch (error: any) {
+          await this.rollbackSaga(compensatingActions)
+          return sfailure(error.message)
         }
-        //this is purposly not being awaited
-        this.depositAdventurers(constractInfoResult.constractInfo)
-        //i should propably store this contract id allong with the assets it holds
-        return success({contractId: constractInfoResult.constractInfo.contractId})
+      }
+
+    private async depositAdventurers(userId: string, contractInfo: CreateContractResponse, compensatingActions: CompensatingAction[]){
+        try {
+            const signedCreateContractTxResult = await this.marloweDSL.signCreateContractTx(contractInfo.tx.cborHex)
+            if (signedCreateContractTxResult.ctype !== "success") throw new Error("Failed to sign contract transaction")
+            await this.marloweDSL.submitContractTx(contractInfo.contractId, signedCreateContractTxResult.signedTx)
+            //maybe add some polling if marlowe sdk allows for it
+            //get seller tx
+            //sign seller tx
+            //submit until it passes or time out
+            //mark assets being in contract
+            //build buyer tx
+            //store buyer tx under a cart id (maybe where we also stored the contract id)
+            //notify of success
+        } catch (error: any) {
+            await this.rollbackSaga(compensatingActions)
+            this.notificaitons.notifyUser(userId, `yooo this shit broke: ${error.message}`)
+        }
     }
 
-    private async depositAdventurers(contractInfo: CreateContractResponse){
-        const signedCreateContractTxResult = await this.marloweDSl.signCreateContractTx(contractInfo.tx.cborHex)
-        //I need to define an exit strategy probably woudl be best to treat this like a saga
-        if (signedCreateContractTxResult.ctype !== "success") return
-        await this.marloweDSl.submitContractTx(contractInfo.contractId, signedCreateContractTxResult.signedTx)
-        //maybe add some polling if marlowe sdk allows for it
-        //get sellet tx
-        //sign sellet tx
-        //submit until it passes or time out
-        //mark assets being in contract
-        //build buyer tx
-        //store buyer tx under a cart id (maybe where we also stored the contract id)
-
+    private async rollbackSaga(actions: CompensatingAction[]){
+        actions.reverse().forEach(async action => {
+            await this.executeRollback(action)
+        })
     }
-
-    private exitStrategy(comands: ExitComand[]){
-
-    }
+    private executeRollback(rollbackAction: CompensatingAction): Promise<void> {
+        switch (rollbackAction.command) {
+          case "release assets":
+            return this.aotInventory.releaseReservedAssets(rollbackAction.assets)
+          default:
+            return Promise.resolve()
+        }
+      }
 }
