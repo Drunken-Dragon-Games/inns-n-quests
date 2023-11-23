@@ -67,6 +67,25 @@ jobs:
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+    # TODO, change the Discord client ID
+    - name: Frontend (Demeter) - Build, tag, and push
+      id: docker-build-push-frontend-demeter
+      working-directory: frontend
+      env:
+        REGISTRY: registry.digitalocean.com/ddu-cr
+        REPOSITORY: ddu-frontend
+        IMAGE_TAG: demeter-preprod # a-${{ steps.date.outputs.date }}-${{ github.sha }}
+      run: |
+        echo "Image name $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+        echo -e "NEXT_PUBLIC_ENVIROMENT=development" >> .env.local 
+        echo -e "NEXT_PUBLIC_API_BASE_HOSTNAME=https://demeter.preprod.ddu.gg" >> .env.local 
+        echo -e "NEXT_PUBLIC_CARDANO_NETWORK=Preprod" >> .env.local 
+        echo -e "NEXT_PUBLIC_BLOCKFROST_API_KEY=${{ secrets.BLOCKFROST_API_KEY_PREPROD }}" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_CLIENT_ID='1129939274855358504'" >> .env.local 
+        echo -e "NEXT_PUBLIC_DISCORD_REDIRECT_URI=https%3A%2F%2Fdemeter.preprod.ddu.gg/inq" >> .env.local 
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
     - name: Setup Deno ${{ matrix.deno-version }}
       uses: denoland/setup-deno@v1.1.2
       with:
