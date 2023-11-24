@@ -25,16 +25,23 @@ class AssetStoreService implements AssetStoreDSL {
 
     async unloadDatabaseModels(): Promise<void>{}
 
-    async initAOTContract(userId: string, buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string }>> {
+    async initAOTContract(userId: string, buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, cartId: string }>> {
         const compensatingActions: CompensatingAction[] = []
         try {
           const reservedItems = await this.aotInventory.reserveAssets(quantity);
           compensatingActions.push({ command: "release assets", assets: reservedItems })
           const contractInfoResult = await this.marloweDSL.genInitContractTx(buyerAddress, this.changeAddress, reservedItems)
           if (contractInfoResult.ctype !== "success") throw new Error("Failed to generate contract transaction")
-          // Purposely not awaited
-          this.depositAdventurers(userId, buyerAddress, reservedItems, contractInfoResult.contractInfo, compensatingActions);
-          return success({ contractId: contractInfoResult.contractInfo.contractId });
+          const contractInfo = contractInfoResult.contractInfo
+          const signedCreateContractTxResult = await this.marloweDSL.signCreateContractTx(contractInfo.tx.cborHex)
+          if (signedCreateContractTxResult.ctype !== "success") throw new Error("Failed to sign contract transaction")
+          await this.marloweDSL.submitContractTx(contractInfo.contractId, signedCreateContractTxResult.signedTx)
+          await this.marloweDSL.awaitContract(contractInfo.contractId)
+          //TODO: add price as argument
+          const buyerAdaDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractInfo.contractId, buyerAddress, [ADA])
+          if (buyerAdaDepositTX.ctype !== "success") throw new Error("Failed to geenrate ADA deposit transaction")
+          //TODO: store the buyerAddress, the txId, the assets and the contract id under a cartId
+          return success({ contractId: contractInfoResult.contractInfo.contractId, depositTx: buyerAdaDepositTX.textEnvelope.cborHex });
         } catch (error: any) {
           await this.rollbackSaga(compensatingActions)
           return sfailure(error.message)
@@ -53,10 +60,11 @@ class AssetStoreService implements AssetStoreDSL {
             const signedDepositAssetsTX = await this.marloweDSL.submitContractInteraciton(contractInfo.contractId, sendingAssetsTx.textEnvelope, sendingAssetsTx.transactionId)
             //TODO: poll this tx
             await this.aotInventory.markAssetsAsInContract(reservedItems, contractInfo.contractId)
+            //TODO: agregar a tabla de carritos
             compensatingActions.push({command: "retrive assets", assets: reservedItems, contractId: contractInfo.contractId})
-            ////TODO: add price as argument
+            //TODO: add price as argument
             const buyerAdaDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractInfo.contractId, buyerAddress, [ADA])
-            ////TODO: store buyer tx under a cart id (maybe where we also stored the contract id)
+            //TODO: store buyer tx under a cart id (maybe where we also stored the contract id)
             this.notificaitons.notifyUser(userId, `yooo this worked: ${buyerAdaDepositTX}`)
         } catch (error: any) {
             await this.rollbackSaga(compensatingActions)
