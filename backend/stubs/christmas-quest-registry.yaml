@@ -1,0 +1,195 @@
+questId: "quest-26"
+name: "Meys Magic"
+location: "Auristar"
+description: "Mey requires 10 shards of light to help her create an orb of magic to assist in her study of the balance of light and magic"
+requirements: 
+- aps: [10, 10, 10]
+
+---
+
+questId: "quest-27"
+name: "Terrible Terror"
+location: "Auristar"
+description: "Terrorhertz has misplaced his guitar after too many meads at the Drunken Dragon! Assemble your most competant adventurers and help him find it before his next adventure!"
+requirements: 
+- aps: [15, 20, 10]
+
+---
+
+questId: "quest-28"
+name: "The Grandmasters Guide"
+location: "Auristar"
+description: "A group of royal travelers arrive at the gates of Auristar. You are to greet them and give them a tour of the city. Make sure to keep your guests entertained, we don't want them being bored!"
+requirements: 
+- aps: [10, 10, 25]
+
+---
+
+questId: "quest-29"
+name: "The Overconfident Ones"
+location: "Auristar"
+description: "Aki has tried to sharpen her blade using regular stone. Overconfident as always! Her blade is now dull and she seeks the aid of a proper weaponsmith to restore her hon-styled blade to its former glory."
+requirements: 
+- aps: [1, 1, 1]
+- classes: ["Blacksmith"]
+- collections: ["adventurers-of-thiolden"]
+
+---
+
+questId: "quest-30"
+name: "Another Milnim Mishap"
+location: "Auristar"
+description: "Milnim visited the catacombs of Auristar with the intention of selling some blackmarket goods. She was ambushed in the maze of drains and lost an important book. You're required to retrieve the book from the underbelly of Auristar but the guards cannot know you're there. Send your most stealthy rogues and get that book back!"
+requirements: 
+- aps: [12, 12, 12]
+- collections: ["grandmaster-adventurers"]
+- classes: ["Rogue"]
+
+---
+
+questId: "quest-31"
+name: "Shadens Sacrifice"
+location: "Auristar"
+description: "Shaden is the Vales most devoted cleric assasin. She sacrifices hours of her day to honig her craft and requires guards at her door to make sure that she isnt distubed during these key hours."
+requirements: 
+- aps: [10, 10, 10]
+- classes: ["Knight"]
+
+---
+
+questId: "quest-32"
+name: "Vadannas Vigil"
+location: "Auristar"
+description: "Vadanna must pay a visit to a wise cleric who will teach her the art of balance and clarity to increase her ability to maneuvour ales around the tavern. You must accompany her there as the path to the cleric is full of bandits and wild beasts. Make sure she gets there safely!"
+requirements: 
+- aps: [20, 10, 10]
+
+---
+
+questId: "quest-33"
+name: "Bo's Banquet"
+location: "Auristar"
+description: "The town comes together to throw a party for Bo to celebrate another year of the safekeeping of the city. Make sure you get the banquet ready for his arrival."
+requirements: 
+- aps: [1, 1, 1]
+- rewardBonus: 10
+
+---
+
+questId: "quest-34"
+name: "Shop Security"
+location: "Auristar"
+description: "Milnim and Gulnim come together to discuss safe transport of their black market goods. Go and give your advice on how to make the safe passage more secure."
+requirements: 
+- aps: [5, 5, 5]
+- collections: ["adventurers-of-thiolden"]
+- classes: ["Trader"]
+
+---
+
+# questId: "quest-35"
+# name: "Slime Season"
+# location: "Auristar"
+# description: "The slimes have escpaed yet again, like they do every winter in the tavern. Send your best slime to go and round them all up and get them back in the basement!"
+# requirements: 
+# - aps: [1, 1, 1]
+# - collections: ["slimes"]
+# - rewardBonus: 5
+#
+#---
+
+questId: "quest-36"
+name: "The Thiolden Traveler"
+location: "Auristar"
+description: "A noteworth pathfinder is travelling through Thiolden and requires safe passage through Auristar. Send your best rangers to track the pathfinder before he reaches the gates and ensure he travels safely to his destination."
+requirements: 
+- aps: [10, 6, 5]
+- classes: ["Ranger"]
+
+---
+
+questId: "quest-37"
+name: "Recharge"
+location: "Auristar"
+description: "Your Paladins return from the front line, weary and in dire need of meditation. Send your Paladin to reflect at the well in Auristar and replenish their light so that they can return to battle."
+requirements: 
+- aps: [5, 9, 3]
+- classes: ["Paladin"]
+
+---
+
+questId: "quest-38"
+name: "The Tavern Show"
+location: "Auristar"
+description: "Your tavern is about to welcome a world famous lute player to play for all of your patrons but they have lost their lute on the way. Go and fetch the loot at your home that they can borrow and they may even let you join them on stage for the encore."
+requirements: 
+- aps: [10,10,15]
+- classes: ["Bard"]
+
+---
+
+questId: "quest-39"
+name: "Hilanas Wood Store"
+location: "Auristar"
+description: "Hilana requires a new outhouse to store all of her lumber. Send your strongs adventurer to help construct the outbuilding."
+requirements: 
+- aps: [15,8,8]
+
+---
+
+questId: "quest-40"
+name: "Another Dragon Debacle"
+location: "Auristar"
+description: "A wild dragon is again on the loose across Thiolden. You must try and catch up to them and help them find their way back to their lair and only those who can speak dragon toungue can communicate with them. It's your time to step up!"
+requirements: 
+- aps: [10,10,10]
+- classes: ["Mage", "Trader", "Bard"]
+
+---
+
+questId: "quest-41"
+name: "Astrids Ales"
+location: "Auristar"
+description: "After spending time in the tavern catering for the patrons, Astrid wants to try her hand in making a new beer that will attract more customers. She requires the finest yeast and the tastiest hops. Help her travel to the burrow to gather what she needs, keeping her protected along the way."
+requirements: 
+- aps: [15,15,15]
+
+---
+
+questId: "quest-42"
+name: "The Axe Grind"
+location: "Auristar"
+description: "Terrorhertz & Vimtyr set off to protect the people of Thiolden. Gather the supplies and get ready to begin this epic tale of two friends."
+requirements: 
+- aps: [21,21,21]
+- collections: ["adventurers-of-thiolden"]
+- classes: ["Rogue", "Bard"]
+
+---
+
+questId: "quest-43"
+name: "The Vulkins Vantage"
+location: "Auristar"
+description: "Vale, the Guildmaster of the Thieves Guild requires your fastest Vulkin. He needs 1,000 Dragon Silver taken to his chamber for storage in his vault, but it must be taken this second, to avoid a hefty fine of carrying it on his person. Get your Vulkin to meet him straight away and ensure a fast delivery. "
+requirements: 
+- aps: [5,5,5]
+- collections: ["grandmaster-adventurers"]
+
+---
+
+questId: "quest-44"
+name: "Seasons Greetings"
+location: "Auristar"
+description: "Tis the season, and you adventurer are required to travel to the woods and find the best tree to bring to the tavern for decorating. You will need all the strength you have as damn, these spruces tress are heavy!"
+requirements: 
+- aps: [20,20,20]
+
+---
+
+questId: "quest-45"
+name: "Randos Rage"
+location: "Auristar"
+description: "Rando has got himself into another of his rages and is stomping about the camp causing destruction in his path. You need to send your best magic adventurers to help subdue and calm him down."
+requirements: 
+- aps: [10,10,10]
+- classes: ["Mage", "Cleric", "Warlock", "Bard"]

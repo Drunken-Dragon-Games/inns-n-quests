@@ -426,7 +426,7 @@ export function parseEasyJsonSyntax(json: any): StakingQuestRequirementDSL {
             else if (key == "assets" && Array.isArray(value) && value.every(isAssetRef))
                 return all(value.map(assetRefReq))
             else 
-                throw new Error(`Unknown key word ${key}`)
+                throw new Error(`Unknown key word ${key} and ${json[key]}`)
         } else
             return all(keys.map(key => parseEasyJsonSyntax({ [key]: json[key] })))
     } else 
