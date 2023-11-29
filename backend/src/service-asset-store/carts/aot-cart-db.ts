@@ -4,15 +4,14 @@ import { Token } from "../models"
 export const cartTableName = "asset_store_aot_carts"
 
 export type CreateAOTCart = {
-    cartId: string
-    buyAddress: string
+    buyerAddress: string
     AdaDepositTxId: string
     Assets: Token[]
 }
 
 export class AOTStoreCart extends Model implements CreateAOTCart{
     declare cartId: string
-    declare buyAddress: string
+    declare buyerAddress: string
     declare AdaDepositTxId: string
     declare Assets: Token[]
 }
@@ -23,7 +22,7 @@ export const aotStoreCartTableAttributes = {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
-    buyAddress: {
+    buyerAddress: {
         type: DataTypes.STRING,
         allowNull: false
     },

@@ -41,7 +41,7 @@ export class MarloweDSl {
 
     }
 
-    async genDepositIntoContractTX(contractId: string, payeeeAddress: string, tokens: Token[]): Promise<SResult<{textEnvelope: TextEnvelope, transactionId: string}>>{
+    async genDepositIntoContractTX(contractId: string, payeeeAddress: string, tokens: {asset:Token, quantity: string}[]): Promise<SResult<{textEnvelope: TextEnvelope, transactionId: string}>>{
         /* import * as wn from "npm:@marlowe.io/wallet/nodejs";
         import * as clientModule from "npm:@marlowe.io/runtime-rest-client";
         import * as w from "npm:@marlowe.io/wallet";
