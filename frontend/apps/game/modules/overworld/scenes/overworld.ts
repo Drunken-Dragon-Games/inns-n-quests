@@ -215,25 +215,25 @@ export class Overworld extends Phaser.Scene {
 
         //Animations
 
-        this.anims.create({
-            key: "tree-sprite-anim",
-            frames : this.anims.generateFrameNumbers("tree-sprite-sheet", {start: 0, end: 7}),
-            frameRate: 10,
-            repeat: -1
-         })
+        // this.anims.create({
+        //     key: "tree-sprite-anim",
+        //     frames : this.anims.generateFrameNumbers("tree-sprite-sheet", {start: 0, end: 7}),
+        //     frameRate: 10,
+        //     repeat: -1
+        //  })
          
         this.add.sprite(769, 650,"layer0").play("BGSpritesheet_anim")
        
-        this.tree1 = this.add.sprite(830,240,"tree-sprite-sheet")
-        this.tree1?.play("tree-sprite-anim")
+        // this.tree1 = this.add.sprite(830,240,"tree-sprite-sheet")
+        // this.tree1?.play("tree-sprite-anim")
         
         
-        const tree2 = this.add.sprite(215,835,"tree-sprite-sheet" )
-        const tree3 = this.add.sprite(0,635,"tree-sprite-sheet" )
-        const tree4 = this.add.sprite(390,150,"tree-sprite-sheet" )
-        tree2.play("tree-sprite-anim")
-        tree3.play("tree-sprite-anim")
-        tree4.play("tree-sprite-anim")
+        // const tree2 = this.add.sprite(215,835,"tree-sprite-sheet" )
+        // const tree3 = this.add.sprite(0,635,"tree-sprite-sheet" )
+        // const tree4 = this.add.sprite(390,150,"tree-sprite-sheet" )
+        // tree2.play("tree-sprite-anim")
+        // tree3.play("tree-sprite-anim")
+        // tree4.play("tree-sprite-anim")
         this.bgBlue = this.add.sprite(910,650,"blue-bg")
         this.bgBlue.setDepth(-1)
         this.cloud1 = this.add.sprite(1400,850,"cloud1")
@@ -367,17 +367,17 @@ export class Overworld extends Phaser.Scene {
             if(state === "transitionState"){
                 switch(randomState){
                     case 0:
-                        console.log("Idle State")
+                        //console.log("Idle State")
                         adventurer.sprites[0].setData("state","idle")
                         
                     break
                     case 1:
-                        console.log("Move State")
+                        //console.log("Move State")
                         adventurer.sprites[0].setData("state","move")
                         
                     break
                     case 2:
-                        console.log("Transition State")
+                        //console.log("Transition State")
                         this.timerstate = 0
                         this.statedirection = randomDirection
                         adventurer.sprites[0].setData("state","transitionState")

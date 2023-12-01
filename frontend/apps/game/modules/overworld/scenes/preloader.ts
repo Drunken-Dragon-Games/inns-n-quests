@@ -50,24 +50,24 @@ export class Preloader extends Phaser.Scene {
 
         // BG Images load
 
-        this.load.image("layer0", "/maps/layer0.png") 
-        this.load.image("layer1", "/maps/layer1.png")
-        this.load.image("layer2", "/maps/layer2.png")
-        this.load.image("layer3", "/maps/layer3.png")
-        this.load.image("layer4", "/maps/layer4.png")
-        this.load.image("layer5", "/maps/layer5.png")
-        this.load.image("layer6", "/maps/layer6.png")
-        this.load.image("layer7", "/maps/layer7.png")
+        this.load.image("layer0", "/maps/layer0Winter.png") 
+        this.load.image("layer1", "/maps/layer1Winter.png")
+        this.load.image("layer2", "/maps/layer2Winter.png")
+        this.load.image("layer3", "/maps/layer3Winter.png")
+        this.load.image("layer4", "/maps/layer4Winter.png")
+        this.load.image("layer5", "/maps/layer5Winter.png")
+        this.load.image("layer6", "/maps/layer6Winter.png")
+        this.load.image("layer7", "/maps/layer7Winter.png")
 
         this.load.spritesheet("Hearth-fire", "/maps/furniture/pixel-tiles/FirePlaceSpriteSheet.png", {
             frameWidth: 64, 
             frameHeight: 64
         })
         
-        this.load.spritesheet("tree-sprite-sheet", "/maps/TreeSpritesheetFall.png", {
-            frameWidth: 256, 
-            frameHeight: 256
-        })
+        // this.load.spritesheet("tree-sprite-sheet", "/maps/TreeSpritesheetFall.png", {
+        //     frameWidth: 256, 
+        //     frameHeight: 256
+        // })
 
         this.load.spritesheet("pixel-tiles-adventurers-front", "/maps/adventurers/pixel-tiles-adventurers-front.png", {
             frameWidth: 32,
