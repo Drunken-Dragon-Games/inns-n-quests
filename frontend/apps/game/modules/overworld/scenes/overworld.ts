@@ -367,17 +367,17 @@ export class Overworld extends Phaser.Scene {
             if(state === "transitionState"){
                 switch(randomState){
                     case 0:
-                        console.log("Idle State")
+                        //console.log("Idle State")
                         adventurer.sprites[0].setData("state","idle")
                         
                     break
                     case 1:
-                        console.log("Move State")
+                        //console.log("Move State")
                         adventurer.sprites[0].setData("state","move")
                         
                     break
                     case 2:
-                        console.log("Transition State")
+                        //console.log("Transition State")
                         this.timerstate = 0
                         this.statedirection = randomDirection
                         adventurer.sprites[0].setData("state","transitionState")
