@@ -8,7 +8,7 @@ import { CreateMortal, CreateSyncedAsset, SyncedAssetChanges } from "./models"
 import { RandomDSL } from "../random-dsl/dsl"
 
 //this will eventually come from another service and will dpeend on the userId
-const maxAssetsAllowed = {characters: 5, furniture: 5}
+const maxAssetsAllowed = {characters: 15, furniture: 5}
 
 export const relevantPolicies = ["pixelTiles", "adventurersOfThiolden", "grandMasterAdventurers"] as const
 const policyIndexMapper: Record<CollectionPolicyNames, typeof relevantPolicies[number]> = {

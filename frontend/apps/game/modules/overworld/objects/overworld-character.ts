@@ -9,6 +9,7 @@ import OverworldObject from "./overworld-object";
 export default class OverworldCharacter extends OverworldObject<Character> {
 
     public lastClickTime: number = 0
+    
 
     constructor(
         public readonly character: Character,

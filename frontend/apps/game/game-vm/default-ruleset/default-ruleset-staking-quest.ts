@@ -80,12 +80,13 @@ export default class DefaultQuestRuleset implements StakingQuestRuleset {
     requirementInfo(requirement: StakingQuestRequirement): StakingQuestRequirementInfo {
         //const duration = 60 * 60 * 24 * 1
         const duration = process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" ? 30 : 60 * 60 * 8
+        //Temporarily duplicating DS
         const currency = (
             Math.round(Math.max(1, apsSum(requirement.aps) / 10)) * 2 +
             (requirement.collection?.length ? (CharacterCollections.length - requirement.collection.length) : 0)  +
             (requirement.class?.length ? (AdventurerClasses.length + CrafterClasses.length - requirement.class.length) : 0) +
             (requirement.assetRef?.length ?? 0) * 30
-        )
+        ) * 2
         const rewardBonus = requirement.rewardBonus
         const successBonus = requirement.successBonus
         return { duration, reward: { currency }, rewardBonus, successBonus }
