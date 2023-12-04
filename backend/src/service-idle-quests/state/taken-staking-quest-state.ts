@@ -120,6 +120,15 @@ export class TakenStakingQuestState {
             .map(([userId, succeededQuests]) => ({userId, succeededQuests}))
     }
 
+    async getUnclaimedQuestsByIdRange (startNumber: number, endNumber: number): Promise<TakenStakingQuest[]>{
+        const oldQuests =  await TakenStakingQuestDB.findAll({
+            where: { 
+                questId: {[Op.between]: [`quest-${startNumber}`, `quest-${endNumber}`]},
+                claimedAt: null
+            }
+          })
+        return oldQuests.map(makeTakenQuest(this.questRegistry))
+    }
 }
 
 const makeTakenQuest = (questRegistry: StakingQuestRegistry) => (takenQuestDB: ITakenStakingQuestDB): TakenStakingQuest => {

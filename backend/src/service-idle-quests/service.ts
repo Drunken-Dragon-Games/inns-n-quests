@@ -303,6 +303,32 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
         return { status: "ok", outcome }
     }
 
+    /**
+     * Froces a claim for all quest that fit inside the range privided (inclusive)
+     * asumes quest id in fomrat "quest-number"
+     * @param from 
+     * @param to 
+     */
+    async forceClaimStakingQuestsByQuestId(from: number, to: number){
+        const transaction = await this.database.transaction()
+        const oldQuests = await this.takenQuestState.getUnclaimedQuestsByIdRange(from, to)
+        oldQuests.forEach(async quest => {
+            const adventurers = await this.characterState.unsetInChallenge(quest.userId, quest.partyIds, transaction)
+            const missing = quest.partyIds.filter(adventurerId => adventurers.map(a => a.entityId).indexOf(adventurerId) < 0)
+            // Check all adventurers are still in the inventory
+            const outcome: vm.StakingQuestOutcome = missing.length > 0 ? 
+                {ctype: "failure-outcome"} :
+                this.rules.stakingQuest.outcome(quest.availableQuest, adventurers)
+
+            const now = this.calendar.now()
+            if (outcome.ctype == "success-outcome") 
+                await this.assetManagementService.grant(quest.userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() })
+            
+            await this.takenQuestState.claimQuest(quest.takenQuestId, now, outcome, transaction)  
+        })
+        await transaction.commit()
+    }
+
     /** Plater State */
 
     /**
