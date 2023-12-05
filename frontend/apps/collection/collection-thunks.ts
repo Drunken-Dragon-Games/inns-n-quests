@@ -59,7 +59,7 @@ export const CollectionThunks = {
     modifyMortalCollection: (asset: MortalCollectible, action: "add" | "remove", policy: "pixelTiles" | "adventurersOfThiolden" | "grandMasterAdventurers"): CollectionThunk => async (dispatch, getState) => {
         const state = getState()
         //TODO: This will eventually come from an endpoint
-        const maxAmount = 5
+        const maxAmount = 15
         if(countCollectionItems(state.mortalCollectionItems) >= maxAmount && action == "add") return
         const foundEntry = Object.entries(state.collectionCache).find(([, collection]) =>
             collection[policy].some(item => item.assetRef === asset.assetRef)

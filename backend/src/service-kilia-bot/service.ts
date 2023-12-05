@@ -517,7 +517,7 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
             console.log({lockedString})
             const locked = lockedString === "true" ||  lockedString === "True" ||  lockedString === "t" ? true :  lockedString === "false" ||  lockedString === "False" ||  lockedString === "f" ? false : undefined
             if (locked === undefined) return this.replyMessage(message, "Could not parse boolean state please use comand wiht either **true** or **false**")
-            this.replyMessage(message, `Got command to set all users collections locked to be ${locked} fi this is correct reply with **yes** If you wish to cancel, reply with **no** or wait for 60 seconds for this request to time out.`)
+            this.replyMessage(message, `Got command to set all users collections locked to be ${locked} if this is correct reply with **yes** If you wish to cancel, reply with **no** or wait for 60 seconds for this request to time out.`)
             await this.waitForConfirmation(message, 60,
                 {
                     cancel: 'Colleciton set confirmation canceled.',
@@ -527,6 +527,28 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
                     try{
                         await this.collectionService.setLockAllUsersCollections(locked)
                         return `Collecitons succesfully set to ${locked ? "Locked" : "unlokced"}`
+                    }
+                    catch(e: any){
+                        return JSON.stringify(e, null, 4)
+                    }
+                })
+        }
+        else if (subcommand == "claim-all-quest-by-id"){
+            const [from, to] = messagesDSL.getArguments(message).split(" ")
+            if (from == "" || to == "") return this.replyMessage(message, "did not get id range")
+            const fromNumber = parseInt(from)
+            const toNumber = parseInt(to)
+            if (isNaN(fromNumber) || isNaN(toNumber)) {return this.replyMessage(message, "Invalid input for range.")}
+            this.replyMessage(message, `Got command to claim all quest with an id beteween ${from} and ${to} if this is correct reply with **yes** If you wish to cancel, reply with **no** or wait for 60 seconds for this request to time out.`)
+            await this.waitForConfirmation(message, 60,
+                {
+                    cancel: 'Quest forced claim canceled.',
+                    timeout: 'Quest forced claim timed out.'
+                },
+                async () => {
+                    try{
+                        await this.idleQuestService.forceClaimStakingQuestsByQuestId(fromNumber, toNumber)
+                        return `Quest forcefully claimed`
                     }
                     catch(e: any){
                         return JSON.stringify(e, null, 4)
@@ -560,6 +582,8 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
         *clear-week-stake <weekNumber> <year>: Removes the records for granting rewrds for a given week. only works if the env is set to development
 
         *set-collection-lock* <state>: Sets all users collections to the provided state
+
+        *claim-all-quest-by-id* <from> <to>: Foces claim for all quest wiht id on the provided range (inclusive)
         
         *help* : Provides a list of available commands and a description of their function.
         
@@ -615,7 +639,6 @@ export class KiliaBotServiceDsl implements EvenstatsSubscriber {
 
         collector.on('collect', async (m: Message) => {
             if (m.content.toLowerCase() === 'yes') {
-
                 const reponse = await preloadedCallback()
                 if (mesages.confirm) await this.replyMessage( message, mesages.confirm)
                 else if (reponse) await this.replyMessage( message, reponse)

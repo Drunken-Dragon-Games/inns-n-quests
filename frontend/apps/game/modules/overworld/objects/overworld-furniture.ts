@@ -31,7 +31,6 @@ export default class OverworldFurniture extends OverworldObject<Furniture>  {
         // Later check furniture collection and load from right sprite sheet
         const { sheet, index, size, offset } = pixelTilesSpritesheetMap(i)
         const baseSprite = overworld.physics.add.sprite(position.x, position.y, sheet, index)
-        const animationSprite = overworld.physics.add.sprite(baseSprite.x, baseSprite.y+42, sheet, index)
         baseSprite.setSize(size[0], size[1]) /** Collision box size */
         baseSprite.setOffset(offset[0], offset[1]) /** Collision box offset */
         baseSprite.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: true })
@@ -40,8 +39,8 @@ export default class OverworldFurniture extends OverworldObject<Furniture>  {
         spriteComposite.push(baseSprite)
 
         // If a furniture has a fire, create animation
-        if(furniture.assetRef=="PixelTile18"||furniture.assetRef=="PixelTile19"){
-            
+        if(furniture.assetRef=="PixelTile18"||furniture.assetRef=="PixelTile19"||furniture.assetRef=="PixelTile10"){
+            const animationSprite = overworld.physics.add.sprite(baseSprite.x, baseSprite.y+42, sheet, index)
             animationSprite.anims.create({key: "PixelTile18_anim",
             frames : baseSprite.anims.generateFrameNumbers("Hearth-fire", {start: 0, end: 7}),
             frameRate: 10,
