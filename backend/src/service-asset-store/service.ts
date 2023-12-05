@@ -12,7 +12,7 @@ export type AssetStoreServiceConfig = {
     AOTPrice: number
 }
 
-class AssetStoreService implements AssetStoreDSL {
+export class AssetStoreService implements AssetStoreDSL {
     constructor(
         private readonly changeAddress: string,
         private readonly AOTPrice: number,
@@ -24,29 +24,58 @@ class AssetStoreService implements AssetStoreDSL {
 
     async unloadDatabaseModels(): Promise<void>{}
 
-    async initAOTContract(userId: string, buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, cartId: string }>> {
+    async initAOTContract(buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, cartId: string }>> {
         const compensatingActions: CompensatingAction[] = []
         try {
-          const reservedItems = await this.aotInventory.reserveAssets(quantity);
+          const reservedItems = await this.aotInventory.reserveAssets(quantity)
           compensatingActions.push({ command: "release assets", assets: reservedItems })
           const contractInfoResult = await this.marloweDSL.genInitContractTx(buyerAddress, this.changeAddress, reservedItems)
           if (contractInfoResult.ctype !== "success") throw new Error("Failed to generate contract transaction")
-          const contractInfo = contractInfoResult.contractInfo
-          const signedCreateContractTxResult = await this.marloweDSL.signCreateContractTx(contractInfo.tx.cborHex)
+          const signedCreateContractTxResult = await this.marloweDSL.signCreateContractTx(contractInfoResult.contractInfo.tx.cborHex)
+          const contractId = contractInfoResult.contractInfo.contractId
           if (signedCreateContractTxResult.ctype !== "success") throw new Error("Failed to sign contract transaction")
-          await this.marloweDSL.submitContractTx(contractInfo.contractId, signedCreateContractTxResult.signedTx)
-          await this.marloweDSL.awaitContract(contractInfo.contractId)
+          await this.marloweDSL.submitContractTx(contractId, signedCreateContractTxResult.signedTx)
+          await this.marloweDSL.awaitContract(contractId)
           const adaQuantity = (quantity * this.AOTPrice).toString()
-          const buyerAdaDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractInfo.contractId, buyerAddress, [{asset: ADA, quantity: adaQuantity}])
+          const buyerAdaDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, buyerAddress, [{asset: ADA, quantity: adaQuantity}])
           if (buyerAdaDepositTX.ctype !== "success") throw new Error("Failed to geenrate ADA deposit transaction")
-          const cartId = await AotCartDSL.create({buyerAddress, AdaDepositTxId: buyerAdaDepositTX.transactionId, Assets: reservedItems})
-          return success({ contractId: contractInfoResult.contractInfo.contractId, depositTx: buyerAdaDepositTX.textEnvelope.cborHex, cartId })
+          const cartId = await AotCartDSL.create({buyerAddress, adaDepositTxId: buyerAdaDepositTX.transactionId, assets: reservedItems, contractId})
+          return success({ contractId: contractId, depositTx: buyerAdaDepositTX.textEnvelope.cborHex, cartId })
         } catch (error: any) {
           await this.rollbackSaga(compensatingActions)
           console.error(`error on init AOT contract ${error.message}`)
           return sfailure(error.message)
         }
       }
+
+    async submitSignedContactInteraction(signedTx: string, contractId: string, cartId: string){
+      try {
+        const cart = await AotCartDSL.get(cartId)
+        if(!cart) throw new Error("Could not find cart by id")
+        //TODO: check the client types
+        const submitResult = await this.marloweDSL.submitContractInteraciton(signedTx, contractId, cart.adaDepositTxId)
+      } catch (error: any){
+        console.error(`error on init AOT contract ${error.message}`)
+        return sfailure(error.message)
+      } 
+    }
+
+    async sendReservedAdventurersToBuyer(contractId: string, cartId: string){
+      try {
+        const cart = await AotCartDSL.get(cartId)
+        if(!cart) throw new Error("Could not find cart by id")
+        const tokens = cart.assets.map(token => {return {asset: token, quantity: "1"}})
+        const sellerAOTDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, this.changeAddress, tokens)
+        if (sellerAOTDepositTX.ctype !== "success") throw new Error("Failed to geenrate AOT deposit transaction")
+        const signedTxResult = await this.marloweDSL.signContractInteraction(sellerAOTDepositTX.textEnvelope.cborHex)
+        if (signedTxResult.ctype !== "success") throw new Error("Failed to sign AOT deposit transaction")
+        const submitResult = await this.marloweDSL.submitContractInteraciton(signedTxResult.signedTx, contractId, cart.adaDepositTxId)
+      }
+      catch(error: any){
+        console.error(`error on init AOT contract ${error.message}`)
+        return sfailure(error.message)
+      }
+    }
 
     private async rollbackSaga(actions: CompensatingAction[]){
         actions.reverse().forEach(async action => {

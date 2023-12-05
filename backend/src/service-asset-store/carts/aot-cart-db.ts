@@ -5,15 +5,17 @@ export const cartTableName = "asset_store_aot_carts"
 
 export type CreateAOTCart = {
     buyerAddress: string
-    AdaDepositTxId: string
-    Assets: Token[]
+    adaDepositTxId: string
+    assets: Token[]
+    contractId: string
 }
 
 export class AOTStoreCart extends Model implements CreateAOTCart{
     declare cartId: string
     declare buyerAddress: string
-    declare AdaDepositTxId: string
-    declare Assets: Token[]
+    declare adaDepositTxId: string
+    declare assets: Token[]
+    declare contractId: string
 }
 
 export const aotStoreCartTableAttributes = {
@@ -26,12 +28,16 @@ export const aotStoreCartTableAttributes = {
         type: DataTypes.STRING,
         allowNull: false
     },
-    AdaDepositTxId: {
+    adaDepositTxId: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    Assets: {
+    assets: {
         type: DataTypes.ARRAY(DataTypes.JSONB),
+        allowNull: false
+    },
+    contractId: {
+        type: DataTypes.STRING,
         allowNull: false
     }
 }

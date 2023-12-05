@@ -7,6 +7,6 @@ export interface AssetStoreDSL {
 
     unloadDatabaseModels(): Promise<void>
 
-    initAOTContract(userId: string, buyerAddres: string, quantity: number, logger?: LoggingContext): Promise<SResult<{contractId: string}>>
+    initAOTContract(buyerAddres: string, quantity: number, logger?: LoggingContext): Promise<SResult<{contractId: string}>>
 
 }

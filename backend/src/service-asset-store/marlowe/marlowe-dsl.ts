@@ -91,7 +91,7 @@ export class MarloweDSl {
         return success({} as {textEnvelope: TextEnvelope, transactionId: string})
     }
 
-    async submitContractInteraciton(contractId: string, textEnvelope: TextEnvelope, transactionId: string): Promise<SResult<{TxID: string}>>{
+    async signContractInteraction(cborHex: string): Promise<SResult<{signedTx: string}>>{
         /* import * as wn from "npm:@marlowe.io/wallet/nodejs";
         import * as clientModule from "npm:@marlowe.io/runtime-rest-client";
         import * as w from "npm:@marlowe.io/wallet";
@@ -101,8 +101,12 @@ export class MarloweDSl {
         const BLProjectId = await stringOrError("BLOCKFROST_API_KEY")
         const context = new wn.Context(BLProjectId, "https://cardano-preprod.blockfrost.io/api/v0", "Preprod")
         const wallet = await wn.SingleAddressWallet.Initialise(context, pk)
-        const signedTx = await wallet.signTx(textEnvelope.cborHex)
-        const funClient = clientModule.mkFPTSRestClient(this.webServerURl)
+        const signedTx = await wallet.signTx(cborHex) */
+        return success({} as {signedTx: string})
+    }
+
+    async submitContractInteraciton(signedTx: string, contractId: string, transactionId: string): Promise<SResult<{TxID: string}>>{
+        /* const funClient = clientModule.mkFPTSRestClient(this.webServerURl)
         const submitResponse = await (funClient.contracts.contract.transactions.transaction.put(contractId, transactionId, signedTx))() */
         return success({} as {TxID: string})
     }
