@@ -1,6 +1,7 @@
 import { LoggingContext } from "../tools-tracing"
 import * as models from "./models"
 import * as vm from "./game-vm"
+import { SResult, Unit } from "../tools-utils"
 
 export interface IdleQuestsService {
 
@@ -45,6 +46,8 @@ export interface IdleQuestsService {
     getInnStateForGuests(host: string, logger?: LoggingContext): Promise<GetInnStateForGuestsResult>
 
     getStakingQuestLeaderboard(size: number, start: Date, end?: Date): Promise<models.Leaderboard>
+
+    forceClaimStakingQuestsByQuestId(from: number, to: number): Promise<SResult<Unit>>
 }
 
 export type HealthStatus =

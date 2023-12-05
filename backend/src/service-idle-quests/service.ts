@@ -4,7 +4,7 @@ import { QueryInterface, Sequelize } from "sequelize"
 import { Umzug } from "umzug"
 import { buildMigrator } from "../tools-database"
 import { LoggingContext } from "../tools-tracing"
-import { HealthStatus } from "../tools-utils"
+import { HealthStatus, SResult, Unit } from "../tools-utils"
 import { AcceptEncounterResult, AcceptStakingQuestResult, ClaimEncounterResult, ClaimStakingQuestResult, GetActiveEncountersResult, GetAvailableEncountersResult, GetAvailableStakingQuestsResult, GetInnStateForGuestsResult, GetInventoryResult, GetTakenStakingQuestsResult, IdleQuestsService } from "./service-spec"
 
 import { CharacterDBInfo, CharacterState } from "./state/character-state"
@@ -309,24 +309,27 @@ export class IdleQuestsServiceDsl implements IdleQuestsService {
      * @param from 
      * @param to 
      */
-    async forceClaimStakingQuestsByQuestId(from: number, to: number){
-        const transaction = await this.database.transaction()
-        const oldQuests = await this.takenQuestState.getUnclaimedQuestsByIdRange(from, to)
-        oldQuests.forEach(async quest => {
-            const adventurers = await this.characterState.unsetInChallenge(quest.userId, quest.partyIds, transaction)
-            const missing = quest.partyIds.filter(adventurerId => adventurers.map(a => a.entityId).indexOf(adventurerId) < 0)
-            // Check all adventurers are still in the inventory
-            const outcome: vm.StakingQuestOutcome = missing.length > 0 ? 
-                {ctype: "failure-outcome"} :
-                this.rules.stakingQuest.outcome(quest.availableQuest, adventurers)
+    async forceClaimStakingQuestsByQuestId(from: number, to: number): Promise<SResult<Unit>> {
+        const oldQuests = await this.takenQuestState.getUnclaimedQuestsByIdRange(from, to);
 
-            const now = this.calendar.now()
+        for (const quest of oldQuests) {
+            const adventurers = await this.characterState.unsetInChallenge(quest.userId, quest.partyIds);
+            const missing = quest.partyIds.filter(adventurerId => adventurers.map(a => a.entityId).indexOf(adventurerId) < 0);
+
+            // Check all adventurers are still in the inventory
+            const outcome: vm.StakingQuestOutcome = missing.length > 0 ?
+                { ctype: "failure-outcome" } :
+                this.rules.stakingQuest.outcome(quest.availableQuest, adventurers);
+
+            const now = this.calendar.now();
             if (outcome.ctype == "success-outcome") 
-                await this.assetManagementService.grant(quest.userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() })
+                await this.assetManagementService.grant(quest.userId, { policyId: this.wellKnownPolicies.dragonSilver.policyId, unit: "DragonSilver", quantity: outcome.reward.currency.toString() });
             
-            await this.takenQuestState.claimQuest(quest.takenQuestId, now, outcome, transaction)  
-        })
-        await transaction.commit()
+
+            await this.takenQuestState.claimQuest(quest.takenQuestId, now, outcome);
+        }
+
+        return {ctype: "success"}
     }
 
     /** Plater State */
