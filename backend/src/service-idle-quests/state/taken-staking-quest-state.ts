@@ -120,6 +120,21 @@ export class TakenStakingQuestState {
             .map(([userId, succeededQuests]) => ({userId, succeededQuests}))
     }
 
+    async getUnclaimedQuestsByIdRange(startNumber: number, endNumber: number): Promise<TakenStakingQuest[]> {
+        const unclaimedQuests: TakenStakingQuest[] = []
+      
+        for (let i = startNumber; i <= endNumber; i++) {
+          const questId = `quest-${i}`
+          const quests = await TakenStakingQuestDB.findAll({where: {questId, claimedAt: null}})
+      
+          if (quests.length > 0) {
+            unclaimedQuests.push(...quests.map(makeTakenQuest(this.questRegistry)))
+          }
+        }
+      
+        return unclaimedQuests
+      }
+      
 }
 
 const makeTakenQuest = (questRegistry: StakingQuestRegistry) => (takenQuestDB: ITakenStakingQuestDB): TakenStakingQuest => {
