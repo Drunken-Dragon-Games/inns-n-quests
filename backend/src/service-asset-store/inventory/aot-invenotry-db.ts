@@ -8,6 +8,7 @@ export class AOTStoreAsset extends Model {
     declare assetId: string
     declare state: AssetState
     declare contract: string | null
+    declare tokenName: string
 }
 
 type AssetStateArray = Array<AssetState>
@@ -30,7 +31,12 @@ export const storeAOTTableAttributes = {
     },
     contract: {
         type: DataTypes.STRING,
+        allowNull: true,
+    },
+    tokenName: {
+        type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
     },
 }
 

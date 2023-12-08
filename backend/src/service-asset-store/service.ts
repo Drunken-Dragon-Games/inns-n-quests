@@ -24,6 +24,7 @@ export class AssetStoreService implements AssetStoreDSL {
 
     async unloadDatabaseModels(): Promise<void>{}
 
+    //FIXME: I should propably split this into a funciton to initializes the contract and another one to generate the buyer TX
     async initAOTContract(buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, cartId: string }>> {
         const compensatingActions: CompensatingAction[] = []
         try {
@@ -36,6 +37,7 @@ export class AssetStoreService implements AssetStoreDSL {
           if (signedCreateContractTxResult.ctype !== "success") throw new Error("Failed to sign contract transaction")
           await this.marloweDSL.submitContractTx(contractId, signedCreateContractTxResult.signedTx)
           await this.marloweDSL.awaitContract(contractId)
+          await this.aotInventory.reserveUnder(reservedItems, contractId)
           const adaQuantity = (quantity * this.AOTPrice).toString()
           const buyerAdaDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, buyerAddress, [{asset: ADA, quantity: adaQuantity}])
           if (buyerAdaDepositTX.ctype !== "success") throw new Error("Failed to geenrate ADA deposit transaction")
@@ -47,7 +49,7 @@ export class AssetStoreService implements AssetStoreDSL {
           return sfailure(error.message)
         }
       }
-
+      
     async submitSignedContactInteraction(signedTx: string, contractId: string, cartId: string){
       try {
         const cart = await AotCartDSL.get(cartId)

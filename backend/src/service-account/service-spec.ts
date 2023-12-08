@@ -145,4 +145,8 @@ export type MortalCollectionLockedStateResult
     = {status: "ok", locked: boolean}
     | {status: "invalid", reason: string}
 
+export type InitAotSellResult
+    = {status: "ok", contractId: string, depositTx: string, cartId: string}
+    | {status: "invalid", reason: string}
+
 export type CollectionAssets = { assetRef: string; quantity: string; }[]

@@ -1,4 +1,5 @@
 import { AssetManagementService } from "../service-asset-management"
+import { AssetStoreService } from "../service-asset-store/service"
 import { BlockchainService } from "../service-blockchain/service-spec"
 import { CollectionFilter, CollectionService } from "../service-collection"
 import { GovernanceService } from "../service-governance/service-spec"
@@ -6,11 +7,12 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, InitAotSellResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
+    aotStoreService: AssetStoreService
     blockchainService: BlockchainService
     governanceService: GovernanceService
     collectionService: CollectionService
@@ -22,6 +24,7 @@ export class AccountServiceDsl implements AccountService {
     constructor (
         private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
+        private readonly aotStoreService: AssetStoreService,
         private readonly blockchainService: BlockchainService,
         private readonly governanceService: GovernanceService,
         private readonly collectionService: CollectionService,
@@ -36,6 +39,7 @@ export class AccountServiceDsl implements AccountService {
         const service = new AccountServiceDsl(
             dependencies.identityService,
             dependencies.assetManagementService,
+            dependencies.aotStoreService,
             dependencies.blockchainService,
             dependencies.governanceService,
             dependencies.collectionService,
@@ -317,6 +321,12 @@ export class AccountServiceDsl implements AccountService {
         const result = await this.collectionService.setMortalCollection(userId, assets, logger)
         if (result.ctype !== "success") return {status: "invalid", reason: result.error}
         return {status: "ok"}
+    }
+
+    async initAOTSellContract(buyerAddress: string, quantity: number):Promise<InitAotSellResult>{
+        const buyerAdaDepositTX = await this.aotStoreService.initAOTContract(buyerAddress, quantity)
+        if (buyerAdaDepositTX.ctype !== "success") return {status: "invalid", reason: buyerAdaDepositTX.error}
+        return {status: "ok", contractId: buyerAdaDepositTX.contractId, depositTx: buyerAdaDepositTX.depositTx, cartId: buyerAdaDepositTX.cartId}
     }
 }
 
