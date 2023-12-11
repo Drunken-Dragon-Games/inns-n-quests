@@ -1,28 +1,34 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
 import { Token } from "../models"
 
-export const cartTableName = "asset_store_aot_carts"
+export const ordersTableName = "asset_store_aot_orders"
 
-export type CreateAOTCart = {
+export type CreateAOTOrder = {
+    userId: string
     buyerAddress: string
     adaDepositTxId: string
     assets: Token[]
     contractId: string
 }
 
-export class AOTStoreCart extends Model implements CreateAOTCart{
-    declare cartId: string
+export class AOTStoreOrder extends Model implements CreateAOTOrder{
+    declare orderId: string
+    declare userId: string
     declare buyerAddress: string
     declare adaDepositTxId: string
     declare assets: Token[]
     declare contractId: string
 }
 
-export const aotStoreCartTableAttributes = {
-    cartId: {
+export const aotStoreOrderTableAttributes = {
+    orderId: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
+    },
+    userId: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     buyerAddress: {
         type: DataTypes.STRING,
@@ -43,9 +49,9 @@ export const aotStoreCartTableAttributes = {
 }
 
 export const configureSequelizeModel = (sequelize: Sequelize): void => {
-    AOTStoreCart.init(aotStoreCartTableAttributes, {
+    AOTStoreOrder.init(aotStoreOrderTableAttributes, {
         sequelize,
         modelName: "AOTStoreCart",
-        tableName: cartTableName
+        tableName: ordersTableName
     })
 }

@@ -84,10 +84,11 @@ export const appsToShow: appsToShow[] = [
         loginOnly: true
     },
     {
-        url: "/trade",
-        name: "Trading tools",
+        url: "/store",
+        name: "Adventurer Store",
         icon: "trade",
-        disable: true
+        hoverMessage: "Adventurer Store",
+        disable: false
     },
     {
         url: "/games",

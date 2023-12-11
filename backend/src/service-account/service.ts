@@ -323,10 +323,10 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok"}
     }
 
-    async initAOTSellContract(buyerAddress: string, quantity: number):Promise<InitAotSellResult>{
-        const buyerAdaDepositTX = await this.aotStoreService.initAOTContract(buyerAddress, quantity)
+    async initAOTSellContract(userId: string, buyerAddress: string, quantity: number):Promise<InitAotSellResult>{
+        const buyerAdaDepositTX = await this.aotStoreService.initAOTContract(userId,buyerAddress, quantity)
         if (buyerAdaDepositTX.ctype !== "success") return {status: "invalid", reason: buyerAdaDepositTX.error}
-        return {status: "ok", contractId: buyerAdaDepositTX.contractId, depositTx: buyerAdaDepositTX.depositTx, cartId: buyerAdaDepositTX.cartId}
+        return {status: "ok", contractId: buyerAdaDepositTX.contractId, depositTx: buyerAdaDepositTX.depositTx, orderId: buyerAdaDepositTX.orderId}
     }
 }
 

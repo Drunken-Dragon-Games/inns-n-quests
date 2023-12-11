@@ -1,6 +1,6 @@
 import { LoggingContext } from "../tools-tracing";
 import { SResult, sfailure, success } from "../tools-utils";
-import { AotCartDSL } from "./carts/aot-cart-dsl";
+import { AotOrdersDSL } from "./orders/aot-order-dsl";
 import { AOTInventory } from "./inventory/aot-invenotry-dsl";
 import { MarloweDSl } from "./marlowe/marlowe-dsl";
 import { CreateContractResponse } from "./marlowe/models";
@@ -45,7 +45,7 @@ export class AssetStoreService implements AssetStoreDSL {
   }
 
   //FIXME: I should propably split this into a funciton to initializes the contract and another one to generate the buyer TX
-  async initAOTContract(buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, cartId: string }>> {
+  async initAOTContract(userId: string, buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, orderId: string }>> {
       const compensatingActions: CompensatingAction[] = []
       try {
         const reservedItems = await this.aotInventory.reserveAssets(quantity)
@@ -61,8 +61,8 @@ export class AssetStoreService implements AssetStoreDSL {
         const adaQuantity = (quantity * this.AOTPrice).toString()
         const buyerAdaDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, buyerAddress, [{asset: ADA, quantity: adaQuantity}])
         if (buyerAdaDepositTX.ctype !== "success") throw new Error("Failed to geenrate ADA deposit transaction")
-        const cartId = await AotCartDSL.create({buyerAddress, adaDepositTxId: buyerAdaDepositTX.transactionId, assets: reservedItems, contractId})
-        return success({ contractId: contractId, depositTx: buyerAdaDepositTX.textEnvelope.cborHex, cartId })
+        const orderId = await AotOrdersDSL.create({buyerAddress, userId, adaDepositTxId: buyerAdaDepositTX.transactionId, assets: reservedItems, contractId})
+        return success({ contractId: contractId, depositTx: buyerAdaDepositTX.textEnvelope.cborHex, orderId })
       } catch (error: any) {
         await this.rollbackSaga(compensatingActions)
         console.error(`error on init AOT contract ${error.message}`)
@@ -70,28 +70,28 @@ export class AssetStoreService implements AssetStoreDSL {
       }
     }
     
-  async submitSignedContactInteraction(signedTx: string, contractId: string, cartId: string){
+  async submitSignedContactInteraction(signedTx: string, contractId: string, orderId: string){
     try {
-      const cart = await AotCartDSL.get(cartId)
-      if(!cart) throw new Error("Could not find cart by id")
+      const order = await AotOrdersDSL.get(orderId)
+      if(!order) throw new Error("Could not find order by id")
       //TODO: check the client types
-      const submitResult = await this.marloweDSL.submitContractInteraciton(signedTx, contractId, cart.adaDepositTxId)
+      const submitResult = await this.marloweDSL.submitContractInteraciton(signedTx, contractId, order.adaDepositTxId)
     } catch (error: any){
       console.error(`error on init AOT contract ${error.message}`)
       return sfailure(error.message)
     } 
   }
 
-  async sendReservedAdventurersToBuyer(contractId: string, cartId: string){
+  async sendReservedAdventurersToBuyer(contractId: string, orderId: string){
     try {
-      const cart = await AotCartDSL.get(cartId)
-      if(!cart) throw new Error("Could not find cart by id")
-      const tokens = cart.assets.map(token => {return {asset: token, quantity: "1"}})
+      const order = await AotOrdersDSL.get(orderId)
+      if(!order) throw new Error("Could not find order by id")
+      const tokens = order.assets.map(token => {return {asset: token, quantity: "1"}})
       const sellerAOTDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, this.changeAddress, tokens)
       if (sellerAOTDepositTX.ctype !== "success") throw new Error("Failed to geenrate AOT deposit transaction")
       const signedTxResult = await this.marloweDSL.signContractInteraction(sellerAOTDepositTX.textEnvelope.cborHex)
       if (signedTxResult.ctype !== "success") throw new Error("Failed to sign AOT deposit transaction")
-      const submitResult = await this.marloweDSL.submitContractInteraciton(signedTxResult.signedTx, contractId, cart.adaDepositTxId)
+      const submitResult = await this.marloweDSL.submitContractInteraciton(signedTxResult.signedTx, contractId, order.adaDepositTxId)
     }
     catch(error: any){
       console.error(`error on init AOT contract ${error.message}`)
