@@ -25,6 +25,7 @@ import { GovernanceServiceDsl } from "./service-governance/service"
 import { BlockchainServiceDsl } from "./service-blockchain/service"
 import { CollectionServiceDsl } from "./service-collection"
 import schedule from 'node-schedule'
+import { AssetStoreService } from "./service-asset-store/service"
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -73,6 +74,7 @@ const runServer = async () => {
         password: config.stringOrError("DB_PASSWORD"),
         database: config.stringOrError("DB_DATABASE"),
     })
+    const aotStoreService = await AssetStoreService.loadFromEnv()
     const blockchainService = BlockchainServiceDsl.loadFromEnv()
     const evenstatsService = await EvenstatsServiceDsl.loadFromEnv({ database })
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
@@ -80,7 +82,7 @@ const runServer = async () => {
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService, blockchainService })
     const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry, calendar})
-    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, blockchainService, governanceService,collectionService, wellKnownPolicies })
+    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, aotStoreService, blockchainService, governanceService,collectionService, wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, identityService, assetManagementService, metadataRegistry, collectionService, questsRegistry, wellKnownPolicies })
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService, idleQuestsService, collectionService })
     
