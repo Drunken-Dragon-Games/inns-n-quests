@@ -1,4 +1,5 @@
 import { AssetManagementService } from "../service-asset-management"
+import { SuportedWallet } from "../service-asset-store/models"
 import { AssetStoreService } from "../service-asset-store/service"
 import { BlockchainService } from "../service-blockchain/service-spec"
 import { CollectionFilter, CollectionService } from "../service-collection"
@@ -323,8 +324,8 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok"}
     }
 
-    async initAOTSellContract(userId: string, buyerAddress: string, quantity: number):Promise<InitAotSellResult>{
-        const buyerAdaDepositTX = await this.aotStoreService.initAOTContract(userId,buyerAddress, quantity)
+    async initAOTSellContract(userId: string, browserWallet: SuportedWallet, buyerAddress: string, quantity: number):Promise<InitAotSellResult>{
+        const buyerAdaDepositTX = await this.aotStoreService.initAOTContract(userId, browserWallet, buyerAddress, quantity)
         if (buyerAdaDepositTX.ctype !== "success") return {status: "invalid", reason: buyerAdaDepositTX.error}
         return {status: "ok", contractId: buyerAdaDepositTX.contractId, depositTx: buyerAdaDepositTX.depositTx, orderId: buyerAdaDepositTX.orderId}
     }

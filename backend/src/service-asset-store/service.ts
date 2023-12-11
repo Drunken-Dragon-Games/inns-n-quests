@@ -4,7 +4,7 @@ import { AotOrdersDSL } from "./orders/aot-order-dsl";
 import { AOTInventory } from "./inventory/aot-invenotry-dsl";
 import { MarloweDSl } from "./marlowe/marlowe-dsl";
 import { CreateContractResponse } from "./marlowe/models";
-import { ADA, CompensatingAction, Token } from "./models";
+import { ADA, CompensatingAction, SuportedWallet, Token } from "./models";
 import { AssetStoreDSL } from "./service-spec";
 import dotenv from "dotenv"
 import { config } from "../tools-utils"
@@ -45,7 +45,7 @@ export class AssetStoreService implements AssetStoreDSL {
   }
 
   //FIXME: I should propably split this into a funciton to initializes the contract and another one to generate the buyer TX
-  async initAOTContract(userId: string, buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, orderId: string }>> {
+  async initAOTContract(userId: string, browserWallet: SuportedWallet, buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, orderId: string }>> {
       const compensatingActions: CompensatingAction[] = []
       try {
         const reservedItems = await this.aotInventory.reserveAssets(quantity)
@@ -61,7 +61,7 @@ export class AssetStoreService implements AssetStoreDSL {
         const adaQuantity = (quantity * this.AOTPrice).toString()
         const buyerAdaDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, buyerAddress, [{asset: ADA, quantity: adaQuantity}])
         if (buyerAdaDepositTX.ctype !== "success") throw new Error("Failed to geenrate ADA deposit transaction")
-        const orderId = await AotOrdersDSL.create({buyerAddress, userId, adaDepositTxId: buyerAdaDepositTX.transactionId, assets: reservedItems, contractId})
+        const orderId = await AotOrdersDSL.create({buyerAddress, userId, browserWallet, adaDepositTxId: buyerAdaDepositTX.transactionId, assets: reservedItems, contractId})
         return success({ contractId: contractId, depositTx: buyerAdaDepositTX.textEnvelope.cborHex, orderId })
       } catch (error: any) {
         await this.rollbackSaga(compensatingActions)
@@ -76,6 +76,7 @@ export class AssetStoreService implements AssetStoreDSL {
       if(!order) throw new Error("Could not find order by id")
       //TODO: check the client types
       const submitResult = await this.marloweDSL.submitContractInteraciton(signedTx, contractId, order.adaDepositTxId)
+      await AotOrdersDSL.updateOrder(order.orderId, "transaction_confirmed")
     } catch (error: any){
       console.error(`error on init AOT contract ${error.message}`)
       return sfailure(error.message)
@@ -92,6 +93,7 @@ export class AssetStoreService implements AssetStoreDSL {
       const signedTxResult = await this.marloweDSL.signContractInteraction(sellerAOTDepositTX.textEnvelope.cborHex)
       if (signedTxResult.ctype !== "success") throw new Error("Failed to sign AOT deposit transaction")
       const submitResult = await this.marloweDSL.submitContractInteraciton(signedTxResult.signedTx, contractId, order.adaDepositTxId)
+      await AotOrdersDSL.updateOrder(order.orderId, "order_completed")
     }
     catch(error: any){
       console.error(`error on init AOT contract ${error.message}`)

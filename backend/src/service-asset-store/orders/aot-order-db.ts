@@ -1,5 +1,5 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
-import { Token } from "../models"
+import { OrderState, SuportedWallet, Token } from "../models"
 
 export const ordersTableName = "asset_store_aot_orders"
 
@@ -9,6 +9,7 @@ export type CreateAOTOrder = {
     adaDepositTxId: string
     assets: Token[]
     contractId: string
+    browserWallet: string
 }
 
 export class AOTStoreOrder extends Model implements CreateAOTOrder{
@@ -18,7 +19,12 @@ export class AOTStoreOrder extends Model implements CreateAOTOrder{
     declare adaDepositTxId: string
     declare assets: Token[]
     declare contractId: string
+    declare browserWallet: SuportedWallet
+    declare orderState: OrderState
 }
+
+type OrderStateArray = Array<OrderState>
+const orderStates: OrderStateArray = ["created", "transaction_confirmed","order_completed"]
 
 export const aotStoreOrderTableAttributes = {
     orderId: {
@@ -45,6 +51,19 @@ export const aotStoreOrderTableAttributes = {
     contractId: {
         type: DataTypes.STRING,
         allowNull: false
+    }
+    ,
+    browserWallet: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    orderState: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "created",
+        validate: {
+            isIn: [orderStates]
+        }
     }
 }
 
