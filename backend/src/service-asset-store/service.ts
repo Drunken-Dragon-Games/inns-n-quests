@@ -62,6 +62,7 @@ export class AssetStoreService implements AssetStoreDSL {
         const buyerAdaDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, buyerAddress, [{asset: ADA, quantity: adaQuantity}])
         if (buyerAdaDepositTX.ctype !== "success") throw new Error("Failed to geenrate ADA deposit transaction")
         const orderId = await AotOrdersDSL.create({buyerAddress, userId, browserWallet, adaDepositTxId: buyerAdaDepositTX.transactionId, assets: reservedItems, contractId})
+        //TODO: add more info to complete the TX screen
         return success({ contractId: contractId, depositTx: buyerAdaDepositTX.textEnvelope.cborHex, orderId })
       } catch (error: any) {
         await this.rollbackSaga(compensatingActions)
@@ -99,6 +100,10 @@ export class AssetStoreService implements AssetStoreDSL {
       console.error(`error on init AOT contract ${error.message}`)
       return sfailure(error.message)
     }
+  }
+
+  async getAllUserOrders(userId: string){
+    return AotOrdersDSL.getOrdersForUser(userId)
   }
 
   private async rollbackSaga(actions: CompensatingAction[]){

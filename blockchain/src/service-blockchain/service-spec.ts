@@ -11,6 +11,7 @@ export const blockchainEnpoints: models.Endpoints = {
     "submitTransaction": {path: "/submit-tx", method: "POST"},
     "buildMintTx": {path: "/get-mint-tx", method: "POST"},
     "buildBulkMintTx": {path: "/get-bulk-mint-tx", method: "POST"},
+    "buildAssetSellTx": {path: "/get-sell-tx", method: "POST"}
 }
 
 export interface BlockchainService {
@@ -22,6 +23,8 @@ export interface BlockchainService {
     buildMintTx(address: string, asset: {policyId: string, unit:string}, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}):Promise<models.BuildTxResponse>
 
     buildBulkMintTx(address: string, assetsInfo: {[policyId: string]: {unit:string, quantityToClaim:string}[]}, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<models.BuildTxResponse>
+
+    buildAssetsSellTx(buyerAddress: string, sellerAddress: string, assetsInfo: {policyId: string, publicAssetName: string, amount: number}[], assetsAdaVal: number): Promise<models.BuildTxResponse>
 
     getTxHashFromTransaction(serilizedTransaction: string): Promise<models.TransactionHashReponse>
 

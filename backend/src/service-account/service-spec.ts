@@ -1,4 +1,5 @@
 import { ClaimStatus } from "../service-asset-management"
+import { SuportedWallet } from "../service-asset-store/models"
 import { CollectionFilter, CollectionWithGameData, CollectionWithUIMetada, GetCollectionResult } from "../service-collection"
 import { PublicBallot, StoredBallot, StoredUserBallot, UserBallot } from "../service-governance"
 import { AuthenticationTokens, UserFullInfo } from "../service-identity"
@@ -37,6 +38,7 @@ export interface AccountService {
     lockMortalCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
     getMortalCollectionLockedState(userId: string, logger?: LoggingContext):Promise<MortalCollectionLockedStateResult>
     setMortalCollection(userId: string, assets: CollectionAssets, logger?: LoggingContext): Promise<SyncUserCollectionResult>
+    initAOTSellContract(userId: string, browserWallet: SuportedWallet, buyerAddress: string, quantity: number):Promise<InitAotSellResult>
 }
 
 export type CleanAssociationTxResult 
@@ -146,7 +148,7 @@ export type MortalCollectionLockedStateResult
     | {status: "invalid", reason: string}
 
 export type InitAotSellResult
-    = {status: "ok", contractId: string, depositTx: string, orderId: string}
+    = {status: "ok", contractId: string, buyerAddres: string, depositTx: string, orderId: string}
     | {status: "invalid", reason: string}
 
 export type CollectionAssets = { assetRef: string; quantity: string; }[]
