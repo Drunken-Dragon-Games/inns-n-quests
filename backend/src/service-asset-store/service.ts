@@ -4,23 +4,26 @@ import { AotOrdersDSL } from "./orders/aot-order-dsl";
 import { AOTInventory } from "./inventory/aot-invenotry-dsl";
 import { MarloweDSl } from "./marlowe/marlowe-dsl";
 import { CreateContractResponse } from "./marlowe/models";
-import { ADA, CompensatingAction, SuportedWallet, Token } from "./models";
+import { ADA, CompensatingAction, OrderResponse, SuportedWallet, Token } from "./models";
 import { AssetStoreDSL } from "./service-spec";
 import dotenv from "dotenv"
 import { config } from "../tools-utils"
+import { BlockchainService } from "../service-blockchain/service-spec";
 
 export type AssetStoreServiceConfig = {
-    changeAddress: string,
+    inventoryAddress: string,
     AOTPrice: number,
-    marloweWebServerURl: string,
-    AOTPolicy: string
+    //marloweWebServerURl: string,
+    AOTPolicy: string,
+    blockchainService: BlockchainService
 }
 
 export class AssetStoreService implements AssetStoreDSL {
   constructor(
-      private readonly changeAddress: string,
+      private readonly inventoryAddress: string,
       private readonly AOTPrice: number,
-      private readonly marloweDSL: MarloweDSl,
+      //private readonly marloweDSL: MarloweDSl,
+      private readonly blockchainService: BlockchainService,
       private readonly aotInventory: AOTInventory
       ){}
 
@@ -28,29 +31,78 @@ export class AssetStoreService implements AssetStoreDSL {
 
   async unloadDatabaseModels(): Promise<void>{}
 
-  static async loadFromEnv(): Promise<AssetStoreService> {
+  static async loadFromEnv( blockchainService: BlockchainService): Promise<AssetStoreService> {
     dotenv.config()
     return await AssetStoreService.loadFromConfig(
-        { changeAddress: config.stringOrError("CARDANO_NETWORK")
-        , AOTPrice: config.intOrError("DISCORD_CLIENT_ID")
-        , marloweWebServerURl: config.stringOrElse("IDENTITY_SERVICE_SESSIONS_DURATION", "https://marlowe-runtime-preprod-web.scdev.aws.iohkdev.io")
-        , AOTPolicy: config.stringOrElse("IDENTITY_SERVICE_SESSIONS_DURATION", "e1c1e63f9d0143ebac802eba892f0ca66072d5c74c8cbcb197c8b95f")
-        })
+        { 
+          inventoryAddress: config.stringOrError("CARDANO_NETWORK"), 
+          AOTPrice: config.intOrError("DISCORD_CLIENT_ID"), 
+          AOTPolicy: config.stringOrElse("IDENTITY_SERVICE_SESSIONS_DURATION", "e1c1e63f9d0143ebac802eba892f0ca66072d5c74c8cbcb197c8b95f"), 
+          blockchainService
+        }
+      )
   }
 
   static async loadFromConfig(serviceConfig: AssetStoreServiceConfig): Promise<AssetStoreService>{
-    const marloweDSL = new MarloweDSl(serviceConfig.marloweWebServerURl)
+    //const marloweDSL = new MarloweDSl(serviceConfig.marloweWebServerURl)
     const aotInventory = new AOTInventory(serviceConfig.AOTPolicy)
-    return new AssetStoreService(serviceConfig.changeAddress, serviceConfig.AOTPrice, marloweDSL, aotInventory)
+    return new AssetStoreService(serviceConfig.inventoryAddress, serviceConfig.AOTPrice, serviceConfig.blockchainService, aotInventory)
   }
 
-  //FIXME: I should propably split this into a funciton to initializes the contract and another one to generate the buyer TX
+  async reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string, logger?: LoggingContext): Promise<OrderResponse>{
+    const compensatingActions: CompensatingAction[] = []
+    try {
+      const adaQuantity = quantity * this.AOTPrice
+      const reservedItems = await this.aotInventory.reserveAssets(quantity)
+      compensatingActions.push({ command: "release assets", assets: reservedItems })
+      const assetsInfo = reservedItems.map(token => {return { policyId: token.currency_symbol, publicAssetName: token.token_name, amount: 1}})
+      const sellInfo = await this.blockchainService.buildAssetsSellTx(address, this.inventoryAddress, assetsInfo,adaQuantity)
+      if (sellInfo.status !== "ok") throw new Error("Failed to generate sell transaction")
+      const orderId = await AotOrdersDSL.create({buyerAddress: address, userId, adaDepositTxId: sellInfo.value.txHash, assets: reservedItems})
+      return success({orderId, tx: sellInfo.value.rawTransaction})
+    } 
+    catch (error: any) {
+      await this.rollbackSaga(compensatingActions)
+      logger?.log.error("error on init AOT contract ${error.message}")
+      console.error(`error on init AOT contract ${error.message}`)
+      return sfailure(error.message)
+    }
+  }
+
+  async submitAssetsSellTx(orderId: string, serializedSignedTx: string, logger?: LoggingContext){
+    const orderInfo = await AotOrdersDSL.get(orderId)
+    if (orderInfo == null) 
+			return sfailure("unknown-order")
+    if (orderInfo.orderState == "order_timed_out") 
+			return sfailure("order-timed-out")
+    if (orderInfo.orderState == "order_submition_failed") 
+			return sfailure("order-submition-failed")
+		if (orderInfo.orderState == "order_completed" || orderInfo.orderState == "transaction_submited") 
+			return sfailure("order-already-completed")
+
+    const txHash = await this.blockchainService.getTxHashFromTransaction(serializedSignedTx)
+    if(txHash.status !== "ok") return sfailure(`could not verify TxHash: ${txHash.reason}`)
+		if (txHash.value != orderInfo.adaDepositTxId) return sfailure("corrupted-tx")
+
+    const txIdResponse = await this.blockchainService.submitTransaction(serializedSignedTx)
+   
+		if (txIdResponse.status !== "ok") {
+      await this.aotInventory.releaseReservedAssets(orderInfo.assets)
+      await AotOrdersDSL.updateOrder(orderId, "order_submition_failed")
+      return sfailure(`TX not submitted: ${txIdResponse.reason} `)
+    }
+    AotOrdersDSL.updateOrder(orderId, "transaction_submited")
+		logger?.log.info({ message: "AssetStoreService.submitAssetsSellTx:submitted", orderId: orderInfo.orderId, assets: JSON.stringify(orderInfo.assets) })
+		return success({ txId: txIdResponse.value })
+  }
+
+  /* //FIXME: I should propably split this into a funciton to initializes the contract and another one to generate the buyer TX
   async initAOTContract(userId: string, browserWallet: SuportedWallet, buyerAddress: string, quantity: number, logger?: LoggingContext): Promise<SResult<{ contractId: string, depositTx: string, orderId: string }>> {
       const compensatingActions: CompensatingAction[] = []
       try {
         const reservedItems = await this.aotInventory.reserveAssets(quantity)
         compensatingActions.push({ command: "release assets", assets: reservedItems })
-        const contractInfoResult = await this.marloweDSL.genInitContractTx(buyerAddress, this.changeAddress, reservedItems)
+        const contractInfoResult = await this.marloweDSL.genInitContractTx(buyerAddress, this.inventoryAddress, reservedItems)
         if (contractInfoResult.ctype !== "success") throw new Error("Failed to generate contract transaction")
         const signedCreateContractTxResult = await this.marloweDSL.signCreateContractTx(contractInfoResult.contractInfo.tx.cborHex)
         const contractId = contractInfoResult.contractInfo.contractId
@@ -69,9 +121,9 @@ export class AssetStoreService implements AssetStoreDSL {
         console.error(`error on init AOT contract ${error.message}`)
         return sfailure(error.message)
       }
-    }
+    } */
     
-  async submitSignedContactInteraction(signedTx: string, contractId: string, orderId: string){
+  /* async submitSignedContactInteraction(signedTx: string, contractId: string, orderId: string){
     try {
       const order = await AotOrdersDSL.get(orderId)
       if(!order) throw new Error("Could not find order by id")
@@ -82,14 +134,14 @@ export class AssetStoreService implements AssetStoreDSL {
       console.error(`error on init AOT contract ${error.message}`)
       return sfailure(error.message)
     } 
-  }
+  } */
 
-  async sendReservedAdventurersToBuyer(contractId: string, orderId: string){
+  /* async sendReservedAdventurersToBuyer(contractId: string, orderId: string){
     try {
       const order = await AotOrdersDSL.get(orderId)
       if(!order) throw new Error("Could not find order by id")
       const tokens = order.assets.map(token => {return {asset: token, quantity: "1"}})
-      const sellerAOTDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, this.changeAddress, tokens)
+      const sellerAOTDepositTX = await this.marloweDSL.genDepositIntoContractTX(contractId, this.inventoryAddress, tokens)
       if (sellerAOTDepositTX.ctype !== "success") throw new Error("Failed to geenrate AOT deposit transaction")
       const signedTxResult = await this.marloweDSL.signContractInteraction(sellerAOTDepositTX.textEnvelope.cborHex)
       if (signedTxResult.ctype !== "success") throw new Error("Failed to sign AOT deposit transaction")
@@ -100,7 +152,7 @@ export class AssetStoreService implements AssetStoreDSL {
       console.error(`error on init AOT contract ${error.message}`)
       return sfailure(error.message)
     }
-  }
+  } */
 
   async getAllUserOrders(userId: string){
     return AotOrdersDSL.getOrdersForUser(userId)
@@ -115,9 +167,8 @@ export class AssetStoreService implements AssetStoreDSL {
       switch (rollbackAction.command) {
         case "release assets":
           return this.aotInventory.releaseReservedAssets(rollbackAction.assets)
-        case "retrive assets":
-          //this is like a whole thing
-          return this.marloweDSL.retriveAssetsFromContract()
+        /* case "retrive assets":
+          return this.marloweDSL.retriveAssetsFromContract() */
         default:
           return Promise.resolve()
       }

@@ -11,7 +11,7 @@ export const blockchainEnpoints: models.Endpoints = {
     "submitTransaction": {path: "/submit-tx", method: "POST"},
     "buildMintTx": {path: "/get-mint-tx", method: "POST"},
     "buildBulkMintTx": {path: "/get-bulk-mint-tx", method: "POST"},
-    "buildAssetSellTx": {path: "/get-sell-tx", method: "POST"}
+    "buildAssetsSellTx": {path: "/get-sell-tx", method: "POST"},
 }
 
 export interface BlockchainService {

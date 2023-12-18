@@ -7,8 +7,6 @@ type OrderInfo = {
     buyerAddress: string
     adaDepositTxId: string
     assets: Token[]
-    contractId: string
-    browserWallet: SuportedWallet
     orderState: OrderState
 }
 export class AotOrdersDSL {
@@ -24,8 +22,6 @@ export class AotOrdersDSL {
             buyerAddress: order.buyerAddress,
             adaDepositTxId: order.adaDepositTxId,
             assets: order.assets,
-            contractId: order.contractId,
-            browserWallet: order.browserWallet,
             orderState: order.orderState,
           } 
     }

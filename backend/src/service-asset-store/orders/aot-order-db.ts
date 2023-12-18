@@ -8,8 +8,8 @@ export type CreateAOTOrder = {
     buyerAddress: string
     adaDepositTxId: string
     assets: Token[]
-    contractId: string
-    browserWallet: string
+    //contractId: string
+    //browserWallet: string
 }
 
 export class AOTStoreOrder extends Model implements CreateAOTOrder{
@@ -18,8 +18,8 @@ export class AOTStoreOrder extends Model implements CreateAOTOrder{
     declare buyerAddress: string
     declare adaDepositTxId: string
     declare assets: Token[]
-    declare contractId: string
-    declare browserWallet: SuportedWallet
+    /* declare contractId: string
+    declare browserWallet: SuportedWallet */
     declare orderState: OrderState
 }
 

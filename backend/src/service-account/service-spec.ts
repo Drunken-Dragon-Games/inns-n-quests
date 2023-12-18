@@ -38,7 +38,7 @@ export interface AccountService {
     lockMortalCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
     getMortalCollectionLockedState(userId: string, logger?: LoggingContext):Promise<MortalCollectionLockedStateResult>
     setMortalCollection(userId: string, assets: CollectionAssets, logger?: LoggingContext): Promise<SyncUserCollectionResult>
-    initAOTSellContract(userId: string, browserWallet: SuportedWallet, buyerAddress: string, quantity: number):Promise<InitAotSellResult>
+    orderAOTAssets(userId: string, address: string, quantity: string): Promise<OrderAOTResult>
 }
 
 export type CleanAssociationTxResult 
@@ -152,3 +152,7 @@ export type InitAotSellResult
     | {status: "invalid", reason: string}
 
 export type CollectionAssets = { assetRef: string; quantity: string; }[]
+
+export type OrderAOTResult
+    = { status: "ok", orderId: string, tx: string}
+    | { status: "invalid", reason: string }

@@ -8,7 +8,7 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, InitAotSellResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, InitAotSellResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, OrderAOTResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -324,10 +324,10 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok"}
     }
 
-    async initAOTSellContract(userId: string, browserWallet: SuportedWallet, buyerAddress: string, quantity: number):Promise<InitAotSellResult>{
-        const buyerAdaDepositTX = await this.aotStoreService.initAOTContract(userId, browserWallet, buyerAddress, quantity)
-        if (buyerAdaDepositTX.ctype !== "success") return {status: "invalid", reason: buyerAdaDepositTX.error}
-        return {status: "ok", contractId: buyerAdaDepositTX.contractId, depositTx: buyerAdaDepositTX.depositTx, orderId: buyerAdaDepositTX.orderId}
+    async orderAOTAssets(userId: string, address: string, quantity: string): Promise<OrderAOTResult>{
+        const result = await this.aotStoreService.reserveAndGetAssetsSellTx(address, Number(quantity), userId)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
+        return {status: "ok", orderId: result.orderId, tx: result.tx}
     }
 }
 

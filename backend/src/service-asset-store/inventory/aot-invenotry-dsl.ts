@@ -3,7 +3,7 @@ import { AssetState, Token } from "../models";
 import { AOTStoreAsset } from "./aot-invenotry-db";
 
 export class AOTInventory {
-    constructor(private readonly AOTPolicy: string){}
+    constructor(public readonly AOTPolicy: string){}
 
     /*
     async loadCollection
