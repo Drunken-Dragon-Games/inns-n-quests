@@ -11,33 +11,50 @@ import { config } from "../tools-utils"
 import { BlockchainService } from "../service-blockchain/service-spec";
 import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
 
+import * as aotOrderDB from "./orders/aot-order-db"
+import * as aotInventoryDB from "./inventory/aot-invenotry-db"
+import { QueryInterface, Sequelize } from "sequelize";
+import { Umzug } from "umzug";
+import path from "path";
+import { buildMigrator } from "../tools-database";
+
 export type AssetStoreServiceConfig = {
     inventoryAddress: string,
     AOTPrice: number,
     //marloweWebServerURl: string,
     AOTPolicy: string,
-    blockchainService: BlockchainService,
     txTTL: number,
-    blockfrost: BlockFrostAPI
 }
 
 export type AssetStoreDependencies = {
   blockchainService: BlockchainService, 
-  blockfrost: BlockFrostAPI
+  blockfrost: BlockFrostAPI,
+  database: Sequelize
 }
 
 export class AssetStoreService implements AssetStoreDSL {
+
+  private readonly migrator: Umzug<QueryInterface>
+
   constructor(
       private readonly inventoryAddress: string,
       private readonly AOTPrice: number,
       //private readonly marloweDSL: MarloweDSl,
+      private readonly database: Sequelize,
       private readonly blockchainService: BlockchainService,
       private readonly aotInventory: AOTInventory,
       private readonly txTTL: number,
       private readonly blockfrost: BlockFrostAPI,
-      ){}
+      ){
+        const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
+        this.migrator = buildMigrator(database, migrationsPath)
+      }
 
-  async loadDatabaseModels(): Promise<void>{}
+  async loadDatabaseModels(): Promise<void>{
+    aotOrderDB.configureSequelizeModel(this.database)
+    aotInventoryDB.configureSequelizeModel(this.database)
+    await this.migrator.up()
+  }
 
   async unloadDatabaseModels(): Promise<void>{}
 
@@ -45,27 +62,29 @@ export class AssetStoreService implements AssetStoreDSL {
     dotenv.config()
     return await AssetStoreService.loadFromConfig(
         { 
-          inventoryAddress: config.stringOrError("CARDANO_NETWORK"), 
-          AOTPrice: config.intOrError("DISCORD_CLIENT_ID"), 
-          AOTPolicy: config.stringOrElse("IDENTITY_SERVICE_SESSIONS_DURATION", "e1c1e63f9d0143ebac802eba892f0ca66072d5c74c8cbcb197c8b95f"), 
-          blockchainService: dependencies.blockchainService,
+          inventoryAddress: config.stringOrError("THIOLDEN_INVENTORY_ADDRESS"), 
+          AOTPrice: config.intOrError("THIOLDEN_ADA_PRICE"), 
+          AOTPolicy: config.stringOrElse("POLICY_THIOLDEN", "e1c1e63f9d0143ebac802eba892f0ca66072d5c74c8cbcb197c8b95f"), 
           txTTL: config.intOrElse("ORDER_TX_TTL", 15 * 60),
-          blockfrost: dependencies.blockfrost,
-        }
+        }, dependencies
       )
   }
 
-  static async loadFromConfig(serviceConfig: AssetStoreServiceConfig): Promise<AssetStoreService>{
+  static async loadFromConfig(serviceConfig: AssetStoreServiceConfig, dependencies: AssetStoreDependencies): Promise<AssetStoreService>{
     //const marloweDSL = new MarloweDSl(serviceConfig.marloweWebServerURl)
     const aotInventory = new AOTInventory(serviceConfig.AOTPolicy)
-    return new AssetStoreService(
+    const service = new AssetStoreService(
       serviceConfig.inventoryAddress, 
-      serviceConfig.AOTPrice, 
-      serviceConfig.blockchainService, 
+      serviceConfig.AOTPrice,
+      dependencies.database,
+      dependencies.blockchainService, 
       aotInventory, 
       serviceConfig.txTTL,
-      serviceConfig.blockfrost
+      dependencies.blockfrost
       )
+
+      await service.loadDatabaseModels()
+      return service
   }
 
   async reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string, logger?: LoggingContext): Promise<OrderResponse>{

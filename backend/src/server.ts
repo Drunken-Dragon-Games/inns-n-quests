@@ -75,11 +75,11 @@ const runServer = async () => {
         database: config.stringOrError("DB_DATABASE"),
     })
     const blockchainService = BlockchainServiceDsl.loadFromEnv()
-    const aotStoreService = await AssetStoreService.loadFromEnv({blockchainService, blockfrost})
     const evenstatsService = await EvenstatsServiceDsl.loadFromEnv({ database })
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const governanceService = await GovernanceServiceDsl.loadFromEnv({database})
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
+    const aotStoreService = await AssetStoreService.loadFromEnv({database, blockchainService, blockfrost})
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService, blockchainService })
     const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry, calendar})
     const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, aotStoreService, blockchainService, governanceService,collectionService, wellKnownPolicies })
