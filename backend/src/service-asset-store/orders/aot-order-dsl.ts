@@ -1,3 +1,4 @@
+import { LoggingContext } from "../../tools-tracing";
 import { OrderState, SuportedWallet, Token } from "../models";
 import { AOTStoreOrder, CreateAOTOrder } from "./aot-order-db";
 
@@ -8,6 +9,7 @@ type OrderInfo = {
     adaDepositTxId: string
     assets: Token[]
     orderState: OrderState
+    createdAt: string
 }
 export class AotOrdersDSL {
     static async create (info: CreateAOTOrder){ return (await AOTStoreOrder.create(info)).orderId}
@@ -23,6 +25,7 @@ export class AotOrdersDSL {
             adaDepositTxId: order.adaDepositTxId,
             assets: order.assets,
             orderState: order.orderState,
+            createdAt: order.createdAt
           } 
     }
 
@@ -36,5 +39,28 @@ export class AotOrdersDSL {
     static async getOrdersForUser(userId: string): Promise<OrderInfo[]>{
         const orders = await AOTStoreOrder.findAll({where: {userId: userId}})
         return orders.map(order => ({ ...order.get() }))
+    }
+
+    static async revertStaleOrders(orderTTL: number,logger?: LoggingContext): Promise<Token[]>{
+        const activeOrders = await AOTStoreOrder.findAll({ where: { orderState: "created" }})
+        const staleAssets = []
+        for (const order of activeOrders) {
+			const timePassed = (Date.now() - Date.parse(order.createdAt))
+			if (timePassed > orderTTL*1000) {
+				order.orderState = "order_timed_out"
+                staleAssets.push(...order.assets)
+                await order.save()
+				logger?.log.info({ message: "AotOrdersDSL.revertStaleOrders:timed-out", orderId: order.orderId, userId: order.userId, tx: order.adaDepositTxId })
+			}
+		}
+        return staleAssets
+    }
+
+    static async reverStaleOrder(orderId: string, logger?: LoggingContext): Promise<Token[]>{
+        const order = await AOTStoreOrder.findByPk(orderId)
+        if(!order) return []
+        order.orderState = "order_timed_out"
+        await order.save()
+        return order.assets
     }
 }

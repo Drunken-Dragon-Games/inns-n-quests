@@ -74,8 +74,8 @@ const runServer = async () => {
         password: config.stringOrError("DB_PASSWORD"),
         database: config.stringOrError("DB_DATABASE"),
     })
-    const aotStoreService = await AssetStoreService.loadFromEnv()
     const blockchainService = BlockchainServiceDsl.loadFromEnv()
+    const aotStoreService = await AssetStoreService.loadFromEnv({blockchainService, blockfrost})
     const evenstatsService = await EvenstatsServiceDsl.loadFromEnv({ database })
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const governanceService = await GovernanceServiceDsl.loadFromEnv({database})

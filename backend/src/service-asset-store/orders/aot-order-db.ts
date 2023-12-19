@@ -21,10 +21,11 @@ export class AOTStoreOrder extends Model implements CreateAOTOrder{
     /* declare contractId: string
     declare browserWallet: SuportedWallet */
     declare orderState: OrderState
+    declare createdAt: string
 }
 
 type OrderStateArray = Array<OrderState>
-const orderStates: OrderStateArray = ["created", "transaction_confirmed","order_completed"]
+const orderStates: OrderStateArray = ["created", "order_completed", "order_submition_failed", "order_timed_out", "transaction_submited"]
 
 export const aotStoreOrderTableAttributes = {
     orderId: {

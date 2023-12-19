@@ -9,13 +9,21 @@ import { AssetStoreDSL } from "./service-spec";
 import dotenv from "dotenv"
 import { config } from "../tools-utils"
 import { BlockchainService } from "../service-blockchain/service-spec";
+import { BlockFrostAPI } from "@blockfrost/blockfrost-js";
 
 export type AssetStoreServiceConfig = {
     inventoryAddress: string,
     AOTPrice: number,
     //marloweWebServerURl: string,
     AOTPolicy: string,
-    blockchainService: BlockchainService
+    blockchainService: BlockchainService,
+    txTTL: number,
+    blockfrost: BlockFrostAPI
+}
+
+export type AssetStoreDependencies = {
+  blockchainService: BlockchainService, 
+  blockfrost: BlockFrostAPI
 }
 
 export class AssetStoreService implements AssetStoreDSL {
@@ -24,21 +32,25 @@ export class AssetStoreService implements AssetStoreDSL {
       private readonly AOTPrice: number,
       //private readonly marloweDSL: MarloweDSl,
       private readonly blockchainService: BlockchainService,
-      private readonly aotInventory: AOTInventory
+      private readonly aotInventory: AOTInventory,
+      private readonly txTTL: number,
+      private readonly blockfrost: BlockFrostAPI,
       ){}
 
   async loadDatabaseModels(): Promise<void>{}
 
   async unloadDatabaseModels(): Promise<void>{}
 
-  static async loadFromEnv( blockchainService: BlockchainService): Promise<AssetStoreService> {
+  static async loadFromEnv( dependencies: AssetStoreDependencies): Promise<AssetStoreService> {
     dotenv.config()
     return await AssetStoreService.loadFromConfig(
         { 
           inventoryAddress: config.stringOrError("CARDANO_NETWORK"), 
           AOTPrice: config.intOrError("DISCORD_CLIENT_ID"), 
           AOTPolicy: config.stringOrElse("IDENTITY_SERVICE_SESSIONS_DURATION", "e1c1e63f9d0143ebac802eba892f0ca66072d5c74c8cbcb197c8b95f"), 
-          blockchainService
+          blockchainService: dependencies.blockchainService,
+          txTTL: config.intOrElse("ORDER_TX_TTL", 15 * 60),
+          blockfrost: dependencies.blockfrost,
         }
       )
   }
@@ -46,7 +58,14 @@ export class AssetStoreService implements AssetStoreDSL {
   static async loadFromConfig(serviceConfig: AssetStoreServiceConfig): Promise<AssetStoreService>{
     //const marloweDSL = new MarloweDSl(serviceConfig.marloweWebServerURl)
     const aotInventory = new AOTInventory(serviceConfig.AOTPolicy)
-    return new AssetStoreService(serviceConfig.inventoryAddress, serviceConfig.AOTPrice, serviceConfig.blockchainService, aotInventory)
+    return new AssetStoreService(
+      serviceConfig.inventoryAddress, 
+      serviceConfig.AOTPrice, 
+      serviceConfig.blockchainService, 
+      aotInventory, 
+      serviceConfig.txTTL,
+      serviceConfig.blockfrost
+      )
   }
 
   async reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string, logger?: LoggingContext): Promise<OrderResponse>{
@@ -94,6 +113,33 @@ export class AssetStoreService implements AssetStoreDSL {
     AotOrdersDSL.updateOrder(orderId, "transaction_submited")
 		logger?.log.info({ message: "AssetStoreService.submitAssetsSellTx:submitted", orderId: orderInfo.orderId, assets: JSON.stringify(orderInfo.assets) })
 		return success({ txId: txIdResponse.value })
+  }
+
+  async revertStaleOrders(logger?: LoggingContext): Promise<void>{
+    const staleAssets = await AotOrdersDSL.revertStaleOrders(this.txTTL, logger)
+    await this.aotInventory.releaseReservedAssets(staleAssets)
+  }
+
+  async updateOrderStatus(orderId: string, logger?: LoggingContext){
+    const order = await AotOrdersDSL.get(orderId)
+    if (order == null) return sfailure("unknown-order")
+    const inBlockchain = await (async () => {
+      try { await this.blockfrost.txs(order.adaDepositTxId); return true }
+      catch (_) { return false }
+    })()
+    if (inBlockchain) {
+      AotOrdersDSL.updateOrder(order.orderId, "order_completed")
+      logger?.log.info({ message: "AssetStoreService.updateOrderStatus:confirmed", orderId })
+    }
+    else{
+      const timePassed = (Date.now() - Date.parse(order.createdAt))
+      if (timePassed > this.txTTL*1000) {
+				const staleAssets = await AotOrdersDSL.reverStaleOrder(orderId)
+        await this.aotInventory.releaseReservedAssets(staleAssets)
+				logger?.log.info({ message: "AssetStoreService.updateOrderStatus:timed-out", orderId })
+			}
+    }
+    return success({ status: order.orderState })
   }
 
   /* //FIXME: I should propably split this into a funciton to initializes the contract and another one to generate the buyer TX
