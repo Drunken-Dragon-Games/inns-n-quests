@@ -5,7 +5,7 @@ import { AOTInventory } from "./inventory/aot-invenotry-dsl";
 import { MarloweDSl } from "./marlowe/marlowe-dsl";
 import { CreateContractResponse } from "./marlowe/models";
 import { ADA, CompensatingAction, OrderResponse, SuportedWallet, Token } from "./models";
-import { AssetStoreDSL } from "./service-spec";
+import { AotStoreDSL } from "./service-spec";
 import dotenv from "dotenv"
 import { config } from "../tools-utils"
 import { BlockchainService } from "../service-blockchain/service-spec";
@@ -17,6 +17,7 @@ import { QueryInterface, Sequelize } from "sequelize";
 import { Umzug } from "umzug";
 import path from "path";
 import { buildMigrator } from "../tools-database";
+import { AssetManagementService } from "../service-asset-management";
 
 export type AssetStoreServiceConfig = {
     inventoryAddress: string,
@@ -29,10 +30,11 @@ export type AssetStoreServiceConfig = {
 export type AssetStoreDependencies = {
   blockchainService: BlockchainService, 
   blockfrost: BlockFrostAPI,
-  database: Sequelize
+  database: Sequelize,
+  assetManager: AssetManagementService
 }
 
-export class AssetStoreService implements AssetStoreDSL {
+export class AssetStoreService implements AotStoreDSL {
 
   private readonly migrator: Umzug<QueryInterface>
 
@@ -44,7 +46,7 @@ export class AssetStoreService implements AssetStoreDSL {
       private readonly blockchainService: BlockchainService,
       private readonly aotInventory: AOTInventory,
       private readonly txTTL: number,
-      private readonly blockfrost: BlockFrostAPI,
+      private readonly blockfrost: BlockFrostAPI
       ){
         const migrationsPath: string = path.join(__dirname, "migrations").replace(/\\/g, "/")
         this.migrator = buildMigrator(database, migrationsPath)
@@ -72,6 +74,12 @@ export class AssetStoreService implements AssetStoreDSL {
 
   static async loadFromConfig(serviceConfig: AssetStoreServiceConfig, dependencies: AssetStoreDependencies): Promise<AssetStoreService>{
     //const marloweDSL = new MarloweDSl(serviceConfig.marloweWebServerURl)
+    if(await AOTInventory.isEmpty()) {
+      const inventoryResponse = await dependencies.assetManager.listChainAssetsByAddress([serviceConfig.inventoryAddress], [serviceConfig.AOTPolicy])
+      if(inventoryResponse.status !== "ok") throw new Error("coudl not stock AOT inventory DB, could not get chain assets") 
+      const stock = inventoryResponse.inventory[serviceConfig.AOTPolicy].map(aot => aot.unit)
+      await AOTInventory.stockEmptyInventory(serviceConfig.AOTPolicy, serviceConfig.inventoryAddress, stock)
+    }
     const aotInventory = new AOTInventory(serviceConfig.AOTPolicy)
     const service = new AssetStoreService(
       serviceConfig.inventoryAddress, 

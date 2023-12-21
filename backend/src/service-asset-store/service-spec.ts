@@ -2,7 +2,7 @@ import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
 import { OrderResponse, SuportedWallet } from "./models"
 
-export interface AssetStoreDSL {
+export interface AotStoreDSL {
 
     loadDatabaseModels(): Promise<void>
 

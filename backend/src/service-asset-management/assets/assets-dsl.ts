@@ -65,6 +65,10 @@ export class AssetStoreDsl {
     }
 
     private fetchOnChainAssets = async (account: string, options: Options): Promise<Inventory> => {
+		//CHECKME:
+		//why is this like this?
+		//should it not be?
+		//const count = options.count
 		const count = 100
 		const recurse = async (page: number, acc: Inventory): Promise<Inventory> => {
 			// FIX ME: In case blockfrost throws an exception then return error

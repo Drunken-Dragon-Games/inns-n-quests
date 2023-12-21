@@ -1,13 +1,16 @@
 import { Op } from "sequelize";
 import { AssetState, Token } from "../models";
 import { AOTStoreAsset } from "./aot-invenotry-db";
+import { AssetManagementService } from "../../service-asset-management";
 
 export class AOTInventory {
     constructor(public readonly AOTPolicy: string){}
 
-    /*
-    async loadCollection
-    */
+    static async stockEmptyInventory(AOTPolicy: string, AOTAddress: string, tokenNames: string[]):Promise<void>{
+        const stock = tokenNames.map(aot => {return {tokenName: aot}})
+        await AOTStoreAsset.bulkCreate(stock)
+    }
+    
 
     private async updateAssetState(assets: Token[], newState: AssetState, newContractId?: string | null): Promise<void> {
         try {
@@ -57,5 +60,10 @@ export class AOTInventory {
 
     async markAssetsAsSold(assets: Token[]){
         await this.updateAssetState(assets, 'sold')
+    }
+
+    static async isEmpty(){
+        const idleAssets = await AOTStoreAsset.findAll({where: {state: 'idle'}})
+        return idleAssets.length < 1
     }
 }

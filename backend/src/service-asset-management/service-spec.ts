@@ -12,6 +12,8 @@ export interface AssetManagementService {
 
     list(userId: string, options: { count?: number, page?: number, chain?: boolean , policies?: string[] }, logger?: LoggingContext): Promise<models.ListResponse>
 
+    listChainAssetsByAddress(addresses: string[], policies: string[], logger?: LoggingContext, ): Promise<models.ListResponse>
+    
     grant(userId: string, asset: models.AssetUnit, logger?: LoggingContext): Promise<models.GrantResponse>
 
     grantMany(userId: string, asset: models.AssetUnit[], logger?: LoggingContext): Promise<models.GrantResponse>

@@ -2,7 +2,7 @@ import { DataTypes, Model, Sequelize } from "sequelize"
 import { AssetState } from "../models"
 
 //TODO: review table name
-export const invenotryTableName = "store_aots"
+export const invenotryTableName = "asset_store_AOT_invenotry"
 
 export class AOTStoreAsset extends Model {
     declare assetId: string
