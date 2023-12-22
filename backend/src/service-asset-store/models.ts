@@ -20,3 +20,6 @@ export const ADA: Token = {
 
 export type OrderResponse = SResult<{orderId: string, tx: string}>
 
+export type SubmitResponse = SResult<{txId: string}>
+
+export type OrderStatusResponse = SResult<{status: OrderState}>

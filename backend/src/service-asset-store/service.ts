@@ -4,7 +4,7 @@ import { AotOrdersDSL } from "./orders/aot-order-dsl";
 import { AOTInventory } from "./inventory/aot-invenotry-dsl";
 import { MarloweDSl } from "./marlowe/marlowe-dsl";
 import { CreateContractResponse } from "./marlowe/models";
-import { ADA, CompensatingAction, OrderResponse, SuportedWallet, Token } from "./models";
+import { ADA, CompensatingAction, OrderResponse, OrderStatusResponse, SubmitResponse, SuportedWallet, Token } from "./models";
 import { AotStoreService } from "./service-spec";
 import dotenv from "dotenv"
 import { config } from "../tools-utils"
@@ -120,7 +120,7 @@ export class AssetStoreDSL implements AotStoreService {
     }
   }
 
-  async submitAssetsSellTx(orderId: string, serializedSignedTx: string, logger?: LoggingContext){
+  async submitAssetsSellTx(orderId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitResponse>{
     const orderInfo = await AotOrdersDSL.get(orderId)
     if (orderInfo == null) 
 			return sfailure("unknown-order")
@@ -153,9 +153,10 @@ export class AssetStoreDSL implements AotStoreService {
     return ordersReverted
   }
 
-  async updateOrderStatus(orderId: string, logger?: LoggingContext){
+  async updateOrderStatus(orderId: string, logger?: LoggingContext): Promise<OrderStatusResponse>{
     const order = await AotOrdersDSL.get(orderId)
     if (order == null) return sfailure("unknown-order")
+    if(order.orderState !== "transaction_submited" && order.orderState !== "created") return success({ status: order.orderState })
     const inBlockchain = await (async () => {
       try { await this.blockfrost.txs(order.adaDepositTxId); return true }
       catch (_) { return false }
@@ -163,6 +164,7 @@ export class AssetStoreDSL implements AotStoreService {
     if (inBlockchain) {
       AotOrdersDSL.updateOrder(order.orderId, "order_completed")
       logger?.log.info({ message: "AssetStoreService.updateOrderStatus:confirmed", orderId })
+      return success({ status: "order_completed" })
     }
     else{
       const timePassed = (Date.now() - Date.parse(order.createdAt))
@@ -170,6 +172,7 @@ export class AssetStoreDSL implements AotStoreService {
 				const staleAssets = await AotOrdersDSL.reverStaleOrder(orderId)
         await this.aotInventory.releaseReservedAssets(staleAssets)
 				logger?.log.info({ message: "AssetStoreService.updateOrderStatus:timed-out", orderId })
+        return success({ status: "order_timed_out" })
 			}
     }
     return success({ status: order.orderState })

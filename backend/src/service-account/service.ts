@@ -7,7 +7,7 @@ import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
 import { WellKnownPolicies, onlyPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, OrderAOTResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, CheckOrderStatusResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, OrderAOTResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SubmitOrderAOTResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
@@ -323,10 +323,22 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok"}
     }
 
-    async orderAOTAssets(userId: string, address: string, quantity: string): Promise<OrderAOTResult>{
-        const result = await this.aotStoreService.reserveAndGetAssetsSellTx(address, Number(quantity), userId)
+    async orderAOTAssets(userId: string, address: string, quantity: string, logger?: LoggingContext): Promise<OrderAOTResult>{
+        const result = await this.aotStoreService.reserveAndGetAssetsSellTx(address, Number(quantity), userId, logger)
         if (result.ctype !== "success") return {status: "invalid", reason: result.error}
         return {status: "ok", orderId: result.orderId, tx: result.tx}
+    }
+
+    async submitAOTOrder(orderId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitOrderAOTResult>{
+        const result = await this.aotStoreService.submitAssetsSellTx(orderId, serializedSignedTx, logger)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
+        return {status: "ok", txId: result.txId}
+    }
+
+    async checkAOTOrderStatus(orderId: string, logger?: LoggingContext): Promise<CheckOrderStatusResult>{
+        const result = await this.aotStoreService.updateOrderStatus(orderId, logger)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
+        return {status: "ok", orderStatus: result.status}
     }
 }
 

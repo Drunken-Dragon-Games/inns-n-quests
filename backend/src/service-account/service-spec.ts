@@ -38,7 +38,9 @@ export interface AccountService {
     lockMortalCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
     getMortalCollectionLockedState(userId: string, logger?: LoggingContext):Promise<MortalCollectionLockedStateResult>
     setMortalCollection(userId: string, assets: CollectionAssets, logger?: LoggingContext): Promise<SyncUserCollectionResult>
-    orderAOTAssets(userId: string, address: string, quantity: string): Promise<OrderAOTResult>
+    orderAOTAssets(userId: string, address: string, quantity: string, logger?: LoggingContext): Promise<OrderAOTResult>
+    submitAOTOrder(orderId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitOrderAOTResult>
+    checkAOTOrderStatus(orderId: string, logger?: LoggingContext): Promise<CheckOrderStatusResult>
 }
 
 export type CleanAssociationTxResult 
@@ -155,4 +157,12 @@ export type CollectionAssets = { assetRef: string; quantity: string; }[]
 
 export type OrderAOTResult
     = { status: "ok", orderId: string, tx: string}
+    | { status: "invalid", reason: string }
+
+export type SubmitOrderAOTResult
+    = { status: "ok", txId: string}
+    | { status: "invalid", reason: string }
+
+export type CheckOrderStatusResult
+    = { status: "ok", orderStatus: string}
     | { status: "invalid", reason: string }
