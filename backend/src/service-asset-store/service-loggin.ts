@@ -28,4 +28,9 @@ export class AssetStoreLogging implements AotStoreService {
             serviceLogger?.log.info(`Succesfully reseved assets`)
         return response
     }
+
+    revertStaleOrders(logger?: LoggingContext | undefined): Promise<number> {
+        const serviceLogger = this.withComponent(logger)
+        return this.base.revertStaleOrders(logger)
+    }
 }

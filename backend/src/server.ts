@@ -26,6 +26,7 @@ import { BlockchainServiceDsl } from "./service-blockchain/service"
 import { CollectionServiceDsl } from "./service-collection"
 import schedule from 'node-schedule'
 import { AssetStoreDSL } from "./service-asset-store/service"
+import { AotStoreService } from "./service-asset-store/service-spec"
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
@@ -36,7 +37,7 @@ async function revertStaledClaimsLoop(assetManagementService: AssetManagementSer
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
 
-async function revertStaledOrdersLoop(assetStoreService: AssetStoreDSL, logger: LoggingContext) {
+async function revertStaledOrdersLoop(assetStoreService: AotStoreService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
     const amountReverted = await assetStoreService.revertStaleOrders(logger)
     if (amountReverted > 0)
@@ -106,6 +107,7 @@ const runServer = async () => {
 
     app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
+    revertStaledOrdersLoop(aotStoreService, new LoggingContext({ ctype: "params", component: "aot-store-service" }))
     collectionsAndRewardsLoop(collectionService, new LoggingContext({ ctype: "params", component: "collection-service" }))
 }
 

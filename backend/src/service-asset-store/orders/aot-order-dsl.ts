@@ -52,7 +52,7 @@ export class AotOrdersDSL {
 				order.orderState = "order_timed_out"
                 staleAssets.push(...order.assets)
                 await order.save()
-				logger?.log.info({ message: "AotOrdersDSL.revertStaleOrders:timed-out", orderId: order.orderId, userId: order.userId, tx: order.adaDepositTxId })
+				logger?.log.info({ message: "AotOrdersDSL.revertStaleOrders:timed-out", orderId: order.orderId, userId: order.userId})
 			}
 		}
         return {staleAssets, ordersReverted}
