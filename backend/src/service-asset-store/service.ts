@@ -5,7 +5,7 @@ import { AOTInventory } from "./inventory/aot-invenotry-dsl";
 import { MarloweDSl } from "./marlowe/marlowe-dsl";
 import { CreateContractResponse } from "./marlowe/models";
 import { ADA, CompensatingAction, OrderResponse, SuportedWallet, Token } from "./models";
-import { AotStoreDSL } from "./service-spec";
+import { AotStoreService } from "./service-spec";
 import dotenv from "dotenv"
 import { config } from "../tools-utils"
 import { BlockchainService } from "../service-blockchain/service-spec";
@@ -18,6 +18,8 @@ import { Umzug } from "umzug";
 import path from "path";
 import { buildMigrator } from "../tools-database";
 import { AssetManagementService } from "../service-asset-management";
+import { AssetStoreLogging } from "./service-loggin";
+import { AssetStoreDsl } from "../service-asset-management/assets/assets-dsl";
 
 export type AssetStoreServiceConfig = {
     inventoryAddress: string,
@@ -31,10 +33,10 @@ export type AssetStoreDependencies = {
   blockchainService: BlockchainService, 
   blockfrost: BlockFrostAPI,
   database: Sequelize,
-  assetManager: AssetManagementService
+  assetManagementService: AssetManagementService
 }
 
-export class AssetStoreService implements AotStoreDSL {
+export class AssetStoreDSL implements AotStoreService {
 
   private readonly migrator: Umzug<QueryInterface>
 
@@ -60,9 +62,9 @@ export class AssetStoreService implements AotStoreDSL {
 
   async unloadDatabaseModels(): Promise<void>{}
 
-  static async loadFromEnv( dependencies: AssetStoreDependencies): Promise<AssetStoreService> {
+  static async loadFromEnv( dependencies: AssetStoreDependencies): Promise<AotStoreService> {
     dotenv.config()
-    return await AssetStoreService.loadFromConfig(
+    return await AssetStoreDSL.loadFromConfig(
         { 
           inventoryAddress: config.stringOrError("THIOLDEN_INVENTORY_ADDRESS"), 
           AOTPrice: config.intOrError("THIOLDEN_ADA_PRICE"), 
@@ -72,16 +74,11 @@ export class AssetStoreService implements AotStoreDSL {
       )
   }
 
-  static async loadFromConfig(serviceConfig: AssetStoreServiceConfig, dependencies: AssetStoreDependencies): Promise<AssetStoreService>{
+  static async loadFromConfig(serviceConfig: AssetStoreServiceConfig, dependencies: AssetStoreDependencies): Promise<AotStoreService>{
     //const marloweDSL = new MarloweDSl(serviceConfig.marloweWebServerURl)
-    if(await AOTInventory.isEmpty()) {
-      const inventoryResponse = await dependencies.assetManager.listChainAssetsByAddress([serviceConfig.inventoryAddress], [serviceConfig.AOTPolicy])
-      if(inventoryResponse.status !== "ok") throw new Error("coudl not stock AOT inventory DB, could not get chain assets") 
-      const stock = inventoryResponse.inventory[serviceConfig.AOTPolicy].map(aot => aot.unit)
-      await AOTInventory.stockEmptyInventory(serviceConfig.AOTPolicy, serviceConfig.inventoryAddress, stock)
-    }
+    
     const aotInventory = new AOTInventory(serviceConfig.AOTPolicy)
-    const service = new AssetStoreService(
+    const service = new AssetStoreLogging( new AssetStoreDSL(
       serviceConfig.inventoryAddress, 
       serviceConfig.AOTPrice,
       dependencies.database,
@@ -89,9 +86,17 @@ export class AssetStoreService implements AotStoreDSL {
       aotInventory, 
       serviceConfig.txTTL,
       dependencies.blockfrost
-      )
+      ))
 
       await service.loadDatabaseModels()
+
+      if(await AOTInventory.isEmpty()) {
+        console.log("Stoking empty invenotry for store...")
+        const inventoryResponse = await dependencies.assetManagementService.listChainAssetsByAddress([serviceConfig.inventoryAddress], [serviceConfig.AOTPolicy])
+        if(inventoryResponse.status !== "ok") throw new Error("coudl not stock AOT inventory DB, could not get chain assets") 
+        const stock = inventoryResponse.inventory[serviceConfig.AOTPolicy].map(aot => aot.unit)
+        await AOTInventory.stockInventory(stock)
+      }
       return service
   }
 
@@ -142,9 +147,10 @@ export class AssetStoreService implements AotStoreDSL {
 		return success({ txId: txIdResponse.value })
   }
 
-  async revertStaleOrders(logger?: LoggingContext): Promise<void>{
-    const staleAssets = await AotOrdersDSL.revertStaleOrders(this.txTTL, logger)
+  async revertStaleOrders(logger?: LoggingContext): Promise<number>{
+    const {staleAssets, ordersReverted} = await AotOrdersDSL.revertStaleOrders(this.txTTL, logger)
     await this.aotInventory.releaseReservedAssets(staleAssets)
+    return ordersReverted
   }
 
   async updateOrderStatus(orderId: string, logger?: LoggingContext){

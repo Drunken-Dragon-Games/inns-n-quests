@@ -6,7 +6,7 @@ import { AssetManagementService } from "../../service-asset-management";
 export class AOTInventory {
     constructor(public readonly AOTPolicy: string){}
 
-    static async stockEmptyInventory(AOTPolicy: string, AOTAddress: string, tokenNames: string[]):Promise<void>{
+    static async stockInventory(tokenNames: string[]):Promise<void>{
         const stock = tokenNames.map(aot => {return {tokenName: aot}})
         await AOTStoreAsset.bulkCreate(stock)
     }
@@ -63,7 +63,7 @@ export class AOTInventory {
     }
 
     static async isEmpty(){
-        const idleAssets = await AOTStoreAsset.findAll({where: {state: 'idle'}})
-        return idleAssets.length < 1
+        const count = await AOTStoreAsset.count({ where: { state: 'idle' } })
+        return count < 1
     }
 }

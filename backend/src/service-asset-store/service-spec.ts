@@ -2,7 +2,7 @@ import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
 import { OrderResponse, SuportedWallet } from "./models"
 
-export interface AotStoreDSL {
+export interface AotStoreService {
 
     loadDatabaseModels(): Promise<void>
 
@@ -10,5 +10,5 @@ export interface AotStoreDSL {
 
     //initAOTContract(userId: string, browserWallet: SuportedWallet, buyerAddres: string, quantity: number, logger?: LoggingContext): Promise<SResult<{contractId: string}>>
 
-    reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string): Promise<OrderResponse>
+    reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string, logger?: LoggingContext): Promise<OrderResponse>
 }

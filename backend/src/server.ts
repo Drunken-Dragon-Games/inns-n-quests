@@ -25,15 +25,26 @@ import { GovernanceServiceDsl } from "./service-governance/service"
 import { BlockchainServiceDsl } from "./service-blockchain/service"
 import { CollectionServiceDsl } from "./service-collection"
 import schedule from 'node-schedule'
-import { AssetStoreService } from "./service-asset-store/service"
+import { AssetStoreDSL } from "./service-asset-store/service"
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
     const amountReverted = await assetManagementService.revertStaledClaims(logger)
     if (amountReverted > 0)
         logger.info(`Reverted ${amountReverted} staled claims`)
+    //TODO: revert stale orders
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
+
+async function revertStaledOrdersLoop(assetStoreService: AssetStoreDSL, logger: LoggingContext) {
+    await setTimeout(1000 * 60)
+    const amountReverted = await assetStoreService.revertStaleOrders(logger)
+    if (amountReverted > 0)
+        logger.info(`Reverted ${amountReverted} staled orders`)
+ 
+    await revertStaledOrdersLoop(assetStoreService, logger)
+}
+
 
 async function collectionsAndRewardsLoop(collectionService: CollectionServiceDsl, logger: LoggingContext){
     const dailyRule = new schedule.RecurrenceRule()
@@ -79,8 +90,8 @@ const runServer = async () => {
     const identityService = await IdentityServiceDsl.loadFromEnv({ database })
     const governanceService = await GovernanceServiceDsl.loadFromEnv({database})
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
-    const aotStoreService = await AssetStoreService.loadFromEnv({database, blockchainService, blockfrost})
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService, blockchainService })
+    const aotStoreService = await AssetStoreDSL.loadFromEnv({database, blockchainService, blockfrost, assetManagementService})
     const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry, calendar})
     const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, aotStoreService, blockchainService, governanceService,collectionService, wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, identityService, assetManagementService, metadataRegistry, collectionService, questsRegistry, wellKnownPolicies })

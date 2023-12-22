@@ -71,8 +71,13 @@ export class AssetStoreDsl {
 		//const count = options.count
 		const count = 100
 		const recurse = async (page: number, acc: Inventory): Promise<Inventory> => {
-			// FIX ME: In case blockfrost throws an exception then return error
-			const assets = await this.blockfrost.accountsAddressesAssets(account, { count, page })
+			let assets: {unit: string,quantity: string}[] = []
+			try {assets = await this.blockfrost.accountsAddressesAssets(account, { count, page })}
+			catch {
+				// FIX ME: In case blockfrost throws an exception then return error
+				assets = (await this.blockfrost.addresses(account)).amount
+				return this.filterBlockFrostAssets(assets, acc, options)
+			}
 			if (assets.length == count)
 				return recurse(page + 1, this.filterBlockFrostAssets(assets, acc, options))
 			else 

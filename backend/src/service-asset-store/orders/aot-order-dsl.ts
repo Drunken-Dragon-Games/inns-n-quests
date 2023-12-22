@@ -41,19 +41,21 @@ export class AotOrdersDSL {
         return orders.map(order => ({ ...order.get() }))
     }
 
-    static async revertStaleOrders(orderTTL: number,logger?: LoggingContext): Promise<Token[]>{
+    static async revertStaleOrders(orderTTL: number,logger?: LoggingContext): Promise<{staleAssets: Token[],  ordersReverted: number}>{
         const activeOrders = await AOTStoreOrder.findAll({ where: { orderState: "created" }})
         const staleAssets = []
+        let ordersReverted = 0
         for (const order of activeOrders) {
 			const timePassed = (Date.now() - Date.parse(order.createdAt))
 			if (timePassed > orderTTL*1000) {
+                ordersReverted += 1
 				order.orderState = "order_timed_out"
                 staleAssets.push(...order.assets)
                 await order.save()
 				logger?.log.info({ message: "AotOrdersDSL.revertStaleOrders:timed-out", orderId: order.orderId, userId: order.userId, tx: order.adaDepositTxId })
 			}
 		}
-        return staleAssets
+        return {staleAssets, ordersReverted}
     }
 
     static async reverStaleOrder(orderId: string, logger?: LoggingContext): Promise<Token[]>{

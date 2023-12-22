@@ -1,19 +1,18 @@
 import { AssetManagementService } from "../service-asset-management"
-import { SuportedWallet } from "../service-asset-store/models"
-import { AssetStoreService } from "../service-asset-store/service"
+import { AotStoreService } from "../service-asset-store/service-spec"
 import { BlockchainService } from "../service-blockchain/service-spec"
 import { CollectionFilter, CollectionService } from "../service-collection"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
+import { WellKnownPolicies, onlyPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, InitAotSellResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, OrderAOTResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, OrderAOTResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
-    aotStoreService: AssetStoreService
+    aotStoreService: AotStoreService
     blockchainService: BlockchainService
     governanceService: GovernanceService
     collectionService: CollectionService
@@ -25,7 +24,7 @@ export class AccountServiceDsl implements AccountService {
     constructor (
         private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
-        private readonly aotStoreService: AssetStoreService,
+        private readonly aotStoreService: AotStoreService,
         private readonly blockchainService: BlockchainService,
         private readonly governanceService: GovernanceService,
         private readonly collectionService: CollectionService,
