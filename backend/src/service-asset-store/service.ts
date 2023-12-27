@@ -60,7 +60,9 @@ export class AssetStoreDSL implements AotStoreService {
     await this.migrator.up()
   }
 
-  async unloadDatabaseModels(): Promise<void>{}
+  async unloadDatabaseModels(): Promise<void>{
+    await this.migrator.down()
+  }
 
   static async loadFromEnv( dependencies: AssetStoreDependencies): Promise<AotStoreService> {
     dotenv.config()
@@ -91,7 +93,7 @@ export class AssetStoreDSL implements AotStoreService {
       await service.loadDatabaseModels()
 
       if(await AOTInventory.isEmpty()) {
-        console.log("Stoking empty invenotry for store...")
+        console.log("Stocking empty inventory for asset store...")
         const inventoryResponse = await dependencies.assetManagementService.listChainAssetsByAddress([serviceConfig.inventoryAddress], [serviceConfig.AOTPolicy])
         if(inventoryResponse.status !== "ok") throw new Error("coudl not stock AOT inventory DB, could not get chain assets") 
         const stock = inventoryResponse.inventory[serviceConfig.AOTPolicy].map(aot => aot.unit)
@@ -105,17 +107,18 @@ export class AssetStoreDSL implements AotStoreService {
     try {
       const adaQuantity = quantity * this.AOTPrice
       const reservedItems = await this.aotInventory.reserveAssets(quantity)
-      compensatingActions.push({ command: "release assets", assets: reservedItems })
-      const assetsInfo = reservedItems.map(token => {return { policyId: token.currency_symbol, publicAssetName: token.token_name, amount: 1}})
+      if (reservedItems.ctype !== "success") throw new Error(reservedItems.error)
+      compensatingActions.push({ command: "release assets", assets: reservedItems.tokens })
+      const assetsInfo = reservedItems.tokens.map(token => {return { policyId: token.currency_symbol, publicAssetName: token.token_name, amount: 1}})
       const sellInfo = await this.blockchainService.buildAssetsSellTx(address, this.inventoryAddress, assetsInfo,adaQuantity)
       if (sellInfo.status !== "ok") throw new Error("Failed to generate sell transaction")
-      const orderId = await AotOrdersDSL.create({buyerAddress: address, userId, adaDepositTxId: sellInfo.value.txHash, assets: reservedItems})
+      const orderId = await AotOrdersDSL.create({buyerAddress: address, userId, adaDepositTxId: sellInfo.value.txHash, assets: reservedItems.tokens})
       return success({orderId, tx: sellInfo.value.rawTransaction})
     } 
     catch (error: any) {
       await this.rollbackSaga(compensatingActions)
-      logger?.log.error("error on init AOT contract ${error.message}")
-      console.error(`error on init AOT contract ${error.message}`)
+      logger?.log.error(`error reserving AOT assets ${error.message}`)
+      console.error(`error reserving AOT assets ${error.message}`)
       return sfailure(error.message)
     }
   }

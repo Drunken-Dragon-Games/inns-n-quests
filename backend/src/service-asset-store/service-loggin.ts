@@ -1,5 +1,6 @@
 import { LoggingContext } from "../tools-tracing";
 import { OrderResponse, OrderStatusResponse, SubmitResponse } from "./models";
+import { OrderInfo } from "./orders/aot-order-dsl";
 import { AotStoreService } from "./service-spec";
 
 export class AssetStoreLogging implements AotStoreService {
@@ -54,5 +55,9 @@ export class AssetStoreLogging implements AotStoreService {
     revertStaleOrders(logger?: LoggingContext | undefined): Promise<number> {
         const serviceLogger = this.withComponent(logger)
         return this.base.revertStaleOrders(serviceLogger)
+    }
+
+    getAllUserOrders(userId: string): Promise<OrderInfo[]> {
+        return this.base.getAllUserOrders(userId)
     }
 }

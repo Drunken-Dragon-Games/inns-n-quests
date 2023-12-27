@@ -34,7 +34,7 @@ export const aotStoreOrderTableAttributes = {
         defaultValue: DataTypes.UUIDV4
     },
     userId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false
     },
     buyerAddress: {
@@ -47,15 +47,6 @@ export const aotStoreOrderTableAttributes = {
     },
     assets: {
         type: DataTypes.ARRAY(DataTypes.JSONB),
-        allowNull: false
-    },
-    contractId: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-    ,
-    browserWallet: {
-        type: DataTypes.STRING,
         allowNull: false
     },
     orderState: {
@@ -71,7 +62,7 @@ export const aotStoreOrderTableAttributes = {
 export const configureSequelizeModel = (sequelize: Sequelize): void => {
     AOTStoreOrder.init(aotStoreOrderTableAttributes, {
         sequelize,
-        modelName: "AOTStoreCart",
+        modelName: "AOTStoreOrder",
         tableName: ordersTableName
     })
 }

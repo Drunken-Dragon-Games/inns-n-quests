@@ -20,7 +20,8 @@ export default class AssetManagementServiceMock {
             createAssociationTx: jest.fn(),
             submitAuthTransaction: jest.fn(),
             faucetClaim: jest.fn(),
-            faucetClaimSubmmit: jest.fn()
+            faucetClaimSubmmit: jest.fn(),
+            listChainAssetsByAddress: jest.fn()
         }
     }
     
@@ -32,5 +33,10 @@ export default class AssetManagementServiceMock {
     listAlwaysReturns(response: ListResponse) {
         return jest.spyOn(this.service, "list")
             .mockReturnValue(Promise.resolve(response))
+    }
+
+    listByAddressReturns(response: ListResponse){
+        return jest.spyOn(this.service, "listChainAssetsByAddress")
+            .mockReturnValueOnce(Promise.resolve(response))
     }
 }

@@ -1,6 +1,7 @@
 import { LoggingContext } from "../tools-tracing"
 import { SResult, Unit } from "../tools-utils"
 import { OrderResponse, OrderStatusResponse, SubmitResponse, SuportedWallet } from "./models"
+import { OrderInfo } from "./orders/aot-order-dsl"
 
 export interface AotStoreService {
 
@@ -17,4 +18,6 @@ export interface AotStoreService {
     updateOrderStatus(orderId: string, logger?: LoggingContext): Promise<OrderStatusResponse>
 
     revertStaleOrders(logger?: LoggingContext): Promise<number>
+
+    getAllUserOrders(userId: string): Promise<OrderInfo[]>
 }

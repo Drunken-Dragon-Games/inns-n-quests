@@ -2,7 +2,7 @@ import { LoggingContext } from "../../tools-tracing";
 import { OrderState, SuportedWallet, Token } from "../models";
 import { AOTStoreOrder, CreateAOTOrder } from "./aot-order-db";
 
-type OrderInfo = {
+export type OrderInfo = {
     orderId: string
     userId: string
     buyerAddress: string

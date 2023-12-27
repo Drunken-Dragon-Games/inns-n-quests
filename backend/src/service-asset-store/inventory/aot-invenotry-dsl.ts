@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import { AssetState, Token } from "../models";
 import { AOTStoreAsset } from "./aot-invenotry-db";
 import { AssetManagementService } from "../../service-asset-management";
+import { SResult, failure, sfailure, success } from "../../tools-utils";
 
 export class AOTInventory {
     constructor(public readonly AOTPolicy: string){}
@@ -29,7 +30,7 @@ export class AOTInventory {
         }
     }
 
-    async reserveAssets(quantity: number): Promise<Token[]>{
+    async reserveAssets(quantity: number): Promise<SResult<{tokens: Token[]}>>{
         try {
             const idleAssets = await AOTStoreAsset.findAll({where: {state: 'idle'}})
             if (idleAssets.length < quantity) throw new Error('Not enough idle assets to reserve.')
@@ -43,10 +44,9 @@ export class AOTInventory {
                 })
             }
             await this.updateAssetState(selectedAssets, 'reserved')
-            return selectedAssets
-          } catch (error) {
-            console.error('Error reserving assets:', error)
-            return []
+            return success({tokens: selectedAssets})
+          } catch (error: any) {
+            return sfailure(error.message)
           }
     }
 
