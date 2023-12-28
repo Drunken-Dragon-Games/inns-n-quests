@@ -105,6 +105,7 @@ export class AssetStoreDSL implements AotStoreService {
   async reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string, logger?: LoggingContext): Promise<OrderResponse>{
     const compensatingActions: CompensatingAction[] = []
     try {
+      if (quantity < 1 || !Number.isInteger(quantity)) throw new Error("invalid quantity of adventurers")
       const adaQuantity = quantity * this.AOTPrice
       const reservedItems = await this.aotInventory.reserveAssets(quantity)
       if (reservedItems.ctype !== "success") throw new Error(reservedItems.error)

@@ -34,3 +34,27 @@ export const SimpleDDButton = styled.button`
         border: 1px solid white;
     }
 `
+
+interface ScalableSimpleButtonProps {
+    height?: string;
+    width?: string;
+    fontSize?: string;
+  }
+
+export const ScalableSimpleButton = styled.button<ScalableSimpleButtonProps>`
+  ${MessiriFontFamily}
+  cursor: pointer;
+  border: 1px solid ${colors.dduGold};
+  border-radius: 3px;
+  background-color: ${colors.dduBackground};
+  color: white;
+  padding: 5px 10px;
+  font-weight: bold;
+  height: ${(props) => props.height || 'auto'};
+  width: ${(props) => props.width || 'auto'};
+  font-size: ${(props) => props.fontSize || 'inherit'};
+
+  &:hover {
+    border: 1px solid white;
+  }
+`;
