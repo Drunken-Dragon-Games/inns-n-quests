@@ -46,7 +46,9 @@ const LogoWrapper = styled.div`
     position: relative;
     width: 210px;
     height: 75px;
-
+    margin: 0 auto 0 auto;
+    margin-right: 32%;
+ 
     @media only screen and (max-width: 414px) {
         display: none;
     }

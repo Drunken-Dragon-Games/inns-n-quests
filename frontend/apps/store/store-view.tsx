@@ -4,7 +4,8 @@ import Footer from "../utils/footer/footer"
 import { Provider } from "react-redux"
 import { StoreStore } from "./store-state"
 import styled from "styled-components"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { AotOrderView } from "./order/store-aot-order-view"
 
 const Container = styled.div<{ isMobile: boolean }>`
   width: 100vw;
@@ -12,16 +13,21 @@ const Container = styled.div<{ isMobile: boolean }>`
   margin-left: ${(props) => (props.isMobile ? "15px" : "105px")};
   margin-bottom: 75px;
   min-height: ${(props) => (props.isMobile ? "auto" : "850px")};
-  display: ${(props) => (props.isMobile ? "block" : "grid")};
-  grid-template-columns: ${(props) => (props.isMobile ? "none" : "11vw 1fr")};
+  display: block;
   ${(props) => (props.isMobile ? "padding-top: 16vh;" : "")}
 `;
 
 const StoreComponent = () => {
     const [isMobile, setIsMobile] = useState(false)
+    useEffect(() => {
+      setIsMobile(window.innerWidth <= 768)
+      const handleResize = () => setIsMobile(window.innerWidth <= 768)
+      window.addEventListener("resize", handleResize)
+      return () => {window.removeEventListener("resize", handleResize)}
+    }, [])
     return (
         <Container isMobile={isMobile}>
-            <h1>Store</h1>
+            <AotOrderView/>
         </Container>)
 }
 
