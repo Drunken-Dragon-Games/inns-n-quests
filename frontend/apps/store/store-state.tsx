@@ -12,7 +12,7 @@ export interface StoreState {
 }
 
 const storeInitialState : StoreState = {
-    aotOrderState: {ctype: "idle"}
+    aotOrderState: {ctype: "Idle"}
 }
 
 export const storeState = createSlice({

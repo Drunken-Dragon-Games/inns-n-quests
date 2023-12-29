@@ -2,10 +2,11 @@ import LateralBar from "../utils/laterBar/lateralBar"
 import NavBarApp from "../utils/navBar/navBarApp"
 import Footer from "../utils/footer/footer"
 import { Provider } from "react-redux"
-import { StoreStore } from "./store-state"
+import { StoreState, StoreStore } from "./store-state"
 import styled from "styled-components"
 import { useEffect, useState } from "react"
 import { AotOrderView } from "./order/store-aot-order-view"
+import { useSelector } from "react-redux"
 
 const Container = styled.div<{ isMobile: boolean }>`
   width: 100vw;
@@ -25,9 +26,12 @@ const StoreComponent = () => {
       window.addEventListener("resize", handleResize)
       return () => {window.removeEventListener("resize", handleResize)}
     }, [])
+
+    const state = useSelector((state: StoreState) => state)
+
     return (
         <Container isMobile={isMobile}>
-            <AotOrderView/>
+            <AotOrderView status={state.aotOrderState}/>
         </Container>)
 }
 
