@@ -173,8 +173,35 @@ export const AccountBackend = {
         return result.data
     },
 
-    async orderAOT(address: string, quantity: string){}
+    async orderAOT(address: string, quantity: string, traceId: string): Promise<OrderAOTResult>{
+        const result = await accountRequest("POST", "/store/aot-tx", {address, quantity}, traceId)
+        return result.data
+    },
+
+    async submitAotOrder(orderId: string, serializedSignedTx: string, traceId: string):Promise<SubmitOrderAOTResult>{
+        const result = await accountRequest("POST", "/store/aot-submit", {orderId, serializedSignedTx}, traceId)
+        return result.data
+    },
+
+    async checkAotOrderStatus(orderId: string, traceId: string):Promise<CheckOrderStatusResult>{
+        const result = await accountRequest("POST", "/store/aot-check-status", {orderId}, traceId)
+        return result.data
+    }
 }
+
+export type OrderState = 'created' | 'transaction_submited' | 'order_completed' | 'order_timed_out' | 'order_submition_failed' 
+
+export type CheckOrderStatusResult
+    = { status: "ok", orderStatus: OrderState}
+    | { status: "invalid", reason: string }
+
+export type SubmitOrderAOTResult
+    = { status: "ok", txId: string}
+    | { status: "invalid", reason: string }
+
+export type OrderAOTResult
+    = { status: "ok", orderId: string, tx: string}
+    | { status: "invalid", reason: string }
 
 export type CollectionAssets = { assetRef: string; quantity: string; }[]
 

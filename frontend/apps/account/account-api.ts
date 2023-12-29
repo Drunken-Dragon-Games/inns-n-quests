@@ -58,5 +58,17 @@ export const AccountApi = {
 
     getWallet(supportedWallet: SupportedWallet){
         return AccountTransitions.getWallet(supportedWallet)
+    },
+
+    orderAOT(address: string, quantity: string, traceId: string){
+        return AccountBackend.orderAOT(address, quantity, traceId)
+    },
+
+    submitAotOrder(orderId: string, serializedSignedTx: string, traceId: string){
+        return AccountBackend.submitAotOrder(orderId, serializedSignedTx, traceId)
+    },
+
+    checkAotOrderStatus(orderId: string, traceId: string){
+        return AccountBackend.checkAotOrderStatus(orderId, traceId)
     }
 }

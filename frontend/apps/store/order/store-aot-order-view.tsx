@@ -1,8 +1,7 @@
-import styled from "styled-components"
-import { Section } from "../components/sections"
-import { OswaldFontFamily, colors, ScalableSimpleButton } from "../../common"
 import { useState } from "react"
-import { SupportedWallet } from "../../account"
+import styled from "styled-components"
+import { OswaldFontFamily, ScalableSimpleButton, colors } from "../../common"
+import { Section } from "../components/sections"
 import { storeTranstions } from "../store-transitions"
 
 const AOTOrderContainer = styled.div<{isMobile: boolean}>`
@@ -41,8 +40,6 @@ const ButtonContainer = styled.div`
 export const AotOrderView = () => {
     const [amount, setAmount] = useState<number>(0)
 
-    const handleOrder = (wallet: SupportedWallet) => {}
-
     return (
     <AOTOrderContainer isMobile={false}>
         <Section key="aot-order" title="Adenturers of Theolden Store" colums={1}>
@@ -56,8 +53,8 @@ export const AotOrderView = () => {
 
         <NumberLabel>Method</NumberLabel>
         <ButtonContainer>
-          <ScalableSimpleButton onClick={() => handleOrder("Eternl")} height="40px" width="100px" fontSize="16px">Eternal</ScalableSimpleButton>
-          <ScalableSimpleButton onClick={() => handleOrder("Nami")} height="40px" width="100px" fontSize="16px">Nami</ScalableSimpleButton>
+          <ScalableSimpleButton onClick={() => storeTranstions.orderAOts("Eternl", amount.toString())} height="40px" width="100px" fontSize="16px">Eternal</ScalableSimpleButton>
+          <ScalableSimpleButton onClick={() => storeTranstions.orderAOts("Nami", amount.toString())} height="40px" width="100px" fontSize="16px">Nami</ScalableSimpleButton>
         </ButtonContainer>
         </Section>
     </AOTOrderContainer>) 
