@@ -4,7 +4,6 @@ import { AOTStoreOrder, CreateAOTOrder } from "./aot-order-db";
 
 export type OrderInfo = {
     orderId: string
-    userId: string
     buyerAddress: string
     adaDepositTxId: string
     assets: Token[]
@@ -20,7 +19,6 @@ export class AotOrdersDSL {
         if(!order) return null
         return {
             orderId: order.orderId,
-            userId: order.userId,
             buyerAddress: order.buyerAddress,
             adaDepositTxId: order.adaDepositTxId,
             assets: order.assets,
@@ -36,10 +34,10 @@ export class AotOrdersDSL {
         await order.save()
     }
 
-    static async getOrdersForUser(userId: string): Promise<OrderInfo[]>{
+    /* static async getOrdersForUser(userId: string): Promise<OrderInfo[]>{
         const orders = await AOTStoreOrder.findAll({where: {userId: userId}})
         return orders.map(order => ({ ...order.get() }))
-    }
+    } */
 
     static async revertStaleOrders(orderTTL: number,logger?: LoggingContext): Promise<{staleAssets: Token[],  ordersReverted: number}>{
         const activeOrders = await AOTStoreOrder.findAll({ where: { orderState: "created" }})
@@ -52,7 +50,7 @@ export class AotOrdersDSL {
 				order.orderState = "order_timed_out"
                 staleAssets.push(...order.assets)
                 await order.save()
-				logger?.log.info({ message: "AotOrdersDSL.revertStaleOrders:timed-out", orderId: order.orderId, userId: order.userId})
+				logger?.log.info({ message: "AotOrdersDSL.revertStaleOrders:timed-out", orderId: order.orderId})
 			}
 		}
         return {staleAssets, ordersReverted}

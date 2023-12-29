@@ -11,7 +11,7 @@ export interface AotStoreService {
 
     //initAOTContract(userId: string, browserWallet: SuportedWallet, buyerAddres: string, quantity: number, logger?: LoggingContext): Promise<SResult<{contractId: string}>>
 
-    reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string, logger?: LoggingContext): Promise<OrderResponse>
+    reserveAndGetAssetsSellTx(address: string, quantity: number, logger?: LoggingContext): Promise<OrderResponse>
 
     submitAssetsSellTx(orderId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitResponse>
 
@@ -19,5 +19,5 @@ export interface AotStoreService {
 
     revertStaleOrders(logger?: LoggingContext): Promise<number>
 
-    getAllUserOrders(userId: string): Promise<OrderInfo[]>
+    //getAllUserOrders(userId: string): Promise<OrderInfo[]>
 }

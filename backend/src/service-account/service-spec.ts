@@ -38,7 +38,7 @@ export interface AccountService {
     lockMortalCollection(userId: string, logger?: LoggingContext):Promise<SyncUserCollectionResult>
     getMortalCollectionLockedState(userId: string, logger?: LoggingContext):Promise<MortalCollectionLockedStateResult>
     setMortalCollection(userId: string, assets: CollectionAssets, logger?: LoggingContext): Promise<SyncUserCollectionResult>
-    orderAOTAssets(userId: string, address: string, quantity: string, logger?: LoggingContext): Promise<OrderAOTResult>
+    orderAOTAssets(address: string, quantity: string, logger?: LoggingContext): Promise<OrderAOTResult>
     submitAOTOrder(orderId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitOrderAOTResult>
     checkAOTOrderStatus(orderId: string, logger?: LoggingContext): Promise<CheckOrderStatusResult>
 }

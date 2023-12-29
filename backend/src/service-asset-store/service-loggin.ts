@@ -19,10 +19,10 @@ export class AssetStoreLogging implements AotStoreService {
         await this.base.unloadDatabaseModels() 
     }
 
-    async reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string, logger?: LoggingContext): Promise<OrderResponse> {
+    async reserveAndGetAssetsSellTx(address: string, quantity: number, logger?: LoggingContext): Promise<OrderResponse> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`Reserving ${quantity} assets for address ${address}`)
-        const response = await this.base.reserveAndGetAssetsSellTx(address, quantity, userId, logger)
+        const response = await this.base.reserveAndGetAssetsSellTx(address, quantity, logger)
         if(response.ctype !== "success")
             serviceLogger?.log.error(`Could not reserve assets becaouse: ${response.error}`)
         else
@@ -57,7 +57,7 @@ export class AssetStoreLogging implements AotStoreService {
         return this.base.revertStaleOrders(serviceLogger)
     }
 
-    getAllUserOrders(userId: string): Promise<OrderInfo[]> {
+    /* getAllUserOrders(userId: string): Promise<OrderInfo[]> {
         return this.base.getAllUserOrders(userId)
-    }
+    } */
 }

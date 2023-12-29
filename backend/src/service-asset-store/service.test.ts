@@ -7,7 +7,6 @@ import { AotStoreService } from "./service-spec"
 import { testPolicies } from "../tools-utils/mocks/test-policies"
 
 let service: AotStoreService
-const userId = "b1925e1f-6820-4155-a917-fa68873906a7"
 
 const databaseConfig: DBConfig = 
     { host: "localhost"
@@ -47,12 +46,10 @@ afterEach(async () => {
 })
 
 test("reserve and get asset Transaction", async () => {
-    const transactionResult = await service.reserveAndGetAssetsSellTx("", 2, userId)
+    const transactionResult = await service.reserveAndGetAssetsSellTx("", 2)
     if (transactionResult.ctype !== "success") fail(`test to reserve assets failed because: ${transactionResult.error}`)
     expect(transactionResult.tx).toEqual("transaction")
-    const orders = await service.getAllUserOrders(userId)
-    expect(orders[0].orderId).toEqual(transactionResult.orderId)
-    const assets = orders[0].assets
-    const transactionResult2 = await service.reserveAndGetAssetsSellTx("", 2, userId)
+    
+    const transactionResult2 = await service.reserveAndGetAssetsSellTx("", 2)
     if (transactionResult2.ctype !== "failure") fail(`test to reserve assets failed becouse coudl reserve beyond limit`)
 })

@@ -323,8 +323,8 @@ export class AccountServiceDsl implements AccountService {
         return {status: "ok"}
     }
 
-    async orderAOTAssets(userId: string, address: string, quantity: string, logger?: LoggingContext): Promise<OrderAOTResult>{
-        const result = await this.aotStoreService.reserveAndGetAssetsSellTx(address, Number(quantity), userId, logger)
+    async orderAOTAssets(address: string, quantity: string, logger?: LoggingContext): Promise<OrderAOTResult>{
+        const result = await this.aotStoreService.reserveAndGetAssetsSellTx(address, Number(quantity), logger)
         if (result.ctype !== "success") return {status: "invalid", reason: result.error}
         return {status: "ok", orderId: result.orderId, tx: result.tx}
     }

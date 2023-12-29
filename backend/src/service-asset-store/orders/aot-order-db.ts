@@ -4,7 +4,6 @@ import { OrderState, SuportedWallet, Token } from "../models"
 export const ordersTableName = "asset_store_aot_orders"
 
 export type CreateAOTOrder = {
-    userId: string
     buyerAddress: string
     adaDepositTxId: string
     assets: Token[]
@@ -14,7 +13,6 @@ export type CreateAOTOrder = {
 
 export class AOTStoreOrder extends Model implements CreateAOTOrder{
     declare orderId: string
-    declare userId: string
     declare buyerAddress: string
     declare adaDepositTxId: string
     declare assets: Token[]
@@ -32,10 +30,6 @@ export const aotStoreOrderTableAttributes = {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
-    },
-    userId: {
-        type: DataTypes.UUID,
-        allowNull: false
     },
     buyerAddress: {
         type: DataTypes.STRING,

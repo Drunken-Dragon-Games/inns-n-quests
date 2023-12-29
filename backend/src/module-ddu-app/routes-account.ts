@@ -292,20 +292,19 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
     
     router.post("/store/aot-tx", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
-        const userId: string = request.auth!.userId
         const {address, quantity} = request.body
-        const result = await accountService.orderAOTAssets(userId, address, quantity, logger)
+        const result = await accountService.orderAOTAssets(address, quantity, logger)
         response.status(200).json(result)
     }))
 
-    router.post("/store/aot-submit", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+    router.post("/store/aot-submit", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const {orderId, serializedSignedTx} = request.body
         const result = await accountService.submitAOTOrder(orderId, serializedSignedTx, logger)
         response.status(200).json(result)
     }))
 
-    router.post("/store/aot-check-status", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+    router.post("/store/aot-check-status", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const {orderId} = request.body
         const result = await accountService.checkAOTOrderStatus(orderId, logger)

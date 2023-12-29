@@ -102,7 +102,7 @@ export class AssetStoreDSL implements AotStoreService {
       return service
   }
 
-  async reserveAndGetAssetsSellTx(address: string, quantity: number, userId: string, logger?: LoggingContext): Promise<OrderResponse>{
+  async reserveAndGetAssetsSellTx(address: string, quantity: number, logger?: LoggingContext): Promise<OrderResponse>{
     const compensatingActions: CompensatingAction[] = []
     try {
       if (quantity < 1 || !Number.isInteger(quantity)) throw new Error("invalid quantity of adventurers")
@@ -113,7 +113,7 @@ export class AssetStoreDSL implements AotStoreService {
       const assetsInfo = reservedItems.tokens.map(token => {return { policyId: token.currency_symbol, publicAssetName: token.token_name, amount: 1}})
       const sellInfo = await this.blockchainService.buildAssetsSellTx(address, this.inventoryAddress, assetsInfo,adaQuantity)
       if (sellInfo.status !== "ok") throw new Error("Failed to generate sell transaction")
-      const orderId = await AotOrdersDSL.create({buyerAddress: address, userId, adaDepositTxId: sellInfo.value.txHash, assets: reservedItems.tokens})
+      const orderId = await AotOrdersDSL.create({buyerAddress: address, adaDepositTxId: sellInfo.value.txHash, assets: reservedItems.tokens})
       return success({orderId, tx: sellInfo.value.rawTransaction})
     } 
     catch (error: any) {
@@ -240,9 +240,9 @@ export class AssetStoreDSL implements AotStoreService {
     }
   } */
 
-  async getAllUserOrders(userId: string){
+  /* async getAllUserOrders(userId: string){
     return AotOrdersDSL.getOrdersForUser(userId)
-  }
+  } */
 
   private async rollbackSaga(actions: CompensatingAction[]){
       actions.reverse().forEach(async action => {
