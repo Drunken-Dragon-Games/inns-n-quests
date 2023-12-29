@@ -1,5 +1,11 @@
 import { Action, configureStore, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
 
+export type StoreStoreState = 
+    ReturnType<typeof StoreStore.getState> // Includes Thunks Middleware
+
+export type StoreThunk<ReturnType = void> = 
+    ThunkAction<ReturnType, StoreStoreState, unknown, Action<string>>
+
 export interface StoreState {
 
 }

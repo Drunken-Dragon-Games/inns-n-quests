@@ -290,7 +290,7 @@ export const accountRoutes = (accountService: AccountService, kilia?: KiliaBotSe
         response.status(200).json(result)
     }))
     
-    router.post("/store/aot-tx", jwtMiddleware, requestCatchError(async (request: Request, response: Response) => {
+    router.post("/store/aot-tx", requestCatchError(async (request: Request, response: Response) => {
         const logger = baseLogger.trace(request)
         const userId: string = request.auth!.userId
         const {address, quantity} = request.body

@@ -3,6 +3,7 @@ import { Section } from "../components/sections"
 import { OswaldFontFamily, colors, ScalableSimpleButton } from "../../common"
 import { useState } from "react"
 import { SupportedWallet } from "../../account"
+import { storeTranstions } from "../store-transitions"
 
 const AOTOrderContainer = styled.div<{isMobile: boolean}>`
   padding-right: ${(p)=>p.isMobile? "15px": "8vw"};

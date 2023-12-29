@@ -171,7 +171,9 @@ export const AccountBackend = {
         if (process.env["NEXT_PUBLIC_ENVIROMENT"] !== "development") return {status: "invalid", reason: "Not allowed"}
         const result = await accountRequestWRefresh("POST", "/assets/claim/faucet-sign-and-submit", {serializedSignedTx},traceId)
         return result.data
-    }
+    },
+
+    async orderAOT(address: string, quantity: string){}
 }
 
 export type CollectionAssets = { assetRef: string; quantity: string; }[]
