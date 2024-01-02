@@ -209,9 +209,8 @@ export class AccountServiceDsl implements AccountService {
         }
        
        const assetInfo: { [policyId: string]: { unit: string, quantityToClaim: string }[] } = {
-            [this.wellKnownPolicies.pixelTiles.policyId] : generateRandomAssets("PixelTile", 62, 12, 3),
-            [this.wellKnownPolicies.grandMasterAdventurers.policyId]: generateRandomAssets("GrandmasterAdventurer", 10000, 12),
-            [this.wellKnownPolicies.adventurersOfThiolden.policyId]: generateRandomAssets("AdventurerOfThiolden", 25000, 16)
+            [this.wellKnownPolicies.pixelTiles.policyId] : generateRandomAssets("PixelTile", 62, 12, 20),
+            [this.wellKnownPolicies.grandMasterAdventurers.policyId]: generateRandomAssets("GrandmasterAdventurer", 10000, 20)
        }
  
        const claimResponse = await this.assetManagementService.faucetClaim(address, assetInfo)
