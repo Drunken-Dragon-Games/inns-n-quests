@@ -7,7 +7,7 @@
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
     "gen:test-registry": "ts-node src/gen-test-registry.ts",
-    "db:start": "docker run -d -e POSTGRES_DB=service_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -p 5432:5432 --health-cmd pg_isready --health-interval 1s --health-timeout 5s --health-retries 30 postgres:14.5",
+    "db:start": "docker run -d --name innsDB -e POSTGRES_DB=service_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -p 5432:5432 --health-cmd pg_isready --health-interval 1s --health-timeout 5s --health-retries 30 postgres:14.5",
     "ls": "ls",
     "proxy:start": "docker run --name nginx-proxy -p 80:80 -v $(pwd)/nginx.dev.conf:/etc/nginx/nginx.conf:ro -d nginx:1.13",
     "proxy:start:win": "docker run --name nginx-proxy -p 80:80 -v %cd%/nginx.dev.conf:/etc/nginx/nginx.conf:ro -d nginx:1.13",

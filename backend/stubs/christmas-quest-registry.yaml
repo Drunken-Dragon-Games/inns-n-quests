@@ -131,7 +131,7 @@ requirements:
 questId: "quest-39"
 name: "Hilanas Wood Store"
 location: "Auristar"
-description: "Hilana requires a new outhouse to store all of her lumber. Send your strongs adventurer to help construct the outbuilding."
+description: "Hilana needs a new outhouse to store all of her lumber. Send your strongest adventurer to help with the construction."
 requirements: 
 - aps: [15,8,8]
 
@@ -180,7 +180,7 @@ requirements:
 questId: "quest-44"
 name: "Seasons Greetings"
 location: "Auristar"
-description: "Tis the season, and you adventurer are required to travel to the woods and find the best tree to bring to the tavern for decorating. You will need all the strength you have as damn, these spruces tress are heavy!"
+description: "Tis the season, and your adventurers are required to travel to the woods and find the best tree to bring to the tavern for decorating. You will need all the strength you have as damn, these spruce trees are heavy!"
 requirements: 
 - aps: [20,20,20]
 

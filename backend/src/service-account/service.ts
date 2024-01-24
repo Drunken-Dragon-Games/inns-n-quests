@@ -1,16 +1,18 @@
 import { AssetManagementService } from "../service-asset-management"
+import { AotStoreService } from "../service-asset-store/service-spec"
 import { BlockchainService } from "../service-blockchain/service-spec"
 import { CollectionFilter, CollectionService } from "../service-collection"
 import { GovernanceService } from "../service-governance/service-spec"
 import * as idenser from "../service-identity"
 import { AuthenticationTokens, IdentityService } from "../service-identity"
-import { onlyPolicies, WellKnownPolicies } from "../tools-assets/registry-policies"
+import { WellKnownPolicies, onlyPolicies } from "../tools-assets/registry-policies"
 import { LoggingContext } from "../tools-tracing"
-import { AccountService, AuthenticateResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
+import { AccountService, AuthenticateResult, CheckOrderStatusResult, ClaimDragonSilverResult, ClaimFaucetResult, ClaimSignAndSubbmitResult, ClaimStatusResult, CleanAssociationTxResult, CollectionAssets, CreateAssociationTxResult, DeassociationResult, GetAssociationNonceResult, GetDragonSilverClaimsResult, GetUserInventoryResult, ModifyMortalCollectionResult, MortalCollectionLockedStateResult, OpenBallotsResult, OpenUserBallotsResult, OrderAOTResult, PublicBallotResult, SignOutResult, SubmitAssociationSignatureResult, SubmitOrderAOTResult, SyncUserCollectionResult, UserBallotResult, UserCollectionWithMetadataResult, UserMortalCollectionResult, UserWeeklyPasiveEarnings, VoteResult } from "./service-spec"
 
 export interface AccountServiceDependencies {
     identityService: IdentityService
     assetManagementService: AssetManagementService
+    aotStoreService: AotStoreService
     blockchainService: BlockchainService
     governanceService: GovernanceService
     collectionService: CollectionService
@@ -22,6 +24,7 @@ export class AccountServiceDsl implements AccountService {
     constructor (
         private readonly identityService: IdentityService,
         private readonly assetManagementService: AssetManagementService,
+        private readonly aotStoreService: AotStoreService,
         private readonly blockchainService: BlockchainService,
         private readonly governanceService: GovernanceService,
         private readonly collectionService: CollectionService,
@@ -36,6 +39,7 @@ export class AccountServiceDsl implements AccountService {
         const service = new AccountServiceDsl(
             dependencies.identityService,
             dependencies.assetManagementService,
+            dependencies.aotStoreService,
             dependencies.blockchainService,
             dependencies.governanceService,
             dependencies.collectionService,
@@ -205,9 +209,8 @@ export class AccountServiceDsl implements AccountService {
         }
        
        const assetInfo: { [policyId: string]: { unit: string, quantityToClaim: string }[] } = {
-            [this.wellKnownPolicies.pixelTiles.policyId] : generateRandomAssets("PixelTile", 62, 12, 3),
-            [this.wellKnownPolicies.grandMasterAdventurers.policyId]: generateRandomAssets("GrandmasterAdventurer", 10000, 12),
-            [this.wellKnownPolicies.adventurersOfThiolden.policyId]: generateRandomAssets("AdventurerOfThiolden", 25000, 16)
+            [this.wellKnownPolicies.pixelTiles.policyId] : generateRandomAssets("PixelTile", 62, 12, 20),
+            [this.wellKnownPolicies.grandMasterAdventurers.policyId]: generateRandomAssets("GrandmasterAdventurer", 10000, 20)
        }
  
        const claimResponse = await this.assetManagementService.faucetClaim(address, assetInfo)
@@ -317,6 +320,24 @@ export class AccountServiceDsl implements AccountService {
         const result = await this.collectionService.setMortalCollection(userId, assets, logger)
         if (result.ctype !== "success") return {status: "invalid", reason: result.error}
         return {status: "ok"}
+    }
+
+    async orderAOTAssets(address: string, quantity: string, logger?: LoggingContext): Promise<OrderAOTResult>{
+        const result = await this.aotStoreService.reserveAndGetAssetsSellTx(address, Number(quantity), logger)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
+        return {status: "ok", orderId: result.orderId, tx: result.tx}
+    }
+
+    async submitAOTOrder(orderId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitOrderAOTResult>{
+        const result = await this.aotStoreService.submitAssetsSellTx(orderId, serializedSignedTx, logger)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
+        return {status: "ok", txId: result.txId}
+    }
+
+    async checkAOTOrderStatus(orderId: string, logger?: LoggingContext): Promise<CheckOrderStatusResult>{
+        const result = await this.aotStoreService.updateOrderStatus(orderId, logger)
+        if (result.ctype !== "success") return {status: "invalid", reason: result.error}
+        return {status: "ok", orderStatus: result.status}
     }
 }
 

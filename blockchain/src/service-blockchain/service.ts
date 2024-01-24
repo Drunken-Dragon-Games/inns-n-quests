@@ -1,5 +1,5 @@
 import { TransactionDSL } from "./lucid-dsl/dsl.ts";
-import { BuildTxResponse, HealthStatus, SubmitTransactionReponse, TransactionHashReponse } from "./models.ts";
+import { BuildOrderSellResponse, BuildTxResponse, HealthStatus, SubmitTransactionReponse, TransactionHashReponse } from "./models.ts";
 import { BlockchainService } from "./service-spec.ts";
 
 export type BlockchainServiceConfig = {
@@ -24,6 +24,10 @@ export class BlockchainServiceDsl implements BlockchainService {
     
     async buildBulkMintTx(address: string, assetsInfo: {[policyId: string]: {unit:string, quantityToClaim:string}[]}): Promise<BuildTxResponse> {
         return await this.transactionDSL.buildBulkMintTx(address, assetsInfo)
+    }
+
+    async buildAssetsSellTx(buyerAddress: string, sellerAddress: string, assetsInfo: {policyId: string, publicAssetName: string, amount: number}[], assetsAdaVal: number, orderId: string): Promise<BuildOrderSellResponse>{
+        return await this.transactionDSL.buildAssetsSellTx(buyerAddress, sellerAddress, assetsInfo, assetsAdaVal, orderId)
     }
 
     async getTxHashFromTransaction(serilizedTransaction: string): Promise<TransactionHashReponse> {

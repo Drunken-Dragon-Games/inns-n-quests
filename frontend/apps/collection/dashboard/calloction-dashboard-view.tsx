@@ -102,30 +102,30 @@ export const DashboardView = ({ status, artType, collectionItems, mortalLocked, 
       <ConfirmationSection title ={confirmationTitle} message={confirmationMessage} handleConfirmation={handleConfirmLock} handleCancel={handleCancelLock} disabled={mortalLocked}/>
       </>:
       <Section title="Dashboard" colums={isMobile ? 2 : 1}>
-            <OpenInnButtonContainer>
-                <GamesButton game="inns" url={gamesButtonSection.quests} toolTip="My Inn" />
-            </OpenInnButtonContainer>
-            <Button action={() => collectionTransitions.syncCollection()} size="regular" disabled={isSyncing}> Sync </Button>
-            <Button action={() => collectionTransitions.flipDisplayArtType()} size="regular">
-                {artType == "miniature" ? "Splash Art" : "Miniature"} 
-            </Button>
-            <Button action={() => handleLockClick()} size="regular" disabled={mortalLocked}>
-                {mortalLocked ? "Locked" : "Lock"}
-            </Button>
-            <DashboardMessage>{`Earning Per Week`}</DashboardMessage>
-            <DashboardMessage><img src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver_toClaim.svg" alt="DS Logo"/> {`${weeklyEranings}`}</DashboardMessage>
-            {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" && !isMobile?
-            <>
-            <h2 style={{ color: 'white' }}>{`Grant is ${status.ctype}`}</h2>
-            <Button action={() => collectionTransitions.grantTestCollection("Nami")} size="small">
-                Faucet Nami
-            </Button>
-            <Button action={() => collectionTransitions.grantTestCollection("Eternl")} size="small">
-                Faucet Eternl
-            </Button>
-            </>
-            : <></>
-        }
+          <OpenInnButtonContainer>
+              <GamesButton game="inns" url={gamesButtonSection.quests} toolTip="My Inn" />
+          </OpenInnButtonContainer>
+          <Button action={() => collectionTransitions.syncCollection()} size="regular" disabled={isSyncing}> Sync </Button>
+          <Button action={() => collectionTransitions.flipDisplayArtType()} size="regular">
+              {artType == "miniature" ? "Splash Art" : "Miniature"} 
+          </Button>
+          <Button action={() => handleLockClick()} size="regular" disabled={mortalLocked}>
+              {mortalLocked ? "Locked" : "Lock"}
+          </Button>
+          <DashboardMessage>{`Earning Per Week`}</DashboardMessage>
+          <DashboardMessage><img src="https://d1f9hywwzs4bxo.cloudfront.net/modules/ddu-app/navbar_main/icons/dragon_silver_toClaim.svg" alt="DS Logo"/> {`${weeklyEranings}`}</DashboardMessage>
+          {process.env["NEXT_PUBLIC_ENVIROMENT"] === "development" && !isMobile?
+          <>
+          <h2 style={{ color: 'white' }}>{`Grant is ${status.ctype}`}</h2>
+          <Button action={() => collectionTransitions.grantTestCollection("Nami")} size="small">
+              Faucet Nami
+          </Button>
+          <Button action={() => collectionTransitions.grantTestCollection("Eternl")} size="small">
+              Faucet Eternl
+          </Button>
+          </>
+          : <></>
+          }
     </Section>
     }
     </DashboardContainer>

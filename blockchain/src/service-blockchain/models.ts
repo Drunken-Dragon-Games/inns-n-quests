@@ -25,6 +25,14 @@ export type HealthStatus = Resolution<"">
 
 export type BuildTxResponse = Resolution<CardanoTransactionInfo>
 
+export type OrderTxInfo = {
+  adaDeposit: CardanoTransactionInfo,
+  assetsDeposit: CardanoTransactionInfo,
+  adaRefound: CardanoTransactionInfo
+}
+
+export type BuildOrderSellResponse = Resolution<OrderTxInfo>
+
 export type TransactionHashReponse = Resolution<string>
 
 export type SubmitTransactionReponse = Resolution<string>

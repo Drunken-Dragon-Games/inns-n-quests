@@ -1,7 +1,8 @@
-import { Lucid } from "../../deps.ts"
-import { SecureSigningService } from "../../service-secure-signing/service-spec.ts"
-import { Resolution, fail, succeed } from "../../utypes.ts"
-import { CardanoTransactionInfo, SubmitTransactionReponse, TransactionHashReponse } from "../models.ts"
+import { Lucid } from "../../deps.ts";
+import { FlexibleTxBuilder } from "../../module-txbuilder/dsl.ts";
+import { SecureSigningService } from "../../service-secure-signing/service-spec.ts";
+import { fail, succeed } from "../../utypes.ts";
+import { BuildOrderSellResponse, BuildTxResponse, SubmitTransactionReponse, TransactionHashReponse } from "../models.ts";
 
 //TODO: hanlde this as an env variable
 const validityRange = 1000 * 60 * 10
@@ -12,7 +13,7 @@ export class TransactionDSL {
                 private secureSigningService: SecureSigningService
     ){}
 
-    async buildSelfTx (address: string): Promise<Resolution<CardanoTransactionInfo>> {
+    async buildSelfTx (address: string): Promise<BuildTxResponse> {
         try{
             const lucidInstance = await this.lucidFactory()
             lucidInstance.selectWalletFrom({ address })
@@ -30,7 +31,7 @@ export class TransactionDSL {
         }
     }
 
-    async buildMintTx(address: string, asset: {policyId: string, unit:string}, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<Resolution<CardanoTransactionInfo>> {
+    async buildMintTx(address: string, asset: {policyId: string, unit:string}, quantityToClaim:string, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<BuildTxResponse> {
         try {
             const policyResponse = this.secureSigningService.policy(asset.policyId)
             if (policyResponse.status !== "ok") return {status: "invalid", reason: `Could not build Tx because: ${policyResponse.reason}`}
@@ -61,7 +62,57 @@ export class TransactionDSL {
         }
     }
 
-    async buildBulkMintTx(address: string, assetsInfo: {[policyId: string]: {unit:string, quantityToClaim:string}[]}): Promise<Resolution<CardanoTransactionInfo>>{
+    async buildAssetsSellTx(buyerAddress: string, sellerAddress: string, assetsInfo: {policyId: string, publicAssetName: string, amount: number}[], assetsAdaVal: number, orderId: string): Promise<BuildOrderSellResponse>{ 
+        const buyerInstance = await this.lucidFactory()
+        buyerInstance.selectWalletFrom({ address: buyerAddress })
+        
+        const sellerInstance = await this.lucidFactory()
+        sellerInstance.selectWalletFrom({ address: sellerAddress })
+
+        const assets: Lucid.Assets = assetsInfo.reduce((acc, assetInfo) => {
+            const unit = `${assetInfo.policyId}${Lucid.fromText(assetInfo.publicAssetName)}`
+            acc[unit] = BigInt(assetInfo.amount)
+            return acc
+        }, {} as Lucid.Assets)
+
+        const lovelace:Lucid.Assets = {lovelace: BigInt(assetsAdaVal * 1000000)}     
+        
+        const adaTx = await buyerInstance.newTx()
+                    .payToAddress( sellerAddress, lovelace)
+                    .validTo(Date.now() + validityRange)
+                    .attachMetadata(133722, { "dd-tx-type": "asset-sell-payment" })
+                    .attachMetadata(133711, { "orderId": orderId })
+                    .complete()
+
+        const assetsTx = await sellerInstance.newTx()
+                    .payToAddress(buyerAddress, assets)
+                    .validTo(Date.now() + (validityRange * 2))
+                    .attachMetadata(133722, { "dd-tx-type": "asset-sell-deposit" })
+                    .attachMetadata(133711, { "orderId": orderId })
+                    .complete()
+
+        const refoundTx = await sellerInstance.newTx()
+                    .payToAddress(buyerAddress, lovelace)
+                    .validTo(Date.now() + (validityRange * 3))
+                    .attachMetadata(133722, { "dd-tx-type": "asset-sell-refound" })
+                    .attachMetadata(133711, { "orderId": orderId })
+                    .complete()
+
+        const assetsSignedTransaction = await this.secureSigningService.signMultiplePolicies(Array.from(new Set(assetsInfo.map(assetInfo => assetInfo.policyId))), assetsTx.toString())
+        if (assetsSignedTransaction.status !== "ok") return {status: "invalid", reason: `Could not build mint Tx because: ${assetsSignedTransaction.reason}`}
+        
+        const refoundSignedTransaction = await this.secureSigningService.signMultiplePolicies(Array.from(new Set(assetsInfo.map(assetInfo => assetInfo.policyId))), refoundTx.toString())
+        if (refoundSignedTransaction.status !== "ok") return {status: "invalid", reason: `Could not build mint Tx because: ${refoundSignedTransaction.reason}`}
+
+
+        return succeed({
+            adaDeposit: {rawTransaction: adaTx.toString(), txHash: adaTx.toHash()},
+            assetsDeposit: {rawTransaction: assetsSignedTransaction.value, txHash: assetsTx.toHash()},
+            adaRefound: {rawTransaction: refoundSignedTransaction.value, txHash: refoundTx.toHash()}
+        })
+    }
+
+    async buildBulkMintTx(address: string, assetsInfo: {[policyId: string]: {unit:string, quantityToClaim:string}[]}): Promise<BuildTxResponse>{
         const lucidInstance = await this.lucidFactory();
         lucidInstance.selectWalletFrom({ address });
         const mintRedeemer = Lucid.Data.to(new Lucid.Constr(0, []));

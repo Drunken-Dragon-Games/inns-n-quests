@@ -31,6 +31,12 @@ export const blockchainRoutes = (blockchainService: BlockchainService) => {
         generateHttpResponse(txInfo, response)
     }))
 
+    router.post(blockchainEnpoints.buildAssetsSellTx.path,requestCatchError(async (request: Request, response: Response) => {
+        const {buyerAddress, sellerAddress, assetsInfo, assetsAdaVal} = request.body
+        const txInfo = await blockchainService.buildAssetsSellTx(buyerAddress, sellerAddress, assetsInfo, assetsAdaVal)
+        generateHttpResponse(txInfo, response)
+    }))
+
     router.post(blockchainEnpoints.getTxHashFromTransaction.path, requestCatchError(async (request: Request, response: Response) => {
         const {serilizedTransaction} = request.body
         const txHash = await blockchainService.getTxHashFromTransaction(serilizedTransaction)

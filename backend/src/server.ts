@@ -25,14 +25,27 @@ import { GovernanceServiceDsl } from "./service-governance/service"
 import { BlockchainServiceDsl } from "./service-blockchain/service"
 import { CollectionServiceDsl } from "./service-collection"
 import schedule from 'node-schedule'
+import { AssetStoreDSL } from "./service-asset-store/service"
+import { AotStoreService } from "./service-asset-store/service-spec"
 
 async function revertStaledClaimsLoop(assetManagementService: AssetManagementService, logger: LoggingContext) {
     await setTimeout(1000 * 60)
     const amountReverted = await assetManagementService.revertStaledClaims(logger)
     if (amountReverted > 0)
         logger.info(`Reverted ${amountReverted} staled claims`)
+    //TODO: revert stale orders
     await revertStaledClaimsLoop(assetManagementService, logger)
 }
+
+async function revertStaledOrdersLoop(assetStoreService: AotStoreService, logger: LoggingContext) {
+    await setTimeout(1000 * 60)
+    const amountReverted = await assetStoreService.revertStaleOrders(logger)
+    if (amountReverted > 0)
+        logger.info(`Reverted ${amountReverted} staled orders`)
+ 
+    await revertStaledOrdersLoop(assetStoreService, logger)
+}
+
 
 async function collectionsAndRewardsLoop(collectionService: CollectionServiceDsl, logger: LoggingContext){
     const dailyRule = new schedule.RecurrenceRule()
@@ -79,8 +92,9 @@ const runServer = async () => {
     const governanceService = await GovernanceServiceDsl.loadFromEnv({database})
     const secureSigningService = await SecureSigningServiceDsl.loadFromEnv("{{ENCRYPTION_SALT}}")
     const assetManagementService = await AssetManagementServiceDsl.loadFromEnv({ database, blockfrost, identityService, secureSigningService, blockchainService })
+    const aotStoreService = await AssetStoreDSL.loadFromEnv({database, blockchainService, blockfrost, assetManagementService})
     const collectionService = await CollectionServiceDsl.loadFromEnv({database, assetManagementService, identityService, wellKnownPolicies, metadataRegistry, calendar})
-    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, blockchainService, governanceService,collectionService, wellKnownPolicies })
+    const accountService = await AccountServiceDsl.loadFromEnv({ identityService, assetManagementService, aotStoreService, blockchainService, governanceService,collectionService, wellKnownPolicies })
     const idleQuestsService = await IdleQuestsServiceDsl.loadFromEnv({ randomSeed, calendar, database, evenstatsService, identityService, assetManagementService, metadataRegistry, collectionService, questsRegistry, wellKnownPolicies })
     const kiliaBotService = await KiliaBotServiceDsl.loadFromEnv({ database, evenstatsService, identityService, governanceService, idleQuestsService, collectionService })
     
@@ -93,6 +107,7 @@ const runServer = async () => {
 
     app.listen(PORT, () => console.log(`Server running on PORT ${PORT}...`))
     revertStaledClaimsLoop(assetManagementService, new LoggingContext({ ctype: "params", component: "asset-management-service" }))
+    revertStaledOrdersLoop(aotStoreService, new LoggingContext({ ctype: "params", component: "aot-store-service" }))
     collectionsAndRewardsLoop(collectionService, new LoggingContext({ ctype: "params", component: "collection-service" }))
 }
 

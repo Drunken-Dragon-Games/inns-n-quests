@@ -34,6 +34,13 @@ export class AssetManagementServiceLogging implements AssetManagementService {
         return response
     }
 
+    async listChainAssetsByAddress(addresses: string[], policies: string[], logger?: LoggingContext): Promise<models.ListResponse> {
+        const serviceLogger = this.withComponent(logger)
+        const response = await this.base.listChainAssetsByAddress(addresses, policies, serviceLogger)
+        serviceLogger?.log.info(`listing assets for addresses ${addresses}, result was ${response.status}`)
+        return response
+    }
+
     async grant(userId: string, asset: { unit: string, policyId: string, quantity: string }, logger?: LoggingContext): Promise<models.GrantResponse> {
         const serviceLogger = this.withComponent(logger)
         serviceLogger?.log.info(`granting assets to user ${userId}`, { asset })
