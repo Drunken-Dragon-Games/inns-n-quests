@@ -26,7 +26,7 @@ const HomeContent = (): JSX.Element => {
             <HomePageComponent>
                 {userInfo ? <>
                     <DashboardView userInfo={userInfo} /> 
-                    <BuySlimeSection />
+                    {/* <BuySlimeSection /> */}
                     <CollectionsSection />
                     <DeadQueenSection />
                 </> : <>
@@ -35,7 +35,7 @@ const HomeContent = (): JSX.Element => {
                     {/* <RoadMapSection/> */}
                     <TavernSection />
                     <IdleQuestsSection />
-                    <BuySlimeSection />
+                    {/* <BuySlimeSection /> */}
                     <CollectionsSection />
                     <DeadQueenSection />
                 </> }
