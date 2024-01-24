@@ -1,29 +1,46 @@
 import { DataTypes, Model, Sequelize } from "sequelize"
-import { OrderState, SuportedWallet, Token } from "../models"
+import { OrderState, RefoundState, SuportedWallet, Token } from "../models"
+import { CardanoTransactionInfo } from "../../service-blockchain/models"
 
 export const ordersTableName = "asset_store_aot_orders"
 
 export type CreateAOTOrder = {
     buyerAddress: string
-    adaDepositTxId: string
-    assets: Token[]
-    //contractId: string
-    //browserWallet: string
 }
 
 export class AOTStoreOrder extends Model implements CreateAOTOrder{
     declare orderId: string
     declare buyerAddress: string
-    declare adaDepositTxId: string
-    declare assets: Token[]
-    /* declare contractId: string
-    declare browserWallet: SuportedWallet */
+    declare adaDepositTx: CardanoTransactionInfo | null
+    declare assetsDepositTx: CardanoTransactionInfo | null
+    declare refoundTx: CardanoTransactionInfo | null
+    declare assets: Token[] | null
     declare orderState: OrderState
     declare createdAt: string
+    declare refoundState: RefoundState
 }
 
 type OrderStateArray = Array<OrderState>
-const orderStates: OrderStateArray = ["created", "order_completed", "order_submition_failed", "order_timed_out", "transaction_submited"]
+const orderStates: OrderStateArray = [
+    'empty' , 
+    'intialized' , 
+    'ada_deposit_submited' , 
+    'ada_deposit_failed' , 
+    'ada_deposit_timedOut' , 
+    'assets_deposit_submited' , 
+    'assets_deposit_failed' , 
+    'assets_deposit_timedOut', 
+    'order_completed'
+]
+
+const refoundStatesArray: RefoundState[] = [
+    'completed' ,
+    'failed' ,
+    'submited',
+    'timedout' ,
+    'initialized' ,
+    'none'
+]
 
 export const aotStoreOrderTableAttributes = {
     orderId: {
@@ -35,20 +52,37 @@ export const aotStoreOrderTableAttributes = {
         type: DataTypes.STRING,
         allowNull: false
     },
-    adaDepositTxId: {
-        type: DataTypes.STRING,
-        allowNull: false
+    adaDepositTx: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    },
+    assetsDepositTx: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    },
+    refoundTx: {
+        type: DataTypes.JSONB,
+        allowNull: true
     },
     assets: {
         type: DataTypes.ARRAY(DataTypes.JSONB),
-        allowNull: false
+        allowNull: true
     },
     orderState: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: "created",
+        defaultValue: "empty",
         validate: {
             isIn: [orderStates]
+        }
+    }
+    ,
+    refoundState: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "none",
+        validate: {
+            isIn: [refoundStatesArray]
         }
     }
 }

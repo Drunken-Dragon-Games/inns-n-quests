@@ -107,14 +107,14 @@ export class AssetStoreDSL implements AotStoreService {
     try {
       if (quantity < 1 || !Number.isInteger(quantity)) throw new Error("invalid quantity of adventurers")
       const adaQuantity = quantity * this.AOTPrice
-      const reservedItems = await this.aotInventory.reserveAssets(quantity)
+      const orderId = await AotOrdersDSL.create({buyerAddress: address})
+      const reservedItems = await this.aotInventory.reserveAssets(quantity, orderId)
       if (reservedItems.ctype !== "success") throw new Error(reservedItems.error)
       compensatingActions.push({ command: "release assets", assets: reservedItems.tokens })
       const assetsInfo = reservedItems.tokens.map(token => {return { policyId: token.currency_symbol, publicAssetName: token.token_name, amount: 1}})
-      const sellInfo = await this.blockchainService.buildAssetsSellTx(address, this.inventoryAddress, assetsInfo,adaQuantity)
+      const sellInfo = await this.blockchainService.buildAssetsSellTx(address, this.inventoryAddress, assetsInfo,adaQuantity, orderId)
       if (sellInfo.status !== "ok") throw new Error("Failed to generate sell transaction")
-      const orderId = await AotOrdersDSL.create({buyerAddress: address, adaDepositTxId: sellInfo.value.txHash, assets: reservedItems.tokens})
-      return success({orderId, tx: sellInfo.value.rawTransaction})
+      return success({orderId, tx: sellInfo.value.adaDeposit.rawTransaction})
     } 
     catch (error: any) {
       await this.rollbackSaga(compensatingActions)
@@ -126,29 +126,103 @@ export class AssetStoreDSL implements AotStoreService {
 
   async submitAssetsSellTx(orderId: string, serializedSignedTx: string, logger?: LoggingContext): Promise<SubmitResponse>{
     const orderInfo = await AotOrdersDSL.get(orderId)
-    if (orderInfo == null) 
+    if (orderInfo == null || orderInfo.orderState == "empty") 
 			return sfailure("unknown-order")
-    if (orderInfo.orderState == "order_timed_out") 
-			return sfailure("order-timed-out")
-    if (orderInfo.orderState == "order_submition_failed") 
-			return sfailure("order-submition-failed")
-		if (orderInfo.orderState == "order_completed" || orderInfo.orderState == "transaction_submited") 
+    if (
+      orderInfo.orderState == "ada_deposit_failed" 
+    || orderInfo.orderState == "ada_deposit_timedOut" 
+    || orderInfo.orderState == "assets_deposit_failed" 
+    || orderInfo.orderState == "assets_deposit_timedOut"
+    )  
+			return sfailure(orderInfo.orderState)
+		if (orderInfo.orderState == "order_completed") 
 			return sfailure("order-already-completed")
+    if(orderInfo.orderState == "ada_deposit_submited" || orderInfo.orderState == "assets_deposit_submited")
+      return sfailure(`Something odd is happening, please contact the developers about order ${orderId}`)
+    if(!orderInfo.adaDepositTx || !orderInfo.assetsDepositTx || !orderInfo.refoundTx || !orderInfo.assets) return sfailure("incomplete-order")
 
     const txHash = await this.blockchainService.getTxHashFromTransaction(serializedSignedTx)
     if(txHash.status !== "ok") return sfailure(`could not verify TxHash: ${txHash.reason}`)
-		if (txHash.value != orderInfo.adaDepositTxId) return sfailure("corrupted-tx")
+		if (txHash.value != orderInfo.adaDepositTx.txHash) return sfailure("corrupted-tx")
 
     const txIdResponse = await this.blockchainService.submitTransaction(serializedSignedTx)
    
 		if (txIdResponse.status !== "ok") {
       await this.aotInventory.releaseReservedAssets(orderInfo.assets)
-      await AotOrdersDSL.updateOrder(orderId, "order_submition_failed")
+      await AotOrdersDSL.updateOrder(orderId, "ada_deposit_failed")
       return sfailure(`TX not submitted: ${txIdResponse.reason} `)
     }
-    AotOrdersDSL.updateOrder(orderId, "transaction_submited")
+    AotOrdersDSL.updateOrder(orderId, "ada_deposit_submited")
 		logger?.log.info({ message: "AssetStoreService.submitAssetsSellTx:submitted", orderId: orderInfo.orderId, assets: JSON.stringify(orderInfo.assets) })
+    this.sendAdventurers(orderId)
 		return success({ txId: txIdResponse.value })
+  }
+
+  async sendAdventurers(orderId: string){
+    const orderInfo = await AotOrdersDSL.get(orderId)
+    if (orderInfo == null ) return sfailure("unknown-order")
+    if (orderInfo.orderState !== "ada_deposit_submited") return sfailure("invalid-order-state")
+    if(!orderInfo.adaDepositTx || !orderInfo.assetsDepositTx || !orderInfo.refoundTx || !orderInfo.assets) return sfailure("incomplete-order")
+
+    const isInBlockchain = async (txId:string) => {
+        try { await this.blockfrost.txs(txId); return true }
+        catch (_) { return false }
+      }
+
+    const adaTimeout = async () => {
+      await this.aotInventory.releaseReservedAssets(orderInfo.assets as Token[])
+        await AotOrdersDSL.updateOrder(orderId, "ada_deposit_timedOut")
+        return sfailure(`ada TX not submitted: ada_deposit_timedOut `)
+    }
+    
+
+    const submitAdventurersTx = async () => {
+
+      const refoundAda = async (reason: "assets_deposit_timedOut" | "assets_deposit_failed") => {
+        //TODO: make kilia do an error anouncment
+        await this.aotInventory.releaseReservedAssets(orderInfo.assets as Token[])
+        const refoundTxIdResponse = await this.blockchainService.submitTransaction(orderInfo.refoundTx!.rawTransaction)
+        if(refoundTxIdResponse.status !== "ok"){
+          await AotOrdersDSL.updateOrder(orderId, reason, "failed")
+          //TODO: make kilia make an anaouncemt
+        }
+        else{
+          await AotOrdersDSL.updateOrder(orderId, reason, "submited")
+          const waitForRefound = async () => {
+            const inBlockchain = await isInBlockchain(orderInfo.refoundTx!.txHash)
+            if(inBlockchain) await AotOrdersDSL.updateOrder(orderId, orderInfo.orderState, "completed")
+            else if((Date.now() - Date.parse(orderInfo.createdAt)) > this.txTTL*1000*3) (()=>{})()//TODO: send error with kilia
+            else setTimeout(waitForRefound, 5000)
+          }
+
+          setTimeout(waitForRefound, 5000)
+        }
+        
+        return sfailure(`assets TX not submitted: ${reason} `)
+    }
+
+      const waitForAdventurers = async () => {
+          const inBlockchain = await isInBlockchain(orderInfo.assetsDepositTx!.txHash)
+          if(inBlockchain) await AotOrdersDSL.updateOrder(orderId, "order_completed")
+          else if((Date.now() - Date.parse(orderInfo.createdAt)) > this.txTTL*1000*2) await refoundAda("assets_deposit_timedOut")
+          else setTimeout(waitForAdventurers, 5000)
+      }
+ 
+      const txIdResponse = await this.blockchainService.submitTransaction(orderInfo.assetsDepositTx!.rawTransaction)
+      if (txIdResponse.status !== "ok") refoundAda("assets_deposit_failed")
+
+      await AotOrdersDSL.updateOrder(orderId, "assets_deposit_submited")
+      setTimeout(waitForAdventurers, 5000)
+    }
+    
+    const checkAdventurersTx = async () => {
+      const inBlockchain = await isInBlockchain(orderInfo.adaDepositTx!.txHash)
+      if(inBlockchain) await submitAdventurersTx()
+      else if((Date.now() - Date.parse(orderInfo.createdAt)) > this.txTTL*1000) await adaTimeout()
+      else setTimeout(checkAdventurersTx, 5000)
+    }
+
+    setTimeout(checkAdventurersTx, 5000)
   }
 
   async revertStaleOrders(logger?: LoggingContext): Promise<number>{

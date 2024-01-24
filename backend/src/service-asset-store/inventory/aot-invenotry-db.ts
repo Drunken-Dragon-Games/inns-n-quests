@@ -7,7 +7,7 @@ export const invenotryTableName = "asset_store_AOT_invenotry"
 export class AOTStoreAsset extends Model {
     declare assetId: string
     declare state: AssetState
-    declare contract: string | null
+    declare orderId: string | null
     declare tokenName: string
 }
 
@@ -29,7 +29,7 @@ export const storeAOTTableAttributes = {
             isIn: [assetStates]
         }
     },
-    contract: {
+    orderId: {
         type: DataTypes.STRING,
         allowNull: true,
     },

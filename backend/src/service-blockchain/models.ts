@@ -13,6 +13,16 @@ export type BuildTxResponse
   = {status: "ok", value: CardanoTransactionInfo}
   | {status: "invalid", reason: string}
 
+export type OrderTxInfo = {
+    adaDeposit: CardanoTransactionInfo,
+    assetsDeposit: CardanoTransactionInfo,
+    adaRefound: CardanoTransactionInfo
+  }
+  
+  export type BuildOrderSellResponse
+  = {status: "ok", value: OrderTxInfo}
+  | {status: "invalid", reason: string}
+
 export type TransactionHashReponse
   = {status: "ok", value: string}
   | {status: "invalid", reason: string}

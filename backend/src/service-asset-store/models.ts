@@ -11,7 +11,24 @@ export type SuportedWallet = "Nami" | "Eternl"
 
 export type TextEnvelope = {type: string, description: string, cborHex: string }
 
-export type OrderState = 'created' | 'transaction_submited' | 'order_completed' | 'order_timed_out' | 'order_submition_failed' 
+export type RefoundState = 
+'completed' |
+'failed' |
+'submited'|
+'timedout' |
+'initialized' |
+'none'
+
+export type OrderState = 
+  'empty' | 
+  'intialized' | 
+  'ada_deposit_submited' | 
+  'ada_deposit_failed' | 
+  'ada_deposit_timedOut' | 
+  'assets_deposit_submited' | 
+  'assets_deposit_failed' | 
+  'assets_deposit_timedOut'| 
+  'order_completed' 
 
 export const ADA: Token = {
     "currency_symbol": "",
@@ -23,3 +40,5 @@ export type OrderResponse = SResult<{orderId: string, tx: string}>
 export type SubmitResponse = SResult<{txId: string}>
 
 export type OrderStatusResponse = SResult<{status: OrderState}>
+
+

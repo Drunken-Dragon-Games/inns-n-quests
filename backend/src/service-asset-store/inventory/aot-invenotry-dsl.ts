@@ -13,7 +13,7 @@ export class AOTInventory {
     }
     
 
-    private async updateAssetState(assets: Token[], newState: AssetState, newContractId?: string | null): Promise<void> {
+    private async updateAssetState(assets: Token[], newState: AssetState, newOrderId?: string | null): Promise<void> {
         try {
             const tokenNames = assets.map(token => token.token_name)
             const assetsToUpdate = await AOTStoreAsset.findAll({
@@ -22,7 +22,7 @@ export class AOTInventory {
 
             for (const asset of assetsToUpdate) {
                 asset.state = newState
-                if (newContractId !== undefined) asset.contract = newContractId
+                if (newOrderId !== undefined) asset.orderId = newOrderId
                 await asset.save()
             }
         } catch (error) {
@@ -30,7 +30,7 @@ export class AOTInventory {
         }
     }
 
-    async reserveAssets(quantity: number): Promise<SResult<{tokens: Token[]}>>{
+    async reserveAssets(quantity: number, orderId: string): Promise<SResult<{tokens: Token[]}>>{
         try {
             const idleAssets = await AOTStoreAsset.findAll({where: {state: 'idle'}})
             if (idleAssets.length < quantity) throw new Error('Not enough idle assets to reserve.')
@@ -43,15 +43,15 @@ export class AOTInventory {
                     token_name: randomAsset.tokenName
                 })
             }
-            await this.updateAssetState(selectedAssets, 'reserved')
+            await this.updateAssetState(selectedAssets, 'reserved', orderId)
             return success({tokens: selectedAssets})
           } catch (error: any) {
             return sfailure(error.message)
           }
     }
 
-    async reserveUnder(assets: Token[], contractId: string){
-        await this.updateAssetState(assets, 'reserved', contractId)
+    async reserveUnder(assets: Token[], orderId: string){
+        await this.updateAssetState(assets, 'reserved', orderId)
     }
 
     async releaseReservedAssets(assets: Token[]){

@@ -24,7 +24,7 @@ export interface BlockchainService {
 
     buildBulkMintTx(address: string, assetsInfo: {[policyId: string]: {unit:string, quantityToClaim:string}[]}, feeInfo?: {feeAddress: string, feeAmount: string}): Promise<models.BuildTxResponse>
 
-    buildAssetsSellTx(buyerAddress: string, sellerAddress: string, assetsInfo: {policyId: string, publicAssetName: string, amount: number}[], assetsAdaVal: number): Promise<models.BuildTxResponse>
+    buildAssetsSellTx(buyerAddress: string, sellerAddress: string, assetsInfo: {policyId: string, publicAssetName: string, amount: number}[], assetsAdaVal: number, orderId: string): Promise<models.BuildOrderSellResponse>
 
     getTxHashFromTransaction(serilizedTransaction: string): Promise<models.TransactionHashReponse>
 
